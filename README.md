@@ -11,10 +11,10 @@ Although SeisIO is not yet a "release"-level package, it presently includes two 
 ### Readable File Formats
 * SAC: readsac
 * mini-SEED: readmseed
-* SEG Y rev 0: readsegy
+* SEG Y rev 0: readsegy<sup>[1](#footnote1)</sup>
 * SEG Y rev 0 (mod. PASSCAL/NMT): readsegy<sup>[1](#footnote1)</sup>
-* SEG Y rev 1: readsegy
-* Win32: readwin32<sup>[2](#footnote1)</sup>
+* SEG Y rev 1: readsegy<sup>[1](#footnote1)</sup>
+* Win32: readwin32<sup>[2](#footnote2)</sup>
 * UW: readuw
 
 There's also a wrapper for Lennartz-style ASCII (rlennasc) that correctly parses the one-line text header.
@@ -69,10 +69,6 @@ S4 = readwin32("/data2/unsorted/ugh_not_another_1440_one-minute-long_files/*cnt"
 S = S1 + S2 + S3 + S4
 ```
 
-<a name="footnote1">1</a>: PASSCAL/NMT/IRIS SEG Y files lack the standard 3600-byte header (3200-byte textural header + 400-byte file header); an added keyword (fmt="nmt") is required to parse them correctly. 
-
-<a name="footnote1">2</a>: Unique among the seismic data readers, readwin32 has basic wildcard functionality for data file names, but it also requires a channel information file as a separate (second) argument. All data files matching the wild card are read in lexicographical order and synchronized.
-
 # SeisData objects
 The SeisData type is designed as a minimalist processable memory-resident object; that is, each SeisData object is meant to contain the minimum information required for routine analysis of continuous data. Type `?SeisData` at the Julia command prompt for details.
 
@@ -111,6 +107,14 @@ SeisData objects can be saved to a native binary file format or written to SAC.
 + Very widely used.
 - Data are only stored in single-precision format.
 - Rudimentary time stamping. Time stamps aren't written by default (change with `ts=true`). If you **do** choose to write time stamps to SAC files, data are treated by SAC itself as unevenly spaced, generic `x-y` data (`LEVEN=0, IFTYPE=4`). This causes issues with SAC readers in many languages; most load timestamped data as the real part of a complex time series, with the time values in the imaginary part.
+
+# Notes on Readers and Formats
+1. <a name="footnote1">SEG Y</a>
+* An added keyword (fmt="nmt") is required to parse PASSCAL SEG Y files correctly. IRIS/PASSCAL/NMT use a modified SEG Y rev 0 data format, which lacks the 3600-byte header (3200-byte textural header + 400-byte file header). In addition, unlike standard SEG Y, PASSCAL SEG Y sometimes uses little endian byte order.
+* Standard rev 0 (and rev 1, to a lesser degree) don't enforce strict channel header formats. There is no guarantee that SEG Y files from industry sources will work with `readsegy`; indeed, they're likely not to. 
+2. <a name="footnote2">WIN32</a>: unique among the included file format readers, readwin32 has basic wildcard functionality for data file names, but it also requires a channel information file as a separate (second) argument. All data files matching the wild card are read in lexicographical order and synchronized.
+
+Unique among the seismic data readers, readwin32 has basic wildcard functionality for data file names, but it also requires a channel information file as a separate (second) argument. All data files matching the wild card are read in lexicographical order and synchronized.
 
 # Acknowledgements
 mini-SEED routines are based on rdmseed.m for Matlab, written by by Francois Beauducel, Institut de Physique du Globe de Paris (France). Many thanks to Robert Casey and Chad Trabant (IRIS, USA) for discussions of IRIS web services, and Douglas Neuhauser (UC Berkeley Seismological Laboratory, USA) for discussions of the SAC data format.
