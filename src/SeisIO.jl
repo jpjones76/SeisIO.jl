@@ -30,12 +30,12 @@ include("SeisData/randseis.jl")
 include("time_aux.jl")
 
 # Data converters
-include("DataFormats/SAC.jl")         # SAC is the old IRIS standard; very easy to use, almost universally readable
-include("DataFormats/SEGY.jl")        # SEG Y, standard of the Society for Exploration Geophysicists
-include("DataFormats/SEED.jl")        # SEED has become the worldwide seismic data standard despite being monolithic
-include("DataFormats/UW.jl")          # University of Washington: used at UW 1970s through mid-2000s
-include("DataFormats/Win32.jl")       # Win32: standard Japanese seismic data format
-include("DataFormats/LennartzAsc.jl") # Lennartz ASCII: a cheap wrapper to readdlm
+include("FileFormats/SAC.jl")         # SAC is the old IRIS standard; very easy to use, almost universally readable
+include("FileFormats/SEGY.jl")        # SEG Y, standard of the Society for Exploration Geophysicists
+include("FileFormats/SEED.jl")        # SEED has become the worldwide seismic data standard despite being monolithic
+include("FileFormats/UW.jl")          # University of Washington: used at UW 1970s through mid-2000s
+include("FileFormats/Win32.jl")       # Win32: standard Japanese seismic data format
+include("FileFormats/LennartzAsc.jl") # Lennartz ASCII: a cheap wrapper to readdlm
 
 # Web clients
 include("WebClients/IRIS.jl")
