@@ -63,7 +63,7 @@ The following example shows how to combine data types (file data + web data, fil
 ```
 S1 = readsac("/data2/unsorted/why_did_you_email_me_a_1-day-long_SAC_file.sac")
 S2 = FSDNget(net="UW", sta="MBW", cha="*", s="2016-03-17T00:00:00", t="2016-03-18T00:00:00")
-S3 = readsegy("/data2/unsorted/howaredaylongsegyfilesevenpossible.segy", fmt="nmt")
+S3 = readsegy("/data2/unsorted/how_are_day-long_segy_files_even_possible.segy", fmt="nmt")
 S4 = readwin32("/data2/unsorted/ugh_not_another_1440_one-minute-long_files/*cnt", "/data2/unsorted/03_02_27_20170318.sjis.ch")
 S = S1 + S2 + S3 + S4
 ```
