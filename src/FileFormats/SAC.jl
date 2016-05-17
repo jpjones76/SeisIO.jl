@@ -105,7 +105,7 @@ S["delta"] for DELTA. S["data"] contains the trace data.
 rsac(fname::ASCIIString; p=false::Bool) = (S = psac(open(fname,"r"), p=p))
 
 function sacwrite(fname::ASCIIString, sacFloats::Array{Float32,1},
-  sacInts::Array{Int32,1}, sacChars::Array{Uint8,1}, x::Array{Float32,1};
+  sacInts::Array{Int32,1}, sacChars::Array{UInt8,1}, x::Array{Float32,1};
   t=[Float32(0)]::Array{Float32,1}, ts=true::Bool)
   f = open(fname, "w")
   write(f, sacFloats)
