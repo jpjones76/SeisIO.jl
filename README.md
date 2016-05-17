@@ -68,7 +68,8 @@ S4 = readwin32("/data2/unsorted/ugh_not_another_1440_one-minute-long_files/*cnt"
 S = S1 + S2 + S3 + S4
 ```
 
-<a name="footnote1">1</a>: PASSCAL/NMT/IRIS SEG Y files lack the standard 3600-byte header (3200-byte textural header + 400-byte file header); an added keyword (fmt="nmt") is required to parse them correctly. <a name="footnote1">2</a>: Unique among the seismic data readers, readwin32 has basic wildcard functionality for data file names, but it also requires a channel information file as a separate (second) argument. All data files matching the wild card are read in lexicographical order and synchronized.
+<a name="footnote1">1</a>: PASSCAL/NMT/IRIS SEG Y files lack the standard 3600-byte header (3200-byte textural header + 400-byte file header); an added keyword (fmt="nmt") is required to parse them correctly. 
+<a name="footnote1">2</a>: Unique among the seismic data readers, readwin32 has basic wildcard functionality for data file names, but it also requires a channel information file as a separate (second) argument. All data files matching the wild card are read in lexicographical order and synchronized.
 
 # SeisData objects
 The SeisData type is designed as a minimalist processable memory-resident object; that is, each SeisData object is meant to contain the minimum information required for routine analysis of continuous data. Type `?SeisData` at the Julia command prompt for details.
