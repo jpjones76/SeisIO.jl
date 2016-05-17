@@ -11,7 +11,7 @@ From the Julia prompt, `Pkg.clone("https://github.com/jpjones76/SeisIO.jl")`
 SeisIO presently includes two web clients (FDSN and IRISws), readers for several seismic data formats, and writers for both SAC and a native "SeisData" format. A large number of utility functions allow synchronization and padding time gaps.
 
 ## Readable File Formats
-* SAC:
+* SAC: readsac
 * mini-SEED: readmseed
 * SEG Y rev 0: readsegy
 * SEG Y rev 0 (mod. PASSCAL/NMT): readsegy<sup>[1](#footnote1)</sup>
