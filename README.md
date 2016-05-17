@@ -97,13 +97,13 @@ Random junk traces can be generated using `randseisdata()` and `randseisobj()`; 
 # Loading and Saving Data
 SeisData objects can be saved to a native binary file format or written to SAC.
 
-## SeisData file format
-`wseis(FNAME, S)` writes SeisData object `S` to `FNAME`.
+### Saving to a native file format
+`wseis(FNAME, S)` writes SeisData object `S` to `FNAME`. 
 
-## SAC file format
-`wsac(S)` writes each channel in `S` to an auto-generated SAC file, one trace per file. By default, time stamps are written as the dependent variable.
+### Saving to SAC format
+`wsac(S)` writes each channel in `S` to an auto-generated SAC file, one trace per file. By default, time stamps are written as the dependent variable; to avoid time stamping data completely, use `wsac(S, ts=false)`.
 
-### Advantages/Disadvantages of SAC
+#### Advantages/Disadvantages of SAC
 + Very widely used.
 - Data are only stored in single-precision format.
 - Rudimentary time stamping. Time stamps aren't written by default (change with `ts=true`). If you **do** choose to write time stamps to SAC files, data are treated by SAC itself as unevenly spaced, generic `x-y` data (`LEVEN=0, IFTYPE=4`). This causes issues with SAC readers in many languages; most load timestamped data as the real part of a complex time series, with the time values in the imaginary part.
