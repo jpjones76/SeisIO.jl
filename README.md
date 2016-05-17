@@ -6,7 +6,7 @@ From the Julia prompt, `Pkg.clone("https://github.com/jpjones76/SeisIO.jl")`
 * Dependencies: DSP, Requests, LightXML, PyPlot
 
 # Current Functionality
-SeisIO presently includes two web clients (FDSN and IRISws), readers for several seismic data formats, and writers for both SAC and a native "SeisData" format. A large number of utility functions allow synchronization and padding time gaps.
+Although SeisIO is not yet a "release"-level package, it presently includes two web clients (FDSN and IRISws), readers for several seismic data formats, and writers for both SAC and a native "SeisData" format. A large number of utility functions allow synchronization and padding time gaps.
 
 ### Readable File Formats
 * SAC: readsac
