@@ -69,6 +69,7 @@ S = S1 + S2 + S3 + S4
 ```
 
 <a name="footnote1">1</a>: PASSCAL/NMT/IRIS SEG Y files lack the standard 3600-byte header (3200-byte textural header + 400-byte file header); an added keyword (fmt="nmt") is required to parse them correctly. 
+
 <a name="footnote1">2</a>: Unique among the seismic data readers, readwin32 has basic wildcard functionality for data file names, but it also requires a channel information file as a separate (second) argument. All data files matching the wild card are read in lexicographical order and synchronized.
 
 # SeisData objects
