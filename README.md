@@ -117,8 +117,6 @@ SeisData objects can be saved to a native binary file format or written to SAC.
 #### <a name="footnote2">WIN32</a>
 Unique among the included file format readers, `readwin32` has basic wildcard functionality for data file names. However, `readwin32` requires a channel information file as a separate (second) argument. All data files matching the wild card are read in lexicographical order and synchronized.
 
-Unique among the seismic data readers, readwin32 has basic wildcard functionality for data file names, but it also requires a channel information file as a separate (second) argument. All data files matching the wild card are read in lexicographical order and synchronized.
-
 # Acknowledgements
 mini-SEED routines are based on rdmseed.m for Matlab, written by by Francois Beauducel, Institut de Physique du Globe de Paris (France). Many thanks to Robert Casey and Chad Trabant (IRIS, USA) for discussions of IRIS web services, and Douglas Neuhauser (UC Berkeley Seismological Laboratory, USA) for discussions of the SAC data format.
 
