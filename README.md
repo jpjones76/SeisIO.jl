@@ -5,9 +5,12 @@ A minimalist, platform-agnostic package for working with geophysical time series
 From the Julia prompt: 
 ```
 Pkg.clone("https://github.com/jpjones76/SeisIO.jl")
-using SeisIO
+using SeisIO # Loads everything into memory
 ```
 * Dependencies: DSP, Requests, LightXML, PyPlot
+
+### Updating
+```Pkg.update(); workspace(); using SeisIO``` should update, recompile, and reload. Please be aware that `workspace()` clears the Julia session's memory, equivalent to e.g. `clear all` in Matlab/Octave.
 
 # Current Functionality
 Although SeisIO is not yet a "release"-level package, it presently includes two web clients (FDSN and IRISws), readers for several seismic data formats, and writers for both SAC and a native "SeisData" format. A large number of utility functions allow synchronization and padding time gaps.
