@@ -556,6 +556,7 @@ function -(S::SeisData, n::ASCIIString)
       error(@sprintf("No channel with name or id %s in S", n))
     end
   end
+  return S
 end
 
 # Delete by header match
