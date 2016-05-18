@@ -1,9 +1,12 @@
-<<<<<<< HEAD
 # SeisIO
 A minimalist, platform-agnostic package for working with geophysical time series data.
 
 ### Installation
-From the Julia prompt, `Pkg.clone("https://github.com/jpjones76/SeisIO.jl")`
+From the Julia prompt: 
+```
+Pkg.clone("https://github.com/jpjones76/SeisIO.jl")
+using SeisIO
+```
 * Dependencies: DSP, Requests, LightXML, PyPlot
 
 # Current Functionality
@@ -52,7 +55,7 @@ This example command sequence requests 10 minutes of data from a May 2016 earthq
 ```
 STA = ["UW.HOOD.BHZ"; "UW.HOOD.BHN"; "UW.HOOD.BHE"; "CC.TIMB.EHZ"; "CC.TIMB.EHN"; "CC.TIMB.EHE"];
 TS = "2016-05-16T14:50:00"; TE = 600;
-S = IRISget(STA, s=TE, e=TE, sync=true);
+S = IRISget(STA, s=TS, t=TE, sync=true);
 wsac(S)
 ```
 
@@ -259,4 +262,3 @@ mini-SEED routines are based on rdmseed.m for Matlab, written by by Francois Bea
 2. Trabant C. (2010), libmseed: the Mini-SEED library, IRIS DMC.
 3. Steim J.M. (1994), 'Steim' Compression, Quanterra Inc.
 4. Storchak, D.A., J. Schweitzer, P. Bormann (2003). The IASPEI Standard Seismic Phase List, Seismol. Res. Lett. 74, 6, 761-772.
->>>>>>> 74f82ac2efb86b6caf1d1b9466041d37bb196952
