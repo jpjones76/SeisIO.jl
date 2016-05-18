@@ -56,7 +56,7 @@ This example command sequence requests 10 minutes of data from a May 2016 earthq
 ```
 STA = ["UW.HOOD.BHZ"; "UW.HOOD.BHN"; "UW.HOOD.BHE"; "CC.TIMB.EHZ"; "CC.TIMB.EHN"; "CC.TIMB.EHE"];
 TS = "2016-05-16T14:50:00"; TE = 600;
-S = IRISget(STA, s=TE, e=TE, sync=true);
+S = IRISget(STA, s=TE, t=TE, sync=true);
 wsac(S)
 ```
 
