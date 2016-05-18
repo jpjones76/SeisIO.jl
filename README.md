@@ -17,11 +17,11 @@ Although SeisIO is not yet a "release"-level package, it presently includes two 
 
 ### Readable File Formats
 * SAC: readsac
-* mini-SEED: readmseed
-* SEG Y rev 0: readsegy<sup>[1](#footnote1)</sup>
-* SEG Y rev 0 (mod. PASSCAL/NMT): readsegy<sup>[1](#footnote1)</sup>
-* SEG Y rev 1: readsegy<sup>[1](#footnote1)</sup>
-* Win32: readwin32<sup>[2](#footnote2)</sup>
+* mini-SEED: readmseed<sup>[1](#footnote1)</sup>
+* SEG Y rev 0: readsegy<sup>[2](#footnote2)</sup>
+* SEG Y rev 0 (mod. PASSCAL/NMT): readsegy<sup>[2](#footnote2)</sup>
+* SEG Y rev 1: readsegy<sup>[2](#footnote2)</sup>
+* Win32: readwin32<sup>[3](#footnote3)</sup>
 * UW: readuw
 
 There's also a wrapper for Lennartz-style ASCII (rlennasc) that correctly parses the one-line text header.
