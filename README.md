@@ -2,7 +2,12 @@
 A minimalist, platform-agnostic package for working with geophysical time series data.
 
 ### Installation
-From the Julia prompt, `Pkg.clone("https://github.com/jpjones76/SeisIO.jl")`
+From the Julia prompt: 
+```
+Pkg.clone("https://github.com/jpjones76/SeisIO.jl")
+using SeisIO
+```
+
 * Dependencies: DSP, Requests, LightXML, PyPlot
 
 # Current Functionality
@@ -26,7 +31,7 @@ Two easy wrappers for web requests are included: FDSNget and IRISget.
 `FDSNget` is a wrapper for FDSN data access via HTTP (e.g. http://service.iris.edu/fdsnws/).
 
 #### An FDSN Example
-The command sqeuence below downloads (up to) 10 data channels (outage-dependent) from 4 stations at Mt. St. Helens (WA, USA), deletes the two low-gain channels, fills in time gaps, plots the data, and saves to the current directory.
+The command sequence below downloads (up to) 10 data channels (outage-dependent) from 4 stations at Mt. St. Helens (WA, USA), deletes the two low-gain channels, fills in time gaps, plots the data, and saves to the current directory.
 ```
 S = FDSNget(net="CC,UW", sta="SEP,SHW,HSR,VALT", cha="*", t=600)
 S -= "SHW    ELZUW"
