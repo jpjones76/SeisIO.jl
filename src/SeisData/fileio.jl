@@ -38,9 +38,11 @@ function wsac(S::SeisData; ts=true, v=true)
     sacFloatVals[4] = Float32(S.gain[i])
     sacFloatVals[6] = Float32(0)
     sacFloatVals[7] = Float32(dt*length(S.x[i]) + sum(S.t[i][2:end,2]))
-    sacFloatVals[32] = S.loc[i][1]
-    sacFloatVals[33] = S.loc[i][2]
-    sacFloatVals[34] = S.loc[i][3]
+    if !isempty(S.loc[i])
+      sacFloatVals[32] = S.loc[i][1]
+      sacFloatVals[33] = S.loc[i][2]
+      sacFloatVals[34] = S.loc[i][3]
+    end
 
     # Ints
     sacIntVals[1] = y

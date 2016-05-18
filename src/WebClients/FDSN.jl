@@ -28,9 +28,6 @@ function parse_FDSN_xml(xsta::XMLDocument)
         sk = join(map(Char,sk))
         gain = parse(content(find_element(find_element(find_element(c,
                      "Response"),"InstrumentSensitivity"), "Value"))) # really?
-        #println(gain)
-        #println([lat lon ele])
-        #println(sk)
         sinfo = cat(1, sinfo, [sk gain lat lon ele])
        end
     end

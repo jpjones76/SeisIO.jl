@@ -96,11 +96,12 @@ function blk_time(sid; b=true::Bool)
   return (yr,jd,HH,MM,SS,sss)
 end
 
-function parsesl(S::SeisData, conn::TCPSocket; x=Array{UInt8,1}()::Array{UInt8,1}, v=true::Bool, L=520::Integer)
+function parsesl(S::SeisData, conn::TCPSocket; x=Array{UInt8,1}()::Array{UInt8,1}, v=true::Bool, L=520::Integer, os=false::bool)
+  L-=os
   while !eof(conn) && length(x) < L
     push!(x, read(conn.buffer, UInt8))
   end
-  sid = IOBuffer(x[9:end])
+  sid = IOBuffer(x[9-os:end])
   parserec(S, sid, vv=v)
   p_now = position(sid);
   println("position =", p_now)
