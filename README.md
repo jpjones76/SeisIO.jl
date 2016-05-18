@@ -98,7 +98,7 @@ Random junk traces can be generated using `randseisdata()` and `randseisobj()`; 
 SeisData objects can be saved to a native binary file format or written to SAC.
 
 ### Saving to a native file format
-`wseis(FNAME, S)` writes SeisData object `S` to `FNAME`. 
+`wseis(FNAME, S)` writes SeisData object `S` to `FNAME`.
 
 ### Saving to SAC format
 `wsac(S)` writes each channel in `S` to an auto-generated SAC file, one trace per file. By default, time stamps are written as the dependent variable; to avoid time stamping data completely, use `wsac(S, ts=false)`.
@@ -112,7 +112,7 @@ SeisData objects can be saved to a native binary file format or written to SAC.
 
 #### <a name="footnote1">SEG Y</a>
 * An added keyword (`fmt="nmt"`) is required to parse PASSCAL SEG Y files correctly. IRIS/PASSCAL/NMT use a modified SEG Y rev 0 data format, which lacks the 3600-byte record header (3200-byte textural header + 400-byte binary header). In addition, PASSCAL SEG Y assumes little endian byte order.
-* SEG Y rev 0 (and rev 1, to a lesser degree) doesn't enforce strict channel header formats. There is no guarantee that SEG Y files from all industry sources will work with `readsegy`; indeed, many are likely not to. 
+* SEG Y rev 0 (and rev 1, to a lesser degree) doesn't enforce strict channel header formats. There is no guarantee that SEG Y files from all industry sources will work with `readsegy`; indeed, many are likely not to.
 
 #### <a name="footnote2">WIN32</a>
 Unique among the included file format readers, `readwin32` has basic wildcard functionality for data file names. However, `readwin32` requires a channel information file as a separate (second) argument. All data files matching the wild card are read in lexicographical order and synchronized.

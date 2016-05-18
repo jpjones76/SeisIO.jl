@@ -23,7 +23,7 @@ function plotseis(S::SeisData; fmt="%H:%M:%S"::ASCIIString)
     xmi = min(xmi, t[1])
     xma = max(xmi, t[end])
     if S.fs[i] > 0
-      x = rescaled(S.x[i],i)
+      x = rescaled(S.x[i]-mean(S.x[i]),i)
       plot(t, x, linewidth=1)
     else
       x = (i-0.4) .+ 0.8*S.x[i]./maximum(S.x[i])

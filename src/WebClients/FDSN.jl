@@ -144,12 +144,16 @@ function FDSNget(; src="IRIS"::ASCIIString,
 
   # Get data
   R = get(data_url, timeout=to, headers=hdr)
-  S = parsemseed(IOBuffer(R.data))
+  tmp = IOBuffer(R.data)
+  S = parsemseed(tmp)
 
   # Automatically incorporate station information from web XML retrieval
   R = get(station_url, timeout=to, headers=hdr)
-  sinfo = parse_FDSN_xml(parse_string(join(readlines(IOBuffer(R.data)))))
+  tmp = IOBuffer(R.data)
+  sinfo = parse_FDSN_xml(parse_string(join(readlines(tmp))))
   FDSNprep!(S, sinfo)
-  do_sync && sync!(S)
+  if do_sync
+    sync!(S)
+  end
   return S
 end

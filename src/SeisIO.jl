@@ -12,7 +12,7 @@ prunesac!, psac, rsac, sacwrite, wsac, chksac, sachdr,         # SAC
 get_sac_keys, get_sac_fw, get_sac_iw,
 readsegy, segyhdr, pruneseg, segytosac, segytoseis, r_segy,    # SEG Y
 readwin32, win32toseis, r_win32,                               # Win 32
-parsemseed, readmseed,                                         # mini-SEED
+parsemseed, readmseed, parsesl, readmseed, parserec,           # mini-SEED
 rlennasc,                                                      # Lennartz ASCII
 plotseis,                                                      # Plotting/plotseis.jl
 j2md, md2j, sac2epoch,                                         # time_aux.jl
@@ -32,7 +32,7 @@ include("time_aux.jl")
 # Data converters
 include("FileFormats/SAC.jl")         # SAC is the old IRIS standard; very easy to use, almost universally readable
 include("FileFormats/SEGY.jl")        # SEG Y, standard of the Society for Exploration Geophysicists
-include("FileFormats/SEED.jl")        # SEED has become the worldwide seismic data standard despite being monolithic
+include("FileFormats/mSEED.jl")       # SEED has become the worldwide seismic data standard despite being monolithic
 include("FileFormats/UW.jl")          # University of Washington: used at UW 1970s through mid-2000s
 include("FileFormats/Win32.jl")       # Win32: standard Japanese seismic data format
 include("FileFormats/LennartzAsc.jl") # Lennartz ASCII: a cheap wrapper to readdlm

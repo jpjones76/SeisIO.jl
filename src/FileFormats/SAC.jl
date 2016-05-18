@@ -294,7 +294,7 @@ end
 """
     S = readsac(fname)
 
-Read SAC file `fname` into a SeisObj. 
+Read SAC file `fname` into a SeisObj.
 """
 readsac(fname::ASCIIString; p=false::Bool) = sactoseis(psac(open(fname,"r"),
   v=v, p=p))

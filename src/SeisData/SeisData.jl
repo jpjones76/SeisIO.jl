@@ -506,6 +506,7 @@ pull(S::SeisData, i::Integer) = (T = getindex(S, i); delete!(S,i);
 
 # Adding a SeisObj to SeisData merges it
 +(S::SeisData, T::SeisObj) = (U = deepcopy(S); merge!(U,T); return U)
++(S::SeisData, T::SeisData) = (U = deepcopy(S); merge!(U,T); return U)
 function +(S::SeisObj, T::SeisObj)
   try
     merge!(S, T)

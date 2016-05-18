@@ -53,14 +53,10 @@ Timberline Lodge, OR, US) in miniseed format.
 however, instrument response is not flattened.
 
 """
-function irisws(;net="UW", sta="TDH", loc="--", cha="EHZ", fmt="miniseed",
+function irisws(;net="UW", sta="TDH", loc="--", cha="EHZ", fmt="sacbl",
                 s=0, t=3600, v=false::Bool, to=10)
   hdr = Dict("UserAgent" => "Julia-IRISget/0.0.1")
-  if (typeof(s) in Any[DateTime,ASCIIString]) && (typeof(t) in Any[DateTime,ASCIIString])
-    d0 = s; d1 = t
-  else
-    d0, d1 = parsetimewin(s, t)
-  end
+  d0, d1 = parsetimewin(s, t)
   URLbase = "http://service.iris.edu/irisws/timeseries/1/query?"
   URLtail = @sprintf("net=%s&sta=%s&loc=%s&cha=%s&starttime=%s&endtime=%s&scale=AUTO&demean=true&output=%s",
                       net, sta, loc, cha, d0, d1, fmt)
@@ -68,9 +64,11 @@ function irisws(;net="UW", sta="TDH", loc="--", cha="EHZ", fmt="miniseed",
   v && println(url)
   req = get(url, timeout=to, headers=hdr)
   if fmt == "sacbl"
-    return prunesac(psac(IOBuffer(req.data),v=v))
+    tmp = IOBuffer(req.data)
+    return prunesac(psac(tmp))
   elseif fmt == "miniseed"
-    return parsemseed(SeisObj(), IOBuffer(req.data))
+    tmp = IOBuffer(req.data)
+    return parsemseed(tmp, v=v)
   else
     if v
       warn(@sprintf("Unusual format spec; returning unparsed data stream in format=%s",fmt))
@@ -164,14 +162,14 @@ function IRISget(chanlist; s=0, t=3600, sync=true::Bool, v=false::Bool, to=10::R
   else
     K = cdim[1]
   end
-  seis = SeisData()
+  global seis = SeisData()
   v && println("IRIS web fetch begins...")
   killflag = falses(K)
   for k = 1:1:K
     c = split(chanlist[k],['.','_'])
     try
       S = irisws(net=c[1], sta=c[2], loc="--", cha=c[3], fmt="miniseed", s=d0, t=d1, v=v, to=to)
-      length(S.x[1]) > 0 && (seis += S)
+      push!(seis, S[1])
     catch
       warn(@sprintf("Couldn't retrieve %s in specified time window (%s -- %s)!\n", chanlist[k], d0, d1))
     end
