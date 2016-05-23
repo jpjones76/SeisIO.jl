@@ -59,14 +59,14 @@ function getcid(Chans, ch)
 end
 
 """
-    S = readwin32(filestr, chanfile)
+    S = r_win32(filestr, chanfile)
 
 Read all win32 data matching string pattern `filestr`, with corresponding
 channel file `chanfile`, into dictionary S. Keys correspond to win32
 
 
 """
-function readwin32(filestr::ASCIIString, cf::ASCIIString; v=false)
+function r_win32(filestr::ASCIIString, cf::ASCIIString; v=false)
   Chans = getcha(cf)
   seis = Dict{ASCIIString,Any}()
   files = lsw(filestr)
@@ -195,11 +195,11 @@ function win32toseis(D = Dict{ASCIIString,Any}())
 end
 
 """
-    S = r_win32(filestr, chanfile)
+    S = readwin32(filestr, chanfile)
 
 Read all win32 data matching string pattern `filestr`, with corresponding
 channel file `chanfile`; return a seisdata object S.
 
 """
-r_win32(f::ASCIIString, c::ASCIIString; v=false::Bool) = (
+readwin32(f::ASCIIString, c::ASCIIString; v=false::Bool) = (
   D = procwin32(f, c, v=v); return(win32toseis(D)))

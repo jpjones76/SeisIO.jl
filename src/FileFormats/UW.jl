@@ -375,7 +375,7 @@ as the datafile to be read.
     S = readuw(filename)
 
 """
-function readuw(filename::ASCIIString; v=false::Bool)
+function r_uw(filename::ASCIIString; v=false::Bool)
   # Identify pickfile and datafile
   filename = realpath(filename)
   pickfile = ""
@@ -472,4 +472,4 @@ function uwtoseis(S::Dict{ASCIIString,Any})
   return seis
 end
 
-r_uw(f::ASCIIString; v=false::Bool) = (S = readuw(f, v=v); uwtoseis(S::Dict{ASCIIString,Any}))
+readuw(f::ASCIIString; v=false::Bool) = (S = r_uw(f, v=v); uwtoseis(S::Dict{ASCIIString,Any}))

@@ -57,14 +57,12 @@ structure.
 ## Arguments
 * `net`, `sta`, `loc`, `cha`: ASCII strings. Wildcards are OK.
 * `s`: Start time. See below.
-* `e`: End time. See below.
-* `to`: Timeout in seconds. [default: 10]
-* `s`: Start time. See below.
 * `t`: End time. See below.
+* `to`: Timeout in seconds. [default: 10]
 * `Q`: Quality. Uses standard FDSN/IRIS codes.
 * `y`: Synchronize the start and end times of all channels and fill all
 time gaps.
-* See FDSN documentation at http://service.iris.edu/fdsnws/station/1/
+* See FDSN documentation at http://service.iris.edu/fdsnws/dataselect/1/
 
 ### Time Specification
 s and t can be real numbers, DateTime objects, or ASCII strings. Strings must
@@ -93,7 +91,7 @@ Helens, USA.
 requests.
 
 ### Some FDSN Servers
-* Incorporated Research Institutions for Seismology: http://service.ncedc.org/fdsnws/
+* Incorporated Research Institutions for Seismology: http://service.iris.edu/fdsnws/
 * Réseau Sismologique et Géodesique Français: http://ws.resif.fr/fdsnws/
 * Northern California Earthquake Data Center: http://service.ncedc.org/fdsnws/
 * GFZ Potsdam: http://geofon.gfz-potsdam.de/fdsnws/

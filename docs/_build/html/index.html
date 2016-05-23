@@ -6,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to SeisIO’s documentation! &mdash; SeisIO 0.0.0 documentation</title>
+    <title>SeisIO &mdash; SeisIO 0.0.1 documentation</title>
     
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.0.0',
+        VERSION:     '0.0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,36 +23,111 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="SeisIO 0.0.0 documentation" href="#" />
-   
-  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
+    <link rel="top" title="SeisIO 0.0.1 documentation" href="#" />
+    <link rel="next" title="Intro" href="src/intro.html" /> 
   </head>
   <body role="document">
-  
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="src/intro.html" title="Intro"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">SeisIO 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="welcome-to-seisio-s-documentation">
-<h1>Welcome to SeisIO&#8217;s documentation!<a class="headerlink" href="#welcome-to-seisio-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Contents:</p>
+  <div class="section" id="seisio">
+<h1>SeisIO<a class="headerlink" href="#seisio" title="Permalink to this headline">¶</a></h1>
+<p>SeisIO is a collection of utilities for reading and downloading geophysical timeseries data.</p>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
-<ul class="simple">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="src/intro.html"><code class="docutils literal"><span class="pre">Intro</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/intro.html#how-seisio-works">How SeisIO Works</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src/webclients.html"><code class="docutils literal"><span class="pre">Web</span> <span class="pre">Clients</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/webclients.html#seedlink">SeedLink</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src/webclients.html#seedlink-client">SeedLink client</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src/webclients.html#fdsn">FDSN</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src/webclients.html#fdsn-client">FDSN client</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src/webclients.html#iris">IRIS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src/webclients.html#iris-client">IRIS Client</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src/webclients.html#web-client-keywords">Web Client Keywords</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src/webclients.html#time-syntax">Time Syntax</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src/fileformats.html"><code class="docutils literal"><span class="pre">File</span> <span class="pre">Formats</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/fileformats.html#current-format-support">Current Format Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/fileformats.html#mini-seed">mini-SEED</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src/fileformats.html#associated-functions">Associated functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src/fileformats.html#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src/fileformats.html#sac">SAC</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src/fileformats.html#id1">Associated functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src/fileformats.html#id2">References</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src/fileformats.html#seg-y">SEG Y</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src/fileformats.html#id3">Associated functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src/fileformats.html#id4">References</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src/fileformats.html#uw">UW</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src/fileformats.html#id5">Associated functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src/fileformats.html#win32-file-format">Win32 file format</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src/fileformats.html#id6">Associated functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src/fileformats.html#id7">References</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src/seisdata.html"><code class="docutils literal"><span class="pre">SeisData</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/seisdata.html#creating-data-containers">Creating Data Containers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/seisdata.html#adding-data">Adding Data</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src/seisdata.html#appending-without-merging">Appending without merging</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src/seisdata.html#deleting-data">Deleting Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/seisdata.html#index-search-sort">Index, Search, Sort</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src/seisdata.html#search-sort-equality">Search, Sort, Equality</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src/seisdata.html#utility-functions">Utility Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/seisdata.html#native-file-i-o">Native File I/O</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/seisdata.html#seisdata-and-seisobj-fields">SeisData and SeisObj Fields</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="src/seisdata.html#common-sense-precautions">Common Sense Precautions</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
-<div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
-<ul class="simple">
-<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
-</ul>
 </div>
 
 
@@ -63,16 +138,15 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Welcome to SeisIO&#8217;s documentation!</a></li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+<li><a class="reference internal" href="#">SeisIO</a><ul>
+<li><a class="reference internal" href="#contents">Contents</a></li>
 </ul>
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="#">Documentation overview</a><ul>
-  </ul></li>
+</li>
 </ul>
-</div>
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="src/intro.html"
+                        title="next chapter"><code class="docutils literal"><span class="pre">Intro</span></code></a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -94,20 +168,24 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="footer">
-      &copy;2016, Joshua Jones.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
-      
-      |
-      <a href="_sources/index.txt"
-          rel="nofollow">Page source</a>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="src/intro.html" title="Intro"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">SeisIO 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
     </div>
-
-    
-
-    
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Joshua Jones.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
   </body>
 </html>

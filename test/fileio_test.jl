@@ -5,7 +5,7 @@ println("randseis and native file IO...")
 S = randseisdata(c=false)
 wseis(S, savfile)
 
-R = rseis(savfile
+R = rseis(savfile)
 @test_approx_eq(R==S, true)
 
 rm(savfile)

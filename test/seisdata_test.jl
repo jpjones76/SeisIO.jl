@@ -110,11 +110,11 @@ println("...gain correction on merge...")
 
 println("...direct reading of supported file formats...")
 println("......SAC...")
-S += r_sac(sac_file)                                      # SAC
+S += readsac(sac_file)                                   # SAC
 println("......SEGY...")
-S += r_segy(segy_file, f="nmt")                           # SEGY rev 0 mod PASSCAL
+S += readsegy(segy_file, f="nmt")                        # SEGY rev 0 mod PASSCAL
 println("......UW...")
-S += r_uw(uw_root)                                        # UW
+S += readuw(uw_root)                                     # UW
 println("......win32 skipped; (file redistribution prohibited by NIED)...")
 
 println("...randseisdata...")
