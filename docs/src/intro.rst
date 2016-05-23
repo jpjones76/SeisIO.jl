@@ -25,12 +25,12 @@ Updating
 The usual update syntax for the Julia language is
 
 ::
-  
+
   Pkg.update()
   workspace()
   using SeisIO
 
-Be aware that ```workspace()`` clears the Julia session's memory, equivalent to ``clear all`` in Matlab/Octave. Save all work before updating.
+Be aware that ``workspace()`` clears the Julia session's memory, equivalent to ``clear all`` in Matlab/Octave. Save all work before updating.
 
 Dependencies
 ============
