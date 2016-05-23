@@ -72,13 +72,12 @@
 <div class="section" id="updating">
 <h2>Updating<a class="headerlink" href="#updating" title="Permalink to this headline">¶</a></h2>
 <p>The usual update syntax for the Julia language is</p>
-<dl class="docutils">
-<dt>::</dt>
-<dd>Pkg.update()
-workspace()
-using SeisIO</dd>
-</dl>
-<p>Be aware that <code class="docutils literal"><span class="pre">`workspace()</span></code> clears the Julia session&#8217;s memory, equivalent to <code class="docutils literal"><span class="pre">clear</span> <span class="pre">all</span></code> in Matlab/Octave. Save all work before updating.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Pkg</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+<span class="n">workspace</span><span class="p">()</span>
+<span class="n">using</span> <span class="n">SeisIO</span>
+</pre></div>
+</div>
+<p>Be aware that <code class="docutils literal"><span class="pre">workspace()</span></code> clears the Julia session&#8217;s memory, equivalent to <code class="docutils literal"><span class="pre">clear</span> <span class="pre">all</span></code> in Matlab/Octave. Save all work before updating.</p>
 </div>
 <div class="section" id="dependencies">
 <h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
