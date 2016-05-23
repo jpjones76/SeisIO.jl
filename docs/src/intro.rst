@@ -25,6 +25,7 @@ Updating
 The usual update syntax for the Julia language is
 
 ::
+  
   Pkg.update()
   workspace()
   using SeisIO
