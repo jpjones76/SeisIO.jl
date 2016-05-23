@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="SeisIO 0.0.1 documentation" href="../index.html" />
-    <link rel="next" title="File Formats" href="fileformats.html" />
+    <link rel="next" title="Web Clients" href="webclients.html" />
     <link rel="prev" title="SeisIO" href="../index.html" /> 
   </head>
   <body role="document">
@@ -38,7 +38,7 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="fileformats.html" title="File Formats"
+          <a href="webclients.html" title="Web Clients"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="../index.html" title="SeisIO"
@@ -61,6 +61,29 @@
 <p>New data, including data for existing channels from new sources, can be merged into SeisData containers (or placed in new SeisData containers) using built-in Julia commands. Unwanted data channels can be removed by matching on a channel&#8217;s ID, name, or index within a SeisData structure.</p>
 <p>Data can be saved to native SeisData format or to SAC.</p>
 </div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>From the Julia prompt:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Pkg</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="s2">&quot;https://github.com/jpjones76/SeisIO.jl&quot;</span><span class="p">)</span>
+<span class="n">using</span> <span class="n">SeisIO</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="updating">
+<h2>Updating<a class="headerlink" href="#updating" title="Permalink to this headline">¶</a></h2>
+<p>The usual update syntax for the Julia language is</p>
+<dl class="docutils">
+<dt>::</dt>
+<dd>Pkg.update()
+workspace()
+using SeisIO</dd>
+</dl>
+<p>Be aware that <code class="docutils literal"><span class="pre">`workspace()</span></code> clears the Julia session&#8217;s memory, equivalent to <code class="docutils literal"><span class="pre">clear</span> <span class="pre">all</span></code> in Matlab/Octave. Save all work before updating.</p>
+</div>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<p>DSP, Requests, LightXML, PyPlot</p>
+</div>
 </div>
 
 
@@ -73,6 +96,9 @@
   <ul>
 <li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">Intro</span></code></a><ul>
 <li><a class="reference internal" href="#how-seisio-works">How SeisIO Works</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#updating">Updating</a></li>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
 </ul>
 </li>
 </ul>
@@ -81,8 +107,8 @@
   <p class="topless"><a href="../index.html"
                         title="previous chapter">SeisIO</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="fileformats.html"
-                        title="next chapter"><code class="docutils literal"><span class="pre">File</span> <span class="pre">Formats</span></code></a></p>
+  <p class="topless"><a href="webclients.html"
+                        title="next chapter"><code class="docutils literal"><span class="pre">Web</span> <span class="pre">Clients</span></code></a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -114,7 +140,7 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="fileformats.html" title="File Formats"
+          <a href="webclients.html" title="Web Clients"
              >next</a> |</li>
         <li class="right" >
           <a href="../index.html" title="SeisIO"

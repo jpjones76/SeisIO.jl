@@ -11,3 +11,26 @@ Data are loaded into minimalist containers called SeisData and SeisObj, which tr
 New data, including data for existing channels from new sources, can be merged into SeisData containers (or placed in new SeisData containers) using built-in Julia commands. Unwanted data channels can be removed by matching on a channel's ID, name, or index within a SeisData structure.
 
 Data can be saved to native SeisData format or to SAC.
+
+Installation
+============
+From the Julia prompt:
+::
+
+  Pkg.clone("https://github.com/jpjones76/SeisIO.jl")
+  using SeisIO
+
+Updating
+========
+The usual update syntax for the Julia language is
+
+::
+  Pkg.update()
+  workspace()
+  using SeisIO
+
+Be aware that ```workspace()`` clears the Julia session's memory, equivalent to ``clear all`` in Matlab/Octave. Save all work before updating.
+
+Dependencies
+============
+DSP, Requests, LightXML, PyPlot
