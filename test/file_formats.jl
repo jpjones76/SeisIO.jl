@@ -4,7 +4,7 @@ uw_root = "SampleFiles/99062109485W"
 sac_file = "SampleFiles/test.sac"
 
 println("SEGY...")
-SEG = readsegy(segy_file, f="nmt")
+SEG = r_segy(segy_file, f="nmt")
 println("...header accuracy...")
 @test_approx_eq(SEG["scale_fac"]/SEG["gainConst"], 1.90735e-06)
 @test_approx_eq(SEG["nzyear"], 2002)
@@ -24,7 +24,7 @@ A = rlennasc(lenn_file)
 S += A
 
 println("UW...")
-W = readuw(uw_root)
+W = r_uw(uw_root)
 println("...header accuracy...")
 for i in ["WWVB","TCG","SSO","VLM","VLL","VG2","VFP","VCR","VBE","TDH","GPS","GL2"]
   @test_approx_eq(isempty(find(W["sta"].==i)), false)

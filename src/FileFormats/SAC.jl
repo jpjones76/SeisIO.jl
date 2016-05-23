@@ -96,13 +96,13 @@ function psac(f; p=false::Bool)
 end
 
 """
-    S = rsac(fname)
+    S = r_sac(fname)
 
 Read SAC file fname into a dictionary. Header values are indexed by key, e.g.
 S["delta"] for DELTA. S["data"] contains the trace data.
 
 """
-rsac(fname::ASCIIString; p=false::Bool) = (S = psac(open(fname,"r"), p=p))
+r_sac(fname::ASCIIString; p=false::Bool) = (S = psac(open(fname,"r"), p=p))
 
 function sacwrite(fname::ASCIIString, sacFloats::Array{Float32,1},
   sacInts::Array{Int32,1}, sacChars::Array{UInt8,1}, x::Array{Float32,1};
@@ -182,22 +182,22 @@ sachdr(S::Dict{ASCIIString,Any}) = [(i != "data" && (println(i, ": ", S[i])))
   for i in sort(collect(keys(S)))]
 
 """
-    wsac(S::Dict{ASCIIString,Any})
+    writesac(S::Dict{ASCIIString,Any})
 
 Write SAC dictionary S to SAC file. Name convention is auto-determined by time
 headers (NZYEAR--NZMSEC), KNETWK, KSTNM, and KCMPNM; default is sacfile.SAC.
 
-    wsac(S, f=FNAME)
+    writesac(S, f=FNAME)
 
 Write SAC dictionary S to SAC file FNAME.
 
-    wsac(S, ts=true)
+    writesac(S, ts=true)
 
 Specify ts=true to time stamp data. If S has a "time" key, all values in
 S["time"] are written blindly as time stamps. Otherwise, time stamps are
 written as delta-encoded integer multiples of S["delta"], with t[1] = 0.
 """
-function wsac(S::Dict{ASCIIString,Any}; f="auto"::ASCIIString, ts=false::Bool)
+function writesac(S::Dict{ASCIIString,Any}; f="auto"::ASCIIString, ts=false::Bool)
   prunesac!(S)
   tdata = Array{Float32}(0)
   !haskey(S, "iftype") && (S["iftype"] = Int32(1))  # Unset in SAC from IRISws
@@ -296,9 +296,10 @@ function sactoseis(D::Dict{ASCIIString,Any})
 end
 
 """
-    S = r_sac(fname)
+    S = rsac(fname)
 
 Read SAC file `fname` into a SeisObj.
 """
-r_sac(fname::ASCIIString) = (src = fname;
+rsac(fname::ASCIIString) = (src = fname;
   S = sactoseis(psac(open(fname,"r"), p=false)); S.src = fname; return S)
+readsac(fname::ASCIIString) = rsac(fname)

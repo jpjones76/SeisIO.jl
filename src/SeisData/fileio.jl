@@ -2,11 +2,11 @@
 import Base:write
 
 """
-    wsac(S::SeisData; ts=false, v=true)
+    writesac(S::SeisData; ts=false, v=true)
 
 Write all data in S to auto-generated SAC files.
 """
-function wsac(S::SeisData; ts=true, v=true)
+function writesac(S::SeisData; ts=true, v=true)
   (sacFloatKeys,sacIntKeys, sacCharKeys) = get_sac_keys()
   if ts
     iftype = Float32(4); leven = Float32(0)

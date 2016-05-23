@@ -9,7 +9,7 @@ println("...header accuracy...")
 @test_approx_eq(get_sac_iw("iftype"), 16)
 
 println("...file read...")
-SAC1 = rsac(sac_file)
+SAC1 = r_sac(sac_file)
 @test_approx_eq(SAC1["delta"], 0.01)
 @test_approx_eq(SAC1["b"], 9.459999e+00)
 @test_approx_eq(SAC1["e"], 1.945000e+01)
@@ -26,14 +26,14 @@ SAC2 = psac(f)
 println("...pruning...")
 prunesac!(SAC1)
 
-println("...wsac with missing headers...")
-wsac(SAC2)
+println("...writesac with missing headers...")
+writesac(SAC2)
 @test_approx_eq(isfile("sacfile.SAC"), true)
 
-println("...wsac with all headers...")
+println("...writesac with all headers...")
 SAC1["kcmpnm"] = "NUL"
 SAC1["knetwk"] = "VU"
-wsac(SAC1)
+writesac(SAC1)
 @test_approx_eq(isfile("1981.088.10.38.14.0000.VU.CDV..NUL.R.SAC"), true)
 
 rm("sacfile.SAC")

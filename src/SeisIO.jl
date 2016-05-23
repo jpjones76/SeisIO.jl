@@ -8,8 +8,9 @@ randseisobj, randseisdata,                                     # SeisData/randse
 wseis, rseis, wsac, r_sac,                                     # SeisData/fileio.jl
 FDSNget, IRISget, irisws, SeedLink,                            # Web services
 readuwpf, readuwdf, readuw, uwtoseis, r_uw,                    # UW
-prunesac!, psac, rsac, sacwrite, wsac, chksac, sachdr,         # SAC
+prunesac!, psac, r_sac, sacwrite, chksac, sachdr,              # SAC
 get_sac_keys, get_sac_fw, get_sac_iw, sactoseis,
+readsac, writesac,
 readsegy, segyhdr, pruneseg, segytosac, segytoseis, r_segy,    # SEG Y
 readwin32, win32toseis, r_win32,                               # Win 32
 parsemseed, readmseed, parsesl, readmseed, parserec,           # mini-SEED

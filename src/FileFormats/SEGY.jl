@@ -66,11 +66,11 @@ function getHdrStrings()
 end
 
 """
-    pruneseg!(S)
+    prunesegy!(S)
 
-Prune irrelevant standard headers from a SEGY dictionary S.
+Prune irrelevant standard headers from SEGY dictionary S.
 """
-function pruneseg!(S)
+function prunesegy!(S)
   # Common headers
   for i in ["enSrcPt", "cdp", "cdpN", "vertSum", "horSum", "dataUse", "recDat",
     "srcDat", "srcWater", "grpWater", "coordUnits", "weatherV", "subweatherV",
@@ -307,11 +307,11 @@ function segytosac(SEG::Dict{ASCIIString,Any})
 end
 
 """
-    readsegy(fid::ASCIIString; [f="nmt","std"])
+    r_segy(fid::ASCIIString; [f="nmt","std"])
 
 Read a SEG Y file into dictionary. Specify f="nmt" for PASSCAL/NMT SEG Y rev 0.
 """
-readsegy(fid::ASCIIString; f="nmt"::ASCIIString) = pseg(open(fid,"r"), f=f)
+r_segy(fid::ASCIIString; f="nmt"::ASCIIString) = pseg(open(fid,"r"), f=f)
 
 """
     segyhdr(S::Dict{ASCIIString,Any})
@@ -365,12 +365,12 @@ segytoseis(SEG::Array{Dict{ASCIIString,Any},1}) = (S = SeisData();
 
 
 """
-    r_segy(fname::ASCIIString; [f="nmt","std"])
+    readsegy(fname::ASCIIString; [f="nmt","std"])
 
 Read a SEG Y file into a SeisData object. Specify f="nmt" for PASSCAL/NMT SEG
 Y rev 0.
 """
-function r_segy(fname::ASCIIString; f="std"::ASCIIString)
+function readsegy(fname::ASCIIString; f="std"::ASCIIString)
   S = segytoseis(pseg(open(fname,"r"), f=f))
   if isa(S,SeisData)
     for i = 1:S.n

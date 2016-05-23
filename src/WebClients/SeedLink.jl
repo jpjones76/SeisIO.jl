@@ -75,6 +75,12 @@ function sltime(S, conn, chans, patts, sstr, tstr, maxbuf; v=false::Bool, vv=fal
   return S
 end
 
+"""
+    S = SeedLink(chanlist)
+
+Retrieve real-time data via. SeedLink in TIME mode for channels specified by
+ASCII array chanlist. See documentation for keyword options.
+"""
 function SeedLink(chans::Array{ASCIIString,1};
   addr="rtserve.iris.washington.edu"::ASCIIString,
   port=18000::Integer,
@@ -85,7 +91,8 @@ function SeedLink(chans::Array{ASCIIString,1};
   to=60::Real,                # timeout (seconds)
   N=32::Integer,              # N 512-byte packets are buffered before each conversion call
   v=false::Bool,              # verbose mode
-  vv=false::Bool)             # very verbose mode
+  vv=false::Bool,             # very verbose mode
+  y=true::Bool)
 
   # Match empty pattern lists
   if patts[1] == "*"
@@ -131,11 +138,11 @@ function SeedLink(chans::Array{ASCIIString,1};
                Dates.Minute(tt).value,
                Dates.Second(tt).value],',')
   if mode == "TIME"
-    if vv
+    if v || vv
       println("Station commands to send:")
-      for i = 1:length(chans)
-        println("write(conn,", "\"SELECT ", patts[i], "\\rSTATION ", chans[i],
-          "\\rTIME ", sstr, " ", tstr, "\\r\")")
+      for s = 1:length(chans)
+        isempty(patts[s]) || println("write(conn,\"SELECT ", patts[s], "\\r\")")
+        println("write(conn,\"STATION ", chans[s], "\\rTIME ", sstr, " ", tstr, "\\r\")")
       end
     end
   sltime(S, conn, chans, patts, sstr, tstr, maxbuf, v=v, vv=vv)
@@ -143,24 +150,20 @@ function SeedLink(chans::Array{ASCIIString,1};
     S.src[i] = "seedlink"
     note(S, i, "SeedLink server was "*addr*":"*string(port))
   end
-  return sync!(S, s="min", t=t)
+  if y
+    return sync!(S, s="min", t=t)
+  else
+    return S
+  end
   # Data mode will simply replace the command with "data" and launch as a coroutiune
   end
 end
 
 """
     SeedLink("config_file")
-  addr="rtserve.iris.washington.edu"::ASCIIString,
-  port=18000::Integer,
-  s=0.0::Float64,
-  t=60.0::Float64,
-  N=32::Integer,
-  v=false::Bool,
-  vv=false::Bool)
 
-Open a SeedLink session in TIME mode using configuration file `config_file`.
-
-
+Retrieve real-time data via. SeedLink in TIME mode for channels specified in
+file config_file. See documentation for keyword options.
 """
 function SeedLink(config_file::ASCIIString;
   addr="rtserve.iris.washington.edu"::ASCIIString,
@@ -171,26 +174,33 @@ function SeedLink(config_file::ASCIIString;
   N=32::Integer,
   to=60::Real,
   v=false::Bool,
-  vv=false::Bool)
+  vv=false::Bool,
+  y=true::Bool)
 
   !isfile(config_file) && error("First argument must be a string array or config filename")
   conf = filter(i -> !startswith(strip(i, ['\r', '\n']), ['\#','\*']), open(readlines, config_file))
   chans = Array{ASCIIString,1}()
   patts = Array{ASCIIString,1}()
   for i = 1:length(conf)
-    (net, sta, sel) = split(strip(conf[i],['\r','\n']), ' ', limit=3)
-    ch = join([sta, net],' ')
-    if isempty(sel)
-      push!(chans, ch)
-      push!(patts, "")
-    else
-      sel = collect(split(strip(sel), ' '))
-      for j = 1:length(sel)
+    try
+      (net, sta, sel) = split(strip(conf[i],['\r','\n']), ' ', limit=3)
+      ch = join([sta, net],' ')
+      if isempty(sel)
         push!(chans, ch)
-        push!(patts, sel[j])
+        push!(patts, "")
+      else
+        sel = collect(split(strip(sel), ' '))
+        for j = 1:length(sel)
+          push!(chans, ch)
+          push!(patts, sel[j])
+        end
       end
+    catch
+      (net, sta) = split(strip(conf[i],['\r','\n']), ' ')
+      push!(chans,net)
+      push!(patts,"")
     end
   end
-  S = SeedLink(chans, patts=patts, addr=addr, port=port, mode=mode, s=s, t=t, N=N, v=v, vv=vv)
+  S = SeedLink(chans, patts=patts, addr=addr, port=port, mode=mode, s=s, t=t, N=N, v=v, vv=vv, y=y)
   return S
 end

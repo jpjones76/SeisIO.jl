@@ -49,8 +49,7 @@ the last 10 minutes of data from CC.TIMB.EHZ (Cascade Volcano Observatory,
 Timberline Lodge, OR, US) in miniseed format.
 
 ### Notes
-* Traces are de-meaned and converted to m/s by dividing out the stage zero gain;
-however, instrument response is not flattened.
+* Traces are de-meaned and the stage zero gain is removed; however, instrument response is not translated.
 
 """
 function irisws(;net="UW", sta="TDH", loc="--", cha="EHZ", fmt="sacbl",
@@ -125,15 +124,7 @@ If `t`::Union{Int,Float64}:
 e.g. `s="2006-03-23T11:17:00"`, `e="2006-03-24T01:00:00"`.
 
 ## Output
-IRISget returns a structure of type SeisData with these fields:
-
-* `id`::Array{ASCIIString}: Trace ID strings, format NN.SSSS.CCC (net.station.channel)
-* `fs`::Array{Float64}: Sampling frequencies in Hz
-* `ts`::Array{Any}: Start times (as epoch times)
-* `te`::Array{Any}: End times (as epoch times)
-* `tr`::Any: If sync = true, an N x K array of uniformly sampled data with
-uniform start and end times; if sync = false, a dictionary indexed by channel
-number with one trace per numeric key.
+IRISget returns a SeisData structure.
 
 ### Examples
 1. `c = ["UW.TDH.EHZ"; "UW.VLL.EHZ"; "CC.TIMB.EHZ"]; seis = IRISget(c, t=3600)`:
@@ -144,12 +135,9 @@ t="2016-04-04T00:10:00",v=3);` : Retrieve an hour of data beginning at
 00:00:00 UTC, 2016-04-04, from the two named N-S channels of Mauna Loa broadbands.
 
 ### Notes
-* Traces are de-meaned and converted to m/s by dividing out the stage zero gain.
-* The IRIS web server doesn't provide full header information; note that this
-means one can't obtain station coordinates with IRISget.
-* Wildcards in the channel list are not yet supported; the IRIS web server
-disallows them.
-* To convert to human-readable times, try e.g. Dates.unix2datetime(seis.te[1])
+* Traces are de-meaned and the stage zero gain is removed; however, instrument response is not translated.
+* The IRIS web server doesn't provide station coordinates.
+* Wildcards in the channel list are not supported.
 
 """
 function IRISget(chanlist; s=0, t=3600, sync=true::Bool, v=false::Bool, to=10::Real)

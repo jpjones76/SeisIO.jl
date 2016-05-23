@@ -76,10 +76,10 @@ type SeisObj
           misc=Dict{ASCIIString,Any}()::Dict{ASCIIString,Any},
           notes=Array{ASCIIString,1}()::Array{ASCIIString,1},
           resp=Array{Complex{Float64},2}(0,2)::Array{Complex{Float64},2},
-          src="unknown"::ASCIIString,
+          src=""::ASCIIString,
           t=Array{Float64,2}(0,2)::Array{Float64,2},
           x=Array{Float64,1}()::Array{Float64,1},
-          units="unknown"::ASCIIString) = begin
+          units=""::ASCIIString) = begin
      return new(name, id, fs, gain, loc, misc, notes, resp, src, t, x, units)
   end
 end
@@ -158,8 +158,8 @@ type SeisData
   function SeisData(T...)
     S = SeisData()
     for i = 1:1:length(T)
-      if isa(T[i],SeisObj)
-        push!(S, T[i])
+      if isa(T[i],SeisObj) || isa(T[i],SeisData)
+        merge!(S, T[i])
       else
         warn(string("Tried to join non-SeisObj into SeisData (arg",
           @sprintf("%i", i), "); skipped."))

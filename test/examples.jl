@@ -12,13 +12,12 @@ T = 600
 S = "2016-05-16T14:50:00"
 seis = FDSNget(net=NET, sta=STA, cha=CHA, s=S, t=T, v=true)
 
-
 # Iris web service, single station
 seis = irisws(net="CC", sta="TIMB", cha="EHZ", t=300, fmt="miniseed")
-wsac(seis)
+writesac(seis)
 
 # Iris web service, multiple stations
 STA = ["UW.HOOD.BHZ"; "UW.HOOD.BHN"; "UW.HOOD.BHE"; "CC.TIMB.EHZ"; "CC.TIMB.EHN"; "CC.TIMB.EHE"];
 TS = "2016-05-16T14:50:00"; TE = 600;
 seis = IRISget(STA, s=TS, t=TE, sync=true);
-wsac(seis)
+writesac(seis)
