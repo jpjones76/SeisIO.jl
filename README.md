@@ -38,7 +38,6 @@ The command sqeuence below downloads (up to) 10 data channels (outage-dependent)
 S = FDSNget(net="CC,UW", sta="SEP,SHW,HSR,VALT", cha="*", t=600)
 S -= "SHW    ELZUW"
 S -= "HSR    ELZUW"
-ungap!(S)             # Remove time gaps
 plotseis(S)           # Time-aligned plot
 wsac(S)               # Save data to SAC files
 ```
