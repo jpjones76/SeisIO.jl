@@ -1,5 +1,3 @@
-using Base.Test, Compat
-include("../timeaux.jl")
 println("timeaux...")
 
 println("...parsetimewin...")
@@ -11,3 +9,16 @@ t = DateTime(now())
 s = t-Dates.Hour(2)
 d0, d1 = parsetimewin(s, t)
 @test_approx_eq(7200000, (d1-d0).value)
+
+@test_approx_eq([1,1], collect(j2md(1,1)))
+@test_approx_eq([3,1], collect(j2md(2015, 60)))
+@test_approx_eq([3,1], collect(j2md(2016, 61)))
+@test_approx_eq([12,31], collect(j2md(2015, 365)))
+@test_approx_eq([12,31], collect(j2md(2000, 366)))
+@test_approx_eq(1, md2j(2001,1,1))
+@test_approx_eq(60, md2j(2015,3,1))
+@test_approx_eq(61, md2j(2016,3,1))
+@test_approx_eq(365, md2j(2015,12,31))
+@test_approx_eq(365, md2j(1900,12,31))
+
+println("...done!")

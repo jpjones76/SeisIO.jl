@@ -1,6 +1,5 @@
 using Base.Test, Compat
-include("../IRIS.jl")
-println("IRIS tests...(creates up to 6 SAC files)")
+println("IRIS tests...")
 
 f_irisws = "out1.sac"
 f_irisget = "out2.sac"
@@ -10,19 +9,17 @@ chans = ["UW.TDH.EHZ"; "UW.VLL.EHZ"; "CC.TIMB.EHZ"]
 
 println("...IRISws...")
 SAC = irisws(net="CC", sta="TIMB", cha="EHZ", s=ts, t=te, fmt="sacbl")
-S = irisws(net="CC", sta="TIMB", cha="EHZ", s=ts, t=te, fmt="miniseed")
-@test_approx_eq(SAC["data"][1], S.Data[1][1])
-@test_approx_eq(SAC["npts"], length(S.Data[1]))
-@test_approx_eq(SAC["npts"], length(S.Time[1]))
-wsac(SAC)
+T = irisws(net="CC", sta="TIMB", cha="EHZ", s=ts, t=te, fmt="miniseed")
+@test_approx_eq(SAC["data"][1], T.x[1][1])
+@test_approx_eq(SAC["npts"], length(T.x[1]))
 
 println("...IRISget...")
-S = IRISget(chans, t=300, v=true)
-for i = 1:1:S.Nc
-  for j = i:1:S.Nc
-    @test_approx_eq(length(S.Data[i]), length(S.Time[j]))
-    @test_approx_eq(S.Start[i], S.Start[j])
-    @test_approx_eq(S.End[i], S.End[j])
-  end
-end
-wsac(S)
+U = IRISget(chans, t=300, v=true)
+L = [length(U.x[i])/U.fs[i] for i = 1:U.n]
+t = [U.t[i][1,2] for i = 1:U.n]
+L_min = minimum(L)
+L_max = maximum(L)
+t_min = minimum(t)
+t_max = maximum(t)
+@test_approx_eq(L_max - L_min <= maximum(1./U.fs), true)
+@test_approx_eq(t_max - t_min <= maximum(1./U.fs), true)

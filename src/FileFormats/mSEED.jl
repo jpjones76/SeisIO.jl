@@ -1,40 +1,18 @@
-"""
-    d = bitsplit(x,B,N)
-
-Splits B-bit unsigned int X into signed N-bit array
-"""
-function bitsplit(x,b,n)
-  m = Int(b/n)
-  y = zeros(m,length(x))
-  for j = 1:1:length(x)
-    s = bits(x[j])[end-b+1:end]
-    for i = 1:1:m
-      if s.data[1+(i-1)*n] == 0x30
-        os = 0
-      else
-        os = 2^(n-1)
-      end
-      y[i,j] = parse(Int, string(s[2+(i-1)*n:i*n]), 2) - os
-    end
+function parsesl(S::SeisData, buf::IOBuffer; v=false::Bool, vv=false::Bool)
+  seekstart(buf)
+  if v || vv
+    @printf(STDOUT, "Parsing: ")
   end
-  return y
-end
-
-"""
-    d = ParseUnenc(D, N, swap)
-
-Parse N samples of unencoded data D; byteswap if swap = true
-"""
-function ParseUnenc(D, N, swap)
-  if swap
-    d = zeros(N)
-    for i = 1:1:N
-      d[i] = bswap(D[i])
+  while !eof(buf)
+    if v || vv
+      id = ascii(read(buf,UInt8,8))
+      @printf(STDOUT, "%s, ", id)
+    else
+      skip(buf, 8)
     end
-  else
-    d = D[1:nsamp]
+    parserec(S, buf, v=v, vv=vv)
   end
-  return d
+  return(S)
 end
 
 """
@@ -80,33 +58,6 @@ function parsemseed(S::SeisData, sid; v=false::Bool, vv=false::Bool, fclose=true
 end
 parsemseed(sid; v=false::Bool, vv=false::Bool, fclose=true::Bool, fmt=10::Int) = (
 S = SeisData(); parsemseed(S, sid, v=v, vv=vv, fclose=fclose, fmt=fmt); return S)
-
-
-function blk_time(sid; b=true::Bool)
-  (yr,jd)       = read(sid, UInt16, 2)
-  (HH,MM,SS)    = read(sid, UInt8, 3)
-  skip(sid, 1)
-  sss           = read(sid, UInt16, 1)
-  if b
-    yr = ntoh(yr)
-    jd = ntoh(jd)
-    sss = ntoh(sss)
-  end
-  sss = sss*1.0e-4
-  return (yr,jd,HH,MM,SS,sss)
-end
-
-function parsesl(S::SeisData, conn::TCPSocket; x=Array{UInt8,1}()::Array{UInt8,1}, v=true::Bool, L=520::Integer, os=false::bool)
-  L-=os
-  while !eof(conn) && length(x) < L
-    push!(x, read(conn.buffer, UInt8))
-  end
-  sid = IOBuffer(x[9-os:end])
-  parserec(S, sid, vv=v)
-  p_now = position(sid);
-  println("position =", p_now)
-  return(S)
-end
 
 function parserec(S::SeisData, sid; v=false::Bool, vv=false::Bool, fmt=10::Int)
   swap= false
@@ -260,7 +211,7 @@ function parserec(S::SeisData, sid; v=false::Bool, vv=false::Bool, fmt=10::Int)
   # Determine start time relative to end of data channel
   ts = Dates.datetime2unix(DateTime(yr, mo, dy, HH, MM, SS, 0)) + ms + TimeCorrection - te
   #te = ts + nsamp*dt
-  vv && println("ts = ", ts, "te = ", te)
+  vv && println("ts = ", ts, " te = ", te)
   if te  == 0
     S.t[channel] = [1.0 ts; Float64(nsamp) 0.0]
   else
@@ -390,4 +341,57 @@ function parserec(S::SeisData, sid; v=false::Bool, vv=false::Bool, fmt=10::Int)
   # Append data
   append!(S.x[channel], d)
   return S
+end
+
+"""
+    d = bitsplit(x,B,N)
+
+Splits B-bit unsigned int X into signed N-bit array
+"""
+function bitsplit(x,b,n)
+  m = Int(b/n)
+  y = zeros(m,length(x))
+  for j = 1:1:length(x)
+    s = bits(x[j])[end-b+1:end]
+    for i = 1:1:m
+      if s.data[1+(i-1)*n] == 0x30
+        os = 0
+      else
+        os = 2^(n-1)
+      end
+      y[i,j] = parse(Int, string(s[2+(i-1)*n:i*n]), 2) - os
+    end
+  end
+  return y
+end
+
+"""
+    d = ParseUnenc(D, N, swap)
+
+Parse N samples of unencoded data D; byteswap if swap = true
+"""
+function ParseUnenc(D, N, swap)
+  if swap
+    d = zeros(N)
+    for i = 1:1:N
+      d[i] = bswap(D[i])
+    end
+  else
+    d = D[1:nsamp]
+  end
+  return d
+end
+
+function blk_time(sid; b=true::Bool)
+  (yr,jd)       = read(sid, UInt16, 2)
+  (HH,MM,SS)    = read(sid, UInt8, 3)
+  skip(sid, 1)
+  sss           = read(sid, UInt16, 1)
+  if b
+    yr = ntoh(yr)
+    jd = ntoh(jd)
+    sss = ntoh(sss)
+  end
+  sss = sss*1.0e-4
+  return (yr,jd,HH,MM,SS,sss)
 end

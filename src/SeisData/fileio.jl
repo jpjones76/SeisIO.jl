@@ -78,7 +78,7 @@ function wsac(S::SeisData; ts=true, v=true)
 
     # Data
     x = map(Float32, S.x[i])
-    ts && (tdata = map(Float32, t_expand(S.t[i], dt)))
+    ts && (tdata = map(Float32, t_expand(S.t[i], dt)-S.t[i][1,2]))
 
     # Write to file
     sacwrite(fname, sacFloatVals, sacIntVals, sacCharVals, x, t=tdata, ts=ts)
@@ -114,7 +114,7 @@ function getnum(a)
   t <: Unsigned && return UInt8(12)
   t <: Integer && return UInt8(13)
   t <: AbstractFloat && return UInt8(14)
-  iscomplex(a[1]) && return UInt8(15)
+  isa(a[1],AbstractString) || return UInt8(15)
   t <: DirectIndexString && return UInt8(16)
   error("Unrecognized type")
   # Who needs "switch"
@@ -300,6 +300,8 @@ function read_misc(io::IOStream)
     id = read(io, UInt8)
     id == 1 && (v = read(io, Char))
     if id == 2
+      # wtf is p?
+      p = read(io, UInt8)
       p == 1 && (v = read(io, UInt8))
       p == 2 && (v = read(io, UInt16))
       p == 4 && (v = read(io, UInt32))
@@ -307,6 +309,7 @@ function read_misc(io::IOStream)
       p == 16 && (v = read(io, UInt128))
     end
     if id == 3
+      p = read(io, UInt8)
       p == 1 && (v = read(io, Int8))
       p == 2 && (v = read(io, Int16))
       p == 4 && (v = read(io, Int32))
@@ -314,11 +317,13 @@ function read_misc(io::IOStream)
       p == 16 && (v = read(io, Int128))
     end
     if id == 4
+      p = read(io, UInt8)
       p == 2 && (v = read(io, Float16))
       p == 4 && (v = read(io, Float32))
       p == 8 && (v = read(io, Float64))
     end
     if id == 5
+      p = read(io, UInt8)
       p == 4 && (r = read(io, Float16); i = read(io, Float16))
       p == 8 && (r = read(io, Float32); i = read(io, Float32))
       p == 16 && (r = read(io, Float32); i = read(io, Float64))

@@ -20,8 +20,8 @@ function rlennasc(fname::ASCIIString)
 
   S.name = join([sta, cmp], '.')
   S.id = join(["", sta, "", cmp], '.')
-  S.t = map(Float64, [0 ts; length(S.x) 0])
+  S.t = map(Float64, [0.0 ts; length(S.x) 0.0])
   S.x = x[:,1]
-  S.src = "lennartz_ascii"
+  S.src = "lennartz ascii"
   return S
 end

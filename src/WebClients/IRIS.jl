@@ -65,10 +65,15 @@ function irisws(;net="UW", sta="TDH", loc="--", cha="EHZ", fmt="sacbl",
   req = get(url, timeout=to, headers=hdr)
   if fmt == "sacbl"
     tmp = IOBuffer(req.data)
-    return prunesac(psac(tmp))
+    D = prunesac(psac(tmp))
+    D["src"] = "irisws/timeseries"
+    return D
   elseif fmt == "miniseed"
     tmp = IOBuffer(req.data)
-    return parsemseed(tmp, v=v)
+    S = parsemseed(tmp, v=v)
+    S.src[1] = "irisws/timeseries"
+    note(S, 1, "Data retrieved in mseed format")
+    return S
   else
     if v
       warn(@sprintf("Unusual format spec; returning unparsed data stream in format=%s",fmt))
@@ -176,7 +181,7 @@ function IRISget(chanlist; s=0, t=3600, sync=true::Bool, v=false::Bool, to=10::R
   end
   if sync
     v && println("Synchronizing data now...")
-    sync!(seis)
+    sync!(seis, s=d0, t=d1)
   end
   return seis
 end

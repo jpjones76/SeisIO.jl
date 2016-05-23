@@ -3,19 +3,19 @@ module SeisIO
 export SeisObj, SeisData, findname, findid, hasid, hasname,    # SeisData/SeisData.jl
 samehdr, t_expand, t_collapse, pull, note,
 getbandcode, prune!, purge, purge!, namestrip, gapfill!,       # SeisData/utils.jl
-gapfill, ungap!, ungap, sync!, sync,
+gapfill, ungap!, ungap, sync!, sync, autotap!,
 randseisobj, randseisdata,                                     # SeisData/randseis.jl
-wseis, rseis, wsac,                                            # SeisData/fileio.jl
-FDSNget, IRISget, irisws,
+wseis, rseis, wsac, r_sac,                                     # SeisData/fileio.jl
+FDSNget, IRISget, irisws, SeedLink,                            # Web services
 readuwpf, readuwdf, readuw, uwtoseis, r_uw,                    # UW
 prunesac!, psac, rsac, sacwrite, wsac, chksac, sachdr,         # SAC
-get_sac_keys, get_sac_fw, get_sac_iw,
+get_sac_keys, get_sac_fw, get_sac_iw, sactoseis,
 readsegy, segyhdr, pruneseg, segytosac, segytoseis, r_segy,    # SEG Y
 readwin32, win32toseis, r_win32,                               # Win 32
 parsemseed, readmseed, parsesl, readmseed, parserec,           # mini-SEED
 rlennasc,                                                      # Lennartz ASCII
 plotseis,                                                      # Plotting/plotseis.jl
-j2md, md2j, sac2epoch,                                         # time_aux.jl
+parsetimewin, j2md, md2j, sac2epoch,                           # time_aux.jl
 seisio_notes                                                   # this file
 
 # SeisData is designed as a universal, gap-tolerant "working" format for
@@ -40,6 +40,7 @@ include("FileFormats/LennartzAsc.jl") # Lennartz ASCII: a cheap wrapper to readd
 # Web clients
 include("WebClients/IRIS.jl")
 include("WebClients/FDSN.jl")
+include("WebClients/SeedLink.jl")
 
 # Plotting
 include("plotseis.jl")

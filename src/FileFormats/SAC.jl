@@ -261,7 +261,11 @@ function sactoseis(D::Dict{ASCIIString,Any})
   unitstrings = ["nm", "nm/s", "V", "nm/s/s", "unknown"]
   pha = Dict{ASCIIString,Float64}()
   if haskey(D, "idep")
-    units = unitstrings[D["idep"]]
+    try
+      units = unitstrings[D["idep"]]
+    catch
+      units = "unknown"
+    end
   else
     units = "m/s"
   end
@@ -279,22 +283,22 @@ function sactoseis(D::Dict{ASCIIString,Any})
   t = map(Float64, [0 sac2epoch(D); D["npts"] 0])
 
   misc = prunesac(D)
-  for k in [collect(pkeys); ["nvhdr", "knetwk", "kstnm", "kcmpnm", "scale",
+  for k in ["nvhdr", "knetwk", "kstnm", "kcmpnm", "scale",
     "nzyear", "nzjday", "nzhour", "nzmin", "nzsec", "nzmsec", "e", "b", "npts",
-    "src", "data", "delta", "cmpaz", "cmpinc", "stla", "stlo", "stel", "idep"]]
+    "src", "data", "delta", "cmpaz", "cmpinc", "stla", "stlo", "stel", "idep"]
     if haskey(misc, k); delete!(misc, k); end
   end
 
   # Turn this monstrosity into a SeisObj
-  T = SeisObj(name=name, id=id, fs=fs, gain=gain, loc=loc, pha=pha, t=t, x=x,
+  T = SeisObj(name=name, id=id, fs=fs, gain=gain, loc=loc, t=t, x=x,
               src="sac file", misc=misc, units=units)
   return T
 end
 
 """
-    S = readsac(fname)
+    S = r_sac(fname)
 
 Read SAC file `fname` into a SeisObj.
 """
-readsac(fname::ASCIIString; p=false::Bool) = sactoseis(psac(open(fname,"r"),
-  v=v, p=p))
+r_sac(fname::ASCIIString) = (src = fname;
+  S = sactoseis(psac(open(fname,"r"), p=false)); S.src = fname; return S)

@@ -115,8 +115,27 @@ function populate_chan!(S::SeisObj; c=false::Bool)
   ccode = split(S.id, '.')[4][2]
 
   # Random miscellany
-  isempty(S.misc) && [S.misc[randstring(12)] = randn(rand(1:6))
-    for i = 1:rand(3:18)]                                               # misc
+  if isempty(S.misc)
+    for i = 1:rand(2:12)
+      n = rand(1:6)
+      n == 1 && (S.misc[randstring(rand(2:12))] = rand(UInt128))
+      n == 2 && (S.misc[randstring(rand(3:13))] = rand(Float32))
+      n == 3 && (S.misc[randstring(rand(4:14))] = randstring(rand(16:256)))
+      if n == 4
+        k = randstring(rand(5:15))
+        S.misc[k] = Array{Char,2}(rand(6:18),rand(6:18))
+      elseif n == 5
+        k = randstring(rand(6:16))
+        S.misc[k] = rand(Complex{Float64}, tuple(randcycle(rand(2:5))...))
+      else
+        k = randstring(rand(6:36))
+        S.misc[k] = Array{ASCIIString,2}(rand(2:5),rand(2:5))
+        for i = 1:length(S.misc[k])
+          S.misc[k][i] = randstring(rand(1:100))
+        end
+      end
+    end
+  end
 
   # A random instrument response function
   if isempty(S.resp)

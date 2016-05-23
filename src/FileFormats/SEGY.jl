@@ -207,7 +207,7 @@ Parse SEGY stream f (Segy rev 0 mod_PASSCAL/NMT).
 
 Parse SEGY stream f (Segy rev 0 mod_PASSCAL/NMT).
 """
-function pseg(fid; f="nmt"::ASCIIString)
+function pseg(fid; f="nmt"::ASCIIString, h=false::Bool)
   if Base.in(f,["passcal", "nmt"])
     S = Dict{ASCIIString,Any}()
 
@@ -236,22 +236,20 @@ function pseg(fid; f="nmt"::ASCIIString)
     S["statDelay"]  = read(fid, Int16)
     samp_rate       = 1.0e6/read(fid, Int32)
     trig_v          = read(fid, Int16, 8); merge!(S, Dict(zip(trig_s, trig_v)))
-    scale_fac       = read(fid, Float32)
+    S["scale_fac"]  = read(fid, Float32)
     S["iinst"]      = read(fid, UInt16)
     skip(fid, 2)
-    S["npts"]       = read(fid, Int32)
+    npts            = read(fid, Int32)
     S["depmax"]     = read(fid, Int32)
     S["depmin"]     = read(fid, Int32)
 
     # Read data
+    S["npts"] = S["sampLen"] == 32767 ? npts : S["sampLen"]
     S["data"]       = read(fid, S["dataForm"] == 0 ? Int16 : Int32, S["npts"])
     close(fid)
 
     # Processing
     settracecode(S)
-    if scale_fac != 0 && S["gainConst"] != 0
-      S["scale"] = (scale_fac/S["gainConst"])
-    end
     S["delta"] = Float32((S["sampDT"] == 1 ? samp_rate : S["sampDT"])/1.0e6)
     S["stla"], S["stlo"] = auto_coords(S["stla"], S["stlo"],
                                        coord_scale, S["coordUnits"])
@@ -259,7 +257,11 @@ function pseg(fid; f="nmt"::ASCIIString)
     return S
   else
     F, S = psegstd(fid)
-    return F, S
+    if h
+      return F, S
+    else
+      return S
+    end
   end
 end
 
@@ -307,10 +309,9 @@ end
 """
     readsegy(fid::ASCIIString; [f="nmt","std"])
 
-Read a SEG Y file into a SeisData object. Specify f="nmt" for PASSCAL/NMT SEG
-Y rev 0.
+Read a SEG Y file into dictionary. Specify f="nmt" for PASSCAL/NMT SEG Y rev 0.
 """
-readsegy(fid::ASCIIString; f="nmt"::ASCIIString) = psegy(open(fid,"r"), f=f)
+readsegy(fid::ASCIIString; f="nmt"::ASCIIString) = pseg(open(fid,"r"), f=f)
 
 """
     segyhdr(S::Dict{ASCIIString,Any})
@@ -341,9 +342,12 @@ function segytoseis(S::Dict{ASCIIString,Any})
   units = "unknown"
   loc = zeros(5)
 
+  # Try to determine scale factor automatically
   if S["src"] == "segy_PASSCAL"
-    # PASSCAL appears to just store this as a scalar
-    gain = S["gainConst"]
+    gain = S["scale_fac"] / S["gainConst"]
+    if gain == Inf || gain <= 0
+      gain = 1.0
+    end
   elseif haskey(S,"transConstMant")
     # I have little confidence in this formula; not sure about traceWtFac;
     # not sure if exponent uses gainConst/10 or gainConst/20 from dB
@@ -361,16 +365,19 @@ segytoseis(SEG::Array{Dict{ASCIIString,Any},1}) = (S = SeisData();
 
 
 """
-    r_segy(fid::ASCIIString; [f="nmt","std"])
+    r_segy(fname::ASCIIString; [f="nmt","std"])
 
 Read a SEG Y file into a SeisData object. Specify f="nmt" for PASSCAL/NMT SEG
 Y rev 0.
 """
-function r_segy(fid::ASCIIString; f="std"::ASCIIString)
-  if Base.in(f,["passcal", "nmt"])
-    SEG = pseg(open(fid,"r"), f=f)
+function r_segy(fname::ASCIIString; f="std"::ASCIIString)
+  S = segytoseis(pseg(open(fname,"r"), f=f))
+  if isa(S,SeisData)
+    for i = 1:S.n
+      S.src[i] = fname
+    end
   else
-    F, SEG = pseg(open(fid,"r"), f=f)
+    S.src = fname
   end
-  return(segytoseis(SEG))
+  return(S)
 end

@@ -1,5 +1,6 @@
 # To do: Abstract type
-using DSP: resample
+using DSP: resample, tukey
+import Base.in
 import Base:getindex, setindex!, append!, deleteat!, delete!, +, -, isequal,
 search, push!, merge!,  length, start, done, next, size, sizeof, ==,
 filter, filt!, sort!, sort #, isempty
@@ -199,6 +200,7 @@ findname(n::AbstractString, S::SeisData) = findfirst(S.name .== n)
 findname(S::SeisData, n::AbstractString) = findfirst(S.name .== n)
 findid(n::AbstractString, S::SeisData) = findfirst(S.id .== n)
 findid(S::SeisData, n::AbstractString) = findfirst(S.id .== n)
+findid(S::SeisData, T::SeisObj) = findfirst(S.id .== T.id)
 hasid(id::AbstractString, S::SeisData) = in(id, S.id)
 hasname(name::AbstractString, S::SeisData) = in(name, S.name)
 
@@ -242,14 +244,6 @@ function setindex!(S::SeisData, T::SeisData, I::Range)
     end
   end
   return S
-end
-
-# overwrite a range of SeisData channels with another SeisData struct
-function search(S::SeisData, T::SeisObj)
-  H = headerhash(S)
-  h = [hash(getfield(T, v)) for v in headerfields(T)]
-  K = find([isequal(H[:,i],h) for i = 1:size(H,2)])
-  return K
 end
 
 #isempty(t::SeisObj) = minimum([isempty(t.(i)) for i in fieldnames(t)])
@@ -381,19 +375,8 @@ function t_collapse(t::Array{Float64,1}, dt::Real)
   return tt
 end
 
-function match_fs!(S::SeisObj, T::SeisObj)
-  # Resample as needed
-  isapprox(S.fs, T.fs) && return
-  rate = rationalize(T.fs/S.fs)
-  S.x = resample(S.x, rate)
-  S.t[:,1] = round(S.t[:,1].*rate)
-  S.fs = copy(T.fs)
-  note(S, @sprintf("Resampled to %.1f Hz", T.fs))
-  return S
-end
-
-function xtmerge!(t1::Array{Float64,2}, x1::Array{Float64,1},
-                  t2::Array{Float64,2}, x2::Array{Float64,1}, dt::Float64)
+function xtmerge(t1::Array{Float64,2}, x1::Array{Float64,1},
+                 t2::Array{Float64,2}, x2::Array{Float64,1}, dt::Float64)
   t = [t_expand(t1, dt); t_expand(t2, dt)]
   if dt == Inf
     dt = 0
@@ -406,11 +389,15 @@ function xtmerge!(t1::Array{Float64,2}, x1::Array{Float64,1},
   x1 = x[i]
 
   # Resolve conflicts
-  if minimum(diff(t1)) < 0.5 * dt
+  if minimum(diff(t1)) < 0.5*dt
     J = flipdim(find(diff(t1) .< 0.5*dt), 1)
     for j in J
       t1[j] = 0.5*(t1[j]+t1[j+1])
-      x1[j] = 0.5*(x1[j]+x1[j+1])
+      if isnan(x1[j])
+        x1[j] = x1[j+1]
+      elseif !isnan(x1[j+1])
+        x1[j] = 0.5*(x1[j]+x1[j+1])
+      end
       deleteat!(t1, j+1)
       deleteat!(x1, j+1)
     end
@@ -420,10 +407,8 @@ function xtmerge!(t1::Array{Float64,2}, x1::Array{Float64,1},
   else
     t1 = [zeros(length(t1)) t1]
   end
-  return (x1, t1)
+  return (t1, x1)
 end
-xtmerge(t1, x1, t2, x2, dt) = (t3 = copy(t1); x3 = copy(x1);
-  xtmerge!(t3, x3, t2, x2, dt); return (t3, x3))
 
 """
     merge!(S::SeisObj, T::SeisObj)
@@ -433,42 +418,49 @@ operation is applied to data value pairs whose timestamps are separated by less
 than half the sampling interval; times ti, tj corresponding to merged samples
 xi, xj are averaged.
 """
-function merge!(S::SeisObj, T::SeisObj)
-  S.id == T.id || error("Channel header mismatch!")
+function merge!(S::SeisObj, U::SeisObj)
+  S.id == U.id || error("Channel header mismatch!")
 
   # Empty channel(s)
-  isempty(T.x) && (return S)
-  isempty(S.x) && ([S.(i) = deepcopy(T.(i)) for i in fieldnames(S)]; return S)
+  isempty(U.x) && (return S)
+  isempty(S.x) && ([S.(i) = deepcopy(U.(i)) for i in fieldnames(S)]; return S)
 
   # Two full channels
-  local U = deepcopy(T)
-  match_fs!(U, S)
-  xtmerge!(S.t, S.x, U.t, U.x, 1/U.fs)                    # time and data
-  merge!(S.misc, U.misc)                                  # misc
-  S.notes = cat(1, S.notes, U.notes)                      # notes
-  note(S, @sprintf("Merged %i samples", length(U.x)))
-  ds = (U.t[1,2] - S.t[1,2])
+  S.fs != U.fs && error("Sampling frequency mismatch; correct manually.")
+  ungap!(S, m=false, w=false)
+  T = ungap(U, m=false, w=false)
+  if !isapprox(S.gain,T.gain)
+    (T.x .*= (S.gain/T.gain); T.gain = copy(S.gain))      # rescale T.x to match S.x
+  end
+  (S.t, S.x) = xtmerge(S.t, S.x, T.t, T.x, 1/T.fs)        # merge time and data
+  merge!(S.misc, T.misc)                                  # merge misc
+  S.notes = cat(1, S.notes, T.notes)                      # merge notes
+  note(S, @sprintf("Merged %i samples", length(T.x)))
   return S
 end
+merge(S::SeisObj, T::SeisObj) = (U = deepcopy(S); merge!(S,T); return(S))
 
 """
     merge!(S::SeisData, T::SeisObj)
 
 Merge a SeisObj structure into a SeisData structure.
 """
-function merge!(S::SeisData, T::SeisObj)
-  isempty(T.x) && return S
-  i = search(S, T)
-  (isempty(i) || isempty(S.x)) && return push!(S, T)
-
+function merge!(S::SeisData, U::SeisObj)
+  isempty(U.x) && return S
+  i = find(S.id .== U.id)
+  (isempty(i) || isempty(S.x)) && return push!(S, U)
   i = i[1]
-  local U = deepcopy(T)
-  match_fs!(U, S[i])
-  xtmerge!(S.t[i], S.x[i], U.t, U.x, 1/U.fs)                # time, data
-  merge!(S.misc[i], U.misc)                                 # misc
-  note(S.notes[i], U.notes)                                 # notes
-  note(S, i, @sprintf("Merged %i samples", length(U.x)))
-  ds = (U.t[1,2] - S.t[i][1,2])
+  S.fs[i] != U.fs && return push!(S,U)
+  T = deepcopy(U)
+  ungap!(S[i], m=false, w=false)
+  ungap!(T, m=false, w=false)
+  if !isapprox(S.gain[i],T.gain)
+    (T.x .*= (S.gain[i]/T.gain); T.gain = copy(S.gain[i]))        # rescale T.x to match S.x
+  end
+  (S.t[i], S.x[i]) = xtmerge(S.t[i], S.x[i], T.t, T.x, 1/T.fs)    # time, data
+  merge!(S.misc[i], T.misc)                                       # misc
+  S.notes[i] = cat(1, S.notes[i], T.notes)                        # notes
+  note(S, i, @sprintf("Merged %i samples", length(T.x)))
   return S
 end
 
@@ -481,8 +473,14 @@ first match.
 """
 function merge!(S::SeisData, T::SeisData)
   isempty(T.x) && (return S)
-  isempty(S.x) && (S = deepcopy(T); return S)
-  [merge!(S, T[i]) for i in 1:T.n]
+  for i = 1:T.n
+    try
+      merge!(S, T[i])
+    catch err
+      warn(err)
+      push!(S, T[i])
+    end
+  end
   return S
 end
 
@@ -508,13 +506,11 @@ pull(S::SeisData, i::Integer) = (T = getindex(S, i); delete!(S,i);
 +(S::SeisData, T::SeisObj) = (U = deepcopy(S); merge!(U,T); return U)
 +(S::SeisData, T::SeisData) = (U = deepcopy(S); merge!(U,T); return U)
 function +(S::SeisObj, T::SeisObj)
-  try
-    merge!(S, T)
-  catch
-    U = SeisData()
-    push!(U, S)
-    merge!(U, T)
-    return U
+  if S.id == T.id
+    U = deepcopy(S)
+    return merge!(U,T)
+  else
+    return SeisData(S, T)
   end
 end
 
@@ -542,31 +538,12 @@ end
 # Adding a string to a SeisObj simply appends it to the "notes" setion
 +(S::SeisObj, s::ASCIIString) = cat(1, S.notes, string(string(now()), 'T')[2], "  ", s)
 
-# Delete by channel #
--(S::SeisData, i::Int) = (U = deepcopy(S); deleteat!(U,i); return U)
+# Rules for deleting
+-(S::SeisData, i::Int) = (U = deepcopy(S); deleteat!(U,i); return U)  # By channel #
+-(S::SeisData, str::ASCIIString) = ([deleteat!(S,k) for k in unique([find(S.id .== str); find(S.name .== str)])]) #Name or ID match
+-(S::SeisData, T::SeisObj) = [deleteat!(S,i) for i in find(S.id .== T.i)] # By SeisObj
 
-# Delete by name/id match
-function -(S::SeisData, n::ASCIIString)
-  try
-    i = findname(n, S); deleteat!(S,i)
-  catch
-    try
-      i = findid(n, S); deleteat!(S,i)
-    catch
-      error(@sprintf("No channel with name or id %s in S", n))
-    end
-  end
-  return S
-end
-
-# Delete by header match
-function -(S::SeisData, T::SeisObj)
-  K = search(S, T)
-  [deleteat!(S,i) for i in K]
-  return S
-end
-
-# Test for equality
+# Tests for equality
 ==(S::SeisObj, T::SeisObj) = isequal(S,T)
 ==(S::SeisData, T::SeisData) = isequal(S,T)
 

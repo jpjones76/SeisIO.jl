@@ -49,7 +49,7 @@ end
 
 """
     S = FDSNget(net="NET", sta="STA", loc="LL", cha="CHA", s=StartTime,
-                t=EndTime, to=TimeOut, do_filt=true, do_sync=true)
+                t=EndTime, to=TimeOut, y=true)
 
 Retrieve time series data from an FDSN HTTP server. Returns data in a SeisData
 structure.
@@ -62,9 +62,7 @@ structure.
 * `s`: Start time. See below.
 * `t`: End time. See below.
 * `Q`: Quality. Uses standard FDSN/IRIS codes.
-* `do_filt`: Demean, cosine taper, and highpass filter all data. Specify corner
-frequency FC as a float by passing `f=FC`.
-* `do_sync`: Synchronize the start and end times of all channels and fill all
+* `y`: Synchronize the start and end times of all channels and fill all
 time gaps.
 * See FDSN documentation at http://service.iris.edu/fdsnws/station/1/
 
@@ -111,7 +109,7 @@ function FDSNget(; src="IRIS"::ASCIIString,
                    t=600::Union{Real,DateTime,ASCIIString},
                    v=false::Bool,
                    vv=false::Bool,
-                   do_sync=true::Bool,
+                   y=true::Bool,
                    to=10::Real)
   hdr = Dict("UserAgent" => "Julia-SeisIO-FSDN.jl/0.0.1")
   if isa(s, Union{DateTime,ASCIIString}) && isa(t, Union{DateTime,ASCIIString})
@@ -128,8 +126,6 @@ function FDSNget(; src="IRIS"::ASCIIString,
     uhead = "http://ws.resif.fr/fdsnws/"
   elseif src == "NCSN"
     uhead = "http://service.ncedc.org/fdsnws/"
-  #elseif src == "IPGP" # Meta-data only
-  # uhead = "http://eida.ipgp.fr/fdsnws/"
   else
     uhead = src
   end
@@ -144,13 +140,21 @@ function FDSNget(; src="IRIS"::ASCIIString,
   tmp = IOBuffer(R.data)
   S = parsemseed(tmp)
 
+  # Source logging
+  usrc = split(uhead, '/', keep=false)
+  usrc = "FDSN " * " " * ascii(usrc[startswith(usrc[1],"http") ? 2 : 1])
+  for i = 1:S.n
+    S.src[1] = usrc
+    note(S, i, "Data retrieved in mseed format")
+  end
+
   # Automatically incorporate station information from web XML retrieval
   R = get(station_url, timeout=to, headers=hdr)
   tmp = IOBuffer(R.data)
   sinfo = parse_FDSN_xml(parse_string(join(readlines(tmp))))
   FDSNprep!(S, sinfo)
-  if do_sync
-    sync!(S)
+  if y
+    sync!(S, s=d0, t=d1)
   end
   return S
 end

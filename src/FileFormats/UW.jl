@@ -203,7 +203,7 @@ Only works correctly with single-event pickfiles.
 """
 readuwpf(pickfile; v=false::Bool) = (procuwpf!(Dict{ASCIIString,Any}(), -1, pickfile, v))
 
-function readuwdf(datafile::AbstractString; b=true::Bool, v=false::Bool)
+function readuwdf(datafile::AbstractString; v=false::Bool)
   dconst = -11676096000
 
   # Open data file
@@ -223,6 +223,7 @@ function readuwdf(datafile::AbstractString; b=true::Bool, v=false::Bool)
   M["flags"]    = read(fid, Int16, 10)
   M["flags"] = [bswap(i) for i in M["flags"]]
   M["extra"]    = replace(ascii(read(fid, UInt8, 10)),"\0"," ")
+  v && [println(k, ": ", M[k]) for k in keys(M)]
   M["comment"]  = replace(ascii(read(fid, UInt8, 80)),"\0"," ")
 
   # Set M time using lmin and lsec WHICH USE GREGORIAN MINUTES JESUS CHRIST WTF
@@ -237,11 +238,11 @@ function readuwdf(datafile::AbstractString; b=true::Bool, v=false::Bool)
   # Seek to end of file get number of structures
   seekend(fid)
   skip(fid, -4)
-  nstructs = b ? bswap(read(fid, Int32)) : read(fid, Int32)
-  #println("nstructs=", nstructs)
+  nstructs = bswap(read(fid, Int32))
+  v && println("nstructs=", nstructs)
   structs_os = (-12*nstructs)-4
   tc_os = 0
-
+  v && println("structs_os=", structs_os)
   # Set version of UW seismic data file (char may be empty, leave code as-is!)
   uwformat = M["extra"][3] == '2' ? 2 : 1
   # Read in UW2 data structures
@@ -353,7 +354,7 @@ function readuwdf(datafile::AbstractString; b=true::Bool, v=false::Bool)
     for i = 1:1:Nc
       seek(fid, S["offset"][i])
       seis = read(fid, fmt[i], S["chlen"][i])
-      b && (seis = [bswap(s) for s in seis])
+      seis = [bswap(s) for s in seis]
       S["data"][i] = seis
     end
   end
@@ -403,14 +404,14 @@ function readuw(filename::ASCIIString; v=false::Bool)
       end
     end
   end
-  src_stub = "uw "
+  src_stub = ""
 
   # Datafile wrapper
   if isfile(datafile)
     v && println("Reading datafile ", datafile)
-    S, Nc = readuwdf(datafile, b=b, v=v)
+    S, Nc = readuwdf(datafile, v=v)
     v && println("Done reading data file.")
-    src_stub *= "df"
+    src_stub *= splitdir(datafile)[2]
     S["Nc"] = Nc
   else
     v && println("Skipping datafile (not found or not given)")
@@ -422,8 +423,11 @@ function readuw(filename::ASCIIString; v=false::Bool)
     v && println("Reading pickfile ", pickfile)
     procuwpf!(S, Nc, pickfile, v)
     v && println("Done reading pick file.")
-    contains(src_stub, "df") && (src_stub *= "+")
-    src_stub *= "pf"
+    if endswith(src_stub, "W")
+      src_stub = src_stub[1:end-1] * "[W," * pickfile[end-1:end-1] * "]"
+    else
+      src_stub *= splitdir(pickfile)[2]
+    end
   else
     v && println("Skipping pickfile (not found or not given)")
   end

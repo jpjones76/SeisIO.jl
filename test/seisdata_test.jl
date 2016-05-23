@@ -1,158 +1,133 @@
 using Base.Test, Compat
-include("../SeisData.jl")
-addc1(S) = AddSeisChan(S, fs = 50.0, gain = 10.0, name = "DEAD.STA.EHZ",
-            t=0.02*cat(1, 0, ones(99)), x=randn(100), ts=0.02, te=2.00)
-addc2(S) = AddSeisChan(S, fs = 100.0, gain = 5.0, name = "DEAD.STA.EHE",
-            t=0.01*cat(1, 0, ones(49), 100, ones(49)), x=rand(100)-0.5, ts=0.0, te=1.99)
-addc3(S) = AddSeisChan(S, fs = 50.0, gain = 10.0, name = "DEAD.STA.EHZ",
-            t=0.02*cat(1, 0, ones(149)), x=randn(150), ts=1.02, te=4.00)
+using DSP:resample
+segy_file = "SampleFiles/02.050.02.01.34.0572.6"
+uw_root = "SampleFiles/99062109485W"
 
+t1 = time()
+ts = t1+0.25
+te = t1+0.75
+fs1 = 50.0
+
+# s1 and s2 represent data from a fictitious channel
+# s2 begins 1 second later, but has a gap of 1s after sample 25
+s1 = SeisObj(fs = fs1, gain = 10.0, name = "DEAD.STA.EHZ", id = "DEAD.STA..EHZ",
+  t = [1.0 t1; 100.0 0.0], x=randn(100))
+s2 = SeisObj(fs = fs1, gain = 10.0, name = "POORLY NAMED", id = "DEAD.STA..EHZ",
+  t = [1.0 t1+1.0; 26.0 1.0; 126 0.2; 150.0 0.0], x=randn(150))
+
+
+s3 = SeisObj(fs = 100.0, gain = 5.0, name = "DEAD.STA.EHE", id = "DEAD.STA..EHE",
+  t = [1.0 t1; 100.0 0.0], x=rand(100)-0.5)
+s4 = SeisObj(fs = 100.0, gain = 50.0, name = "UNNAMED", id = "DEAD.STA..EHE",
+  t = [1.0 t1+1; 100.0 1.0; 150.0 0.0], x=randn(150))
+
+# We expect:
+# (1) LAST 25-26 points in s1 will be averaged with first 25 points in s3
+# (2) s3 will be ungapped with exactly 50 samples of junk
+# (3) after sync of a seisobj formed from [s1+s3, s2], s2 will be padded with 0.5s
+# at start and 3s at end
 
 println("seisdata...")
 println("...init...")
-S = SeisData();
-for i in (S.Fs, S.Loc, S.Name, S.RespN, S.End, S.Gain, S.LocN, S.Start, S.Time, S.Data, S.Resp, S.Picks)
-  @test_approx_eq(isempty([]), isempty(i))
-end
-
-println("...channel add...")
-addc1(S)
-@test_approx_eq(S.Nc, 1)
-@test_approx_eq(length(S.Fs), 1)
-@test_approx_eq(length(S.Gain), 1)
-@test_approx_eq(length(S.Name), 1)
-@test_approx_eq(length(S.Time),1)
-@test_approx_eq(length(S.Data),1)
-@test_approx_eq(S.Fs[1], 50.0)
-@test_approx_eq(S.Gain[1], 10.0)
-@test_approx_eq(true, S.Name[1]=="DEAD.STA.EHZ")
-@test_approx_eq(length(S.Time[1]), 100)
-@test_approx_eq(length(S.Data[1]), 100)
-@test_approx_eq(length(S.Resp), 0)
-
-println("...channel delete...")
-RmSeisChan(S, 1)
-for i in (S.Fs, S.Loc, S.Name, S.RespN, S.End, S.Gain, S.LocN, S.Start, S.Time, S.Data, S.Resp, S.Picks)
-  @test_approx_eq(isempty([]), isempty(i))
-end
-
-# Test pick add, set, remove
-println("...merge...")
-addc1(S)
-addc2(S)
-T = SeisData()
-addc3(T)
-addc2(T)
-U = MergeSeis(S,T,v=true)
-@test_approx_eq(length(U.Data[1]), 200)
-@test_approx_eq(length(U.Data[1]), length(U.Time[1]))
-@test_approx_eq(length(U.Data[2]), length(S.Data[2]))
-@test_approx_eq(length(U.Data[2]), length(T.Data[2]))
-@test_approx_eq(length(U.Resp), 0)
-
-# Test location add, set, remove
-println("...location add/remove...")
-loc1 = [13.597867  40.666833  511.0]
-loc2 = [52.640278,-114.233889, 930]
-loc3 = [-77.529722 167.153333 3794]
-AddSLoc(U, loc1, chans=2)
-AddSLoc(U, loc2, chans=[1])
-AddSLoc(U, loc3)
-@test_approx_eq(U.LocN[1], 2)
-@test_approx_eq(U.LocN[2], 1)
-@test_approx_eq(isempty(find(U.LocN .== 3)), true)
-RmSLoc(U, 1)
-@test_approx_eq(U.LocN[2], 0)
-@test_approx_eq(U.LocN[1], 1)
-RmSLoc(U, 1)
-@test_approx_eq(U.LocN[1], 0)
-@test_approx_eq(U.LocN[2], 0)
-AddSLoc(U, loc1, chans=[2])
-AddSLoc(U, loc2, chans=1)
-@test_approx_eq(U.LocN[1], 3)
-@test_approx_eq(U.LocN[2], 2)
-@test_approx_eq(length(U.Resp), 0)
-
-# Test response add, set, remove
-println("...resp add/remove...")
-l22 = [0.0 -8.88+8.88*im;
-       0.0 -8.88-8.88*im]
-le3d_20 = [   0.0 -0.220+0.235*im;
-              0.0 -0.220-0.235*im;
-              0.0 -0.230+0.0*im]
-le3d_5 = [0.0 -0.888+0.888*im;
-          0.0 -0.888-0.888*im]
-AddSResp(U, l22, chans=2)
-@test_approx_eq(U.RespN[2], 1)
-AddSResp(U, le3d_20, chans=[1])
-@test_approx_eq(U.RespN[1], 2)
-AddSResp(U, le3d_5)
-@test_approx_eq(U.RespN[1], 2)
-@test_approx_eq(U.RespN[2], 1)
-@test_approx_eq(isempty(find(U.RespN .== 3)), true)
-RmSResp(U, 1)
-@test_approx_eq(U.RespN[2], 0)
-@test_approx_eq(U.RespN[1], 1)
-RmSResp(U, 1)
-@test_approx_eq(U.RespN[1], 0)
-@test_approx_eq(U.RespN[2], 0)
-AddSResp(U, l22, chans=[2])
-AddSResp(U, le3d_20, chans=1)
-@test_approx_eq(U.RespN[1], 3)
-@test_approx_eq(U.RespN[2], 2)
-
-# Test pick add, set, remove
-println("...pick add/remove...")
-p1 = "P"
-p2 = "S"
-p3 = "Rn"
-tp1 = 3.5
-tp2 = 2.3
-ts = [6.1 5.5]
-AddPick(U, p1, [0 tp2])
-@test_approx_eq(haskey(U.Picks,p1), true)
-AddPick(U, p1, tp1)
-@test_approx_eq(U.Picks[p1][1], tp1)
-@test_approx_eq(U.Picks[p1][2], tp2)
-AddPick(U, p2, ts)
-@test_approx_eq(U.Picks[p2][2], ts[2])
-RmPick(U, p2, chans=2)
-@test_approx_eq(U.Picks[p2][2], 0)
-U.Picks[p2][2] = tp2
-@test_approx_eq(U.Picks[p1][2], tp2)
-AddPick(U, p3)
-@test_approx_eq(haskey(U.Picks,p3), true)
-@test_approx_eq(length(collect(keys(U.Picks))), 3)
-
-println("...filtering...")
-S = deepcopy(U)
-T = FiltSeis(U, F=BitArray([false,true]), ftype='h', fl=1, fh=20.0)
-@test_approx_eq(S.Data[1][1],T.Data[1][1])
-@test_approx_eq(S.Data[2][1]==T.Data[2][1],false)
-T = FiltSeis(U, F=true, ftype='b')
-T = FiltSeis(U, ftype='l', fh=10.0)
-T = FiltSeis(S, ftype='s', fl=1, fh=20.0)
-S = FiltSeis(U)
-FiltSeis!(U)
-@test_approx_eq(S.Data[1][1], U.Data[1][1])
-
-println("...pad...")
-PadSeis!(U)
-@test_approx_eq(U.End[2]-U.Start[2],length(U.Data[2])/U.Fs[2])
-
-println("...sync...")
-SyncSeis!(U)
-for i = 1:1:S.Nc
-  for j = i:1:S.Nc
-    @test_approx_eq(length(U.Data[i]), length(U.Time[j]))
-    @test_approx_eq(U.Start[i], U.Start[j])
-    @test_approx_eq(U.End[i], U.End[j])
+S = SeisData()
+for i in fieldnames(S)
+  if i != :n
+    @test_approx_eq(isempty([]), isempty(S.(i)))
   end
 end
 
-#println("...screen dump...")
-#PrintSeis(U, nx = 10, np = 2, na = "NA")
-WriteSeis(T);
-S = ReadSeis("save.seis");
-@test_approx_eq(findfirst(T.Time[2].>1/T.Fs[2]), findfirst(S.Time[2].>1/S.Fs[2]))
-println("...done.")
+println("...dealing with gaps...")
+s2u = ungap(s2)
+@test_approx_eq(length(s2.x)/s2.fs + sum(s2.t[2:end-1,2]), length(s2u.x)/s2u.fs)
+
+println("...channel add...")
+S += (s1 + s2)
+
+# Do in-place operations only change leftmost variable?
+@test_approx_eq(length(s1.x), 100)
+@test_approx_eq(length(s2.x), 150)
+
+# expected behavior for S = s1+s2
+# (0) length[s.x[1]] = 250
+# (1) S.x[1][1:50] = s1.x[1:50]
+# (2) S.x[1][51:75] = mean(s1.x[51:75] + s2.x[1:25])
+# (3) S.x[1][76:100] = s1.x[76:100]
+# (4) S.x[1][101:125] = mean(S.x[1])
+# (5) S.x[1][126:250] = s2.x[126:250]
+
+# Basic merge ops
+@test_approx_eq(S.n, 1)
+@test_approx_eq(length(S.fs), 1)
+@test_approx_eq(S.fs[1], s1.fs)
+@test_approx_eq(length(S.gain), 1)
+@test_approx_eq(S.gain[1], s1.gain)
+@test_approx_eq(length(S.name), 1)
+@test_approx_eq(length(S.t),1)
+@test_approx_eq(length(S.x),1)
+@test_approx_eq(true, S.id[1]=="DEAD.STA..EHZ")
+@test_approx_eq(length(S.x[1]), 260)
+@test_approx_eq(S.x[1][1:50], s1.x[1:50])
+@test_approx_eq(S.x[1][51:75], 0.5.*(s1.x[51:75] .+ s2.x[1:25]))
+@test_approx_eq(S.x[1][76:100], s1.x[76:100])
+@test_approx_eq(S.x[1][101:125], collect(repeated(NaN,25)))
+@test_approx_eq(S.x[1][126:225], s2.x[26:125])
+@test_approx_eq(S.x[1][226:235], collect(repeated(NaN,10)))
+@test_approx_eq(S.x[1][236:260], s2.x[126:150])
+
+# Auto-tapering after a merge
+T = deepcopy(S)
+ii = find(isnan(S.x[1]))
+autotap!(S)
+@test_approx_eq(0, length(find(isnan(S.x[1]))))   # No more NaNs?
+@test_approx_eq(sum(diff(S.x[1][ii])), 0)         # All NaNs filled w/same val?
+@test_approx_eq(T.x[1][12:90], S.x[1][12:90])     # Un-windowed vals untouched?
+
+println("...channel delete...")
+S -= 1
+for i in fieldnames(S)
+  if i != :n
+    @test_approx_eq(isempty([]), isempty(S.(i)))
+  end
+end
+
+println("...merge...")
+S += (s1 + s3)
+S += (s2 + s4)
+@test_approx_eq(S.n, 2)
+@test_approx_eq(length(S.fs), 2)
+@test_approx_eq(length(S.gain), 2)
+@test_approx_eq(length(S.name), 2)
+@test_approx_eq(length(S.t),2)
+@test_approx_eq(length(S.x),2)
+@test_approx_eq(S.fs[2], 100.0)
+@test_approx_eq(S.gain[1], 10.0)
+@test_approx_eq(true, S.id[1]=="DEAD.STA..EHZ")
+@test_approx_eq(length(S.x[1]), 260)
+println("...auto-resample on merge...")
+@test_approx_eq(length(S.x[2]), 350)
+println("...gain correction on merge...")
+@test_approx_eq(S.x[2][101], s4.x[1]/10)
+
+println("...direct reading of supported file formats...")
+println("......SAC...")
+S += r_sac(sac_file)                                      # SAC
+println("......SEGY...")
+S += r_segy(segy_file, f="nmt")                           # SEGY rev 0 mod PASSCAL
+println("......UW...")
+S += r_uw(uw_root)                                        # UW
+println("......win32 skipped; (file redistribution prohibited by NIED)...")
+
+println("...randseisdata...")
+R = randseisdata(c=true)
+S += R
+
+# Ensure merge works correctly with traces separated in time
+s5 = SeisObj(fs = 100.0, gain = 32.0, name = "DEAD.STA.EHE", id = "DEAD.STA..EHE",
+  t = [1.0 t1; 100.0 0.0], x=randn(100))
+s6 = SeisObj(fs = 100.0, gain = 32.0, name = "UNNAMED", id = "DEAD.STA..EHE",
+  t = [1.0 t1+30; 200.0 0.0], x=randn(200))
+println("...channel add...")
+T = (s5 + s6)
+ungap!(T)
+@test_approx_eq(length(T.x),3200)
+println("...done!")
