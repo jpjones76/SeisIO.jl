@@ -7,9 +7,9 @@ A few utility programs are included with SeisIO.
 
 ``plotseis(S)``: Plot time-aligned trace data from SeisData structure ``S``.
 
-``randseis()``: Generate a SeisObj structure with pseudo-random headers and data. Specify ``c=false`` to allow campaign-style channels with ``fs=0``. Specify an integer argument to set the number of channels; otherwise, ``S.n`` varies from 12 to 24.
+``randseisdata()``: Generate a SeisData structure with pseudo-random headers and data. Specify ``c=false`` to allow campaign-style channels with ``fs=0``. Specify an integer argument to set the number of channels; otherwise, ``S.n`` varies from 12 to 24.
 
-``randseisobj()``: Generate a SeisData structure with pseudo-random headers and data.
+``randseisobj()``: Generate a Seisobj structure with pseudo-random headers and data.
 
 ``getbandcode(fs, fc=FC)``: Generate a valid FDSN-compliant one-character band code for data sampled at ``fs``; corner frequency ``FC`` is optional.
 
