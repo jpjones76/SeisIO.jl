@@ -139,14 +139,4 @@ Utility Functions
 
 Native File I/O
 ===============
-Use ``rseis`` and ``wseis`` to read and save in native format. ``writesac(S)`` saves trace data in ``S`` to single-channel :ref:`SAC <sac1>` files.
-
-Advantages/Disadvantages of SAC
-
-+ Very widely used.
-
-- Single-precision format.
-
-- Rudimentary time stamping.
-
-The last point merits brief discussion. Time stamps aren't written to SAC by default (you can change this by passing ``ts=true`` as a keyword). If you write time stamps to SAC files, the data are treated by SAC itself as unevenly spaced, generic `x-y` data (`LEVEN=0, IFTYPE=4`). However, the behavior of third-party SAC readers is less predictable: timestamped data *might* be loaded as the real part of a complex time series, with the time values themselves as the imaginary part...or, perhaps, the other way around.
+Use ``rseis`` and ``wseis`` to read and save in native format. ``writesac(S)`` saves trace data in ``S`` to single-channel :ref:`SAC <sac1>` files. SAC is widely used and well-supported, but writes data in single-precision format with rudimentary time stamping. The last point merits brief discussion. Time stamps are written to SAC by default (change this with kw ``ts=false``). Tme stamped SAC data are treated by SAC itself as unevenly spaced, generic ``x-y`` data (``LEVEN=0, IFTYPE=4``). However, third-party SAC readers interpret such files less predictably: timestamped data *might* be loaded as the real part of a complex time series, with the time values themselves as the imaginary part...or the other way around...or not at all.
