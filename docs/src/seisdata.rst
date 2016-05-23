@@ -51,7 +51,7 @@ Data can be merged from any file read or data acquisition command that outputs a
 
   merge 300 seconds of SeedLink data into S using config file "myconfig".
 
-* In a merge operation, pairs of data `x`:sub:`i`, `x`:sub:`j` with overlapping time stamps (i.e. `t`:sub:`i` - `t`:sub:`j` |le| 1/fs) are *averaged*.
+* In a merge operation, pairs of data `x`:sub:`i`, `x`:sub:`j` with overlapping time stamps (i.e. `t`:sub:`i` - `t`:sub:`j` < 1/fs) are *averaged*.
 
 
 Appending without merging
@@ -139,7 +139,7 @@ Utility Functions
 
 Native File I/O
 ===============
-Use ``rseis`` and ``wseis`` to read and save in native format. ``writesac(S)`` saves trace data in ``S`` to single-channel `SAC <sac>` files.
+Use ``rseis`` and ``wseis`` to read and save in native format. ``writesac(S)`` saves trace data in ``S`` to single-channel :ref:`SAC <sac1>` files.
 
 Advantages/Disadvantages of SAC
 
