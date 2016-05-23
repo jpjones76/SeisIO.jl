@@ -1,0 +1,319 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>SeisData &mdash; SeisIO 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="SeisIO 0.0.1 documentation" href="../index.html" />
+    <link rel="prev" title="Web Clients" href="webclients.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="webclients.html" title="Web Clients"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SeisIO 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="module-sphinx.ext.mathbase"></span><div class="section" id="seisdata">
+<h1><code class="xref py py-mod docutils literal"><span class="pre">SeisData</span></code><a class="headerlink" href="#seisdata" title="Permalink to this headline">¶</a></h1>
+<p>SeisData is a minimalist memory-resident working format for discretely sampled, time-dependent data. It can hold both regularly sampled (time series) data and irregularly sampled measurements.</p>
+<p>SeisData and SeisObj instances can be manipulated using standard Julia commands. The rest of this section explains this functionality in detail.</p>
+<div class="section" id="creating-data-containers">
+<h2>Creating Data Containers<a class="headerlink" href="#creating-data-containers" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first"><code class="docutils literal"><span class="pre">S</span> <span class="pre">=</span> <span class="pre">SeisData()</span></code></p>
+<p>initialize an empty SeisData container</p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">S</span> <span class="pre">=</span> <span class="pre">SeisObj()</span></code></p>
+<p>initialize a new SeisObj container</p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">S</span> <span class="pre">=</span> <span class="pre">SeisData(s1,</span> <span class="pre">s2,</span> <span class="pre">s3)</span></code></p>
+<p>create a SeisData container by merging s1, s2, s3.</p>
+</li>
+</ul>
+<p>When using the third syntax, if a merge variable isn&#8217;t of class SeisData or SeisObj, it&#8217;s ignored with a warning.</p>
+<p>Fields can be initialized by name when a new SeisObj container is created.</p>
+<ul>
+<li><p class="first"><code class="docutils literal"><span class="pre">S</span> <span class="pre">=</span> <span class="pre">SeisObj(name=&quot;DEAD</span> <span class="pre">CHANNEL&quot;,</span> <span class="pre">fs=50)</span></code></p>
+<p>initialize a SeisObj with name &#8220;DEAD CHANNEL&#8221;, fs = 50.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="adding-data">
+<h2>Adding Data<a class="headerlink" href="#adding-data" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal"><span class="pre">+</span></code> (the addition operator) is the standard way to add data channels. Addition attempts to merge data with matching channel IDs. Channels with unique IDs are simply assigned as new channels. <code class="docutils literal"><span class="pre">merge!</span></code> and <code class="docutils literal"><span class="pre">+</span></code> work identically on SeisData and SeisObj containers.</p>
+<p>Data can be merged from any file read or data acquisition command that outputs a SeisData or SeisObj structure.</p>
+<ul>
+<li><p class="first"><code class="docutils literal"><span class="pre">S</span> <span class="pre">+=</span> <span class="pre">r_sac(sacfile.sac)</span></code></p>
+<p>merge data from sacfile.sac into S in place.</p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">T</span> <span class="pre">=</span> <span class="pre">S</span> <span class="pre">+</span> <span class="pre">SeedLink(&quot;myconfig&quot;,</span> <span class="pre">t=300)</span></code></p>
+<p>merge 300 seconds of SeedLink data into S using config file &#8220;myconfig&#8221;.</p>
+</li>
+<li><p class="first">In a merge operation, pairs of data <cite>x</cite><sub>i</sub>, <cite>x</cite><sub>j</sub> with overlapping time stamps (i.e. <cite>t</cite><sub>i</sub> - <cite>t</cite><sub>j</sub> ≦ 1/fs) are <em>averaged</em>.</p>
+</li>
+</ul>
+<div class="section" id="appending-without-merging">
+<h3>Appending without merging<a class="headerlink" href="#appending-without-merging" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal"><span class="pre">push!</span></code> adds channels without attempting to merge.</p>
+<ul>
+<li><p class="first"><code class="docutils literal"><span class="pre">push!(S,T)</span></code></p>
+<p>assign each channel in T to a new channel in S, even if it creates redundant channel IDs.</p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">push!(S,S)</span></code></p>
+<p>append a duplicate of each channel in S to S.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="deleting-data">
+<h2>Deleting Data<a class="headerlink" href="#deleting-data" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal"><span class="pre">-</span></code> (the subtraction operator) is the standard way to delete unwanted data channels. It&#8217;s generally safest to use e.g. <code class="docutils literal"><span class="pre">T</span> <span class="pre">=</span> <span class="pre">S</span> <span class="pre">-</span> <span class="pre">i</span></code>, but in-place deletion (e.g. <code class="docutils literal"><span class="pre">S</span> <span class="pre">-=</span> <span class="pre">i</span></code>) is valid.</p>
+<ul>
+<li><p class="first"><code class="docutils literal"><span class="pre">S</span> <span class="pre">-</span> <span class="pre">k</span></code></p>
+<ul class="simple">
+<li>If k is an integer, channel k is deleted from S.</li>
+<li>If k is a string, all channels whose names and ids match k are deleted.</li>
+<li>If k is a SeisObj instance, all channels from S with the same id as k are deleted.</li>
+</ul>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">deleteat!(S,i)</span></code></p>
+<p>identical to <code class="docutils literal"><span class="pre">S-=i</span></code> for an integer i.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="index-search-sort">
+<h2>Index, Search, Sort<a class="headerlink" href="#index-search-sort" title="Permalink to this headline">¶</a></h2>
+<p>Individual channels in a SeisData container can be accessed by channel index; for example, <code class="docutils literal"><span class="pre">S[3]</span></code> returns channel 3. Indexing a single channel outputs a SeisObj instance; indexing a range of channels outputs a new SeisData object.</p>
+<p>The same syntax can be used to ovewrwrite data by channel (or channel range). For example, <code class="docutils literal"><span class="pre">S[2]</span> <span class="pre">=</span> <span class="pre">T</span></code>, where T is a SeisObj instance, replaces the second channel of S with T.</p>
+<p>Multiple channels in a SeisData container S can be overwritten with another SeisData container T using <code class="docutils literal"><span class="pre">setindex!(S,</span> <span class="pre">T,</span> <span class="pre">I)</span></code>; the last input is a range of indices.</p>
+<p><em>Julia is a &#8220;pass by reference&#8221; language</em>. The precaution here is best illustrated by example. If one uses index assignment, e.g. <code class="docutils literal"><span class="pre">S[2]</span> <span class="pre">=</span> <span class="pre">T</span></code>, subsequent changes to T also modify S[2].</p>
+<div class="section" id="search-sort-equality">
+<h3>Search, Sort, Equality<a class="headerlink" href="#search-sort-equality" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal"><span class="pre">sort!</span></code> command sorts channels by id in lexicographical order.</p>
+<p>The following commands offer search functionality:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">findid(S,id)</span></code>: search for channels with S.id == id.</li>
+<li><code class="docutils literal"><span class="pre">findid(S,T)</span></code>: find all channels with S.id == T.id.</li>
+<li><code class="docutils literal"><span class="pre">hasid(S,id)</span></code>: true if S has a channel id that matches id.</li>
+<li><code class="docutils literal"><span class="pre">hasname(S,name)</span></code>: true if S has a channel name that matches name.</li>
+<li><code class="docutils literal"><span class="pre">findname(S,name)</span></code>: search for channels with S.name == name.</li>
+</ul>
+<p>The following commands offer tests for equality:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">samehdr(S,T)</span></code>: true if S, T contain identical header information (<code class="docutils literal"><span class="pre">id,</span> <span class="pre">fs,</span> <span class="pre">gain,</span> <span class="pre">loc,</span> <span class="pre">resp</span></code>).</li>
+<li><code class="docutils literal"><span class="pre">==</span></code> and <code class="docutils literal"><span class="pre">isequal</span></code> test for equality.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="utility-functions">
+<h2>Utility Functions<a class="headerlink" href="#utility-functions" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">note</span></code>: Add a timestamped note.</li>
+<li><code class="docutils literal"><span class="pre">plotseis</span></code>: Plot time-aligned data. Time series data are represented by straight lines; irregularly sampled data (<code class="docutils literal"><span class="pre">fs=0</span></code>) use normalized stem plots.</li>
+<li><code class="docutils literal"><span class="pre">prune!,</span> <span class="pre">prune</span></code>: Merges channels with redundant header fields.</li>
+<li><code class="docutils literal"><span class="pre">purge!,</span> <span class="pre">purge</span></code>: Deletes all channels with no data (defined for any channel i as isempty(S.x[i]) == true).</li>
+<li><code class="docutils literal"><span class="pre">sync!,</span> <span class="pre">sync</span></code>: Synchronize time windows for all channels and fill time gaps.  Calls ungap at invocation.</li>
+<li><code class="docutils literal"><span class="pre">ungap!,</span> <span class="pre">ungap</span></code>: Fill all time gaps in each channel of regularly sampled data.</li>
+</ul>
+</div>
+<div class="section" id="native-file-i-o">
+<h2>Native File I/O<a class="headerlink" href="#native-file-i-o" title="Permalink to this headline">¶</a></h2>
+<p>Use <code class="docutils literal"><span class="pre">rseis</span></code> and <code class="docutils literal"><span class="pre">wseis</span></code> to read and save in native format. <code class="docutils literal"><span class="pre">wsac(S)</span></code> saves
+trace data in <code class="docutils literal"><span class="pre">S</span></code> to single-channel SAC files.</p>
+<p>Advantages/Disadvantages of SAC</p>
+<ul class="simple">
+<li>Very widely used.</li>
+</ul>
+<ul class="simple">
+<li>Only uses single-precision format.</li>
+<li>Rudimentary time stamping.</li>
+</ul>
+<p>The last point merits brief discussion. Time stamps aren&#8217;t written to SAC with <code class="docutils literal"><span class="pre">wsac</span></code> by default (change by setting keyword <code class="docutils literal"><span class="pre">ts=true</span></code>). If you write time stamps to SAC files, the data are treated by SAC itself as unevenly spaced, generic <cite>x-y</cite> data (<cite>LEVEN=0, IFTYPE=4</cite>). This causes issues with SAC readers in some other languages; timestamped data might be loaded as the real part of a complex time series, with the time values themselves as the imaginary part...or the other way around, depending on the reader.</p>
+</div>
+<div class="section" id="seisdata-and-seisobj-fields">
+<h2>SeisData and SeisObj Fields<a class="headerlink" href="#seisdata-and-seisobj-fields" title="Permalink to this headline">¶</a></h2>
+<p>All field names use lowercase letters.</p>
+<ul>
+<li><p class="first"><code class="docutils literal"><span class="pre">id</span></code>: Unique channel identifier, formated <code class="docutils literal"><span class="pre">nn.sssss.ll.ccc</span></code>. Valid ID subfields contain no whitespace and cannot contain any of the characters ,!&#64;#$%^&amp;*()+/~~.:| within a subfield.</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">nn</span></code>: two-letter network code</li>
+<li><code class="docutils literal"><span class="pre">sssss</span></code>: station code, up to five characters.</li>
+<li><code class="docutils literal"><span class="pre">ll</span></code>: location code, typically numeric.</li>
+<li><code class="docutils literal"><span class="pre">ccc</span></code>: channel code, e.g. EHZ. See <a class="reference external" href="http://www.fdsn.org/seed_manual/SEEDManual_V2.4_Appendix-A.pdf">SEED v2.4, Appendix A</a> for a full list of channel codes.</li>
+</ul>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">name</span></code>: Unique freeform string for the channel name. <sup>(a)</sup></p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">src</span></code>: Short, freeform string describing the data source.  Usually auto-set by the reader. <sup>(a)</sup></p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">fs</span></code>: Sampling frequency in Hz.</p>
+<ul class="simple">
+<li>For non-time series data (e.g. campaign GPS, gas flux, etc.), set <code class="docutils literal"><span class="pre">fs</span> <span class="pre">=</span> <span class="pre">0</span></code>. This affects the behavior of several commands, including synchronization with <code class="docutils literal"><span class="pre">sync</span></code>; it also affects the behavior and expected structure of field <code class="docutils literal"><span class="pre">t</span></code>.</li>
+</ul>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">gain</span></code>: Scalar value to divide from data to obtain measurements in SI units in the &#8220;flat&#8221; part of the frequency spectrum. Identical meaning to the &#8220;Stage 0&#8221; gain of FDSN/SeedLink XML files.</p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">units</span></code>: Units of the dependent variable. MKS units are strongly recommended, with &#8220;/s&#8221; for velocity and &#8220;/s/s&#8221; for acceleration (e.g. &#8220;m/s/s&#8221; for seismic accelerometer data). <sup>a</sup></p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">loc</span></code>: Ssnsor location, a 5-entry vector: <code class="docutils literal"><span class="pre">[lat,</span> <span class="pre">lon,</span> <span class="pre">ele,</span> <span class="pre">|thgr|,</span> <span class="pre">|phgr|]</span></code></p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">lat</span></code>: latitude in decimal degrees; N is positive.</li>
+<li><code class="docutils literal"><span class="pre">lon</span></code>: longitude in decimal degrees; E is positive.</li>
+<li><code class="docutils literal"><span class="pre">ele</span></code>: elevation in meters above sea level (asl).</li>
+<li><code class="docutils literal"><span class="pre">|thgr|</span></code>: channel azimuth in degrees, measured clockwise from North.</li>
+<li><code class="docutils literal"><span class="pre">|phgr|</span></code>: channel incidence in degrees, measured from vertical.</li>
+</ul>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">resp</span></code>: instrument frequency response (poles and zeros). Stored for each channel as a two-column matrix <code class="docutils literal"><span class="pre">r</span></code>, with zeros in <code class="docutils literal"><span class="pre">r[:,1]</span></code> and poles in <code class="docutils literal"><span class="pre">r[:,2]</span></code>.</p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">misc</span></code>: dictionary of miscellaneous information. Although key values can be of any type, there are strict conventions for what can be saved to disk:</p>
+<ul class="simple">
+<li>Scalars and single-type arrays of these types: Char, Unsigned, Integer, Float, Complex, DirectIndexString. Other types will be ignored on file, write and produce warning messages.</li>
+<li>Subtypes of the above types are OK.</li>
+<li><em>Do not store mixed type arrays in ``misc``</em>. Not only will they not be written correctly to disk, they&#8217;ll break file write.</li>
+</ul>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">notes</span></code>: array of notes describing modifications to the data. Notes can be logged with time stamps using the <code class="docutils literal"><span class="pre">note</span></code> command.</p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">t</span></code>: pseudo-sparse two-column array of times.</p>
+<ul>
+<li><p class="first">For time series data, <code class="docutils literal"><span class="pre">t</span></code> is a sparse delta-encoded representation of time gaps. Indices are stored in the first column, values in the second column.</p>
+<blockquote>
+<div><ul class="simple">
+<li>The second column of the first row stores the time series begin time relative to the Unix epoch (0.0 = 1970-01-01T00:00:00).</li>
+<li>The last row always takes the form <code class="docutils literal"><span class="pre">[length(x)</span> <span class="pre">0.0]</span></code>, where <code class="docutils literal"><span class="pre">x</span></code> is the corresponding data.</li>
+<li>Other rows take the form <code class="docutils literal"><span class="pre">[(start</span> <span class="pre">of</span> <span class="pre">gap</span> <span class="pre">in</span> <span class="pre">x)</span> <span class="pre">(length</span> <span class="pre">of</span> <span class="pre">gap)]</span></code>, where <code class="docutils literal"><span class="pre">x</span></code> is the corresponding data.</li>
+<li>The <code class="docutils literal"><span class="pre">ungap</span></code> command fills all gaps with the mean of non-null values in <code class="docutils literal"><span class="pre">x</span></code>. The <code class="docutils literal"><span class="pre">sync</span></code> command calls <code class="docutils literal"><span class="pre">ungap</span></code> automatically at invocation.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">For irregularly sampled data, <code class="docutils literal"><span class="pre">t</span></code> is a sparse delta-encoded representation of sample times. Only the second column of <code class="docutils literal"><span class="pre">t</span></code> is used.</p>
+</li>
+</ul>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">x</span></code>: vector of sample data.</p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">n</span></code>: (SeisData only) number of channels in a SeisData object.</p>
+</li>
+</ul>
+<p><sup>(a)</sup> Only the first 26 characters of each channel&#8217;s name, units, and src values are saved to file.</p>
+<div class="section" id="common-sense-precautions">
+<h3>Common Sense Precautions<a class="headerlink" href="#common-sense-precautions" title="Permalink to this headline">¶</a></h3>
+<p>Or, &#8220;how not to break things&#8221;.</p>
+<ul class="simple">
+<li>Never set a channel <code class="docutils literal"><span class="pre">name</span></code> to the <code class="docutils literal"><span class="pre">id</span></code> of a different channel.</li>
+<li>Use static typing to declare arrays in <code class="docutils literal"><span class="pre">misc</span></code>.</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">SeisData</span></code></a><ul>
+<li><a class="reference internal" href="#creating-data-containers">Creating Data Containers</a></li>
+<li><a class="reference internal" href="#adding-data">Adding Data</a><ul>
+<li><a class="reference internal" href="#appending-without-merging">Appending without merging</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#deleting-data">Deleting Data</a></li>
+<li><a class="reference internal" href="#index-search-sort">Index, Search, Sort</a><ul>
+<li><a class="reference internal" href="#search-sort-equality">Search, Sort, Equality</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
+<li><a class="reference internal" href="#native-file-i-o">Native File I/O</a></li>
+<li><a class="reference internal" href="#seisdata-and-seisobj-fields">SeisData and SeisObj Fields</a><ul>
+<li><a class="reference internal" href="#common-sense-precautions">Common Sense Precautions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="webclients.html"
+                        title="previous chapter"><code class="docutils literal"><span class="pre">Web</span> <span class="pre">Clients</span></code></a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/src/seisdata.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="webclients.html" title="Web Clients"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">SeisIO 0.0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Joshua Jones.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>
