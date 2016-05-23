@@ -61,15 +61,6 @@ end
 purge(S::SeisData) = (T = deepcopy(S); purge!(T); return(T))
 
 """
-    namestrip(s::AbstractString)
-
-Remove bad characters from S: \,, \\, !, \@, \#, \$, \%, \^, \&, \*, \(, \),
-  \+, \/, \~, \`, \:, \|, and whitespace.
-"""
-namestrip(S::AbstractString) = strip(S, ['\,', '\\', '!', '\@', '\#', '\$',
-  '\%', '\^', '\&', '\*', '\(', '\)', '\+', '\/', '\~', '\`', '\:', '\|', ' '])
-
-"""
     gapfill!(x::Array{Float64,1}, t::Array{Float64,2}, fs::Float64)
 
 Fill gaps in x, as specified in t, assuming sampling rate fs

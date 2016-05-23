@@ -56,10 +56,10 @@
 <h1><code class="xref py py-mod docutils literal"><span class="pre">Web</span> <span class="pre">Clients</span></code><a class="headerlink" href="#web-clients" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="seedlink">
 <h2>SeedLink<a class="headerlink" href="#seedlink" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="https://www.seiscomp3.org/wiki/doc/applications/seedlink">SeedLink</a> is a TCP/IP-based data transmission protocol. It can be used to receive near-real-time data.</p>
+<p><a class="reference external" href="https://www.seiscomp3.org/wiki/doc/applications/seedlink">SeedLink</a> is a TCP/IP-based data transmission protocol. It can be used to receive real-time data to whatever degree lag allows. It can also retrieve recent data in TIME acquisition mode.</p>
 <div class="section" id="seedlink-client">
 <h3>SeedLink client<a class="headerlink" href="#seedlink-client" title="Permalink to this headline">¶</a></h3>
-<p><code class="docutils literal"><span class="pre">SeedLink</span></code> is an experimental client for the SeedLink protocol in TIME acquisition mode. A channel list (array of ASCII strings) or config filename (ASCII string) must be passed as the first argument. All other arguments are passed as keywords.</p>
+<p><code class="docutils literal"><span class="pre">SeedLink</span></code> is an experimental client for the SeedLink protocol in TIME acquisition mode. It can receive real-time data for a limited (user-specified) duration. A channel list (array of ASCII strings) or config filename (ASCII string) must be given as the first argument. All other arguments are passed as <a class="reference internal" href="#web-client-keywords"><span class="std std-ref">keywords</span></a>.</p>
 <div class="section" id="channel-specification">
 <h4>Channel Specification<a class="headerlink" href="#channel-specification" title="Permalink to this headline">¶</a></h4>
 <p>If passing a list of channels as a keyword, construct an array of ASCII strings of the form [&#8220;sssss nn&#8221;, &#8220;sssss nn&#8221;, (etc.)], where nn is the two-letter network code and sssss is the station code.</p>
@@ -80,7 +80,7 @@
 <p><a class="reference external" href="http://www.fdsn.org/">FDSN</a> is a global organization that supports seismology research. The FDSN web protocol offers near-real-time access to data from thousands of instruments across the world.</p>
 <div class="section" id="fdsn-client">
 <h3>FDSN client<a class="headerlink" href="#fdsn-client" title="Permalink to this headline">¶</a></h3>
-<p><code class="docutils literal"><span class="pre">FDSNget</span></code> is a highly customizable wrapper to FDSN services. All arguments to FDSNget are keywords.</p>
+<p><code class="docutils literal"><span class="pre">FDSNget</span></code> is a highly customizable wrapper to FDSN services. All arguments to FDSNget are <a class="reference internal" href="#web-client-keywords"><span class="std std-ref">keywords</span></a>.</p>
 <div class="section" id="public-fdsn-servers">
 <h4>Public FDSN servers<a class="headerlink" href="#public-fdsn-servers" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
@@ -108,7 +108,7 @@
 <p>Incorporated Research Institutions for Seismology <a class="reference external" href="http://www.iris.edu/">(IRIS)</a> is a consortium of universities dedicated to the operation of science facilities for the acquisition, management, and distribution of seismological data. IRIS maintains an exhaustive number of data services.</p>
 <div class="section" id="iris-client">
 <h3>IRIS Client<a class="headerlink" href="#iris-client" title="Permalink to this headline">¶</a></h3>
-<p><code class="docutils literal"><span class="pre">IRISget</span></code> is a wrapper for the <a class="reference external" href="http://service.iris.edu/irisws/timeseries/1/">IRIS timeseries web service</a>. IRISget requires a list of channels (array of ASCII strings) as the first argument; all other arguments are keywords</p>
+<p><code class="docutils literal"><span class="pre">IRISget</span></code> is a wrapper for the <a class="reference external" href="http://service.iris.edu/irisws/timeseries/1/">IRIS timeseries web service</a>. IRISget requires a list of channels (array of ASCII strings) as the first argument; all other arguments are <a class="reference internal" href="#web-client-keywords"><span class="std std-ref">keywords</span></a>.</p>
 <p>The channel list should be an array of channel identification strings, formated either &#8220;net.sta.chan&#8221; or &#8220;net_sta_chan&#8221; (e.g. <code class="docutils literal"><span class="pre">[&quot;UW.HOOD.BHZ&quot;;</span> <span class="pre">&quot;CC.TIMB.EHZ&quot;]</span></code>). Location codes are not used.</p>
 <div class="section" id="notes">
 <h4>Notes<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h4>
@@ -130,24 +130,24 @@
 </div>
 </div>
 <div class="section" id="web-client-keywords">
-<h2>Web Client Keywords<a class="headerlink" href="#web-client-keywords" title="Permalink to this headline">¶</a></h2>
+<span id="id7"></span><h2>Web Client Keywords<a class="headerlink" href="#web-client-keywords" title="Permalink to this headline">¶</a></h2>
 <p>The SeisIO web clients use a similar set of keywords; a full glossary is provided below. For client-specific keywords, the client(s) that support each keyword are listed in parenthesis.</p>
 <ul class="simple">
 <li><code class="docutils literal"><span class="pre">N</span></code> (SeedLink): Number of 520-byte mini-SEED packets to buffer before calling the parser subroutine. Setting this value too high can make the length of the data returned unreliable.</li>
 <li><code class="docutils literal"><span class="pre">`Q</span></code> (FDSNget, IRISget): Quality. Uses standard <a class="reference external" href="https://ds.iris.edu/ds/nodes/dmc/manuals/breq_fast/#quality-option">FDSN/IRIS codes</a>. <code class="docutils literal"><span class="pre">Q=R</span></code> is not recommended and will not work on some FDSN servers.</li>
 <li><code class="docutils literal"><span class="pre">loc</span></code> (FDSNget): Location code. Specify wildcard with <code class="docutils literal"><span class="pre">loc=&quot;&quot;--&quot;</span></code>.</li>
 <li><code class="docutils literal"><span class="pre">net</span></code>, <code class="docutils literal"><span class="pre">sta</span></code>, <code class="docutils literal"><span class="pre">cha</span></code> (FDSNget): ASCII strings. Wildcards are OK; specify with &#8221;???&#8221;.</li>
-<li><code class="docutils literal"><span class="pre">patts</span></code> (SeedLink): Array of selector patterns. Not used if a config file is passed as the first argument.</li>
+<li><code class="docutils literal"><span class="pre">patts</span></code> (SeedLink): Array of selector patterns. Do not use if a config file name is passed as the first argument to SeedLink.</li>
 <li><code class="docutils literal"><span class="pre">port</span></code> (SeedLink): Connection port. Defaults to 18000.</li>
-<li><code class="docutils literal"><span class="pre">s</span></code>: Start time. See below for specification and expected argument types.</li>
-<li><code class="docutils literal"><span class="pre">t</span></code>: End time. See below for specification and expected argument types.</li>
+<li><code class="docutils literal"><span class="pre">s</span></code>: Start time. <a class="reference internal" href="#time-syntax"><span class="std std-ref">See below</span></a> for how to specify <code class="docutils literal"><span class="pre">s</span></code> and <code class="docutils literal"><span class="pre">t</span></code>.</li>
+<li><code class="docutils literal"><span class="pre">t</span></code>: End time. <a class="reference internal" href="#time-syntax"><span class="std std-ref">See below</span></a> for how to specify <code class="docutils literal"><span class="pre">s</span></code> and <code class="docutils literal"><span class="pre">t</span></code>.</li>
 <li><code class="docutils literal"><span class="pre">to</span></code> (FDSNget, IRISget): Timeout in seconds.</li>
 <li><code class="docutils literal"><span class="pre">v</span></code>: Verbose mode (boolean).</li>
 <li><code class="docutils literal"><span class="pre">vv</span></code>: Very verbose mode (boolean).</li>
 <li><code class="docutils literal"><span class="pre">y</span></code>: Synchronize (boolean).</li>
 </ul>
 <div class="section" id="time-syntax">
-<h3>Time Syntax<a class="headerlink" href="#time-syntax" title="Permalink to this headline">¶</a></h3>
+<span id="id8"></span><h3>Time Syntax<a class="headerlink" href="#time-syntax" title="Permalink to this headline">¶</a></h3>
 <p>The &#8220;time&#8221; keywords <code class="docutils literal"><span class="pre">s</span></code> and <code class="docutils literal"><span class="pre">t</span></code> can be real numbers, DateTime objects, or ASCII strings. Strings must follow the format <code class="docutils literal"><span class="pre">yyyy-mm-ddTHH:MM:SS</span></code>, e.g. <code class="docutils literal"><span class="pre">s=&quot;2016-03-23T11:17:00&quot;</span></code>.</p>
 <div class="section" id="time-specification-for-backwards-fill">
 <h4>Time Specification for Backwards Fill<a class="headerlink" href="#time-specification-for-backwards-fill" title="Permalink to this headline">¶</a></h4>
@@ -161,10 +161,10 @@
 </div>
 <div class="section" id="time-specification-for-range-retrieval">
 <h4>Time Specification for Range Retrieval<a class="headerlink" href="#time-specification-for-range-retrieval" title="Permalink to this headline">¶</a></h4>
-<p>Passing a string or DateTime object with keyword <code class="docutils literal"><span class="pre">t</span></code> sets the mode to range retrieval.</p>
+<p>Passing a string or DateTime object D with keyword <code class="docutils literal"><span class="pre">t=D</span></code> sets the mode to range retrieval.</p>
 <ul class="simple">
 <li>Retrieved data <em>begin</em> at <code class="docutils literal"><span class="pre">s</span></code> and <em>end</em> at <code class="docutils literal"><span class="pre">t</span></code>.</li>
-<li><code class="docutils literal"><span class="pre">s=D</span></code>, a DateTime object or ASCIIString.</li>
+<li><code class="docutils literal"><span class="pre">s=D</span></code>, another DateTime object or ASCIIString.</li>
 </ul>
 </div>
 </div>

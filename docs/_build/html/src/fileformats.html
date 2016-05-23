@@ -24,8 +24,8 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="SeisIO 0.0.1 documentation" href="../index.html" />
-    <link rel="next" title="Web Clients" href="webclients.html" />
-    <link rel="prev" title="Intro" href="intro.html" /> 
+    <link rel="next" title="SeisData" href="seisdata.html" />
+    <link rel="prev" title="Web Clients" href="webclients.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -38,10 +38,10 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="webclients.html" title="Web Clients"
+          <a href="seisdata.html" title="SeisData"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="intro.html" title="Intro"
+          <a href="webclients.html" title="Web Clients"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">SeisIO 0.0.1 documentation</a> &raquo;</li> 
       </ul>
@@ -58,36 +58,29 @@
 <div class="section" id="current-format-support">
 <h2>Current Format Support<a class="headerlink" href="#current-format-support" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><strong>mini-SEED</strong>: SEED has become a worldwide standard for seismic dat archival</li>
-<li><strong>SAC</strong>: Widespread seismic data standard. Easy to use, almost universally readable</li>
-<li><strong>SEGY</strong>: SEG Y, standard of the Society for Exploration Geophysicists</li>
-<li><strong>UW</strong>: University of Washington seismic data format, used 1970s through mid-2000s</li>
-<li><strong>Win32</strong>: Seismic data format used by NIED (Japan)</li>
+<li><a class="reference internal" href="#mseed"><span class="std std-ref">mini-SEED</span></a>: <a class="reference external" href="https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf">SEED</a> has become a worldwide standard for seismic data archival; mini-SEED archives are special SEED volumes that contain only data records.</li>
+<li><a class="reference internal" href="#sac1"><span class="std std-ref">SAC</span></a>: <a class="reference external" href="https://ds.iris.edu/files/sac-manual/manual/file_format.html">SAC</a> is a popular seismic data standard, very easy to use, developed at Lawrence Livermore National Laboratory.</li>
+<li><a class="reference internal" href="#segy"><span class="std std-ref">SEGY</span></a>: <a class="reference external" href="http://wiki.seg.org/wiki/SEG_Y">SEG Y</a> is the standard data archival format of the Society for Exploration Geophysicists.</li>
+<li><a class="reference internal" href="#uw"><span class="std std-ref">UW</span></a>: The University of Washington seismic data format was used from the 1970s through mid-2000s; legacy support is included with SeisIO.</li>
+<li><a class="reference internal" href="#win32"><span class="std std-ref">Win32</span></a>: <a class="reference external" href="http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html">WIN</a> is a seismic data format developed and used by the NIED (National Research Institute for Earth Science and Disaster Prevention), Japan.</li>
 </ul>
 </div>
 <div class="section" id="mini-seed">
-<h2>mini-SEED<a class="headerlink" href="#mini-seed" title="Permalink to this headline">¶</a></h2>
+<span id="mseed"></span><h2>mini-SEED<a class="headerlink" href="#mini-seed" title="Permalink to this headline">¶</a></h2>
 <p>The mini-SEED reader doesn&#8217;t have a full range of data decoders yet. Currently supported data formats include Int16, Int32, Float, Double, Steim1, and Steim2. Future updates will add Int24, Steim3, and the various GEOSCOPE encodings.</p>
-<p>Assumed endianness: big</p>
+<p><em>Expected endianness: big</em></p>
 <div class="section" id="associated-functions">
 <h3>Associated functions<a class="headerlink" href="#associated-functions" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><code class="docutils literal"><span class="pre">readmseed</span></code>: read mini-SEED file to SeisData</li>
 </ul>
 </div>
-<div class="section" id="references">
-<h3>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h3>
-<ol class="arabic simple">
-<li><a class="reference external" href="https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf">SEED manual (pdf)</a></li>
-<li><a class="reference external" href="https://ds.iris.edu/ds/nodes/dmc/data/formats/">IRIS mini-SEED page</a></li>
-</ol>
 </div>
-</div>
-<div class="section" id="sac">
-<h2>SAC<a class="headerlink" href="#sac" title="Permalink to this headline">¶</a></h2>
-<p>Assumed endianness: little</p>
-<div class="section" id="id1">
-<h3>Associated functions<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="sac1">
+<span id="id1"></span><h2>SAC<a class="headerlink" href="#sac1" title="Permalink to this headline">¶</a></h2>
+<p><em>Expected endianness: little</em></p>
+<div class="section" id="id2">
+<h3>Associated functions<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><code class="docutils literal"><span class="pre">chksac</span></code>: check for valid SAC header structure</li>
 <li><code class="docutils literal"><span class="pre">prunesac!</span></code>: delete unset headers from a SAC dictionary</li>
@@ -98,18 +91,14 @@
 <li><code class="docutils literal"><span class="pre">writesac</span></code>: write SeisData object or SAC dictionary to SAC file</li>
 </ul>
 </div>
-<div class="section" id="id2">
-<h3>References<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="https://ds.iris.edu/files/sac-manual/manual/file_format.html">SAC data format</a></p>
 </div>
-</div>
-<div class="section" id="seg-y">
-<h2>SEG Y<a class="headerlink" href="#seg-y" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="segy">
+<span id="id3"></span><h2>SEG Y<a class="headerlink" href="#segy" title="Permalink to this headline">¶</a></h2>
 <p>SEG Y rev 0 (and rev 1, to a lesser degree) doesn&#8217;t enforce strict channel header formats. There is no guarantee that SEG Y files from all industry sources will parse correctly with <code class="docutils literal"><span class="pre">readsegy</span></code>.</p>
 <p>An added keyword (<code class="docutils literal"><span class="pre">fmt=&quot;nmt&quot;</span></code>) is required to parse PASSCAL SEG Y trace files. The modified file format used by IRIS/PASSCAL/NMT lacks the 3600-byte record header (3200-byte textural header + 400-byte file header). In addition, PASSCAL SEG Y assumes little endian byte order.</p>
-<p>Assumed endianness: big for standard SEGY, little for PASSCAL/NMT</p>
-<div class="section" id="id3">
-<h3>Associated functions<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p><em>Expected endianness: big for standard SEGY, little for PASSCAL/NMT</em></p>
+<div class="section" id="id4">
+<h3>Associated functions<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><code class="docutils literal"><span class="pre">prunesegy!</span></code>: delete junk headers from a SEGY dictionary</li>
 <li><code class="docutils literal"><span class="pre">r_segy</span></code>: read SEGY file to SeisData object</li>
@@ -119,8 +108,8 @@
 <li><code class="docutils literal"><span class="pre">segytoseis</span></code>: convert SEGY dictionary to SeisData object</li>
 </ul>
 </div>
-<div class="section" id="id4">
-<h3>References<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="references">
+<h3>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li><a class="reference external" href="http://wiki.seg.org/wiki/SEG_Y">SEG Y data format</a></li>
 <li><a class="reference external" href="https://www.passcal.nmt.edu/content/seg-y-what-it-is">PASSCAL SEG Y trace files</a></li>
@@ -128,11 +117,11 @@
 </div>
 </div>
 <div class="section" id="uw">
-<h2>UW<a class="headerlink" href="#uw" title="Permalink to this headline">¶</a></h2>
+<span id="id5"></span><h2>UW<a class="headerlink" href="#uw" title="Permalink to this headline">¶</a></h2>
 <p>UW files are event-oriented, typically used to archive earthquake data; a typical event is described by a pickfile and a corresponding data file. If a datafile name (ending in <cite>*W</cite>) is passed to a read command, it searches for a pickfile in the datafile directory; similarity, if a pickfile name (ending in <cite>*[a-z]</cite>) is used, it searches the pickfile directory for the corresponding data file.</p>
-<p>Assumed endianness: big</p>
-<div class="section" id="id5">
-<h3>Associated functions<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p><em>Expected endianness: big</em></p>
+<div class="section" id="id6">
+<h3>Associated functions<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><code class="docutils literal"><span class="pre">r_uw</span></code>: read UW pickfile and/or datafile to dictionary</li>
 <li><code class="docutils literal"><span class="pre">readuw</span></code>: read UW pickfile and/or datafile to SeisData</li>
@@ -144,20 +133,16 @@
 </div>
 </div>
 <div class="section" id="win32-file-format">
-<h2>Win32 file format<a class="headerlink" href="#win32-file-format" title="Permalink to this headline">¶</a></h2>
+<span id="win32"></span><h2>Win32 file format<a class="headerlink" href="#win32-file-format" title="Permalink to this headline">¶</a></h2>
 <p>Because win32 favors dividing contiguous data into small (typically one-minute) files, readwin32 has basic wildcard functionality for data file names. All data files matching the wildcard are read in lexicographical order and synchronized. However, readwin32 requires a channel information file as a mandatory second argument.</p>
-<p>Assumed endianness: big</p>
-<div class="section" id="id6">
-<h3>Associated functions<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<p><em>Expected endianness: big</em></p>
+<div class="section" id="id7">
+<h3>Associated functions<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><code class="docutils literal"><span class="pre">readwin32</span></code>: read win32 files to SeisData</li>
 <li><code class="docutils literal"><span class="pre">r_win32</span></code>: read win32 files to dictionary</li>
 <li><code class="docutils literal"><span class="pre">win32toseis</span></code>: convert win32 dictionary to SeisData</li>
 </ul>
-</div>
-<div class="section" id="id7">
-<h3>References<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
-<p><a class="reference external" href="http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html">What is WIN system? (in Japanese)</a></p>
 </div>
 </div>
 </div>
@@ -174,26 +159,23 @@
 <li><a class="reference internal" href="#current-format-support">Current Format Support</a></li>
 <li><a class="reference internal" href="#mini-seed">mini-SEED</a><ul>
 <li><a class="reference internal" href="#associated-functions">Associated functions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sac1">SAC</a><ul>
+<li><a class="reference internal" href="#id2">Associated functions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#segy">SEG Y</a><ul>
+<li><a class="reference internal" href="#id4">Associated functions</a></li>
 <li><a class="reference internal" href="#references">References</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#sac">SAC</a><ul>
-<li><a class="reference internal" href="#id1">Associated functions</a></li>
-<li><a class="reference internal" href="#id2">References</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#seg-y">SEG Y</a><ul>
-<li><a class="reference internal" href="#id3">Associated functions</a></li>
-<li><a class="reference internal" href="#id4">References</a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#uw">UW</a><ul>
-<li><a class="reference internal" href="#id5">Associated functions</a></li>
+<li><a class="reference internal" href="#id6">Associated functions</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#win32-file-format">Win32 file format</a><ul>
-<li><a class="reference internal" href="#id6">Associated functions</a></li>
-<li><a class="reference internal" href="#id7">References</a></li>
+<li><a class="reference internal" href="#id7">Associated functions</a></li>
 </ul>
 </li>
 </ul>
@@ -201,11 +183,11 @@
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="intro.html"
-                        title="previous chapter"><code class="docutils literal"><span class="pre">Intro</span></code></a></p>
-  <h4>Next topic</h4>
   <p class="topless"><a href="webclients.html"
-                        title="next chapter"><code class="docutils literal"><span class="pre">Web</span> <span class="pre">Clients</span></code></a></p>
+                        title="previous chapter"><code class="docutils literal"><span class="pre">Web</span> <span class="pre">Clients</span></code></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="seisdata.html"
+                        title="next chapter"><code class="docutils literal"><span class="pre">SeisData</span></code></a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -237,10 +219,10 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="webclients.html" title="Web Clients"
+          <a href="seisdata.html" title="SeisData"
              >next</a> |</li>
         <li class="right" >
-          <a href="intro.html" title="Intro"
+          <a href="webclients.html" title="Web Clients"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">SeisIO 0.0.1 documentation</a> &raquo;</li> 
       </ul>

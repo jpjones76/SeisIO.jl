@@ -6,7 +6,7 @@ SeisIO was created as a framework for working with geophysical time series data.
 
 How SeisIO Works
 ================
-Data are loaded into minimalist containers called SeisData and SeisObj, which track record times and other necessary quantities for further processing. SeisObj containers hold a single data channel each. SeisData containers hold multiple channels at once.
+Data are loaded into minimalist containers called :ref:`SeisData and SeisObj <seisdata>`, which track record times and other necessary quantities for further processing. SeisObj containers hold a single data channel each. SeisData containers hold multiple channels at once.
 
 New data, including data for existing channels from new sources, can be merged into SeisData containers (or placed in new SeisData containers) using built-in Julia commands. Unwanted data channels can be removed by matching on a channel's ID, name, or index within a SeisData structure.
 

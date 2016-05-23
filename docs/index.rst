@@ -18,3 +18,6 @@ Contents
    src/webclients.rst
    src/fileformats.rst
    src/seisdata.rst
+   src/seisdata_fields.rst
+   src/seisdata_fileformat.rst
+   src/utils.rst
