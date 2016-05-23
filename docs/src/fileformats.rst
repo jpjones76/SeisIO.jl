@@ -9,23 +9,24 @@ SeisIO can read several file formats. In most cases, files can be read directly 
 Current Format Support
 ======================
 
-* **mini-SEED**: SEED has become a worldwide standard for seismic dat archival
+* :ref:`mini-SEED <mseed>`: `SEED <https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf>`_ has become a worldwide standard for seismic data archival; mini-SEED archives are special SEED volumes that contain only data records.
 
-* **SAC**: Widespread seismic data standard. Easy to use, almost universally readable
+* :ref:`SAC <sac1>`: `SAC <https://ds.iris.edu/files/sac-manual/manual/file_format.html>`_ is a popular seismic data standard, very easy to use, developed at Lawrence Livermore National Laboratory.
 
-* **SEGY**: SEG Y, standard of the Society for Exploration Geophysicists
+* :ref:`SEGY <segy>`: `SEG Y <http://wiki.seg.org/wiki/SEG_Y>`_ is the standard data archival format of the Society for Exploration Geophysicists.
 
-* **UW**: University of Washington seismic data format, used 1970s through mid-2000s
+* :ref:`UW <uw>`: The University of Washington seismic data format was used from the 1970s through mid-2000s; legacy support is included with SeisIO.
 
-* **Win32**: Seismic data format used by NIED (Japan)
+* :ref:`Win32 <win32>`: `WIN <http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html>`_ is a seismic data format developed and used by the NIED (National Research Institute for Earth Science and Disaster Prevention), Japan.
 
 
+.. _mseed:
 
 mini-SEED
 =========
 The mini-SEED reader doesn't have a full range of data decoders yet. Currently supported data formats include Int16, Int32, Float, Double, Steim1, and Steim2. Future updates will add Int24, Steim3, and the various GEOSCOPE encodings.
 
-Assumed endianness: big
+*Expected endianness: big*
 
 
 Associated functions
@@ -34,18 +35,13 @@ Associated functions
 * ``readmseed``: read mini-SEED file to SeisData
 
 
-References
-----------
-
-#. `SEED manual (pdf) <https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf>`_
-
-#. `IRIS mini-SEED page <https://ds.iris.edu/ds/nodes/dmc/data/formats/>`_
 
 
+.. _sac1:
 
 SAC
 ===
-Assumed endianness: little
+*Expected endianness: little*
 
 
 Associated functions
@@ -66,12 +62,8 @@ Associated functions
 * ``writesac``: write SeisData object or SAC dictionary to SAC file
 
 
-References
-----------
 
-`SAC data format <https://ds.iris.edu/files/sac-manual/manual/file_format.html>`_
-
-
+.. _segy:
 
 SEG Y
 =====
@@ -79,7 +71,7 @@ SEG Y rev 0 (and rev 1, to a lesser degree) doesn't enforce strict channel heade
 
 An added keyword (``fmt="nmt"``) is required to parse PASSCAL SEG Y trace files. The modified file format used by IRIS/PASSCAL/NMT lacks the 3600-byte record header (3200-byte textural header + 400-byte file header). In addition, PASSCAL SEG Y assumes little endian byte order.
 
-Assumed endianness: big for standard SEGY, little for PASSCAL/NMT
+*Expected endianness: big for standard SEGY, little for PASSCAL/NMT*
 
 
 Associated functions
@@ -107,11 +99,13 @@ References
 
 
 
+.. _uw:
+
 UW
 ===
 UW files are event-oriented, typically used to archive earthquake data; a typical event is described by a pickfile and a corresponding data file. If a datafile name (ending in `*W`) is passed to a read command, it searches for a pickfile in the datafile directory; similarity, if a pickfile name (ending in `*[a-z]`) is used, it searches the pickfile directory for the corresponding data file.
 
-Assumed endianness: big
+*Expected endianness: big*
 
 
 Associated functions
@@ -131,11 +125,13 @@ Associated functions
 
 
 
+.. _win32:
+
 Win32 file format
 =================
 Because win32 favors dividing contiguous data into small (typically one-minute) files, readwin32 has basic wildcard functionality for data file names. All data files matching the wildcard are read in lexicographical order and synchronized. However, readwin32 requires a channel information file as a mandatory second argument.
 
-Assumed endianness: big
+*Expected endianness: big*
 
 
 Associated functions
@@ -146,8 +142,3 @@ Associated functions
 * ``r_win32``: read win32 files to dictionary
 
 * ``win32toseis``: convert win32 dictionary to SeisData
-
-
-References
-----------
-`What is WIN system? (in Japanese) <http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html>`_

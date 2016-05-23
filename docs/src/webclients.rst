@@ -6,12 +6,12 @@
 
 SeedLink
 ########
-`SeedLink <https://www.seiscomp3.org/wiki/doc/applications/seedlink>`_ is a TCP/IP-based data transmission protocol. It can be used to receive near-real-time data.
+`SeedLink <https://www.seiscomp3.org/wiki/doc/applications/seedlink>`_ is a TCP/IP-based data transmission protocol. It can be used to receive real-time data to whatever degree lag allows. It can also retrieve recent data in TIME acquisition mode.
 
 
 SeedLink client
 ================
-``SeedLink`` is an experimental client for the SeedLink protocol in TIME acquisition mode. A channel list (array of ASCII strings) or config filename (ASCII string) must be passed as the first argument. All other arguments are passed as keywords.
+``SeedLink`` is an experimental client for the SeedLink protocol in TIME acquisition mode. It can receive real-time data for a limited (user-specified) duration. A channel list (array of ASCII strings) or config filename (ASCII string) must be given as the first argument. All other arguments are passed as :ref:`keywords <web_client_keywords>`.
 
 
 Channel Specification
@@ -39,7 +39,7 @@ FDSN
 
 FDSN client
 ===========
-``FDSNget`` is a highly customizable wrapper to FDSN services. All arguments to FDSNget are keywords.
+``FDSNget`` is a highly customizable wrapper to FDSN services. All arguments to FDSNget are :ref:`keywords <web_client_keywords>`.
 
 
 Public FDSN servers
@@ -74,7 +74,7 @@ Incorporated Research Institutions for Seismology `(IRIS) <http://www.iris.edu/>
 
 IRIS Client
 ===========
-``IRISget`` is a wrapper for the `IRIS timeseries web service <http://service.iris.edu/irisws/timeseries/1/>`_. IRISget requires a list of channels (array of ASCII strings) as the first argument; all other arguments are keywords
+``IRISget`` is a wrapper for the `IRIS timeseries web service <http://service.iris.edu/irisws/timeseries/1/>`_. IRISget requires a list of channels (array of ASCII strings) as the first argument; all other arguments are :ref:`keywords <web_client_keywords>`.
 
 The channel list should be an array of channel identification strings, formated either "net.sta.chan" or "net_sta_chan" (e.g. ``["UW.HOOD.BHZ"; "CC.TIMB.EHZ"]``). Location codes are not used.
 
@@ -98,6 +98,7 @@ Request 10 minutes of continuous data recorded during the May 2016 earthquake sw
   TS = "2016-05-16T14:50:00"; TE = 600
   S = IRISget(STA, s=TS, t=TE)
 
+.. _web_client_keywords:
 
 Web Client Keywords
 ###################
@@ -112,13 +113,13 @@ The SeisIO web clients use a similar set of keywords; a full glossary is provide
 
 * ``net``, ``sta``, ``cha`` (FDSNget): ASCII strings. Wildcards are OK; specify with "???".
 
-* ``patts`` (SeedLink): Array of selector patterns. Not used if a config file is passed as the first argument.
+* ``patts`` (SeedLink): Array of selector patterns. Do not use if a config file name is passed as the first argument to SeedLink.
 
 * ``port`` (SeedLink): Connection port. Defaults to 18000.
 
-* ``s``: Start time. See below for specification and expected argument types.
+* ``s``: Start time. :ref:`See below <time_syntax>` for how to specify ``s`` and ``t``.
 
-* ``t``: End time. See below for specification and expected argument types.
+* ``t``: End time. :ref:`See below <time_syntax>` for how to specify ``s`` and ``t``.
 
 * ``to`` (FDSNget, IRISget): Timeout in seconds.
 
@@ -128,6 +129,8 @@ The SeisIO web clients use a similar set of keywords; a full glossary is provide
 
 * ``y``: Synchronize (boolean).
 
+
+.. _time_syntax:
 
 Time Syntax
 ===========
@@ -148,8 +151,8 @@ Passing an Int or Float64 with keyword `t` sets the mode to backwards fill. Retr
 
 Time Specification for Range Retrieval
 --------------------------------------
-Passing a string or DateTime object with keyword ``t`` sets the mode to range retrieval.
+Passing a string or DateTime object D with keyword ``t=D`` sets the mode to range retrieval.
 
 * Retrieved data *begin* at ``s`` and *end* at ``t``.
 
-* ``s=D``, a DateTime object or ASCIIString.
+* ``s=D``, another DateTime object or ASCIIString.

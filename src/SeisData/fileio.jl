@@ -183,12 +183,12 @@ end
 
 function whdr(io, n::Integer)
   write(io, "SEISDATA".data)    # it's seisdata
-  write(io, UInt8(0))           # version
+  write(io, Float32(0.0))       # version
   write(io, UInt32(n))          # number of SeisData objects to be written
 end
 
 function write(io::IOStream, S::SeisData)
-  write(io, S.n)
+  write(io, UInt64(S.n))
   for i = 1:S.n
     name = writestr_fixlen(io, S.name[i], 26)                           # name
     id = writestr_fixlen(io, S.id[i], 15)                               # id
@@ -318,13 +318,11 @@ function read_misc(io::IOStream)
     end
     if id == 4
       p = read(io, UInt8)
-      p == 2 && (v = read(io, Float16))
       p == 4 && (v = read(io, Float32))
       p == 8 && (v = read(io, Float64))
     end
     if id == 5
       p = read(io, UInt8)
-      p == 4 && (r = read(io, Float16); i = read(io, Float16))
       p == 8 && (r = read(io, Float32); i = read(io, Float32))
       p == 16 && (r = read(io, Float32); i = read(io, Float64))
       v = complex(r,i)
@@ -353,13 +351,10 @@ function read_misc(io::IOStream)
       p == 16 && (v = read(io, Int128, tuple(d[:]...)))
     end
     if id == 14
-      p == 2 && (v = read(io, Float16, tuple(d[:]...)))
       p == 4 && (v = read(io, Float32, tuple(d[:]...)))
       p == 8 && (v = read(io, Float64, tuple(d[:]...)))
     end
     if id == 15
-      p == 2 && (r = read(io, Float16, tuple(d[:]...));
-        i = read(io, Float16, tuple(d[:]...)))
       p == 4 && (r = read(io, Float32, tuple(d[:]...));
         i = read(io, Float32, tuple(d[:]...)))
       p == 8 && (r = read(io, Float64, tuple(d[:]...));
@@ -414,7 +409,7 @@ function rseis(fname::ASCIIString; v=false::Bool)
   io = open(fname, "r")
   c = ascii(read(io, UInt8, 8))
   c == "SEISDATA" || (close(io); error("Not a SeisData file!"))
-  ver = read(io, UInt8)
+  ver = read(io, Float32)
   n_seis = read(io, UInt32)
   if v
     println("SeisData version = ", ver)
@@ -422,7 +417,7 @@ function rseis(fname::ASCIIString; v=false::Bool)
   end
   S = Array{Union{SeisData,SeisObj}}(n_seis)
   for i = 1:n_seis
-    n_chan = read(io, Int64)
+    n_chan = read(io, UInt64)
     v && println("To read: ", n_chan, " channels")
     if n_chan == 1
       s = r_seisobj(io)

@@ -3,10 +3,12 @@
 ..    include:: <isoamsr.txt>
 ..    module:: sphinx.ext.mathbase
 
+.. _seisdata:
+
 ***************
 :mod:`SeisData`
 ***************
-SeisData is a minimalist memory-resident working format for discretely sampled, time-dependent data. It can hold both regularly sampled (time series) data and irregularly sampled measurements.
+SeisData is a minimalist class (type) designed for discretely sampled sequential signals, including (but not limited to) time-series data. It can hold both regularly sampled (time series) data and irregularly sampled measurements.
 
 SeisData and SeisObj instances can be manipulated using standard Julia commands. The rest of this section explains this functionality in detail.
 
@@ -137,97 +139,14 @@ Utility Functions
 
 Native File I/O
 ===============
-Use ``rseis`` and ``wseis`` to read and save in native format. ``wsac(S)`` saves
-trace data in ``S`` to single-channel SAC files.
+Use ``rseis`` and ``wseis`` to read and save in native format. ``writesac(S)`` saves trace data in ``S`` to single-channel `SAC <sac>` files.
 
 Advantages/Disadvantages of SAC
 
 + Very widely used.
 
-- Only uses single-precision format.
+- Single-precision format.
 
 - Rudimentary time stamping.
 
-The last point merits brief discussion. Time stamps aren't written to SAC with ``wsac`` by default (change by setting keyword ``ts=true``). If you write time stamps to SAC files, the data are treated by SAC itself as unevenly spaced, generic `x-y` data (`LEVEN=0, IFTYPE=4`). This causes issues with SAC readers in some other languages; timestamped data might be loaded as the real part of a complex time series, with the time values themselves as the imaginary part...or the other way around, depending on the reader.
-
-
-
-SeisData and SeisObj Fields
-===========================
-All field names use lowercase letters.
-
-* ``id``: Unique channel identifier, formated ``nn.sssss.ll.ccc``. Valid ID subfields contain no whitespace and cannot contain any of the characters ,\!@#$%^&*()+/~\~.:| within a subfield.
-
-  * ``nn``: two-letter network code
-
-  * ``sssss``: station code, up to five characters.
-
-  * ``ll``: location code, typically numeric.
-
-  * ``ccc``: channel code, e.g. EHZ. See `SEED v2.4, Appendix A  <http://www.fdsn.org/seed_manual/SEEDManual_V2.4_Appendix-A.pdf>`_ for a full list of channel codes.
-
-* ``name``: Unique freeform string for the channel name. :sup:`(a)`
-
-* ``src``: Short, freeform string describing the data source.  Usually auto-set by the reader. :sup:`(a)`
-
-*  ``fs``: Sampling frequency in Hz.
-
-   * For non-time series data (e.g. campaign GPS, gas flux, etc.), set ``fs = 0``. This affects the behavior of several commands, including synchronization with ``sync``; it also affects the behavior and expected structure of field ``t``.
-
-* ``gain``: Scalar value to divide from data to obtain measurements in SI units in the "flat" part of the frequency spectrum. Identical meaning to the "Stage 0" gain of FDSN/SeedLink XML files.
-
-* ``units``: Units of the dependent variable. MKS units are strongly recommended, with "/s" for velocity and "/s/s" for acceleration (e.g. "m/s/s" for seismic accelerometer data). :sup:`a`
-
-* ``loc``: Ssnsor location, a 5-entry vector: ``[lat, lon, ele, |thgr|, |phgr|]``
-
-  * ``lat``: latitude in decimal degrees; N is positive.
-
-  * ``lon``: longitude in decimal degrees; E is positive.
-
-  * ``ele``: elevation in meters above sea level (asl).
-
-  * ``|thgr|``: channel azimuth in degrees, measured clockwise from North.
-
-  * ``|phgr|``: channel incidence in degrees, measured from vertical.
-
-* ``resp``: instrument frequency response (poles and zeros). Stored for each channel as a two-column matrix ``r``, with zeros in ``r[:,1]`` and poles in ``r[:,2]``.
-
-* ``misc``: dictionary of miscellaneous information. Although key values can be of any type, there are strict conventions for what can be saved to disk:
-
-  * Scalars and single-type arrays of these types: Char, Unsigned, Integer, Float, Complex, DirectIndexString. Other types will be ignored on file, write and produce warning messages.
-
-  * Subtypes of the above types are OK.
-
-  * *Do not store mixed type arrays in ``misc``*. Not only will they not be written correctly to disk, they'll break file write.
-
-* ``notes``: array of notes describing modifications to the data. Notes can be logged with time stamps using the ``note`` command.
-
-* ``t``: pseudo-sparse two-column array of times.
-
-  * For time series data, ``t`` is a sparse delta-encoded representation of time gaps. Indices are stored in the first column, values in the second column.
-
-      * The second column of the first row stores the time series begin time relative to the Unix epoch (0.0 = 1970-01-01T00:00:00).
-
-      * The last row always takes the form ``[length(x) 0.0]``, where ``x`` is the corresponding data.
-
-      * Other rows take the form ``[(start of gap in x) (length of gap)]``, where ``x`` is the corresponding data.
-
-      * The ``ungap`` command fills all gaps with the mean of non-null values in ``x``. The ``sync`` command calls ``ungap`` automatically at invocation.
-
-  * For irregularly sampled data, ``t`` is a sparse delta-encoded representation of sample times. Only the second column of ``t`` is used.
-
-* ``x``: vector of sample data.
-
-* ``n``: (SeisData only) number of channels in a SeisData object.
-
-
-:sup:`(a)` Only the first 26 characters of each channel's name, units, and src values are saved to file.
-
-
-Common Sense Precautions
-------------------------
-Or, "how not to break things".
-
-* Never set a channel ``name`` to the ``id`` of a different channel.
-
-* Use static typing to declare arrays in ``misc``.
+The last point merits brief discussion. Time stamps aren't written to SAC by default (you can change this by passing ``ts=true`` as a keyword). If you write time stamps to SAC files, the data are treated by SAC itself as unevenly spaced, generic `x-y` data (`LEVEN=0, IFTYPE=4`). However, the behavior of third-party SAC readers is less predictable: timestamped data *might* be loaded as the real part of a complex time series, with the time values themselves as the imaginary part...or, perhaps, the other way around.

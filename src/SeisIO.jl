@@ -2,10 +2,10 @@ VERSION >= v"0.4.0" && __precompile__(true)
 module SeisIO
 export SeisObj, SeisData, findname, findid, hasid, hasname,    # SeisData/SeisData.jl
 samehdr, t_expand, t_collapse, pull, note,
-getbandcode, prune!, purge, purge!, namestrip, gapfill!,       # SeisData/utils.jl
+getbandcode, prune!, purge, purge!, gapfill!,                  # SeisData/utils.jl
 gapfill, ungap!, ungap, sync!, sync, autotap!,
 randseisobj, randseisdata,                                     # SeisData/randseis.jl
-wseis, rseis, wsac, r_sac,                                     # SeisData/fileio.jl
+wseis, rseis, writesac,                                        # SeisData/fileio.jl
 FDSNget, IRISget, irisws, SeedLink,                            # Web services
 readuwpf, readuwdf, readuw, uwtoseis, r_uw,                    # UW
 prunesac!, psac, r_sac, sacwrite, chksac, sachdr,              # SAC

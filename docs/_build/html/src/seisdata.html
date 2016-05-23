@@ -24,7 +24,8 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="SeisIO 0.0.1 documentation" href="../index.html" />
-    <link rel="prev" title="Web Clients" href="webclients.html" /> 
+    <link rel="next" title="Appendix B: SeisData File Format" href="seisdata_fileformat.html" />
+    <link rel="prev" title="File Formats" href="fileformats.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -37,7 +38,10 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="webclients.html" title="Web Clients"
+          <a href="seisdata_fileformat.html" title="Appendix B: SeisData File Format"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="fileformats.html" title="File Formats"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">SeisIO 0.0.1 documentation</a> &raquo;</li> 
       </ul>
@@ -49,8 +53,8 @@
           <div class="body" role="main">
             
   <span class="target" id="module-sphinx.ext.mathbase"></span><div class="section" id="seisdata">
-<h1><code class="xref py py-mod docutils literal"><span class="pre">SeisData</span></code><a class="headerlink" href="#seisdata" title="Permalink to this headline">¶</a></h1>
-<p>SeisData is a minimalist memory-resident working format for discretely sampled, time-dependent data. It can hold both regularly sampled (time series) data and irregularly sampled measurements.</p>
+<span id="id1"></span><h1><code class="xref py py-mod docutils literal"><span class="pre">SeisData</span></code><a class="headerlink" href="#seisdata" title="Permalink to this headline">¶</a></h1>
+<p>SeisData is a minimalist class (type) designed for discretely sampled sequential signals, including (but not limited to) time-series data. It can hold both regularly sampled (time series) data and irregularly sampled measurements.</p>
 <p>SeisData and SeisObj instances can be manipulated using standard Julia commands. The rest of this section explains this functionality in detail.</p>
 <div class="section" id="creating-data-containers">
 <h2>Creating Data Containers<a class="headerlink" href="#creating-data-containers" title="Permalink to this headline">¶</a></h2>
@@ -153,93 +157,16 @@
 </div>
 <div class="section" id="native-file-i-o">
 <h2>Native File I/O<a class="headerlink" href="#native-file-i-o" title="Permalink to this headline">¶</a></h2>
-<p>Use <code class="docutils literal"><span class="pre">rseis</span></code> and <code class="docutils literal"><span class="pre">wseis</span></code> to read and save in native format. <code class="docutils literal"><span class="pre">wsac(S)</span></code> saves
-trace data in <code class="docutils literal"><span class="pre">S</span></code> to single-channel SAC files.</p>
+<p>Use <code class="docutils literal"><span class="pre">rseis</span></code> and <code class="docutils literal"><span class="pre">wseis</span></code> to read and save in native format. <code class="docutils literal"><span class="pre">writesac(S)</span></code> saves trace data in <code class="docutils literal"><span class="pre">S</span></code> to single-channel <cite>SAC &lt;sac&gt;</cite> files.</p>
 <p>Advantages/Disadvantages of SAC</p>
 <ul class="simple">
 <li>Very widely used.</li>
 </ul>
 <ul class="simple">
-<li>Only uses single-precision format.</li>
+<li>Single-precision format.</li>
 <li>Rudimentary time stamping.</li>
 </ul>
-<p>The last point merits brief discussion. Time stamps aren&#8217;t written to SAC with <code class="docutils literal"><span class="pre">wsac</span></code> by default (change by setting keyword <code class="docutils literal"><span class="pre">ts=true</span></code>). If you write time stamps to SAC files, the data are treated by SAC itself as unevenly spaced, generic <cite>x-y</cite> data (<cite>LEVEN=0, IFTYPE=4</cite>). This causes issues with SAC readers in some other languages; timestamped data might be loaded as the real part of a complex time series, with the time values themselves as the imaginary part...or the other way around, depending on the reader.</p>
-</div>
-<div class="section" id="seisdata-and-seisobj-fields">
-<h2>SeisData and SeisObj Fields<a class="headerlink" href="#seisdata-and-seisobj-fields" title="Permalink to this headline">¶</a></h2>
-<p>All field names use lowercase letters.</p>
-<ul>
-<li><p class="first"><code class="docutils literal"><span class="pre">id</span></code>: Unique channel identifier, formated <code class="docutils literal"><span class="pre">nn.sssss.ll.ccc</span></code>. Valid ID subfields contain no whitespace and cannot contain any of the characters ,!&#64;#$%^&amp;*()+/~~.:| within a subfield.</p>
-<ul class="simple">
-<li><code class="docutils literal"><span class="pre">nn</span></code>: two-letter network code</li>
-<li><code class="docutils literal"><span class="pre">sssss</span></code>: station code, up to five characters.</li>
-<li><code class="docutils literal"><span class="pre">ll</span></code>: location code, typically numeric.</li>
-<li><code class="docutils literal"><span class="pre">ccc</span></code>: channel code, e.g. EHZ. See <a class="reference external" href="http://www.fdsn.org/seed_manual/SEEDManual_V2.4_Appendix-A.pdf">SEED v2.4, Appendix A</a> for a full list of channel codes.</li>
-</ul>
-</li>
-<li><p class="first"><code class="docutils literal"><span class="pre">name</span></code>: Unique freeform string for the channel name. <sup>(a)</sup></p>
-</li>
-<li><p class="first"><code class="docutils literal"><span class="pre">src</span></code>: Short, freeform string describing the data source.  Usually auto-set by the reader. <sup>(a)</sup></p>
-</li>
-<li><p class="first"><code class="docutils literal"><span class="pre">fs</span></code>: Sampling frequency in Hz.</p>
-<ul class="simple">
-<li>For non-time series data (e.g. campaign GPS, gas flux, etc.), set <code class="docutils literal"><span class="pre">fs</span> <span class="pre">=</span> <span class="pre">0</span></code>. This affects the behavior of several commands, including synchronization with <code class="docutils literal"><span class="pre">sync</span></code>; it also affects the behavior and expected structure of field <code class="docutils literal"><span class="pre">t</span></code>.</li>
-</ul>
-</li>
-<li><p class="first"><code class="docutils literal"><span class="pre">gain</span></code>: Scalar value to divide from data to obtain measurements in SI units in the &#8220;flat&#8221; part of the frequency spectrum. Identical meaning to the &#8220;Stage 0&#8221; gain of FDSN/SeedLink XML files.</p>
-</li>
-<li><p class="first"><code class="docutils literal"><span class="pre">units</span></code>: Units of the dependent variable. MKS units are strongly recommended, with &#8220;/s&#8221; for velocity and &#8220;/s/s&#8221; for acceleration (e.g. &#8220;m/s/s&#8221; for seismic accelerometer data). <sup>a</sup></p>
-</li>
-<li><p class="first"><code class="docutils literal"><span class="pre">loc</span></code>: Ssnsor location, a 5-entry vector: <code class="docutils literal"><span class="pre">[lat,</span> <span class="pre">lon,</span> <span class="pre">ele,</span> <span class="pre">|thgr|,</span> <span class="pre">|phgr|]</span></code></p>
-<ul class="simple">
-<li><code class="docutils literal"><span class="pre">lat</span></code>: latitude in decimal degrees; N is positive.</li>
-<li><code class="docutils literal"><span class="pre">lon</span></code>: longitude in decimal degrees; E is positive.</li>
-<li><code class="docutils literal"><span class="pre">ele</span></code>: elevation in meters above sea level (asl).</li>
-<li><code class="docutils literal"><span class="pre">|thgr|</span></code>: channel azimuth in degrees, measured clockwise from North.</li>
-<li><code class="docutils literal"><span class="pre">|phgr|</span></code>: channel incidence in degrees, measured from vertical.</li>
-</ul>
-</li>
-<li><p class="first"><code class="docutils literal"><span class="pre">resp</span></code>: instrument frequency response (poles and zeros). Stored for each channel as a two-column matrix <code class="docutils literal"><span class="pre">r</span></code>, with zeros in <code class="docutils literal"><span class="pre">r[:,1]</span></code> and poles in <code class="docutils literal"><span class="pre">r[:,2]</span></code>.</p>
-</li>
-<li><p class="first"><code class="docutils literal"><span class="pre">misc</span></code>: dictionary of miscellaneous information. Although key values can be of any type, there are strict conventions for what can be saved to disk:</p>
-<ul class="simple">
-<li>Scalars and single-type arrays of these types: Char, Unsigned, Integer, Float, Complex, DirectIndexString. Other types will be ignored on file, write and produce warning messages.</li>
-<li>Subtypes of the above types are OK.</li>
-<li><em>Do not store mixed type arrays in ``misc``</em>. Not only will they not be written correctly to disk, they&#8217;ll break file write.</li>
-</ul>
-</li>
-<li><p class="first"><code class="docutils literal"><span class="pre">notes</span></code>: array of notes describing modifications to the data. Notes can be logged with time stamps using the <code class="docutils literal"><span class="pre">note</span></code> command.</p>
-</li>
-<li><p class="first"><code class="docutils literal"><span class="pre">t</span></code>: pseudo-sparse two-column array of times.</p>
-<ul>
-<li><p class="first">For time series data, <code class="docutils literal"><span class="pre">t</span></code> is a sparse delta-encoded representation of time gaps. Indices are stored in the first column, values in the second column.</p>
-<blockquote>
-<div><ul class="simple">
-<li>The second column of the first row stores the time series begin time relative to the Unix epoch (0.0 = 1970-01-01T00:00:00).</li>
-<li>The last row always takes the form <code class="docutils literal"><span class="pre">[length(x)</span> <span class="pre">0.0]</span></code>, where <code class="docutils literal"><span class="pre">x</span></code> is the corresponding data.</li>
-<li>Other rows take the form <code class="docutils literal"><span class="pre">[(start</span> <span class="pre">of</span> <span class="pre">gap</span> <span class="pre">in</span> <span class="pre">x)</span> <span class="pre">(length</span> <span class="pre">of</span> <span class="pre">gap)]</span></code>, where <code class="docutils literal"><span class="pre">x</span></code> is the corresponding data.</li>
-<li>The <code class="docutils literal"><span class="pre">ungap</span></code> command fills all gaps with the mean of non-null values in <code class="docutils literal"><span class="pre">x</span></code>. The <code class="docutils literal"><span class="pre">sync</span></code> command calls <code class="docutils literal"><span class="pre">ungap</span></code> automatically at invocation.</li>
-</ul>
-</div></blockquote>
-</li>
-<li><p class="first">For irregularly sampled data, <code class="docutils literal"><span class="pre">t</span></code> is a sparse delta-encoded representation of sample times. Only the second column of <code class="docutils literal"><span class="pre">t</span></code> is used.</p>
-</li>
-</ul>
-</li>
-<li><p class="first"><code class="docutils literal"><span class="pre">x</span></code>: vector of sample data.</p>
-</li>
-<li><p class="first"><code class="docutils literal"><span class="pre">n</span></code>: (SeisData only) number of channels in a SeisData object.</p>
-</li>
-</ul>
-<p><sup>(a)</sup> Only the first 26 characters of each channel&#8217;s name, units, and src values are saved to file.</p>
-<div class="section" id="common-sense-precautions">
-<h3>Common Sense Precautions<a class="headerlink" href="#common-sense-precautions" title="Permalink to this headline">¶</a></h3>
-<p>Or, &#8220;how not to break things&#8221;.</p>
-<ul class="simple">
-<li>Never set a channel <code class="docutils literal"><span class="pre">name</span></code> to the <code class="docutils literal"><span class="pre">id</span></code> of a different channel.</li>
-<li>Use static typing to declare arrays in <code class="docutils literal"><span class="pre">misc</span></code>.</li>
-</ul>
-</div>
+<p>The last point merits brief discussion. Time stamps aren&#8217;t written to SAC by default (you can change this by passing <code class="docutils literal"><span class="pre">ts=true</span></code> as a keyword). If you write time stamps to SAC files, the data are treated by SAC itself as unevenly spaced, generic <cite>x-y</cite> data (<cite>LEVEN=0, IFTYPE=4</cite>). However, the behavior of third-party SAC readers is less predictable: timestamped data <em>might</em> be loaded as the real part of a complex time series, with the time values themselves as the imaginary part...or, perhaps, the other way around.</p>
 </div>
 </div>
 
@@ -264,17 +191,16 @@ trace data in <code class="docutils literal"><span class="pre">S</span></code> t
 </li>
 <li><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
 <li><a class="reference internal" href="#native-file-i-o">Native File I/O</a></li>
-<li><a class="reference internal" href="#seisdata-and-seisobj-fields">SeisData and SeisObj Fields</a><ul>
-<li><a class="reference internal" href="#common-sense-precautions">Common Sense Precautions</a></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="webclients.html"
-                        title="previous chapter"><code class="docutils literal"><span class="pre">Web</span> <span class="pre">Clients</span></code></a></p>
+  <p class="topless"><a href="fileformats.html"
+                        title="previous chapter"><code class="docutils literal"><span class="pre">File</span> <span class="pre">Formats</span></code></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="seisdata_fileformat.html"
+                        title="next chapter"><code class="docutils literal"><span class="pre">Appendix</span> <span class="pre">B:</span> <span class="pre">SeisData</span> <span class="pre">File</span> <span class="pre">Format</span></code></a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -306,7 +232,10 @@ trace data in <code class="docutils literal"><span class="pre">S</span></code> t
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="webclients.html" title="Web Clients"
+          <a href="seisdata_fileformat.html" title="Appendix B: SeisData File Format"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="fileformats.html" title="File Formats"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">SeisIO 0.0.1 documentation</a> &raquo;</li> 
       </ul>
