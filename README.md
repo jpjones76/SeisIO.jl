@@ -4,19 +4,6 @@ A minimalist, platform-agnostic package for working with geophysical time series
 # Documentation
 http://seisio.readthedocs.org
 
-# Installation
-From the Julia prompt: 
-```
-Pkg.clone("https://github.com/jpjones76/SeisIO.jl")
-using SeisIO # Loads everything into memory
-```
-
-## Updating
-```Pkg.update(); workspace(); using SeisIO``` should update, recompile, and reload. Please be aware that `workspace()` clears the Julia session's memory, equivalent to e.g. `clear all` in Matlab/Octave.
-
-## Dependencies
-DSP, Requests, LightXML, PyPlot
-
 # Current Functionality
 SeisIO presently includes three web clients, readers for several data formats, and writers for both SAC and a native format. Utility functions allow synchronization, seamless data merging, and padding time gaps.
 
