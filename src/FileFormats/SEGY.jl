@@ -337,7 +337,7 @@ function segytoseis(S::Dict{ASCIIString,Any})
     id = join(["",sta,"",cmp],'.')
   end
   x = S["data"]
-  t = map(Float64, [0 sac2epoch(S); length(x) 0])
+  t = map(Float64, [1.0 sac2epoch(S); length(x) 0])
   gain = 1.0
   units = "unknown"
   loc = zeros(5)
