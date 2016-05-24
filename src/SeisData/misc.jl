@@ -166,7 +166,7 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
     start_times[i] = S.t[i][1,2]
     end_times[i] = sum(S.t[i][:,2])
   end
-  k = find(S.fs .> 0)
+  k = find((S.fs .> 0).*[!isempty(S.x[i]) for i=1:S.n])
   for i in k
     S.x[i] -= mean(S.x[i])
     start_times[i] = round(Int, S.t[i][1,2]*S.fs[i]) / S.fs[i]
@@ -325,16 +325,21 @@ end
 Automatically cosine taper (Tukey window) all data in U
 """
 function autotap!(U::SeisObj)
-  U.fs == 0 && return
+  (U.fs == 0 || isempty(U.x)) && return
+
+  # Fill time gaps with NaNs
+  ungap!(U, m=false, w=false)
+
   j = find(!isnan(U.x))
   mx = mean(U.x[j])
   u = round(Int, max(20,0.2*U.fs))
 
   # First remove the mean
-  U.x -= mx
+  U.x[j] .-= mx
 
   # Then check for auto-fill values (i.e. values that don't change) and NaNs
   # autotuk!(U.x, find(diff(U.x).!=0), u)
+  # Removed; leaving this would be a mistake
 
   # Then check for NaNs
   autotuk!(U.x, find(!isnan(U.x)), u)
@@ -343,28 +348,27 @@ function autotap!(U::SeisObj)
   U.x[find(isnan(U.x))] = 0
 
   # And note it
-  note(U, "Auto-tapered data; replaced NaNs with zeros.")
+  note(U, "De-meaned, auto-tapered, and ungapped data; replaced all NaNs with zeros.")
   return U
 end
 function autotap!(U::SeisData)
+  # Fill gaps with NaNs
+  ungap!(U, m=false, w=false)
+
   for i = 1:U.n
-    U.fs[i] == 0 && continue
+    (U.fs[i] == 0 || isempty(U.x[i])) && continue
     j = find(!isnan(U.x[i]))
     mx = mean(U.x[i][j])
+    U.x[i][j] .-= mx
+
     u = round(Int, max(20,0.2*U.fs[i]))
 
-    # Remove mean
-    U.x[i] -= mx
-
-    # Check for auto-fill values (i.e. values that don't change); taper around them
-    # autotuk!(U.x[i], find(diff(U.x[i]).!=0), u)
-
-    # Check for NaNs
+    # Check for NaNs and window around them
     autotuk!(U.x[i], find(!isnan(U.x[i])), u)
 
-    # Then replace NaNs with zeros
+    # Replace NaNs with zeros
     U.x[i][find(isnan(U.x[i]))] = 0
-    note(U, i, "Auto-tapered data; replaced NaNs with zeros.")
+    note(U, i, "De-meaned, auto-tapered, and ungapped data; replaced all NaNs with zeros.")
   end
   return U
 end
