@@ -301,5 +301,5 @@ end
 Read SAC file `fname` into a SeisObj.
 """
 rsac(fname::ASCIIString) = (src = fname;
-  S = sactoseis(psac(open(fname,"r"), p=false)); S.src = fname; return S)
+  S = sactoseis(psac(open(fname,"r"), p=false)); note(S, fname); return S)
 readsac(fname::ASCIIString) = rsac(fname)
