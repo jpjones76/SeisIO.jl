@@ -11,48 +11,8 @@ filter, filt!, sort!, sort #, isempty
 """
     S = SeisObj()
 
-Create a single channel instance of univariate geophysical data. A SeisObj has
-the following fields, which can be set by name at creation; for example,
-T = SeisObj(gain=1.0e6) creates a SeisObj with T.gain = 1.0e6.
-
-* name: ASCIIString. Freeform; strings > 26 characters long cannot be saved to
-SeisData files.
-* id: ASCIIString. ID must follow the convention `net`.`sta`.`loc`.`chan`;
-If unsure of a value, leave it blank.
-+ `network` is a 2-character network code.
-+ `station` is a 5-character (maximum) station code. For strict compliance with
-SEED standards, station codes shouldn't contain punctuation or non-standard
-characters.
-+ `loc` is a 2-character SEED-style location code. Not widely used.
-+ `chan` is a 3-character channel code. If you only know the orientation, try
-`getbandcode(fs)` for the first character; if you also know the critical
-frequency FC, `getbandcode(fs, fc=FC)`.
-* fs: Float64. Sampling frequency in Hz.
-+ For irregularly sampled data, such as "campaign" style gas flux, set fs = 0.
-* gain: Float64. Stage 0 scalar gain.
-* loc: 5-element vector. The first three elements should be [latitude [°N],
-longitude [°E], elevation [m]]. For data channels from a three-component
-seismometer with orthogonal channels, loc[4] should be the azimuth of the
-horizontal components [N°E]; loc [5] should be the incidence angle of the
-vertical component [° from vertical].
-* misc: Dictionary with ASCII keys. Can hold any type of value, but only
-characters, strings, numbers, and arrays will be saved to/read from file.
-* notes: An array of strings. A log of channel information as data is processed.
-The command `note` appends a timestamped note.
-* resp: Instrument frequency response, given as a matrix with complex zeros in
-the first column and complex poles in the second.
-* src: ASCII string. The source of the data. Normally this is filled in
-automatically when data are loaded in.
-* t: Sparse two-column array of delta-encoded times.
-+ For regularly sampled data (S.fs > 0), the first column gives the index
-in the data (S.x) of the first value after each time gap. The second column
-gives the gap length in seconds.
-+ For irregularly sampled data (S.fs == 0), the first column is meaningless;
-the second column gives delta-encoded sample times.
-+ For all data, S.t[1,2] is the start of the time series, measured from Unix
-Epoch time (1 January 1970).
-* x: Array of data points.
-* units: Freeform string with the unit type.
+Create a single channel instance of univariate geophysical data. See
+documentation for information on fields.
 """
 type SeisObj
   name::ASCIIString
@@ -90,37 +50,7 @@ end
 
 Create a multichannel structure for univariate geophysical data. A SeisData
 structure has the same fields as a SeisObj, but they cannot be set at creation.
-See the help for `SeisObj` for details of field names and meanings.
 
-### Creating and modifying SeisData structures
-You can create a SeisData structure piecewise from individual channels by
-concatenating SeisObj structures:
-* `S = SeisData(SeisObj(name="BRASIL"), SeisObj(name="UKRAINE"), SeisObj())``
-**creates** a new SeisData structure with three channels; the first is named
-"BRASIL", the second "UKRAINE", the third is blank.
-* You can **merge** SeisObj and SeisData structures into existing SeisData
-structures with the addition operator. `S = SeisData(); T = SeisObj(); S += T`
-merges T into S.
-+ If a merged SeisObj structure has the same ID field as a channel in an existing
-SeisData structure, the data are meged using the `.t` fields. Data pairs separated
-by less than half the sampling interval are *averaged*.
-+ To append a SeisObj `T` as a new channel in `S` without merging, use `append!(S,T)`.
-+ You can create a new SeisData structure by adding two or more SeisObj instances
-together, e.g. `S = SeisObj(); T = SeisObj(); U = SeisObj(); R = S + T + U`
-* You can **remove** a channel from a SeisData structure in three ways:
-+ `T = S[i]` creates a SeisObj out of all data in channel `i` of `S`;
-`T = S[i1:i2]` creates a SeisData object from multiple channels. Both methods
-leave S intact.
-+ `S -= i`, where `i` is an integer, deletes channel `i` from S.
-+ `T = pull(S, name)`, where `name` is a string, creates a SeisObj `T` from
-the first channel with name=`name`. The channel is removed from `S`.
-+ `T = pull(S, i)`, where `i` is an integer, creates a SeisObj `T` from
-channel `i` and removes channel `i` from `S`.
-
-### Differences between SeisData and SeisObj interactions
-* The command `note(S, i, [note])` adds a timestamped note to channel `i` of `S`.
-* The command `S += "[name]: [note]"`, adds a note with a short form date.
-* The command `S += "[note]"` adds a note with short-form date to all channels.
 """
 type SeisData
   n::Int64
