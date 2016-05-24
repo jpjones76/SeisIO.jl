@@ -1,5 +1,15 @@
 getcha(cf) = (f = open(cf, "r"); F = readlines(f); close(f); return F)
 
+function get_netStr(orgID,netID)
+  nets = readdlm(string(Pkg.dir(),"/SeisIO/src/FileFormats/jpcodes.csv"), ';')
+  i = find((nets[:,1].==orgID).*(nets[:,2].==netID))
+  if isempty(i)
+    return "Unknown"
+  else
+    return nets[i[1],:]
+  end
+end
+
 function lsw(filestr::ASCIIString)
   d, f = splitdir(filestr)
   i = search(f, '*')
@@ -23,9 +33,14 @@ function int4_2c(s::Array{Int32,1})
   return dot(p, s[1:4]), dot(p, s[5:8])
 end
 
-function win32dict(Nh::UInt16, cinfo::ASCIIString, hexID::ASCIIString, StartTime::Float64)
+function win32dict(Nh::UInt16, cinfo::ASCIIString, hexID::ASCIIString, StartTime::Float64, orgID::ASCIIString, netID::ASCIIString)
   k = Dict{ASCIIString,Any}()
   k["hexID"] = hexID
+  k["orgID"] = orgID
+  k["netID"] = netID
+  k["netName"] = get_netStr(orgID,netID)
+  k["locID"] = @sprintf("%i%i", parse(orgID), parse(netID))
+  parse(k["locID"]) > 99 && (warn(string("hexID = ", hexID, "locID > 99, loc code can't be set.")); k["locID"] = "")
   k["data"] = Array{Int32,1}()
   k["OldTime"] = 0
   k["seisSum"] = 0
@@ -85,7 +100,8 @@ function r_win32(filestr::ASCIIString, cf::ASCIIString; v=false)
       y = 0
 
       while y < lsecb
-        skip(fid, 2)
+        orgID = bytes2hex(read(fid, UInt8, 1))
+        netID = bytes2hex(read(fid, UInt8, 1))
         hexID = bytes2hex(read(fid, UInt8, 2))
         c = string(bits(read(fid, UInt8)),bits(read(fid, UInt8)))
         C = parse(UInt8, c[1:4], 2)
@@ -103,7 +119,7 @@ function r_win32(filestr::ASCIIString, cf::ASCIIString; v=false)
         y += (10 + B)
 
         c, id = getcid(Chans, hexID)
-        haskey(seis, id) || (seis[id] = win32dict(Nh, Chans[c], hexID, NewTime))
+        haskey(seis, id) || (seis[id] = win32dict(Nh, Chans[c], hexID, NewTime, orgID, netID))
         x[1] = bswap(read(fid, Int32))
 
         if C == 0
@@ -171,7 +187,8 @@ function r_win32(filestr::ASCIIString, cf::ASCIIString; v=false)
       delete!(seis[i],j)
     end
   end
-  seis["src"] = "win32 file"
+  seis["fname"] = filestr
+  seis["cfile"] = cf
   return seis
 end
 
@@ -180,18 +197,45 @@ function win32toseis(D = Dict{ASCIIString,Any}())
   seis = SeisData()
   for k in K
     !isa(D[k],Dict{ASCIIString,Any}) && continue
-    id_stub = split(k, '.')
-    id = join(["JP",id_stub[2],id_stub[1],id_stub[3]], '.')
-    # There will be some issues here; Japanese files use NIED or local station
-    # names, which don't necessarily correspond to international station names
-    # See e.g. http://data.sokki.jmbsc.or.jp/cdrom/seismological/catalog/appendix/apendixe.htm
-    # for an example of poor correspondence
-    misc = Dict{ASCIIString,Any}()
+    fs = D[k]["fs"]
+    (net, sta, chan_stub) = split(k, '.')
+    b = getbandcode(fs, fc = D[k]["fc"])          # Band code
+    g = 'H'                                       # Gain code
+    c = chan_stub[1]                              # Channel code
+    c == 'U' && (c = 'Z')                         # Nope
+    cha = string(b,g,c)
+    loc = D[k]["locID"]
+    # Location codes are based on Japanese numeric network codes
+    # This is done because the SEED standard currently only has one Japanese
+    # network listed; JMA, under code "JP"
+
+    id = join(["JP", sta, loc, cha], '.')
+    # There will be issues here; Japanese files use NIED or local station
+    # names, which don't necessarily match international station names. See e.g.
+    # http://data.sokki.jmbsc.or.jp/cdrom/seismological/catalog/appendix/apendixe.htm
+    # for an example of the (lack of) correspondence
+
+    x = map(Float64, D[k]["data"].*D[k]["scale"])
     t = [1.0 D[k]["startTime"]; length(D[k]["data"]) 0.0]
-    [misc[sk] = D[k][sk] for sk in ("hexID", "fc", "hc", "pCorr", "sCorr", "lineDelay")]
-    seis += SeisObj(name=k, id=id, x=map(Float64, D[k]["data"]), t=t,
-      gain=1/D[k]["scale"], fs=D[k]["fs"], units=D[k]["unit"],
-      loc=[D[k]["loc"]; 0; 0], misc=misc, notes=[string("src=", D["src"])])
+    src = "win32"
+    notes = [string(now, "  Record source: ", D[k]["netName"]);
+             string(now, "  Location comment: ", D[k]["comment"]);
+             string(now, "  Read from file ", D["fname"]);
+             string(now, "  Channel file ", D["cfile"])]
+    misc = Dict{ASCIIString,Any}()
+    [misc[sk] = D[k][sk] for sk in ("hexID", "orgID", "netID", "fc", "hc", "pCorr", "sCorr", "lineDelay", "comment")]
+
+    seis += SeisObj(id=id,
+      name=k,
+      x=x,
+      t=t,
+      gain=1.0,
+      fs=fs,
+      units=D[k]["unit"],
+      loc=[D[k]["loc"]; 0; 0],
+      misc=misc,
+      src=src,
+      notes=notes)
   end
   return seis
 end
