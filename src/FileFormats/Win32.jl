@@ -189,7 +189,7 @@ function win32toseis(D = Dict{ASCIIString,Any}())
     misc = Dict{ASCIIString,Any}()
     t = [1.0 D[k]["startTime"]; length(D[k]["data"]) 0.0]
     [misc[sk] = D[k][sk] for sk in ("hexID", "fc", "hc", "pCorr", "sCorr", "lineDelay")]
-    seis += SeisObj(name=k, id=id, x=map(Float64, D[k]["data"]),
+    seis += SeisObj(name=k, id=id, x=map(Float64, D[k]["data"]), t=t,
       gain=1/D[k]["scale"], fs=D[k]["fs"], units=D[k]["unit"],
       loc=[D[k]["loc"]; 0; 0], misc=misc, notes=[string("src=", D["src"])])
   end
