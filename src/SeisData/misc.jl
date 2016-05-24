@@ -67,7 +67,7 @@ Fill gaps in x, as specified in t, assuming sampling rate fs
 """
 function gapfill!(x::Array{Float64,1}, t::Array{Float64,2}, fs::Float64; m=true::Bool, w=true::Bool)
   (fs == 0 || fs == Inf) && (return x)
-  mx = m ? mean(x) : NaN
+  mx = m ? mean(x[!isnan[x]]) : NaN
   u = round(Int, max(20,0.2*fs))
   for i = size(t,1):-1:2
     g = t[i,2]
@@ -296,7 +296,7 @@ Synchronize S and downsample data to the lowest non-null interval in S.fs.
 sync(S::SeisData; r=false::Bool) = (T = deepcopy(S); sync!(T, resample=r);
   return T)
 
-function autotuk!(x, v, u, m)
+function autotuk!(x, v, u)
   g = find(diff(v) .> 1)
   L = length(g)
   if L > 0
@@ -311,8 +311,8 @@ function autotuk!(x, v, u, m)
         x[j+1:k] .*= tukey(N, u/N)
       else
         warn(string(@sprintf("Channel %i: Time window too small, ",i),
-          @sprintf("x[%i:%i]; replaced with mean.", j+1, k)))
-        x[j+1:k] = m
+          @sprintf("x[%i:%i]; replaced with zeros.", j+1, k)))
+        x[j+1:k] = 0
       end
     end
   end
@@ -320,41 +320,51 @@ function autotuk!(x, v, u, m)
 end
 
 """
-autotap!(U)
+    !autotap(U)
 
-Automatically cosine taper (Tukey window) any
+Automatically cosine taper (Tukey window) all data in U
 """
 function autotap!(U::SeisObj)
-  mx = mean(U.x[find(!isnan(U.x))])
+  U.fs == 0 && return
+  j = find(!isnan(U.x))
+  mx = mean(U.x[j])
   u = round(Int, max(20,0.2*U.fs))
 
-  # First check for auto-fill values (i.e. values that don't change)
-  autotuk!(U.x, find(diff(U.x).!=0), u, mx)
+  # First remove the mean
+  U.x -= mx
+
+  # Then check for auto-fill values (i.e. values that don't change) and NaNs
+  # autotuk!(U.x, find(diff(U.x).!=0), u)
 
   # Then check for NaNs
-  autotuk!(U.x, find(!isnan(U.x)), u, mx)
+  autotuk!(U.x, find(!isnan(U.x)), u)
 
-  # Then replace NaNs with the mean
-  U.x[find(isnan(U.x))] = mx
+  # Then replace NaNs with zeros
+  U.x[find(isnan(U.x))] = 0
 
   # And note it
-  note(U, "Auto-tapered data.")
+  note(U, "Auto-tapered data; replaced NaNs with zeros.")
   return U
 end
 function autotap!(U::SeisData)
   for i = 1:U.n
-    mx = mean(U.x[i][find(!isnan(U.x[i]))])
+    U.fs[i] == 0 && continue
+    j = find(!isnan(U.x[i]))
+    mx = mean(U.x[i][j])
     u = round(Int, max(20,0.2*U.fs[i]))
 
-    # First check for auto-fill values (i.e. values that don't change)
-    autotuk!(U.x[i], find(diff(U.x[i]).!=0), u, mx)
+    # Remove mean
+    U.x[i] -= mx
 
-    # Then check for NaNs
-    autotuk!(U.x[i], find(!isnan(U.x[i])), u, mx)
+    # Check for auto-fill values (i.e. values that don't change); taper around them
+    # autotuk!(U.x[i], find(diff(U.x[i]).!=0), u)
 
-    # Then replace NaNs with the mean
-    U.x[i][find(isnan(U.x[i]))] = mx
-    note(U, i, "Auto-tapered data.")
+    # Check for NaNs
+    autotuk!(U.x[i], find(!isnan(U.x[i])), u)
+
+    # Then replace NaNs with zeros
+    U.x[i][find(isnan(U.x[i]))] = 0
+    note(U, i, "Auto-tapered data; replaced NaNs with zeros.")
   end
   return U
 end
