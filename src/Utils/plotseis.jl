@@ -11,7 +11,7 @@ Renormalized, time-aligned trace plot of data in S.x using timestamps in S.t.
 
 Use timing of channel C to determine x-ticks and format FMT to format x-labels.
 """
-function plotseis(S::SeisData; fmt="auto"::ASCIIString, use_name=false::Bool)
+function plotseis(S::SeisData; fmt="auto"::ASCIIString, use_name=false::Bool, auto_x=true::Bool)
   # Basic plotting
   figure()
   axes([0.15, 0.1, 0.8, 0.8])
@@ -51,18 +51,19 @@ function plotseis(S::SeisData; fmt="auto"::ASCIIString, use_name=false::Bool)
   end
   dt /= 3
 
-  xt = Array{Float64,1}[]
-  xl = Array{ASCIIString,1}[]
-  for i = 1:1:4
-    xt = cat(1, xt, xmi+(i-1)*dt)
-    xl = cat(1, xl, Libc.strftime(fmt,xt[i]))
+  if auto_x
+    xt = Array{Float64,1}[]
+    xl = Array{ASCIIString,1}[]
+    for i = 1:1:4
+      xt = cat(1, xt, xmi+(i-1)*dt)
+      xl = cat(1, xl, Libc.strftime(fmt,xt[i]))
+    end
+    xlim(xmi, xma)
+    xticks(xt, xl)
   end
 
-  # Plot micromanagement
-  xlim(xmi, xma)
   ylim(0.5, S.n+0.5)
-  xticks(xt, xl)
-  yticks(collect(1:1:S.n), map((x) -> replace(x, " ", ""), use_name? S.name : S.id))
+  yticks(collect(1:1:S.n), map((i) -> replace(i, " ", ""), use_name? S.name : S.id))
   xlabel(@sprintf("Time [%s]",replace(fmt, "%", "")))
   return
 end
