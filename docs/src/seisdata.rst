@@ -142,8 +142,7 @@ Utility Functions
 
 * ``sync!, sync``: Synchronize time windows for all channels and fill time gaps. Calls ``autotap!``, which in turn de-means and calls ``ungap!``.
 
-* ``ungap!, ungap``: Fill all time gaps in each channel of regularly sampled data. By default, ``ungap`` invoked alone will cosine taper non-gap subsequences of time series data (keyword ``w=true``), and will fill time gaps with the mean of non-NaN data points (keyword ``m=true``). These behaviors can be changed by changing the keywords corresponding to each.
-
+* ``ungap!, ungap``: Fill all time gaps in each channel of regularly sampled data. By default, invoking ``ungap!`` alone cosine tapers non-gap subsequences of time series data (keyword ``w=true``), and fills time gaps with the mean of non-NaN data points (keyword ``m=true``).
 
 
 Native File I/O
