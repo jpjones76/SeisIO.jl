@@ -11,7 +11,7 @@ Renormalized, time-aligned trace plot of data in S.x using timestamps in S.t.
 
 Use timing of channel C to determine x-ticks and format FMT to format x-labels.
 """
-function plotseis(S::SeisData; fmt="auto"::ASCIIString, use_name==false::Bool)
+function plotseis(S::SeisData; fmt="auto"::ASCIIString, use_name=false::Bool)
   # Basic plotting
   figure()
   axes([0.15, 0.1, 0.8, 0.8])

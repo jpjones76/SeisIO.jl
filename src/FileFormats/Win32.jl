@@ -1,7 +1,9 @@
 getcha(cf) = (f = open(cf, "r"); F = readlines(f); close(f); return F)
 
 function get_netStr(orgID,netID)
-  nets = readdlm(string(Pkg.dir(),"/SeisIO/src/FileFormats/jpcodes.csv"), ';')
+  fname = string(Pkg.dir(),"/SeisIO/src/FileFormats/jpcodes.csv")
+  isfile(fname) || return "Unknown"
+  nets = readdlm(fname, ';')
   i = find((nets[:,1].==orgID).*(nets[:,2].==netID))
   if isempty(i)
     return "Unknown"
