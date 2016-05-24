@@ -78,6 +78,7 @@ ungap!(S, m=false, w=false)
 # Auto-tapering after a merge
 T = deepcopy(S)
 ii = find(isnan(S.x[1]))
+T.x[1] -= mean(T.x[1][!isnan(T.x[1])])
 autotap!(S)
 @test_approx_eq(0, length(find(isnan(S.x[1]))))   # No more NaNs?
 @test_approx_eq(sum(diff(S.x[1][ii])), 0)         # All NaNs filled w/same val?

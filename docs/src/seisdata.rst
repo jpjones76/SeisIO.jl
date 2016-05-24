@@ -57,23 +57,28 @@ Appending without merging
 
 Deleting Data
 =============
-``-`` (the subtraction operator) is the standard way to delete unwanted data channels. It's generally safest to use e.g. ``T = S - i``, but in-place deletion (e.g. ``S -= i``) is valid. The exact behavior for a general operation ``S - K`` depends on the type of the addend:
+``-`` (the subtraction operator) is the standard way to delete unwanted data channels. It's generally safest to use e.g. ``T = S - i``, but in-place deletion (e.g. ``S -= i``) is valid. The exact behavior for a general operation ``S - K`` depends on the data type of the addend:
 
-  * If K is an integer, channel k is deleted from S.
+Methods
+-------
+``S - i``, where ``i`` is an integer, deletes the ``i``\ th channel of S.
 
-  * If K is a string, all channels whose names and ids match k are deleted.
+``S - str``, where ``str`` is a string, deletes all channels whose names and ids match ``str``.
 
-  * If K is a SeisObj instance, all channels from S with the same id as k are deleted.
+``S - U``, where ``U`` is a SeisObj instance, deletes all channels from ``S`` with the same id value as ``U.id``.
 
-``deleteat!(S,i)`` is identical to ``S-=K`` for an integer K.
+``deleteat!(S,i)`` is identical to ``S-=K`` for integer K.
 
 
 Safe deletion with ``pull``
----------------------------
+===========================
 The ``pull`` command extracts a channel from a SeisData instance and returns it as a SeisObj.
-```T = pull(S, name)``, where ``name`` is a string, creates a SeisObj ``T`` from the first channel with name=``name``. The channel is removed from `S`.
-+ `T = pull(S, i)`, where `i` is an integer, creates a SeisObj `T` from
-channel `i` and removes channel `i` from `S`.
+
+Methods
+-------
+``T = pull(S, name)``, where ``name`` is a string, creates a SeisObj ``T`` from the first channel with name=``name``, then removes the matching channel from ``S``.
+
+``T = pull(S, i)``, where ``i`` is an integer, creates a SeisObj ``T`` from channel ``i``, then removes channel ``i`` from ``S``.
 
 
 Index, Search, Sort
@@ -123,20 +128,19 @@ SeisData and SeisObj are intended to be annotated as data are analyzed; the comm
 
 Utility Functions
 =================
-* ``plotseis``: Plot time-aligned data from a SeisData object. Time series data are represented by straight lines; irregularly sampled data (``fs=0``) use normalized stem plots.
+* ``autotap!``: Apply a cosine taper to non-gap subsequences of all time series data.  Removes the mean of all time series channels. Calls ``ungap!``.
+
+* ``plotseis``: Plot time-aligned data from a SeisData object. Time series data are represented by straight lines; irregularly sampled data (``fs=0``) use normalized stem plots. Data are labeled by channel id; change this with keyword ``use_name=true``.
 
 * ``prune!, prune``: Merge channels with redundant header fields.
 
 * ``purge!, purge``: Delete all channels with no data (defined for any channel ``i`` by ``isempty(S.x[i]) == true``).
 
-* ``sync!, sync``: Synchronize time windows for all channels and fill time gaps. Calls ``ungap!`` at invocation.
+* ``sync!, sync``: Synchronize time windows for all channels and fill time gaps. Calls ``autotap!``, which in turn de-means and calls ``ungap!``.
 
 * ``ungap!, ungap``: Fill all time gaps in each channel of regularly sampled data.
-
-* ``autotap!``: Cosine taper time series data around time gaps. 
-
 
 
 Native File I/O
 ===============
-Use ``rseis`` and ``wseis`` to read and save in native format. ``writesac(S)`` saves trace data in ``S`` to single-channel :ref:`SAC <sac1>` files. SAC is widely used and well-supported, but writes data in single-precision format with rudimentary time stamping. The last point merits brief discussion. Time stamps are written to SAC by default (change this with kw ``ts=false``). Tme stamped SAC data are treated by SAC itself as unevenly spaced, generic ``x-y`` data (``LEVEN=0, IFTYPE=4``). However, third-party SAC readers interpret such files less predictably: timestamped data *might* be loaded as the real part of a complex time series, with the time values themselves as the imaginary part...or the other way around...or not at all.
+Use ``rseis`` and ``wseis`` to read and save in native format. ``writesac(S)`` saves trace data in ``S`` to single-channel :ref:`SAC <sac1>` files. SAC is widely used and well-supported, but writes data in single-precision format with rudimentary time stamping. The last point merits brief discussion. Time stamps are written to SAC by default (change this by setting ``ts=false``). Tme stamped SAC data are treated by SAC itself as unevenly spaced, generic ``x-y`` data (``LEVEN=0, IFTYPE=4``). However, third-party SAC readers interpret such files less predictably: timestamped data *might* be loaded as the real part of a complex time series, with the time values themselves as the imaginary part...or the other way around...or not at all.

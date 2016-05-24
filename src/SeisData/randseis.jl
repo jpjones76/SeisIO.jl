@@ -215,7 +215,7 @@ function populate_seis!(S::SeisData; c=false::Bool)
     end
   end
 end
-populate_seis!(S::SeisData, N::Int; c=false::Bool) = ([append!(S,
+populate_seis!(S::SeisData, N::Int; c=false::Bool) = ([push!(S,
   randseisobj(c=c)) for n = 1:N])
 
 """

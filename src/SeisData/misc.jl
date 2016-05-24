@@ -66,8 +66,8 @@ purge(S::SeisData) = (T = deepcopy(S); purge!(T); return(T))
 Fill gaps in x, as specified in t, assuming sampling rate fs
 """
 function gapfill!(x::Array{Float64,1}, t::Array{Float64,2}, fs::Float64; m=true::Bool, w=true::Bool)
-  (fs == 0 || fs == Inf) && (return x)
-  mx = m ? mean(x[!isnan[x]]) : NaN
+  (fs == 0 || isempty(x)) && (return x)
+  mx = m ? mean(x[!isnan(x)]) : NaN
   u = round(Int, max(20,0.2*fs))
   for i = size(t,1):-1:2
     g = t[i,2]
@@ -158,7 +158,8 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
   t="max"::Union{ASCIIString,Real,DateTime})
 
   # Do not edit order of operations
-  ungap!(S)
+  ungap!(S, m=false, w=false)
+  autotap!(S)
   start_times = zeros(S.n)
   end_times = zeros(S.n)
   c = find(S.fs .== 0)
