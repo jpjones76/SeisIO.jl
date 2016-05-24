@@ -133,7 +133,7 @@ Utility Functions
 
 * ``ungap!, ungap``: Fill all time gaps in each channel of regularly sampled data.
 
-* ``autotap!``: Cosine taper time series data around time gaps.
+* ``autotap!``: Cosine taper time series data around time gaps. 
 
 
 
