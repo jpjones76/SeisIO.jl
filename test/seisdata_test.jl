@@ -130,7 +130,7 @@ S += readuw(uw_root)                                     # UW
 @test_approx_eq(S.t[S.n][end,1], length(S.x[S.n]))
 @test_approx_eq(S.t[S.n][end,2], 0.0)
 
-println("......win32 skipped; (file redistribution prohibited by NIED)...")
+println("......win32 skipped (data redistribution prohibited; tested internally)...")
 
 println("...randseisdata...")
 R = randseisdata(c=true)
