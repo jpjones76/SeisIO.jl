@@ -19,6 +19,9 @@ plotseis,                                                      # Plotting/plotse
 parsetimewin, j2md, md2j, sac2epoch,                           # time_aux.jl
 seisio_notes                                                   # this file
 
+# Auxiliary time functions
+include("Utils/time_aux.jl")
+
 # SeisData is designed as a universal, gap-tolerant "working" format for
 # geophysical timeseries data
 include("SeisData/SeisData.jl")
@@ -26,9 +29,6 @@ include("SeisData/show.jl")
 include("SeisData/fileio.jl")
 include("SeisData/utils.jl")
 include("SeisData/randseis.jl")
-
-# Auxiliary time functions
-include("time_aux.jl")
 
 # Data converters
 include("FileFormats/SAC.jl")         # SAC is the old IRIS standard; very easy to use, almost universally readable
@@ -44,7 +44,7 @@ include("WebClients/FDSN.jl")
 include("WebClients/SeedLink.jl")
 
 # Plotting
-include("plotseis.jl")
+include("Utils/plotseis.jl")
 
 """
 seisio_notes()
