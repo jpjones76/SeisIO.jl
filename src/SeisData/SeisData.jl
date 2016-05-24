@@ -331,7 +331,7 @@ samehdr(S::SeisData, T::SeisObj, i) = (
 # Append, delete
 push!(S::SeisData, T::SeisObj; n=true::Bool) = ([push!(S.(i),T.(i)) for i in fieldnames(T)];
   S.n += 1; n && (note(S, S.n, @sprintf("Channel added."));))
-append!(S::SeisData, T::SeisObj; n=true::Bool) = push!(S, T, n=n)
+append!(S::SeisData, T::SeisData; n=true::Bool) = ([push!(S,T[i],n=n) for i = 1:S.n])
 deleteat!(S::SeisData, j::Int) = ([deleteat!(S.(i),j) for i in datafields(S)];
   S.n -= 1;)
 deleteat!(S::SeisData, J::Range) = (collect(J); [deleteat!(S, j)
@@ -427,8 +427,6 @@ function merge!(S::SeisObj, U::SeisObj)
 
   # Two full channels
   S.fs != U.fs && error("Sampling frequency mismatch; correct manually.")
-  # ungap!(S, m=false, w=false)
-  # T = ungap(U, m=false, w=false)
   T = deepcopy(U)
   if !isapprox(S.gain,T.gain)
     (T.x .*= (S.gain/T.gain); T.gain = copy(S.gain))      # rescale T.x to match S.x
@@ -453,8 +451,6 @@ function merge!(S::SeisData, U::SeisObj)
   i = i[1]
   S.fs[i] != U.fs && return push!(S,U)
   T = deepcopy(U)
-  #ungap!(S[i], m=false, w=false)
-  #ungap!(T, m=false, w=false)
   if !isapprox(S.gain[i],T.gain)
     (T.x .*= (S.gain[i]/T.gain); T.gain = copy(S.gain[i]))        # rescale T.x to match S.x
   end
