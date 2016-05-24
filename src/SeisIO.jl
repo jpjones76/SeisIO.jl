@@ -2,7 +2,7 @@ VERSION >= v"0.4.0" && __precompile__(true)
 module SeisIO
 export SeisObj, SeisData, findname, findid, hasid, hasname,    # SeisData/SeisData.jl
 samehdr, t_expand, t_collapse, pull, note,
-getbandcode, prune!, purge, purge!, gapfill!,                  # SeisData/utils.jl
+getbandcode, prune!, purge, purge!, gapfill!,                  # SeisData/misc.jl
 gapfill, ungap!, ungap, sync!, sync, autotap!,
 randseisobj, randseisdata,                                     # SeisData/randseis.jl
 wseis, rseis, writesac,                                        # SeisData/fileio.jl
@@ -15,7 +15,8 @@ readsegy, segyhdr, pruneseg, segytosac, segytoseis, r_segy,    # SEG Y
 readwin32, win32toseis, r_win32,                               # Win 32
 parsemseed, readmseed, parsesl, readmseed, parserec,           # mini-SEED
 rlennasc,                                                      # Lennartz ASCII
-plotseis,                                                      # Plotting/plotseis.jl
+plotseis,                                                      # Utils/plotseis.jl
+fctopz,                                                        # Utils/resp.jl
 parsetimewin, j2md, md2j, sac2epoch,                           # time_aux.jl
 seisio_notes                                                   # this file
 
@@ -27,7 +28,7 @@ include("Utils/time_aux.jl")
 include("SeisData/SeisData.jl")
 include("SeisData/show.jl")
 include("SeisData/fileio.jl")
-include("SeisData/utils.jl")
+include("SeisData/misc.jl")
 include("SeisData/randseis.jl")
 
 # Data converters
@@ -43,8 +44,8 @@ include("WebClients/IRIS.jl")
 include("WebClients/FDSN.jl")
 include("WebClients/SeedLink.jl")
 
-# Plotting
-include("Utils/plotseis.jl")
+include("Utils/resp.jl")              # Instrument response
+include("Utils/plotseis.jl")          # Plotting
 
 """
 seisio_notes()

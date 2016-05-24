@@ -372,12 +372,6 @@ Y rev 0.
 """
 function readsegy(fname::ASCIIString; f="std"::ASCIIString)
   S = segytoseis(pseg(open(fname,"r"), f=f))
-  if isa(S,SeisData)
-    for i = 1:S.n
-      S.src[i] = fname
-    end
-  else
-    S.src = fname
-  end
+  note(S, fname)
   return(S)
 end

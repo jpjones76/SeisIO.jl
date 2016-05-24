@@ -200,8 +200,11 @@ function win32toseis(D = Dict{ASCIIString,Any}())
   for k in K
     !isa(D[k],Dict{ASCIIString,Any}) && continue
     fs = D[k]["fs"]
+    units = D[k]["unit"]
     (net, sta, chan_stub) = split(k, '.')
-    b = getbandcode(fs, fc = D[k]["fc"])          # Band code
+    fc = D[k]["fc"]
+    hc = D[k]["hc"]
+    b = getbandcode(fs, fc = fc)                  # Band code
     g = 'H'                                       # Gain code
     c = chan_stub[1]                              # Channel code
     c == 'U' && (c = 'Z')                         # Nope
@@ -225,6 +228,11 @@ function win32toseis(D = Dict{ASCIIString,Any}())
              string(now, "  Read from file ", D["fname"]);
              string(now, "  Channel file ", D["cfile"])]
     misc = Dict{ASCIIString,Any}()
+    if units == "m/s"
+      resp = fctopz(fc, hc=hc, units=units)
+    else
+      resp = Array{Complex{Float64},2}(0,2)
+    end
     [misc[sk] = D[k][sk] for sk in ("hexID", "orgID", "netID", "fc", "hc", "pCorr", "sCorr", "lineDelay", "comment")]
 
     seis += SeisObj(id=id,
@@ -233,10 +241,11 @@ function win32toseis(D = Dict{ASCIIString,Any}())
       t=t,
       gain=1.0,
       fs=fs,
-      units=D[k]["unit"],
+      units=units,
       loc=[D[k]["loc"]; 0; 0],
       misc=misc,
       src=src,
+      resp=resp,
       notes=notes)
   end
   return seis
