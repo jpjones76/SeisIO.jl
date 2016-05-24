@@ -136,9 +136,14 @@ Utility Functions
 
 * ``purge!, purge``: Delete all channels with no data (defined for any channel ``i`` by ``isempty(S.x[i]) == true``).
 
+* ``randseisdata()``: Generate a SeisData structure with pseudo-random headers and data. Specify ``c=false`` to allow campaign-style channels with ``fs=0``. Specify an integer argument to set the number of channels; otherwise, ``S.n`` varies from 12 to 24.
+
+* ``randseisobj()``: Generate a Seisobj structure with pseudo-random headers and data.
+
 * ``sync!, sync``: Synchronize time windows for all channels and fill time gaps. Calls ``autotap!``, which in turn de-means and calls ``ungap!``.
 
-* ``ungap!, ungap``: Fill all time gaps in each channel of regularly sampled data.
+* ``ungap!, ungap``: Fill all time gaps in each channel of regularly sampled data. By default, ``ungap`` invoked alone will cosine taper non-gap subsequences of time series data (keyword ``w=true``), and will fill time gaps with the mean of non-NaN data points (keyword ``m=true``). These behaviors can be changed by changing the keywords corresponding to each.
+
 
 
 Native File I/O
