@@ -457,7 +457,7 @@ function uwtoseis(S::Dict{ASCIIString,Any})
     src = S["src"]
     x = map(Float64, S["data"][i])
     notes = S["comment"]
-    t = map(Float64, [0 S["start"][i]+S["ot"]; length(x) 0])
+    t = map(Float64, [1.0 S["start"][i]+S["ot"]; length(x) 0])
     misc = Dict{ASCIIString,Any}()
     for k in misc_keys
       misc[k] = S[k][i]

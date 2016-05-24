@@ -23,7 +23,7 @@ function int4_2c(s::Array{Int32,1})
   return dot(p, s[1:4]), dot(p, s[5:8])
 end
 
-function win32dict(Nh::UInt16, cinfo::ASCIIString, hexID::ASCIIString)
+function win32dict(Nh::UInt16, cinfo::ASCIIString, hexID::ASCIIString, StartTime::Float)
   k = Dict{ASCIIString,Any}()
   k["hexID"] = hexID
   k["data"] = Array{Int32,1}()
@@ -31,6 +31,7 @@ function win32dict(Nh::UInt16, cinfo::ASCIIString, hexID::ASCIIString)
   k["seisSum"] = 0
   k["seisN"] = 0
   k["seisNN"] = 0
+  k["startTime"] = StartTime
   k["gapStart"] = Array{Int64,1}(0)
   k["gapEnd"] = Array{Int64,1}(0)
   k["fs"] = Float32(Nh)
@@ -102,7 +103,7 @@ function r_win32(filestr::ASCIIString, cf::ASCIIString; v=false)
         y += (10 + B)
 
         c, id = getcid(Chans, hexID)
-        haskey(seis, id) || (seis[id] = win32dict(Nh, Chans[c], hexID))
+        haskey(seis, id) || (seis[id] = win32dict(Nh, Chans[c], hexID, NewTime))
         x[1] = bswap(read(fid, Int32))
 
         if C == 0
@@ -181,11 +182,12 @@ function win32toseis(D = Dict{ASCIIString,Any}())
     !isa(D[k],Dict{ASCIIString,Any}) && continue
     id_stub = split(k, '.')
     id = join(["JP",id_stub[2],id_stub[1],id_stub[3]], '.')
-    # There will be some issues here; Japanese files use their own station
-    # names, which don't necessarily correspond to their international names
+    # There will be some issues here; Japanese files use NIED or local station
+    # names, which don't necessarily correspond to international station names
     # See e.g. http://data.sokki.jmbsc.or.jp/cdrom/seismological/catalog/appendix/apendixe.htm
     # for an example of poor correspondence
     misc = Dict{ASCIIString,Any}()
+    t = [1.0 D[k]["startTime"]; length(D[k]["data"]) 0.0]
     [misc[sk] = D[k][sk] for sk in ("hexID", "fc", "hc", "pCorr", "sCorr", "lineDelay")]
     seis += SeisObj(name=k, id=id, x=map(Float64, D[k]["data"]),
       gain=1/D[k]["scale"], fs=D[k]["fs"], units=D[k]["unit"],
@@ -202,4 +204,4 @@ channel file `chanfile`; return a seisdata object S.
 
 """
 readwin32(f::ASCIIString, c::ASCIIString; v=false::Bool) = (
-  D = procwin32(f, c, v=v); return(win32toseis(D)))
+  D = r_win32(f, c, v=v); return(win32toseis(D)))

@@ -111,10 +111,22 @@ println("...gain correction on merge...")
 println("...direct reading of supported file formats...")
 println("......SAC...")
 S += readsac(sac_file)                                   # SAC
+@test_approx_eq(S.t[S.n][1,1], 1.0)
+@test_approx_eq(S.t[S.n][end,1], length(S.t[S.n]))
+@test_approx_eq(S.t[S.n][end,2], 0.0)
+
 println("......SEGY...")
 S += readsegy(segy_file, f="nmt")                        # SEGY rev 0 mod PASSCAL
 println("......UW...")
+@test_approx_eq(S.t[S.n][1,1], 1.0)
+@test_approx_eq(S.t[S.n][end,1], length(S.t[S.n]))
+@test_approx_eq(S.t[S.n][end,2], 0.0)
+
 S += readuw(uw_root)                                     # UW
+@test_approx_eq(S.t[S.n][1,1], 1.0)
+@test_approx_eq(S.t[S.n][end,1], length(S.t[S.n]))
+@test_approx_eq(S.t[S.n][end,2], 0.0)
+
 println("......win32 skipped; (file redistribution prohibited by NIED)...")
 
 println("...randseisdata...")
