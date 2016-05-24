@@ -8,50 +8,36 @@
 ***************
 :mod:`SeisData`
 ***************
-SeisData is a minimalist class (type) designed for discretely sampled sequential signals, including (but not limited to) time-series data. It can hold both regularly sampled (time series) data and irregularly sampled measurements.
+SeisData is a minimalist container type designed for discretely sampled sequential signals, including (but not limited to) time-series data. It can hold both regularly sampled (time series) data and irregularly sampled measurements.
 
-SeisData and SeisObj instances can be manipulated using standard Julia commands. The rest of this section explains this functionality in detail.
+SeisData and SeisObj containers can be manipulated using standard Julia commands. The rest of this section explains this functionality in detail.
 
 
 Creating Data Containers
 ========================
-* ``S = SeisData()``
+SeisData and SeisObj containers can be created in three ways:
 
-  initialize an empty SeisData container
+#. ``S = SeisData()`` initializes an empty SeisData container
 
-* ``S = SeisObj()``
+#. ``S = SeisObj()``  initializes a new SeisObj container
 
-  initialize a new SeisObj container
+#. ``S = SeisData(s1, s2, s3)`` creates a SeisData container by merging s1, s2, s3. If a merge variable isn't of type SeisData or SeisObj, it's ignored and a warning is given to STDOUT.
 
-* ``S = SeisData(s1, s2, s3)``
-
-  create a SeisData container by merging s1, s2, s3.
-
-When using the third syntax, if a merge variable isn't of class SeisData or SeisObj, it's ignored with a warning.
-
-Fields can be initialized by name when a new SeisObj container is created.
-
-* ``S = SeisObj(name="DEAD CHANNEL", fs=50)``
-
-  initialize a SeisObj with name "DEAD CHANNEL", fs = 50.
+Fields can be initialized by name when a new SeisObj container is created; for example,``S = SeisObj(name="DEAD CHANNEL", fs=50)`` initialize a SeisObj with name "DEAD CHANNEL", fs = 50.
 
 
 
 Adding Data
 ===========
-``+`` (the addition operator) is the standard way to add data channels. Addition attempts to merge data with matching channel IDs. Channels with unique IDs are simply assigned as new channels. ``merge!`` and ``+`` work identically on SeisData and SeisObj containers.
+``+`` (the addition operator) is the standard way to add data channels. Addition attempts to merge data with matching channel IDs. Channels with unique IDs are simply assigned to new channels. ``merge!`` and ``+`` are identical commands for SeisData and SeisObj instances.
 
-Data can be merged from any file read or data acquisition command that outputs a SeisData or SeisObj structure.
+Data can be merged directly from the output of any SeisIO command that outputs a compatible structure. For example:
 
-* ``S += r_sac(sacfile.sac)``
+``S += r_sac(sacfile.sac)`` merges data from sacfile.sac into S in place.
 
-  merge data from sacfile.sac into S in place.
+``T = S + SeedLink("myconfig", t=300)`` merges 300 seconds of SeedLink data into S, where the data are acquired using config file "myconfig".
 
-* ``T = S + SeedLink("myconfig", t=300)``
-
-  merge 300 seconds of SeedLink data into S using config file "myconfig".
-
-* In a merge operation, pairs of data `x`:sub:`i`, `x`:sub:`j` with overlapping time stamps (i.e. `t`:sub:`i` - `t`:sub:`j` < 1/fs) are *averaged*.
+In a merge operation, pairs of non-NaN data `x`:sub:`i`, `x`:sub:`j` with overlapping time stamps (i.e. `t`:sub:`i` - `t`:sub:`j` < 1/fs) are *averaged*.
 
 
 Appending without merging
@@ -131,7 +117,7 @@ Utility Functions
 
 * ``purge!, purge``: Deletes all channels with no data (defined for any channel i as isempty(S.x[i]) == true).
 
-* ``sync!, sync``: Synchronize time windows for all channels and fill time gaps.  Calls ungap at invocation.
+* ``sync!, sync``: Synchronize time windows for all channels and fill time gaps. Calls ungap at invocation.
 
 * ``ungap!, ungap``: Fill all time gaps in each channel of regularly sampled data.
 
