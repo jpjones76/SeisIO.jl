@@ -23,7 +23,7 @@ function int4_2c(s::Array{Int32,1})
   return dot(p, s[1:4]), dot(p, s[5:8])
 end
 
-function win32dict(Nh::UInt16, cinfo::ASCIIString, hexID::ASCIIString, StartTime::Float)
+function win32dict(Nh::UInt16, cinfo::ASCIIString, hexID::ASCIIString, StartTime::Float64)
   k = Dict{ASCIIString,Any}()
   k["hexID"] = hexID
   k["data"] = Array{Int32,1}()
