@@ -11,11 +11,11 @@ end
 # =============================================================================
 # Special functions to control display formatting of different fields
 # Time size
-ngaps(t::Array{Float64,2}, L::Integer) = max(0,size(t,1)-(t[end,2]==0?2:1))
+ngaps(t::Array{Int64,2}, L::Integer) = max(0,size(t,1)-(t[end,2]==0?2:1))
 is_ts(f::Float64) = (f > 0)
-isgapped(t::Array{Float64,2}) = (size(t,1) > 2)
-maxgap(t::Array{Float64,2}) = @sprintf("%.2f", isgapped(t) ? maximum(t[2:end,2]) : 0)
-gapsum(t::Array{Float64,2}, f::Float64, L::Integer) = isempty(t) ? "" :
+isgapped(t::Array{Int64,2}) = (size(t,1) > 2)
+maxgap(t::Array{Int64,2}) = @sprintf("%.2f", isgapped(t) ? μs*maximum(t[2:end,2]) : 0)
+gapsum(t::Array{Int64,2}, f::Float64, L::Integer) = isempty(t) ? "" :
   !is_ts(f) ? string(ngaps(t,L)+1, " vals") : !isgapped(t) ? "0 gaps" :
     string(ngaps(t,L), " gap", ngaps(t,L)>1 ? "s <= ":" = ", maxgap(t))
 

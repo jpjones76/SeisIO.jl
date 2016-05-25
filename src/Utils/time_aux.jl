@@ -1,3 +1,5 @@
+const μs = 1.0e-6
+
 u2d(k) = Dates.unix2datetime(k)
 d2u(k) = Dates.datetime2unix(k)
 
@@ -99,4 +101,66 @@ function parsetimewin(s, t)
     d0 = u2d(d2u(d1)-t)
   end
   return d0, d1
+end
+
+"""
+    T = t_expand(t, fs)
+
+Expand sparse delta-encoded time stamp representation t to full time stamps.
+Returns integer time stamps in microseconds. fs should be in Hz.
+"""
+function t_expand(t::Array{Int64,2}, fs::Real)
+  fs == 0 && return cumsum(t[:,1])
+  dt = round(Int, 1/(fs*μs))
+  tt = dt.*ones(Int64, t[end,1])
+  tt[t[:,1]] += t[:,2]
+  return cumsum(tt)
+end
+
+"""
+    t = t_collapse(T, fs)
+
+Collapse full time stamp representation T to sparse-difference representation t.
+Time stamps in T should be in integer microseconds. fs should be in Hz.
+"""
+function t_collapse(tt::Array{Int64,1}, fs::Real)
+  fs == 0 && return reshape([tt[1]; diff[tt]], length(tt), 1)
+  dt = round(Int, 1/(fs*μs))
+  ts = [dt; diff(tt)]
+  L = length(tt)
+  i = find(ts .!= dt)
+  t = [[1 tt[1]]; [i ts[i]-dt]]
+  (isempty(i) || i[end] != L) && (t = cat(1, t, [L 0]))
+  return t
+end
+
+function xtmerge(t1::Array{Int64,2}, x1::Array{Float64,1},
+                 t2::Array{Int64,2}, x2::Array{Float64,1}, fs::Float64)
+  t = [t_expand(t1, fs); t_expand(t2, fs)]
+  x = [x1; x2]
+
+  # Sort
+  i = sortperm(t)
+  t1 = t[i]
+  x1 = x[i]
+
+  # Resolve conflicts
+  half_samp = fs == 0 ? 0 : round(Int, 0.5/(fs*μs))
+  if minimum(diff(t1)) < half_samp
+    J = flipdim(find(diff(t1) .< half_samp), 1)
+    for j in J
+      t1[j] = round(Int, 0.5*(t1[j]+t1[j+1]))
+      if isnan(x1[j])
+        x1[j] = x1[j+1]
+      elseif !isnan(x1[j+1])
+        x1[j] = 0.5*(x1[j]+x1[j+1])
+      end
+      deleteat!(t1, j+1)
+      deleteat!(x1, j+1)
+    end
+  end
+  if half_samp > 0
+    t1 = t_collapse(t1, fs)
+  end
+  return (t1, x1)
 end

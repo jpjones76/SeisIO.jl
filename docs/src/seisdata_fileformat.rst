@@ -181,10 +181,10 @@ As with string arrays in ``misc``, split notes using the value of ``a`` as a cha
   :widths: 5, 32, 5, 5
 
   ``nt``, number of gaps, i64, 1
-  ``ti``, time gap indices, f64, ``nt``
-  ``tv``, time gap values, f64, ``nt``
+  ``ti``, time gap indices, i64, ``nt``
+  ``tv``, time gap values, i64, ``nt``
 
-``t`` is a two-column array, ``t = [ti tv]``.
+If ``fs>0, t`` is a two-column array, ``t = [ti tv]``; otherwise, Julia reshapes ``t`` to a one-column, two-dimensional array. 
 
 ``x``
 ^^^^^

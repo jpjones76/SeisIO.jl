@@ -37,7 +37,7 @@ function writesac(S::SeisData; ts=true, v=true)
     sacFloatVals[1] = Float32(dt)
     sacFloatVals[4] = Float32(S.gain[i])
     sacFloatVals[6] = Float32(0)
-    sacFloatVals[7] = Float32(dt*length(S.x[i]) + sum(S.t[i][2:end,2]))
+    sacFloatVals[7] = Float32(dt*length(S.x[i]) + sum(S.t[i][2:end,2])*μs)
     if !isempty(S.loc[i])
       sacFloatVals[32] = S.loc[i][1]
       sacFloatVals[33] = S.loc[i][2]
@@ -78,7 +78,7 @@ function writesac(S::SeisData; ts=true, v=true)
 
     # Data
     x = map(Float32, S.x[i])
-    ts && (tdata = map(Float32, t_expand(S.t[i], dt)-S.t[i][1,2]))
+    ts && (tdata = map(Float32, μs*(t_expand(S.t[i], dt)-S.t[i][1,2])))
 
     # Write to file
     sacwrite(fname, sacFloatVals, sacIntVals, sacCharVals, x, t=tdata, ts=ts)
@@ -388,11 +388,15 @@ function r_seisobj(io::IOStream)
   notes = read_string_array(io)
   T = read(io, Int64)
   if T > 0
-    ti = read(io, Float64, T)
-    tv = read(io, Float64, T)
-    t = [ti tv]
+    if fs > 0.0
+      ti = read(io, Int64, T)
+      tv = read(io, Int64, T)
+      t = [ti tv]
+    else
+      t = reshape(read(io, Int64, T), T, 1)
+    end
   else
-    t = Array{Float64,2}()
+    t = Array{Int64,2}()
   end
   X = read(io, Int64)
   if X > 0

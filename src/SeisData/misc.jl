@@ -61,23 +61,27 @@ end
 purge(S::SeisData) = (T = deepcopy(S); purge!(T); return(T))
 
 """
-    gapfill!(x::Array{Float64,1}, t::Array{Float64,2}, fs::Float64)
+    gapfill!(x, t, fs)
 
 Fill gaps in x, as specified in t, assuming sampling rate fs
 """
-function gapfill!(x::Array{Float64,1}, t::Array{Float64,2}, fs::Float64; m=true::Bool, w=true::Bool)
+function gapfill!(x::Array{Float64,1}, t::Array{Int64,2}, fs::Float64; m=true::Bool, w=true::Bool)
   (fs == 0 || isempty(x)) && (return x)
   mx = m ? mean(x[!isnan(x)]) : NaN
   u = round(Int, max(20,0.2*fs))
   for i = size(t,1):-1:2
-    g = t[i,2]
-    g < 0 && (warn(@sprintf("Channel %i: Negative time gap (t = %.3f); skipped.", i, g)); continue)
-    (g == 0 && i < size(t,1)) && continue
-    j = Int(t[i-1,1])
-    k = Int(t[i,1])
+    # Gap fill
+    g = round(Int, fs*μs*t[i,2])
+    g < 0 && (warn(@sprintf("Channel %i: negative time gap (t = %.3f); skipped.", i, g)); continue)
+    g == 0 && continue
+    j = t[i-1,1]
+    k = t[i,1]
+    N = k-j
+    splice!(x, k:k-1, mx.*ones(g))
+
+    # Window if selected
     if w
-      if (k-j) >= u
-        N = round(Int, k-j)
+      if N >= u
         x[j+1:k] .*= tukey(N, u/N)
       else
         warn(string(@sprintf("Channel %i: Time window too small, ",i),
@@ -85,11 +89,10 @@ function gapfill!(x::Array{Float64,1}, t::Array{Float64,2}, fs::Float64; m=true:
         x[j+1:k] = mx
       end
     end
-    splice!(x, k:k-1, mx.*ones(round(Int, fs*g)))
   end
   return x
 end
-gapfill(x::Array{Float64,1}, t::Array{Float64,2}, f::Float64) =
+gapfill(x::Array{Float64,1}, t::Array{Int64,2}, f::Float64) =
   (y = deepcopy(x); gapfill!(y,t,f); return y)
 
 """
@@ -101,20 +104,18 @@ time gaps in channel [i] are filled with the mean value of each channel's data.
 function ungap!(S::SeisObj; m=true::Bool, w=true::Bool)
   N = size(S.t,1)-2
   (N ≤ 0 || S.fs == 0) && return S
-  L = sum(S.t[2:end-1,2])
   gapfill!(S.x, S.t, S.fs, m=m, w=w)
-  note(S, @sprintf("Filled %i gaps (%i total points)", N, L))
-  S.t = [S.t[1,:]; [length(S.x) 0.0]]
+  note(S, @sprintf("Filled %i gaps (sum = %i microseconds)", N, sum(S.t[2:end-1,2])))
+  S.t = [S.t[1,:]; [length(S.x) 0]]
   return S
 end
 function ungap!(S::SeisData; m=true::Bool, w=true::Bool)
   for i = 1:1:S.n
     N = size(S.t[i],1)-2
     (N ≤ 0 || S.fs[i] == 0) && continue
-    L = sum(S.t[i][2:end-1,2])
     gapfill!(S.x[i], S.t[i], S.fs[i], m=m, w=w)
-    note(S, i, @sprintf("Filled %i gaps (%i total points)", N, L))
-    S.t[i] = [S.t[i][1,:]; [length(S.x[i]) 0.0]]
+    note(S, i, @sprintf("Filled %i gaps (sum = %i microseconds)", N, sum(S.t[i][2:end-1,2])))
+    S.t[i] = [S.t[i][1,:]; [length(S.x[i]) 0]]
   end
   return S
 end
@@ -177,9 +178,9 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
 
   # Possible options for s
   if isa(s,Real)
-    t_start = s
+    t_start = round(Int, s/μs)
   elseif isa(s,DateTime)
-    t_start = Dates.datetime2unix(s)
+    t_start = round(Int, Dates.datetime2unix(s)/μs)
   else
     starts = start_times[k]
     if s == "max"
@@ -187,15 +188,15 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
     elseif s == "min"
       t_start = maximum(starts)
     else
-      t_start = Dates.datetime2unix(DateTime(s))
+      t_start = round(Int, Dates.datetime2unix(DateTime(s))/μs)
     end
   end
 
   # Possible options for t
   if isa(t,Real)
-    t_end = t_start + t
+    t_end = t_start + round(Int, t/μs)
   elseif isa(t,DateTime)
-    t_end = Dates.datetime2unix(t)
+    t_end = round(Int, Dates.datetime2unix(t)/μs)
   else
     ends = end_times[k] + start_times[k]
     if t == "max"
@@ -203,16 +204,16 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
     elseif t == "min"
       t_end = minimum(ends)
     else
-      t_end = Dates.datetime2unix(DateTime(t))
+      t_end = round(Int, Dates.datetime2unix(DateTime(t))/μs)
     end
   end
   t_end <= t_start && error("No time overlap with given start \& end times!")
-  @printf(STDOUT, "Synching %.2f seconds of data\n", t_end - t_start)
+  @printf(STDOUT, "Synching %.2f seconds of data\n", (t_end - t_start)*μs)
 
   # Resample
   if resample && S.n > 1
-    f0 = fs == 0 ? minimum(S.fs[0 .< S.fs .< Inf]) : fs
-    N = floor(Int64, f0*(t_end-t_start))-1
+    f0 = fs == 0 ? minimum(S.fs[S.fs .> 0]) : fs
+    N = floor(Int64, f0*(t_end-t_start)*μs)-1
     for i = 1:S.n
       S.fs[i] == 0 && continue
       isapprox(S.fs[i],f0) && continue
@@ -222,8 +223,8 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
     end
   end
 
-  sstr = string(Dates.unix2datetime(t_start))
-  tstr = string(Dates.unix2datetime(t_end))
+  sstr = string(Dates.unix2datetime(t_start*μs))
+  tstr = string(Dates.unix2datetime(t_end*μs))
 
   # Pad and truncate
   end_times += start_times
@@ -235,51 +236,52 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
       j = find(t_start .< t .< t_end)
       S.x[i] = S.x[i][j]
       if isempty(j)
-        S.t[i] = Array{Float64,2}()
+        S.t[i] = Array{Int64,2}()
         note(S, i, @sprintf("Channel emptied; no samples in range %s--%s.", sstr, tstr))
       else
         t = t[j]
         t = [t[1]; diff(t)]
-        L = length(t)
-        S.t[i] = [zeros(L,1) reshape(t,L,1)]
+        S.t[i] = reshape(t,length(t),1)
         note(S, i, @sprintf("Samples outside range %s--%s pulled.", sstr, tstr))
       end
     end
   end
 
-  # PRE LOOP: EMPTY; FILL ER UP
+  # PRE LOOP: fill empty items
   for i = 1:S.n
     if length(S.x[i]) == 0 && S.fs[i] > 0
-      S.x[i] = zeros(1 + round(Int, S.fs[i]*(t_end-t_start)))
-      S.t[i] = [1.0 t_start; length(S.x[i]) t_end]
+      S.x[i] = zeros(1 + round(Int, S.fs[i]*(t_end-t_start)*μs))
+      S.t[i] = [1 t_start; length(S.x[i]) t_end]
       note(S, i, "Replaced empty data array with zeros.")
     end
   end
 
   # FIRST LOOP: START TIMES.
   for i in k
-    dt = 1/S.fs[i]
+    fsμ = S.fs[i]*μs
+    dt = round(Int, 1/fsμ)
+
     mx = mean(S.x[i])
 
     # truncate X to values within bounds
-    t = t_expand(S.t[i], dt)
-    I = find(t_start .< t .< t_end)
-    S.x[i] = S.x[i][I]
+    t = t_expand(S.t[i], S.fs[i])
+    j = find(t_start .< t .< t_end)
+    S.x[i] = S.x[i][j]
 
     # prepend time series data that begin late
     if (start_times[i] - t_start) >= dt
-      ni = round(Int, (start_times[i]-t_start)*S.fs[i])
+      ni = round(Int, (start_times[i]-t_start)*fsμ)
       prepend!(S.x[i], collect(repeated(mx, ni)))
       note(S, i, join(["Prepended ", ni, " values."]))
     end
-    end_times[i] = t_start + length(S.x[i])/S.fs[i]
+    end_times[i] = t_start + round(Int, length(S.x[i])/fsμ)
 
     if (t_end - end_times[i]) >= dt
-      ii = round(Int, (t_end-end_times[i])*S.fs[i])
+      ii = round(Int, (t_end-end_times[i])*fsμ)
       append!(S.x[i], collect(repeated(mx, ii)))
       note(S, i, join(["Appended ", ii, " values."]))
     end
-    S.t[i] = [1.0 t_start; length(S.x[i]) 0.0]
+    S.t[i] = [1 t_start; length(S.x[i]) 0]
     note(S, i, "Synched to"*sstr*" -- "*tstr)
   end
   return S
@@ -335,7 +337,7 @@ function autotap!(U::SeisObj)
   mx = mean(U.x[j])
   u = round(Int, max(20,0.2*U.fs))
 
-  # First remove the mean
+  # remove mean
   U.x[j] .-= mx
 
   # Then check for auto-fill values (i.e. values that don't change) and NaNs

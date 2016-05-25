@@ -280,7 +280,7 @@ function sactoseis(D::Dict{ASCIIString,Any})
     loc = [D["stla"], D["stlo"], D["stel"], 0, 0]
   end
   x = map(Float64, D["data"])
-  t = map(Float64, [1.0 sac2epoch(D); D["npts"] 0.0])
+  t = map(Float64, [1 sac2epoch(D)/μs; D["npts"] 0])
 
   misc = prunesac(D)
   for k in ["nvhdr", "knetwk", "kstnm", "kcmpnm", "scale",

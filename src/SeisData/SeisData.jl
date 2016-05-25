@@ -24,7 +24,7 @@ type SeisObj
   notes::Array{ASCIIString,1}
   resp::Array{Complex{Float64},2}
   src::ASCIIString
-  t::Array{Float64,2}
+  t::Array{Int64,2}
   x::Array{Float64,1}
   units::ASCIIString
 
@@ -37,7 +37,7 @@ type SeisObj
           notes=Array{ASCIIString,1}()::Array{ASCIIString,1},
           resp=Array{Complex{Float64},2}(0,2)::Array{Complex{Float64},2},
           src=""::ASCIIString,
-          t=Array{Float64,2}(0,2)::Array{Float64,2},
+          t=Array{Int64,2}(0,2)::Array{Int64,2},
           x=Array{Float64,1}()::Array{Float64,1},
           units=""::ASCIIString) = begin
      return new(name, id, fs, gain, loc, misc, notes, resp, src, t, x, units)
@@ -63,7 +63,7 @@ type SeisData
   notes::Array{Array{ASCIIString,1},1}         # notes
   resp::Array{Array{Complex{Float64},2},1}     # resp
   src::Array{ASCIIString,1}                    # src
-  t::Array{Array{Float64,2},1}                 # time
+  t::Array{Array{Int64,2},1}                 # time
   x::Array{Array{Float64,1},1}                 # data
   units::Array{ASCIIString,1}                  # units
 
@@ -78,7 +78,7 @@ type SeisData
     notes=Array{Array{ASCIIString,1},1}(),        # notes
     resp=Array{Array{Complex{Float64},2},1}(),    # resp
     src=Array{ASCIIString,1}(),                   # src
-    t=Array{Array{Float64,2},1}(),                # time
+    t=Array{Array{Int64,2},1}(),                # time
     x=Array{Array{Float64,1},1}(),                # data
     units=Array{ASCIIString,1}()                  # units
     ) = begin
@@ -275,70 +275,7 @@ delete!(S::SeisData, J::Array{Int,1}) = deleteat!(S, J)
 # ============================================================================
 # Merge and extract
 # Dealing with sparse time difference representations
-"""
-    t = t_expand(T::Array{Float64,2}, dt::Real)
 
-Expand sparse-difference (SeisData-style) time stamp representation t to full
-time stamps.
-"""
-function t_expand(t::Array{Float64,2}, dt::Real)
-  dt == Inf && return cumsum(t[:,2])
-  i = round(Int, t[:,1])
-  tt = dt.*ones(i[end])
-  tt[i] += t[:,2]
-  return cumsum(tt)
-end
-
-"""
-    t = t_collapse(T::Array{Float64,1}, dt::Real)
-
-Collapse full time stamp representation t to SeisData sparse-difference
-representation t.
-"""
-function t_collapse(t::Array{Float64,1}, dt::Real)
-  ts = map(Float32, [dt; diff(t)])
-  L = length(t)
-  i = find([!isapprox(ts[i],Float32(dt)) for i = 1:1:length(t)])
-  tt = cat(1, [1.0 t[1]], [map(Float64, i) ts[i]-dt])
-  (isempty(i) || i[length(i)] != Float64(L)) && (tt = cat(1, tt,
-    [Float64(L) 0.0]))
-  return tt
-end
-
-function xtmerge(t1::Array{Float64,2}, x1::Array{Float64,1},
-                 t2::Array{Float64,2}, x2::Array{Float64,1}, dt::Float64)
-  t = [t_expand(t1, dt); t_expand(t2, dt)]
-  if dt == Inf
-    dt = 0
-  end
-  x = [x1; x2]
-
-  # Sort
-  i = sortperm(t)
-  t1 = t[i]
-  x1 = x[i]
-
-  # Resolve conflicts
-  if minimum(diff(t1)) < 0.5*dt
-    J = flipdim(find(diff(t1) .< 0.5*dt), 1)
-    for j in J
-      t1[j] = 0.5*(t1[j]+t1[j+1])
-      if isnan(x1[j])
-        x1[j] = x1[j+1]
-      elseif !isnan(x1[j+1])
-        x1[j] = 0.5*(x1[j]+x1[j+1])
-      end
-      deleteat!(t1, j+1)
-      deleteat!(x1, j+1)
-    end
-  end
-  if 0 < dt < Inf
-    t1 = t_collapse(t1, dt)
-  else
-    t1 = [zeros(length(t1)) t1]
-  end
-  return (t1, x1)
-end
 
 """
     merge!(S::SeisObj, T::SeisObj)
@@ -361,7 +298,7 @@ function merge!(S::SeisObj, U::SeisObj)
   if !isapprox(S.gain,T.gain)
     (T.x .*= (S.gain/T.gain); T.gain = copy(S.gain))      # rescale T.x to match S.x
   end
-  (S.t, S.x) = xtmerge(S.t, S.x, T.t, T.x, 1/T.fs)        # merge time and data
+  (S.t, S.x) = xtmerge(S.t, S.x, T.t, T.x, T.fs)          # merge time and data
   merge!(S.misc, T.misc)                                  # merge misc
   S.notes = cat(1, S.notes, T.notes)                      # merge notes
   note(S, @sprintf("Merged %i samples", length(T.x)))
@@ -384,7 +321,7 @@ function merge!(S::SeisData, U::SeisObj)
   if !isapprox(S.gain[i],T.gain)
     (T.x .*= (S.gain[i]/T.gain); T.gain = copy(S.gain[i]))        # rescale T.x to match S.x
   end
-  (S.t[i], S.x[i]) = xtmerge(S.t[i], S.x[i], T.t, T.x, 1/T.fs)    # time, data
+  (S.t[i], S.x[i]) = xtmerge(S.t[i], S.x[i], T.t, T.x, T.fs)      # time, data
   merge!(S.misc[i], T.misc)                                       # misc
   S.notes[i] = cat(1, S.notes[i], T.notes)                        # notes
   note(S, i, @sprintf("Merged %i samples", length(T.x)))
