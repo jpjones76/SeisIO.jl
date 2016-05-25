@@ -2,24 +2,25 @@ using Base.Test, Compat
 using DSP:resample
 segy_file = "SampleFiles/02.050.02.01.34.0572.6"
 uw_root = "SampleFiles/99062109485W"
+const μs = 1.0e-6
 
-t1 = time()
-ts = t1+0.25
-te = t1+0.75
+t1 = round(Int,time()/μs)
+ts = t1+round(Int,0.25/μs)
+te = t1+round(Int,0.75/μs)
 fs1 = 50.0
 
 # s1 and s2 represent data from a fictitious channel
 # s2 begins 1 second later, but has a gap of 1s after sample 25
 s1 = SeisObj(fs = fs1, gain = 10.0, name = "DEAD.STA.EHZ", id = "DEAD.STA..EHZ",
-  t = [1.0 t1; 100.0 0.0], x=randn(100))
+  t = [1 t1; 100 0], x=randn(100))
 s2 = SeisObj(fs = fs1, gain = 10.0, name = "POORLY NAMED", id = "DEAD.STA..EHZ",
-  t = [1.0 t1+1.0; 26.0 1.0; 126 0.2; 150.0 0.0], x=randn(150))
+  t = [1 t1+1000000; 26 1000000; 126 200000; 150 0], x=randn(150))
 
 
 s3 = SeisObj(fs = 100.0, gain = 5.0, name = "DEAD.STA.EHE", id = "DEAD.STA..EHE",
-  t = [1.0 t1; 100.0 0.0], x=rand(100)-0.5)
+  t = [1 t1; 100 0], x=rand(100)-0.5)
 s4 = SeisObj(fs = 100.0, gain = 50.0, name = "UNNAMED", id = "DEAD.STA..EHE",
-  t = [1.0 t1+1; 100.0 1.0; 150.0 0.0], x=randn(150))
+  t = [1 t1+1000000; 100 1000000; 150 0], x=randn(150))
 
 # We expect:
 # (1) LAST 25-26 points in s1 will be averaged with first 25 points in s3
@@ -38,9 +39,9 @@ end
 
 println("...dealing with gaps...")
 s2u = ungap(s2)
-@test_approx_eq(length(s2.x)/s2.fs + sum(s2.t[2:end-1,2]), length(s2u.x)/s2u.fs)
+@test_approx_eq(length(s2.x)/s2.fs + μs*sum(s2.t[2:end-1,2]), length(s2u.x)/s2u.fs)
 
-println("...channel add...")
+println("...channel add + simple merge...")
 S += (s1 + s2)
 
 # Do in-place operations only change leftmost variable?
@@ -92,7 +93,7 @@ for i in fieldnames(S)
   end
 end
 
-println("...merge...")
+println("...a more difficult merge...")
 S += (s1 + s3)
 S += (s2 + s4)
 @test_approx_eq(S.n, 2)
@@ -138,9 +139,9 @@ S += R
 
 # Ensure merge works correctly with traces separated in time
 s5 = SeisObj(fs = 100.0, gain = 32.0, name = "DEAD.STA.EHE", id = "DEAD.STA..EHE",
-  t = [1.0 t1; 100.0 0.0], x=randn(100))
+  t = [1 t1; 100 0], x=randn(100))
 s6 = SeisObj(fs = 100.0, gain = 32.0, name = "UNNAMED", id = "DEAD.STA..EHE",
-  t = [1.0 t1+30; 200.0 0.0], x=randn(200))
+  t = [1 t1+30000000; 200 0], x=randn(200))
 println("...channel add...")
 T = (s5 + s6)
 ungap!(T)

@@ -221,7 +221,7 @@ function win32toseis(D = Dict{ASCIIString,Any}())
     # for an example of the (lack of) correspondence
 
     x = map(Float64, D[k]["data"].*D[k]["scale"])
-    t = [1.0 D[k]["startTime"]; length(D[k]["data"]) 0.0]
+    t = [1 round(Int,D[k]["startTime"]/μs); length(D[k]["data"]) 0]
     src = "win32"
     notes = [string(now, "  Record source: ", D[k]["netName"]);
              string(now, "  Location comment: ", D[k]["comment"]);

@@ -40,7 +40,10 @@ function sltime(S, conn, chans, patts, sstr, tstr, maxbuf; v=false::Bool, vv=fal
   buf = IOBuffer(maxbuf)
 
   # Begin receiving data
-  write(buf, not_ok(conn))
+  c = not_ok(conn) # Will always return 'S' for good data
+  vv && println("c =", c)
+  c == 'E' && error(@sprintf("Malformed channel or pattern spec (check manually):\nchans = %s\npatts = %s\n", chans, patts))
+  write(buf, c)
   write(buf, read(conn,UInt8,7))
   while true
     n = 0

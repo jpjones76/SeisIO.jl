@@ -129,7 +129,7 @@ function parserec(S::SeisData, sid; v=false::Bool, vv=false::Bool, fmt=10::Int)
     # Lazy coding; I assume fs doesn't change
     channel = channel[1]
     dt = 1/S.fs[channel]
-    te = sum(S.t[channel][:,2]) + length(S.x[channel])*dt
+    te = sum(S.t[channel][:,2]) + length(S.x[channel])*round(Int,dt/μs)
   end
 
   # =========================================================================
@@ -213,13 +213,13 @@ function parserec(S::SeisData, sid; v=false::Bool, vv=false::Bool, fmt=10::Int)
   #te = ts + nsamp*dt
   vv && println("ts = ", ts, " te = ", te)
   if te  == 0
-    S.t[channel] = [1.0 ts; Float64(nsamp) 0.0]
+    S.t[channel] = [1 round(Int,ts/μs); nsamp 0]
   else
     S.t[channel] = S.t[channel][1:end-1,:]
     if ts-te > dt
-      S.t[channel] = [S.t[channel]; [length(S.x[channel])+1.0 ts-te]]
+      S.t[channel] = [S.t[channel]; [length(S.x[channel])+1 ts-te]]
     end
-    S.t[channel] = [S.t[channel]; [Float64(length(S.x[channel])+nsamp) 0.0]]
+    S.t[channel] = [S.t[channel]; [length(S.x[channel])+nsamp 0]]
   end
 
   # Data Read

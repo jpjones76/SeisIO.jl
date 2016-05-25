@@ -20,7 +20,7 @@ function plotseis(S::SeisData; fmt="auto"::ASCIIString, use_name=false::Bool, au
   yflag = false
 
   for i = 1:1:S.n
-    t = t_expand(S.t[i],1/S.fs[i])
+    t = t_expand(S.t[i],S.fs[i])
     xmi = min(xmi, t[1])
     xma = max(xmi, t[end])
     floor(t[1]/31536000) == floor(t[end]/31536000) || (yflag == true)
@@ -37,7 +37,7 @@ function plotseis(S::SeisData; fmt="auto"::ASCIIString, use_name=false::Bool, au
   end
 
   # Determine extent of data range when plot format is "auto"
-  dt = xma-xmi
+  dt = (xma-xmi)*μs
   if fmt == "auto"
     if dt < 3600
       fmt ="%M:%S"

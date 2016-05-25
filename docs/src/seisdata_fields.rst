@@ -53,7 +53,7 @@ Field Names and Meanings
 
 * ``notes``: array of notes
 
-* ``t``: pseudo-sparse two-column array of times
+* ``t``: pseudo-sparse two-column array of times :ref:`(see below) <seisdata_t>`
 
 * ``x``: vector of sample data
 
@@ -82,14 +82,16 @@ Scalars and single-type arrays of the follwoing types are OK: ``Char, Complex64,
 ---------
 The ``notes`` array grows automatically as data are modified. Any ``merge`` or ``sync`` operation is automatically noted. Additional notes can be written manually using the ``note`` command.
 
+.. _seisdata_t:
+
 ``t``
 -----
-For time series data (``fs > 0``), ``t`` is a sparse delta-encoded representation of *time gaps* in the correspoding data ``x``. The first column stores *indices*; the second column stores gap lengths in *seconds*.
+For *time series data* ``x``, ``t`` is a sparse delta-compressed representation of *time gaps in microseconds* in ``x``. The first column stores *indices*; the second column stores *gap lengths*.
 
-* The second column of the first row, i.e. ``t[1,2]``, always stores the time of the first sample in ``x`` relative to the Unix epoch (0.0 = 1970-01-01T00:00:00).
+* The second column of the first row, i.e. ``t[1,2]``, always stores the *time of the first sample* in ``x`` relative to the Unix epoch (e.g. ``t[1,2] = 10`` means the time series begins at 1970-01-01T00:00:00.000010 UTC).
 
 * The last row of ``t`` should always take the form ``[length(x) 0.0]``.
 
-* Other rows should take the form ``[(start of gap in x) (length of gap)]``.
+* Other rows should take the form ``[(starting index of gap in x) (length of gap)]``.
 
-For irregularly sampled data (``fs = 0``), ``t`` is a sparse delta-encoded representation of time stamps, one per sample. In this case, only the second column of ``t`` is used. The first column is usually a column of zeros.
+For *irregularly sampled data* (``fs = 0``), ``t`` is a dense delta-compressed representation of *time stamps in microseconds for each sample*. ``t`` for irregularly sampled data has a single column, but is treated by Julia as a two-dimensiona array (not a one-dimensional vector).
