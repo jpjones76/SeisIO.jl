@@ -164,9 +164,10 @@ function xtmerge(t1::Array{Int64,2}, x1::Array{Float64,1},
       elseif !isnan(x1[j+1])
         x1[j] = 0.5*(x1[j]+x1[j+1])
       end
-      deleteat!(t1, j+1)
-      deleteat!(x1, j+1)
     end
+    K = sort(unique(J.+1))
+    deleteat!(t1, K)
+    deleteat!(x1, K)
   end
   if half_samp > 0
     t1 = t_collapse(t1, fs)
