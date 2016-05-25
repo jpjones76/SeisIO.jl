@@ -2,8 +2,7 @@ using PyPlot: figure, axes, plot, xlim, ylim, xlabel, xticks, yticks, title, bro
 
 rescaled(x::Array{Float64,1},i::Int) = (Float64(i) + x./(2.0*maximum(abs(x))))
 
-function xfmt(xmi::Int64, xma::Int64; fmt="auto"::ASCIIString, auto_x=true::Bool, N=4::Int)
-  yflag = false
+function xfmt(xmi::Int64, xma::Int64, yflag::Bool; fmt="auto"::ASCIIString, auto_x=true::Bool, N=4::Int)
   dt = (xma-xmi)
   if fmt == "auto"
     if dt*μs < 3600
@@ -53,6 +52,7 @@ function plotseis(S::SeisData; fmt="auto"::ASCIIString, use_name=false::Bool, au
   axes([0.15, 0.1, 0.8, 0.8])
   xmi = 2^63-1
   xma = xmi+1
+  yflag = false
 
   for i = 1:1:S.n
     t = t_expand(S.t[i],S.fs[i])
@@ -71,7 +71,7 @@ function plotseis(S::SeisData; fmt="auto"::ASCIIString, use_name=false::Bool, au
     end
   end
 
-  xfmt(xmi, xma, fmt=fmt, auto_x=auto_x)
+  xfmt(xmi, xma, yflag, fmt=fmt, auto_x=auto_x)
   ylim(0.5, S.n+0.5)
   yticks(collect(1:1:S.n), map((i) -> replace(i, " ", ""), use_name? S.name : S.id))
   return nothing
