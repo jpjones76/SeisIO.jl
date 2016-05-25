@@ -15,10 +15,9 @@ readsegy, segyhdr, pruneseg, segytosac, segytoseis, r_segy,    # SEG Y
 readwin32, win32toseis, r_win32,                               # Win 32
 parsemseed, readmseed, parsesl, readmseed, parserec,           # mini-SEED
 rlennasc,                                                      # Lennartz ASCII
-plotseis,                                                      # Utils/plotseis.jl
+plotseis, plot_uptimes,                                        # Utils/plotseis.jl
 fctopz,                                                        # Utils/resp.jl
-parsetimewin, j2md, md2j, sac2epoch,                           # time_aux.jl
-seisio_notes                                                   # this file
+parsetimewin, j2md, md2j, sac2epoch, u2d, d2u, tzcorr          # time_aux.jl
 
 # Auxiliary time functions
 include("Utils/time_aux.jl")
@@ -46,19 +45,4 @@ include("WebClients/SeedLink.jl")
 
 include("Utils/resp.jl")              # Instrument response
 include("Utils/plotseis.jl")          # Plotting
-
-"""
-seisio_notes()
-
-* mSEED: limited blockette, encoding support at present
-* SEG Y: supports standard rev0/rev1 and the modified rev0 used by PASSCAL/NMT
-* UW: works with UW-2 format; untested on UW-1 format (≤ 1990)
-* WIN32: works with win32 format; untested on win format (≤ 2000)
-"""
-function seisio_notes()
-  println("mSEED: limited blockette, encoding support at present")
-  println("SEG Y: supports standard rev0/rev1 and the modified rev0 used by PASSCAL/NMT")
-  println("UW: works with UW-2 format; untested on UW-1 format (≤ 1990)")
-  println("WIN32: works with win32 format; untested on win format (≤ 2000)")
-end
 end

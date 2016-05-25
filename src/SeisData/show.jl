@@ -11,7 +11,7 @@ end
 # =============================================================================
 # Special functions to control display formatting of different fields
 # Time size
-ngaps(t::Array{Int64,2}, L::Integer) = max(0,size(t,1)-(t[end,2]==0?2:1))
+ngaps(t::Array{Int64,2}, L::Integer) = max(0,size(t,1)-(t[end]==0?2:1))
 is_ts(f::Float64) = (f > 0)
 isgapped(t::Array{Int64,2}) = (size(t,1) > 2)
 maxgap(t::Array{Int64,2}) = @sprintf("%.2f", isgapped(t) ? μs*maximum(t[2:end,2]) : 0)

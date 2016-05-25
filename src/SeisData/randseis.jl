@@ -162,7 +162,7 @@ function populate_chan!(S::SeisObj; c=false::Bool)
       L+=2
       S.x = rand(L) .* 10.^(rand(1:10, L))
       t = [round(Int,ts/μs); round(Int, diff(sort(rand(2:Lx, L)))/(μs*S.fs))]
-      S.t = [zeros(L,1) t]
+      S.t = reshape(t, L, 1)
       S.fs = 0
       S.units = rand(irregular_units)
     else
