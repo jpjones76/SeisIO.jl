@@ -29,7 +29,7 @@ function xfmt(xmi::Int64, xma::Int64, yflag::Bool; fmt="auto"::ASCIIString, auto
     xl = Array{ASCIIString,1}[]
     for i = 1:N
       xt = cat(1, xt, xmi+(i-1)*dt)
-      xl = cat(1, xl, Libc.strftime(fmt,xt[i]))
+      xl = cat(1, xl, Libc.strftime(fmt,xt[i]*μs))
     end
     xlim(xmi, xma)
     xticks(xt, xl)
