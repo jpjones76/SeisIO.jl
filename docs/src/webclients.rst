@@ -150,7 +150,7 @@ Passing an Int or Float64 with keyword ``t=T`` sets the mode to backwards fill. 
 
 Time Specification for Range Retrieval
 --------------------------------------
-Passing a string or DateTime object D with keyword ``t=D`` sets the mode to range retrieval. Retrieved data *begin* at ``s=S`` and *end* at ``t=T``.  Keyword ``s`` has the following types and interpretations in range retrieval mode:
+Passing a string or DateTime object D with keyword ``t=T`` sets the mode to range retrieval. Retrieved data *begin* at ``s=S`` and *end* at ``t=T``.  Keyword ``s`` has the following types and interpretations in range retrieval mode:
 
 * ``s=D``, another DateTime object or ASCIIString: range retrieval *starts* at ``S``.
 
