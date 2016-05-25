@@ -58,7 +58,7 @@ function plotseis(S::SeisData; fmt="auto"::ASCIIString, use_name=false::Bool, au
     t = t_expand(S.t[i],S.fs[i])
     xmi = min(xmi, t[1])
     xma = max(xmi, t[end])
-    floor(t[1]/31536000) == floor(t[end]/31536000) || (yflag == true)
+    floor(t[1]*μs/31536000) == floor(t[end]*μs/31536000) || (yflag == true)
     if S.fs[i] > 0
       x = rescaled(S.x[i]-mean(S.x[i]),i)
       plot(t, x, linewidth=1)
@@ -109,6 +109,7 @@ function uptimes_bar(S::SeisData, fmt::ASCIIString, use_name::Bool, auto_x::Bool
     t = t_expand(S.t[i],S.fs[i])
     xmi = min(xmi, t[1])
     xma = max(xma, t[end])
+    floor(t[1]*μs/31536000) == floor(t[end]*μs/31536000) || (yflag == true)
     if S.fs[i] == 0
       plot(t, collect(repeated(i,length(t))),  marker="o", markeredgecolor=[0,0,0], markerfacecolor=[1,0,1], markersize=8, ls="none")
     else
@@ -120,7 +121,7 @@ function uptimes_bar(S::SeisData, fmt::ASCIIString, use_name::Bool, auto_x::Bool
     end
   end
 
-  xfmt(xmi, xma, fmt=fmt, auto_x=auto_x)
+  xfmt(xmi, xma, yflag, fmt=fmt, auto_x=auto_x)
   ylim(0.5, S.n+0.5)
   yticks(collect(1:1:S.n), map((i) -> replace(i, " ", ""), use_name? S.name : S.id))
   title("Channel uptimes")
@@ -138,6 +139,7 @@ function uptimes_sum(S::SeisData, fmt::ASCIIString, use_name::Bool, auto_x::Bool
     S.fs[i] == 0 && continue
     xmi = min(xmi, t[1])
     xma = max(xma, t[end])
+    floor(t[1]*μs/31536000) == floor(t[end]*μs/31536000) || (yflag == true)
     for j = 1:size(S.t[i],1)-1
       st = t[S.t[i][j,1]+1]
       en = t[S.t[i][j+1,1]-1]
@@ -151,7 +153,7 @@ function uptimes_sum(S::SeisData, fmt::ASCIIString, use_name::Bool, auto_x::Bool
   x = t[1:end-1]
   bar(x,h[1:end-1],w,color="b")
 
-  xfmt(xmi, xma, fmt=fmt, auto_x=auto_x)
+  xfmt(xmi, xma, yflag, fmt=fmt, auto_x=auto_x)
   ylabel(@sprintf("%% of Network Active (n=%i)", sum(S.fs.>0)))
   ylim(0.0, 1.0)
   yticks(collect(0.0:0.2:1.0))
