@@ -107,7 +107,7 @@ The SeisIO web clients use a similar set of keywords; a full glossary is provide
 
 * ``N`` (SeedLink): Number of 520-byte mini-SEED packets to buffer before calling the parser subroutine. Setting this value too high can make the length of the data returned unreliable.
 
-* ```Q`` (FDSNget, IRISget): Quality. Uses standard `FDSN/IRIS codes <https://ds.iris.edu/ds/nodes/dmc/manuals/breq_fast/#quality-option>`_. ``Q=R`` is not recommended and will not work on some FDSN servers.
+* ``Q`` (FDSNget, IRISget): Quality. Uses standard `FDSN/IRIS codes <https://ds.iris.edu/ds/nodes/dmc/manuals/breq_fast/#quality-option>`_. ``Q=R`` is not recommended and will not work on some FDSN servers.
 
 * ``loc`` (FDSNget): Location code. Specify wildcard with ``loc=""--"``.
 
@@ -139,20 +139,19 @@ The "time" keywords ``s`` and ``t`` can be real numbers, DateTime objects, or AS
 
 Time Specification for Backwards Fill
 -------------------------------------
-Passing an Int or Float64 with keyword `t` sets the mode to backwards fill. Retrieved data begin `t` seconds before `s`.
+Passing an Int or Float64 with keyword ``t=T`` sets the mode to backwards fill. Retrieved data begin ``T`` seconds before ``s=S``. ``T`` is interpreted as a *duration in seconds*.
 
-* ``t`` is interpreted as a *duration in seconds*.
+* ``s=0``: Ends at the *start of the current minute*.
 
-* ``s=0``: Ends at the *start of the current minute* on your system.
+* ``s=F``, an Integer or Float64: ``F`` is treated as *Unix (Epoch) time in seconds*.
 
-* ``s==F``, an Integer or Float64 value: s is treated as *Unix (Epoch) time in seconds*.
+* ``s=D``, a DateTime object or ASCIIString value: Backfill *ends* at ``D``.
 
-* ``s=D``, a DateTime object or ASCIIString value: Backfill *ends* at ``s``.
 
 Time Specification for Range Retrieval
 --------------------------------------
-Passing a string or DateTime object D with keyword ``t=D`` sets the mode to range retrieval.
+Passing a string or DateTime object D with keyword ``t=D`` sets the mode to range retrieval. Retrieved data *begin* at ``s=S`` and *end* at ``t=T``.  Keyword ``s`` has the following types and interpretations in range retrieval mode:
 
-* Retrieved data *begin* at ``s`` and *end* at ``t``.
+* ``s=D``, another DateTime object or ASCIIString: range retrieval *starts* at ``S``.
 
-* ``s=D``, another DateTime object or ASCIIString.
+* ``S=F``, an Integer or Float64: ``F`` is considered a *Unix (Epoch) time in seconds*.
