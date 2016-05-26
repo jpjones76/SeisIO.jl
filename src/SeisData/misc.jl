@@ -375,3 +375,31 @@ function autotap!(U::SeisData)
   end
   return U
 end
+
+"""
+    namestrip(s::AbstractString)
+
+Remove bad characters from S: \,, \\, !, \@, \#, \$, \%, \^, \&, \*, \(, \),
+  \+, \/, \~, \`, \:, \|, and whitespace.
+"""
+namestrip(S::AbstractString) = strip(S, ['\,', '\\', '!', '\@', '\#', '\$',
+  '\%', '\^', '\&', '\*', '\(', '\)', '\+', '\/', '\~', '\`', '\:', '\|', ' '])
+
+"""
+    add_fake_net!(S, NET)
+
+Insert arbitrary network code NET at the start of all IDs with no specified
+network (i.e. IDs that begin with a '.'). Only the first two characters of NET
+are used.
+"""
+function add_fake_net!(S::SeisData, str::ASCIIString)
+  if length(str) > 2
+    str = str[1:2]
+  end
+  str = uppercase(str)
+  for i = 1:S.n
+    if startswith(S.id[i],'.')
+      S.id[i] = join(str, S.id[i][2:end])
+    end
+  end
+end

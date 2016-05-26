@@ -230,9 +230,9 @@ function pseg(fid; f="nmt"::ASCIIString, h=false::Bool)
               Dict(zip(sr_s, map(Float32,sr_v.*sr_scale))),
               Dict(zip(coord_s, map(Float32, coord_scale.*coord_v))),
               Dict(zip(short_s_2, map(Int32, short_v_2))))
-    S["kstnm"]      = replace(strip(ascii(read(fid, UInt8, 6))),"\0","")
-    S["kinst"]      = replace(strip(ascii(read(fid, UInt8, 8))),"\0","")
-    S["kcmpnm"]     = replace(strip(ascii(read(fid, UInt8, 4))),"\0","")
+    S["kstnm"]      = strip(ascii(read(fid, UInt8, 6)),['\0', '\ '])
+    S["kinst"]      = strip(ascii(read(fid, UInt8, 8)),['\0', '\ '])
+    S["kcmpnm"]     = strip(ascii(read(fid, UInt8, 4)),['\0', '\ '])
     S["statDelay"]  = read(fid, Int16)
     samp_rate       = 1.0e6/read(fid, Int32)
     trig_v          = read(fid, Int16, 8); merge!(S, Dict(zip(trig_s, trig_v)))
@@ -328,8 +328,17 @@ Convert SEG Y dictionary `SEG` to a SeisData object.
 function segytoseis(S::Dict{ASCIIString,Any})
   fs = 1/S["delta"]
   if haskey(S, "kstnm")
-    name = join([S["kstnm"],S["kcmpnm"],S["kinst"]],'.')
-    id = join(["",S["kstnm"],"",S["kcmpnm"]],'.')
+    sta = S["kstnm"]
+    cmp = S["kcmpnm"]
+    if (isempty(cmp) || cmp == "NC")
+      cmp = "YYY"
+      loc = @sprintf("%02i",S["chanN"])
+    elseif cmp in ["Z","N","E"]
+      cmp = string(getbandcode(fs),'H',cmp[1])
+      loc = ""
+    end
+    name = join([S["kstnm"],S["kcmpnm"]," ",S["kinst"]])
+    id   = join(["",sta,loc,cmp],'.')
   else
     cmp = getsegchantype(S["traceCode"], fs=fs)
     sta = @sprintf("%04i", S["traceID"])
