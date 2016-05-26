@@ -156,18 +156,27 @@ function xtmerge(t1::Array{Int64,2}, x1::Array{Float64,1},
   # Resolve conflicts
   half_samp = fs == 0 ? 0 : round(Int, 0.5/(fs*μs))
   if minimum(diff(t1)) < half_samp
-    J = flipdim(find(diff(t1) .< half_samp), 1)
-    for j in J
-      t1[j] = round(Int, 0.5*(t1[j]+t1[j+1]))
-      if isnan(x1[j])
-        x1[j] = x1[j+1]
-      elseif !isnan(x1[j+1])
-        x1[j] = 0.5*(x1[j]+x1[j+1])
-      end
+    J0 = find(diff(t1) .< half_samp)
+    while !isempty(J0)
+      J1 = J0.+1
+      K = [isnan(x1[J0]) isnan(x1[J1])]
+
+      # Average points that are either both NaN or neither Nan
+      ii = find(K[:,1]+K[:,2].!=1)
+      i0 = J0[ii]
+      i1 = J1[ii]
+      t1[i0] = round(Int, 0.5*(t1[i0]+t1[i1]))
+      x1[i0] = 0.5*(x1[i0]+x1[i1])
+
+      # Delete pairs with only one NaN (and delete i1, while we're here)
+      i3 = find(K[:,1].*!K[:,2])
+      i4 = find(!K[:,1].*K[:,2])
+      II = sort([J0[i3]; J1[i4]; i1])
+      deleteat!(t1, II)
+      deleteat!(x1, II)
+
+      J0 = find(diff(t1) .< half_samp)
     end
-    K = sort(unique(J.+1))
-    deleteat!(t1, K)
-    deleteat!(x1, K)
   end
   if half_samp > 0
     t1 = t_collapse(t1, fs)
