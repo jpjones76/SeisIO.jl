@@ -61,6 +61,8 @@ Associated functions
 
 * ``writesac``: write SeisData object or SAC dictionary to SAC file
 
+* ``sac_bat``: fast batch read of SAC files from the same channel
+
 
 
 .. _segy:
