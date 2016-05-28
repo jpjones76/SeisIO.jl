@@ -153,33 +153,40 @@ function xtmerge(t1::Array{Int64,2}, x1::Array{Float64,1},
   t1 = t[i]
   x1 = x[i]
 
-  # Resolve conflicts
   half_samp = fs == 0 ? 0 : round(Int, 0.5/(fs*μs))
   if minimum(diff(t1)) < half_samp
-    J0 = find(diff(t1) .< half_samp)
-    while !isempty(J0)
-      J1 = J0.+1
-      K = [isnan(x1[J0]) isnan(x1[J1])]
-
-      # Average points that are either both NaN or neither Nan
-      ii = find(K[:,1]+K[:,2].!=1)
-      i0 = J0[ii]
-      i1 = J1[ii]
-      t1[i0] = round(Int, 0.5*(t1[i0]+t1[i1]))
-      x1[i0] = 0.5*(x1[i0]+x1[i1])
-
-      # Delete pairs with only one NaN (and delete i1, while we're here)
-      i3 = find(K[:,1].*!K[:,2])
-      i4 = find(!K[:,1].*K[:,2])
-      II = sort([J0[i3]; J1[i4]; i1])
-      deleteat!(t1, II)
-      deleteat!(x1, II)
-
-      J0 = find(diff(t1) .< half_samp)
-    end
+    xtjoin!((t1,x1),half_samp)
   end
   if half_samp > 0
     t1 = t_collapse(t1, fs)
   end
+  return (t1, x1)
+end
+
+function xtjoin!(tx,half_samp)
+  t1 = tx[1]
+  x1 = tx[2]
+  J0 = find(diff(t1) .< half_samp)
+  while !isempty(J0)
+    J1 = J0.+1
+    K = [isnan(x1[J0]) isnan(x1[J1])]
+
+    # Average points that are either both NaN or neither Nan
+    ii = find(K[:,1]+K[:,2].!=1)
+    i0 = J0[ii]
+    i1 = J1[ii]
+    t1[i0] = round(Int, 0.5*(t1[i0]+t1[i1]))
+    x1[i0] = 0.5*(x1[i0]+x1[i1])
+
+    # Delete pairs with only one NaN (and delete i1, while we're here)
+    i3 = find(K[:,1].*!K[:,2])
+    i4 = find(!K[:,1].*K[:,2])
+    II = sort([J0[i3]; J1[i4]; i1])
+    deleteat!(t1, II)
+    deleteat!(x1, II)
+
+    J0 = find(diff(t1) .< half_samp)
+  end
+  #tx[1] = t1; tx[2] = x1
   return (t1, x1)
 end

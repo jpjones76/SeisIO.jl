@@ -300,6 +300,101 @@ end
 
 Read SAC file `fname` into a SeisObj.
 """
-rsac(fname::ASCIIString) = (src = fname;
+rsac(fname::Union{ASCIIString,UTF8String}) = (src = fname;
   S = sactoseis(psac(open(fname,"r"), p=false)); note(S, fname); return S)
-readsac(fname::ASCIIString) = rsac(fname)
+readsac(fname::Union{ASCIIString,UTF8String}) = rsac(fname)
+
+
+"""
+    S = sac_bat(FILESTR)
+
+Batch read all SAC files matching string FILESTR. *All files matching
+FILESTR must be from the same channel*.
+
+FILESTR supports wildcard filenames, but not directories. Thus,
+sac_bat("/data/PALM_EHZ_CC/2015.16*SAC") will read all files in
+/data/PALM_EHZ_CC/ that begin with "2015.16" and end with "SAC". However,
+sac_bat("/data2/Hood/\*/2015.16*SAC") will result in an error.
+
+    S = sac_bat(FILES)
+
+Batch read all SAC file names in string array FILES. *All filenames in FILES
+must be from the same channel*.
+
+    S = sac_bat(FILES, fs=FS)
+
+Batch read and resample to FS Hz.
+"""
+function sac_bat(files::Array{ByteString,1}; fs = 0.0::Float64)
+  file0 = files[1]
+  files = files[2:end]
+
+  # Read first file
+  S = readsac(file0)
+  isempty(files) && return(S)
+
+  # Check fs to see whether we resample
+  if fs == 0.0
+    fs = S.fs
+    dt = 1/S.fs
+  else
+    # Time gaps aren't tracked in SAC files, so we only resample x
+    dt = 1/fs
+    if S.fs != fs
+      S.x = resample(S.x, fs/S.fs)
+      S.fs = fs
+    end
+  end
+
+  xx = S.x
+  tx = Array{Int64,2}(1,2)
+  tx = [S.t[1,2] length(xx)]
+  tmp = pmap(sacp, files, collect(repeated(dt,length(files))))
+  for i = 1:length(tmp)
+    tx = cat(1, tx, [round(Int, tmp[i][1]*1.0e6) length(tmp[i][2])])
+    xx = cat(1, xx, tmp[i][2])
+    note(S, tmp[i][3])
+  end
+
+  # All done. Expand array of times
+  tt = Array{Int64,1}()
+  for i = 1:size(tx,1)
+    append!(tt, t_expand([1 tx[i,1]; tx[i,2] 0], fs))
+  end
+  (length(tt) == length(xx)) || error(@sprintf("length(tt) = %i != length(xx) = %i", length(tt), length(xx)))
+
+  # Merge
+  i = sortperm(tt)
+  t1 = tt[i]
+  x1 = map(Float64, xx[i])
+  half_samp = round(Int, 0.5*dt*1.0e6)
+  xtjoin!((t1,x1), half_samp)
+  S.t = t_collapse(t1, fs)
+  S.x = x1
+  return S
+end
+sac_bat(filestr::AbstractString; fs = 0.0::Float64) = sac_bat(lsw(filestr), fs = fs)
+
+function sacp(fname::AbstractString, dt::Float64)
+  f = open(fname, "r")
+
+  # Read important headers
+  fv = read(f, Float32, 70)
+  iv = read(f, Int32, 16)
+
+  # Parse ints to check file type
+  n = iv[10]
+  iv[16] > 1 && error("Can't parse IFTYPE > 1 in multifile mode")
+
+  # Data
+  seek(f, 632)
+  x = map(Float64, read(f, Float32, n))
+  close(f)
+
+  # Proceed...
+  fv[4] != -12345.0 && (x ./= fv[4])                    # remove gain
+  isapprox(dt,fv[1]) || (x = resample(x, fv[1]/dt))     # resample
+  (m,d) = j2md(iv[1],iv[2])
+  t = d2u(DateTime(iv[1],m,d,iv[3],iv[4],iv[5])) + (iv[6]/1000) + (fv[6] == -12345.0 ? 0.0 : fv[6])
+  return (t,x,fname)
+end
