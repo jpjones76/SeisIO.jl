@@ -10,17 +10,20 @@ FDSNget, IRISget, irisws, SeedLink,                            # Web services
 readuwpf, readuwdf, readuw, uwtoseis, r_uw,                    # UW
 prunesac!, psac, r_sac, sacwrite, chksac, sachdr,              # SAC
 get_sac_keys, get_sac_fw, get_sac_iw, sactoseis,
-readsac, writesac,
+readsac, writesac, sac_bat,
 readsegy, segyhdr, pruneseg, segytosac, segytoseis, r_segy,    # SEG Y
 readwin32, win32toseis, r_win32,                               # Win 32
 parsemseed, readmseed, parsesl, readmseed, parserec,           # mini-SEED
 rlennasc,                                                      # Lennartz ASCII
 plotseis, plot_uptimes,                                        # Utils/plotseis.jl
 fctopz,                                                        # Utils/resp.jl
-parsetimewin, j2md, md2j, sac2epoch, u2d, d2u, tzcorr          # time_aux.jl
+lsw,                                                           # Utils/file_aux.jl
+parsetimewin, j2md, md2j, sac2epoch, u2d, d2u, tzcorr,         # Utils/time_aux.jl
+xtmerge, xtjoin!
 
-# Auxiliary time functions
+# Auxiliary time and file functions
 include("Utils/time_aux.jl")
+include("Utils/file_aux.jl")
 
 # SeisData is designed as a universal, gap-tolerant "working" format for
 # geophysical timeseries data
