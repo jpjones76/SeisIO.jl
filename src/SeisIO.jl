@@ -11,6 +11,7 @@ readuwpf, readuwdf, readuw, uwtoseis, r_uw,                    # UW
 prunesac!, psac, r_sac, sacwrite, chksac, sachdr,              # SAC
 get_sac_keys, get_sac_fw, get_sac_iw, sactoseis,
 readsac, writesac, sac_bat,
+batch_read,                                                    # FileFormats/BatchProc.jl
 readsegy, segyhdr, pruneseg, segytosac, segytoseis, r_segy,    # SEG Y
 readwin32, win32toseis, r_win32,                               # Win 32
 parsemseed, readmseed, parsesl, readmseed, parserec,           # mini-SEED
@@ -40,6 +41,7 @@ include("FileFormats/mSEED.jl")       # SEED has become the worldwide seismic da
 include("FileFormats/UW.jl")          # University of Washington: used at UW 1970s through mid-2000s
 include("FileFormats/Win32.jl")       # Win32: standard Japanese seismic data format
 include("FileFormats/LennartzAsc.jl") # Lennartz ASCII: a cheap wrapper to readdlm
+include("FileFormats/BatchProc.jl")   # SAC is the old IRIS standard; very easy to use, almost universally readable
 
 # Web clients
 include("WebClients/IRIS.jl")

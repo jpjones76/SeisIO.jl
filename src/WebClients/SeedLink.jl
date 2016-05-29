@@ -42,7 +42,7 @@ function sltime(S, conn, chans, patts, sstr, tstr, maxbuf; v=false::Bool, vv=fal
   # Begin receiving data
   c = not_ok(conn) # Will always return 'S' for good data
   vv && println("c = ", Char(c))
-  char(c) == 'E' && error(@sprintf("Malformed channel or pattern spec (check manually):\nchans = %s\npatts = %s\n", chans, patts))
+  Char(c) == 'E' && error(@sprintf("Malformed channel or pattern spec (check manually):\nchans = %s\npatts = %s\n", chans, patts))
   write(buf, c)
   write(buf, read(conn,UInt8,7))
   while true
