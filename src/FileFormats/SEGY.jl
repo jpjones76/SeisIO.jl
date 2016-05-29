@@ -336,6 +336,8 @@ function segytoseis(S::Dict{ASCIIString,Any})
     elseif cmp in ["Z","N","E"]
       cmp = string(getbandcode(fs),'H',cmp[1])
       loc = ""
+    else
+      loc = ""
     end
     name = join([S["kstnm"],S["kcmpnm"]," ",S["kinst"]])
     id   = join(["",sta,loc,cmp],'.')
@@ -362,12 +364,13 @@ function segytoseis(S::Dict{ASCIIString,Any})
     # not sure if exponent uses gainConst/10 or gainConst/20 from dB
     gain = (2.0^S["traceWtFac"]) * S["transConstMant"] * 10.0^(S["transConstExp"]+(S["gainConst"]/10.0))
   end
+  x .*= gain
   haskey(S,"transUnit") && (units = getsegunit(S["transUnit"]))
   haskey(S, "stla") && (loc = [S["stla"]; S["stlo"]; S["stel"]; 0; 0])
 
   # Not going to bother converting misc SEGY stuff for now
-  return SeisObj(name=name, id=id, x=x, gain=gain, t=t, gain=gain, fs=fs,
-    units=units, src=S["src"], loc=loc)
+  return SeisObj(name=name, id=id, x=x, t=t, gain=1.0, fs=fs, units=units,
+    src=S["src"], loc=loc)
 end
 segytoseis(SEG::Array{Dict{ASCIIString,Any},1}) = (S = SeisData();
   [S += segytoseis(SEG[i]) for i=1:length(SEG)]; return S)
