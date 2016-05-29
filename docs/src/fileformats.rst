@@ -11,14 +11,16 @@ Current Format Support
 
 * :ref:`mini-SEED <mseed>`: `SEED <https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf>`_ has become a worldwide standard for seismic data archival; mini-SEED archives are special SEED volumes that contain only data records.
 
-* :ref:`SAC <sac1>`: `SAC <https://ds.iris.edu/files/sac-manual/manual/file_format.html>`_ is a popular seismic data standard, very easy to use, developed at Lawrence Livermore National Laboratory.
+* :ref:`SAC <sac1>`:sup:`(a)`: `SAC <https://ds.iris.edu/files/sac-manual/manual/file_format.html>`_ is a popular seismic data standard, very easy to use, developed at Lawrence Livermore National Laboratory.
 
-* :ref:`SEGY <segy>`: `SEG Y <http://wiki.seg.org/wiki/SEG_Y>`_ is the standard data archival format of the Society for Exploration Geophysicists.
+* :ref:`SEGY <segy>`:sup:`(a)`: `SEG Y <http://wiki.seg.org/wiki/SEG_Y>`_ is the standard data archival format of the Society for Exploration Geophysicists.
 
 * :ref:`UW <uw>`: The University of Washington seismic data format was used from the 1970s through mid-2000s; legacy support is included with SeisIO.
 
 * :ref:`Win32 <win32>`: `WIN <http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html>`_ is a seismic data format developed and used by the NIED (National Research Institute for Earth Science and Disaster Prevention), Japan.
 
+
+:sup:`(a)`  Partial support for fast multi-file read with ``batch_read``; see below.
 
 .. _mseed:
 
@@ -60,8 +62,6 @@ Associated functions
 * ``sactoseis``: convert SAC dictionary to SeisData
 
 * ``writesac``: write SeisData object or SAC dictionary to SAC file
-
-* ``sac_bat``: fast batch read of SAC files from the same channel
 
 
 
@@ -144,3 +144,18 @@ Associated functions
 * ``r_win32``: read win32 files to dictionary
 
 * ``win32toseis``: convert win32 dictionary to SeisData
+
+
+Batch Read
+==========
+The utility ``batch_read`` speeds up single-channel file read using parallel file read to a shared array. The result is a 2-4x speedup over single-file read methods.
+
+Supported keywords
+------------------
+``ftype=FT`` (ASCIIString): File type. Default is SAC.
+
+``fs=FS`` (Float64): Resample data to ``FS`` Hz.
+
+Currently supported formats
+---------------------------
+:ref:`SAC <sac1>`, :ref:`PASSCAL SEG Y <segy>`

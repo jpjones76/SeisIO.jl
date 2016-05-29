@@ -25,7 +25,7 @@ function batch_read(files::Array{ByteString,1}; ftype=ftype::ASCIIString, fs=0.0
 
   if ftype == "SAC"
     S = readsac(ascii(file0))
-  elseif ftype == "NMT"
+  elseif ftype == "NMT" || ftype == "PASSCAL"
     S = readsegy(ascii(file0), f="nmt")
   else
     error(@sprintf("File format %s not yet supported", ftype))
