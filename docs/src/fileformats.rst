@@ -156,6 +156,6 @@ Supported keywords
 
 ``fs=FS`` (Float64): Resample data to ``FS`` Hz.
 
-Currently supported formats
----------------------------
-:ref:`SAC <sac1>`, :ref:`PASSCAL SEG Y <segy>`
+Supported file formats
+----------------------
+:ref:`SAC <sac1>`, :ref:`PASSCAL SEG Y <segy>` (specify ``ftype="NMT"`` or ``ftype="PASSCAL"``)
