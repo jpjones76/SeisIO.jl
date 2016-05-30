@@ -152,7 +152,7 @@ The utility ``batch_read`` speeds up single-channel file read using parallel fil
 
 Supported keywords
 ------------------
-``ftype=FT`` (ASCIIString): File type. Default is SAC.
+``ftype=FT`` (ASCIIString): File type. Default is :ref:`"SAC" <sac1>`.
 
 ``fs=FS`` (Float64): Resample data to ``FS`` Hz.
 
