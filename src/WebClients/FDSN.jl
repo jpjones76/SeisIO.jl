@@ -1,48 +1,110 @@
 using LightXML: attribute, content, root, find_element, get_elements_by_tagname, parse_string, XMLDocument
 using Requests: get
 
-#function parse_FDSN_xml(xsta::Union{HttpCommon.Response,LightXML.XMLDocument})
-  #if typeof(xsta) == HttpCommon.Response
-  #  xsta = LightXML.parse_string(join(readlines(IOBuffer(xsta.data))))
-  #end
 function parse_FDSN_xml(xsta::XMLDocument)
+  badchars = ['\0', '\ ']
   N = get_elements_by_tagname(root(xsta), "Network")
-  sinfo = Array{Union{ASCIIString,Float64},2}(0,5)
+  ids = Array{ASCIIString,1}()
+  units = Array{ASCIIString,1}()
+  locs = Array{Float64,2}(5,0)
+  normfacs = Array{Float64,1}()
+  resps = Array{Array{Complex128,2},1}()
+  gains = Array{Float64,1}()
+
   for n in N
     net = attribute(n, "code")
     S = get_elements_by_tagname(n, "Station")
     for s in S
+      # t = u2d(attribute(s, startDate))
       sta = attribute(s, "code")
       C = get_elements_by_tagname(s, "Channel")
-      lat = parse(content(find_element(s, "Latitude")))
-      lon = parse(content(find_element(s, "Longitude")))
-      ele = parse(content(find_element(s, "Elevation")))
+
+      # lon = parse(content(find_element(s, "Longitude")))
       for c in C
-        cha = attribute(c, "code")
-        sk = ones(UInt8,12)*0x20
-        L = length(sta)
-        LL = length(cha)
-        sk[1:L] = sta.data
-        sk[8:8+LL-1] = cha.data
-        sk[11:12] = net.data
-        sk = join(map(Char,sk))
-        gain = parse(content(find_element(find_element(find_element(c,
-                     "Response"),"InstrumentSensitivity"), "Value"))) # really?
-        sinfo = cat(1, sinfo, [sk gain lat lon ele])
-       end
+        cha = strip(ascii(join(map(Char, attribute(c, "code")))),badchars)
+        ll = strip(ascii(join(map(Char, attribute(c, "locationCode")))),badchars)
+        id = join([net,sta,ll,cha],'.')
+        loc = zeros(Float64,5,1)
+        for (n,i) in enumerate(["Latitude", "Longitude", "Elevation", "Azmiuth", "Dip"])
+          el = find_element(c, i)
+          if el != nothing
+            loc[n] = parse(content(el))
+            if i == "Dip"
+              loc[n] += 90.0
+            end
+          end
+        end
+
+        resp = find_element(c,"Response")
+        gain = parse(content(find_element(find_element(resp,"InstrumentSensitivity"), "Value")))
+        stages = get_elements_by_tagname(resp, "Stage")
+        normfac = 1.0
+        cz = Array{Complex128,1}()
+        cp = Array{Complex128,1}()
+        for stg in stages
+          stgN = parse(attribute(stg, "number"))
+          pz = find_element(stg, "PolesZeros")
+          if pz != nothing
+            if stgN == 1
+              push!(units, lowercase(join(map(Char,
+                content(find_element(find_element(pz, "InputUnits"),"Name"))))))
+            end
+            has_tf = find_element(pz,"PzTransferFunctionType")
+            if has_tf != nothing
+              if content(has_tf) == "LAPLACE (RADIANS/SECOND)"
+                normfac *= parse(content(find_element(pz, "NormalizationFactor")))
+                zz = get_elements_by_tagname(pz, "Zero")
+                pp = get_elements_by_tagname(pz, "Pole")
+                for z in zz
+                  zr = parse(content(find_element(z, "Real")))
+                  zi = parse(content(find_element(z, "Imaginary")))
+                  push!(cz, complex(zr,zi))
+                end
+                for p in pp
+                  pr = parse(content(find_element(p, "Real")))
+                  pi = parse(content(find_element(p, "Imaginary")))
+                  push!(cp, complex(pr,pi))
+                end
+              end
+            end
+          end
+        end
+        NZ = length(cz)
+        NP = length(cp)
+        if NZ < NP
+          for z = NZ+1:NP
+            push!(cz, complex(0.0,0.0))
+          end
+        end
+        cresp = hcat(cz,cp)
+        locs = cat(2, locs, loc)
+        resps = cat(1, resps, Array{Complex128,2}[cresp])
+        push!(normfacs, normfac)
+        push!(ids, id)
+        push!(gains, gain)
+      end
     end
   end
-  return sinfo
+  return (ids, units, gains, normfacs, locs, resps)
 end
 
-function FDSNprep!(S::SeisData, sinfo::Array{Any,2})
-  sn = sinfo[:,1]
+function FDSNprep!(S::SeisData,
+  ids::Array{ASCIIString,1},
+  units::Array{ASCIIString,1},
+  gains::Array{Float64,1},
+  normfacs::Array{Float64,1},
+  locs::Array{Float64,2},
+  resps::Array{Array{Complex128,2},1})
+
   for i = 1:S.n
-    k = find(sn .== S.name[i])
+    k = find(ids .== S.id[i])
     isempty(k) && continue
     k = k[1]
-    S.gain[i] = sinfo[k,2]
-    S.loc[i] = vec([sinfo[k,3:5] 0 0])
+    S.units[i] = units[k]
+    S.gain[i] = gains[k]
+    S.loc[i] = vec(locs[:,k])
+    S.resp[i] = resps[k]
+    note(S, i, string("normfac = ", @sprintf("%.6e",normfacs[k])))
   end
   return S
 end
@@ -149,8 +211,8 @@ function FDSNget(; src="IRIS"::ASCIIString,
   # Automatically incorporate station information from web XML retrieval
   R = get(station_url, timeout=to, headers=hdr)
   tmp = IOBuffer(R.data)
-  sinfo = parse_FDSN_xml(parse_string(join(readlines(tmp))))
-  FDSNprep!(S, sinfo)
+  ids, units, gains, normfacs, locs, resps = parse_FDSN_xml(parse_string(join(readlines(tmp))))
+  FDSNprep!(S, ids, units, gains, normfacs, locs, resps)
   if y
     sync!(S, s=d0, t=d1)
   end

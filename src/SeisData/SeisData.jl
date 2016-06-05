@@ -259,8 +259,7 @@ samehdr(S::SeisData, T::SeisObj, i) = (
 
 # ============================================================================
 # Append, delete
-push!(S::SeisData, T::SeisObj; n=true::Bool) = ([push!(S.(i),T.(i)) for i in fieldnames(T)];
-  S.n += 1; n && (note(S, S.n, @sprintf("Channel added."));))
+push!(S::SeisData, T::SeisObj) = ([push!(S.(i),T.(i)) for i in fieldnames(T)]; S.n += 1)
 append!(S::SeisData, T::SeisData; n=true::Bool) = ([push!(S,T[i],n=n) for i = 1:S.n])
 deleteat!(S::SeisData, j::Int) = ([deleteat!(S.(i),j) for i in datafields(S)];
   S.n -= 1;)
