@@ -42,6 +42,8 @@ function writesac(S::SeisData; ts=true, v=true)
       sacFloatVals[32] = S.loc[i][1]
       sacFloatVals[33] = S.loc[i][2]
       sacFloatVals[34] = S.loc[i][3]
+      sacFloatVals[58] = S.loc[i][4]
+      sacFloatVals[59] = S.loc[i][5]
     end
 
     # Ints

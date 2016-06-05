@@ -148,14 +148,28 @@ Associated functions
 
 Batch Read
 ==========
-The utility ``batch_read`` speeds up single-channel file read using parallel file read to a shared array. The result is a 2-4x speedup over single-file read methods.
+The utility ``batch_read`` speeds up file read using parallel file read to shared arrays. The result is an order of magnitude speedup relative to reading files one at a time.
+
+
+Syntax
+------
+``S = batch_read(FILESTR, ftype=FMT, fs=FS)``
+
+Read files matching FILESTR of format FMT and resample to FS Hz. If FS isn't specified, files are resampled to match the first file read.
+
+``FILESTR`` supports wildcards in filenames, but not directory names. Thus, ``batch_read("/data/PALM_EHZ_CC/2015.16*SAC")`` will read all files in ``/data/PALM_EHZ_CC/`` that begin with "2015.16" and end with "SAC"; ``batch_read("/data2/Hood/*/2015.16*SAC")`` will result in an error.
+
 
 Supported keywords
 ------------------
+
 ``ftype=FT`` (ASCIIString): File type. Default is :ref:`"SAC" <sac1>`.
 
 ``fs=FS`` (Float64): Resample data to ``FS`` Hz.
 
 Supported file formats
 ----------------------
-:ref:`SAC <sac1>`, :ref:`PASSCAL SEG Y <segy>` (specify ``ftype="NMT"`` or ``ftype="PASSCAL"``)
+
+``ftype="SAC""``: :ref:`SAC <sac1>`
+
+``ftype="NMT"`` or ``ftype="PASSCAL"``: :ref:`PASSCAL SEG Y <segy>`
