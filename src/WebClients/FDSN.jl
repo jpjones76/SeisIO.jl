@@ -101,10 +101,12 @@ function FDSNprep!(S::SeisData,
     isempty(k) && continue
     k = k[1]
     S.units[i] = units[k]
-    S.gain[i] = gains[k]
+    S.x[i] .*= (1/gains[k])     # Remove stage 0 gain
+    note(S, i, string("Removed stage 0 gain = ", @sprintf("%.5e",gains[k])))
+    S.gain[i] = 1.0
     S.loc[i] = vec(locs[:,k])
     S.resp[i] = resps[k]
-    note(S, i, string("normfac = ", @sprintf("%.6e",normfacs[k])))
+    note(S, i, string("normfac = ", @sprintf("%.5e",normfacs[k])))
   end
   return S
 end
@@ -200,12 +202,11 @@ function FDSNget(; src="IRIS"::ASCIIString,
   tmp = IOBuffer(R.data)
   S = parsemseed(tmp)
 
-  # Source logging
+  # Detailed source logging
   usrc = split(uhead, '/', keep=false)
   usrc = "FDSN " * " " * ascii(usrc[startswith(usrc[1],"http") ? 2 : 1])
   for i = 1:S.n
-    S.src[1] = usrc
-    note(S, i, "Data retrieved in mseed format")
+    note(S, i, usrc)
   end
 
   # Automatically incorporate station information from web XML retrieval
