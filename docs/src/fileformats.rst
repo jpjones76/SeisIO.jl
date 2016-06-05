@@ -170,6 +170,6 @@ Supported keywords
 Supported file formats
 ----------------------
 
-``ftype="SAC""``: :ref:`SAC <sac1>`
+:ref:`SAC <sac1>`: use keyword ``ftype="SAC"``
 
-``ftype="NMT"`` or ``ftype="PASSCAL"``: :ref:`PASSCAL SEG Y <segy>`
+:ref:`PASSCAL SEG Y <segy>`: use keyword ``ftype="NMT"`` or ``ftype="PASSCAL"``
