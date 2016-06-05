@@ -22,14 +22,14 @@ function not_ok(conn)
   c ="K".data[1]
   OK = "OK\r\n".data
   while c in OK
+    eof(conn)
     c = read(conn, UInt8)
-    eof(conn) && sleep(1)
   end
   return c
 end
 
 # SeedLink "TIME" mode
-function sltime(S, conn, chans, patts, sstr, tstr, maxbuf; v=false::Bool, vv=false::Bool)
+function sltime!(S, conn, chans, patts, sstr, tstr, maxbuf; v=false::Bool, vv=false::Bool)
   for s = 1:length(chans)
     isempty(patts[s]) || write(conn, string("SELECT ", patts[s], "\r"))
     write(conn, string("STATION ", chans[s], "\rTIME ", sstr, " ", tstr, "\r"))
@@ -44,23 +44,11 @@ function sltime(S, conn, chans, patts, sstr, tstr, maxbuf; v=false::Bool, vv=fal
   vv && println("c = ", Char(c))
   Char(c) == 'E' && error(@sprintf("Malformed channel or pattern spec (check manually):\nchans = %s\npatts = %s\n", chans, patts))
   write(buf, c)
-  write(buf, read(conn,UInt8,7))
+  write(buf, read(conn.buffer, UInt8, 519))
   while true
-    n = 0
-    while eof(conn)
-      n += 1
-      try
-        vv && println("Single-char read")
-        write(buf, read(conn,UInt8))
-        break
-      catch
-        vv && println("sleep(1)")
-        sleep(1)
-        n > 60 && error("Too many retries, exit w/error.")
-      end
-    end
+    eof(conn)
     try
-      write(buf, read(conn.buffer,UInt8,520-rem(position(buf),520)))
+      write(buf, read(conn.buffer, UInt8, 520))
     catch
       if v || vv
         println("Connection closed, clearing buffer and exiting.")
@@ -143,18 +131,18 @@ function SeedLink(chans::Array{ASCIIString,1};
   if mode == "TIME"
     if v || vv
       println("Station commands to send:")
-      for s = 1:length(chans)
-        isempty(patts[s]) || println("write(conn,\"SELECT ", patts[s], "\\r\")")
-        println("write(conn,\"STATION ", chans[s], "\\rTIME ", sstr, " ", tstr, "\\r\")")
+      for c = 1:length(chans)
+        isempty(patts[c]) || println("write(conn,\"SELECT ", patts[c], "\\r\")")
+        println("write(conn,\"STATION ", chans[c], "\\rTIME ", sstr, " ", tstr, "\\r\")")
       end
     end
-  sltime(S, conn, chans, patts, sstr, tstr, maxbuf, v=v, vv=vv)
+  sltime!(S, conn, chans, patts, sstr, tstr, maxbuf, v=v, vv=vv)
   for i = 1:S.n
     S.src[i] = "seedlink"
     note(S, i, "SeedLink server was "*addr*":"*string(port))
   end
   if y
-    return sync!(S, s="min", t=t)
+    return sync!(S, s=ts, t=t)
   else
     return S
   end
