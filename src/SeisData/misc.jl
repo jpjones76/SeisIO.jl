@@ -282,7 +282,7 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
       note(S, i, join(["Appended ", ii, " values."]))
     end
     S.t[i] = [1 t_start; length(S.x[i]) 0]
-    note(S, i, "Synched to"*sstr*" -- "*tstr)
+    note(S, i, "Synched to "*sstr*" -- "*tstr)
   end
   return S
 end
