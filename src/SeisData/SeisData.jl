@@ -262,11 +262,11 @@ samehdr(S::SeisData, T::SeisObj, i) = (
 push!(S::SeisData, T::SeisObj) = ([push!(S.(i),T.(i)) for i in fieldnames(T)]; S.n += 1)
 append!(S::SeisData, T::SeisData; n=true::Bool) = ([push!(S,T[i],n=n) for i = 1:S.n])
 deleteat!(S::SeisData, j::Int) = ([deleteat!(S.(i),j) for i in datafields(S)];
-  S.n -= 1;)
+  S.n -= 1; return S)
 deleteat!(S::SeisData, J::Range) = (collect(J); [deleteat!(S, j)
-  for j in sort(J, rev=true)];)
+  for j in sort(J, rev=true)]; return S)
 deleteat!(S::SeisData, J::Array{Int,1}) = ([deleteat!(S, j)
-  for j in sort(J, rev=true)];)
+  for j in sort(J, rev=true)]; return S)
 delete!(S::SeisData, j::Int) = deleteat!(S, j)
 delete!(S::SeisData, J::Range) = deleteat!(S, J)
 delete!(S::SeisData, J::Array{Int,1}) = deleteat!(S, J)
@@ -402,7 +402,9 @@ end
 +(S::SeisObj, s::ASCIIString) = cat(1, S.notes, string(string(now()), 'T')[2], "  ", s)
 
 # Rules for deleting
--(S::SeisData, i::Int) = (deleteat!(S,i); return S)  # By channel #
+-(S::SeisData, i::Int) = deleteat!(S,i)                       # By channel #
+-(S::SeisData, J::Array{Int64,1}) = deleteat!(S,J)            # By array of channel #s
+-(S::SeisData, J::Range) = deleteat!(S,J)                     # By range of channel #s
 -(S::SeisData, str::ASCIIString) = ([deleteat!(S,k) for k in unique([find(S.id .== str); find(S.name .== str)])]; return S) #Name or ID match
 -(S::SeisData, T::SeisObj) = ([deleteat!(S,i) for i in find(S.id .== T.i)]; return S) # By SeisObj
 
