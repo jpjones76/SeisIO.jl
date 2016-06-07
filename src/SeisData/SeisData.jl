@@ -402,9 +402,9 @@ end
 +(S::SeisObj, s::ASCIIString) = cat(1, S.notes, string(string(now()), 'T')[2], "  ", s)
 
 # Rules for deleting
--(S::SeisData, i::Int) = (U = deepcopy(S); deleteat!(U,i); return U)  # By channel #
--(S::SeisData, str::ASCIIString) = ([deleteat!(S,k) for k in unique([find(S.id .== str); find(S.name .== str)])]) #Name or ID match
--(S::SeisData, T::SeisObj) = [deleteat!(S,i) for i in find(S.id .== T.i)] # By SeisObj
+-(S::SeisData, i::Int) = (deleteat!(S,i); return S)  # By channel #
+-(S::SeisData, str::ASCIIString) = ([deleteat!(S,k) for k in unique([find(S.id .== str); find(S.name .== str)])]; return S) #Name or ID match
+-(S::SeisData, T::SeisObj) = ([deleteat!(S,i) for i in find(S.id .== T.i)]; return S) # By SeisObj
 
 # Tests for equality
 ==(S::SeisObj, T::SeisObj) = isequal(S,T)

@@ -104,7 +104,11 @@ function batch_read(files::Array{ByteString,1}; ftype="SAC"::ASCIIString, fs=0.0
   end
   return S
 end
-batch_read(filestr::ASCIIString; ftype=ftype::ASCIIString, fs=0.0::Float64) = batch_read(lsw(filestr), ftype=ftype, fs = fs)
+batch_read(filestr::ASCIIString; ftype="SAC"::ASCIIString, fs=0.0::Float64) = batch_read(lsw(filestr), ftype=ftype, fs = fs)
+batch_read(files::Array{ASCIIString,1}; ftype="SAC"::ASCIIString, fs=0.0::Float64) = (
+  tmp = convert(Array{ByteString,1}, [bytestring(f) for f in files]);
+  batch_read(tmp, ftype=ftype, fs=fs))
+
 # =============================================================================
 function segy_geth(j::Int64,
   fname::ByteString,
