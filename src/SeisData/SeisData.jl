@@ -260,7 +260,7 @@ samehdr(S::SeisData, T::SeisObj, i) = (
 # ============================================================================
 # Append, delete
 push!(S::SeisData, T::SeisObj) = ([push!(S.(i),T.(i)) for i in fieldnames(T)]; S.n += 1)
-append!(S::SeisData, T::SeisData; n=true::Bool) = ([push!(S,T[i],n=n) for i = 1:S.n])
+append!(S::SeisData, T::SeisData) = ([push!(S,T[i]) for i = 1:S.n])
 deleteat!(S::SeisData, j::Int) = ([deleteat!(S.(i),j) for i in datafields(S)];
   S.n -= 1; return S)
 deleteat!(S::SeisData, J::Range) = (collect(J); [deleteat!(S, j)
