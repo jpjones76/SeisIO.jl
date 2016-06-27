@@ -130,10 +130,6 @@ Utility Functions
 =================
 * ``autotap!``: Apply a cosine taper to non-gap subsequences of all time series data.  Removes the mean of all time series channels. Calls ``ungap!``.
 
-.. * ``plotseis``: Plot time-aligned data from a SeisData object. Time series data are represented by straight lines; irregularly sampled data (``fs=0``) use normalized stem plots. Data are labeled by channel id; change this with keyword ``use_name=true``.
-..
-.. * ``plot_uptimes``: Plot uptimes of channels in a SeisData object.
-.. 
 * ``prune!, prune``: Merge channels with redundant header fields.
 
 * ``purge!, purge``: Delete all channels with no data (defined for any channel ``i`` by ``isempty(S.x[i]) == true``).
