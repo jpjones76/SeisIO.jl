@@ -55,14 +55,13 @@ Public FDSN servers
 
 Example
 -------
-Download 10 minutes of data from 4 stations at Mt. St. Helens (WA, USA), delete the low-gain channels, plot, and save to the current directory:
+Download 10 minutes of data from 4 stations at Mt. St. Helens (WA, USA), delete the low-gain channels, and save to the current directory:
 
 ::
 
   S = FDSNget(net="CC,UW", sta="SEP,SHW,HSR,VALT", cha="*", t=600)
   S -= "SHW    ELZUW"
   S -= "HSR    ELZUW"
-  plotseis(S)
   writesac(S)
 
 

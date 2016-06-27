@@ -430,7 +430,7 @@ function rseis(fname::ASCIIString; v=false::Bool)
     else
       s = SeisData()
       for n = 1:n_chan
-        push!(s, r_seisobj(io), n=false)
+        push!(s, r_seisobj(io))
         v && println("...read ", n, "/", n_chan)
       end
     end

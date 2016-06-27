@@ -34,4 +34,4 @@ Be aware that ``workspace()`` clears the Julia session's memory, equivalent to `
 
 Dependencies
 ============
-DSP, Requests, LightXML, PyPlot
+DSP, Requests, LightXML

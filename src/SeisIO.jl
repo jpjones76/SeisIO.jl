@@ -16,7 +16,6 @@ readsegy, segyhdr, pruneseg, segytosac, segytoseis, r_segy,    # SEG Y
 readwin32, win32toseis, r_win32,                               # Win 32
 parsemseed, readmseed, parsesl, readmseed, parserec,           # mini-SEED
 rlennasc,                                                      # Lennartz ASCII
-plotseis, plot_uptimes,                                        # Utils/plotseis.jl
 fctopz,                                                        # Utils/resp.jl
 lsw,                                                           # Utils/file_aux.jl
 parsetimewin, j2md, md2j, sac2epoch, u2d, d2u, tzcorr,         # Utils/time_aux.jl
@@ -49,5 +48,4 @@ include("WebClients/FDSN.jl")
 include("WebClients/SeedLink.jl")
 
 include("Utils/resp.jl")              # Instrument response
-include("Utils/plotseis.jl")          # Plotting
 end
