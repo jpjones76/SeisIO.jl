@@ -18,7 +18,7 @@ FILESTR supports wildcard filenames, but not directories. Thus,
 
 Batch read and resample to FS Hz.
 """
-function batch_read(files::Array{ByteString,1}; ftype="SAC"::String, fs=0.0::Float64)
+function batch_read(files::Array{String,1}; ftype="SAC"::String, fs=0.0::Float64)
   NF = length(files)
 
   # Parallelize file info read into shared arrays
@@ -106,12 +106,12 @@ function batch_read(files::Array{ByteString,1}; ftype="SAC"::String, fs=0.0::Flo
 end
 batch_read(filestr::String; ftype="SAC"::String, fs=0.0::Float64) = batch_read(lsw(filestr), ftype=ftype, fs = fs)
 batch_read(files::Array{String,1}; ftype="SAC"::String, fs=0.0::Float64) = (
-  tmp = convert(Array{ByteString,1}, [bytestring(f) for f in files]);
+  tmp = convert(Array{String,1}, [bytestring(f) for f in files]);
   batch_read(tmp, ftype=ftype, fs=fs))
 
 # =============================================================================
 function segy_geth(j::Int64,
-  fname::ByteString,
+  fname::String,
   ts::SharedArray{Int64,1},
   nx::SharedArray{Int32,1},
   gain::SharedArray{Float32,1},
@@ -170,7 +170,7 @@ function segy_geth(j::Int64,
 end
 # =============================================================================
 
-function sac_geth(j::Int64, fname::ByteString,
+function sac_geth(j::Int64, fname::String,
   ts::SharedArray{Int64,1},
   nx::SharedArray{Int32,1},
   gain::SharedArray{Float32,1},
@@ -207,7 +207,7 @@ function sac_geth(j::Int64, fname::ByteString,
 end
 
 # =============================================================================
-function read_bat(j::Int64, fname::ByteString, DT::Int64, os::Int64,
+function read_bat(j::Int64, fname::String, DT::Int64, os::Int64,
   fmt::Type,
   si::SharedArray{Int64,1},
   nx::SharedArray{Int32,1},
@@ -234,7 +234,7 @@ function read_bat(j::Int64, fname::ByteString, DT::Int64, os::Int64,
   end
 
 function getsach(
-  files::Array{ByteString,1},
+  files::Array{String,1},
   ts::SharedArray{Int64,1},
   nx::SharedArray{Int32,1},
   gain::SharedArray{Float32,1},
@@ -264,7 +264,7 @@ function getsach(
 end
 
 function par_read(
-  files::Array{ByteString,1},
+  files::Array{String,1},
   nx::SharedArray{Int32,1},
   rr::SharedArray{Float64,1},
   si::SharedArray{Int64,1},
@@ -298,7 +298,7 @@ function par_read(
 end
 
 function getsegh(
-  files::Array{ByteString,1},
+  files::Array{String,1},
   ts::SharedArray{Int64,1},
   nx::SharedArray{Int32,1},
   gain::SharedArray{Float32,1},

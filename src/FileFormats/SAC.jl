@@ -300,6 +300,6 @@ end
 
 Read SAC file `fname` into a SeisObj.
 """
-rsac(fname::Union{String,UTF8String}) = (src = fname;
+rsac(fname::String) = (src = fname;
   S = sactoseis(psac(open(fname,"r"), p=false)); note(S, fname); return S)
-readsac(fname::Union{String,UTF8String}) = rsac(fname)
+readsac(fname::String) = rsac(fname)
