@@ -118,7 +118,7 @@ function show(io::IO, S::Union{SeisData,SeisObj})
   str = Dict{String,AbstractString}()
   for i in datafields(S)
     if i != :t
-      str[string(i)] = strpop(@sprintf("%5s: ", uppercase(string(i))), S.(i))
+      str[string(i)] = strpop(@sprintf("%5s: ", uppercase(string(i))), getfield(S,i))
     else
       s = "    T: "
       if isa(S, SeisObj)

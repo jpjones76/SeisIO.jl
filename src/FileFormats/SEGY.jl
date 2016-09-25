@@ -230,9 +230,9 @@ function pseg(fid; f="nmt"::String, h=false::Bool)
               Dict(zip(sr_s, map(Float32,sr_v.*sr_scale))),
               Dict(zip(coord_s, map(Float32, coord_scale.*coord_v))),
               Dict(zip(short_s_2, map(Int32, short_v_2))))
-    S["kstnm"]      = strip(ascii(read(fid, UInt8, 6)),['\0', '\ '])
-    S["kinst"]      = strip(ascii(read(fid, UInt8, 8)),['\0', '\ '])
-    S["kcmpnm"]     = strip(ascii(read(fid, UInt8, 4)),['\0', '\ '])
+    S["kstnm"]      = strip(String(read(fid, UInt8, 6)),['\0', '\ '])
+    S["kinst"]      = strip(String(read(fid, UInt8, 8)),['\0', '\ '])
+    S["kcmpnm"]     = strip(String(read(fid, UInt8, 4)),['\0', '\ '])
     S["statDelay"]  = read(fid, Int16)
     samp_rate       = 1.0e6/read(fid, Int32)
     trig_v          = read(fid, Int16, 8); merge!(S, Dict(zip(trig_s, trig_v)))
@@ -364,7 +364,7 @@ function segytoseis(S::Dict{String,Any})
     # not sure if exponent uses gainConst/10 or gainConst/20 from dB
     gain = (2.0^S["traceWtFac"]) * S["transConstMant"] * 10.0^(S["transConstExp"]+(S["gainConst"]/10.0))
   end
-  x .*= gain
+  x = x.*gain
   haskey(S,"transUnit") && (units = getsegunit(S["transUnit"]))
   haskey(S, "stla") && (loc = [S["stla"]; S["stlo"]; S["stel"]; 0; 0])
 

@@ -92,6 +92,7 @@ function gapfill!(x::Array{Float64,1}, t::Array{Int64,2}, fs::Float64; m=true::B
   end
   return x
 end
+
 gapfill(x::Array{Float64,1}, t::Array{Int64,2}, f::Float64) =
   (y = deepcopy(x); gapfill!(y,t,f); return y)
 
@@ -106,7 +107,7 @@ function ungap!(S::SeisObj; m=true::Bool, w=true::Bool)
   (N ≤ 0 || S.fs == 0) && return S
   gapfill!(S.x, S.t, S.fs, m=m, w=w)
   note(S, @sprintf("Filled %i gaps (sum = %i microseconds)", N, sum(S.t[2:end-1,2])))
-  S.t = [S.t[1,:]; [length(S.x) 0]]
+  S.t = [reshape(S.t[1,:],1,2); [length(S.x) 0]]
   return S
 end
 function ungap!(S::SeisData; m=true::Bool, w=true::Bool)
@@ -115,7 +116,7 @@ function ungap!(S::SeisData; m=true::Bool, w=true::Bool)
     (N ≤ 0 || S.fs[i] == 0) && continue
     gapfill!(S.x[i], S.t[i], S.fs[i], m=m, w=w)
     note(S, i, @sprintf("Filled %i gaps (sum = %i microseconds)", N, sum(S.t[i][2:end-1,2])))
-    S.t[i] = [S.t[i][1,:]; [length(S.x[i]) 0]]
+    S.t[i] = [reshape(S.t[i][1,:],1,2); [length(S.x[i]) 0]]
   end
   return S
 end

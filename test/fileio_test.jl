@@ -3,8 +3,10 @@ savfile = "test.seis"
 
 println("randseis and native file IO...")
 S = randseisdata(c=false)
+println("...file write...")
 wseis(S, savfile)
 
+println("...file read...")
 R = rseis(savfile)
 @test_approx_eq(R==S, true)
 

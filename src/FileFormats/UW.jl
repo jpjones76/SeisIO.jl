@@ -222,9 +222,9 @@ function readuwdf(datafile::AbstractString; v=false::Bool)
   [M[i] = bswap(M[i]) for i in collect(keys(M))]
   M["flags"]    = read(fid, Int16, 10)
   M["flags"] = [bswap(i) for i in M["flags"]]
-  M["extra"]    = replace(ascii(read(fid, UInt8, 10)),"\0"," ")
+  M["extra"]    = replace(String(read(fid, UInt8, 10)),"\0"," ")
   v && [println(k, ": ", M[k]) for k in keys(M)]
-  M["comment"]  = replace(ascii(read(fid, UInt8, 80)),"\0"," ")
+  M["comment"]  = replace(String(read(fid, UInt8, 80)),"\0"," ")
 
   # Set M time using lmin and lsec WHICH USE GREGORIAN MINUTES JESUS CHRIST WTF
   uwdate = Dates.unix2datetime(lmin*60 + lsec*1.0e-6 + dconst)
@@ -252,7 +252,7 @@ function readuwdf(datafile::AbstractString; v=false::Bool)
     seekend(fid)
     skip(fid, structs_os)
     for i1 = 1:1:nstructs
-      structtag    = replace(ascii(read(fid, UInt8, 4)),"\0","")
+      structtag    = replace(String(read(fid, UInt8, 4)),"\0","")
       #println(structtag)
       nstructs     = read(fid, Int32)
       byteoffset   = read(fid, Int32)
@@ -316,8 +316,8 @@ function readuwdf(datafile::AbstractString; v=false::Bool)
       push!(S["trig"], read(fid, Int16))
       push!(S["bias"], read(fid, Int16))
       push!(S["fill"], read(fid, Int16))
-      push!(name, replace(ascii(read(fid, UInt8, 8)),"\0",""))
-      tmp = replace(ascii(read(fid, UInt8, 4)),"\0","")
+      push!(name, replace(String(read(fid, UInt8, 8)),"\0",""))
+      tmp = replace(String(read(fid, UInt8, 4)),"\0","")
       for j1 = 1:1:length(tmp)
         if tmp[j1] == 'F'
           fmt[i1] = Float32
@@ -327,9 +327,9 @@ function readuwdf(datafile::AbstractString; v=false::Bool)
           fmt[i1] = Int16
         end
       end
-      push!(compflg, replace(ascii(read(fid, UInt8, 4)),"\0",""))
-      push!(chid, replace(ascii(read(fid, UInt8, 4)),"\0",""))
-      push!(expan2, replace(ascii(read(fid, UInt8, 4)),"\0",""))
+      push!(compflg, replace(String(read(fid, UInt8, 4)),"\0",""))
+      push!(chid, replace(String(read(fid, UInt8, 4)),"\0",""))
+      push!(expan2, replace(String(read(fid, UInt8, 4)),"\0",""))
     end
 
     for i in collect(keys(S))
@@ -380,7 +380,7 @@ function r_uw(filename::String; v=false::Bool)
   filename = realpath(filename)
   pickfile = ""
   datafile = ""
-  ec = UInt8(filename[end])
+  ec = Char(filename[end])
   lc = collect(0x61:1:0x7a)
   if Base.in(ec,lc)
     pickfile = filename

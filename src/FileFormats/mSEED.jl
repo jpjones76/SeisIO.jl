@@ -5,7 +5,7 @@ function parsesl(S::SeisData, buf::IOBuffer; v=false::Bool, vv=false::Bool)
   end
   while !eof(buf)
     if v || vv
-      id = ascii(read(buf,UInt8,8))
+      id = String(read(buf,UInt8,8))
       @printf(STDOUT, "%s, ", id)
     else
       skip(buf, 8)
@@ -262,7 +262,7 @@ function parserec(S::SeisData, sid; v=false::Bool, vv=false::Bool, fmt=10::Int)
 
     # Get and parse nibbles
     vals = flipdim(collect(UInt32(0):UInt32(2):UInt32(30)),1)
-    nibbles = (repmat(frame32[1,:], 16, 1) .>> repmat(vals,1,size(frame32,2))) & 3
+    nibbles = (repmat(frame32[1:1,:], 16, 1) .>> repmat(vals,1,size(frame32,2))) & 3
     x0 = bitsplit(frame32[2,1],32,32)[1]
     xn = bitsplit(frame32[3,1],32,32)[1]
 
