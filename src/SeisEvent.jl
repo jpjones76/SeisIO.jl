@@ -73,5 +73,4 @@ show(io::IO, S::SeisEvent) = (
   println(io, "\n(.data)");
   show(S.data);
   )
-show(S::SeisHdr) = show(STDOUT, S)
 summary(S::SeisEvent) = string(typeof(S))

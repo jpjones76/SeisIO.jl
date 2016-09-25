@@ -294,7 +294,7 @@ function merge!(S::SeisObj, U::SeisObj)
 
   # Empty channel(s)
   isempty(U.x) && (return S)
-  isempty(S.x) && ([S.(i) = deepcopy(U.(i)) for i in fieldnames(S)]; return S)
+  isempty(S.x) && ([setfield!(S,i,deepcopy(getfield(U,i))) for i in fieldnames(S)]; return S)
 
   # Two full channels
   S.fs != U.fs && error("Sampling frequency mismatch; correct manually.")
@@ -425,7 +425,7 @@ In-place sort of channels in SeisData object S by S.id. Specify rev=true
 to reverse the sort order.
 """
 sort!(S::SeisData; rev=false) = (j = sortperm(S.id, rev=rev);
-  [S.(i) = S.(i)[j] for i in datafields(S)])
+  [setfield!(S,i,getfield(S,i)[j]) for i in datafields(S)])
 
 """
     T = sort(S, [rev=false])
@@ -433,4 +433,4 @@ sort!(S::SeisData; rev=false) = (j = sortperm(S.id, rev=rev);
 Sort channels in SeisData object S by S.id. Specify rev=true for reverse order.
 """
 sort(S::SeisData; rev=false) = (T = deepcopy(S); j = sortperm(T.id, rev=rev);
-  [T.(i) = T.(i)[j] for i in datafields(T)]; return(T))
+  [setfield!(T,i,getfield(T,i)[j]) for i in datafields(T)]; return(T))
