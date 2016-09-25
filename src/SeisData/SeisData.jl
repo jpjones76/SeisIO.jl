@@ -15,31 +15,31 @@ Create a single channel instance of univariate geophysical data. See
 documentation for information on fields.
 """
 type SeisObj
-  name::ASCIIString
-  id::ASCIIString
+  name::String
+  id::String
   fs::Float64
   gain::Float64
   loc::Array{Float64,1}
-  misc::Dict{ASCIIString,Any}
-  notes::Array{ASCIIString,1}
+  misc::Dict{String,Any}
+  notes::Array{String,1}
   resp::Array{Complex{Float64},2}
-  src::ASCIIString
+  src::String
   t::Array{Int64,2}
   x::Array{Float64,1}
-  units::ASCIIString
+  units::String
 
-  SeisObj(;name=""::ASCIIString,
-          id=""::ASCIIString,
+  SeisObj(;name=""::String,
+          id=""::String,
           fs=0.0::Float64,
           gain=1.0::Float64,
           loc=Array{Float64,1}()::Array{Float64,1},
-          misc=Dict{ASCIIString,Any}()::Dict{ASCIIString,Any},
-          notes=Array{ASCIIString,1}()::Array{ASCIIString,1},
+          misc=Dict{String,Any}()::Dict{String,Any},
+          notes=Array{String,1}()::Array{String,1},
           resp=Array{Complex{Float64},2}(0,2)::Array{Complex{Float64},2},
-          src=""::ASCIIString,
+          src=""::String,
           t=Array{Int64,2}(0,2)::Array{Int64,2},
           x=Array{Float64,1}()::Array{Float64,1},
-          units=""::ASCIIString) = begin
+          units=""::String) = begin
      return new(name, id, fs, gain, loc, misc, notes, resp, src, t, x, units)
   end
 end
@@ -54,33 +54,33 @@ structure has the same fields as a SeisObj, but they cannot be set at creation.
 """
 type SeisData
   n::Int64
-  name::Array{ASCIIString,1}                   # name
-  id::Array{ASCIIString,1}                     # id
-  fs::Array{Float64,1}                         # fs
-  gain::Array{Float64,1}                       # gain
-  loc::Array{Array{Float64,1},1}               # loc
-  misc::Array{Dict{ASCIIString,Any},1}         # misc
-  notes::Array{Array{ASCIIString,1},1}         # notes
-  resp::Array{Array{Complex{Float64},2},1}     # resp
-  src::Array{ASCIIString,1}                    # src
-  t::Array{Array{Int64,2},1}                 # time
-  x::Array{Array{Float64,1},1}                 # data
-  units::Array{ASCIIString,1}                  # units
+  name::Array{String,1}                       # name
+  id::Array{String,1}                         # id
+  fs::Array{Float64,1}                        # fs
+  gain::Array{Float64,1}                      # gain
+  loc::Array{Array{Float64,1},1}              # loc
+  misc::Array{Dict{String,Any},1}             # misc
+  notes::Array{Array{String,1},1}             # notes
+  resp::Array{Array{Complex{Float64},2},1}    # resp
+  src::Array{String,1}                        # src
+  t::Array{Array{Int64,2},1}                  # time
+  x::Array{Array{Float64,1},1}                # data
+  units::Array{String,1}                      # units
 
   SeisData(;
     n=0::Int64,
-    name=Array{ASCIIString,1}(),                  # name
-    id=Array{ASCIIString,1}(),                    # id
-    fs=Array{Float64,1}(),                        # fs
-    gain=Array{Float64,1}(),                      # gain
-    loc=Array{Array{Float64,1},1}(),              # loc
-    misc=Array{Dict{ASCIIString,Any},1}(),        # misc
-    notes=Array{Array{ASCIIString,1},1}(),        # notes
-    resp=Array{Array{Complex{Float64},2},1}(),    # resp
-    src=Array{ASCIIString,1}(),                   # src
-    t=Array{Array{Int64,2},1}(),                # time
-    x=Array{Array{Float64,1},1}(),                # data
-    units=Array{ASCIIString,1}()                  # units
+    name=Array{String,1}(),                   # name
+    id=Array{String,1}(),                     # id
+    fs=Array{Float64,1}(),                    # fs
+    gain=Array{Float64,1}(),                  # gain
+    loc=Array{Array{Float64,1},1}(),          # loc
+    misc=Array{Dict{String,Any},1}(),         # misc
+    notes=Array{Array{String,1},1}(),         # notes
+    resp=Array{Array{Complex{Float64},2},1}(),# resp
+    src=Array{String,1}(),                    # src
+    t=Array{Array{Int64,2},1}(),              # time
+    x=Array{Array{Float64,1},1}(),            # data
+    units=Array{String,1}()                   # units
     ) = begin
       return new(n, name, id, fs, gain, loc, misc, notes, resp, src, t, x, units)
   end
@@ -145,7 +145,7 @@ end
 
 # I can only make this work with a dict
 function getindex(S::SeisData, j::Int)
-  A = Dict{ASCIIString,Any}()
+  A = Dict{String,Any}()
   [A[string(v)] = deepcopy(getfield(S, v)[j]) for v in datafields(S)]
   return SeisObj(name=A["name"],
                  id=A["id"],
@@ -349,7 +349,7 @@ end
 
 # Extract to SeisObj
 """
-    T = pull(S::SeisData, n::ASCIIString)
+    T = pull(S::SeisData, n::String)
 
 Extract the first channel named `n` from `S` and return it as a SeisObj structure.
 
@@ -357,7 +357,7 @@ Extract the first channel named `n` from `S` and return it as a SeisObj structur
 
 Extract channel `i` from `S` as a SeisObj.
 """
-pull(S::SeisData, n::ASCIIString) = (i = findname(n, S); T = getindex(S, i);
+pull(S::SeisData, n::String) = (i = findname(n, S); T = getindex(S, i);
   delete!(S,i); note(T, "Extracted from a SeisData object"); return T)
 pull(S::SeisData, i::Integer) = (T = getindex(S, i); delete!(S,i);
   note(T, "Extracted from a SeisData object"); return T)
@@ -380,7 +380,7 @@ end
 # Adding a string to SeisData writes a note; if the string begins with a
 # channel name, the note is restricted to the given channel, else it's
 # added to all channels
-function +(S::SeisData, s::ASCIIString)
+function +(S::SeisData, s::String)
   local T = deepcopy(S)
   name,note = split(s, r"[:]", limit=2)
   t = split(string(now()), 'T')[2]
@@ -399,13 +399,13 @@ function +(S::SeisData, s::ASCIIString)
 end
 
 # Adding a string to a SeisObj simply appends it to the "notes" setion
-+(S::SeisObj, s::ASCIIString) = cat(1, S.notes, string(string(now()), 'T')[2], "  ", s)
++(S::SeisObj, s::String) = cat(1, S.notes, string(string(now()), 'T')[2], "  ", s)
 
 # Rules for deleting
 -(S::SeisData, i::Int) = deleteat!(S,i)                       # By channel #
 -(S::SeisData, J::Array{Int64,1}) = deleteat!(S,J)            # By array of channel #s
 -(S::SeisData, J::Range) = deleteat!(S,J)                     # By range of channel #s
--(S::SeisData, str::ASCIIString) = ([deleteat!(S,k) for k in unique([find(S.id .== str); find(S.name .== str)])]; return S) #Name or ID match
+-(S::SeisData, str::String) = ([deleteat!(S,k) for k in unique([find(S.id .== str); find(S.name .== str)])]; return S) #Name or ID match
 -(S::SeisData, T::SeisObj) = ([deleteat!(S,i) for i in find(S.id .== T.i)]; return S) # By SeisObj
 
 # Tests for equality

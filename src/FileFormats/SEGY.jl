@@ -1,4 +1,4 @@
-settracecode(S::Dict{ASCIIString,Any}) = (tc = ["Local", "GMT", "Other", "UTC"];
+settracecode(S::Dict{String,Any}) = (tc = ["Local", "GMT", "Other", "UTC"];
   try S["tc"] = tc[S["tc"]]; end)
 
 function getsegunit(i)
@@ -103,7 +103,7 @@ This is the default for most industry SEG Y rev 1 data.
 Parse standard-format SEGY stream sid in little endian byte order.
 """
 function psegstd(fid; b=true::Bool)
-  F = Dict{ASCIIString,Any}()
+  F = Dict{String,Any}()
   types = [UInt32, Int32, Int16, Any, Float32, Any, Any, Int8]
 
   # Header strings
@@ -133,7 +133,7 @@ function psegstd(fid; b=true::Bool)
   merge!(F, Dict(zip(h_s,h_v)))
   b && [F[i] = bswap(F[i]) for i in collect(keys(F))]
   if nETH > 0
-    extTxtHdr = Array{ASCIIString,1}(nETH)
+    extTxtHdr = Array{String,1}(nETH)
     for i = 1:1:nETH
       extTxtHdr[i]          = replace(join(read(fid, Cchar, 3200)),"\0"," ")
     end
@@ -145,9 +145,9 @@ function psegstd(fid; b=true::Bool)
   F["txtHdr"]  = replace(txtHdr,"\0"," ")
   F["fmt"]     = types[F["fmt"]]
 
-  S = Array{Dict{ASCIIString,Any},1}(F["nTrace"])
+  S = Array{Dict{String,Any},1}(F["nTrace"])
   for k = 1:1:F["nTrace"]
-    T = Dict{ASCIIString,Any}()
+    T = Dict{String,Any}()
     reel_v                  = read(fid, Int32, 7)
     short_v_1               = read(fid, Int16, 4)
     sr_v                    = read(fid, Int32, 8)
@@ -207,9 +207,9 @@ Parse SEGY stream f (Segy rev 0 mod_PASSCAL/NMT).
 
 Parse SEGY stream f (Segy rev 0 mod_PASSCAL/NMT).
 """
-function pseg(fid; f="nmt"::ASCIIString, h=false::Bool)
+function pseg(fid; f="nmt"::String, h=false::Bool)
   if Base.in(f,["passcal", "nmt"])
-    S = Dict{ASCIIString,Any}()
+    S = Dict{String,Any}()
 
     # Strings
     reel_s, short_s_1, sr_s,
@@ -273,8 +273,8 @@ end
 single-channel dictionary; for standard SEG Y dictionaries, operate on one
 channel `k` at a time with `S = segy2sac(SEG[k])`.
 """
-function segytosac(SEG::Dict{ASCIIString,Any})
-  S = Dict{ASCIIString,Any}()
+function segytosac(SEG::Dict{String,Any})
+  S = Dict{String,Any}()
 
   # Create SAC headers
   S["b"] = Float32(0)
@@ -307,25 +307,25 @@ function segytosac(SEG::Dict{ASCIIString,Any})
 end
 
 """
-    r_segy(fid::ASCIIString; [f="nmt","std"])
+    r_segy(fid::String; [f="nmt","std"])
 
 Read a SEG Y file into dictionary. Specify f="nmt" for PASSCAL/NMT SEG Y rev 0.
 """
-r_segy(fid::ASCIIString; f="nmt"::ASCIIString) = pseg(open(fid,"r"), f=f)
+r_segy(fid::String; f="nmt"::String) = pseg(open(fid,"r"), f=f)
 
 """
-    segyhdr(S::Dict{ASCIIString,Any})
+    segyhdr(S::Dict{String,Any})
 
 Print SEG Y headers to STDOUT.
 """
-segyhdr(S::Dict{ASCIIString,Any}) = [(i != "data" && (println(i, ": ", S[i]))) for i in sort(collect(keys(S)))]
+segyhdr(S::Dict{String,Any}) = [(i != "data" && (println(i, ": ", S[i]))) for i in sort(collect(keys(S)))]
 
 """
-    S = segytoseis(SEG::Dict{ASCIIString,Any})
+    S = segytoseis(SEG::Dict{String,Any})
 
 Convert SEG Y dictionary `SEG` to a SeisData object.
 """
-function segytoseis(S::Dict{ASCIIString,Any})
+function segytoseis(S::Dict{String,Any})
   fs = 1/S["delta"]
   if haskey(S, "kstnm")
     sta = S["kstnm"]
@@ -372,17 +372,17 @@ function segytoseis(S::Dict{ASCIIString,Any})
   return SeisObj(name=name, id=id, x=x, t=t, gain=1.0, fs=fs, units=units,
     src=S["src"], loc=loc)
 end
-segytoseis(SEG::Array{Dict{ASCIIString,Any},1}) = (S = SeisData();
+segytoseis(SEG::Array{Dict{String,Any},1}) = (S = SeisData();
   [S += segytoseis(SEG[i]) for i=1:length(SEG)]; return S)
 
 
 """
-    readsegy(fname::ASCIIString; [f="nmt","std"])
+    readsegy(fname::String; [f="nmt","std"])
 
 Read a SEG Y file into a SeisData object. Specify f="nmt" for PASSCAL/NMT SEG
 Y rev 0.
 """
-function readsegy(fname::ASCIIString; f="std"::ASCIIString)
+function readsegy(fname::String; f="std"::String)
   S = segytoseis(pseg(open(fname,"r"), f=f))
   note(S, fname)
   return(S)

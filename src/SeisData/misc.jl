@@ -155,8 +155,8 @@ Start time can be synchronized to a variety of values:
 * numeric, datetime, and other string values are as for `ST`.
 """
 function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
-  s="max"::Union{ASCIIString,Real,DateTime},
-  t="max"::Union{ASCIIString,Real,DateTime})
+  s="max"::Union{String,Real,DateTime},
+  t="max"::Union{String,Real,DateTime})
 
   # Do not edit order of operations
   ungap!(S, m=false, w=false)
@@ -392,7 +392,7 @@ Insert arbitrary network code NET at the start of all IDs with no specified
 network (i.e. IDs that begin with a '.'). Only the first two characters of NET
 are used.
 """
-function add_fake_net!(S::SeisData, str::ASCIIString)
+function add_fake_net!(S::SeisData, str::String)
   if length(str) > 2
     str = str[1:2]
   end

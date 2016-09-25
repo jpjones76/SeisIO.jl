@@ -18,8 +18,8 @@ function int4_2c(s::Array{Int32,1})
   return dot(p, s[1:4]), dot(p, s[5:8])
 end
 
-function win32dict(Nh::UInt16, cinfo::ASCIIString, hexID::ASCIIString, StartTime::Float64, orgID::ASCIIString, netID::ASCIIString)
-  k = Dict{ASCIIString,Any}()
+function win32dict(Nh::UInt16, cinfo::String, hexID::String, StartTime::Float64, orgID::String, netID::String)
+  k = Dict{String,Any}()
   k["hexID"] = hexID
   k["orgID"] = orgID
   k["netID"] = netID
@@ -67,9 +67,9 @@ channel file `chanfile`, into dictionary S. Keys correspond to win32
 
 
 """
-function r_win32(filestr::ASCIIString, cf::ASCIIString; v=false)
+function r_win32(filestr::String, cf::String; v=false)
   Chans = getcha(cf)
-  seis = Dict{ASCIIString,Any}()
+  seis = Dict{String,Any}()
   files = lsw(filestr)
   nf = 0
   for fname in files
@@ -177,11 +177,11 @@ function r_win32(filestr::ASCIIString, cf::ASCIIString; v=false)
   return seis
 end
 
-function win32toseis(D = Dict{ASCIIString,Any}())
+function win32toseis(D = Dict{String,Any}())
   K = sort(collect(keys(D)))
   seis = SeisData()
   for k in K
-    !isa(D[k],Dict{ASCIIString,Any}) && continue
+    !isa(D[k],Dict{String,Any}) && continue
     fs = D[k]["fs"]
     units = D[k]["unit"]
     (net, sta, chan_stub) = split(k, '.')
@@ -210,7 +210,7 @@ function win32toseis(D = Dict{ASCIIString,Any}())
              string(now, "  Location comment: ", D[k]["comment"]);
              string(now, "  Read from file ", D["fname"]);
              string(now, "  Channel file ", D["cfile"])]
-    misc = Dict{ASCIIString,Any}()
+    misc = Dict{String,Any}()
     if units == "m/s"
       resp = fctopz(fc, hc=hc, units=units)
     else
@@ -241,5 +241,5 @@ Read all win32 data matching string pattern `filestr`, with corresponding
 channel file `chanfile`; return a seisdata object S.
 
 """
-readwin32(f::ASCIIString, c::ASCIIString; v=false::Bool) = (
+readwin32(f::String, c::String; v=false::Bool) = (
   D = r_win32(f, c, v=v); return(win32toseis(D)))

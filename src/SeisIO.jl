@@ -2,11 +2,13 @@ VERSION >= v"0.4.0" && __precompile__(true)
 module SeisIO
 export SeisObj, SeisData, findname, findid, hasid, hasname,    # SeisData/SeisData.jl
 samehdr, t_expand, t_collapse, pull, note,
+ SeisHdr, SeisEvent,                                           # SeisEvent.jl
 getbandcode, prune!, purge, purge!, gapfill!,                  # SeisData/misc.jl
 gapfill, ungap!, ungap, sync!, sync, autotap!,
 randseisobj, randseisdata,                                     # SeisData/randseis.jl
 wseis, rseis, writesac,                                        # SeisData/fileio.jl
 FDSNget, IRISget, irisws, SeedLink,                            # Web services
+get_uhead, GetSta,                                             # Web/WebMisc.jl
 readuwpf, readuwdf, readuw, uwtoseis, r_uw,                    # UW
 prunesac!, psac, r_sac, sacwrite, chksac, sachdr,              # SAC
 get_sac_keys, get_sac_fw, get_sac_iw, sactoseis,
@@ -46,6 +48,10 @@ include("FileFormats/BatchProc.jl")   # SAC is the old IRIS standard; very easy 
 include("WebClients/IRIS.jl")
 include("WebClients/FDSN.jl")
 include("WebClients/SeedLink.jl")
+include("WebClients/WebMisc.jl")      # Common functions for web data access
 
+include("SeisEvent.jl")               # Classes for discrete events and event headers
 include("Utils/resp.jl")              # Instrument response
+
+
 end

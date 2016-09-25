@@ -4,8 +4,8 @@ using Requests: get
 function parse_FDSN_xml(xsta::XMLDocument)
   badchars = ['\0', '\ ']
   N = get_elements_by_tagname(root(xsta), "Network")
-  ids = Array{ASCIIString,1}()
-  units = Array{ASCIIString,1}()
+  ids = Array{String,1}()
+  units = Array{String,1}()
   locs = Array{Float64,2}(5,0)
   normfacs = Array{Float64,1}()
   resps = Array{Array{Complex128,2},1}()
@@ -89,8 +89,8 @@ function parse_FDSN_xml(xsta::XMLDocument)
 end
 
 function FDSNprep!(S::SeisData,
-  ids::Array{ASCIIString,1},
-  units::Array{ASCIIString,1},
+  ids::Array{String,1},
+  units::Array{String,1},
   gains::Array{Float64,1},
   normfacs::Array{Float64,1},
   locs::Array{Float64,2},
@@ -138,12 +138,12 @@ Retrieved data begin `t` seconds before `s`. `t` is interpreted as a duration.
 
 * `s=0`: End at start of current minute on your system.
 * `s` ∈ {Int, Float64}: `s` is treated as Unix (Epoch) time in seconds.
-* `s` ∈ {DateTime, ASCIIString}: Backfill ends at `s`.
+* `s` ∈ {DateTime, String}: Backfill ends at `s`.
 
 ### Time Specification for Range Retrieval
 Passing a string or DateTime object with keyword `t` sets the mode to range
 retrieval. Retrieved data begin at `s` and end at `t`. `s` can be a DateTime
-object or ASCIIString.
+object or String.
 
 ### Example
 * `S = FDSNget(net="CC,UW", sta="SEP,SHW,HSR,VALT", cha="*", t=600)`: Get the
@@ -160,37 +160,22 @@ requests.
 * Northern California Earthquake Data Center: http://service.ncedc.org/fdsnws/
 * GFZ Potsdam: http://geofon.gfz-potsdam.de/fdsnws/
 """
-function FDSNget(; src="IRIS"::ASCIIString,
-                   net="UW,CC"::ASCIIString,
-                   sta="PALM,TDH,VLL"::ASCIIString,
-                   loc="--"::ASCIIString,
-                   cha="???"::ASCIIString,
-                   q="data"::ASCIIString,
-                   Q="B"::ASCIIString,
-                   s=0::Union{Real,DateTime,ASCIIString},
-                   t=600::Union{Real,DateTime,ASCIIString},
+function FDSNget(; src="IRIS"::String,
+                   net="UW,CC"::String,
+                   sta="PALM,TDH,VLL"::String,
+                   loc="--"::String,
+                   cha="???"::String,
+                   q="data"::String,
+                   Q="B"::String,
+                   s=0::Union{Real,DateTime,String},
+                   t=600::Union{Real,DateTime,String},
                    v=false::Bool,
                    vv=false::Bool,
                    y=true::Bool,
                    to=10::Real)
   hdr = Dict("UserAgent" => "Julia-SeisIO-FSDN.jl/0.0.1")
-  if isa(s, Union{DateTime,ASCIIString}) && isa(t, Union{DateTime,ASCIIString})
-    d0 = s
-    d1 = t
-  else
-    d0, d1 = parsetimewin(s, t)
-  end
-  if src == "IRIS"
-    uhead = "http://service.iris.edu/fdsnws/"
-  elseif src == "GFZ"
-    uhead = "http://geofon.gfz-potsdam.de/fdsnws/"
-  elseif src == "RESIF"
-    uhead = "http://ws.resif.fr/fdsnws/"
-  elseif src == "NCSN"
-    uhead = "http://service.ncedc.org/fdsnws/"
-  else
-    uhead = src
-  end
+  d0, d1 = parsetimewin(s, t)
+  uhead = get_uhead(src)
   utail = @sprintf("net=%s&sta=%s&loc=%s&cha=%s&start=%s&end=%s",
                    net, sta, loc, cha, d0, d1)
   station_url = string(uhead, "station/1/query?level=response&", utail)

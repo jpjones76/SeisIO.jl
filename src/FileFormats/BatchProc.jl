@@ -18,7 +18,7 @@ FILESTR supports wildcard filenames, but not directories. Thus,
 
 Batch read and resample to FS Hz.
 """
-function batch_read(files::Array{ByteString,1}; ftype="SAC"::ASCIIString, fs=0.0::Float64)
+function batch_read(files::Array{ByteString,1}; ftype="SAC"::String, fs=0.0::Float64)
   NF = length(files)
 
   # Parallelize file info read into shared arrays
@@ -104,8 +104,8 @@ function batch_read(files::Array{ByteString,1}; ftype="SAC"::ASCIIString, fs=0.0
   end
   return S
 end
-batch_read(filestr::ASCIIString; ftype="SAC"::ASCIIString, fs=0.0::Float64) = batch_read(lsw(filestr), ftype=ftype, fs = fs)
-batch_read(files::Array{ASCIIString,1}; ftype="SAC"::ASCIIString, fs=0.0::Float64) = (
+batch_read(filestr::String; ftype="SAC"::String, fs=0.0::Float64) = batch_read(lsw(filestr), ftype=ftype, fs = fs)
+batch_read(files::Array{String,1}; ftype="SAC"::String, fs=0.0::Float64) = (
   tmp = convert(Array{ByteString,1}, [bytestring(f) for f in files]);
   batch_read(tmp, ftype=ftype, fs=fs))
 
@@ -244,7 +244,7 @@ function getsach(
   n = length(files)
   i = 1
   nextj() = (j=i; i+=1; j)    # Next index
-  id = Array{ASCIIString,1}(n)
+  id = Array{String,1}(n)
   @sync begin
     for p=1:np
       if p != myid() || np == 1
@@ -307,7 +307,7 @@ function getsegh(
   np = nprocs()
   n = length(files)
   ftype = Array{Type,1}(n)
-  id = Array{ASCIIString,1}(n)
+  id = Array{String,1}(n)
   i = 1
   nextj() = (j=i; i+=1; j)    # Next index
   @sync begin

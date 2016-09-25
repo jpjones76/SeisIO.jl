@@ -27,15 +27,15 @@ function get_sac_keys()
   return (sacFloatKeys,sacIntKeys, sacCharKeys)
 end
 
-get_sac_fw(k::ASCIIString) = ((F, I, C) = get_sac_keys(); findfirst(F .== k))
-get_sac_iw(k::ASCIIString) = ((F, I, C) = get_sac_keys(); findfirst(I .== k))
+get_sac_fw(k::String) = ((F, I, C) = get_sac_keys(); findfirst(F .== k))
+get_sac_iw(k::String) = ((F, I, C) = get_sac_keys(); findfirst(I .== k))
 
 """
-    prunesac!(S::Dict{ASCIIString,Any})
+    prunesac!(S::Dict{String,Any})
 
 Auto-prune unset SAC headers.
 """
-function prunesac!(S::Dict{ASCIIString,Any})
+function prunesac!(S::Dict{String,Any})
   (sacFloatKeys,sacIntKeys, sacCharKeys) = get_sac_keys()
   for i in cat(1,sacFloatKeys,sacIntKeys)
     if haskey(S, i)
@@ -69,7 +69,7 @@ For generic xy data (IFTYPE==4), by convention, the first NPTS values are read
 into S["data"]; the second NPTS values are returned in S["time"].
 """
 function psac(f; p=false::Bool)
-  S = Dict{ASCIIString,Any}()
+  S = Dict{String,Any}()
   (fk,ik,ck) = get_sac_keys()
   fv = read(f, Float32, 70)
   iv = read(f, Int32, 40)
@@ -102,9 +102,9 @@ Read SAC file fname into a dictionary. Header values are indexed by key, e.g.
 S["delta"] for DELTA. S["data"] contains the trace data.
 
 """
-r_sac(fname::ASCIIString; p=false::Bool) = (S = psac(open(fname,"r"), p=p))
+r_sac(fname::String; p=false::Bool) = (S = psac(open(fname,"r"), p=p))
 
-function sacwrite(fname::ASCIIString, sacFloats::Array{Float32,1},
+function sacwrite(fname::String, sacFloats::Array{Float32,1},
   sacInts::Array{Int32,1}, sacChars::Array{UInt8,1}, x::Array{Float32,1};
   t=[Float32(0)]::Array{Float32,1}, ts=true::Bool)
   f = open(fname, "w")
@@ -120,11 +120,11 @@ function sacwrite(fname::ASCIIString, sacFloats::Array{Float32,1},
 end
 
 """
-    chksac(S::Dict{ASCIIString,Any})
+    chksac(S::Dict{String,Any})
 
 Check for required and recommended headers in SAC dictionary S.
 """
-function chksac(S::Dict{ASCIIString,Any})
+function chksac(S::Dict{String,Any})
   req = ["nzyear","nzjday","nzhour","nzmin","nzsec","nzmsec",
          "npts","nvhdr", "b", "e", "iftype", "leven", "delta"]
   nrec = ["stla", "stlo", "stel"]
@@ -174,15 +174,15 @@ function chksac(S::Dict{ASCIIString,Any})
 end
 
 """
-    sachdr(S::Dict{ASCIIString,Any})
+    sachdr(S::Dict{String,Any})
 
 Print SAC headers in SAC dictionary S to STDOUT.
 """
-sachdr(S::Dict{ASCIIString,Any}) = [(i != "data" && (println(i, ": ", S[i])))
+sachdr(S::Dict{String,Any}) = [(i != "data" && (println(i, ": ", S[i])))
   for i in sort(collect(keys(S)))]
 
 """
-    writesac(S::Dict{ASCIIString,Any})
+    writesac(S::Dict{String,Any})
 
 Write SAC dictionary S to SAC file. Name convention is auto-determined by time
 headers (NZYEAR--NZMSEC), KNETWK, KSTNM, and KCMPNM; default is sacfile.SAC.
@@ -197,7 +197,7 @@ Specify ts=true to time stamp data. If S has a "time" key, all values in
 S["time"] are written blindly as time stamps. Otherwise, time stamps are
 written as delta-encoded integer multiples of S["delta"], with t[1] = 0.
 """
-function writesac(S::Dict{ASCIIString,Any}; f="auto"::ASCIIString, ts=false::Bool)
+function writesac(S::Dict{String,Any}; f="auto"::String, ts=false::Bool)
   prunesac!(S)
   tdata = Array{Float32}(0)
   !haskey(S, "iftype") && (S["iftype"] = Int32(1))  # Unset in SAC from IRISws
@@ -254,12 +254,12 @@ function writesac(S::Dict{ASCIIString,Any}; f="auto"::ASCIIString, ts=false::Boo
   return
 end
 
-function sactoseis(D::Dict{ASCIIString,Any})
+function sactoseis(D::Dict{String,Any})
   !haskey(D, "nvhdr") && error("Invalid SAC dictionary! (NVHDR not set)")
   D["nvhdr"] == 6 || error("Can't parse old SAC versions! (NVHDR != 6)")
 
   unitstrings = ["nm", "nm/s", "V", "nm/s/s", "unknown"]
-  pha = Dict{ASCIIString,Float64}()
+  pha = Dict{String,Float64}()
   if haskey(D, "idep")
     try
       units = unitstrings[D["idep"]]
@@ -300,6 +300,6 @@ end
 
 Read SAC file `fname` into a SeisObj.
 """
-rsac(fname::Union{ASCIIString,UTF8String}) = (src = fname;
+rsac(fname::Union{String,UTF8String}) = (src = fname;
   S = sactoseis(psac(open(fname,"r"), p=false)); note(S, fname); return S)
-readsac(fname::Union{ASCIIString,UTF8String}) = rsac(fname)
+readsac(fname::Union{String,UTF8String}) = rsac(fname)
