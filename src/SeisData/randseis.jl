@@ -93,7 +93,6 @@ function populate_chan!(S::SeisObj; c=false::Bool)
     'H',  'S',   'E',   'E',   'C']
   seiscodes = ['H','L','N']
   irregular_units = ["K", "tonnes SO2", "rad", "W", "m"]
-
   isempty(S.name) && (S.name = randstring(12))                          # name
   (isempty(S.fs) || S.fs == 0 || isnan(S.fs)) && (S.fs = rand(fs_vals))  # fs
   fc = rand(fc_vals[fc_vals .< S.fs/2])
@@ -129,7 +128,7 @@ function populate_chan!(S::SeisObj; c=false::Bool)
         S.misc[k] = rand(Complex{Float64}, tuple(randcycle(rand(2:5))...))
       else
         k = randstring(rand(6:36))
-        S.misc[k] = Array{ASCIIString,2}(rand(2:5),rand(2:5))
+        S.misc[k] = Array{String,2}(rand(2:5),rand(2:5))
         for i = 1:length(S.misc[k])
           S.misc[k][i] = randstring(rand(1:100))
         end

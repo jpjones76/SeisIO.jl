@@ -163,7 +163,8 @@ end
 
 # overwrite a SeisData channel with a SeisObj
 setindex!(S::SeisData, T::SeisObj, i::Int) =
-  ([S.(v)[i] = T.(v) for v in datafields(T)])
+  #([S.(v)[i] = T.(v) for v in datafields(T)])
+  ([S.(v)[i] = getfield(T,v) for v in datafields(T)])
 
 # overwrite a range of SeisData channels with another SeisData struct
 function setindex!(S::SeisData, T::SeisData, I::Range)
@@ -259,9 +260,13 @@ samehdr(S::SeisData, T::SeisObj, i) = (
 
 # ============================================================================
 # Append, delete
-push!(S::SeisData, T::SeisObj) = ([push!(S.(i),T.(i)) for i in fieldnames(T)]; S.n += 1)
+#push!(S::SeisData, T::SeisObj) = ([push!(S.(i),T.(i)) for i in fieldnames(T)]; S.n += 1)
+#push!(S::SeisData, T::SeisObj) = ([push!(S.(i),getfield(T,i)) for i in fieldnames(T)]; S.n += 1)
+push!(S::SeisData, T::SeisObj) = ([push!(getfield(S,i),getfield(T,i)) for i in fieldnames(T)]; S.n += 1)
 append!(S::SeisData, T::SeisData) = ([push!(S,T[i]) for i = 1:S.n])
-deleteat!(S::SeisData, j::Int) = ([deleteat!(S.(i),j) for i in datafields(S)];
+#deleteat!(S::SeisData, j::Int) = ([deleteat!(S.(i),j) for i in datafields(S)];
+#  S.n -= 1; return S)
+deleteat!(S::SeisData, j::Int) = ([deleteat!(getfield(S, i),j) for i in datafields(S)];
   S.n -= 1; return S)
 deleteat!(S::SeisData, J::Range) = (collect(J); [deleteat!(S, j)
   for j in sort(J, rev=true)]; return S)

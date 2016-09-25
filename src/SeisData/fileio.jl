@@ -106,7 +106,9 @@ function getnum(a)
   isa(a, Integer) && return UInt8(3)
   isa(a, AbstractFloat) && return UInt8(4)
   isa(a, Complex) && return UInt8(5)
-  typeof(a) <: DirectIndexString && return UInt8(6)
+  #typeof(a) <: DirectIndexString && return UInt8(6)
+  # They broke THIS?
+  typeof(a) <: AbstractString && return UInt8(6)
 
   # It is intentional that this syntax causes an error for non-arrays
   t = typeof(a[1])
@@ -117,26 +119,47 @@ function getnum(a)
   t <: Integer && return UInt8(13)
   t <: AbstractFloat && return UInt8(14)
   isa(a[1],AbstractString) || return UInt8(15)
-  t <: DirectIndexString && return UInt8(16)
+  #t <: DirectIndexString && return UInt8(16)
+  t <: AbstractString && return UInt8(16)
   error("Unrecognized type")
+
   # Who needs "switch"
 end
 
-function get_separator(s::AbstractString)
+function get_separator(s::String)
   for i in ['\,', '\\', '!', '\@', '\#', '\$', '\%', '\^', '\&', '\*', '\(',
     '\)', '\+', '\/', '\~', '\`', '\:', '\|']
-    search(s, i) == 0 && return i
+    if search(s, i) == 0
+      return i
+    end
   end
   error("Couldn't set separator")
 end
 
-function write_string_array(io, v)
+# ID codes and their meanings
+# 1 	  Char
+# 2     UInt (*)
+# 3     Int (*)
+# 4     Float (*)
+# 5     Complex Float (*)
+# 6     String
+# 11 	  Array of Chars
+# 12    Array of UInts (*)
+# 13    Array of Ints (*)
+# 14    Array of Floats (*)
+# 15    Complex Array of Complex Float (*)
+# 16    Array of Strings
+#
+# (*)   subcode stored as variable p = precision, in bytes
+
+function write_string_array(io, v::Array{String})
   nd = UInt8(ndims(v))
   d = collect(size(v))
   sep = get_separator(join(v))
   v = join(v, sep)
   write(io, sep, nd, d, length(v.data), v.data)
 end
+write_string_array(io, v::String) = write_string_array(io, [v])
 
 function write_misc(io::IOStream, D::Dict{String,Any})
   P = position(io)
@@ -168,6 +191,9 @@ function write_misc(io::IOStream, D::Dict{String,Any})
       kstr *= ksep
       n_writes += 1
     catch err
+      warn("Failed to write data from Misc. Screen dump of bad data follows.")
+      println("Key = ", k)
+      println("Value = ", D[k])
       warn(err)
       seek(io, p)
     end
@@ -279,7 +305,7 @@ function read_string_array(io)
   nd = read(io, UInt8)
   d = read(io, Int64, nd)
   l = read(io, Int64)
-  A = reshape(collect(split(ascii(read(io, UInt8, l)), sep)), tuple(d[:]...))
+  A = reshape(collect(split(ascii(String(read(io, UInt8, l))), sep)), tuple(d[:]...))
   #println(A[1])
   return A
 end
@@ -293,7 +319,7 @@ function read_misc(io::IOStream)
   seek(io, Q)
   ksep = Char(read(io, UInt8))
   N = read(io, Int64)
-  kstr = ascii(read(io, UInt8, N))
+  kstr = String(read(io, UInt8, N))
   K = split(kstr, ksep)
   Q = position(io)
   seek(io, P)
@@ -329,7 +355,7 @@ function read_misc(io::IOStream)
       p == 16 && (r = read(io, Float32); i = read(io, Float64))
       v = complex(r,i)
     end
-    id == 6 && (l = read(io, Int64); v = ascii(read(io, UInt8, l)))
+    id == 6 && (l = read(io, Int64); v = String(read(io, UInt8, l)))
 
     id == 11 && (nd = read(io, UInt8); d = read(io, Int64, nd);
       v = read(io, Char, tuple(d[:]...)))
@@ -371,12 +397,12 @@ function read_misc(io::IOStream)
 end
 
 function r_seisobj(io::IOStream)
-  name = strip(ascii(read(io, UInt8, 26)))
-  id = strip(ascii(read(io, UInt8, 15)))
-  src = strip(ascii(read(io, UInt8, 26)))
+  name = strip(String(read(io, UInt8, 26)))
+  id = strip(String(read(io, UInt8, 15)))
+  src = strip(String(read(io, UInt8, 26)))
   fs = read(io, Float64)
   gain = read(io, Float64)
-  units = strip(ascii(read(io, UInt8, 26)))
+  units = strip(String(read(io, UInt8, 26)))
   loc = read(io, Float64, 5)
   R = read(io, UInt8)
   if R > 0
@@ -413,7 +439,7 @@ end
 
 function rseis(fname::String; v=false::Bool)
   io = open(fname, "r")
-  c = ascii(read(io, UInt8, 8))
+  c = String(read(io, UInt8, 8))
   c == "SEISDATA" || (close(io); error("Not a SeisData file!"))
   ver = read(io, Float32)
   n_seis = read(io, UInt32)

@@ -78,7 +78,7 @@ function psac(f; p=false::Bool)
   n = 1
   for k = 1:length(ck)
     nn = k == 2 ? 15 : 7
-    S[ck[k]] = replace(strip(ascii(cv[n : n + nn])),"\0","")
+    S[ck[k]] = replace(strip(ascii(String(cv[n : n + nn]))),"\0","")
     n += (nn+1)
   end
 

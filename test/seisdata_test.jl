@@ -33,7 +33,7 @@ println("...init...")
 S = SeisData()
 for i in fieldnames(S)
   if i != :n
-    @test_approx_eq(isempty([]), isempty(S.(i)))
+    @test_approx_eq(isempty([]), isempty(getfield(S,i)))
   end
 end
 
@@ -89,7 +89,7 @@ println("...channel delete...")
 S -= 1
 for i in fieldnames(S)
   if i != :n
-    @test_approx_eq(isempty([]), isempty(S.(i)))
+    @test_approx_eq(isempty([]), isempty(getfield(S,i)))
   end
 end
 

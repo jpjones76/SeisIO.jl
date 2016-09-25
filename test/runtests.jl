@@ -1,11 +1,11 @@
 using Base.Test, Compat
 using SeisIO
 
-include("./timeaux_test.jl")
-include("./sac_test.jl")
-include("./seisdata_test.jl")
-include("./fileio_test.jl")
-include("./file_formats.jl")
+# include("./timeaux_test.jl")
+# include("./sac_test.jl")
+# include("./seisdata_test.jl")
+# include("./fileio_test.jl")
+# include("./file_formats.jl")
 include("./fdsn_test.jl")
 include("./iris_test.jl")
 include("./seedlink_test.jl")
