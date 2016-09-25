@@ -51,7 +51,7 @@ end
 Generate epoch time `t` from SAC dictionary `S`. `S` must contain all relevant
 time headers (NZYEAR, NZJDAY, NZHOUR, NZMIN, NZSEC, NSMSEC).
 """
-function sac2epoch(S::Dict{ASCIIString,Any})
+function sac2epoch(S::Dict{String,Any})
   y = convert(Int64,S["nzyear"])
   j = convert(Int64,S["nzjday"])
   m,d = j2md(y,j)
@@ -67,22 +67,22 @@ DateTime objects, or create a pair of DateTime objects with `d0` as the start
 datetime and `d1` as the end.
 """
 function parsetimewin(s, t)
-  if isa(s,Union{DateTime,ASCIIString}) && isa(t,Union{DateTime,ASCIIString})
-    if typeof(s) == ASCIIString
+  if isa(s,Union{DateTime,String}) && isa(t,Union{DateTime,String})
+    if typeof(s) == String
       d0 = DateTime(s)
     else
       d0 = s
     end
-    if typeof(t) == ASCIIString
+    if typeof(t) == String
       d1 = DateTime(t)
     else
       d1 = t
     end
     return d0, d1
 
-  # t::Union{ASCIIString,DateTime} --> start at s, end at t
-  elseif isa(t,Union{ASCIIString,DateTime}) && isa(s,Union{Float64,Int})
-    if typeof(t) == ASCIIString
+  # t::Union{String,DateTime} --> start at s, end at t
+  elseif isa(t,Union{String,DateTime}) && isa(s,Union{Float64,Int})
+    if typeof(t) == String
       d1 = DateTime(t)
     else
       d1 = t
@@ -100,7 +100,7 @@ function parsetimewin(s, t)
     d0 = u2d(t1-t)
     d1 = u2d(t1)
   else
-    if typeof(s) == ASCIIString
+    if typeof(s) == String
       d1 = DateTime(s)
     elseif typeof(s) == DateTime
       d1 = s

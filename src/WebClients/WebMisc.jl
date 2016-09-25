@@ -50,7 +50,7 @@ function GetSta(config_file::String;
   S = GetSta(chans, src=src, st=st, et=et, to=to, v=v, vv=vv)
   return S
 end
-function GetSta(chans::Union{Array{UTF8String,2},Array{String,2}};
+function GetSta(chans::Array{String,2})
   src="IRIS"::AbstractString,
   st="2011-01-08T00:00:00"::Union{Real,DateTime,String},
   et="2011-01-09T00:00:00"::Union{Real,DateTime,String},
