@@ -1,4 +1,4 @@
-function lsw(filestr::ASCIIString)
+function lsw(filestr::String)
   d, f = splitdir(filestr)
   i = search(f, '*')
   if !isempty(i)
