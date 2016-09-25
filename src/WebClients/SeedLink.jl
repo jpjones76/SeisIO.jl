@@ -72,11 +72,11 @@ end
 Retrieve real-time data via. SeedLink in TIME mode for channels specified by
 ASCII array chanlist. See documentation for keyword options.
 """
-function SeedLink(chans::Array{ASCIIString,1};
-  addr="rtserve.iris.washington.edu"::ASCIIString,
+function SeedLink(chans::Array{String,1};
+  addr="rtserve.iris.washington.edu"::String,
   port=18000::Integer,
-  patts=["*"]::Array{ASCIIString,1},
-  mode="TIME"::ASCIIString,   # only "TIME" is currently supported
+  patts=["*"]::Array{String,1},
+  mode="TIME"::String,        # only "TIME" is currently supported
   s=0.0::Float64,             # start time. Set to 0.0 for "current second"
   t=120.0::Float64,           # time length (seconds).
   to=60::Real,                # timeout (seconds)
@@ -107,7 +107,7 @@ function SeedLink(chans::Array{ASCIIString,1};
   vv && println("Server = ", strip(sline,['\r','\n']))
 
   N = length(chans)
-  if ver < 2.5 && isa(chans, Array{ASCIIString,1})
+  if ver < 2.5 && isa(chans, Array{String,1})
     error(@sprintf("Multi-station mode unsupported in SeedLink v%.1f", ver))
   elseif ver < 2.92 && mode == "TIME"
     error(@sprintf("Mode \"TIME\" not available in SeedLink v%.1f", ver))
@@ -156,10 +156,10 @@ end
 Retrieve real-time data via. SeedLink in TIME mode for channels specified in
 file config_file. See documentation for keyword options.
 """
-function SeedLink(config_file::ASCIIString;
-  addr="rtserve.iris.washington.edu"::ASCIIString,
+function SeedLink(config_file::String;
+  addr="rtserve.iris.washington.edu"::String,
   port=18000::Integer,
-  mode="TIME"::ASCIIString,
+  mode="TIME"::String,
   s=0.0::Float64,
   t=120.0::Float64,
   N=32::Integer,
@@ -170,8 +170,8 @@ function SeedLink(config_file::ASCIIString;
 
   !isfile(config_file) && error("First argument must be a string array or config filename")
   conf = filter(i -> !startswith(strip(i, ['\r', '\n']), ['\#','\*']), open(readlines, config_file))
-  chans = Array{ASCIIString,1}()
-  patts = Array{ASCIIString,1}()
+  chans = Array{String,1}()
+  patts = Array{String,1}()
   for i = 1:length(conf)
     try
       (net, sta, sel) = split(strip(conf[i],['\r','\n']), ' ', limit=3)

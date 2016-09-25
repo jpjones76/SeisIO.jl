@@ -1,5 +1,5 @@
 import Base:summary, show
-const screenwid = Base.tty_size()[2]-2
+const screenwid = Base.displaysize()[2]-2
 
 function strtrunc(str::AbstractString; wid=screenwid::Integer)
   L = length(str)
@@ -38,7 +38,7 @@ function long_loc(loc::Array{Float64,1})
   end
 end
 # Picks
-picksum(D::Dict{ASCIIString,Float64}) =
+picksum(D::Dict{String,Float64}) =
   strtrunc(join([@sprintf("%s %.2f",i,D[i]) for i in collect(keys(D))], ", "))
 
 # Response
@@ -69,23 +69,23 @@ arraypop(s, A, v) = strtrunc(s*join(["["*string(size(A[i],1))
   for i = 1:length(A)], v*"], ")*(isempty(A)?:"":v*"]"))
 
 # SeisObj
-strpop(s::AbstractString, A::ASCIIString) = s*A          # name, id, units, src
+strpop(s::AbstractString, A::String) = s*A              # name, id, units, src
 strpop(s::AbstractString, A::Array{Complex{Float64},2}) =
   s*respsum(A)                                                           # resp
-strpop(s::AbstractString, A::Array{ASCIIString,1}) =
+strpop(s::AbstractString, A::Array{String,1}) =
   strtrunc(s*join(A, ", "))   # SeisObj: notes / SeisData: name, id, units, src
-strpop(s::AbstractString, A::Dict{ASCIIString,Any}) =
+strpop(s::AbstractString, A::Dict{String,Any}) =
     s*string(length(A), " entries")                                      # misc
 strpop(s::AbstractString, A::Real) = (
       s*(searchindex(s, "FS") > 0 ? @sprintf("%.1f", A) :
         @sprintf("%.3e", A)))                                        # fs, gain
 
 # SeisData
-strpop(s::AbstractString, A::Array{Array{ASCIIString,1},1}) =
+strpop(s::AbstractString, A::Array{Array{String,1},1}) =
   arraypop(s, A, " entries")                                            # notes
 strpop(s::AbstractString, A::Array{Array{Complex{Float64},2},1}) =
   arraypop(s, A, " p/z")                                                 # resp
-strpop(s::AbstractString, A::Array{Dict{ASCIIString,Any},1}) =
+strpop(s::AbstractString, A::Array{Dict{String,Any},1}) =
       strtrunc(s*join([string("[",length(A[i])," entries]")
         for i=1:length(A)], ", "))                                       # misc
 function strpop(s::AbstractString, A::Array{Array{Float64,1},1})
@@ -115,7 +115,7 @@ end
 # =============================================================================
 # Display-replated
 function show(io::IO, S::Union{SeisData,SeisObj})
-  str = Dict{ASCIIString,AbstractString}()
+  str = Dict{String,AbstractString}()
   for i in datafields(S)
     if i != :t
       str[string(i)] = strpop(@sprintf("%5s: ", uppercase(string(i))), S.(i))
@@ -138,7 +138,7 @@ function show(io::IO, S::Union{SeisData,SeisObj})
   end
 end
 show(S::Union{SeisData,SeisObj}) = show(STDOUT, S)
-summary(s::SeisData) = string(typeof(s), " with ", s.n, " channel",
+summary(s::SeisData) = string("type ", typeof(s), " with ", s.n, " channel",
   s.n == 1 ? "" : "s")
 summary(S::SeisObj) = string(typeof(S), " with ", length(S.x), " sample",
   (length(S.x) == 1 ? "" : "s"), ", ", gapsum(S.t, S.fs,length(S.x)))

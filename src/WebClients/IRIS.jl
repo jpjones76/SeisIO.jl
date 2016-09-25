@@ -24,17 +24,17 @@ If `t`::Union{Int,Float64}:
 * `t` is duration in seconds. Extraction begins `t` seconds before `s`.
 * `s=0`: End at start of current minute on your system.
 * `s` Int or Float64: Treated as Unix (Epoch) time from 1-1-1970.
-* `s` DateTime or ASCIIString: End at `s`. Expected format is
+* `s` DateTime or String: End at `s`. Expected format is
 "yyyy-mm-ddTHH:MM:SS", e.g. "2006-03-23T11:17:00".
 
 ### Time Specification for Range Retrieval
- If `t`::Union{DateTime,ASCIIString}:
+ If `t`::Union{DateTime,String}:
 
-* `s` DateTime or ASCIIString: Data are retrieved from `s` to `t`.
-* ASCIIString values for `s` and `t` should be formatted
+* `s` DateTime or String: Data are retrieved from `s` to `t`.
+* String values for `s` and `t` should be formatted
 Expected string format is "yyyy-mm-ddTHH:MM:SS", e.g. `s="2006-03-23T11:17:00"`,
 `t="2006-03-24T01:00:00"`.
-* ASCIIString: Guess start time by converting s with DateTime. Expected
+* String: Guess start time by converting s with DateTime. Expected
 format is yyyy-mm-ddTHH:MM:SS, e.g. "2006-03-23T11:17:00".
 
 ### Examples
@@ -113,14 +113,14 @@ If `t`::Union{Int,Float64}:
 * `t` is duration in seconds. Extraction begins `t` seconds before `s`.
 * `s=0`: End at start of current minute on your system.
 * `s` Int or Float64: Treated as Unix (Epoch) time from 1-1-1970.
-* `s` DateTime or ASCIIString: End at `s`. Expected format is
+* `s` DateTime or String: End at `s`. Expected format is
 "yyyy-mm-ddTHH:MM:SS", e.g. "2006-03-23T11:17:00".
 
 ### Time Specification for Range Retrieval
- If `t`::Union{DateTime,ASCIIString}:
+ If `t`::Union{DateTime,String}:
 
-* `s` DateTime or ASCIIString: Data are retrieved from `s` to `t`.
-* ASCIIString values for `s` and `t` should be formatted yyyy-mm-ddTHH:MM:SS,
+* `s` DateTime or String: Data are retrieved from `s` to `t`.
+* String values for `s` and `t` should be formatted yyyy-mm-ddTHH:MM:SS,
 e.g. `s="2006-03-23T11:17:00"`, `e="2006-03-24T01:00:00"`.
 
 ## Output
@@ -151,7 +151,7 @@ function IRISget(chanlist; s=0, t=3600, sync=true::Bool, v=false::Bool, to=10::R
   end
   cdim = size(chanlist)
   if length(cdim) > 1
-    error("typeof(chanlist) != Array{ASCIIString,1}!")
+    error("typeof(chanlist) != Array{String,1}!")
   else
     K = cdim[1]
   end

@@ -22,7 +22,7 @@ Read file fname in big-Endian mini-SEED format. Returns a SeisData structure.
 Note: Limited functionality; cannot currently handle full SEED files or most
 non-data blockettes.
 """
-function readmseed(fname::ASCIIString; swap=false::Bool, v=false::Bool, vv=false::Bool)
+function readmseed(fname::String; swap=false::Bool, v=false::Bool, vv=false::Bool)
   nproc  = 0
   ef     = 10
   chno   = 1

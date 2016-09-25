@@ -138,7 +138,7 @@ function write_string_array(io, v)
   write(io, sep, nd, d, length(v.data), v.data)
 end
 
-function write_misc(io::IOStream, D::Dict{ASCIIString,Any})
+function write_misc(io::IOStream, D::Dict{String,Any})
   P = position(io)
   isempty(D) && (write(io, Int64(0), position(io)+8); return)
   K = collect(keys(D))
@@ -248,13 +248,13 @@ end
 
 Write SeisData or SeisObj structure `S` to file `f`.
 """
-wseis(f::ASCIIString, S::SeisData) = (fid = open(f, "w"); whdr(fid, 1);
+wseis(f::String, S::SeisData) = (fid = open(f, "w"); whdr(fid, 1);
   write(fid, S); close(fid))
-wseis(S::SeisData, f::ASCIIString) = wseis(f::ASCIIString, S::SeisData)
-wseis(f::ASCIIString, S::SeisObj) = (fid = open(f, "w"); whdr(fid, 1);
+wseis(S::SeisData, f::String) = wseis(f::String, S::SeisData)
+wseis(f::String, S::SeisObj) = (fid = open(f, "w"); whdr(fid, 1);
   write(fid, S); close(fid))
-wseis(S::SeisObj, f::ASCIIString) = wseis(f::ASCIIString, S::SeisObj)
-function wseis(f::ASCIIString, S...)
+wseis(S::SeisObj, f::String) = wseis(f::String, S::SeisObj)
+function wseis(f::String, S...)
   L = length(S)
   fid = open(f, "w")
   skip(fid, 13)
@@ -286,7 +286,7 @@ end
 
 function read_misc(io::IOStream)
   n_reads = read(io, Int64)
-  D = Dict{ASCIIString,Any}()
+  D = Dict{String,Any}()
   n_reads == 0 && (skip(io, 8); return D)
   Q = read(io, Int64)
   P = position(io)
@@ -411,7 +411,7 @@ function r_seisobj(io::IOStream)
   return T
 end
 
-function rseis(fname::ASCIIString; v=false::Bool)
+function rseis(fname::String; v=false::Bool)
   io = open(fname, "r")
   c = ascii(read(io, UInt8, 8))
   c == "SEISDATA" || (close(io); error("Not a SeisData file!"))

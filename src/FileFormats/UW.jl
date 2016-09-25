@@ -14,8 +14,8 @@ end
 function guess_nc(pfid, S)
   seekstart(pfid)
   nc = 0
-  S["sta"] = Array{ASCIIString,1}()
-  S["cha"] = Array{ASCIIString,1}()
+  S["sta"] = Array{String,1}()
+  S["cha"] = Array{String,1}()
   while !eof(pfid)
     L = readline(pfid)
     if startswith(L, '.')
@@ -126,7 +126,7 @@ function procuwpf!(S, Nc::Int64, pickfile::AbstractString, v::Bool)
   mline = nextline(pfid,'M')
   m1 = 0
   if mline != -1
-    S["mech_lines"] = Array{ASCIIString,1}()
+    S["mech_lines"] = Array{String,1}()
     while mline != -1
       m1 += 1
       push!(S["mech_lines"], mline)
@@ -182,7 +182,7 @@ function procuwpf!(S, Nc::Int64, pickfile::AbstractString, v::Bool)
   m1 = 0
   cline = nextline(pfid,'C')
   if cline != -1
-    S["comment"] = Array{ASCIIString,1}()
+    S["comment"] = Array{String,1}()
     while cline != -1
       m1 += 1
       push!(S["comment"], cline[3:end])
@@ -201,7 +201,7 @@ end
   Read UW-format pickfile PFILE into a dictionary containing pick information.
 Only works correctly with single-event pickfiles.
 """
-readuwpf(pickfile; v=false::Bool) = (procuwpf!(Dict{ASCIIString,Any}(), -1, pickfile, v))
+readuwpf(pickfile; v=false::Bool) = (procuwpf!(Dict{String,Any}(), -1, pickfile, v))
 
 function readuwdf(datafile::AbstractString; v=false::Bool)
   dconst = -11676096000
@@ -210,8 +210,8 @@ function readuwdf(datafile::AbstractString; v=false::Bool)
   fid = open(datafile, "r")
 
   # Process master header
-  M = Dict{ASCIIString,Any}()
-  S = Dict{ASCIIString,Any}()
+  M = Dict{String,Any}()
+  S = Dict{String,Any}()
   M["nchan"]    = read(fid, Int16)
   M["lrate"]    = read(fid, Int32)
   lmin          = bswap(read(fid, Int32))
@@ -299,10 +299,10 @@ function readuwdf(datafile::AbstractString; v=false::Bool)
     for i in ["lta", "trig", "bias", "fill"]
       S[i] = Array{Int16,1}()
     end
-    compflg = Array{ASCIIString,1}()
-    chid = Array{ASCIIString,1}()
-    expan2 = Array{ASCIIString,1}()
-    name = Array{ASCIIString,1}()
+    compflg = Array{String,1}()
+    chid = Array{String,1}()
+    expan2 = Array{String,1}()
+    name = Array{String,1}()
     S["fs"] = Array{Int32,1}()
 
     for i1 = 1:1:Nc
@@ -375,7 +375,7 @@ as the datafile to be read.
     S = readuw(filename)
 
 """
-function r_uw(filename::ASCIIString; v=false::Bool)
+function r_uw(filename::String; v=false::Bool)
   # Identify pickfile and datafile
   filename = realpath(filename)
   pickfile = ""
@@ -415,7 +415,7 @@ function r_uw(filename::ASCIIString; v=false::Bool)
     S["Nc"] = Nc
   else
     v && println("Skipping datafile (not found or not given)")
-    S = Dict{ASCIIString,Any}()
+    S = Dict{String,Any}()
   end
 
   # Pickfile wrapper
@@ -442,7 +442,7 @@ function r_uw(filename::ASCIIString; v=false::Bool)
   return S
 end
 
-function uwtoseis(S::Dict{ASCIIString,Any})
+function uwtoseis(S::Dict{String,Any})
   seis = SeisData()
   misc_keys = ("P_pol", "bias", "chid", "chlen",  "expan1", "expan2", "fill", "lta", "trig")
   pick_keys = ("D", "P", "S")
@@ -458,7 +458,7 @@ function uwtoseis(S::Dict{ASCIIString,Any})
     x = map(Float64, S["data"][i])
     notes = S["comment"]
     t = [1 round(Int,(S["start"][i]+S["ot"])/μs); length(x) 0]
-    misc = Dict{ASCIIString,Any}()
+    misc = Dict{String,Any}()
     for k in misc_keys
       misc[k] = S[k][i]
     end
@@ -472,4 +472,4 @@ function uwtoseis(S::Dict{ASCIIString,Any})
   return seis
 end
 
-readuw(f::ASCIIString; v=false::Bool) = (S = r_uw(f, v=v); uwtoseis(S::Dict{ASCIIString,Any}))
+readuw(f::String; v=false::Bool) = (S = r_uw(f, v=v); uwtoseis(S::Dict{String,Any}))
