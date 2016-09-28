@@ -19,6 +19,7 @@ readwin32, win32toseis, r_win32,                               # Win 32
 parsemseed, readmseed, parsesl, readmseed, parserec,           # mini-SEED
 rlennasc,                                                      # Lennartz ASCII
 fctopz,                                                        # Utils/resp.jl
+gcdist,                                                        # Utils/event_utils.jl
 lsw,                                                           # Utils/file_aux.jl
 parsetimewin, j2md, md2j, sac2epoch, u2d, d2u, tzcorr,         # Utils/time_aux.jl
 xtmerge, xtjoin!

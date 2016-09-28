@@ -60,7 +60,7 @@ end
 # hdr
 show(io::IO, S::SeisHdr) = (
   println(io, summary(S));
-  [println(uppercase(@sprintf("%10s",v)),": ", S.(v)) for v in fieldnames(S)]
+  [println(uppercase(@sprintf("%10s",v)),": ", getfield(S,v)) for v in fieldnames(S)]
   )
 show(S::SeisHdr) = show(STDOUT, S)
 summary(S::SeisHdr) = string("type ", typeof(S), " with values")
