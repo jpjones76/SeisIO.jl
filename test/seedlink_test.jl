@@ -1,5 +1,4 @@
 using Base.Test, Compat
-println("SeedLink client test...")
 config_file = "./SampleFiles/seedlink.conf"
 
 # Seedlink with command-line stations

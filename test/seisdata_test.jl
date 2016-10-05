@@ -28,7 +28,7 @@ s4 = SeisObj(fs = 100.0, gain = 50.0, name = "UNNAMED", id = "DEAD.STA..EHE",
 # (3) after sync of a seisobj formed from [s1+s3, s2], s2 will be padded with 0.5s
 # at start and 3s at end
 
-println("seisdata...")
+
 println("...init...")
 S = SeisData()
 for i in fieldnames(S)

@@ -1,5 +1,3 @@
-println("timeaux...")
-
 println("...parsetimewin...")
 d0, d1 = parsetimewin(0, 600)
 @test_approx_eq(600000, (d1-d0).value)

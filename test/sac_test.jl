@@ -1,4 +1,3 @@
-println("SAC IO...")
 # test.sac was generated in SAC 101.6a with "fg seismogram; write test.sac"
 sac_file = "SampleFiles/test.sac"
 
