@@ -1,6 +1,4 @@
 using Base.Test, Compat
-println("IRIS tests...")
-
 f_irisws = "out1.sac"
 f_irisget = "out2.sac"
 ts = "2016-03-23T23:10:00"

@@ -35,7 +35,8 @@ function readmseed(fname::String; swap=false::Bool, v=false::Bool, vv=false::Boo
     if search("DRMQ",ftype) == 0
       error( "Scan failed due to invalid file type")
     end
-    return parsemseed(S, fid, v=v, vv=vv, fclose=true)
+    seek(fid, 0)
+    return parsemseed(S, fid, swap=swap, v=v, vv=vv, fclose=true)
   else
     error(@printf("Invalid file name: %s\n",fname))
   end
@@ -49,18 +50,19 @@ Parse stream `sid` of mini-SEED data. Assumes `sid` is a mini-SEED stream
 in big-Endian format. Modifies Seis, a SeisData object.
 
 """
-function parsemseed(S::SeisData, sid; v=false::Bool, vv=false::Bool, fclose=true::Bool, fmt=10::Int)
+function parsemseed(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::Bool, fclose=true::Bool, fmt=10::Int)
   while !eof(sid)
-    parserec(S, sid, v=v, vv=vv, fmt=fmt)
+    parserec(S, sid, swap=swap, v=v, vv=vv, fmt=fmt)
   end
   fclose && close(sid)
   return S
 end
-parsemseed(sid; v=false::Bool, vv=false::Bool, fclose=true::Bool, fmt=10::Int) = (
-S = SeisData(); parsemseed(S, sid, v=v, vv=vv, fclose=fclose, fmt=fmt); return S)
+parsemseed(sid; swap=false::Bool, v=false::Bool, vv=false::Bool, fclose=true::Bool, fmt=10::Int) = (
+  S = SeisData();
+  parsemseed(S, sid, swap=swap, v=v, vv=vv, fclose=fclose, fmt=fmt);
+  return S)
 
-function parserec(S::SeisData, sid; v=false::Bool, vv=false::Bool, fmt=10::Int)
-  swap= false
+function parserec(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::Bool, fmt=10::Int)
   L   = 0
   nx  = 2^12
   wo  = 1
@@ -68,9 +70,7 @@ function parserec(S::SeisData, sid; v=false::Bool, vv=false::Bool, fmt=10::Int)
 
   # =========================================================================
   # Fixed section of data header (48 bytes)
-  hdr   = join(map(Char,read(sid, Cchar, 20)))
-  #hdr                         = ascii(read(sid, UInt8, 20))
-  vv && (println(hdr); println("position=", position(sid)-p_start))
+  hdr                         = join(map(Char,read(sid, Cchar, 20)))
   SeqNo = hdr[1:6]
   chid  = hdr[9:20]
   (yr,jd)                     = read(sid, UInt16, 2)
@@ -101,8 +101,11 @@ function parserec(S::SeisData, sid; v=false::Bool, vv=false::Bool, fmt=10::Int)
   # Units of 0.0001 s...? Seriously?
   TimeCorrection /= 1.0e4
   ms /= 1.0e4
-  vv && println(yr, ",", jd, ",", HH, ",", MM, ",", SS, ",", ms)
-  vv && (println("position=", position(sid)-p_start))
+  if vv
+    println("position=", position(sid), ", OffsetBeginData=", OffsetBeginData, ", NBos =", NBos, " hdr = ", hdr)
+    println("time (y,j,h,m,s,ms) =", yr, ",", jd, ",", HH, ",", MM, ",", SS, ",", ms)
+    println("position=", position(sid), "NBos=", NBos)
+  end
   # Generate dt
   if rateFac > 0
     dt = 1/Float64(rateFac*rateMult)
@@ -126,7 +129,7 @@ function parserec(S::SeisData, sid; v=false::Bool, vv=false::Bool, fmt=10::Int)
     channel = S.n
     te = 0
   else
-    # Lazy coding; I assume fs doesn't change
+    # I assume fs doesn't change within a SeisData structure
     channel = channel[1]
     dt = 1/S.fs[channel]
     te = sum(S.t[channel][:,2]) + length(S.x[channel])*round(Int,dt/μs)
@@ -134,16 +137,21 @@ function parserec(S::SeisData, sid; v=false::Bool, vv=false::Bool, fmt=10::Int)
 
   # =========================================================================
   # Blockettes
+  nsk = OffsetBeginData-48
   for i = 1:1:NBlk
+    vv && println("Blockette ", i, " of ", NBlk)
     BlocketteType = ntoh(read(sid, UInt16))
     if BlocketteType == 100
-      skip(sid, 1)
+      # [100] Sample Rate Blockette (12 bytes)
+      # V 2.3 – Introduced in  SEED Version 2.3
+      skip(sid, 2)
       true_dt = ntoh(read(sid, Float32))
       skip(sid, 4)
       vv && @printf(STDOUT, "BlocketteType 100.\nfs = %.3e.\n", true_dt)
+      nsk -= 12
       # Not sure how to handle this, don't know units
     elseif BlocketteType == 500
-      # Timing (200 bytes), not much useful, just detail
+      #  [500] Timing Blockette (200 bytes)
       skip(sid, 1)
       vco_correction = ntoh(read(sid, Float32))
       time_of_exception = blk_time(sid, b=swap)           # This is a tuple
@@ -164,19 +172,26 @@ function parserec(S::SeisData, sid; v=false::Bool, vv=false::Bool, fmt=10::Int)
         println("clock_model: ", clock_model)
         println("clock_status: ", clock_status)
       end
+      nsk -= 200
     elseif BlocketteType == 1000
-      (null, null, fmt, wo, L, null) = read(sid, UInt8, 6)
+      # [1000] Data Only SEED Blockette (8 bytes)
+      # V 2.3 – Introduced in SEED Version 2.3
+      (null1, null2, fmt, wo, L, null3) = read(sid, UInt8, 6)
       wob = parse(Int, string(wo))
       wo  = wob
       nx  = 2^L
-      vv && println("BlocketteType 1000 parsed.")
+      nsk -= 8
     elseif BlocketteType == 1001
+      # [1001] Data Extension Blockette  (8 bytes)
+      # V 2.3 – Introduced in SEED Version 2.3
       skip(sid, 3)
       mu = read(sid, UInt8)
       skip(sid, 2)
       TimeCorrection += mu/1.0e6
-      vv && println("BlocketteType 1001 parsed.")
+      nsk -= 8
     elseif BlocketteType == 2000
+      # [2000] Variable Length Opaque Data Blockette
+      # V 2.3 – Introduced in SEED Version 2.3
       nextblk_pos = ntoh(read(sid, UInt16)) + p_start
       blk_length = ntoh(read(sid, UInt16))
       opaque_data_offset = ntoh(read(sid, UInt16))
@@ -189,13 +204,15 @@ function parserec(S::SeisData, sid; v=false::Bool, vv=false::Bool, fmt=10::Int)
       S.misc[channel][ri * "_flags"] = bits(flags)
       S.misc[channel][ri * "_header"] = collect[header_fields]
       S.misc[channel][ri * "_data"] = opaque_data
+      nsk -= blk_length
     else
-      # I have yet to find another BlocketteType in an IRIS stream/archive
+      # I have yet to find any other BlocketteType in an IRIS stream/archive
+      # Similar reports from C. Trabant @ IRIS
       error(@sprintf("No support for BlocketteType %i", BlocketteType))
     end
   end
   # =========================================================================
-
+  skip(sid, nsk)
 
 
   # =========================================================================
@@ -204,14 +221,14 @@ function parserec(S::SeisData, sid; v=false::Bool, vv=false::Bool, fmt=10::Int)
   # Data: Adapted from rdmseed.m by Francois Beauducel <beauducel@ipgp.fr>,
   #                                 Institut de Physique du Globe de Paris
   mo,dy = j2md(yr, jd)
-  vv && @printf(STDOUT,
-  "%s %04i %02i/%02i %02i:%02i:%02i.%03i, dt = %0.02f, Nsamp = %i, NBos = %i\n",
-  hdr, yr, mo, dy, HH, MM, SS, ms*1.0e4, dt, nsamp, NBos)
 
   # Determine start time relative to end of data channel
   ts = Dates.datetime2unix(DateTime(yr, mo, dy, HH, MM, SS, 0)) + ms + TimeCorrection - te
-  #te = ts + nsamp*dt
-  vv && println("ts = ", ts, " te = ", te)
+  if vv
+    @printf(STDOUT, "%s %04i %02i/%02i %02i:%02i:%02i.%03i, dt = %0.02f, Nsamp = %i, NBos = %i\n",
+                    hdr, yr, mo, dy, HH, MM, SS, ms*1.0e4, dt, nsamp, NBos)
+    println("ts = ", ts, " te = ", te)
+  end
   if te  == 0
     S.t[channel] = [1 round(Int,ts/μs); nsamp 0]
   else
@@ -261,8 +278,9 @@ function parserec(S::SeisData, sid; v=false::Bool, vv=false::Bool, fmt=10::Int)
     end
 
     # Get and parse nibbles
-    vals = flipdim(collect(UInt32(0):UInt32(2):UInt32(30)),1)
-    nibbles = (repmat(frame32[1:1,:], 16, 1) .>> repmat(vals,1,size(frame32,2))) & 3
+    vals = repmat(flipdim(collect(UInt32(0):UInt32(2):UInt32(30)),1), 1, size(frame32,2))
+    nibbles = (repmat(frame32[1,:]', 16, 1) .>> vals) & 3
+
     x0 = bitsplit(frame32[2,1],32,32)[1]
     xn = bitsplit(frame32[3,1],32,32)[1]
 
@@ -318,7 +336,7 @@ function parserec(S::SeisData, sid; v=false::Bool, vv=false::Bool, fmt=10::Int)
 
     # Check that we read correct # of samples
     if length(dd) != nsamp
-      warn(@sprintf("RDMSEED:DataIntegrity -- extracted %i points, expected %i!",
+      warn(@sprintf("RDMSEED: data integrity -- extracted %i points, expected %i!",
       length(dd), nsamp))
       nsamp = minimum([nsamp, length(dd)])
     end
@@ -326,9 +344,9 @@ function parserec(S::SeisData, sid; v=false::Bool, vv=false::Bool, fmt=10::Int)
 
     # Check data values
     if abs(d[end] - xn) > eps()
-      warn(string("RDMSEED:DataIntegrity --",
-      @sprintf("Problem in steim%i sequence #%s:", steim, SeqNo),
-      @sprintf(" data integrity check failed, last_data=%d, Xn=%d.\n",
+      warn(string("RDMSEED: data integrity -- ",
+      @sprintf("steim%i sequence #%s ", steim, SeqNo),
+      @sprintf("integrity check failed, last_data=%d, Xn=%d.\n",
       d[end], xn)))
     end
     if nsamp == 0

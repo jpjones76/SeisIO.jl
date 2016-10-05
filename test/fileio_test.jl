@@ -1,7 +1,6 @@
 # save to disk/read from disk
 savfile = "test.seis"
 
-println("randseis and native file IO...")
 S = randseisdata(c=false)
 println("...file write...")
 wseis(S, savfile)

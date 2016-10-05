@@ -1,13 +1,30 @@
 using Base.Test, Compat
 using SeisIO
 
+println("begin tests:")
+
+println("timeaux...")
 include("./timeaux_test.jl")
+
+println("SAC i/o...")
 include("./sac_test.jl")
+
+println("seisdata...")
 include("./seisdata_test.jl")
+
+println("randseis and native file i/o...")
 include("./fileio_test.jl")
+
+println("other (non-SAC) file formats...")
 include("./file_formats.jl")
+
+println("FDSN data queries...")
 include("./fdsn_test.jl")
+
+println("IRIS web services...")
 include("./iris_test.jl")
+
+println("SEEDlink client...")
 include("./seedlink_test.jl")
 
 println("To test for faithful SAC writing of SeisData objects:")

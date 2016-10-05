@@ -1,5 +1,4 @@
 using Base.Test, Compat
-println("FDSN test...")
 
 # US Test
 STA = "SEP,SHW,HSR,VALT"
