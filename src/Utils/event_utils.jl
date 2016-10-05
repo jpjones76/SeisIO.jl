@@ -221,7 +221,6 @@ distance, azimuth, and backazimuth for each channel. Values are stored as
 S.data.misc["dist"], S.data.misc["az"],and S.data.misc["baz"], respectively.
 
 """
-
 function distaz!(S)
   rec = Array{Float64,2}(S.data.n,2)
   for i = 1:S.data.n
@@ -339,7 +338,3 @@ function getP(evt::String, cc::String;
   end
   return S
 end
-
-
-# Them https://service.iris.edu/fdsnws/dataselect/1/query?net=IU&sta=ANMO&loc=00&cha=BHZ&start=2010-02-27T06:30:00.000&end=2010-02-27T10:30:00.000
-# Me   https://service.iris.edu/fdsnws/dataselect/1/query?net=PB&sta=B004&loc=--&cha=EH1&start=2006-11-15T11:23:31.000&end=2006-11-15T11:25:31.000
