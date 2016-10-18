@@ -8,7 +8,7 @@
 **********************************
 :mod:`Appendix A: SeisData Fields`
 **********************************
-All field names use lowercase letters. SeisData and SeisObj types have identical field types; SeisData objects have the additional field ``n``.
+All field names use lowercase letters. SeisData and SeisChannel types have identical field types; SeisData objects have the additional field ``n``.
 
 
 Field Names and Meanings
@@ -95,3 +95,38 @@ For *time series data* ``x``, ``t`` is a sparse delta-compressed representation 
 * Other rows should take the form ``[(starting index of gap in x) (length of gap)]``.
 
 For *irregularly sampled data* (``fs = 0``), ``t`` is a dense delta-compressed representation of *time stamps in microseconds for each sample*. ``t`` for irregularly sampled data has a single column, but is treated by Julia as a two-dimensiona array (not a one-dimensional vector).
+
+
+*********************************
+:mod:`Appendix B: SeisHdr Fields`
+*********************************
+All field names use lowercase letters.
+
+
+Field Names and Meanings
+========================
+* ``id``: event ID
+
+* ``time``: origin time
+
+* ``lat``: source latitude; + = North
+
+* ``lon``: source longitude; + = East
+
+*  ``dep``: source depth in km; + = down
+
+* ``mag``: magnitude
+
+* ``mag_typ``: magnitude type (scale)
+
+* ``mag_auth``: magnitude author
+
+* ``auth``: event author
+
+* ``cat``: source catalog
+
+* ``contrib``: solution contributor
+
+* ``contrib_id``: contributor numeric ID
+
+* ``loc_name``: freeform location name

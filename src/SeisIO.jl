@@ -2,7 +2,7 @@ VERSION >= v"0.4.0" && __precompile__(true)
 module SeisIO
 
 export SeisChannel, SeisData, findname, findid, hasid, hasname,# Types/SeisData.jl
-SeisHdr, SeisEvt, note,                                        # Types/SeisHdr.jl
+SeisHdr, SeisEvent, note,                                      # Types/SeisHdr.jl
 wseis, writesac,                                               # Types/write.jl
 rseis,                                                         # Types/read.jl
 samehdr, pull, getbandcode, prune!, purge, purge!, gapfill!,   # Types/misc.jl
@@ -30,7 +30,7 @@ t_expand, xtmerge, xtjoin!
 # geophysical timeseries data
 include("Types/SeisData.jl")      # SeisData, SeisChan classes for channel data
 include("Types/SeisHdr.jl")       # Class for headers of discrete events (SeisHdr)
-include("Types/composite.jl")     # Composite types (SeisEvt, SeisCat)
+include("Types/composite.jl")     # Composite types (SeisEvent, SeisCat)
 include("Types/read.jl")          # Read
 include("Types/write.jl")         # Write
 include("Types/show.jl")          # Display

@@ -10,30 +10,30 @@
 ***************
 SeisData is a minimalist container type designed for discretely sampled sequential signals, including (but not limited to) time-series data. It can hold both regularly sampled (time series) data and irregularly sampled measurements.
 
-SeisData and SeisObj containers can be manipulated using standard Julia commands. The rest of this section explains this functionality in detail.
+SeisData and SeisChannel containers can be manipulated using standard Julia commands. The rest of this section explains this functionality in detail.
 
 
 Creating Data Containers
 ========================
-SeisData and SeisObj containers can be created in three ways:
+SeisData and SeisChannel containers can be created in three ways:
 
 #. ``S = SeisData()`` initializes an empty SeisData container
 
-#. ``S = SeisObj()`` initializes a new SeisObj container
+#. ``S = SeisChannel()`` initializes a new SeisChannel container
 
-#. ``S = SeisData(s1, s2, s3)`` creates a SeisData container by merging s1, s2, s3. If a variable passed to SeisData in this way isn't of type SeisData or SeisObj, it's ignored with a warning.
+#. ``S = SeisData(s1, s2, s3)`` creates a SeisData container by merging s1, s2, s3. If a variable passed to SeisData in this way isn't of type SeisData or SeisChannel, it's ignored with a warning.
 
-Fields can be initialized by name when a new SeisObj container is created; for example,``S = SeisObj(name="DEAD CHANNEL", fs=50)`` initialize a SeisObj with name "DEAD CHANNEL", fs = 50.
+Fields can be initialized by name when a new SeisChannel container is created; for example,``S = SeisChannel(name="DEAD CHANNEL", fs=50)`` initialize a SeisChannel with name "DEAD CHANNEL", fs = 50.
 
 
 Example
 --------
-```S = SeisData(SeisObj(name="BRASIL", id="IU.SAML.00.BHZ"), SeisObj(name="UKRAINE", id="IU.KIEV.00.BHE"), SeisObj())`` creates* a new SeisData structure with three channels; the first is named "BRASIL", the second "UKRAINE", the third is blank. This syntax requires unique IDs for each new channel created.
+```S = SeisData(SeisChannel(name="BRASIL", id="IU.SAML.00.BHZ"), SeisChannel(name="UKRAINE", id="IU.KIEV.00.BHE"), SeisChannel())`` creates* a new SeisData structure with three channels; the first is named "BRASIL", the second "UKRAINE", the third is blank. This syntax requires unique IDs for each new channel created.
 
 
 Adding Data
 ===========
-``+`` (the addition operator) is the standard way to add data channels. Addition attempts to merge data with matching channel IDs. Channels with unique IDs are simply assigned to new channels. ``merge!`` and ``+`` are identical commands for SeisData and SeisObj instances.
+``+`` (the addition operator) is the standard way to add data channels. Addition attempts to merge data with matching channel IDs. Channels with unique IDs are simply assigned to new channels. ``merge!`` and ``+`` are identical commands for SeisData and SeisChannel instances.
 
 Data can be merged directly from the output of any SeisIO command that outputs a compatible structure. For example:
 
@@ -47,7 +47,7 @@ In a merge operation, pairs of non-NaN data `x`:sub:`i`, `x`:sub:`j` with overla
 
 Appending without merging
 -------------------------
-``push!`` adds a SeisObj instance to a SeisData instance without attempting to merge the channel with existing data. ``append!`` adds a SeisData instance to another SeisData instance without attempting to merge identical channels.
+``push!`` adds a SeisChannel instance to a SeisData instance without attempting to merge the channel with existing data. ``append!`` adds a SeisData instance to another SeisData instance without attempting to merge identical channels.
 
 ``push!(S,T)`` assigns each channel in T to a new channel in S, even if it creates redundant channel IDs.
 
@@ -65,27 +65,27 @@ Methods
 
 ``S - str``, where ``str`` is a string, deletes all channels whose names and ids match ``str``.
 
-``S - U``, where ``U`` is a SeisObj instance, deletes all channels from ``S`` with the same id value as ``U.id``.
+``S - U``, where ``U`` is a SeisChannel instance, deletes all channels from ``S`` with the same id value as ``U.id``.
 
 ``deleteat!(S,i)`` is identical to ``S-=K`` for integer K.
 
 
 Safe deletion with ``pull``
 ===========================
-The ``pull`` command extracts a channel from a SeisData instance and returns it as a SeisObj.
+The ``pull`` command extracts a channel from a SeisData instance and returns it as a SeisChannel.
 
 Methods
 -------
-``T = pull(S, name)``, where ``name`` is a string, creates a SeisObj ``T`` from the first channel with name=``name``, then removes the matching channel from ``S``.
+``T = pull(S, name)``, where ``name`` is a string, creates a SeisChannel ``T`` from the first channel with name=``name``, then removes the matching channel from ``S``.
 
-``T = pull(S, i)``, where ``i`` is an integer, creates a SeisObj ``T`` from channel ``i``, then removes channel ``i`` from ``S``.
+``T = pull(S, i)``, where ``i`` is an integer, creates a SeisChannel ``T`` from channel ``i``, then removes channel ``i`` from ``S``.
 
 
 Index, Search, Sort
 ===================
-Individual channels in a SeisData container can be accessed by channel index; for example, ``S[3]`` returns channel 3. Indexing a single channel outputs a SeisObj instance; indexing a range of channels outputs a new SeisData object.
+Individual channels in a SeisData container can be accessed by channel index; for example, ``S[3]`` returns channel 3. Indexing a single channel outputs a SeisChannel instance; indexing a range of channels outputs a new SeisData object.
 
-The same syntax can be used to ovewrwrite data by channel (or channel range). For example, ``S[2] = T``, where T is a SeisObj instance, replaces the second channel of S with T.
+The same syntax can be used to ovewrwrite data by channel (or channel range). For example, ``S[2] = T``, where T is a SeisChannel instance, replaces the second channel of S with T.
 
 Multiple channels in a SeisData container S can be overwritten with another SeisData container T using ``setindex!(S, T, I)``; the last input is a range of indices.
 
@@ -117,7 +117,7 @@ The following commands offer tests for equality:
 
 Annotation
 ==========
-SeisData and SeisObj are intended to be annotated as data are analyzed; the command ``note`` exists for this purpose. Calling ``note`` appends a timestamped note to the ``notes`` field of the target container.
+SeisData and SeisChannel are intended to be annotated as data are analyzed; the command ``note`` exists for this purpose. Calling ``note`` appends a timestamped note to the ``notes`` field of the target container.
 
 * ``note(S, i, NOTE)`` adds string ``NOTE`` to channel ``i`` of ```S``.
 

@@ -29,7 +29,7 @@ Restrict queries to **MIN_MAG** ≤ m ≤ **MAX_MAG**.
 
     S = evq(s, n=N)
 
-Return **N** events, rather than 1. S will be an array of SeisEvts.
+Return **N** events, rather than 1. S will be an array of SeisEvents.
 
     S = evq(s, lat=[LAT_MIN LAT_MAX], lon=[LON_MIN LON_MAX], dep=[DEP_MIN DEP_MAX])
 
@@ -42,7 +42,7 @@ Only query server **SRC**. Specify as a string. See list of sources in SeisIO
 documentation.
 """
 function evq(ts::String;
-  dep=[-100.0 6370.0]::Array{Float64,2},
+  dep=[-30.0 700.0]::Array{Float64,2},
   lat=[-90.0 90.0]::Array{Float64,2},
   lon=[-180.0 180.0]::Array{Float64,2},
   mag=[6.0 9.9]::Array{Float64,2},
@@ -217,14 +217,14 @@ function mkevthdr(evt_line::String)
 end
 
 """
-    distaz!(S::SeisEvt)
+    distaz!(S::SeisEvent)
 
-Compute Δ, Θ by the Haversine formula. Updates SeisEvt structure **S** with
+Compute Δ, Θ by the Haversine formula. Updates SeisEvent structure **S** with
 distance, azimuth, and backazimuth for each channel. Values are stored as
 S.data.misc["dist"], S.data.misc["az"],and S.data.misc["baz"], respectively.
 
 """
-function distaz!(S::SeisEvt)
+function distaz!(S::SeisEvent)
   rec = Array{Float64,2}(S.data.n,2)
   for i = 1:S.data.n
     rec[i,:] = S.data.loc[i][1:2]
@@ -273,10 +273,10 @@ function getevt(evt::String, cc::String;
     println(now(), ": channels initialized.")
   end
 
-  # Initialize SeisEvt structure
-  S = SeisEvt(hdr = h, data = d)
+  # Initialize SeisEvent structure
+  S = SeisEvent(hdr = h, data = d)
   if (v|vv)
-    println(now(), ": SeisEvt created.")
+    println(now(), ": SeisEvent created.")
   end
   vv && println(S)
 
@@ -324,10 +324,10 @@ function getevt(evt::String, cc::String;
 end
 
 """
-    getpha(pha::String, Δ::Float64, z::Float64)
+    T = getpha(pha::String, Δ::Float64, z::Float64)
 
-Get phase onsets **pha** relative to origin time for an eventat distance **Δ**
-(degrees), depth **z** (km).
+Get onset times of phases **pha** relative to origin time for an event at
+distance **Δ** (degrees), depth **z** (km). Returns a matrix of strings.
 
 Detail: getpha is a command-line interface to the IRIS travel time calculator,
 which calls TauP (1,2,3). Specify **pha** as a comma-separated string, e.g.
