@@ -11,15 +11,15 @@ fs1 = 50.0
 
 # s1 and s2 represent data from a fictitious channel
 # s2 begins 1 second later, but has a gap of 1s after sample 25
-s1 = SeisObj(fs = fs1, gain = 10.0, name = "DEAD.STA.EHZ", id = "DEAD.STA..EHZ",
+s1 = SeisChannel(fs = fs1, gain = 10.0, name = "DEAD.STA.EHZ", id = "DEAD.STA..EHZ",
   t = [1 t1; 100 0], x=randn(100))
-s2 = SeisObj(fs = fs1, gain = 10.0, name = "POORLY NAMED", id = "DEAD.STA..EHZ",
+s2 = SeisChannel(fs = fs1, gain = 10.0, name = "POORLY NAMED", id = "DEAD.STA..EHZ",
   t = [1 t1+1000000; 26 1000000; 126 200000; 150 0], x=randn(150))
 
 
-s3 = SeisObj(fs = 100.0, gain = 5.0, name = "DEAD.STA.EHE", id = "DEAD.STA..EHE",
+s3 = SeisChannel(fs = 100.0, gain = 5.0, name = "DEAD.STA.EHE", id = "DEAD.STA..EHE",
   t = [1 t1; 100 0], x=rand(100)-0.5)
-s4 = SeisObj(fs = 100.0, gain = 50.0, name = "UNNAMED", id = "DEAD.STA..EHE",
+s4 = SeisChannel(fs = 100.0, gain = 50.0, name = "UNNAMED", id = "DEAD.STA..EHE",
   t = [1 t1+1000000; 100 1000000; 150 0], x=randn(150))
 
 # We expect:
@@ -138,9 +138,9 @@ R = randseisdata(c=true)
 S += R
 
 # Ensure merge works correctly with traces separated in time
-s5 = SeisObj(fs = 100.0, gain = 32.0, name = "DEAD.STA.EHE", id = "DEAD.STA..EHE",
+s5 = SeisChannel(fs = 100.0, gain = 32.0, name = "DEAD.STA.EHE", id = "DEAD.STA..EHE",
   t = [1 t1; 100 0], x=randn(100))
-s6 = SeisObj(fs = 100.0, gain = 32.0, name = "UNNAMED", id = "DEAD.STA..EHE",
+s6 = SeisChannel(fs = 100.0, gain = 32.0, name = "UNNAMED", id = "DEAD.STA..EHE",
   t = [1 t1+30000000; 200 0], x=randn(200))
 println("...channel add...")
 T = (s5 + s6)

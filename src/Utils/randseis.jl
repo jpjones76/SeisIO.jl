@@ -81,11 +81,11 @@ function getcodes(b::Char)
 end
 
 """
-    populate_chan!(S::SeisObj)
+    populate_chan!(S::SeisChannel)
 
 Populate all empty fields of S with quasi-random values.
 """
-function populate_chan!(S::SeisObj; c=false::Bool)
+function populate_chan!(S::SeisChannel; c=false::Bool)
   fc_vals = [1/120 1/60 1/30 0.2 1.0 1.0 1.0 2.0 4.5 15.0]
   fs_vals = [0.1, 1.0, 2.0, 5.0, 10.0, 20.0, 25.0, 40.0, 50.0, 60.0, 62.5,
     80.0, 100.0, 120.0, 125.0, 250.0]
@@ -178,12 +178,12 @@ function populate_chan!(S::SeisObj; c=false::Bool)
 end
 
 """
-    randseisobj()
+    randseischa()
 
-Generate a random channel of seismic data as a SeisObj.
+Generate a random channel of seismic data as a SeisChannel.
 
 """
-randseisobj(; c=false::Bool) = (S = populate_chan!(SeisObj(), c=c); return S)
+randseischa(; c=false::Bool) = (S = populate_chan!(SeisChannel(), c=c); return S)
 
 """
     populate_seis!(S::SeisData)
@@ -215,7 +215,7 @@ function populate_seis!(S::SeisData; c=false::Bool)
   end
 end
 populate_seis!(S::SeisData, N::Int; c=false::Bool) = ([push!(S,
-  randseisobj(c=c)) for n = 1:N])
+  randseischa(c=c)) for n = 1:N])
 
 """
     randseisdata()

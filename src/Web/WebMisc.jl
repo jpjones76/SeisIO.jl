@@ -14,13 +14,13 @@ function get_uhead(src)
 end
 
 """
-    S = GetSta(CC)
+    S = getsta(CC)
 
 Retrieve station info for channels specified in SeedLink-formatted input file
 **CC**. See SeedLink documentation for keyword options. Returns a SeisData object
 with information from the requested channels.
 """
-function GetSta(CC::String;
+function getsta(CC::String;
   st="2011-01-08T00:00:00"::Union{Real,DateTime,String},
   et="2011-01-09T00:00:00"::Union{Real,DateTime,String},
   src="IRIS"::String,
@@ -32,10 +32,10 @@ function GetSta(CC::String;
   if vv
     println("sta =", sta, "cha=", cha)
   end
-  S = GetSta(sta, cha, src=src, st=st, et=et, to=to, v=v, vv=vv)
+  S = getsta(sta, cha, src=src, st=st, et=et, to=to, v=v, vv=vv)
   return S
 end
-function GetSta(stations::Array{String,1}, channels::Array{String,1};
+function getsta(stations::Array{String,1}, channels::Array{String,1};
   src="IRIS"::String,
   st="2011-01-08T00:00:00"::Union{Real,DateTime,String},
   et="2011-01-09T00:00:00"::Union{Real,DateTime,String},
@@ -93,9 +93,13 @@ function parse_cinfo(C::Array{SubString{String},1}, src::String)
                  parse(Float64, C[10])])
   # Strictly speaking this is only accurate for passive velocity sensors
   RESP = fctopz(parse(Float64, C[13]))
-  MISC = Dict{String,Any}("SensorDescription" => C[11], "StartTime" => C[16], "EndTime" => C[17])
+  MISC = Dict{String,Any}(
+    "SensorDescription" => String(C[11]),
+    "SensorStart" => String(C[16]),
+    "SensorEnd" => String(C[17])
+    )
 
-  return SeisObj(name=NAME, id=ID, fs=parse(Float64, C[15]),
+  return SeisChannel(name=NAME, id=ID, fs=parse(Float64, C[15]),
     gain=parse(Float64, C[12]), loc=LOC, misc=MISC, resp=RESP, src=src,
     units=C[14])
 end

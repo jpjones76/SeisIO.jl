@@ -1,5 +1,38 @@
 using DSP:tukey, resample
 
+# ============================================================================
+# Logging
+note(S::SeisChannel, s::AbstractString) = (S.notes = cat(1, S.notes,
+  string(now(), "  ", s)))
+note(S::SeisData, i::Integer, s::AbstractString) = (
+    push!(S.notes[i], string(now(), "  ", s)))
+note(S::SeisData, s1::AbstractString, s2::AbstractString) = note(S, findname(s1, S), s2)
+
+# In case all we care about is a header match
+"""
+    samehdr(S, T)
+
+Test for equality of headers for S, T.
+"""
+samehdr(S::SeisChannel, T::SeisChannel) = minimum([isequal(hash(getfield(S,v)), hash(getfield(T,v))) for v in headerfields(S)])
+samehdr(S::SeisData, T::SeisChannel, i) = minimum([isequal(hash(getfield(S, v)[i]), hash(getfield(T, v))) for v in headerfields(S)])
+samehdr(S::SeisChannel, T::SeisData, i) = minimum([isequal(hash(getfield(S, v)[i]), hash(getfield(T, v))) for v in headerfields(S)])
+
+# Extract to SeisChannel
+"""
+    T = pull(S::SeisData, n::String)
+
+Extract the first channel named `n` from `S` and return it as a SeisChannel structure.
+
+    T = pull(S::SeisData, i::integer)
+
+Extract channel `i` from `S` as a SeisChannel.
+"""
+pull(S::SeisData, n::String) = (i = findname(n, S); T = getindex(S, i);
+  delete!(S,i); note(T, "Extracted from a SeisData object"); return T)
+pull(S::SeisData, i::Integer) = (T = getindex(S, i); delete!(S,i);
+  note(T, "Extracted from a SeisData object"); return T)
+
 """
     getbandcode(fs, fc=FC)
 
@@ -102,7 +135,7 @@ gapfill(x::Array{Float64,1}, t::Array{Int64,2}, f::Float64) =
 Fill time gaps in S with the mean of data in S. If S is a SeisData structure,
 time gaps in channel [i] are filled with the mean value of each channel's data.
 """
-function ungap!(S::SeisObj; m=true::Bool, w=true::Bool)
+function ungap!(S::SeisChannel; m=true::Bool, w=true::Bool)
   N = size(S.t,1)-2
   (N ≤ 0 || S.fs == 0) && return S
   gapfill!(S.x, S.t, S.fs, m=m, w=w)
@@ -120,7 +153,7 @@ function ungap!(S::SeisData; m=true::Bool, w=true::Bool)
   end
   return S
 end
-ungap(S::Union{SeisData,SeisObj}; m=true::Bool, w=true::Bool) = (T = deepcopy(S); ungap!(T, m=m, w=w))
+ungap(S::Union{SeisData,SeisChannel}; m=true::Bool, w=true::Bool) = (T = deepcopy(S); ungap!(T, m=m, w=w))
 
 """
     sync!(S::SeisData)
@@ -328,7 +361,7 @@ end
 
 Automatically cosine taper (Tukey window) all data in U
 """
-function autotap!(U::SeisObj)
+function autotap!(U::SeisChannel)
   (U.fs == 0 || isempty(U.x)) && return
 
   # Fill time gaps with NaNs

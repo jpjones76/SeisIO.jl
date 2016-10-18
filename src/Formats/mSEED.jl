@@ -125,7 +125,7 @@ function parserec(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::B
   if isempty(channel)
     seisdata_id = join([strip(chid[11:12]), strip(chid[1:5]),
     strip(chid[6:7]), strip(chid[8:10])], '.')
-    push!(S, SeisObj(name = chid, id = seisdata_id, fs = 1/dt, src="mseed"))
+    push!(S, SeisChannel(name = chid, id = seisdata_id, fs = 1/dt, src="mseed"))
     channel = S.n
     te = 0
   else
@@ -212,7 +212,9 @@ function parserec(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::B
     end
   end
   # =========================================================================
-  skip(sid, nsk)
+  if nsk > 0
+    skip(sid, nsk)
+  end
 
 
   # =========================================================================
@@ -353,7 +355,7 @@ function parserec(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::B
       d = Float64[]
     end
   else
-    # I'll add more someday
+    # I'll add more someday but I've literally never seen anything but steim
     error(@sprintf("Decoding for fmt = %i NYI!",fmt))
   end
   # Append data

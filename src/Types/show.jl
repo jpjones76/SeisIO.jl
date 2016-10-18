@@ -13,6 +13,7 @@ end
 # Time size
 ngaps(t::Array{Int64,2}, L::Integer) = max(0,size(t,1)-(t[end]==0?2:1))
 is_ts(f::Float64) = (f > 0)
+is_ts(S::SeisChannel) = (S.f > 0)
 isgapped(t::Array{Int64,2}) = (size(t,1) > 2)
 maxgap(t::Array{Int64,2}) = @sprintf("%.2f", isgapped(t) ? μs*maximum(t[2:end,2]) : 0)
 gapsum(t::Array{Int64,2}, f::Float64, L::Integer) = isempty(t) ? "" :
@@ -68,12 +69,12 @@ end
 arraypop(s, A, v) = strtrunc(s*join(["["*string(size(A[i],1))
   for i = 1:length(A)], v*"], ")*(isempty(A)?:"":v*"]"))
 
-# SeisObj
+# SeisChannel
 strpop(s::AbstractString, A::String) = s*A              # name, id, units, src
 strpop(s::AbstractString, A::Array{Complex{Float64},2}) =
   s*respsum(A)                                                           # resp
 strpop(s::AbstractString, A::Array{String,1}) =
-  strtrunc(s*join(A, ", "))   # SeisObj: notes / SeisData: name, id, units, src
+  strtrunc(s*join(A, ", "))   # SeisChannel: notes / SeisData: name, id, units, src
 strpop(s::AbstractString, A::Dict{String,Any}) =
     s*string(length(A), " entries")                                      # misc
 strpop(s::AbstractString, A::Real) = (
@@ -97,7 +98,7 @@ function strpop(s::AbstractString, A::Array{Array{Float64,1},1})
    end
 end
 
-# SeisData: fs, gain / SeisObj: loc, x
+# SeisData: fs, gain / SeisChannel: loc, x
 function strpop(s::AbstractString, A::Array{Float64,1})
   if searchindex(s, "FS") > 0
     return strtrunc(s * join([@sprintf("%.1f", A[i])
@@ -114,14 +115,14 @@ end
 
 # =============================================================================
 # Display-replated
-function show(io::IO, S::Union{SeisData,SeisObj})
+function show(io::IO, S::Union{SeisData,SeisChannel})
   str = Dict{String,AbstractString}()
   for i in datafields(S)
     if i != :t
       str[string(i)] = strpop(@sprintf("%5s: ", uppercase(string(i))), getfield(S,i))
     else
       s = "    T: "
-      if isa(S, SeisObj)
+      if isa(S, SeisChannel)
         str["t"] = string(s, gapsum(S.t,S.fs,length(S.x)))
       else
         str["t"] = (s*join(["["*gapsum(S.t[i],S.fs[i],length(S.x[i]))
@@ -137,11 +138,31 @@ function show(io::IO, S::Union{SeisData,SeisObj})
     println(io, str[k])
   end
 end
-show(S::Union{SeisData,SeisObj}) = show(STDOUT, S)
+show(S::Union{SeisData,SeisChannel}) = show(STDOUT, S)
+show(io::IO, S::SeisHdr) = (
+  println(io, summary(S));
+  [println(uppercase(@sprintf("%10s",v)),": ", getfield(S,v)) for v in fieldnames(S)]
+  )
+
+# SeisHdr
+show(S::SeisHdr) = show(STDOUT, S)
+
+# SeisEvt
+show(io::IO, S::SeisEvt) = (
+  println(io, typeof(S), ":");
+  println(io, "\n(.hdr)");
+  show(S.hdr);
+  println(io, "\n(.data)");
+  show(S.data);
+  )
+
 summary(s::SeisData) = string("type ", typeof(s), " with ", s.n, " channel",
   s.n == 1 ? "" : "s")
-summary(S::SeisObj) = string(typeof(S), " with ", length(S.x), " sample",
+summary(s::SeisEvt) = string(typeof(s), " with ", s.data.n, " channel",
+  s.data.n == 1 ? "" : "s")
+summary(S::SeisChannel) = string(typeof(S), " with ", length(S.x), " sample",
   (length(S.x) == 1 ? "" : "s"), ", ", gapsum(S.t, S.fs,length(S.x)))
-length(t::SeisObj) = println(summary(t))
-size(t::SeisObj) = println(summary(t))
-# =============================================================================
+
+length(t::Union{SeisChannel,SeisEvt}) = println(summary(t))
+
+size(t::Union{SeisChannel,SeisEvt}) = length(t)

@@ -369,7 +369,7 @@ function segytoseis(S::Dict{String,Any})
   haskey(S, "stla") && (loc = [S["stla"]; S["stlo"]; S["stel"]; 0; 0])
 
   # Not going to bother converting misc SEGY stuff for now
-  return SeisObj(name=name, id=id, x=x, t=t, gain=1.0, fs=fs, units=units,
+  return SeisChannel(name=name, id=id, x=x, t=t, gain=1.0, fs=fs, units=units,
     src=S["src"], loc=loc)
 end
 segytoseis(SEG::Array{Dict{String,Any},1}) = (S = SeisData();

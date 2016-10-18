@@ -5,7 +5,7 @@ Read Lennartz-type ASCII file fname with pseudo-header info in first line.
 """
 
 function rlennasc(fname::String)
-  S = SeisObj()
+  S = SeisChannel()
   fid = open(fname, "r")
   h = split(readline(fid))
   ts = 0

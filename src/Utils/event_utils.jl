@@ -1,3 +1,6 @@
+using Requests: get
+sa_prune!(S::Union{Array{String,1},Array{SubString{String},1}}) = (deleteat!(S, find(isempty, S)); return S)
+
 """
     S = evq(t)
 
@@ -26,7 +29,7 @@ Restrict queries to **MIN_MAG** ≤ m ≤ **MAX_MAG**.
 
     S = evq(s, n=N)
 
-Return **N** events, rather than 1. S will be an array of SeisEvents.
+Return **N** events, rather than 1. S will be an array of SeisEvts.
 
     S = evq(s, lat=[LAT_MIN LAT_MAX], lon=[LON_MIN LON_MAX], dep=[DEP_MIN DEP_MAX])
 
@@ -86,7 +89,7 @@ function evq(ts::String;
     evt_data = [evt_data; split(readall(get(url, timeout=to, headers=webhdr())), '\n')[2:end]]
     vv && println("evt_data = ", evt_data)
   end
-  deleteat!(evt_data, find(isempty, evt_data))
+  sa_prune!(evt_data)
   ot = Array{Float64,1}(length(evt_data))
   for i = 1:1:length(evt_data)
     ot[i] = d2u(DateTime(split(evt_data[i],"|")[2]))
@@ -106,56 +109,56 @@ end
 
 # Purpose: Given DELTA, OT, and source depth, compute expected phase arrival times
 # Template: https://service.iris.edu/irisws/traveltime/1/query?distdeg=10.1&evdepth=20.5&phases=P,S&noheader=true
-"""
-    (T, ϕ, R) = getPha(ot::DateTime, Δ::Float64, z::Float64; pha="P,S"::String)
-
-Get expected arrival times in UTC for the given phases. Specify phases as a
-comma-separated list with no spaces, e.g. "P,pP,ScS"; getPha uses the TauP
-phase naming convention (see reference). Defaults to "P,S".
-
-Values returned:
-    T   Arrival times as a DateTime vector
-    ϕ   Incidence angles of each phase
-    R   Phase names corresponding to each entry in T, ϕ
-
-Reference: Crotwell, H.P., Owens, T.J., \& Ritsema, J. (1999). The TauP
-Toolkit: flexible seismic travel-time and ray-path utilities, SRL 70, 154–-160.
-
-"""
-function getPha(ot::DateTime, Δ::Float64, z::Float64;
-  pha="P,S"::String,
-  to=10::Real,
-  v=false::Bool,
-  vv=false::Bool)
-
-  # Initialize
-  os = d2u(ot)
-  N = length(split(pha,','))
-  S = Array{String,1}(N)
-  ϕ = zeros(Float64,N)
-  t = zeros(Float64,N)
-  url = string("https://service.iris.edu/irisws/traveltime/1/query?distdeg=",
-    Δ, "&evdepth=", z, "&phases=", pha, "&noheader=true&mintimeonly=true")
-  (v | vv) && println("url = ", url)
-
-  # Get URL
-  req = readall(get(url, timeout=to, headers=webhdr()))
-  vv && println("req = ", req)
-
-  # Parse result
-  ptab = split(req, '\n')[1:end-1]
-  for i = 1:length(ptab)
-    L = split(ptab[i])
-    S[i] = L[3]
-    t[i] = parse(Float64, L[4])
-    ϕ[i] = parse(Float64, L[7])
-    vv && println("t[", i, "] =", t[i])
-  end
-
-  # Convert to absolute times
-  T = Dates.unix2datetime(t.+os)
-  return (T, ϕ, S)
-end
+# """
+#     (T, ϕ, R) = getOnset(ot::DateTime, Δ::Float64, z::Float64; pha="P,S"::String)
+#
+# Get expected arrival times in UTC for the given phases. Specify phases as a
+# comma-separated list with no spaces, e.g. "P,pP,ScS"; getOnset uses the TauP
+# phase naming convention (see reference). Defaults to "P,S".
+#
+# Values returned:
+#     T   Arrival times as a DateTime vector
+#     ϕ   Incidence angles of each phase
+#     R   Phase names corresponding to each entry in T, ϕ
+#
+# Reference: Crotwell, H.P., Owens, T.J., \& Ritsema, J. (1999). The TauP
+# Toolkit: flexible seismic travel-time and ray-path utilities, SRL 70, 154–-160.
+#
+# """
+# function getOnset(ot::DateTime, Δ::Float64, z::Float64;
+#   pha="P,S"::String,
+#   to=10::Real,
+#   v=false::Bool,
+#   vv=false::Bool)
+#
+#   # Initialize
+#   os = d2u(ot)
+#   N = length(split(pha,','))
+#   S = Array{String,1}(N)
+#   ϕ = zeros(Float64,N)
+#   t = zeros(Float64,N)
+#   url = string("https://service.iris.edu/irisws/traveltime/1/query?distdeg=",
+#     Δ, "&evdepth=", z, "&phases=", pha, "&noheader=true&mintimeonly=true")
+#   (v | vv) && println("url = ", url)
+#
+#   # Get URL
+#   req = readall(get(url, timeout=to, headers=webhdr()))
+#   vv && println("req = ", req)
+#
+#   # Parse result
+#   ptab = split(req, '\n')[1:end-1]
+#   for i = 1:length(ptab)
+#     L = split(ptab[i])
+#     S[i] = L[3]
+#     t[i] = parse(Float64, L[4])
+#     ϕ[i] = parse(Float64, L[7])
+#     vv && println("t[", i, "] =", t[i])
+#   end
+#
+#   # Convert to absolute times
+#   T = Dates.unix2datetime(t.+os)
+#   return (T, ϕ, S)
+# end
 
 """
 (dist, az, baz) = gcdist([lat_src, lon_src], rec)
@@ -214,23 +217,19 @@ function mkevthdr(evt_line::String)
 end
 
 """
-    distaz!(S::SeisEvent)
+    distaz!(S::SeisEvt)
 
-Compute Δ, Θ by the Haversine formula. Updates SeisEvent structure **S** with
+Compute Δ, Θ by the Haversine formula. Updates SeisEvt structure **S** with
 distance, azimuth, and backazimuth for each channel. Values are stored as
 S.data.misc["dist"], S.data.misc["az"],and S.data.misc["baz"], respectively.
 
 """
-function distaz!(S)
+function distaz!(S::SeisEvt)
   rec = Array{Float64,2}(S.data.n,2)
   for i = 1:S.data.n
     rec[i,:] = S.data.loc[i][1:2]
   end
-  println(rec)
   (dist, az, baz) = gcdist([S.hdr.lat, S.hdr.lon], rec)
-  println("dist = ", dist)
-  println("az = ", az)
-  println("baz = ", baz)
   for i = 1:S.data.n
     S.data.misc[i]["dist"] = dist[i]
     S.data.misc[i]["az"] = az[i]
@@ -239,14 +238,17 @@ function distaz!(S)
 end
 
 """
-    getP(evt::String, cc::String)
+    getevt(evt::String, cc::String)
 
-Get P-wave data for event **evt** on channels **cc**. Event and channel data are
+Get data for event **evt** on channels **cc**. Event and channel data are
 auto-filled using auxiliary functions.
 """
-function getP(evt::String, cc::String;
+function getevt(evt::String, cc::String;
   mag=[6.0 9.9]::Array{Float64,2},
-  to=10::Real,
+  to=10.0::Real,
+  pha="P"::String,
+  spad=1.0::Real,
+  epad=0.0::Real,
   v=false::Bool,
   vv=false::Bool)
 
@@ -264,17 +266,17 @@ function getP(evt::String, cc::String;
   end
 
   # Create channel data
-  s = h.time                                    # Start time for GetSta is event origin time
+  s = h.time                                    # Start time for getsta is event origin time
   t = u2d(d2u(s) + 1.0)                         # End time is one second later
-  d = GetSta(Sta, Cha, st=s, et=t, to=to, v=v, vv=vv)
+  d = getsta(Sta, Cha, st=s, et=t, to=to, v=v, vv=vv)
   if (v|vv)
     println(now(), ": channels initialized.")
   end
 
-  # Initialize SeisEvent structure
-  S = SeisEvent(hdr = h, data = d)
+  # Initialize SeisEvt structure
+  S = SeisEvt(hdr = h, data = d)
   if (v|vv)
-    println(now(), ": SeisEvent created.")
+    println(now(), ": SeisEvt created.")
   end
   vv && println(S)
 
@@ -284,57 +286,101 @@ function getP(evt::String, cc::String;
     println(now(), ": Δ,Θ updated.")
   end
 
-  # Phase arrivals to get: (Somewhat simplified to condense code)
-  # Δ < 40° "P,S", Δ ≥ 40° "P,PP"; might expand later
-  I = [Array{Int64,1}(), Array{Int64,1}()]
-  D = [Array{Float64,1}(), Array{Float64,1}()]
-  pstr = ["P,S", "P,PP"]
+  # Desired behavior:
+  # If the phase string supplied is "all", request window is spad s before P to twice the last phase arrival
+  # If a phase name is supplied, request window is spad s before that phase to epad s after next phase
+  pstr = Array{String,1}(S.data.n)
   for i = 1:1:S.data.n
-    if S.data.misc[i]["dist"] <= 40.0
-      j = 1
+    pdat = getpha(S.data.misc[i]["dist"], S.hdr.dep, to=to, v=v, vv=vv)
+    if pha == "all"
+      j = getPhaSt(pdat)
+      s = parse(Float64,pdat[j,4]) - spad
+      t = 2.0*parse(Float64,pdat[getPhaEn(pdat),4])
+      S.data.misc[i]["PhaseWindow"] = string(pdat[j,3], " : Coda")
     else
-      j = 2
+      s = parse(Float64,pdat[find(pdat[:,3].==pha)[1],4]) - spad
+      (p2,t) = getNextPhase(pha, pdat)
+      t += epad
+      S.data.misc[i]["PhaseWindow"] = string(pha, " : ", p2)
     end
-    push!(I[j], i)
-    push!(D[j], S.data.misc[i]["dist"])
-  end
-  for j = 1:length(I)
-    if !isempty(I[j])
-      ind = I[j]
-      delta = D[j]
-      for k = 1:length(ind)
-        vv && println("Calling getPha(",
-                      S.hdr.time, ", ",
-                      delta[k], ", ",
-                      S.hdr.dep, "; ",
-                      "pha=", pstr[j], ", ",
-                      "v=", v, ", ",
-                      "vv=", vv, ")")
-        (T1, ~, ~) = getPha(S.hdr.time, delta[k], S.hdr.dep; pha=pstr[j], v=v, vv=vv)
-        vv && println("T1 =", T1)
-        S.data.misc[ind[k]]["t1"] = T1[1]
-        S.data.misc[ind[k]]["t2"] = T1[2]
-      end
-    end
-  end
-  if (v|vv)
-    println(now(), ": time request windows done.")
-  end
-
-  # Unsynched data query by channel, to minimize length of each request
-  for i = 1:1:S.data.n
+    s = string(u2d(d2u(S.hdr.time) + s))
+    t = string(u2d(d2u(S.hdr.time) + t))
     (NET, STA, LOC, CHA) = split(S.data.id[i],".")
     if isempty(LOC)
       LOC = "--"
     end
-    s = FDSNget(net = NET, sta = STA, loc = LOC, cha = CHA,
-                s = S.data.misc[i]["t1"], t = S.data.misc[i]["t2"],
-                si = false, y = false, v=v, vv=vv)
-    vv && println(s)
-    S.data.x[i] = copy(s.x[1])
+    C = FDSNget(net = NET, sta = STA, loc = LOC, cha = CHA,
+                s = s, t = t, si = false, y = false, v=v, vv=vv)
+    vv && println("FDSNget output:\n", C)
+    S.data.t[i] = C.t[1]
+    S.data.x[i] = C.x[1]
+    S.data.notes[i] = C.notes[1]
+    S.data.src[i] = C.src[1]
     if (v | vv)
-      println(now(), ": data acquired for ", S.data.id[i])
+         println(now(), ": data acquired for ", S.data.id[i])
     end
   end
   return S
+end
+
+"""
+    getpha(pha::String, Δ::Float64, z::Float64)
+
+Get phase onsets **pha** relative to origin time for an eventat distance **Δ**
+(degrees), depth **z** (km).
+
+Detail: getpha is a command-line interface to the IRIS travel time calculator,
+which calls TauP (1,2,3). Specify **pha** as a comma-separated string, e.g.
+"P,S,PKiKP". **pha** also accepts special keywords (e.g. \"ttall\") as described
+on the IRIS web pages.
+
+References:
+(1) IRIS travel time calculator: https://service.iris.edu/irisws/traveltime/1/
+(2) TauP manual: http://www.seis.sc.edu/downloads/TauP/taup.pdf
+(3) Crotwell, H. P., Owens, T. J., & Ritsema, J. (1999). The TauP Toolkit:
+Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.
+"""
+function getpha(Δ::Float64, z::Float64;
+  phases=""::String,
+  model="iasp91"::String,
+  to=10.0::Real, v=false::Bool, vv=false::Bool)
+
+  # Generate URL and do web query
+  if isempty(phases)
+    pq = ""
+  else
+    pq = string("&phases=", phases)
+  end
+
+  url = string("http://service.iris.edu/irisws/traveltime/1/query?",
+  "distdeg=", Δ, "&evdepth=", z, pq, "&model=", model,
+  "&mintimeonly=true&noheader=true")
+  (v | vv) && println("url = ", url)
+  req = readall(get(url, timeout=to, headers=webhdr()))
+  (v | vv) && println("Request result:\n", req)
+
+  # Parse results
+  phase_data = split(req, '\n')
+  sa_prune!(phase_data)
+  Nf = length(split(phase_data[1]))
+  Np = length(phase_data)
+  Pha = Array{String,2}(Np, Nf)
+  for p = 1:Np
+    Pha[p,1:Nf] = split(phase_data[p])
+  end
+  return Pha
+end
+
+getphaseTime(pha::String, Pha::Array{String,2}) = parse(Float64, Pha[find(Pha[:,3].==pha)[1],4])
+getPhaSt(pha::String, Pha::Array{String,2}) = findmin([parse(Float64,i) for i in Pha[:,4]])
+getPhaEn(pha::String, Pha::Array{String,2}) = findmax([parse(Float64,i) for i in Pha[:,4]])
+function getNextPhase(pha::String, Pha::Array{String,2})
+  s = Pha[:,3]
+  t = [parse(Float64,i) for i in Pha[:,4]]
+  j = find(s.==pha)[1]
+  i = t.-t[j].>0
+  tt = t[i]
+  ss = s[i]
+  k = sortperm(tt.-t[j])[1]
+  return(ss[k],tt[k])
 end

@@ -100,7 +100,7 @@ function batch_read(files::Array{String,1}; ftype="SAC"::String, fs=0.0::Float64
     xtjoin!((t1,x1), div(DT, 2))
 
     # Reassign, collapse to sparse, done.
-    S += SeisObj(id=u, name=u, t=t_collapse(t1, fs), x=x1, src=ftype, fs=fs, loc=chan_loc)
+    S += SeisChannel(id=u, name=u, t=t_collapse(t1, fs), x=x1, src=ftype, fs=fs, loc=chan_loc)
   end
   return S
 end

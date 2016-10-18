@@ -21,3 +21,6 @@ STA = ["UW.HOOD.BHZ"; "UW.HOOD.BHN"; "UW.HOOD.BHE"; "CC.TIMB.EHZ"; "CC.TIMB.EHN"
 TS = "2016-05-16T14:50:00"; TE = 600;
 seis = IRISget(STA, s=TS, t=TE, sync=true);
 writesac(seis)
+
+# Download some data from the Tohoku-Oki great earthquake
+S = getevt("201103110547", "PB B004  EH?,PB B004  BS?,PB B001  BS?")
