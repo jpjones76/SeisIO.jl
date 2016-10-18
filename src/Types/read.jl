@@ -136,11 +136,10 @@ function r_seishdr(io::IOStream)
     setfield!(S, i, read(io, Float64))
   end
   setfield!(S, :mag, read(io, Float32))
-  for i in [:mag_auth, :auth, :cat, :contrib]
+  setfield!(S, :contrib_id, read(io, Int64))
+  for i in [:mag_auth, :auth, :cat, :contrib, :loc_name]
     setfield!(S, i, readstr_varlen(io))
   end
-  setfield!(S, :contrib_id, read(io, Int64))
-  setfield!(S, :loc_name, readstr_varlen(io))
   return S
 end
 
@@ -190,7 +189,7 @@ function r_seisdata(io::IOStream)
 end
 
 r_seisevt(io::IOStream) = (
-  S = SeisEvt();
+  S = SeisEvent();
   setfield!(S, :hdr, r_seishdr(io));
   setfield!(S, :data, r_seisdata(io));
   return S
@@ -206,7 +205,8 @@ Read SeisIO file FNAME.
 function rseis(fname::String; v=false::Bool)
   io = open(fname, "r")
   c = String(read(io, UInt8, 6))
-  c == "SEISIO" || (close(io); error("Not a SeisData file!"))
+  c == "SEISIO" || (close(io); error("Not a SeisIO file!"))
+  ver = read(io, Float32)
   L = read(io, UInt64)
   T = String(read(io, UInt8, L))
   V = read(io, UInt64, L)

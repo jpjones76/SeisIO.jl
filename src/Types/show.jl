@@ -147,8 +147,8 @@ show(io::IO, S::SeisHdr) = (
 # SeisHdr
 show(S::SeisHdr) = show(STDOUT, S)
 
-# SeisEvt
-show(io::IO, S::SeisEvt) = (
+# SeisEvent
+show(io::IO, S::SeisEvent) = (
   println(io, typeof(S), ":");
   println(io, "\n(.hdr)");
   show(S.hdr);
@@ -158,11 +158,11 @@ show(io::IO, S::SeisEvt) = (
 
 summary(s::SeisData) = string("type ", typeof(s), " with ", s.n, " channel",
   s.n == 1 ? "" : "s")
-summary(s::SeisEvt) = string(typeof(s), " with ", s.data.n, " channel",
+summary(s::SeisEvent) = string(typeof(s), " with ", s.data.n, " channel",
   s.data.n == 1 ? "" : "s")
 summary(S::SeisChannel) = string(typeof(S), " with ", length(S.x), " sample",
   (length(S.x) == 1 ? "" : "s"), ", ", gapsum(S.t, S.fs,length(S.x)))
 
-length(t::Union{SeisChannel,SeisEvt}) = println(summary(t))
+length(t::Union{SeisChannel,SeisEvent}) = println(summary(t))
 
-size(t::Union{SeisChannel,SeisEvt}) = length(t)
+size(t::Union{SeisChannel,SeisEvent}) = length(t)

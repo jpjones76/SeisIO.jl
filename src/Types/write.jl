@@ -252,18 +252,17 @@ function w_struct(io::IOStream, S::SeisHdr)
   write(io, Int64(round(d2u(S.time)*1.0e6)))                # ot
   write(io, S.lat, S.lon, S.dep)                            # loc
   write(io, getfield(S, :mag))                              # mag
-  for i in [:mag_auth, :auth, :cat, :contrib]
+  write(io, getfield(S, :contrib_id))
+  for i in [:mag_auth, :auth, :cat, :contrib, :loc_name]
     writestr_varlen(io, getfield(S, i))
   end
-  write(io, getfield(S, :contrib_id))
-  writestr_varlen(io, getfield(S, :loc_name))
 end
 
 # SeisChannel
 w_struct(io::IOStream, S::SeisChannel) = write(io, SeisData(S))
 
-# SeisEvt
-w_struct(io::IOStream, S::SeisEvt) = (H = deepcopy(S.hdr); D = deepcopy(S.data); w_struct(io, H); w_struct(io, D))
+# SeisEvent
+w_struct(io::IOStream, S::SeisEvent) = (H = deepcopy(S.hdr); D = deepcopy(S.data); w_struct(io, H); w_struct(io, D))
 
 # ===========================================================================
 # functions that invoke w_struct()
@@ -273,7 +272,7 @@ w_struct(io::IOStream, S::SeisEvt) = (H = deepcopy(S.hdr); D = deepcopy(S.data);
 Write SeisIO data structure(s) `S` to file `f`.
 """
 function wseis(f::String, S...)
-  U = Union{SeisData,SeisChannel,SeisHdr,SeisEvt}
+  U = Union{SeisData,SeisChannel,SeisHdr,SeisEvent}
   L = length(S)
   for i = 1:L
     if !(typeof(S[i]) <: U)
@@ -286,6 +285,7 @@ function wseis(f::String, S...)
 
   # Write begins
   write(fid, "SEISIO".data)
+  write(fid, vSeisIO())
   write(fid, UInt64(L))     # Smallest possible struct is 100 bytes; UInt64 is overkill, but consistent
   skip(fid, 9*L)            # Leave blank space for an index at the start of the file
 
@@ -295,7 +295,7 @@ function wseis(f::String, S...)
       T[i] = UInt8('D')
     elseif typeof(S[i]) == SeisHdr
       T[i] = UInt8('H')
-    elseif typeof(S[i]) == SeisEvt
+    elseif typeof(S[i]) == SeisEvent
       T[i] = UInt8('E')
     end
     w_struct(fid, S[i])
@@ -307,4 +307,4 @@ function wseis(f::String, S...)
   write(fid, V)
   close(fid)
 end
-wseis(S::Union{SeisData,SeisChannel,SeisHdr,SeisEvt}, f::String) = wseis(f, S)
+wseis(S::Union{SeisData,SeisChannel,SeisHdr,SeisEvent}, f::String) = wseis(f, S)

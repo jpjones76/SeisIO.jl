@@ -1,9 +1,9 @@
 .. _seisdata_file_format:
 
 *************************************
-:mod:`Appendix B: SeisIO File Format`
+:mod:`Appendix C: SeisIO File Format`
 *************************************
-SeisData files can contain multiple SeisData and SeisObj instances. The specifications below describe the file structure. Files should be written in little-endian byte order.
+SeisData files can contain multiple SeisData and SeisChannel objects. The specifications below describe the file structure. Files should be written in little-endian byte order.
 
 .. csv-table:: Abbreviations used in this section
   :header: Var, Meaning, Julia, C ``\<stdint.h\>``
@@ -22,18 +22,53 @@ SeisData files can contain multiple SeisData and SeisObj instances. The specific
 
 File header
 ===========
-Each SeisIO file begins with the 8-character string ``SEISDATA``, followed by a version number ``V`` and the number of objects ``J`` in the file.
+Each SeisIO file begins with the 6-character string ``SEISIO``, followed by a version number ``V``, and a table of contents:  number of objects in file,  single-character object type codes, and byte indices.
 
 .. csv-table:: File header (16 bytes)
   :header: Var, Meaning, T, N
   :widths: 5, 32, 5, 5
 
-  ,\"SEISDATA\",c,8
+  ,\"SEISIO\",c,6
   ``V``,version,f32,1
-  ``J``,\# of SeisData objects in file,u32,1
+  ``J``,\# of SeisIO objects in file,u32,1
+  ``C``,Character codes for each object,c,J
+  ``B``,Byte indices for each object,u64,J
 
-SeisData object info
-====================
+
+.. csv-table:: Object codes
+  :header: Char, Meaning
+  :widths: 5, 50
+
+  'D', SeisData
+  'H', SeisHdr
+  'E', SeisEvent
+
+SeisHdr object
+==============
+.. csv-table:: Fixed header information (44 bytes)
+  :header: Field, T, N
+  :widths: 32, 5, 5
+
+  ``id``,i64,1
+  ``time``,i64,1
+  ``lat``,f64,1
+  ``lon``,f64,1
+  ``dep``,f64,1
+  ``mag``,f32,1
+  ``contrib_id``,i64,1
+
+Time is stored as Epoch time (i.e. measured from 1970-01-01 00:00:00 UTC) in *integer microseconds*.
+
+Header Strings
+--------------
+Header strings are stored as ``String_Length (i64), String (if String_Length > 0) (c, String_Length)``, in the following order: ``mag_auth, auth, cat, contrib, loc_name``.
+
+SeisEvent object
+================
+A SeisEvent object is stored as a SeisHdr object followed by a SeisData object. Note that the combination of SeisHdr+SeisData that comprises a SeisEvent object counts as one object, not two, in the file's table of contents.
+
+SeisData object
+===============
 Each SeisData object in the file begins with the number of channels (field ``n``).
 
 .. csv-table:: Object header (8 bytes)
@@ -43,7 +78,7 @@ Each SeisData object in the file begins with the number of channels (field ``n``
   ``n``,\# of channels,u64,1
 
 Channel data
-============
+------------
 Each channel in the current SeisData object has its own set of channel data.
 
 .. csv-table:: Fixed channel information (100 bytes)
@@ -184,7 +219,7 @@ As with string arrays in ``misc``, split notes using the value of ``a`` as a cha
   ``ti``, time gap indices, i64, ``nt``
   ``tv``, time gap values, i64, ``nt``
 
-If ``fs>0, t`` is a two-column array, ``t = [ti tv]``; otherwise, Julia reshapes ``t`` to a one-column, two-dimensional array. 
+If ``fs>0, t`` is a two-column array, ``t = [ti tv]``; otherwise, Julia reshapes ``t`` to a one-column, two-dimensional array.
 
 ``x``
 ^^^^^
