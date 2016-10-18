@@ -22,9 +22,9 @@ SeisData files can contain multiple SeisData and SeisChannel objects. The specif
 
 File header
 ===========
-Each SeisIO file begins with the 6-character string ``SEISIO``, followed by a version number ``V``, and a table of contents:  number of objects in file,  single-character object type codes, and byte indices.
+Each SeisIO file begins with the 6-character string ``SEISIO``, followed by a version number ``V``, number of objects in file, and a table of contents (TOC) with single-character object type codes followed by byte indices.
 
-.. csv-table:: File header (16 bytes)
+.. csv-table:: File header (14 bytes + TOC)
   :header: Var, Meaning, T, N
   :widths: 5, 32, 5, 5
 
@@ -34,10 +34,9 @@ Each SeisIO file begins with the 6-character string ``SEISIO``, followed by a ve
   ``C``,Character codes for each object,c,J
   ``B``,Byte indices for each object,u64,J
 
-
 .. csv-table:: Object codes
   :header: Char, Meaning
-  :widths: 5, 50
+  :widths: 5, 25
 
   'D', SeisData
   'H', SeisHdr
