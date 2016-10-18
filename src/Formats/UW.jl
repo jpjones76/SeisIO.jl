@@ -382,7 +382,7 @@ function r_uw(filename::String; v=false::Bool)
   datafile = ""
   ec = Char(filename[end])
   lc = collect(0x61:1:0x7a)
-  if Base.in(ec,lc)
+  if Base.in(UInt32(ec),lc)
     pickfile = filename
     datafile = string(filename[1:end-1],"W")
   elseif ec == 'W'
@@ -466,7 +466,7 @@ function uwtoseis(S::Dict{String,Any})
     S["S"][i,1] > 0 && (misc["S"] = S["S"][i,:])
     S["D"][i] > 0 && (misc["D"] = S["D"][i])
 
-    seis += SeisObj(name=name, id=id, fs=fs, x=x, t=t, src=src, notes=notes,
+    seis += SeisChannel(name=name, id=id, fs=fs, x=x, t=t, src=src, notes=notes,
       misc=misc, units="counts")
   end
   return seis

@@ -1,53 +1,56 @@
 VERSION >= v"0.4.0" && __precompile__(true)
 module SeisIO
-export SeisObj, SeisData, findname, findid, hasid, hasname,    # SeisData/SeisData.jl
-samehdr, t_expand, t_collapse, pull, note,
-wseis, rseis, writesac,                                        # SeisData/fileio.jl
-getbandcode, prune!, purge, purge!, gapfill!,                  # SeisData/misc.jl
-gapfill, ungap!, ungap, sync!, sync, autotap!,
-randseisobj, randseisdata,                                     # SeisData/randseis.jl
-batch_read,                                                    # FileFormats/BatchProc.jl
-parsemseed, readmseed, parsesl, readmseed, parserec,           # FileFormats/mSEED.jl
-rlennasc,                                                      # FileFormats/LennartzAsc.jl
-prunesac!, psac, r_sac, sacwrite, chksac, sachdr,              # FileFormats/SAC.jl
-get_sac_keys, get_sac_fw, get_sac_iw, sactoseis,
-readsac, writesac, sac_bat,
-readsegy, segyhdr, pruneseg, segytosac, segytoseis, r_segy,    # FileFormats/SEGY.jl
-readuwpf, readuwdf, readuw, uwtoseis, r_uw,                    # FileFormats/UW.jl
-readwin32, win32toseis, r_win32,                               # FileFormats/Win32.jl
+
+export SeisChannel, SeisData, findname, findid, hasid, hasname,# Types/SeisData.jl
+SeisHdr, SeisEvt, note,                                        # Types/SeisHdr.jl
+wseis, writesac,                                               # Types/write.jl
+rseis,                                                         # Types/read.jl
+samehdr, pull, getbandcode, prune!, purge, purge!, gapfill!,   # Types/misc.jl
+gapfill, ungap!, ungap, sync!, sync, autotap!,                 #
+batch_read,                                                    # Formats/BatchProc.jl
+parsemseed, readmseed, parsesl, readmseed, parserec,           # Formats/mSEED.jl
+rlennasc,                                                      # Formats/LennartzAsc.jl
+prunesac!, psac, r_sac, sacwrite, chksac, sachdr,              # Formats/SAC.jl
+get_sac_keys, get_sac_fw, get_sac_iw, sactoseis,               #
+readsac, writesac, sac_bat,                                    #
+readsegy, segyhdr, pruneseg, segytosac, segytoseis, r_segy,    # Formats/SEGY.jl
+readuwpf, readuwdf, readuw, uwtoseis, r_uw,                    # Formats/UW.jl
+readwin32, win32toseis, r_win32,                               # Formats/Win32.jl
 FDSNget,                                                       # Web/FDSN.jl
 IRISget, irisws,                                               # Web/IRIS.jl
 SeedLink,                                                      # Web/SeedLink.jl
 get_uhead, GetSta,                                             # Web/WebMisc.jl
-evq, getPha, gcdist, distaz!, getP,                            # Utils/event_utils.jl
-fctopz,                                                        # Utils/resp.jlr
+evq, gcdist, distaz!, getpha, getevt,                          # Utils/event_utils.jl
+randseisobj, randseisdata,                                     # Utils/randseis.jl
+fctopz,                                                        # Utils/resp.jl
 parsetimewin, j2md, md2j, sac2epoch, u2d, d2u, tzcorr,         # Utils/time_aux.jl
-xtmerge, xtjoin!,
-SeisHdr, SeisEvent                                             # SeisEvent.jl
+t_expand, xtmerge, xtjoin!
 
 # SeisData is designed as a universal, gap-tolerant "working" format for
 # geophysical timeseries data
-include("SeisData/SeisData.jl")
-include("SeisData/show.jl")
-include("SeisData/fileio.jl")
-include("SeisData/misc.jl")
-include("SeisData/randseis.jl")
-include("SeisEvent.jl")               # Classes for discrete events and event headers
+include("Types/SeisData.jl")      # SeisData, SeisChan classes for channel data
+include("Types/SeisHdr.jl")       # Class for headers of discrete events (SeisHdr)
+include("Types/composite.jl")     # Composite types (SeisEvt, SeisCat)
+include("Types/read.jl")          # Read
+include("Types/write.jl")         # Write
+include("Types/show.jl")          # Display
 
 # Auxiliary time and file functions
-include("Utils/time_aux.jl")
-include("Utils/file_aux.jl")
-include("Utils/resp.jl")
-include("Utils/event_utils.jl")
+include("Utils/randseis.jl")      # Create random SeisData for testing purposes
+include("Utils/misc.jl")          # Utilities that don't fit elsewhere
+include("Utils/time_aux.jl")      # Time functions
+include("Utils/file_aux.jl")      # Misc. file function
+include("Utils/resp.jl")          # Instrument response
+include("Utils/event_utils.jl")   # Event utilities
 
 # Data converters
-include("FileFormats/SAC.jl")         # SAC is the old IRIS standard; very easy to use, almost universally readable
-include("FileFormats/SEGY.jl")        # SEG Y, standard of the Society for Exploration Geophysicists
-include("FileFormats/mSEED.jl")       # SEED has become the worldwide seismic data standard despite being monolithic
-include("FileFormats/UW.jl")          # University of Washington: used at UW 1970s through mid-2000s
-include("FileFormats/Win32.jl")       # Win32: standard Japanese seismic data format
-include("FileFormats/LennartzAsc.jl") # Lennartz ASCII: a cheap wrapper to readdlm
-include("FileFormats/BatchProc.jl")   # SAC is the old IRIS standard; very easy to use, almost universally readable
+include("Formats/SAC.jl")         # SAC is the old IRIS standard; very easy to use, almost universally readable
+include("Formats/SEGY.jl")        # SEG Y, standard of the Society for Exploration Geophysicists
+include("Formats/mSEED.jl")       # SEED has become the worldwide seismic data standard despite being monolithic
+include("Formats/UW.jl")          # University of Washington: used at UW 1970s through mid-2000s
+include("Formats/Win32.jl")       # Win32: standard Japanese seismic data format
+include("Formats/LennartzAsc.jl") # Lennartz ASCII: a cheap wrapper to readdlm
+include("Formats/BatchProc.jl")   # SAC is the old IRIS standard; very easy to use, almost universally readable
 
 # Web clients
 include("Web/IRIS.jl")
@@ -55,7 +58,11 @@ include("Web/FDSN.jl")
 include("Web/SeedLink.jl")
 include("Web/WebMisc.jl")             # Common functions for web data access
 
-include("Utils/resp.jl")              # Instrument response
-
+# Submodule SeisPol
+module SeisPol
+export seispol, seisvpol, polhist, gauss, gdm, chi2d, qchd
+include("Submodules/hist_utils.jl")
+include("Submodules/seis_pol.jl")
+end
 
 end

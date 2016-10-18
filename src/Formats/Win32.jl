@@ -218,7 +218,7 @@ function win32toseis(D = Dict{String,Any}())
     end
     [misc[sk] = D[k][sk] for sk in ("hexID", "orgID", "netID", "fc", "hc", "pCorr", "sCorr", "lineDelay", "comment")]
 
-    seis += SeisObj(id=id,
+    seis += SeisChannel(id=id,
       name=k,
       x=x,
       t=t,

@@ -289,8 +289,8 @@ function sactoseis(D::Dict{String,Any})
     if haskey(misc, k); delete!(misc, k); end
   end
 
-  # Turn this monstrosity into a SeisObj
-  T = SeisObj(name=name, id=id, fs=fs, gain=gain, loc=loc, t=t, x=x,
+  # Turn this monstrosity into a SeisChannel
+  T = SeisChannel(name=name, id=id, fs=fs, gain=gain, loc=loc, t=t, x=x,
               src="sac file", misc=misc, units=units)
   return T
 end
@@ -298,7 +298,7 @@ end
 """
     S = rsac(fname)
 
-Read SAC file `fname` into a SeisObj.
+Read SAC file `fname` into a SeisChannel.
 """
 rsac(fname::String) = (src = fname;
   S = sactoseis(psac(open(fname,"r"), p=false)); note(S, fname); return S)

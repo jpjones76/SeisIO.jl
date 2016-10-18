@@ -1,4 +1,4 @@
-import Base:summary, show
+import Base:summary, isequal
 
 """
     S = SeisHdr()
@@ -44,33 +44,7 @@ type SeisHdr
   end
 end
 
-"""
-    S = SeisEvent()
-
-Create a seismic event consisting of a seismic header object, S.hdr, and a seismic data object, S.data.
-"""
-type SeisEvent
-  hdr::SeisHdr
-  data::SeisData
-  SeisEvent(; hdr=SeisHdr()::SeisHdr, data=SeisData()::SeisData) = return new(hdr, data)
-end
-
 # =============================================================================
-# Formatting for output to STDOUT
-# hdr
-show(io::IO, S::SeisHdr) = (
-  println(io, summary(S));
-  [println(uppercase(@sprintf("%10s",v)),": ", getfield(S,v)) for v in fieldnames(S)]
-  )
-show(S::SeisHdr) = show(STDOUT, S)
-summary(S::SeisHdr) = string("type ", typeof(S), " with values")
-
-# event
-show(io::IO, S::SeisEvent) = (
-  println(io, typeof(S), ":");
-  println(io, "\n(.hdr)");
-  show(S.hdr);
-  println(io, "\n(.data)");
-  show(S.data);
-  )
-summary(S::SeisEvent) = string(typeof(S))
+# Equality
+isequal(S::SeisHdr, T::SeisHdr) = minimum([isequal(hash(getfield(S,v)), hash(getfield(T,v))) for v in fieldnames(S)])
+==(S::SeisHdr, T::SeisHdr) = isequal(S,T)
