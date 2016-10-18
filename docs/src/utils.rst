@@ -10,11 +10,7 @@ The following utilities are for acquisition and storage of discrete event data.
 
 evq
 ---
-Event query. A fast command-line utility to do a multi-server query for one or
-more events near an origin time ``t``.  Incomplete string queries are read to
-the nearest fully specified time constraint, e.g., evq("2001-02-08") returns
-the nearest event to 2001-02-08T00:00:00 UTC. If no event is found on any
-server queried within one day of ``t``, evq exits with an error.
+Event query. A fast command-line utility to do a multi-server query for one or more events near an origin time ``t``.  Incomplete string queries are read to the nearest fully specified time constraint, e.g., evq("2001-02-08") returns the nearest event to 2001-02-08T00:00:00 UTC. If no event is found on any server queried within one day of ``t``, evq exits with an error.
 
 User-specified parameters (always passed as param=value) can include:
 
@@ -34,12 +30,7 @@ User-specified parameters (always passed as param=value) can include:
 
 * ``to``: Query timeout (in seconds) for each FDSN query. Default: ``to=10``.
 
-* ``src``: Data sources. Specify a comma-delineated list of strings or ``"All"``
-to query all (Default: ``src="All"``). Valid sources currently include IRIS
-(Incorporated Research Institutions for Seismology, WA, USA), RESIF (Réseau
-sismologique & géodésique français, France), NCEDC (Northern California
-Earthquake Data Center, CA, USA), and GFZ (GeoForschungsZentrum, Potsdam,
-Germany).
+* ``src``: Data sources. Specify a comma-delineated list of strings or ``"All"`` to query all (Default: ``src="All"``). Valid sources currently include IRIS (Incorporated Research Institutions for Seismology, WA, USA), RESIF (Réseau sismologique & géodésique français, France), NCEDC (Northern California Earthquake Data Center, CA, USA), and GFZ (GeoForschungsZentrum, Potsdam, Germany).
 
 gcdist
 ------
@@ -51,9 +42,7 @@ Get phase onset times relative to the origin time of an event.
 
 distaz!
 -------
-Update SeisEvent object S with distances(in degrees), azimuth, and backazimuth
-for each channel. Values are saved in S.data.misc["dist"], S.data.misc["az"],
-and S.data.misc["baz"], respectively.
+Update SeisEvent object S with distances(in degrees), azimuth, and backazimuth for each channel. Values are saved in S.data.misc["dist"], S.data.misc["az"], and S.data.misc["baz"], respectively.
 
 Miscellaneous
 =============
