@@ -1,18 +1,18 @@
 # SeisIO
-A minimalist, platform-agnostic package for working with geophysical time series data.
+A minimalist, platform-agnostic package for working with univariate geophysical data.
 
 # Documentation
 http://seisio.readthedocs.org
 
 # Current Functionality
-SeisIO presently includes three web clients, readers for several data formats, and writers for both SAC and a native format. Utility functions allow synchronization, seamless data merging, and padding time gaps.
+SeisIO presently includes three web clients, readers for several data formats, and writers for SAC and a native SeisIO format. Utility functions allow synchronization, seamless data merging, and padding time gaps.
 
-### Web clients
+## Web clients
 * SeedLink
-* FDSN
+* FDSN (continuous data and event queries)
 * IRIS timeseries
 
-### Readable File Formats
+## Readable File Formats
 * SAC <sup>(a)</sup>
 * mini-SEED
 * SEG Y (PASSCAL/NMT) <sup>(a)</sup>
