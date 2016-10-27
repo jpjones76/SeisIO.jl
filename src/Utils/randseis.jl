@@ -230,3 +230,24 @@ randseisdata(; c=false::Bool) = (S = SeisData();
   populate_seis!(S, rand(8:24), c=c); return S)
 randseisdata(i::Int; c=false::Bool) = (S = SeisData();
   populate_seis!(S, i, c=c); return S)
+
+function randseishdr()
+  H = SeisHdr(id = rand(1:2^62), time=now(),
+  lat=(rand(0:1:89)+rand())*-1^(rand(1:2)),
+  lon=(rand(0:1:179)+rand())*-1^(rand(1:2)),
+  dep=abs(100*randn()),
+  mag=rand()*6,
+  mag_auth=randstring(rand(2:8)),
+  mag_typ=randstring(rand(2:4)),
+  auth=randstring(rand(2:12)),
+  cat=randstring(rand(2:12)),
+  contrib=randstring(rand(2:12)),
+  contrib_id = rand(1:2^62),
+  loc_name=randstring(rand(8:24)))
+end
+
+function randseisevent(; c=false::Bool)
+  D = SeisData()
+  populate_seis!(D, rand(8:24), c=c)
+  return SeisEvent(hdr=randseishdr(), data=D)
+end

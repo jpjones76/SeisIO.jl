@@ -2,10 +2,8 @@ using DSP:tukey, resample
 
 # ============================================================================
 # Logging
-note(S::SeisChannel, s::AbstractString) = (S.notes = cat(1, S.notes,
-  string(now(), "  ", s)))
-note(S::SeisData, i::Integer, s::AbstractString) = (
-    push!(S.notes[i], string(now(), "  ", s)))
+note(S::SeisChannel, s::AbstractString) = (S.notes = cat(1, S.notes, string(now(), "  ", s)))
+note(S::SeisData, i::Integer, s::AbstractString) = push!(S.notes[i], string(now(), "  ", s))
 note(S::SeisData, s1::AbstractString, s2::AbstractString) = note(S, findname(s1, S), s2)
 
 # In case all we care about is a header match

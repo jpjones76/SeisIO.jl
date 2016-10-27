@@ -27,8 +27,11 @@ include("./iris_test.jl")
 println("SEEDlink client...")
 include("./seedlink_test.jl")
 
-println("To test for faithful SAC writing of SeisData objects:")
+println("To test for faithful SAC write of SeisIO in SAC:")
 println("     (1) Type `wsac(SL)` at the Julia prompt.")
 println("     (2) Open a terminal, change to the current directory, and start SAC.")
 println("     (4) type `r *GPW*SAC *MBW*SAC; qdp off; plot1; lh default`.")
 println("     (5) Report any irregularities.")
+
+println("Canonical examples...")
+include("./examples.jl")

@@ -107,3 +107,157 @@ end
 function webhdr()
   return Dict("UserAgent" => "Julia-SeisIO-FSDN.jl/0.0.1")
 end
+
+"""
+  (s, c) = chparse(C)
+
+Parse channel file or channel string **C**. **C** must use valid SeedLink
+syntax, e.g. C = "GE ISP  BH?.D,NL HGN"; (s, c) = chparse(C).
+
+Outputs:
+* s: array of station strings, each formatted "net sta"
+* c: array of channel patterns to match
+"""
+function chparse(C::String)
+
+  # Read C
+  if isfile(C)
+    ccfg = [strip(j, ['\r','\n']) for j in filter(i -> !startswith(i, ['\#','\*']), open(readlines, C))]
+  else
+    ccfg = split(C, ',')
+  end
+
+  stas = Array{String,1}()
+  patts = Array{String,1}()
+
+  # Parse ccfg
+  for i = 1:length(ccfg)
+    try
+      (net, sta, sel) = split(ccfg[i], ' ', limit=3)
+      ch = join([sta, net],' ')
+      if isempty(sel)
+        push!(stas, ch)
+        push!(patts, "")
+      else
+        sel = collect(split(strip(sel), ' '))
+        for j = 1:length(sel)
+          push!(stas, ch)
+          push!(patts, sel[j])
+        end
+      end
+    catch
+      (net, sta) = split(ccfg[i], ' ', limit=3)
+      push!(stas,net)
+      push!(patts,"")
+    end
+  end
+
+  return (stas, patts)
+end
+
+
+"""
+  (net, sta, loc, cha) = mkchanstr(C)
+
+Generate input strings for web queries from channel config file or string C.
+Each entry should be formatted "SSS NN LLCCC.T" (N = net, S = sta, L = loc,
+C = channel; number of letters gives the allowed size of each string). T (type)
+is not used by any routine that calls mkchanstr.
+
+If C is a file, there should be one entry per line.
+
+If C is a string, separate entries with commas.
+
+If C is a string array, each string should comprise one channel specification.
+"""
+function mkchanstr(C::String)
+
+  # Read C
+  if isfile(C)
+    ccfg = [strip(j, ['\r','\n']) for j in filter(i -> !startswith(i, ['\#','\*']), open(readlines, C))]
+  else
+    ccfg = split(C, ',')
+  end
+  net = Array{String,1}()
+  sta = Array{String,1}()
+  loc = Array{String,1}()
+  cha = Array{String,1}()
+
+  for i = 1:length(ccfg)
+    (n, s, lc) = split(ccfg[i], ' ', limit=3)
+    push!(net, n)
+    push!(sta, s)
+    if !isempty(lc)
+      if contains(lc, ".")
+        (lc,d) = split(lc, '.')
+      end
+      if !isempty(lc)
+        lc = strip(lc)
+        if length(lc) > 3
+          push!(loc, lc[1:2])
+          push!(cha, lc[3:5])
+        else
+          push!(cha, lc[1:3])
+        end
+      end
+    end
+  end
+
+  # Deal with sta
+  sta = join(unique(sta), ',')
+  if contains(sta, "???")
+    error("Station wildcards disallowed by SeisIO to limit data request sizes")
+  end
+
+  # Deal with net
+  net = join(unique(net), ',')
+  if contains(net, "??")
+    net = "*"
+  end
+
+  # Deal with cha
+  cha = join(unique(cha), ',')
+  if contains(cha, "???")
+    cha = "*"
+  end
+
+  # Deal with loc
+  if isempty(loc)
+    loc = "*"
+  else
+    loc = join(unique(loc),',')
+  end
+  return (net, sta, loc, cha)
+end
+mkchstr(C::Array{String,1}) = mkchstr(join(C,','))
+
+hashfname(str::Array{String,1}, ext::String) = string(hash(str), ".", ext)
+
+function savereq(D::Array{UInt8,1}, ext::String, net::String, sta::String,
+  loc::String, cha::String, s::DateTime, t::DateTime, q::String; c=false::Bool)
+  if ext == "miniseed"
+    ext = "mseed"
+  elseif ext == "sacbl"
+    ext = "SAC"
+  end
+  if c
+    y = Dates.year(s)
+    m = Dates.month(s)
+    d = Dates.day(s)
+    j = md2j(y,m,d)
+    i = replace(split(string(s), 'T')[2],':','.')
+    if loc == "--"
+      loc = ""
+    end
+    fname = string(join([y, j, i, net, sta, loc, cha],'.'), ".", q, ".", ext)
+  else
+    fname = hashfname([net, sta, loc, cha, string(s), string(t), q], ext)
+  end
+  if isfile(fname)
+    warn(string("File ", fname, " appears to contain an identical request. Not overwriting."))
+  end
+  f = open(fname, "w")
+  write(f, D)
+  close(f)
+  return nothing
+end

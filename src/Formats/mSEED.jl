@@ -1,20 +1,3 @@
-function parsesl(S::SeisData, buf::IOBuffer; v=false::Bool, vv=false::Bool)
-  seekstart(buf)
-  if v || vv
-    @printf(STDOUT, "Parsing: ")
-  end
-  while !eof(buf)
-    if v || vv
-      id = String(read(buf,UInt8,8))
-      @printf(STDOUT, "%s, ", id)
-    else
-      skip(buf, 8)
-    end
-    parserec(S, buf, v=v, vv=vv)
-  end
-  return(S)
-end
-
 """
 S = readmseed(fname)
 
@@ -70,16 +53,16 @@ function parserec(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::B
 
   # =========================================================================
   # Fixed section of data header (48 bytes)
-  hdr                         = join(map(Char,read(sid, Cchar, 20)))
-  SeqNo = hdr[1:6]
-  chid  = hdr[9:20]
+  hdr                         = String(read(sid, UInt8, 20))
   (yr,jd)                     = read(sid, UInt16, 2)
-  (HH,MM,SS)                  = read(sid, UInt8, 3)
-  skip(sid, 1)
-  (ms,nsamp,rateFac,rateMult) = read(sid, UInt16, 4)
+  (HH,MM,SS,unused)           = read(sid, UInt8, 4)
+  (ms,nsamp)                  = read(sid, UInt16, 2)
+  (rateFac,rateMult)          = read(sid, Int16, 2)
   (AFlag,IOFlag,DQFlag,NBlk)  = read(sid, UInt8, 4)
   TimeCorrection              = read(sid, Int32)
   (OffsetBeginData,NBos)      = read(sid, UInt16, 2)
+  SeqNo = hdr[1:6]
+  chid  = hdr[9:20]
   # =========================================================================
   # Fixed header
 
@@ -102,23 +85,23 @@ function parserec(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::B
   TimeCorrection /= 1.0e4
   ms /= 1.0e4
   if vv
-    println("position=", position(sid), ", OffsetBeginData=", OffsetBeginData, ", NBos =", NBos, " hdr = ", hdr)
-    println("time (y,j,h,m,s,ms) =", yr, ",", jd, ",", HH, ",", MM, ",", SS, ",", ms)
-    println("position=", position(sid), "NBos=", NBos)
+    println("position = ", position(sid), ", OffsetBeginData = ", OffsetBeginData, ", NBos = ", NBos, " hdr = ", hdr)
+    println("time (y,j,h,m,s,ms) = ", yr, ", ", jd, ", ", HH, ", ", MM, ", ", SS, ", ", ms)
+    println("position = ", position(sid), ", NBos = ", NBos)
   end
   # Generate dt
-  if rateFac > 0
-    dt = 1/Float64(rateFac*rateMult)
-    if rateMult < 0
-      dt = -1*dt
-    end
+  if rateFac > 0 && rateMult > 0
+    dt = 1.0/Float64(rateFac*rateMult)
+  elseif rateFac > 0 && rateMult < 0
+    dt = -1.0*Float64(rateMult/rateFac)
+  elseif rateFac < 0 && rateMult > 0
+    dt = -1.0*Float64(rateFac/rateMult)
   else
     dt = Float64(rateFac*rateMult)
-    if rateMult >= 0
-      dt = -1*dt
-    end
   end
-
+  if vv
+    println("rateFac = ", rateFac, ", rateMult = ", rateMult, ", dt = ", dt)
+  end
   # =========================================================================
   # Update Seis if necessary
   channel = find(S.name .== chid)
@@ -139,17 +122,38 @@ function parserec(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::B
   # Blockettes
   nsk = OffsetBeginData-48
   for i = 1:1:NBlk
-    vv && println("Blockette ", i, " of ", NBlk)
     BlocketteType = ntoh(read(sid, UInt16))
+    vv && @printf(STDOUT, "Blockette %i of %i: type %i.\n", i, NBlk, BlocketteType)
     if BlocketteType == 100
       # [100] Sample Rate Blockette (12 bytes)
       # V 2.3 – Introduced in  SEED Version 2.3
       skip(sid, 2)
       true_dt = ntoh(read(sid, Float32))
       skip(sid, 4)
-      vv && @printf(STDOUT, "BlocketteType 100.\nfs = %.3e.\n", true_dt)
+      vv && @printf(STDOUT, "BlocketteType 100, with fs = %.3e.\n", true_dt)
       nsk -= 12
       # Not sure how to handle this, don't know units
+    elseif BlocketteType == 201
+      # [201] Murdock Event Detection Blockette (60 bytes)
+      # First encountered 2016-10-26
+      # Mostly irrelevant, but event detections might be useful
+      skip(sid, 16)
+      (eyr,ejd)           = read(sid, UInt16, 2)
+      (eHH,eMM,eSS,enull) = read(sid, UInt8, 4)
+      ems                 = read(sid, UInt16)
+      if swap
+        eyr               = ntoh(eyr)
+        ejd               = ntoh(ejd)
+        ems               = ntoh(ems)
+      end
+      ems /= 1.0e4
+      if !haskey(S.misc[channel], "Events")
+        S.misc[channel]["Events"] = Array{Int,1}()
+      end
+      emo,edy = j2md(eyr, ejd)
+      push!(S.misc[channel]["Events"],
+            d2u(DateTime(eyr, emo, edy, eHH, eMM, eSS, 0)) + ems + TimeCorrection)
+      skip(sid, 32)
     elseif BlocketteType == 500
       #  [500] Timing Blockette (200 bytes)
       skip(sid, 1)
@@ -225,11 +229,11 @@ function parserec(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::B
   mo,dy = j2md(yr, jd)
 
   # Determine start time relative to end of data channel
-  ts = Dates.datetime2unix(DateTime(yr, mo, dy, HH, MM, SS, 0)) + ms + TimeCorrection - te
+  ts = d2u(DateTime(yr, mo, dy, HH, MM, SS, 0)) + ms + TimeCorrection - te
   if vv
-    @printf(STDOUT, "%s %04i %02i/%02i %02i:%02i:%02i.%03i, dt = %0.02f, Nsamp = %i, NBos = %i\n",
+    @printf(STDOUT, "%s %04i %02i/%02i %02i:%02i:%02i.%03i, dt = %0.02e, Nsamp = %i, NBos = %i\n",
                     hdr, yr, mo, dy, HH, MM, SS, ms*1.0e4, dt, nsamp, NBos)
-    println("ts = ", ts, " te = ", te)
+    #println("ts = ", ts, " te = ", te) # Not useful
   end
   if te  == 0
     S.t[channel] = [1 round(Int,ts/μs); nsamp 0]

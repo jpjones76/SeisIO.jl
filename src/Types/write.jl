@@ -1,7 +1,7 @@
 # to do: Consolidate write methods for seisobj, seisdata; too much cut-and-paste
 import Base:write
 
-vSeisIO() = return(Float32(0.1))
+vSeisIO() = Float32(0.1)
 
 # ===========================================================================
 # Auxiliary file write functions
@@ -24,7 +24,7 @@ end
 
 # I'm only allowing 12 types of values in misc; numeric arrays, string/char
 # arrays, numeric values, and strings. Technically I could store these codes
-# as a UInt12, but why hurt people like that?
+# as a UInt12, but why hurt peoples' heads like that?
 function getnum(a)
   isa(a, Char) && return UInt8(1)
   isa(a, Unsigned) && return UInt8(2)
@@ -119,95 +119,6 @@ function write_misc(io::IOStream, D::Dict{String,Any})
   return
 end
 
-# ============================================================================
-# SAC write
-"""
-    writesac(S::SeisData; ts=false, v=true)
-
-Write all data in S to auto-generated SAC files.
-"""
-function writesac(S::SeisData; ts=true, v=true)
-  (sacFloatKeys,sacIntKeys, sacCharKeys) = get_sac_keys()
-  if ts
-    iftype = Float32(4); leven = Float32(0)
-  else
-    iftype = Float32(1); leven = Float32(1)
-  end
-  tdata = Array{Float32}(0)
-  for i = 1:1:S.n
-    # Initialize values
-    sacFloatVals = Float32(-12345).*ones(Float32, 70)
-    sacIntVals = Int32(-12345).*ones(Int32, 40)
-    sacCharVals = repmat("-12345  ".data, 24)
-    sacCharVals[17:24] = (" "^8).data
-
-    # Prep time info
-    t = u2d(S.t[i][1,2])
-    y = parse(Int32, Dates.format(t, "yyyy"))
-    m = parse(Int32, Dates.format(t, "mm"))
-    d = parse(Int32, Dates.format(t, "dd"))
-    j = Int32(md2j(y,m,d))
-    H = parse(Int32, Dates.format(t, "H"))
-    M = parse(Int32, Dates.format(t, "M"))
-    sec = parse(Int32, Dates.format(t, "S"))
-    ms = parse(Int32, Dates.format(t, "sss"))
-
-    # Floats
-    dt = 1/S.fs[i]
-    sacFloatVals[1] = Float32(dt)
-    sacFloatVals[4] = Float32(S.gain[i])
-    sacFloatVals[6] = Float32(0)
-    sacFloatVals[7] = Float32(dt*length(S.x[i]) + sum(S.t[i][2:end,2])*μs)
-    if !isempty(S.loc[i])
-      sacFloatVals[32] = S.loc[i][1]
-      sacFloatVals[33] = S.loc[i][2]
-      sacFloatVals[34] = S.loc[i][3]
-      sacFloatVals[58] = S.loc[i][4]
-      sacFloatVals[59] = S.loc[i][5]
-    end
-
-    # Ints
-    sacIntVals[1] = y
-    sacIntVals[2] = j
-    sacIntVals[3] = H
-    sacIntVals[4] = M
-    sacIntVals[5] = sec
-    sacIntVals[6] = ms
-    sacIntVals[7] = 6
-    sacIntVals[10] = Int32(length(S.x[i]))
-    sacIntVals[16] = iftype
-    sacIntVals[36] = leven
-
-    # Chars (ugh...)
-    # Station name
-    id = split(S.id[i],'.')
-    st = ascii(id[2])
-    L = length(st)
-    sacCharVals[1:8] = cat(1, st.data, repmat(" ".data, 8-L))
-
-    # Channel name
-    ch = ascii(id[4])
-    L = length(ch)
-    sacCharVals[161:168] = cat(1, ch.data, repmat(" ".data, 8-L))
-
-    # Network name
-    nn = ascii(id[1])
-    L = length(nn)
-    sacCharVals[169:176] = cat(1, nn.data, repmat(" ".data, 8-L))
-
-    # Guess filename
-    fname = @sprintf("%04i.%03i.%02i.%02i.%02i.%04i.%s.%s..%s.R.SAC", y, j, H, M, sec, ms, nn, st, ch)
-
-    # Data
-    x = map(Float32, S.x[i])
-    ts && (tdata = map(Float32, μs*(t_expand(S.t[i], dt)-S.t[i][1,2])))
-
-    # Write to file
-    sacwrite(fname, sacFloatVals, sacIntVals, sacCharVals, x, t=tdata, ts=ts)
-    v && @printf(STDOUT, "%s: Wrote file %s from SeisData channel %i\n", string(now()), fname, i)
-  end
-end
-
 # ===========================================================================
 # write methods
 
@@ -273,7 +184,7 @@ Write SeisIO data structure(s) `S` to file `f`.
 """
 function wseis(f::String, S...)
   U = Union{SeisData,SeisChannel,SeisHdr,SeisEvent}
-  L = length(S)
+  L = UInt64(length(S))
   for i = 1:L
     if !(typeof(S[i]) <: U)
       error(@printf("Object of incompatible type passed to wseis at %i; exit with error!", i+1))
@@ -286,7 +197,7 @@ function wseis(f::String, S...)
   # Write begins
   write(fid, "SEISIO".data)
   write(fid, vSeisIO())
-  write(fid, UInt64(L))     # Smallest possible struct is 100 bytes; UInt64 is overkill, but consistent
+  write(fid, L)
   skip(fid, 9*L)            # Leave blank space for an index at the start of the file
 
   for i = 1:L
@@ -300,7 +211,7 @@ function wseis(f::String, S...)
     end
     w_struct(fid, S[i])
   end
-  seek(fid, 14)
+  seek(fid, 18)
 
   # Index format: array of object types, array of byte indices
   write(fid, T)

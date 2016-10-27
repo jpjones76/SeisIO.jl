@@ -6,13 +6,13 @@ te = "2016-03-23T23:17:00"
 chans = ["UW.TDH.EHZ"; "UW.VLL.EHZ"; "CC.TIMB.EHZ"]
 
 println("...IRISws...")
-SAC = irisws(net="CC", sta="TIMB", cha="EHZ", s=ts, t=te, fmt="sacbl")
-T = irisws(net="CC", sta="TIMB", cha="EHZ", s=ts, t=te, fmt="miniseed")
+SAC = irisws(net="CC", sta="TIMB", cha="EHZ", s=ts, t=te, fmt="sacbl",w=true,v=true)
+T = irisws(net="CC", sta="TIMB", cha="EHZ", s=ts, t=te, fmt="miniseed",w=true,v=true)
 @test_approx_eq(SAC["data"][1], T.x[1][1])
 @test_approx_eq(SAC["npts"], length(T.x[1]))
 
 println("...IRISget...")
-U = IRISget(chans, t=300, v=true)
+U = IRISget(chans, t=-300, v=true, w=true)
 L = [length(U.x[i])/U.fs[i] for i = 1:U.n]
 t = [U.t[i][1,2] for i = 1:U.n]
 L_min = minimum(L)

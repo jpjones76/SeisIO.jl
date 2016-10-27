@@ -1,3 +1,6 @@
+# ===========================================================================
+# SAC read methods
+# ===========================================================================
 function get_sac_keys()
   sacFloatKeys = ["delta", "depmin", "depmax", "scale", "odelta",
                 "b", "e", "o", "a", "internal1",
@@ -26,9 +29,6 @@ function get_sac_keys()
                "kuser1", "kuser2", "kcmpnm", "knetwk", "kdatrd", "kinst"]
   return (sacFloatKeys,sacIntKeys, sacCharKeys)
 end
-
-get_sac_fw(k::String) = ((F, I, C) = get_sac_keys(); findfirst(F .== k))
-get_sac_iw(k::String) = ((F, I, C) = get_sac_keys(); findfirst(I .== k))
 
 """
     prunesac!(S::Dict{String,Any})
@@ -104,21 +104,6 @@ S["delta"] for DELTA. S["data"] contains the trace data.
 """
 r_sac(fname::String; p=false::Bool) = (S = psac(open(fname,"r"), p=p))
 
-function sacwrite(fname::String, sacFloats::Array{Float32,1},
-  sacInts::Array{Int32,1}, sacChars::Array{UInt8,1}, x::Array{Float32,1};
-  t=[Float32(0)]::Array{Float32,1}, ts=true::Bool)
-  f = open(fname, "w")
-  write(f, sacFloats)
-  write(f, sacInts)
-  write(f, sacChars)
-  write(f, x)
-  if ts
-    write(f, t)
-  end
-  close(f)
-  return
-end
-
 """
     chksac(S::Dict{String,Any})
 
@@ -181,23 +166,196 @@ Print SAC headers in SAC dictionary S to STDOUT.
 sachdr(S::Dict{String,Any}) = [(i != "data" && (println(i, ": ", S[i])))
   for i in sort(collect(keys(S)))]
 
-"""
-    writesac(S::Dict{String,Any})
+function sactoseis(D::Dict{String,Any})
+  !haskey(D, "nvhdr") && error("Invalid SAC dictionary! (NVHDR not set)")
+  D["nvhdr"] == 6 || error("Can't parse old SAC versions! (NVHDR != 6)")
 
-Write SAC dictionary S to SAC file. Name convention is auto-determined by time
+  unitstrings = ["nm", "nm/s", "V", "nm/s/s", "unknown"]
+  pha = Dict{String,Float64}()
+  if haskey(D, "idep")
+    try
+      units = unitstrings[D["idep"]]
+    catch
+      units = "unknown"
+    end
+  else
+    units = "m/s"
+  end
+
+  name = join([D["knetwk"],D["kstnm"],D["kcmpnm"]],".")
+  id = join([D["knetwk"],D["kstnm"],"",D["kcmpnm"]],".")
+  gain = D["scale"] == -12345.0 ? 1.0 : D["scale"]
+  fs = 1/D["delta"]
+  if haskey(D, "cmpaz") && haskey(D, "cmpinc")
+    loc = [D["stla"], D["stlo"], D["stel"], D["cmpaz"], D["cmpinc"]]
+  else
+    loc = [D["stla"], D["stlo"], D["stel"], 0, 0]
+  end
+  x = map(Float64, D["data"])
+  t = map(Float64, [1 sac2epoch(D)/μs; D["npts"] 0])
+
+  misc = prunesac(D)
+  for k in ["nvhdr", "knetwk", "kstnm", "kcmpnm", "scale",
+    "nzyear", "nzjday", "nzhour", "nzmin", "nzsec", "nzmsec", "e", "b", "npts",
+    "src", "data", "delta", "cmpaz", "cmpinc", "stla", "stlo", "stel", "idep"]
+    if haskey(misc, k); delete!(misc, k); end
+  end
+
+  # Turn this monstrosity into a SeisChannel
+  T = SeisChannel(name=name, id=id, fs=fs, gain=gain, loc=loc, t=t, x=x,
+              src="sac file", misc=misc, units=units)
+  return T
+end
+
+"""
+    S = rsac(fname)
+
+Read SAC file `fname` into a SeisChannel.
+"""
+rsac(fname::String) = (src = fname;
+  S = sactoseis(psac(open(fname,"r"), p=false)); note(S, fname); return S)
+readsac(fname::String) = rsac(fname)
+
+# ===========================================================================
+# SAC write methods
+# ===========================================================================
+function fillSacVals(S::SeisChannel, ts::Bool, leven::Bool)
+  # Initialize values
+  sacFloatVals = Float32(-12345).*ones(Float32, 70)
+  sacIntVals = Int32(-12345).*ones(Int32, 40)
+  sacCharVals = repmat("-12345  ".data, 24)
+  sacCharVals[17:24] = (" "^8).data
+
+  # Ints
+  t = S.t[1,2]*μs
+  tt = [parse(Int32, i) for i in split(string(u2d(t)),r"[\.\:T\-]")]
+  length(tt) == 6 && append!(tt,0)
+  y = tt[1]
+  j = Int32(md2j(y, tt[2], tt[3]))
+  sacIntVals[1:6] = prepend!(tt[4:7], [y, j])
+  sacIntVals[7] = 6
+  sacIntVals[10] = Int32(length(S.x))
+  sacIntVals[16] = ts ? 4 : 1
+  sacIntVals[36] = leven ? 1 : 0
+
+  # Floats
+  dt = 1/S.fs
+  sacFloatVals[1] = Float32(dt)
+  sacFloatVals[4] = Float32(S.gain)
+  sacFloatVals[6] = Float32(0)
+  sacFloatVals[7] = Float32(dt*length(S.x) + sum(S.t[2:end,2])*μs)
+  if !isempty(S.loc)
+    if maximum(abs(S.loc)) > 0.0
+      sacFloatVals[32] = Float32(S.loc[1])
+      sacFloatVals[33] = Float32(S.loc[2])
+      sacFloatVals[34] = Float32(S.loc[3])
+      sacFloatVals[58] = Float32(S.loc[4])
+      sacFloatVals[59] = Float32(S.loc[5])
+    end
+  end
+
+  # Chars (ugh...)
+  id = split(S.id,'.')
+  ci = [169, 1, 25, 161]
+  Lc = [8, 16, 8, 8]
+  ss = Array{String,1}(4)
+  for i = 1:1:4
+    ss[i] = String(id[i])
+    s = ss[i].data
+    Ls = length(s)
+    L = Lc[i]
+    c = ci[i]
+    sacCharVals[c:c+L-1] = cat(1, s, repmat(" ".data, L-Ls))
+  end
+
+  # Assign a filename
+  fname = @sprintf("%04i.%03i.%02i.%02i.%02i.%04i.%s.%s.%s.%s.R.SAC", y, j,
+  tt[4], tt[5], tt[6], tt[7], ss[1], ss[2], ss[3], ss[4])
+  return (sacFloatVals, sacIntVals, sacCharVals, fname)
+
+end
+
+function sacwrite(fname::String, sacFloats::Array{Float32,1},
+  sacInts::Array{Int32,1}, sacChars::Array{UInt8,1}, x::Array{Float32,1};
+  t=[Float32(0)]::Array{Float32,1}, ts=true::Bool)
+  f = open(fname, "w")
+  write(f, sacFloats)
+  write(f, sacInts)
+  write(f, sacChars)
+  write(f, x)
+  if ts
+    write(f, t)
+  end
+  close(f)
+  return
+end
+
+# ============================================================================
+# SAC write
+"""
+    wsac(S::SeisData; ts=false, v=true)
+
+Write all data in S to auto-generated SAC files.
+"""
+function wsac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=true::Bool)
+  (sacFloatKeys,sacIntKeys, sacCharKeys) = get_sac_keys()
+  if ts
+    ift = Int32(4); leven = false
+  else
+    ift = Int32(1); leven = true
+  end
+  tdata = Array{Float32}(0)
+  if isa(S, SeisEvent)
+    evt_info = Array{Float32,1}([S.hdr.lat, S.hdr.lon, S.hdr.dep, -12345.0f0, S.hdr.mag])
+    t_evt = d2u(S.hdr.time)
+    evid  = S.hdr.id == 0 ? "-12345" : String(S.hdr.id)
+    EvL   = length(evid)
+    N     = S.data.n
+  else
+    N     = S.n
+  end
+  for i = 1:1:N
+    T = isa(S, SeisEvent) ? S.data[i] : S[i]
+    b = T.t[1,2]
+    dt = 1/T.fs
+    (sacFloatVals, sacIntVals, sacCharVals, fname) = fillSacVals(T, ts, leven)
+
+    # Values from event header
+    if isa(S, SeisEvent)
+      sacFloatVals[40:44] = evt_info
+      sacFloatVals[8] = t_evt - b*μs
+      sacCharVals[9+EvL:24] = cat(1, nn.data, repmat(" ".data, 16-EvL))
+    end
+
+    # Data
+    x = map(Float32, T.x)
+    ts && (tdata = map(Float32, μs*(t_expand(T.t, dt) .- b)))
+
+    # Write to file
+    sacwrite(fname, sacFloatVals, sacIntVals, sacCharVals, x, t=tdata, ts=ts)
+    v && @printf(STDOUT, "%s: Wrote file %s from SeisData channel %i\n", string(now()), fname, i)
+  end
+end
+writesac(S::Union{SeisData,SeisEvent}; ts=false::Bool, v=true::Bool) = wsac(S::SeisData, ts=ts, v=v)
+writesac(S::SeisChannel; ts=false::Bool, v=true::Bool) = wsac(SeisData(S), ts=ts, v=v)
+
+"""
+    wsac(D::Dict{String,Any})
+
+Write SAC dictionary D to SAC file. Name convention is auto-determined by time
 headers (NZYEAR--NZMSEC), KNETWK, KSTNM, and KCMPNM; default is sacfile.SAC.
 
-    writesac(S, f=FNAME)
+    wsac(D, f=FNAME)
 
 Write SAC dictionary S to SAC file FNAME.
 
-    writesac(S, ts=true)
+    wsac(D, ts=true)
 
-Specify ts=true to time stamp data. If S has a "time" key, all values in
-S["time"] are written blindly as time stamps. Otherwise, time stamps are
-written as delta-encoded integer multiples of S["delta"], with t[1] = 0.
+Specify ts=true to time stamp data. If D has a "time" key, all values in
+D["time"] are written blindly as time stamps. Otherwise, time stamps are
+written as delta-encoded integer multiples of D["delta"], with t[1] = 0.
 """
-function writesac(S::Dict{String,Any}; f="auto"::String, ts=false::Bool)
+function wsac(S::Dict{String,Any}; f="auto"::String, ts=false::Bool)
   prunesac!(S)
   tdata = Array{Float32}(0)
   !haskey(S, "iftype") && (S["iftype"] = Int32(1))  # Unset in SAC from IRISws
@@ -253,53 +411,4 @@ function writesac(S::Dict{String,Any}; f="auto"::String, ts=false::Bool)
   sacwrite(f, fv, iv, cv, x, t=tdata, ts=ts)
   return
 end
-
-function sactoseis(D::Dict{String,Any})
-  !haskey(D, "nvhdr") && error("Invalid SAC dictionary! (NVHDR not set)")
-  D["nvhdr"] == 6 || error("Can't parse old SAC versions! (NVHDR != 6)")
-
-  unitstrings = ["nm", "nm/s", "V", "nm/s/s", "unknown"]
-  pha = Dict{String,Float64}()
-  if haskey(D, "idep")
-    try
-      units = unitstrings[D["idep"]]
-    catch
-      units = "unknown"
-    end
-  else
-    units = "m/s"
-  end
-
-  name = join([D["knetwk"],D["kstnm"],D["kcmpnm"]],".")
-  id = join([D["knetwk"],D["kstnm"],"",D["kcmpnm"]],".")
-  gain = D["scale"] == -12345.0 ? 1.0 : D["scale"]
-  fs = 1/D["delta"]
-  if haskey(D, "cmpaz") && haskey(D, "cmpinc")
-    loc = [D["stla"], D["stlo"], D["stel"], D["cmpaz"], D["cmpinc"]]
-  else
-    loc = [D["stla"], D["stlo"], D["stel"], 0, 0]
-  end
-  x = map(Float64, D["data"])
-  t = map(Float64, [1 sac2epoch(D)/μs; D["npts"] 0])
-
-  misc = prunesac(D)
-  for k in ["nvhdr", "knetwk", "kstnm", "kcmpnm", "scale",
-    "nzyear", "nzjday", "nzhour", "nzmin", "nzsec", "nzmsec", "e", "b", "npts",
-    "src", "data", "delta", "cmpaz", "cmpinc", "stla", "stlo", "stel", "idep"]
-    if haskey(misc, k); delete!(misc, k); end
-  end
-
-  # Turn this monstrosity into a SeisChannel
-  T = SeisChannel(name=name, id=id, fs=fs, gain=gain, loc=loc, t=t, x=x,
-              src="sac file", misc=misc, units=units)
-  return T
-end
-
-"""
-    S = rsac(fname)
-
-Read SAC file `fname` into a SeisChannel.
-"""
-rsac(fname::String) = (src = fname;
-  S = sactoseis(psac(open(fname,"r"), p=false)); note(S, fname); return S)
-readsac(fname::String) = rsac(fname)
+writesac(S::Dict{String,Any}; f="auto"::String, ts=false::Bool) = wsac(S,f=f,ts=ts)

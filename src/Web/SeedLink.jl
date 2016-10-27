@@ -1,5 +1,22 @@
 using SeisIO
 
+function parsesl!(S::SeisData, buf::IOBuffer; v=false::Bool, vv=false::Bool)
+  seekstart(buf)
+  if v || vv
+    @printf(STDOUT, "Parsing: ")
+  end
+  while !eof(buf)
+    if v || vv
+      id = String(read(buf,UInt8,8))
+      @printf(STDOUT, "%s, ", id)
+    else
+      skip(buf, 8)
+    end
+    parserec(S, buf, v=v, vv=vv)
+  end
+  return(S)
+end
+
 # Get version
 function getSLver(vline)
   # Versioning (function getver) will break if SeedLink ever switches to a VV.PPP.NNN format
@@ -15,9 +32,7 @@ function getSLver(vline)
   end
 end
 
-# Deal with with OK\r\n spammmm + implicit Julia blocking
-# Doesn't correctly handle extended replies, but the beauty of an interpreted
-# language is that you can always fix your syntax and try again.
+# Deal with with OK\r\n + implicit Julia blocking
 function not_ok(conn)
   c ="K".data[1]
   OK = "OK\r\n".data
@@ -29,40 +44,83 @@ function not_ok(conn)
 end
 
 # SeedLink "TIME" mode
-function sltime!(S, conn, chans, patts, sstr, tstr, maxbuf; v=false::Bool, vv=false::Bool)
+function sltime(conn, chans::Array{String,1}, patts::Array{String,1}, sstr::String, tstr::String, maxbuf::Integer;
+  v=false::Bool,
+  vv=false::Bool,
+  w=false::Bool)
+
+  S = SeisData()
   for s = 1:length(chans)
-    isempty(patts[s]) || write(conn, string("SELECT ", patts[s], "\r"))
-    write(conn, string("STATION ", chans[s], "\rTIME ", sstr, " ", tstr, "\r"))
+    str = ""
+    if isempty(patts[s])
+      str *= string("SELECT ?????.D\r")
+    else
+      str *= string("SELECT ", patts[s], "\r")
+    end
+    str *= string("STATION ", chans[s], "\rTIME ", sstr, " ", tstr, "\r")
+    vv && println("Sending string to server: ", replace(str,"\r","\\r"))
+    write(conn, str)
+
+    # We expect exactly 2 lines back
+    r1 = readline(conn)
+    r2 = readline(conn)
+    vv && @printf(STDOUT, "Response to SELECT query = %sResponse to STATION query = %s", r1, r2)
   end
-  write(conn, "END\r")
+  write(conn,"END\r")
+
+  # Create a file for raw packet dump
+  if w
+    fname = hashfname([join(chans,','), join(patts,','), sstr, tstr], "mseed")
+    open(fname, "w")
+  end
 
   # Buffer copy seems like the fastest "safe" approach in Julia
   buf = IOBuffer(maxbuf)
 
   # Begin receiving data
-  c = not_ok(conn) # Will always return 'S' for good data
+  c = not_ok(conn)                      # Always 'S' for good data
   vv && println("c = ", Char(c))
   Char(c) == 'E' && error(@sprintf("Malformed channel or pattern spec (check manually):\nchans = %s\npatts = %s\n", chans, patts))
+
   write(buf, c)
-  write(buf, read(conn.buffer, UInt8, 519))
+  write(buf, read(conn, UInt8, 519))
+  n = 1
+  @printf(STDOUT, "Total packets buffered: %5i", n)
   while true
     eof(conn)
     try
-      write(buf, read(conn.buffer, UInt8, 520))
-    catch
-      if v || vv
-        println("Connection closed, clearing buffer and exiting.")
+      write(buf, read(conn, UInt8, 520))
+      if vv
+        n+=1
+        @printf(STDOUT, "\b\b\b\b\b%5i", n)
       end
-      parsesl(S, buf, v=true, vv=vv)
-      break
+    catch
+      if eof(conn)
+        vv && @printf(STDOUT, "...done.\n")
+        (v || vv) && println("Connection closed, clearing buffer and exiting.")
+        parsesl!(S, buf, v=v, vv=vv)
+        break
+      else
+        c = read(conn, UInt8)
+        if char(c) == 'E'
+          read(conn, UInt8, 2)
+        else
+          write(buf, c)
+        end
+      end
     end
     if position(buf) == maxbuf
-      parsesl(S, buf, v=v, vv=vv)
+      if w
+        seekstart(buf)
+        write(fname, buf)
+      end
+      parsesl!(S, buf, v=v, vv=vv)
       seekstart(buf)
     end
   end
   close(buf)
   close(conn)
+  w && close(fname)
   return S
 end
 
@@ -77,25 +135,24 @@ function SeedLink(chans::Array{String,1};
   port=18000::Integer,
   patts=["*"]::Array{String,1},
   mode="TIME"::String,        # only "TIME" is currently supported
-  s=0.0::Float64,             # start time. Set to 0.0 for "current second"
-  t=120.0::Float64,           # time length (seconds).
+  s=0::Union{Real,DateTime,String},
+  t=300::Union{Real,DateTime,String},
   to=60::Real,                # timeout (seconds)
-  N=32::Integer,              # N 512-byte packets are buffered before each conversion call
+  N=1024::Integer,            # N 512-byte packets are buffered before each conversion call
   v=false::Bool,              # verbose mode
   vv=false::Bool,             # very verbose mode
+  w=false::Bool,              # write raw packets to disk
   y=true::Bool)
-
+  
   # Match empty pattern lists
   if patts[1] == "*"
     patts = repmat([""], length(chans))
   end
 
   maxbuf = N*520
-  S = SeisData()
 
   # Create connection
   sock = TCPSocket()
-  sock.line_buffered = false
   conn = connect(sock,addr,port)
 
   # Get version, server info
@@ -112,23 +169,13 @@ function SeedLink(chans::Array{String,1};
   elseif ver < 2.92 && mode == "TIME"
     error(@sprintf("Mode \"TIME\" not available in SeedLink v%.1f", ver))
   end
-  ts = s == 0.0 ? floor(time()) : s
-  tt = ts + t
-  ts = Dates.unix2datetime(ts)
-  tt = Dates.unix2datetime(tt)
-  sstr = join([Dates.Year(ts).value,
-               Dates.Month(ts).value,
-               Dates.Day(ts).value,
-               Dates.Hour(ts).value,
-               Dates.Minute(ts).value,
-               Dates.Second(ts).value],',')
-  tstr = join([Dates.Year(tt).value,
-               Dates.Month(tt).value,
-               Dates.Day(tt).value,
-               Dates.Hour(tt).value,
-               Dates.Minute(tt).value,
-               Dates.Second(tt).value],',')
   if mode == "TIME"
+    (d0,d1) = parsetimewin(s,t)
+    if (d1-u2d(time())).value < 0
+      warn("End time before present; SeedLink may behave badly!")
+    end
+    sstr = join(split(string(d0),r"[\-T\:\.]")[1:6],',')
+    tstr = join(split(string(d1),r"[\-T\:\.]")[1:6],',')
     if v || vv
       println("Station commands to send:")
       for c = 1:length(chans)
@@ -136,17 +183,17 @@ function SeedLink(chans::Array{String,1};
         println("write(conn,\"STATION ", chans[c], "\\rTIME ", sstr, " ", tstr, "\\r\")")
       end
     end
-  sltime!(S, conn, chans, patts, sstr, tstr, maxbuf, v=v, vv=vv)
-  for i = 1:S.n
-    S.src[i] = "seedlink"
-    note(S, i, "SeedLink server was "*addr*":"*string(port))
-  end
-  if y
-    return sync!(S, s=ts, t=t)
-  else
-    return S
-  end
-  # Data mode will simply replace the command with "data" and launch as a coroutiune
+    S = sltime(conn, chans, patts, sstr, tstr, maxbuf, v=v, vv=vv, w=w)
+    for i = 1:S.n
+      S.src[i] = "seedlink"
+      note(S, i, "SeedLink server was "*addr*":"*string(port))
+    end
+    if y
+      return sync!(S, s=d0, t=d1)
+    else
+      return S
+    end
+    # Data mode will simply replace the command with "data" and launch as a coroutiune
   end
 end
 
@@ -160,12 +207,13 @@ function SeedLink(config_file::String;
   addr="rtserve.iris.washington.edu"::String,
   port=18000::Integer,
   mode="TIME"::String,
-  s=0.0::Float64,
-  t=120.0::Float64,
+  s=0::Union{Real,DateTime,String},
+  t=300::Union{Real,DateTime,String},
   N=32::Integer,
   to=60::Real,
   v=false::Bool,
   vv=false::Bool,
+  w=false::Bool,
   y=true::Bool)
 
   !isfile(config_file) && error("First argument must be a string array or config filename")
@@ -192,6 +240,6 @@ function SeedLink(config_file::String;
       push!(patts,"")
     end
   end
-  S = SeedLink(chans, patts=patts, addr=addr, port=port, mode=mode, s=s, t=t, N=N, v=v, vv=vv, y=y)
+  S = SeedLink(chans, patts=patts, addr=addr, port=port, mode=mode, s=s, t=t, N=N, v=v, vv=vv, y=y, w=w)
   return S
 end
