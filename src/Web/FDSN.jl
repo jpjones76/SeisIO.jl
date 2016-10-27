@@ -1,6 +1,9 @@
 using LightXML: attribute, content, root, find_element, get_elements_by_tagname, parse_string, XMLDocument
 using Requests: get
 
+# =============================================================================
+# FDSN station XML parser
+# Could use cleaning
 function parse_FDSN_xml(xsta::XMLDocument)
   badchars = ['\0', '\ ']
   N = get_elements_by_tagname(root(xsta), "Network")
@@ -88,6 +91,8 @@ function parse_FDSN_xml(xsta::XMLDocument)
   return (ids, units, gains, normfacs, locs, resps)
 end
 
+# =============================================================================
+# FDSNprep!: update a SeisData struct with various pieces of station info
 function FDSNprep!(S::SeisData,
   ids::Array{String,1},
   units::Array{String,1},
@@ -111,59 +116,53 @@ function FDSNprep!(S::SeisData,
   return S
 end
 
+# =============================================================================
 """
-    S = FDSNget(net="NET", sta="STA", loc="LL", cha="CHA", s=StartTime,
-                t=EndTime, to=TimeOut, y=true)
+FDSNget: CLI for FDSN time-series requests.
 
-Retrieve time series data from an FDSN HTTP server. Returns data in a SeisData
-structure.
+    S = FDSNget(net="NN", sta="SSSSS", loc="LL", cha="CCC", s=TS,
+                t=TE, to=TO, w=false, y=true)
 
-## Arguments
-* `net`, `sta`, `loc`, `cha`: ASCII strings. Wildcards are OK.
-* `s`: Start time. See below.
-* `t`: End time. See below.
-* `to`: Timeout in seconds. [default: 10]
-* `Q`: Quality. Uses standard FDSN/IRIS codes.
-* `y`: Synchronize the start and end times of all channels and fill all
-time gaps.
-* See FDSN documentation at http://service.iris.edu/fdsnws/dataselect/1/
+Retrieve data from an FDSN HTTP server. Returns a SeisData struct. See FDSN documentation at http://service.iris.edu/fdsnws/dataselect/1/
+
+## Possible Keywords
+* `net`, `sta`, `loc`, `cha`: Strings. Wildcards OK.
+* `s`: Start time (see below)
+* `t`: End time (see below)
+* `to`: Timeout in seconds
+* `Q`: Quality code (FDSN/IRIS). Caution: `Q="R"` fails with many queries
+* `w`: Write raw download to file
+* `y`: Synchronize start and end times of channels and fill time gaps
 
 ### Time Specification
-s and t can be real numbers, DateTime objects, or ASCII strings. Strings must
-follow the format "yyyy-mm-ddTHH:MM:SS", e.g. `s="2016-03-23T11:17:00"`.
+`s` and `t` can be real numbers, DateTime objects, or ASCII strings. Strings must follow the format "yyyy-mm-ddTHH:MM:SS", e.g. `s="2016-03-23T11:17:00"`. Exact behavior depends on the data types of s and t:
 
-### Time Specification for Backward Fill
-Passing an Int or Float64 with keyword `t` sets the mode to backward fill.
-Retrieved data begin `t` seconds before `s`. `t` is interpreted as a duration.
+``\ \begin{tabular}{ c c l }
+\bf{s} & \bf{t} &  \bf{Behavior}
+Real     & DateTime & Add `s` seconds to `t` and sort\\
+DateTime & Real     & Add `t` seconds to `s` and sort\\
+String   &          & Convert `s` \rightarrow DateTime, sort\\
+         & String   & Convert `t` \rightarrow DateTime, sort\\
+Int      & Real     & Read `t`seconds relative to current time\\
+\end{tabular}
+``
 
-* `s=0`: End at start of current minute on your system.
-* `s` ∈ {Int, Float64}: `s` is treated as Unix (Epoch) time in seconds.
-* `s` ∈ {DateTime, String}: Backfill ends at `s`.
-
-### Time Specification for Range Retrieval
-Passing a string or DateTime object with keyword `t` sets the mode to range
-retrieval. Retrieved data begin at `s` and end at `t`. `s` can be a DateTime
-object or String.
+* **Relative fill**: Pass a numeric value to keyword `t` to set end time relative to start time in seconds.
+* **Backwards fill**: Specify a negative number for `t` for backwards fill from `s`.
 
 ### Example
-* `S = FDSNget(net="CC,UW", sta="SEP,SHW,HSR,VALT", cha="*", t=600)`: Get the
-last 10 minutes of data from short-period stations SEP, SHW, and HSR, Mt. St.
-Helens, USA.
-
-### Notes
-*  `Q="R"` doesn't appear to work with IRIS' server on many near-real-time
-requests.
+* `S = FDSNget(net="CC,UW", sta="SEP,SHW,HSR,VALT", cha="*", t=600)`: Get the last 10 minutes of data from short-period stations SEP, SHW, and HSR, Mt. St. Helens, USA.
 
 ### Some FDSN Servers
-* Incorporated Research Institutions for Seismology: http://service.iris.edu/fdsnws/
-* Réseau Sismologique et Géodesique Français: http://ws.resif.fr/fdsnws/
-* Northern California Earthquake Data Center: http://service.ncedc.org/fdsnws/
-* GFZ Potsdam: http://geofon.gfz-potsdam.de/fdsnws/
+* Incorporated Research Institutions for Seismology, US: http://service.iris.edu/fdsnws/
+* Réseau Sismologique et Géodesique Français, FR: http://ws.resif.fr/fdsnws/
+* Northern California Earthquake Data Center, US: http://service.ncedc.org/fdsnws/
+* GFZ Potsdam, DE: http://geofon.gfz-potsdam.de/fdsnws/
 """
 function FDSNget(; src="IRIS"::String,
                    net="UW,CC"::String,
                    sta="PALM,TDH,VLL"::String,
-                   loc="--"::String,
+                   loc="*"::String,
                    cha="???"::String,
                    q="data"::String,
                    Q="B"::String,
@@ -171,19 +170,20 @@ function FDSNget(; src="IRIS"::String,
                    t=600::Union{Real,DateTime,String},
                    v=false::Bool,
                    vv=false::Bool,
+                   w=false::Bool,
                    y=true::Bool,
                    si=true::Bool,
                    to=10::Real)
   d0, d1 = parsetimewin(s, t)
   uhead = get_uhead(src)
-  utail = @sprintf("net=%s&sta=%s&loc=%s&cha=%s&start=%s&end=%s",
-                   net, sta, loc, cha, d0, d1)
+  utail = @sprintf("net=%s&sta=%s&loc=%s&cha=%s&start=%s&end=%s", net, sta, loc, cha, d0, d1)
   station_url = string(uhead, "station/1/query?level=response&", utail)
   data_url = string(uhead, @sprintf("dataselect/1/query?quality=%s&",Q), utail)
-  vv && println("data url = ", data_url)
+  (v || vv) && println("data url = ", data_url)
 
   # Get data
   R = get(data_url, timeout=to, headers=webhdr())
+  w && savereq(R.data, "mseed", net, sta, loc, cha, string(d0), string(d1), Q)
   tmp = IOBuffer(R.data)
   S = parsemseed(tmp, v=v, vv=vv)
 

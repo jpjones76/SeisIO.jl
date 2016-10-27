@@ -228,19 +228,6 @@ function sizeof(S::SeisChannel)
   return n
 end
 
-
-#start(S::SeisData) = 1
-#done(S::SeisData) = i > S.n
-#next(S::SeisData, i) = # ...um
-
-# ============================================================================
-# Logging
-note(S::SeisChannel, s::AbstractString) = (S.notes = cat(1, S.notes,
-  string(now(), "  ", s)))
-note(S::SeisData, i::Integer, s::AbstractString) = (
-    push!(S.notes[i], string(now(), "  ", s)))
-note(S::SeisData, s1::AbstractString, s2::AbstractString) = note(S, findname(s1, S), s2)
-
 # ============================================================================
 # Equality
 isequal(S::SeisChannel, T::SeisChannel) = (
@@ -254,12 +241,8 @@ isequal(S::SeisData, T::SeisData) = (
 
 # ============================================================================
 # Append, delete
-#push!(S::SeisData, T::SeisChannel) = ([push!(S.(i),T.(i)) for i in fieldnames(T)]; S.n += 1)
-#push!(S::SeisData, T::SeisChannel) = ([push!(S.(i),getfield(T,i)) for i in fieldnames(T)]; S.n += 1)
 push!(S::SeisData, T::SeisChannel) = ([push!(getfield(S,i),getfield(T,i)) for i in fieldnames(T)]; S.n += 1)
 append!(S::SeisData, T::SeisData) = ([push!(S,T[i]) for i = 1:S.n])
-#deleteat!(S::SeisData, j::Int) = ([deleteat!(S.(i),j) for i in datafields(S)];
-#  S.n -= 1; return S)
 deleteat!(S::SeisData, j::Int) = ([deleteat!(getfield(S, i),j) for i in datafields(S)];
   S.n -= 1; return S)
 deleteat!(S::SeisData, J::Range) = (collect(J); [deleteat!(S, j)
@@ -403,13 +386,11 @@ end
 In-place sort of channels in SeisData object S by S.id. Specify rev=true
 to reverse the sort order.
 """
-sort!(S::SeisData; rev=false) = (j = sortperm(S.id, rev=rev);
-  [setfield!(S,i,getfield(S,i)[j]) for i in datafields(S)])
+sort!(S::SeisData; rev=false::Bool) = (j = sortperm(S.id, rev=rev); [setfield!(S,i,getfield(S,i)[j]) for i in datafields(S)])
 
 """
     T = sort(S, [rev=false])
 
 Sort channels in SeisData object S by S.id. Specify rev=true for reverse order.
 """
-sort(S::SeisData; rev=false) = (T = deepcopy(S); j = sortperm(T.id, rev=rev);
-  [setfield!(T,i,getfield(T,i)[j]) for i in datafields(T)]; return(T))
+sort(S::SeisData; rev=false::Bool) = (T = deepcopy(S); j = sortperm(T.id, rev=rev); [setfield!(T,i,getfield(T,i)[j]) for i in datafields(T)]; return(T))

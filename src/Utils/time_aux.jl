@@ -62,55 +62,22 @@ end
 """
     d0, d1 = parsetimewin(s, t)
 
-Either convert length `t` time window ending at time `s` to a pair of
-DateTime objects, or create a pair of DateTime objects with `d0` as the start
-datetime and `d1` as the end.
+Convert times `s` and `t` to DateTime objects and sorts s.t. d0 < d1.
 """
-function parsetimewin(s, t)
-  if isa(s,Union{DateTime,String}) && isa(t,Union{DateTime,String})
-    if typeof(s) == String
-      d0 = DateTime(s)
-    else
-      d0 = s
-    end
-    if typeof(t) == String
-      d1 = DateTime(t)
-    else
-      d1 = t
-    end
-    return d0, d1
-
-  # t::Union{String,DateTime} --> start at s, end at t
-  elseif isa(t,Union{String,DateTime}) && isa(s,Union{Float64,Int})
-    if typeof(t) == String
-      d1 = DateTime(t)
-    else
-      d1 = t
-    end
-    return u2d(s), d1
-  elseif !isa(t,Union{Float64,Int})
-    throw(TypeError(:t))
-
-  # t::Union{Float64,Int} --> backfill approximately t seconds from s
-  elseif isa(s,Union{Float64,Int})
-    # Special (default) case: s=0 --> start at beginning of current minute
-    if abs(s-0) < eps()
-      t1 = 60*floor(time()/60)
-    end
-    d0 = u2d(t1-t)
-    d1 = u2d(t1)
+function parsetimewin(s::DateTime, t::DateTime)
+  if s < t
+    return (s, t)
   else
-    if typeof(s) == String
-      d1 = DateTime(s)
-    elseif typeof(s) == DateTime
-      d1 = s
-    else
-      throw(TypeError(:s))
-    end
-    d0 = u2d(d2u(d1)-t)
+    return (t, s)
   end
-  return d0, d1
 end
+parsetimewin(s::DateTime, t::String) = parsetimewin(s, DateTime(t))
+parsetimewin(s::DateTime, t::Real) = parsetimewin(s, u2d(d2u(s)+t))
+parsetimewin(s::Real, t::DateTime) = parsetimewin(t, u2d(d2u(t)+s))
+parsetimewin(s::String, t::Union{Real,DateTime}) = parsetimewin(DateTime(s), t)
+parsetimewin(s::Union{Real,DateTime}, t::String) = parsetimewin(s, DateTime(t))
+parsetimewin(s::String, t::String) = parsetimewin(DateTime(s), DateTime(t))
+parsetimewin(s::Real, t::Real) = parsetimewin(u2d(60*floor(Int, time()/60) + s), t)
 
 """
     T = t_expand(t, fs)
