@@ -21,7 +21,7 @@ STA = ["UW.HOOD.BHZ"; "UW.HOOD.BHN"; "UW.HOOD.BHE"; "CC.TIMB.EHZ"; "CC.TIMB.EHN"
 S = "2016-05-16T14:50:00"
 T = 600
 seis = IRISget(STA, s=S, t=T, sync=true)
-wseis(seis)
+wseis(seis, "test.seis")
 
 # The Tohoku-Oki great earthquake, from IRIS FDSN, recorded by boreholes in WA (USA)
 S = getevt("201103110547", "PB B004  EH?,PB B004  BS?,PB B001  BS?")
