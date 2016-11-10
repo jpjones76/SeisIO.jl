@@ -1,4 +1,4 @@
-using DSP:filt, hilbert
+using DSP
 using Distributions
 using SeisIO
 #using HistUtils: gdm, qchd
@@ -69,6 +69,7 @@ Use `SORT_ORDER` for the relative orientations of different components. Default:
 
 """
 function seispol!(S::SeisData,
+  f = [0.02, 0.1]::Array{Float64,1},
   sort_ord = ["Z","N","E","0","1","2","3","4","5","6","7","8","9"]::Array{String,1},
   inst_codes = ['G', 'H', 'L', 'M', 'N', 'P']::Array{Char,1})
   # Add: bandpass filtering paramters (npoles, corners)
@@ -112,9 +113,14 @@ function seispol!(S::SeisData,
         sync!(T)
         L = length(T.x[1])
         X = Array{Float64,2}(L,3)
+
+        # Assumes fs is the same on all 3 channels; should always be true
+        rt = Bandpass(f[1], f[2]; fs=T.fs[1])
+        
         for m = 1:3
-          X[:,m] = T.x[m]/T.gain[m]
+          X[:,m] = filtfilt(digitalfilter(rt, Butterworth(4)), T.x[m]/T.gain[m])
         end
+
         (P,W) = seispol(X)
         S.misc[ii]["pol"] = P
         S.misc[ii]["wt"] = W
