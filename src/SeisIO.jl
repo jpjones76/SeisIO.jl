@@ -59,7 +59,7 @@ include("Web/WebMisc.jl")         # Common functions for web data access
 
 # Submodule SeisPol
 module Polarization
-export seispol, polhist, gauss, gdm, chi2d, qchd
+export seispol, polhist, gauss, gdm, chi2d, qchd, seispol!
 include("Submodules/Histograms.jl")
 include("Submodules/Polarization.jl")
 end

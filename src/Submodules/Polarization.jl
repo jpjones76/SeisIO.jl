@@ -53,7 +53,22 @@ using SeisIO
 #   return (Θ_c, Σ_c)
 # end
 
-function spol!(S::SeisData,
+
+"""
+  seispol!(S)
+
+Update SeisData structure S with polarization of all seismic instruments. Polarization values are in S.misc[i]["pol"], weights in S.misc[i]["wt"], where [i] is the channel number of the vertical component.
+
+  seispol!(S, inst_codes = INST_CODES::Array{Char,1})
+
+Compute polarization on instruments whose codes match `INST_CODES`. Default: ['G', 'H', 'L', 'M', 'N', 'P'].
+
+  seispol!(S, sort_ord = SORT_ORDER::Array{String,1})
+
+Use `SORT_ORDER` for the relative orientations of different components. Default: ["Z","N","E","0","1","2","3","4","5","6","7","8","9"]
+
+"""
+function seispol!(S::SeisData,
   sort_ord = ["Z","N","E","0","1","2","3","4","5","6","7","8","9"]::Array{String,1},
   inst_codes = ['G', 'H', 'L', 'M', 'N', 'P']::Array{Char,1})
   # Add: bandpass filtering paramters (npoles, corners)
