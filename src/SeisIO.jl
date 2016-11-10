@@ -18,8 +18,8 @@ IRISget, irisws,                                               # Web/IRIS.jl
 SeedLink, SeedLink!, has_sta, SLinfo,                          # Web/SeedLink.jl
 GetSta, chparse,                                               # Web/WebMisc.jl
 evq, gcdist, distaz!, getpha, getevt,                          # Utils/event_utils.jl
-pull, getbandcode, prune!, purge, purge!, gapfill!, note,      # Utils/misc.jl
-gapfill, ungap!, ungap, sync!, sync, chan_sort,                #
+pull, getbandcode, prune!, purge, purge!, chan_sort, note,     # Utils/misc.jl
+gapfill, ungap!, ungap, sync!, sync, gapfill!,                 # Utils/sync.jl
 randseischa, randseisdata, randseisevent, randseishdr,         # Utils/randseis.jl
 fctopz,                                                        # Utils/resp.jl
 parsetimewin, j2md, md2j, sac2epoch, u2d, d2u, tzcorr,         # Utils/time_aux.jl
@@ -40,6 +40,7 @@ include("Utils/misc.jl")          # Utilities that don't fit elsewhere
 include("Utils/time_aux.jl")      # Time functions
 include("Utils/file_aux.jl")      # File functions
 include("Utils/resp.jl")          # Instrument responses
+include("Utils/sync.jl")          # Synchronization
 include("Utils/event_utils.jl")   # Event utilities
 
 # Data converters
