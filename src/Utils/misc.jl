@@ -192,7 +192,7 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
 
   # Do not edit order of operations
   ungap!(S, m=false, w=false)
-  autotap!(S)
+  #autotap!(S)
   start_times = zeros(S.n)
   end_times = zeros(S.n)
   c = find(S.fs .== 0)
@@ -331,83 +331,6 @@ Synchronize S and downsample data to the lowest non-null interval in S.fs.
 sync(S::SeisData; r=false::Bool) = (T = deepcopy(S); sync!(T, resample=r);
   return T)
 
-function autotuk!(x, v, u)
-  g = find(diff(v) .> 1)
-  L = length(g)
-  if L > 0
-    w = Array{Int64,2}(0,2)
-    v[g[1]] > 1 && (w = cat(1, w, [1 v[g[1]]]))
-    v[g[L]] < length(x) && (w = cat(1, w, [v[g[L]+1] length(x)]))
-    L > 1 && ([w = cat(1, w, [v[g[i]+1] v[g[i+1]]]) for i = 1:L-1])
-    for i = 1:size(w,1)
-      (j,k) = w[i,:]
-      if (k-j) >= u
-        N = round(Int, k-j)
-        x[j+1:k] .*= tukey(N, u/N)
-      else
-        warn(string(@sprintf("Channel %i: Time window too small, ",i),
-          @sprintf("x[%i:%i]; replaced with zeros.", j+1, k)))
-        x[j+1:k] = 0
-      end
-    end
-  end
-  return x
-end
-
-"""
-    !autotap(U)
-
-Automatically cosine taper (Tukey window) all data in U
-"""
-function autotap!(U::SeisChannel)
-  (U.fs == 0 || isempty(U.x)) && return
-
-  # Fill time gaps with NaNs
-  ungap!(U, m=false, w=false)
-
-  j = find(!isnan(U.x))
-  mx = mean(U.x[j])
-  u = round(Int, max(20,0.2*U.fs))
-
-  # remove mean
-  U.x[j] .-= mx
-
-  # Then check for auto-fill values (i.e. values that don't change) and NaNs
-  # autotuk!(U.x, find(diff(U.x).!=0), u)
-  # Removed; leaving this would be a mistake
-
-  # Then check for NaNs
-  autotuk!(U.x, find(!isnan(U.x)), u)
-
-  # Then replace NaNs with zeros
-  U.x[find(isnan(U.x))] = 0
-
-  # And note it
-  note(U, "De-meaned, auto-tapered, and ungapped data; replaced all NaNs with zeros.")
-  return U
-end
-function autotap!(U::SeisData)
-  # Fill gaps with NaNs
-  ungap!(U, m=false, w=false)
-
-  for i = 1:U.n
-    (U.fs[i] == 0 || isempty(U.x[i])) && continue
-    j = find(!isnan(U.x[i]))
-    mx = mean(U.x[i][j])
-    U.x[i][j] .-= mx
-
-    u = round(Int, max(20,0.2*U.fs[i]))
-
-    # Check for NaNs and window around them
-    autotuk!(U.x[i], find(!isnan(U.x[i])), u)
-
-    # Replace NaNs with zeros
-    U.x[i][find(isnan(U.x[i]))] = 0
-    note(U, i, "De-meaned, auto-tapered, and ungapped data; replaced all NaNs with zeros.")
-  end
-  return U
-end
-
 """
     namestrip(s::AbstractString)
 
@@ -418,20 +341,64 @@ namestrip(S::AbstractString) = strip(S, ['\,', '\\', '!', '\@', '\#', '\$',
   '\%', '\^', '\&', '\*', '\(', '\)', '\+', '\/', '\~', '\`', '\:', '\|', ' '])
 
 """
-    add_fake_net!(S, NET)
+    T = chan_sort(S::SeisData)
 
-Insert arbitrary network code NET at the start of all IDs with no specified
-network (i.e. IDs that begin with a '.'). Only the first two characters of NET
-are used.
+Sort data in `S` by channel ID, and arrange seismic data in order (Z, {N,1}, {E,2}, ...)
+
+    T = chan_sort(S::SeisData, sort_ord = CS::Array{String,1})
+
+As above, with custom sort order `CS`.
+
+    T = chan_sort(S::SeisData, sort_ord = CS::Array{String,1}, inst_codes = IC::Array{Char,1})
+
+As above for channels with instrument codes in `IC`. The instrument code is the second character of the channel field of each S.id string.
+
+Note that `inst_codes` is a Char array, but `sort_ord` is a String array.
+
+In-place channel sorting is not possible.
 """
-function add_fake_net!(S::SeisData, str::String)
-  if length(str) > 2
-    str = str[1:2]
+
+function chan_sort(S::SeisData;
+  sort_ord = ["Z","N","E","0","1","2","3","4","5","6","7","8","9"]::Array{String,1},
+  inst_codes = ['G', 'H', 'L', 'M', 'N', 'P']::Array{Char,1})
+  id = Array{String,1}(S.n)
+  j = Array{Int64,1}(S.n)
+  for i = 1:1:S.n
+    id[i] = S.id[i][1:end-1]
   end
-  str = uppercase(str)
-  for i = 1:S.n
-    if startswith(S.id[i],'.')
-      S.id[i] = join(str, S.id[i][2:end])
+
+  ids = sort(unique(id))
+  k = 0
+  for i in ids
+    c = find(ids.==i)
+    d = find(id.==i)
+    L = length(d)
+    if i[end] in inst_codes
+      for m in sort_ord
+        cc = findfirst(S.id .== i*m)
+        if cc > 0
+           k += 1; j[k] = cc; deleteat!(d, findfirst(d.==cc))
+        end
+      end
+
+      # assign other components
+      L = length(d)
+      if L == 1
+        k += 1
+        j[k] = d[1]
+      elseif L > 0
+        j[k+1:k+L] = sortperm(S.id[d])
+        k += L
+      end
+    else
+      j[k+1:k+L] = sortperm(S.id[d])
+      k += L
     end
   end
+
+  T = SeisData()
+  for i = 1:length(j)
+    T += S[j[i]]
+  end
+  return T
 end

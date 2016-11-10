@@ -251,3 +251,22 @@ function randseisevent(; c=false::Bool)
   populate_seis!(D, rand(8:24), c=c)
   return SeisEvent(hdr=randseishdr(), data=D)
 end
+
+"""
+    add_fake_net_code!(S, NET)
+
+Insert arbitrary network code NET at the start of all IDs with no specified
+network (i.e. IDs that begin with a '.'). Only the first two characters of NET
+are used.
+"""
+function add_fake_net_code!(S::SeisData, str::String)
+  if length(str) > 2
+    str = str[1:2]
+  end
+  str = uppercase(str)
+  for i = 1:S.n
+    if startswith(S.id[i],'.')
+      S.id[i] = join(str, S.id[i][2:end])
+    end
+  end
+end

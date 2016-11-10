@@ -47,7 +47,7 @@ function getsta(stations::Array{String,1}, channels::Array{String,1};
   uhead = string(get_uhead(src), "station/1/query?")
   S = SeisData()
   for i = 1:1:size(stations,1)
-    (sta, net) = split(stations[i],' ')
+    (sta, net) = split(stations[i], ' ', keep=false)
     cha = channels[i]
     if isempty(cha)
       umid = string("net=", net, "&sta=", sta)
@@ -124,7 +124,7 @@ function chparse(C::String)
   if isfile(C)
     ccfg = [strip(j, ['\r','\n']) for j in filter(i -> !startswith(i, ['\#','\*']), open(readlines, C))]
   else
-    ccfg = split(C, ',')
+    ccfg = split(C, ',', keep=false)
   end
 
   stas = Array{String,1}()
@@ -133,7 +133,7 @@ function chparse(C::String)
   # Parse ccfg
   for i = 1:length(ccfg)
     try
-      (net, sta, sel) = split(ccfg[i], ' ', limit=3)
+      (net, sta, sel) = split(ccfg[i], ' ', limit=3, keep=false)
       ch = join([sta, net],' ')
       if isempty(sel)
         push!(stas, ch)

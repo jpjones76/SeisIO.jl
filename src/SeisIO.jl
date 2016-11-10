@@ -1,28 +1,28 @@
-VERSION >= v"0.4.0" && __precompile__(true)
+VERSION >= v"0.5.0" && __precompile__(true)
 module SeisIO
 
 export SeisChannel, SeisData, findname, findid, hasid, hasname,# Types/SeisData.jl
 SeisHdr, SeisEvent,                                            # Types/SeisHdr.jl
-wseis, writesac,                                               # Types/write.jl
+wseis,                                                         # Types/write.jl
 rseis,                                                         # Types/read.jl
-pull, getbandcode, prune!, purge, purge!, gapfill!, note,      # Types/misc.jl
-gapfill, ungap!, ungap, sync!, sync, autotap!,                 #
-batch_read,                                                    # Formats/BatchProc.jl
 parsemseed, readmseed, parsesl, readmseed, parserec,           # Formats/mSEED.jl
 rlennasc,                                                      # Formats/LennartzAsc.jl
 get_sac_keys, prunesac!, chksac, sachdr, sactoseis,            # Formats/SAC.jl
-psac, rsac, readsac, wsac, writesac,
+psac, rsac, readsac, wsac, writesac,                           #
 readsegy, segyhdr, pruneseg, segytosac, segytoseis, r_segy,    # Formats/SEGY.jl
 readuwpf, readuwdf, readuw, uwtoseis, r_uw,                    # Formats/UW.jl
 readwin32, win32toseis, r_win32,                               # Formats/Win32.jl
+batch_read,                                                    # Formats/BatchProc.jl
 FDSNget,                                                       # Web/FDSN.jl
 IRISget, irisws,                                               # Web/IRIS.jl
-SeedLink,                                                      # Web/SeedLink.jl
-get_uhead, GetSta, chparse,                                    # Web/WebMisc.jl
+SeedLink, SeedLink!, has_sta, SLinfo,                          # Web/SeedLink.jl
+GetSta, chparse,                                               # Web/WebMisc.jl
 evq, gcdist, distaz!, getpha, getevt,                          # Utils/event_utils.jl
+pull, getbandcode, prune!, purge, purge!, gapfill!, note,      # Utils/misc.jl
+gapfill, ungap!, ungap, sync!, sync, chan_sort,                #
 randseischa, randseisdata, randseisevent, randseishdr,         # Utils/randseis.jl
 fctopz,                                                        # Utils/resp.jl
-parsetimewin, j2md, md2j, sac2epoch, u2d, d2u, tzcorr,         #  Utils/time_aux.jl
+parsetimewin, j2md, md2j, sac2epoch, u2d, d2u, tzcorr,         # Utils/time_aux.jl
 t_expand, xtmerge, xtjoin!
 
 # SeisData is designed as a universal, gap-tolerant "working" format for
@@ -58,10 +58,15 @@ include("Web/SeedLink.jl")
 include("Web/WebMisc.jl")         # Common functions for web data access
 
 # Submodule SeisPol
-module SeisPol
-export seispol, seisvpol, polhist, gauss, gdm, chi2d, qchd
-include("Submodules/hist_utils.jl")
-include("Submodules/seis_pol.jl")
+module Polarization
+export seispol, polhist, gauss, gdm, chi2d, qchd
+include("Submodules/Histograms.jl")
+include("Submodules/Polarization.jl")
+end
+
+module Preprocessing
+export autotap!, autotuk
+include("Submodules/Preprocessing.jl")
 end
 
 end
