@@ -185,6 +185,7 @@ Write SeisIO data structure(s) `S` to file `f`.
 function wseis(f::String, S...)
   U = Union{SeisData,SeisChannel,SeisHdr,SeisEvent}
   L = UInt64(length(S))
+  (L == 0) && error("No SeisIO structures passed to wseis!")
   for i = 1:L
     if !(typeof(S[i]) <: U)
       error(@printf("Object of incompatible type passed to wseis at %i; exit with error!", i+1))

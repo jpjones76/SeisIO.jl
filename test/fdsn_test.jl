@@ -5,7 +5,7 @@ STA = "SEP,SHW,HSR,VALT"
 CHA = "*"
 NET = "CC,UW"
 T = 120
-S = FDSNget(net=NET, sta=STA, cha=CHA, s=now(), t=T, v=true)
+S = FDSNget(net=NET, sta=STA, cha=CHA, s=now(), t=T)
 if S.n == 0
   warn("No data retrieved! Can't fully test FDSNget accuracy, please try again later")
 else
@@ -28,6 +28,6 @@ CHA = "BH*" # 1 station, 18 channels...? Whyyyyyyyy is this useful...?
 SRC = "GFZ"
 ts = "2011-03-11T06:00:00"
 te = "2011-03-11T06:05:00"
-R = FDSNget(src=SRC, net=NET, sta=STA, cha=CHA, s=ts, t=te, v=true, y=false)
+R = FDSNget(src=SRC, net=NET, sta=STA, cha=CHA, s=ts, t=te, y=false)
 
 println("...done!")

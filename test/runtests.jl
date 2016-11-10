@@ -33,5 +33,4 @@ println("     (2) Open a terminal, change to the current directory, and start SA
 println("     (4) type `r *GPW*SAC *MBW*SAC; qdp off; plot1; lh default`.")
 println("     (5) Report any irregularities.")
 
-println("Canonical examples...")
-include("./examples.jl")
+println("To run the canonical examples type include(\"", dirname(Base.source_path()), "/examples.jl\")")

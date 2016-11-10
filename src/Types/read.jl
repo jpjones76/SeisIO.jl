@@ -16,8 +16,11 @@ function read_string_array(io::IOStream)
     sep = Char(read(io, UInt8))
     d = read(io, Int64, nd)
     l = read(io, Int64)
-    A = reshape(collect(split(String(read(io, UInt8, l)), sep)), tuple(d[:]...))
-    return A
+    if l > 0
+      return reshape(collect(split(String(read(io, UInt8, l)), sep)), tuple(d[:]...))
+    else
+      return Array{String,1}()
+    end
   else
     return Array{String,1}()
   end
