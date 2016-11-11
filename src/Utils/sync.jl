@@ -95,57 +95,72 @@ Start time can be synchronized to a variety of values:
 """
 function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
   s="max"::Union{String,Real,DateTime},
-  t="max"::Union{String,Real,DateTime})
+  t="max"::Union{String,Real,DateTime},
+  v=false::Bool)
 
-  # Do not edit order of operations
+  for i = 1:S.n
+    S.x[i] -= mean(S.x[i])
+  end
   ungap!(S, m=false, w=false)
   #autotap!(S)
-  start_times = zeros(S.n)
-  end_times = zeros(S.n)
+
+  # Do not edit order of operations -------------------------------------------
+  start_times = zeros(Int64, S.n)
+  end_times = zeros(Int64, S.n)
+
+  # non-timeseries data
   c = find(S.fs .== 0)
   for i in c
     start_times[i] = S.t[i][1,2]
     end_times[i] = sum(S.t[i][:,2])
   end
+
+  # non-null timeseries data
   k = find((S.fs .> 0).*[!isempty(S.x[i]) for i=1:S.n])
   for i in k
-    S.x[i] -= mean(S.x[i])
     start_times[i] = round(Int, S.t[i][1,2]*S.fs[i]) / S.fs[i]
+    end_times[i] = start_times[i] + round(Int, length(S.x[i])/(μs*S.fs[i]))
   end
-  [end_times[i] = length(S.x[i])/S.fs[i] for i in k]
-  # Do not edit order of operations
+  # Do not edit order of operations -------------------------------------------
+  v && println("start_times = ", start_times)
+  v && println("end_times = ", end_times)
 
   # Possible options for s
+  v && println("s = ", s)
   if isa(s,Real)
     t_start = round(Int, s/μs)
   elseif isa(s,DateTime)
     t_start = round(Int, Dates.datetime2unix(s)/μs)
   else
     starts = start_times[k]
+    v && println("starts = ", starts)
     if s == "max"
-      t_start = minimum(starts)
+      t_start = floor(Int, minimum(starts))
     elseif s == "min"
-      t_start = maximum(starts)
+      t_start = ceil(Int, maximum(starts))
     else
       t_start = round(Int, Dates.datetime2unix(DateTime(s))/μs)
     end
   end
+  v && println("t_start =", t_start)
 
   # Possible options for t
+  v && println("t = ", t)
   if isa(t,Real)
     t_end = t_start + round(Int, t/μs)
   elseif isa(t,DateTime)
     t_end = round(Int, Dates.datetime2unix(t)/μs)
   else
-    ends = end_times[k] + start_times[k]
     if t == "max"
-      t_end = maximum(ends)
+      t_end = maximum(end_times)
     elseif t == "min"
-      t_end = minimum(ends)
+      t_end = minimum(end_times)
     else
       t_end = round(Int, Dates.datetime2unix(DateTime(t))/μs)
     end
   end
+  v && println("t_end =", t_end)
+
   t_end <= t_start && error("No time overlap with given start \& end times!")
   @printf(STDOUT, "Synching %.2f seconds of data\n", (t_end - t_start)*μs)
 
@@ -161,12 +176,10 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
       note(S, i, @sprintf("Resampled to %.1f", f0))
     end
   end
-
+  v && println("t_start = ", t_start)
+  v && println("t_end = ", t_end)
   sstr = string(Dates.unix2datetime(t_start*μs))
   tstr = string(Dates.unix2datetime(t_end*μs))
-
-  # Pad and truncate
-  end_times += start_times
 
   # Loop over non-timeseries data
   for i in c

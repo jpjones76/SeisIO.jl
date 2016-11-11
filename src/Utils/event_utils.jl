@@ -201,6 +201,11 @@ gc_unwrap!(t::Array{Float64,1}) = (t[t .< 0] .+= 2.0*π; return t)
 
 function mkevthdr(evt_line::String)
   evt = split(evt_line,'|')
+  CONTRIB_ID = try
+      parse(Int64, evt[9])
+    catch
+      -1
+    end
   return SeisHdr( id = parse(Int64, evt[1]),
                   time = Dates.DateTime(evt[2]),
                   lat = parse(Float64, evt[3]),
@@ -209,7 +214,7 @@ function mkevthdr(evt_line::String)
                   auth = evt[6],
                   cat = evt[7],
                   contrib = evt[8],
-                  contrib_id = parse(Int64, evt[9]),
+                  contrib_id = CONTRIB_ID,
                   mag_typ = evt[10],
                   mag = parse(Float32, evt[11]),
                   mag_auth = evt[12],
@@ -290,6 +295,7 @@ function getevt(evt::String, cc::String;
   # If the phase string supplied is "all", request window is spad s before P to twice the last phase arrival
   # If a phase name is supplied, request window is spad s before that phase to epad s after next phase
   pstr = Array{String,1}(S.data.n)
+  bads = falses(S.data.n)
   for i = 1:1:S.data.n
     pdat = getpha(S.data.misc[i]["dist"], S.hdr.dep, to=to, v=v, vv=vv)
     if pha == "all"
@@ -298,10 +304,22 @@ function getevt(evt::String, cc::String;
       t = 2.0*parse(Float64,pdat[getPhaEn(pdat),4])
       S.data.misc[i]["PhaseWindow"] = string(pdat[j,3], " : Coda")
     else
-      s = parse(Float64,pdat[find(pdat[:,3].==pha)[1],4]) - spad
-      (p2,t) = getNextPhase(pha, pdat)
+      # Note: at Δ > ~90, we must use Pdiff; we can't use P
+      p1 = pha
+      j = findfirst(pdat[:,3].==p1)
+      if j == 0
+        p1 = pha*"diff"
+        j = findfirst(pdat[:,3].==p1)
+        if j == 0
+          error(string("Neither ", pha, " nor ", pha, "diff found!"))
+        else
+          warn(string(pha, "diff substituted for ", pha, " at ", S.data.id[i]))
+        end
+      end
+      s = parse(Float64,pdat[j,4]) - spad
+      (p2,t) = getNextPhase(p1, pdat)
       t += epad
-      S.data.misc[i]["PhaseWindow"] = string(pha, " : ", p2)
+      S.data.misc[i]["PhaseWindow"] = string(p1, " : ", p2)
     end
     s = string(u2d(d2u(S.hdr.time) + s))
     t = string(u2d(d2u(S.hdr.time) + t))
@@ -312,13 +330,23 @@ function getevt(evt::String, cc::String;
     C = FDSNget(net = NET, sta = STA, loc = LOC, cha = CHA,
                 s = s, t = t, si = false, y = false, v=v, vv=vv)
     vv && println("FDSNget output:\n", C)
-    S.data.t[i] = C.t[1]
-    S.data.x[i] = C.x[1]
-    S.data.notes[i] = C.notes[1]
-    S.data.src[i] = C.src[1]
-    if (v | vv)
-         println(now(), ": data acquired for ", S.data.id[i])
+    if C.n == 0
+      bads[i] = true
+    else
+      S.data.t[i] = C.t[1]
+      S.data.x[i] = C.x[1]
+      S.data.notes[i] = C.notes[1]
+      S.data.src[i] = C.src[1]
+      if (v | vv)
+        println(now(), ": data acquired for ", S.data.id[i])
+      end
     end
+  end
+  bad = find(bads.==true)
+  if !isempty(bad)
+    ids = join(S.data.id[bad],',')
+    warn(string("Channels ", ids, " removed (no data were found)."))
+    deleteat!(S.data, bad)
   end
   return S
 end
