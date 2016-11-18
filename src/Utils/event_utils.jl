@@ -201,11 +201,8 @@ gc_unwrap!(t::Array{Float64,1}) = (t[t .< 0] .+= 2.0*π; return t)
 
 function mkevthdr(evt_line::String)
   evt = split(evt_line,'|')
-  CONTRIB_ID = try
-      parse(Int64, evt[9])
-    catch
-      -1
-    end
+  cid = evt[9]
+  CONTRIB_ID = isnumber(cid) ? parse(cid) : -1
   return SeisHdr( id = parse(Int64, evt[1]),
                   time = Dates.DateTime(evt[2]),
                   lat = parse(Float64, evt[3]),
@@ -240,6 +237,68 @@ function distaz!(S::SeisEvent)
     S.data.misc[i]["az"] = az[i]
     S.data.misc[i]["baz"] = baz[i]
   end
+end
+
+"""
+    T = getpha(pha::String, Δ::Float64, z::Float64)
+
+Get onset times of phases **pha** relative to origin time for an event at
+distance **Δ** (degrees), depth **z** (km). Returns a matrix of strings.
+
+Detail: getpha is a command-line interface to the IRIS travel time calculator,
+which calls TauP (1,2,3). Specify **pha** as a comma-separated string, e.g.
+"P,S,PKiKP". **pha** also accepts special keywords (e.g. \"ttall\") as described
+on the IRIS web pages.
+
+References:
+(1) IRIS travel time calculator: https://service.iris.edu/irisws/traveltime/1/
+(2) TauP manual: http://www.seis.sc.edu/downloads/TauP/taup.pdf
+(3) Crotwell, H. P., Owens, T. J., & Ritsema, J. (1999). The TauP Toolkit:
+Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.
+"""
+function getpha(Δ::Float64, z::Float64;
+  phases=""::String,
+  model="iasp91"::String,
+  to=10.0::Real, v=false::Bool, vv=false::Bool)
+
+  # Generate URL and do web query
+  if isempty(phases)
+    pq = ""
+  else
+    pq = string("&phases=", phases)
+  end
+
+  url = string("http://service.iris.edu/irisws/traveltime/1/query?",
+  "distdeg=", Δ, "&evdepth=", z, pq, "&model=", model,
+  "&mintimeonly=true&noheader=true")
+  (v | vv) && println("url = ", url)
+  req = readall(get(url, timeout=to, headers=webhdr()))
+  (v | vv) && println("Request result:\n", req)
+
+  # Parse results
+  phase_data = split(req, '\n')
+  sa_prune!(phase_data)
+  Nf = length(split(phase_data[1]))
+  Np = length(phase_data)
+  Pha = Array{String,2}(Np, Nf)
+  for p = 1:Np
+    Pha[p,1:Nf] = split(phase_data[p])
+  end
+  return Pha
+end
+
+getphaseTime(pha::String, Pha::Array{String,2}) = parse(Float64, Pha[find(Pha[:,3].==pha)[1],4])
+getPhaSt(pha::String, Pha::Array{String,2}) = findmin([parse(Float64,i) for i in Pha[:,4]])
+getPhaEn(pha::String, Pha::Array{String,2}) = findmax([parse(Float64,i) for i in Pha[:,4]])
+function getNextPhase(pha::String, Pha::Array{String,2})
+  s = Pha[:,3]
+  t = [parse(Float64,i) for i in Pha[:,4]]
+  j = find(s.==pha)[1]
+  i = t.-t[j].>0
+  tt = t[i]
+  ss = s[i]
+  k = sortperm(tt.-t[j])[1]
+  return(ss[k],tt[k])
 end
 
 """
@@ -349,66 +408,4 @@ function getevt(evt::String, cc::String;
     deleteat!(S.data, bad)
   end
   return S
-end
-
-"""
-    T = getpha(pha::String, Δ::Float64, z::Float64)
-
-Get onset times of phases **pha** relative to origin time for an event at
-distance **Δ** (degrees), depth **z** (km). Returns a matrix of strings.
-
-Detail: getpha is a command-line interface to the IRIS travel time calculator,
-which calls TauP (1,2,3). Specify **pha** as a comma-separated string, e.g.
-"P,S,PKiKP". **pha** also accepts special keywords (e.g. \"ttall\") as described
-on the IRIS web pages.
-
-References:
-(1) IRIS travel time calculator: https://service.iris.edu/irisws/traveltime/1/
-(2) TauP manual: http://www.seis.sc.edu/downloads/TauP/taup.pdf
-(3) Crotwell, H. P., Owens, T. J., & Ritsema, J. (1999). The TauP Toolkit:
-Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.
-"""
-function getpha(Δ::Float64, z::Float64;
-  phases=""::String,
-  model="iasp91"::String,
-  to=10.0::Real, v=false::Bool, vv=false::Bool)
-
-  # Generate URL and do web query
-  if isempty(phases)
-    pq = ""
-  else
-    pq = string("&phases=", phases)
-  end
-
-  url = string("http://service.iris.edu/irisws/traveltime/1/query?",
-  "distdeg=", Δ, "&evdepth=", z, pq, "&model=", model,
-  "&mintimeonly=true&noheader=true")
-  (v | vv) && println("url = ", url)
-  req = readall(get(url, timeout=to, headers=webhdr()))
-  (v | vv) && println("Request result:\n", req)
-
-  # Parse results
-  phase_data = split(req, '\n')
-  sa_prune!(phase_data)
-  Nf = length(split(phase_data[1]))
-  Np = length(phase_data)
-  Pha = Array{String,2}(Np, Nf)
-  for p = 1:Np
-    Pha[p,1:Nf] = split(phase_data[p])
-  end
-  return Pha
-end
-
-getphaseTime(pha::String, Pha::Array{String,2}) = parse(Float64, Pha[find(Pha[:,3].==pha)[1],4])
-getPhaSt(pha::String, Pha::Array{String,2}) = findmin([parse(Float64,i) for i in Pha[:,4]])
-getPhaEn(pha::String, Pha::Array{String,2}) = findmax([parse(Float64,i) for i in Pha[:,4]])
-function getNextPhase(pha::String, Pha::Array{String,2})
-  s = Pha[:,3]
-  t = [parse(Float64,i) for i in Pha[:,4]]
-  j = find(s.==pha)[1]
-  i = t.-t[j].>0
-  tt = t[i]
-  ss = s[i]
-  k = sortperm(tt.-t[j])[1]
-  return(ss[k],tt[k])
 end
