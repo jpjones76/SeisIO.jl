@@ -17,7 +17,7 @@ FDSNget,                                                       # Web/FDSN.jl
 IRISget, irisws,                                               # Web/IRIS.jl
 SeedLink, SeedLink!, has_sta, SLinfo,                          # Web/SeedLink.jl
 GetSta, chparse,                                               # Web/WebMisc.jl
-evq, gcdist, distaz!, getpha, getevt,                          # Utils/event_utils.jl
+evq, gcdist, distaz!, getpha, getevt, getsta, getNextPhase,    # Utils/event_utils.jl
 pull, getbandcode, prune!, purge, purge!, chan_sort, note,     # Utils/misc.jl
 gapfill, ungap!, ungap, sync!, sync, gapfill!,                 # Utils/sync.jl
 randseischa, randseisdata, randseisevent, randseishdr,         # Utils/randseis.jl
