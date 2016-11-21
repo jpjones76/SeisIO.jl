@@ -240,17 +240,20 @@ function distaz!(S::SeisEvent)
 end
 
 """
-    T = getpha(pha::String, Δ::Float64, z::Float64)
+    T = getpha(Δ::Float64, z::Float64)
 
-Get onset times of phases **pha** relative to origin time for an event at
-distance **Δ** (degrees), depth **z** (km). Returns a matrix of strings.
+Command-line interface to IRIS online travel time calculator using TauP (1-3). Returns a matrix of strings.
 
-Detail: getpha is a command-line interface to the IRIS travel time calculator,
-which calls TauP (1,2,3). Specify **pha** as a comma-separated string, e.g.
-"P,S,PKiKP". **pha** also accepts special keywords (e.g. \"ttall\") as described
-on the IRIS web pages.
+Specify `Δ` in decimal degrees, `z` in km.
 
-References:
+### Keyword Arguments and Default Values
+* `pha="ttall"`: comma-separated string of phases to return, e.g. "P,S,ScS"
+* `model="iasp91"`: velocity model
+* `to=10.0`: ste web request timeout, in seconds
+* `v=false`: verbose mode
+* `vv=false`: very verbose mode
+
+### References
 (1) IRIS travel time calculator: https://service.iris.edu/irisws/traveltime/1/
 (2) TauP manual: http://www.seis.sc.edu/downloads/TauP/taup.pdf
 (3) Crotwell, H. P., Owens, T. J., & Ritsema, J. (1999). The TauP Toolkit:
@@ -259,11 +262,15 @@ Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.
 function getpha(Δ::Float64, z::Float64;
   phases=""::String,
   model="iasp91"::String,
-  to=10.0::Real, v=false::Bool, vv=false::Bool)
+  to=10.0::Real,
+  v=false::Bool,
+  vv=false::Bool)
 
   # Generate URL and do web query
   if isempty(phases)
-    pq = ""
+    #pq = ""
+    #pq = "&phases=p,s,P,S,pS,PS,sP,SP,Pn,Sn,PcP,Pdiff,Sdiff,PKP,PKiKP,PKIKP"
+    pq = "&phases=ttall"
   else
     pq = string("&phases=", phases)
   end
