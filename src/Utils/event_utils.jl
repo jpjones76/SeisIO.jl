@@ -307,6 +307,26 @@ function getNextPhase(pha::String, Pha::Array{String,2})
   k = sortperm(tt.-t[j])[1]
   return(ss[k],tt[k])
 end
+function nextConverted(pha::String, Pha::Array{String,2})
+  s = Pha[:,3]
+  t = [parse(Float64,i) for i in Pha[:,4]]
+  j = find(s.==pha)[1]
+
+  p = replace(lowercase(s[j]),"diff","")[end]
+  if p == 'p'
+    c = 's'
+  else
+    c = 'p'
+  end
+  p_bool = [replace(lowercase(a),"diff","")[end]==c for a in s]
+  t_bool = t.-t[j].>0
+  i = t_bool.*p_bool
+
+  tt = t[i]
+  ss = s[i]
+  k = sortperm(tt.-t[j])[1]
+  return(ss[k],tt[k])
+end
 
 """
     getevt(evt::String, cc::String)
@@ -383,7 +403,8 @@ function getevt(evt::String, cc::String;
         end
       end
       s = parse(Float64,pdat[j,4]) - spad
-      (p2,t) = getNextPhase(p1, pdat)
+      #(p2,t) = getNextPhase(p1, pdat)
+      (p2,t) = nextConverted(p1, pdat)
       t += epad
       S.data.misc[i]["PhaseWindow"] = string(p1, " : ", p2)
     end
