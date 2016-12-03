@@ -63,7 +63,7 @@ function irisws(;net="UW"::String,
   w && savereq(req.data, fmt, net, sta, loc, cha, d0, d1, "R", c=true)
   if fmt == "sacbl"
     tmp = IOBuffer(req.data)
-    D = prunesac(psac(tmp))
+    D = prunesac(parse_sac(tmp))
     D["src"] = "irisws/timeseries"
     return D
   elseif fmt == "miniseed"
@@ -122,18 +122,13 @@ function IRISget(chanlist::Array{String,1};
   w=false::Bool,
   to=10::Real)
 
+  K = length(chanlist)
   d0, d1 = parsetimewin(s, t)
-  dt = d2u(d1)-d2u(d0)
-  if length(chanlist)*dt > 1.0e7
+  dt = (DateTime(d1)-DateTime(d0)).value
+  if length(chanlist)*dt > 1.0e13
     error("Request too large! Please limit requests to K*t < 1.0e7 seconds")
   elseif v
     @printf("Requesting %i seconds of data from %i channels.\n", dt,            length(chanlist))
-  end
-  cdim = size(chanlist)
-  if length(cdim) > 1
-    error("typeof(chanlist) != Array{String,1}!")
-  else
-    K = cdim[1]
   end
 
   # was: global seis = SeisData() ... if there are errors, revert
@@ -162,4 +157,9 @@ function IRISget(chanlist::Array{String,1};
   end
   return seis
 end
+
+# Chanlist passed as a string
 IRISget(chanlist::String; s=0::Union{Real,DateTime,String}, t=3600::Union{Real,DateTime,String}, sync=true::Bool, v=false::Bool, w=false::Bool, to=10::Real) = IRISget(split(chanlist,','), s=s, t=t, sync=sync, v=v, w=w, to=to)
+
+# Chanlist passed as an array
+IRISget(chanlist::Array{String,2}; s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String},  sync=true::Bool,  v=false::Bool,  w=false::Bool,  to=10::Real) = IRISget([join(chanlist[i,:],'.') for i = 1:size(chanlist,1)], s=0::Union{Real,DateTime,String},  t=(-3600)::Union{Real,DateTime,String}, sync=true::Bool,  v=false::Bool,  w=false::Bool,  to=10::Real)

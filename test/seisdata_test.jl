@@ -126,7 +126,8 @@ println("......UW...")
 @test_approx_eq(S.t[S.n][end,1], length(S.x[S.n]))
 @test_approx_eq(S.t[S.n][end,2], 0.0)
 
-S += readuw(uw_root)                                     # UW
+Ev = readuw(uw_root)                                     # UW
+S += Ev.data
 @test_approx_eq(S.t[S.n][1,1], 1.0)
 @test_approx_eq(S.t[S.n][end,1], length(S.x[S.n]))
 @test_approx_eq(S.t[S.n][end,2], 0.0)

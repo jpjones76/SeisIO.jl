@@ -1,6 +1,3 @@
-# ===========================================================================
-# SAC read methods
-# ===========================================================================
 function get_sac_keys()
   sacFloatKeys = ["delta", "depmin", "depmax", "scale", "odelta",
                 "b", "e", "o", "a", "internal1",
@@ -60,7 +57,7 @@ function prunesac(S)
 end
 
 """
-    S = psac(s)
+    S = parse_sac(s)
 
 Parse SAC stream s, returning dictionary S with data in S["data"] and
 SAC headers in other keys.
@@ -68,7 +65,7 @@ SAC headers in other keys.
 For generic xy data (IFTYPE==4), by convention, the first NPTS values are read
 into S["data"]; the second NPTS values are returned in S["time"].
 """
-function psac(f; p=false::Bool)
+function parse_sac(f; p=false::Bool)
   S = Dict{String,Any}()
   (fk,ik,ck) = get_sac_keys()
   fv = read(f, Float32, 70)
@@ -95,6 +92,9 @@ function psac(f; p=false::Bool)
   return(S)
 end
 
+# ===========================================================================
+# SAC read methods
+# ===========================================================================
 """
     S = r_sac(fname)
 
@@ -102,7 +102,7 @@ Read SAC file fname into a dictionary. Header values are indexed by key, e.g.
 S["delta"] for DELTA. S["data"] contains the trace data.
 
 """
-r_sac(fname::String; p=false::Bool) = (S = psac(open(fname,"r"), p=p))
+r_sac(fname::String; p=false::Bool) = (S = parse_sac(open(fname,"r"), p=p))
 
 """
     chksac(S::Dict{String,Any})
@@ -213,7 +213,7 @@ end
 Read SAC file `fname` into a SeisChannel.
 """
 rsac(fname::String) = (src = fname;
-  S = sactoseis(psac(open(fname,"r"), p=false)); note(S, fname); return S)
+  S = sactoseis(parse_sac(open(fname,"r"), p=false)); note(S, fname); return S)
 readsac(fname::String) = rsac(fname)
 
 # ===========================================================================

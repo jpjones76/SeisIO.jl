@@ -10,14 +10,14 @@ println("...header accuracy...")
 @test_approx_eq(get_sac_iw("npts"), 10)
 @test_approx_eq(get_sac_iw("iftype"), 16)
 
-println("...file read...")
+println("...file read to dict...")
 SAC1 = rsac(sac_file)
 @test_approx_eq(SAC1.fs, 100.0)
 @test_approx_eq(length(SAC1.x), 1000)
 
-println("...data stream read...")
+println("...data stream read to dict...")
 f = open(sac_file,"r")
-SAC2 = psac(f)
+SAC2 = parse_sac(f)
 @test_approx_eq(1/SAC1.fs, SAC2["delta"])
 @test_approx_eq(length(SAC1.x), SAC2["npts"])
 

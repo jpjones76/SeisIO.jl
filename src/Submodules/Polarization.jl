@@ -4,6 +4,13 @@ using SeisIO
 #using HistUtils: gdm, qchd
 #export seispol, seisvpol, polhist, polexpand
 
+function az_wrap(S::SeisEvent)
+  for i = 1:1:S.data.n
+    if haskey(S.data.misc[i]["pol"])
+      Θ = S.data.misc[i]["pol"] .- S.hdr
+    end
+  end
+end
 
 #
 # function s_orient(S::SeisEvent)
@@ -52,7 +59,88 @@ using SeisIO
 #   end
 #   return (Θ_c, Σ_c)
 # end
+function seis_orient!(U::Array{SeisEvent,1};
+  sort_ord = ["Z","N","E","0","1","2","3","4","5","6","7","8","9"]::Array{String,1},
+  inst_codes = ['G', 'H', 'L', 'M', 'N', 'P']::Array{Char,1})
+  # Add: bandpass filtering paramters (npoles, corners)
+  P = Dict{String,Array{Float64,2}}()
 
+  for S in U
+    # Generate IDs
+    println("Processing ", S.hdr.id, ": M=", S.hdr.mag, " ", S.hdr.time, " ", S.hdr.loc_name)
+    ungap!(S.data)
+    N = S.data.n
+    id = Array{String,1}(N)
+    j = Array{Int64,1}(N)
+    for i = 1:1:N
+      id[i] = S.data.id[i][1:end-1]
+    end
+    ids = sort(unique(id))
+
+    # Loop over each unique instrument ID
+    k = 0
+    for i in ids
+      c = find(ids.==i)
+      d = find(id.==i)
+      L = length(d)
+      if i[end] in inst_codes &&  L >= 3
+
+        # Fill a SeisData structure with channels matching each ID
+        T = SeisData()
+        ii = 0
+        for m in sort_ord
+          cc = findfirst(S.data.id .== i*m)
+          if ii == 0
+            ii = cc
+          end
+          if cc > 0
+            T += S.data[cc]
+            T.misc[end]["oi"] = cc
+          end
+        end
+
+        # Proceed only if exactly 3 matching channels are found
+        if T.n == 3
+          if !haskey(P, S.data.id[ii])
+            P[S.data.id[ii]] = Array{Float64,2}(0,2)
+          end
+          # println("Computing polarization for ", i, "*")
+          sync!(T)
+          L = length(T.x[1])
+          X = Array{Float64,2}(L,3)
+          Y = copy(X)
+          Θ = Array{Float64,2}(1,3)
+          ϕ = copy(Θ)
+          β = T.misc[1]["baz"]
+          a = 1 + ceil(Int, T.fs[1]/2)
+
+          for m = 1:3
+            X[:,m] = T.x[m]/T.gain[m]
+            Θ[m] = T.loc[m][4]
+            ϕ[m] = T.loc[m][5]
+          end
+
+          # Guarantee true Z,N,E coordinates to the accuracy of seis.loc
+          ψz = repmat(cosd(ϕ), L, 1)
+          ψn = repmat(sind(ϕ).*cosd(Θ), L, 1)
+          ψe = repmat(sind(ϕ).*sind(Θ), L, 1)
+          Y[:,1] = sum(X.*ψz,2)
+          Y[:,2] = sum(X.*ψn,2)
+          Y[:,3] = sum(X.*ψe,2)
+
+          # Compute polarization
+          (p, w) = seispol(Y, Na=a)
+
+          # Rotate left, round, and wrap
+          p = round(p[:,1].-rem(β,180))
+          p[p.<-90.0] .+= 180.0
+          P[S.data.id[ii]] = cat(1, P[S.data.id[ii]], [p w[:,1]])
+        end
+      end
+    end
+  end
+  return P
+end
 
 """
   seispol!(S)
@@ -68,8 +156,7 @@ Compute polarization on instruments whose codes match `INST_CODES`. Default: ['G
 Use `SORT_ORDER` for the relative orientations of different components. Default: ["Z","N","E","0","1","2","3","4","5","6","7","8","9"]
 
 """
-function seispol!(S::SeisData,
-  f = [0.02, 0.1]::Array{Float64,1},
+function seispol!(S::SeisData;
   sort_ord = ["Z","N","E","0","1","2","3","4","5","6","7","8","9"]::Array{String,1},
   inst_codes = ['G', 'H', 'L', 'M', 'N', 'P']::Array{Char,1})
   # Add: bandpass filtering paramters (npoles, corners)
@@ -113,20 +200,46 @@ function seispol!(S::SeisData,
         sync!(T)
         L = length(T.x[1])
         X = Array{Float64,2}(L,3)
+        Y = copy(X)
+        Θ = Array{Float64,2}(1,3)
+        ϕ = copy(Θ)
 
-        # Assumes fs is the same on all 3 channels; should always be true
-        rt = Bandpass(f[1], f[2]; fs=T.fs[1])
-        
         for m = 1:3
-          X[:,m] = filtfilt(digitalfilter(rt, Butterworth(4)), T.x[m]/T.gain[m])
+          X[:,m] = T.x[m]/T.gain[m]
+          Θ[m] = T.loc[m][4]
+          ϕ[m] = T.loc[m][5]
+          #m == 3 && β = T.misc["baz"]
         end
 
-        (P,W) = seispol(X)
+        # Guarantee true Z,N,E coordinates to the accuracy of seis.loc
+        ψz = repmat(cosd(ϕ), L, 1)
+        ψn = repmat(sind(ϕ).*sind(Θ), L, 1)
+        ψe = repmat(sind(ϕ).*cosd(Θ), L, 1)
+        Y[:,1] = sum(X.*ψz,2)
+        Y[:,2] = sum(X.*ψn,2)
+        Y[:,3] = sum(X.*ψe,2)
+        println(Y[1:3,:])
+        # Y = copy(X)
+
+        # Rotate horizontal channels of Y into backazimuth
+        #M = [cosd(β) sind(β); -sind(β) cosd(β)]'
+        #Y[:,2:3] = Y[:,2:3]*M
+
+        # Compute polarization
+        (P,W) = seispol(Y)
+
+        # # Round az, inc to nearest whole degree
+        # P[:,1] = round(P[:,1])
+        # P[:,3] = round(P[:,3])
+
+        # Store in S.misc
         S.misc[ii]["pol"] = P
         S.misc[ii]["wt"] = W
+
+        # D = fit_mle(Normal, P[:,1], W[:,1])
+        # μ_c[i] = D.μ
+        # Σ_c[i] = d.σ
       end
-    else
-      println("Skipped ", i, "*")
     end
   end
   return

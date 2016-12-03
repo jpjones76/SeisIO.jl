@@ -146,3 +146,16 @@ function chi2d{T}(H::Array{T,2})
   end
   return D
 end
+
+function whist{T}(H::Array{T,1}, W::Array{T,1}; dh=1.0::Real, r=[0.0, 0.0]::Array{T,1})
+  if r==[0.0, 0.0]
+    r = [minimum(H),maximum(H)]
+  end
+  hx = collect(r[1]:dh:r[2])
+  n = length(hx)
+  wh = Array{Float64,1}(n)
+  for i = 1:1:n-1
+    wh[i] = sum(W[find(hx[i] .<= H .< hx[i+1])])
+  end
+  return wh
+end

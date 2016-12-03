@@ -66,9 +66,9 @@ Convert times `s` and `t` to DateTime objects and sorts s.t. d0 < d1.
 """
 function parsetimewin(s::DateTime, t::DateTime)
   if s < t
-    return (s, t)
+    return (string(s), string(t))
   else
-    return (t, s)
+    return (string(t), string(s))
   end
 end
 parsetimewin(s::DateTime, t::String) = parsetimewin(s, DateTime(t))

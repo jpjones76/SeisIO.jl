@@ -1,9 +1,10 @@
-# REALLY slow...need to rewrite for 1 dict per channel, as with Win32
-function nextline(pfid, c::Char)
-  tmpstring = chomp(readline(pfid))
+# ============================================================================
+# Utility functions not for export
+function nextline(pf, c::Char)
+  tmpstring = chomp(readline(pf))
   while tmpstring[1] != c
-    tmpstring = chomp(readline(pfid))
-    if eof(pfid)
+    tmpstring = chomp(readline(pf))
+    if eof(pf)
       tmpstring = -1
       break
     end
@@ -11,231 +12,215 @@ function nextline(pfid, c::Char)
   return tmpstring
 end
 
-function guess_nc(pfid, S)
-  seekstart(pfid)
-  nc = 0
-  S["sta"] = Array{String,1}()
-  S["cha"] = Array{String,1}()
-  while !eof(pfid)
-    L = readline(pfid)
-    if startswith(L, '.')
-      LL = split(L, '.')
-      sta = LL[2]
-      cmp = split(LL[3])[1]
-      if isempty(find(((S["cha"].==cmp) & (S["sta"].==sta)) .== true))
-        push!(S["sta"], sta)
-        push!(S["cha"], cmp)
-        nc+=1
-      end
+function getpf(froot, lc)
+  for i in lc
+    p = string(froot, Char(i))
+    if isfile(p)
+      return p
     end
   end
-  seekstart(pfid)
-  return nc, S
+  return froot*".nope"
 end
+# ============================================================================
 
-function procuwpf!(S, Nc::Int64, pickfile::AbstractString, v::Bool)
-  has_datafile = true
-  pfid = open(pickfile, "r")
-  if Nc < 1
-    Nc, S = guess_nc(pfid, S)
-    S["Nc"] = Nc
-    has_datafile = false
-  end
-  seekstart(pfid)
-  A = nextline(pfid,'A')
-  v && println(A)
-  ycorr = 0
-  if length(A) == 75 || length(A) == 12
-    y2k = 0
-    ycorr = 1900
-  else
-    y2k = 2
-  end
-  S["type"] = A[2]
+"""
+    uwpf!(S, f)
 
-  # Start time
-  st = A[3:4+y2k]
-  ycorr > 0 && (st = string(parse(st)+ycorr))
-  ot = Dates.datetime2unix(DateTime(parse(st), parse(A[5+y2k:6+y2k]),
-  parse(A[7+y2k:8+y2k]))) +
-  parse(A[9+y2k:10+y2k])*3600 + parse(A[11+y2k:12+y2k])*60
+Read University of Washington-format seismic pick info from pickfile `f` into header of SeisEvent `S`.
 
-  if length(A) > (14+y2k)
-    if y2k == 0
-      (sec, evla, evlo, S["evdp"], S["fix"], S["mag"], S["numsta"], S["numpha"],
-      S["gap"], S["dmin"], S["rms"], S["err"], S["q"], S["vmod"]) =
-      (A[13:18], A[19:26], A[27:35], A[36:41], A[42], A[43:46], A[47:49], A[51:53],
-      A[54:57], A[58:60], A[61:65], A[66:70], A[71:72], A[74:75])
-    else
-      (sec, evla, evlo, S["evdp"], S["fix"], S["mag"], S["numsta"], S["numpha"],
-      S["gap"], S["dmin"], S["rms"], S["err"], S["q"], S["vmod"]) =
-      (A[15:20], A[21:28], A[29:37], A[38:43], A[44], A[45:48], A[49:51], A[53:55],
-      A[56:59], A[60:62], A[63:67], A[68:72], A[73:74], A[76:77])
-    end
-    for i in ("evdp", "mag", "numsta", "numpha", "gap", "dmin", "rms", "err")
-      S[i] = parse(S[i])
-    end
-
-    # Set start time of each channel
-    ot += parse(sec)
-    if has_datafile
-      S["start"] = zeros(Float32,Nc)
-      for n = 1:1:Nc
-        S["start"][n] = ot - S["ctime"][n]
-      end
-    end
-    S["ot"] = ot
-
-    # Lat, Lon
-    S["evla"] = (parse(evla[1:3]) + parse(evla[5:6])/60 + parse(evla[7:8])/6000)
-    *(evla[4] == 'S' ? -1.0 : 1.0)
-    S["evlo"] = (parse(evlo[1:4]) + parse(evlo[6:7])/60 + parse(evlo[8:9])/6000)
-    *(evlo[5] == 'W' ? -1.0 : 1.0)
-
-  elseif length(A) > 12+y2k
-    S["reg"] = A[14+y2k]
-  end
-
-  # Error line...mostly pointless, left as a string w/limited parses for fast QC
-  seekstart(pfid)
-  E = nextline(pfid,'E')
-  if E != -1
-    #(S["meanRMS"], S["sdAbout0"], S["sswres"], S["ndfr"], S["fixxyzt"],
-    #S["sdx"], S["sdy"], S["sdz"], S["sdt"], S["sdmag"], S["meanUncert"]) =
-    #(E[12:17], E[18:23], E[24:29], E[30:37], E[38:41], E[42:45],
-    #E[46:50], E[51:55], E[56:60], E[61:65], E[66:70], E[76:79])
-    #for i in ("meanRMS", "sdAbout0", "sswres", "ndfr", "sdx", "sdy", "sdz",
-    #  "sdt", "sdmag", "meanUncert")
-    #  S[i] = parse(S[i])
-    #end
-    S["error_line"] = E
-    (S["rms"], S["sdx"], S["sdy"], S["sdz"], S["sdmag"], S["meanUncert"]) =
-      (parse(E[12:17]), E[46:50], E[51:55], E[56:60], E[66:70], E[76:79])
-  end
-
-  # Alternate magnitude line
-  seekstart(pfid)
-  sline = nextline(pfid, 'S')
-  if sline != -1
-    warn("Alternate magnitude found, M_d overwritten.")
-    (S["mag"], S["magtype"]) = (parse(sline[1:5]), sline(6:8))
-  end
-
-  # Focal mechanism line(s)
-  seekstart(pfid)
-  mline = nextline(pfid,'M')
-  m1 = 0
-  if mline != -1
-    S["mech_lines"] = Array{String,1}()
-    while mline != -1
-      m1 += 1
-      push!(S["mech_lines"], mline)
-      mline = nextline(pfid,'M')
-    end
-    v && println("Processed ", m1, " focal mechanism lines.")
-  end
+*Caution*: Low-level reader. *No* sanity checks are done to ensure `S` and `f` are the same event!
+"""
+function uwpf!(S::SeisEvent, pickfile::String; v=false::Bool)
+  (pf, H) = uwpf(pickfile, v=v, u=true)
+  N = S.data.n
 
   # Pick lines
-  seekstart(pfid)
-  m1 = 0
-  pline = nextline(pfid,'.')
-  if pline != -1
-    S["P"] = ones(Float32, Nc, 4).*repmat([-1.0 9.0 9.9 99.9], Nc, 1)
-    S["S"] = ones(Float32, Nc, 4).*repmat([-1.0 9.0 9.9 99.9], Nc, 1)
-    S["D"] = -1.0*ones(Float32, Nc)
-    S["P_pol"] = collect(repeated("_", Nc))
-    #S["S_pol"] = collect(repeated("_", Nc))
-    # Likely unneeded, AFAIK S polarities weren't used at UW (did SPONG even allow them?)
-
-    while pline != -1
-      m1 += 1
-      sta = pline[2:4]
-      cmp = pline[6:8]
-      for j1 = 1:1:Nc
-        if ((S["sta"][j1] == sta) && (S["cha"][j1] == cmp))
-          # Process P pick if one exists
-          try
-            i = search(pline, "(P P")[1]
-            pl = split(pline[i:end])
-            S["P_pol"][j1] = pl[3]
-            S["P"][j1,:] = [parse(pl[4]) parse(pl[5]) parse(pl[6]) parse(pl[7][1:end-1])]
-          end
-          try
-            i = search(pline, "(P S")[1]
-            pl = split(pline[i:end])
-            S["S"][j1,:] = [parse(pl[4]) parse(pl[5]) parse(pl[6]) parse(pl[7][1:end-1])]
-          end
-          try
-            i = search(pline, "(D")[1]
-            pl = split(pline[i:end])
-            S["D"][j1] = parse(pl[2][1:end-1])
-          end
+  seekstart(pf)
+  m = 0
+  pline = nextline(pf,'.')
+  while pline != -1
+    m += 1
+    sta = pline[2:4]
+    cmp = pline[6:8]
+    for j = 1:1:N
+      if contains(S.data.id[j], sta) && contains(S.data.id[j], cmp)
+        p = search(pline, "(P P")
+        if !isempty(p)
+          pl = split(pline[p[1]:end])
+          S.data.misc[j]["p_pol"] = pl[3]
+          S.data.misc[j]["t_p"] = [parse(pl[4]), parse(pl[5]), parse(pl[6]), parse(pl[7][1:end-1])]
+        end
+        s = search(pline, "(P S")
+        if !isempty(s)
+          pl = split(pline[s[1]:end])
+          S.data.misc[j]["s_pol"] = pl[3]
+          S.data.misc[j]["t_s"] = [parse(pl[4]), parse(pl[5]), parse(pl[6]), parse(pl[7][1:end-1])]
+        end
+        d = search(pline, "(D")
+        if !isempty(d)
+          pl = split(pline[d[1]:end])
+          S.data.misc[j]["t_d"] = parse(pl[2][1:end-1])
         end
       end
-      pline = nextline(pfid,'.')
     end
+    pline = nextline(pf,'.')
   end
-  v && println("Processed ", m1, " pick lines.")
-
-  # Comment lines
-  seekstart(pfid)
-  m1 = 0
-  cline = nextline(pfid,'C')
-  if cline != -1
-    S["comment"] = Array{String,1}()
-    while cline != -1
-      m1 += 1
-      push!(S["comment"], cline[3:end])
-      cline = nextline(pfid,'C')
-    end
-    v && println("Processed ", m1, " comment lines.")
-  end
-  S["src"] = "uw df"
-  close(pfid)
+  v && println("Processed ", m, " pick lines.")
+  close(pf)
+  S.hdr = deepcopy(H)
   return S
 end
 
 """
-  readuwpf(PFILE)
+    H = uwpf(hf)
 
-  Read UW-format pickfile PFILE into a dictionary containing pick information.
-Only works correctly with single-event pickfiles.
+Read University of Washington-format seismic pick file `hf` into SeisHdr `H`.
+
+    H = uwpf(hf, v=true)
+
+Specify verbose mode (for debugging).
 """
-readuwpf(pickfile; v=false::Bool) = (procuwpf!(Dict{String,Any}(), -1, pickfile, v))
+function uwpf(pickfile::String; v=false::Bool, u=false::Bool)
+  pf = open(pickfile, "r")
+  seekstart(pf)
+  A = nextline(pf,'A')
+  v && println(A)
+  c = 0
+  if length(A) == 75 || length(A) == 12
+    y = 0
+    c = 1900
+  else
+    y = 2
+  end
+  D = Dict{String,Any}()
+  D["type"] = A[2]
 
-function readuwdf(datafile::AbstractString; v=false::Bool)
+  # Start time
+  ot = d2u(DateTime(string(parse(Int, A[3:4+y]) + c)*A[5+y:12+y],"yyyymmddHHMM"))
+
+  si = [13,19,27,36,42,43,47,51,54,58,61,66,71,74]+y
+  ei = [18,26,35,41,42,46,49,53,57,60,65,70,72,75]+y
+  L = length(si)
+
+  if length(A) > (14+y)
+    ah = [A[si[i]:ei[i]] for i=1:1:L]
+    # Parse numeric and string headers
+    nh = [parse(ah[i]) for i in [1,4,6,7,8,9,10,11,12]]
+    #    [sec, evdp, mag, numsta, numpha, gap, dmin, rms, err]
+    (evla,evlo,qual,vmod) = (ah[2],ah[3],ah[13],ah[14])
+
+    # Set start time of each channel
+    ot += nh[1]
+    dep = nh[2]
+    mag = nh[3]
+
+    # Lat, Lon, Dep, Mag
+    lat = (parse(evla[1:3]) + parse(evla[5:6])/60 + parse(evla[7:8])/6000) * (evla[4] == 'S' ? -1.0 : 1.0)
+    lon = (parse(evlo[1:4]) + parse(evlo[6:7])/60 + parse(evlo[8:9])/6000) * (evlo[5] == 'W' ? -1.0 : 1.0)
+    mag_typ = "M_d (UW)"
+
+  elseif length(A) > 12+y
+    reg = A[14+y]
+    close(pf)
+    error(string("Teleseism, source region: ", reg, "; pickfile unusable! (use `uwdf` for datafile)"))
+  end
+
+  # Error line...mostly pointless crap, left as a string w/limited parses for fast QC
+  seekstart(pf)
+  eline = nextline(pf,'E')
+  if eline != -1
+    (D["meanRMS"], D["sdAbout0"], D["sswres"], D["ndfr"], D["fixxyzt"],
+    D["sdx"], D["sdy"], D["sdz"], D["sdt"], D["sdmag"], D["meanUncert"]) =
+    (eline[12:17], eline[18:23], eline[24:29], eline[30:37], eline[38:41], eline[42:45],
+    eline[46:50], eline[51:55], eline[56:60], eline[61:65], eline[66:70], eline[76:79])
+    for i in ("meanRMS", "sdAbout0", "sswres", "ndfr", "sdx", "sdy", "sdz",
+      "sdt", "sdmag", "meanUncert")
+      D[i] = parse(D[i])
+    end
+  end
+
+  # Alternate magnitude line
+  seekstart(pf)
+  sline = nextline(pf, 'S')
+  if sline != -1
+    warn("Alternate magnitude found, M_d overwritten.")
+    (mag, mag_typ) = (parse(sline[1:5]), sline(6:8))
+  end
+
+  # Focal mechanism line(s)
+  seekstart(pf)
+  mline = nextline(pf,'M')
+  m = 0
+  if mline != -1
+    D["mech_lines"] = Array{String,1}()
+    while mline != -1
+      m += 1
+      push!(D["mech_lines"], mline)
+      mline = nextline(pf,'M')
+    end
+    v && println("Processed ", m, " focal mechanism lines.")
+  end
+
+  # Comment lines
+  loc_name = ""
+  event_id = 0
+  seekstart(pf)
+  m = 0
+  cline = nextline(pf,'C')
+  if cline != -1
+    D["comment"] = Array{String,1}()
+    while cline != -1
+      m += 1
+      if contains(cline, "NEAR")
+        loc_name = strip(cline[8:end])
+      elseif contains(cline, "EVENT ID")
+        event_id = parse(Int, strip(cline[13:end]))
+      else
+        push!(D["comment"], cline[3:end])
+      end
+      cline = nextline(pf,'C')
+    end
+    v && println("Processed ", m, " comment lines.")
+  end
+  H = SeisHdr(time=u2d(ot), lat=lat, lon=lon, dep=dep, mag=mag, mag_typ=mag_typ, loc_name=loc_name, id=event_id)
+  if u
+    return (pf, H)
+  else
+    close(pf)
+    return (D, H)
+  end
+end
+
+"""
+    D = uwdf(df)
+
+Read University of Washington-format seismic data file `df` into SeisData structure `D`.
+
+    D = uwdf(hf, v=true)
+
+Specify verbose mode (for debugging).
+"""
+function uwdf(datafile::String; v=false::Bool)
   dconst = -11676096000
+  D = Dict{String,Any}()
 
   # Open data file
   fid = open(datafile, "r")
 
   # Process master header
-  M = Dict{String,Any}()
-  S = Dict{String,Any}()
-  M["nchan"]    = read(fid, Int16)
-  M["lrate"]    = read(fid, Int32)
-  lmin          = bswap(read(fid, Int32))
-  lsec          = bswap(read(fid, Int32))
-  M["length"]   = read(fid, Int32)
-  M["tapenum"]  = read(fid, Int16)
-  M["eventnum"]	= read(fid, Int16)
-  [M[i] = bswap(M[i]) for i in collect(keys(M))]
-  M["flags"]    = read(fid, Int16, 10)
-  M["flags"] = [bswap(i) for i in M["flags"]]
-  M["extra"]    = replace(String(read(fid, UInt8, 10)),"\0"," ")
-  v && [println(k, ": ", M[k]) for k in keys(M)]
-  M["comment"]  = replace(String(read(fid, UInt8, 80)),"\0"," ")
+  N = bswap(read(fid, Int16))
+  skip(fid, 4)
+  lmin = bswap(read(fid, Int32))
+  lsec = bswap(read(fid, Int32))
+  skip(fid, 8)
+  flags = [bswap(i) for i in read(fid, Int16, 10)]
+  extras = replace(String(read(fid, UInt8, 10)),"\0"," ")
+  comment = replace(String(read(fid, UInt8, 80)),"\0"," ")
 
-  # Set M time using lmin and lsec WHICH USE GREGORIAN MINUTES JESUS CHRIST WTF
-  uwdate = Dates.unix2datetime(lmin*60 + lsec*1.0e-6 + dconst)
-  M["yr"] = Dates.Year(uwdate).value
-  M["mo"] = Dates.Month(uwdate).value
-  M["dy"] = Dates.Day(uwdate).value
-  M["hr"] = Dates.Hour(uwdate).value
-  M["mn"] = Dates.Minute(uwdate).value
-  M["sc"] = Dates.Second(uwdate).value
+  # Set M time using lmin and lsec GREGORIAN MINUTES JESUS CHRIST WTF
+  uw_ot = lmin*60 + lsec*1.0e-6 + dconst
 
-  # Seek to end of file get number of structures
+  # Seek EOF to get number of structures
   seekend(fid)
   skip(fid, -4)
   nstructs = bswap(read(fid, Int32))
@@ -243,8 +228,10 @@ function readuwdf(datafile::AbstractString; v=false::Bool)
   structs_os = (-12*nstructs)-4
   tc_os = 0
   v && println("structs_os=", structs_os)
+
   # Set version of UW seismic data file (char may be empty, leave code as-is!)
-  uwformat = M["extra"][3] == '2' ? 2 : 1
+  uwformat = extras[3] == '2' ? 2 : 1
+
   # Read in UW2 data structures
   chno = Array{Int32,1}()
   corr = Array{Int32,1}()
@@ -252,14 +239,11 @@ function readuwdf(datafile::AbstractString; v=false::Bool)
     seekend(fid)
     skip(fid, structs_os)
     for i1 = 1:1:nstructs
-      structtag    = replace(String(read(fid, UInt8, 4)),"\0","")
-      #println(structtag)
-      nstructs     = read(fid, Int32)
-      byteoffset   = read(fid, Int32)
-      nstructs   = bswap(nstructs)
-      byteoffset = bswap(byteoffset)
+      structtag     = replace(String(read(fid, UInt8, 4)),"\0","")
+      nstructs      = bswap(read(fid, Int32))
+      byteoffset    = bswap(read(fid, Int32))
       if structtag == "CH2"
-        Nc = nstructs
+        N = nstructs
       elseif structtag == "TC2"
         fpos = position(fid)
         seek(fid, byteoffset)
@@ -274,202 +258,146 @@ function readuwdf(datafile::AbstractString; v=false::Bool)
         seek(fid, fpos)
       end
     end
-  else
-    Nc = M["nchan"]
   end
-  v && println("Processing ", Nc , " channels.")
-  Nc = Int(Nc)
+  N = Int64(N)
+  v && println("Processing ", N , " channels.")
 
   # Write time corrections
-  timecorr = zeros(Nc)
+  timecorr = zeros(Float32, N)
   if length(chno) > 0
-       for n = 1:1:length(chno)
-           timecorr[chno[n]] = corr[n]*1.0e-6
-       end
+    for n = 1:1:length(chno)
+      timecorr[chno[n]] = corr[n]*Float32(1.0e-6)
+    end
   end
 
   # Read UW2 channel headers
   if uwformat == 2
     seekend(fid)
-    skip(fid, Int(-56*Nc + structs_os + tc_os))
-    fmt = Array{DataType,1}(Nc)
-    for i in ["chlen", "offset", "lmin", "lsec", "expan1"]
-      S[i] = Array{Int32,1}()
+    skip(fid, Int(-56*N + structs_os + tc_os))
+    f = Array{DataType,1}(N)
+    I32 = Array{Int32,2}(6,N)  # chlen, offset, lmin, lsec, fs, expan1
+    U8 = Array{UInt8,2}(32,N)  # (8 = 4*int16, unused) + name(8), tmp(4), compflg(4), chid(4)
+    for i = 1:1:N
+      I32[1:6,i] = read(fid, Int32,  6)
+      U8[1:32,i] = read(fid, UInt8, 32)
     end
-    for i in ["lta", "trig", "bias", "fill"]
-      S[i] = Array{Int16,1}()
-    end
-    compflg = Array{String,1}()
-    chid = Array{String,1}()
-    expan2 = Array{String,1}()
-    name = Array{String,1}()
-    S["fs"] = Array{Int32,1}()
+    I32 = [bswap(i) for i in I32]'
+    U8 = U8'
 
-    for i1 = 1:1:Nc
-      push!(S["chlen"], read(fid, Int32))
-      push!(S["offset"], read(fid, Int32))
-      push!(S["lmin"], read(fid, Int32))
-      push!(S["lsec"], read(fid, Int32))
-      push!(S["fs"], read(fid, Int32))
-      push!(S["expan1"], read(fid, Int32))
-      push!(S["lta"], read(fid, Int16))
-      push!(S["trig"], read(fid, Int16))
-      push!(S["bias"], read(fid, Int16))
-      push!(S["fill"], read(fid, Int16))
-      push!(name, replace(String(read(fid, UInt8, 8)),"\0",""))
-      tmp = replace(String(read(fid, UInt8, 4)),"\0","")
-      for j1 = 1:1:length(tmp)
-        if tmp[j1] == 'F'
-          fmt[i1] = Float32
-        elseif tmp[j1]=='L'
-          fmt[i1] = Int32
-        elseif tmp[j1]=='S'
-          fmt[i1] = Int16
+    # Parse I32
+    ch_len = I32[:,1]
+    ch_os = I32[:,2]
+    ch_time = I32[:,3].*60.0 .+ I32[:,4]*1.0e-6 .+ timecorr .+ dconst
+    fs = map(Float64, I32[:,5])./1000.0
+
+    # Divide up U8
+    sta_u8 = U8[:,09:16]
+    fmt_u8 = U8[:,17:20]'
+    cha_u8 = U8[:,21:24]
+
+    # Format codes
+    c = flipdim(fmt_u8, 1)
+    for i = 1:N
+      f[i] = Int16
+      for j = 1:4
+        if c[j,i] == 0x46 # 'F'
+          f[i] = Float32
+          break
+        elseif c[j,i] == 0x4c # 'L'
+          f[i] = Int32
+          break
+        elseif c[j,i] == 0x53 # 'S'
+          f[i] = Int16
+          break
         end
       end
-      push!(compflg, replace(String(read(fid, UInt8, 4)),"\0",""))
-      push!(chid, replace(String(read(fid, UInt8, 4)),"\0",""))
-      push!(expan2, replace(String(read(fid, UInt8, 4)),"\0",""))
     end
 
-    for i in collect(keys(S))
-      for j=1:1:length(S[i])
-        S[i][j] = bswap(S[i][j])
-      end
-    end
-    S["cha"] = compflg
-    S["chid"] = chid
-    S["expan2"] = expan2
-    S["sta"] = name
-    S["fs"] = map(Float32, S["fs"]./1000)
-    S["ctime"] = Array{Float64,1}(Nc)
-    for i = 1:1:Nc
-      S["ctime"][i] = S["lmin"][i]*60 + S["lsec"][i]*1.0e-6 + timecorr[i] + dconst
-    end
-  end
-
-  #Read UW channel data
-  if uwformat == 2
-    S["data"] = Array{Array{Any,1},1}(Nc)
-    for i = 1:1:Nc
-      seek(fid, S["offset"][i])
-      seis = read(fid, fmt[i], S["chlen"][i])
-      seis = [bswap(s) for s in seis]
-      S["data"][i] = seis
+    s = cat(2, repmat([0x55 0x57 0x2e], N, 1), sta_u8, repmat([0x2e 0x2e], N, 1), cha_u8)'
+    id = [replace(String(s[:,i]),"\0","") for i=1:N]
+    X = Array{Array{Float64,1},1}(N)
+    T = Array{Array{Int64,2},1}(N)
+    #println("To read: ", N, " channels")
+    for i = 1:1:N
+      #println("Channel ", i, ": ", id[i], " (offset =", ch_os[i],", Nx=", ch_len[i], ")")
+      seek(fid, ch_os[i])
+      X[i] = [bswap(j) for j in read(fid, f[i], ch_len[i])]
+      T[i] = [1 round(Int, ch_time[i]*1000000); length(X[i]) 0]
     end
   end
   close(fid)
-  S["src"] = "uw pf"
-  return S, Nc
+
+  return SeisData(n=N, name=id, id=id, fs=fs, x=X, t=T,
+    loc=repmat([zeros(Float64,5)],N),
+    resp=repmat([complex(zeros(Float64,2,2))],N),
+    misc=[Dict{String,Any}() for i = 1:N],
+    notes=[[""] for i = 1:N],
+    gain=ones(Float64,N),
+    src=repmat(["uwdf"],N),
+    units=repmat(["counts"],N))
 end
 
 """
-    S = readuw(filename)
+    S = readuw(f)
 
-Read seismic data in "UW" format into dictionary S. The UW interface libraries
-are NOT required. Byte order of data files is assumed to be big endian.
+Read University of Washington-format seismic data in file `f` into SeisEvent `S`. `f` can be a data file, a pick file, or a stub for one or both.
 
-`filename` must be either a datafile, or a pickfile in the same directory
-as the datafile to be read.
+### Requirements
+* A data file must end in 'W'
+* A pick file must end in [a-z] and contain exactly one event. Pick files from teleseisms aren't read.
+* A filename stub must be complete except for the last letter, e.g. "99062109485".
 
-    S = readuw(filename)
+### Example
+    S = readuw("99062109485")
 
+Read data file 99062109485W and pick file 99062109485o in the current working directory.
 """
-function r_uw(filename::String; v=false::Bool)
+function readuw(filename::String; v=false::Bool)
+
   # Identify pickfile and datafile
   filename = realpath(filename)
-  pickfile = ""
-  datafile = ""
-  ec = Char(filename[end])
+  pf = ""
+  df = ""
+  ec = UInt8(filename[end])
   lc = collect(0x61:1:0x7a)
-  if Base.in(UInt32(ec),lc)
-    pickfile = filename
-    datafile = string(filename[1:end-1],"W")
-  elseif ec == 'W'
-    datafile = filename
+  if Base.in(ec, lc)
+    pf = filename
+    df = filename[1:end-1]*"W"
+  elseif ec == 0x57
+    df = filename
     froot = filename[1:end-1]
-    for i in lc
-      pickfile = string(froot, Char(i))
-      if isfile(pickfile)
-        break
-      end
-    end
+    pf = getpf(froot, lc)
   else
-    datafile = string(filename,'W')
-    !isfile(datafile) && error("Invalid UW datafile name (must end with 'W')!")
-    for i=0x61:1:0x7a
-      pickfile = string(filename, Char(i))
-      if isfile(pickfile)
-        break
-      end
-    end
+    df = filename*"W"
+    isfile(df) || error("Invalid filename stub (no corresponding data file)!")
+    pf = getpf(froot, lc)
   end
   src_stub = ""
 
-  # Datafile wrapper
-  if isfile(datafile)
-    v && println("Reading datafile ", datafile)
-    S, Nc = readuwdf(datafile, v=v)
+  # File read wrappers
+  if isfile(df)
+    # Datafile wrapper
+    v && println("Reading datafile ", df)
+    S = SeisEvent(data=uwdf(df, v=v))
     v && println("Done reading data file.")
-    src_stub *= splitdir(datafile)[2]
-    S["Nc"] = Nc
-  else
-    v && println("Skipping datafile (not found or not given)")
-    S = Dict{String,Any}()
-  end
+    src_stub *= df
 
-  # Pickfile wrapper
-  if isfile(pickfile)
-    v && println("Reading pickfile ", pickfile)
-    procuwpf!(S, Nc, pickfile, v)
-    v && println("Done reading pick file.")
-    if endswith(src_stub, "W")
-      src_stub = src_stub[1:end-1] * "[W," * pickfile[end-1:end-1] * "]"
+    # Pickfile wrapper
+    if isfile(pf)
+      v && println("Reading pickfile ", pf)
+      uwpf!(S, pf)
+      v && println("Done reading pick file.")
+      src_stub = string(src_stub[1:end-1],"[",pf[end],",W]")
     else
-      src_stub *= splitdir(pickfile)[2]
+      v && println("Skipping pickfile (not found or not given)")
+    end
+    for i=1:1:S.data.n
+      S.data.src[i] = src_stub
     end
   else
-    v && println("Skipping pickfile (not found or not given)")
+    # Pickfile only
+    S = SeisEvent(hdr=uwpf(pf, v=v))
+    src_stub *= pf
   end
-
-  # Clean up
-  for i in ("ctime","lmin","lsec","offset")
-    try
-      delete!(S,i)
-    end
-  end
-  S["src"] = src_stub
   return S
 end
-
-function uwtoseis(S::Dict{String,Any})
-  seis = SeisData()
-  misc_keys = ("P_pol", "bias", "chid", "chlen",  "expan1", "expan2", "fill", "lta", "trig")
-  pick_keys = ("D", "P", "S")
-  event_keys = ("dmin", "err", "error_line", "evdp", "evla", "evlo", "fix",
-  "gap", "mag", "meanUncert", "mech_lines", "numpha", "numsta", "q",
-  "rms", "sdmag", "sdx", "sdy", "sdz", "type", "vmod")
-
-  for i = 1:S["Nc"]
-    name = join(["UW",S["sta"][i],"",S["cha"][i]],'.')
-    id = join(["UW",S["sta"][i],"",S["cha"][i]],'.')
-    fs = S["fs"][i]
-    src = S["src"]
-    x = map(Float64, S["data"][i])
-    notes = S["comment"]
-    t = [1 round(Int,(S["start"][i]+S["ot"])/μs); length(x) 0]
-    misc = Dict{String,Any}()
-    for k in misc_keys
-      misc[k] = S[k][i]
-    end
-    S["P"][i,1] > 0 && (misc["P"] = S["P"][i,:])
-    S["S"][i,1] > 0 && (misc["S"] = S["S"][i,:])
-    S["D"][i] > 0 && (misc["D"] = S["D"][i])
-
-    seis += SeisChannel(name=name, id=id, fs=fs, x=x, t=t, src=src, notes=notes,
-      misc=misc, units="counts")
-  end
-  return seis
-end
-
-readuw(f::String; v=false::Bool) = (S = r_uw(f, v=v); uwtoseis(S::Dict{String,Any}))

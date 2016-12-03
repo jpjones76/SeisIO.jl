@@ -1,3 +1,14 @@
+function get_sync_t(s::Union{String,DateTime}, t::Array{Int64,1}, k::Array{Int64,1})
+  isa(s, DateTime) && return round(Int, d2u(s)/μs)
+  if s == "max"
+    return minimum(t[k])
+  elseif s == "min"
+    return maximum(t[k])
+  else
+    return round(Int, d2u(DateTime(s))/μs)
+  end
+end
+
 """
     gapfill!(x, t, fs)
 
@@ -94,15 +105,27 @@ Start time can be synchronized to a variety of values:
 * numeric, datetime, and other string values are as for `ST`.
 """
 function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
-  s="max"::Union{String,Real,DateTime},
-  t="max"::Union{String,Real,DateTime},
+  s="max"::Union{String,DateTime}, t="max"::Union{String,DateTime},
   v=false::Bool)
 
   for i = 1:S.n
     S.x[i] -= mean(S.x[i])
   end
   ungap!(S, m=false, w=false)
-  #autotap!(S)
+  autotap!(S)
+
+  # Resample
+  if resample && S.n > 1
+    f0 = fs == 0 ? minimum(S.fs[S.fs .> 0]) : fs
+    N = floor(Int64, f0*(t_end-t_start)*μs)-1
+    for i = 1:S.n
+      S.fs[i] == 0 && continue
+      isapprox(S.fs[i],f0) && continue
+      S.x[i] = resample(S.x[i], f0/S.fs[i])
+      S.fs[i] = f0
+      note(S, i, @sprintf("Resampled to %.1f", f0))
+    end
+  end
 
   # Do not edit order of operations -------------------------------------------
   start_times = zeros(Int64, S.n)
@@ -118,87 +141,40 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
   # non-null timeseries data
   k = find((S.fs .> 0).*[!isempty(S.x[i]) for i=1:S.n])
   for i in k
-    start_times[i] = round(Int, S.t[i][1,2]*S.fs[i]) / S.fs[i]
+    start_times[i] = S.t[i][1,2]
     end_times[i] = start_times[i] + round(Int, length(S.x[i])/(μs*S.fs[i]))
   end
   # Do not edit order of operations -------------------------------------------
-  v && println("start_times = ", start_times)
-  v && println("end_times = ", end_times)
 
-  # Possible options for s
-  v && println("s = ", s)
-  if isa(s,Real)
-    t_start = round(Int, s/μs)
-  elseif isa(s,DateTime)
-    t_start = round(Int, Dates.datetime2unix(s)/μs)
-  else
-    starts = start_times[k]
-    v && println("starts = ", starts)
-    if s == "max"
-      t_start = floor(Int, minimum(starts))
-    elseif s == "min"
-      t_start = ceil(Int, maximum(starts))
-    else
-      t_start = round(Int, Dates.datetime2unix(DateTime(s))/μs)
-    end
-  end
-  v && println("t_start =", t_start)
-
-  # Possible options for t
-  v && println("t = ", t)
-  if isa(t,Real)
-    t_end = t_start + round(Int, t/μs)
-  elseif isa(t,DateTime)
-    t_end = round(Int, Dates.datetime2unix(t)/μs)
-  else
-    if t == "max"
-      t_end = maximum(end_times)
-    elseif t == "min"
-      t_end = minimum(end_times)
-    else
-      t_end = round(Int, Dates.datetime2unix(DateTime(t))/μs)
-    end
-  end
-  v && println("t_end =", t_end)
-
+  # Start and end times
+  t_start = get_sync_t(s, start_times, k)
+  t_end = get_sync_t(t, end_times, k)
   t_end <= t_start && error("No time overlap with given start \& end times!")
-  @printf(STDOUT, "Synching %.2f seconds of data\n", (t_end - t_start)*μs)
-
-  # Resample
-  if resample && S.n > 1
-    f0 = fs == 0 ? minimum(S.fs[S.fs .> 0]) : fs
-    N = floor(Int64, f0*(t_end-t_start)*μs)-1
-    for i = 1:S.n
-      S.fs[i] == 0 && continue
-      isapprox(S.fs[i],f0) && continue
-      S.x[i] = resample(S.x[i], f0/S.fs[i])
-      S.fs[i] = f0
-      note(S, i, @sprintf("Resampled to %.1f", f0))
-    end
+  if v
+    @printf(STDOUT, "Synching %.2f seconds of data\n", (t_end - t_start)*μs)
+    println("t_start = ", t_start, " μs from epoch")
+    println("t_end = ", t_end, " μs from epoch")
   end
-  v && println("t_start = ", t_start)
-  v && println("t_end = ", t_end)
   sstr = string(Dates.unix2datetime(t_start*μs))
   tstr = string(Dates.unix2datetime(t_end*μs))
 
   # Loop over non-timeseries data
   for i in c
-    if S.fs[i] == 0
-      t = cumsum(S.t[i][:,2])
-      j = find(t_start .< t .< t_end)
-      S.x[i] = S.x[i][j]
-      if isempty(j)
-        S.t[i] = Array{Int64,2}()
-        note(S, i, @sprintf("Channel emptied; no samples in range %s--%s.", sstr, tstr))
-      else
-        t = t[j]
-        t = [t[1]; diff(t)]
-        S.t[i] = reshape(t,length(t),1)
-        note(S, i, @sprintf("Samples outside range %s--%s pulled.", sstr, tstr))
-      end
+    t = cumsum(S.t[i][:,2])
+    j = find(t_start .< t .< t_end)
+    S.x[i] = S.x[i][j]
+    if isempty(j)
+      S.t[i] = Array{Int64,2}()
+      note(S, i, @sprintf("Channel emptied; no samples in range %s--%s.", sstr, tstr))
+    else
+      t = t[j]
+      t = [t[1]; diff(t)]
+      S.t[i] = reshape(t,length(t),1)
+      note(S, i, @sprintf("Samples outside range %s--%s pulled.", sstr, tstr))
     end
   end
 
+  # Timeserires data
   # PRE LOOP: fill empty items
   for i = 1:S.n
     if length(S.x[i]) == 0 && S.fs[i] > 0
@@ -210,9 +186,8 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
 
   # FIRST LOOP: START TIMES.
   for i in k
-    fsμ = S.fs[i]*μs
-    dt = round(Int, 1/fsμ)
-
+    fμs = S.fs[i]*μs
+    dt = round(Int, 1/fμs)
     mx = mean(S.x[i])
 
     # truncate X to values within bounds
@@ -220,16 +195,17 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
     j = find(t_start .< t .< t_end)
     S.x[i] = S.x[i][j]
 
-    # prepend time series data that begin late
+    # prepend points to time series data that begin late
     if (start_times[i] - t_start) >= dt
-      ni = round(Int, (start_times[i]-t_start)*fsμ)
+      ni = round(Int, (start_times[i]-t_start)*fμs)
       prepend!(S.x[i], collect(repeated(mx, ni)))
       note(S, i, join(["Prepended ", ni, " values."]))
     end
-    end_times[i] = t_start + round(Int, length(S.x[i])/fsμ)
+    end_times[i] = t_start + round(Int, length(S.x[i])/fμs)
 
+    # append points to time series data that end early
     if (t_end - end_times[i]) >= dt
-      ii = round(Int, (t_end-end_times[i])*fsμ)
+      ii = round(Int, (t_end-end_times[i])*fμs)
       append!(S.x[i], collect(repeated(mx, ii)))
       note(S, i, join(["Appended ", ii, " values."]))
     end

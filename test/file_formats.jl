@@ -24,15 +24,18 @@ A = rlennasc(lenn_file)
 S += A
 
 println("UW...")
-W = r_uw(uw_root)
+W = readuw(uw_root)
 println("...header accuracy...")
-for i in ["WWVB","TCG","SSO","VLM","VLL","VG2","VFP","VCR","VBE","TDH","GPS","GL2"]
-  @test_approx_eq(isempty(find(W["sta"].==i)), false)
+for i in ["UW.WWVB..TIM","UW.TCG..TIM","UW.SSO..EHZ","UW.VLM..EHZ"]
+  @test_approx_eq(isempty(find(W.data.id.==i)), false)
+  @test_approx_eq(isempty(find(W.data.name.==i)), false)
+  n = findfirst(W.data.id.==i)
+  @test_approx_eq(W.data.fs[n],100.0)
 end
 println("...pick accuracy...")
-i = findfirst(W["sta"].=="TDH")
-@test_approx_eq(W["P"][i,1], 67.183)
-i = findfirst(W["sta"].=="VFP")
-@test_approx_eq(W["D"][i], 19.0)
+i = findfirst(W.data.id.=="UW.TDH..EHZ")
+@test_approx_eq(W.data.misc[i]["t_p"][1], 67.183)
+i = findfirst(W.data.id.=="UW.VFP..EHZ")
+@test_approx_eq(W.data.misc[i]["t_d"][1], 19.0)
 
 println("...done!")
