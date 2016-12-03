@@ -1,3 +1,5 @@
+# ============================================================================
+# Utility functions not for export
 settracecode(S::Dict{String,Any}) = (tc = ["Local", "GMT", "Other", "UTC"];
   try S["tc"] = tc[S["tc"]]; end)
 
@@ -47,7 +49,7 @@ function auto_coords(lat, lon, coord_scale, coord_units)
   return lat, lon
 end
 
-function getHdrStrings()
+function hdr_strings()
   Trace = ["lineSeq", "reelSeq", "eventN", "chanN", "enSrcPt", "cdp", "cdpN"]
   Short1 = ["traceCode", "vertSum", "horSum", "dataUse"]
   SrcRec = ["stel", "evel", "evdp", "recDat", "srcDat", "srcWater", "grpWater"]
@@ -65,44 +67,17 @@ function getHdrStrings()
   return (Trace, Short1, SrcRec, Coord, Short2)
 end
 
-"""
-    prunesegy!(S)
-
-Prune irrelevant standard headers from SEGY dictionary S.
-"""
-function prunesegy!(S)
-  # Common headers
-  for i in ["enSrcPt", "cdp", "cdpN", "vertSum", "horSum", "dataUse", "recDat",
-    "srcDat", "srcWater", "grpWater", "coordUnits", "weatherV", "subweatherV",
-    "srcUpholeT", "recUpholeT", "srcStaticC", "recStaticC", "totalStatic",
-    "lagA", "lagB", "delay", "muteS", "muteE", "sampLen", "sampDT",
-    "correlated", "sweepSF", "sweepEF", "sweepL", "sweepType", "sweepTapS",
-    "sweepTapE", "taperType", "aliasF", "aliasSlope","notchF", "notchSlope",
-    "fl", "fh", "lowCutSlope", "highCutSlope", "tc", "geopRollPos1",
-    "geopFirstTrace", "geopLastTrace", "gapSize", "taperOvertravel"]
-      delete!(S,i)
-  end
-  try
-    # PASSCAL/NMT-specific headers
-    for i in ["dataForm", "trigyear", "trigjday", "trighour", "statDelay",
-              "trigmin", "trigsec", "trigmsec"]
-      delete!(S,i)
-    end
-  end
-  return S
-end
-
-"""
-  F, S = psegstd(sid)
-
-Parse standard-format SEG Y stream sid with values in big endian byte order.
-This is the default for most industry SEG Y rev 1 data.
-
-  F, S = psegstd(sid, b=false)
-
-Parse standard-format SEGY stream sid in little endian byte order.
-"""
-function psegstd(fid; b=true::Bool)
+# """
+#   F, S = segstd(sid)
+#
+# Parse standard-format SEG Y stream sid with values in big endian byte order.
+# This is the default for most industry SEG Y rev 1 data.
+#
+#   F, S = segstd(sid, b=false)
+#
+# Parse standard-format SEGY stream sid in little endian byte order.
+# """
+function segstd(fid; b=true::Bool)
   F = Dict{String,Any}()
   types = [UInt32, Int32, Int16, Any, Float32, Any, Any, Int8]
 
@@ -116,7 +91,7 @@ function psegstd(fid; b=true::Bool)
     "vibPolCode"]
 
   # Trace strings
-  reel_s, short_s_1, sr_s, coord_s, short_s_2 = getHdrStrings()
+  reel_s, short_s_1, sr_s, coord_s, short_s_2 = hdr_strings()
   long_s = ["cdpX", "cdpY", "inline3D", "crossline3D", "shotPoint"]
   short_s_3 = ["transConstExp", "transUnit", "traceID", "timeSc", "srcType"]
 
@@ -197,23 +172,52 @@ function psegstd(fid; b=true::Bool)
   close(fid)
   return F,S
 end
+# ============================================================================
+
+"""
+    prunesegy!(S)
+
+Prune irrelevant standard headers from SEGY dictionary S.
+"""
+function prunesegy!(S)
+  # Common headers
+  for i in ["enSrcPt", "cdp", "cdpN", "vertSum", "horSum", "dataUse", "recDat",
+    "srcDat", "srcWater", "grpWater", "coordUnits", "weatherV", "subweatherV",
+    "srcUpholeT", "recUpholeT", "srcStaticC", "recStaticC", "totalStatic",
+    "lagA", "lagB", "delay", "muteS", "muteE", "sampLen", "sampDT",
+    "correlated", "sweepSF", "sweepEF", "sweepL", "sweepType", "sweepTapS",
+    "sweepTapE", "taperType", "aliasF", "aliasSlope","notchF", "notchSlope",
+    "fl", "fh", "lowCutSlope", "highCutSlope", "tc", "geopRollPos1",
+    "geopFirstTrace", "geopLastTrace", "gapSize", "taperOvertravel"]
+      delete!(S,i)
+  end
+  try
+    # PASSCAL/NMT-specific headers
+    for i in ["dataForm", "trigyear", "trigjday", "trighour", "statDelay",
+              "trigmin", "trigsec", "trigmsec"]
+      delete!(S,i)
+    end
+  end
+  return S
+end
+
 
 """"
-      S = pseg(f)
+      S = parse_seg(f)
 
 Parse SEGY stream f (Segy rev 0 mod_PASSCAL/NMT).
 
-      S = pseg(f, fmt = "std")
+      S = parse_seg(f, fmt = "std")
 
 Parse SEGY stream f (Segy rev 0 mod_PASSCAL/NMT).
 """
-function pseg(fid; f="nmt"::String, h=false::Bool)
+function parse_seg(fid; f="nmt"::String, h=false::Bool)
   if Base.in(f,["passcal", "nmt"])
     S = Dict{String,Any}()
 
     # Strings
     reel_s, short_s_1, sr_s,
-      coord_s, short_s_2 = getHdrStrings()
+      coord_s, short_s_2 = hdr_strings()
     trig_s = ["dataForm", "nzmsec", "trigyear", "trigjday", "trighour",
               "trigmin", "trigsec", "trigmsec"]
 
@@ -256,7 +260,7 @@ function pseg(fid; f="nmt"::String, h=false::Bool)
     S["src"] = "segy_PASSCAL"
     return S
   else
-    F, S = psegstd(fid)
+    F, S = segstd(fid)
     if h
       return F, S
     else
@@ -311,7 +315,7 @@ end
 
 Read a SEG Y file into dictionary. Specify f="nmt" for PASSCAL/NMT SEG Y rev 0.
 """
-r_segy(fid::String; f="nmt"::String) = pseg(open(fid,"r"), f=f)
+r_segy(fid::String; f="nmt"::String) = parse_seg(open(fid,"r"), f=f)
 
 """
     segyhdr(S::Dict{String,Any})
@@ -383,7 +387,7 @@ Read a SEG Y file into a SeisData object. Specify f="nmt" for PASSCAL/NMT SEG
 Y rev 0.
 """
 function readsegy(fname::String; f="std"::String)
-  S = segytoseis(pseg(open(fname,"r"), f=f))
+  S = segytoseis(parse_seg(open(fname,"r"), f=f))
   note(S, fname)
   return(S)
 end

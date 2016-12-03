@@ -2,6 +2,42 @@ using LightXML: attribute, root, get_elements_by_tagname, parse_string, XMLDocum
 using Requests: get
 using SeisIO
 
+cmatch(xel, pat, tag) = prod([contains(attribute(xel,tag[i]),pat[i]) for i=1:length(pat)])
+
+"""
+    info_xml = SLinfo(level=LEVEL::String, addr=URL::String, port=PORT::Integer)
+
+    Retrieve XML output of SeedLink command "INFO `LEVEL`" from server `URL:PORT`. Returns formatted XML.
+
+    `LEVEL` must be one of "ID", "CAPABILITIES", "STATIONS", "STREAMS", "GAPS", "CONNECTIONS", "ALL".
+
+"""
+function SLinfo(;level="STATIONS"::String,                  # level
+                addr="rtserve.iris.washington.edu"::String, # url
+                port=18000::Integer                         # port
+                )
+  conn = connect(TCPSocket(),addr,port)
+  write(conn, string("INFO ", level, "\r"))
+  eof(conn)
+  B = takebuf_array(conn.buffer)
+  N = length(B)
+  while (Char(B[end]) != '\0' || rem(N,520) > 0)
+    eof(conn)
+    append!(B, takebuf_array(conn.buffer))
+    N = length(B)
+  end
+  close(conn)
+  buf = IOBuffer(N)
+  write(buf, B)
+  seekstart(buf)
+  xml_str = ""
+  while !eof(buf)
+    skip(buf, 64)
+    xml_str *= join(map(x -> Char(x), read(buf, UInt8, 456)))
+  end
+  return parse_string(replace(xml_str,"\0",""))
+end
+
 function check_sta_exists(sta::Array{String,1}, xml_p::XMLDocument)
   N = length(sta)
   x = falses(N)
@@ -14,7 +50,81 @@ function check_sta_exists(sta::Array{String,1}, xml_p::XMLDocument)
   return x
 end
 
-hashfname(str::Array{String,1}, ext::String) = string(hash(str), ".", ext)
+"""
+    X = has_sta(sta::Array{String,1}, url)
+
+    Check that stations in `sta` are available via SeedLink from `url`.
+"""
+has_sta(sta::Array{String,1}, url::String; port=18000::Integer) = check_sta_exists(sta, SLinfo(level="STATIONS", addr=url, port=port))
+has_sta(sta::String, url::String; port=18000::Integer) = has_sta([sta], url, port=port)
+
+function has_stream(sta::Array{String,1}, patts::Array{String,1}, url::String;
+  port=18000::Integer,
+  to=1800::Real)
+
+  tag = ["seedname","location","type"]
+
+  xdoc = SLinfo(level="STREAMS", addr=url, port=port)
+  xstreams = get_elements_by_tagname(root(xdoc), "station")
+  L = length(xstreams)
+  ids = Array{String,1}(L)
+  for i = 1:1:L
+    ids[i] = string(attribute(xstreams[i], "name")," ",attribute(xstreams[i], "network"))
+  end
+  N = length(sta)
+  x = falses(N)
+  for i = 1:1:N
+    # Assumes the combination of network name and station name is unique
+    K = findfirst(ids .== sta[i])
+    if K > 0
+      (lc,d) = split(patts[i],'.')
+
+      # Syntax requires that contains(string, "") returns true for any string
+      ll = replace(lc[1:2],"?","")
+      cc = replace(lc[3:5],"?","")
+      pat = [cc, ll, d]
+
+      t = Inf
+      streams = get_elements_by_tagname(xstreams[K], "stream")
+      if !isempty(streams)
+        S = length(streams)
+        for j = 1:1:S
+          xel = streams[j]
+          if cmatch(xel, pat, tag)
+            tstr = replace(string(attribute(xel,"end_time"))," ","T")
+            t = min(t, time()-d2u(Dates.DateTime(tstr)))
+          end
+        end
+      end
+
+      # Treat station as "present" if there's a match
+      if minimum(t) < to
+        x[i] = true
+        break
+      end
+    end
+  end
+  return x
+end
+
+
+
+
+
+
+function getSLver(vline)
+  # Versioning will break if SeedLink switches to VV.PPP.NNN format
+  ver = 0.0
+  vinfo = split(vline)
+  for i in vinfo
+    if startswith(i, 'v')
+      try
+        ver = parse(i[2:end])
+        return ver
+      end
+    end
+  end
+end
 
 """
     C = SeedLink!(S, sta)
@@ -101,7 +211,7 @@ function SeedLink!(S::SeisData,
     h = has_stream(sta, patts, addr, port=port, g=g)
   elseif f==1
     v>0 && println("Checking that request exists (may take 60 s)...")
-    h = has_sta(sta, addr=addr, port=port)
+    h = has_sta(sta, addr, port=port)
   else
     h = trues(Ns)
   end
@@ -116,7 +226,7 @@ function SeedLink!(S::SeisData,
 
   Ns = length(sta)
   if Ns == 0
-    warn("No stations left in current SeedLink session. Exiting normally.")
+    warn("No channels in the current request were found. Exiting SeedLink!...")
     return 0
   end
 
@@ -145,12 +255,12 @@ function SeedLink!(S::SeisData,
 
   # create mode string and filename for -w
   (d0,d1) = parsetimewin(s,t)
-  s = join(split(string(d0),r"[\-T\:\.]")[1:6],',')
-  t = join(split(string(d1),r"[\-T\:\.]")[1:6],',')
+  s = join(split(d0,r"[\-T\:\.]")[1:6],',')
+  t = join(split(d1,r"[\-T\:\.]")[1:6],',')
   if mode in ["TIME", "FETCH"]
     if mode == "TIME"
-      if (d1-u2d(time())).value < 0
-        warn("End time before present; SeedLink may behave badly!")
+      if (DateTime(d1)-u2d(time())).value < 0
+        warn("End time < time() in TIME mode; SeedLink will receive no data!")
       end
       m_str = string("TIME ", s, " ", t, "\r")
     else
@@ -252,171 +362,65 @@ function SeedLink!(S::SeisData,
 
   return conn
 end
+
+# If no SeisData object supplied, create/return one
 SeedLink(sta::Array{String,1};
   addr="rtserve.iris.washington.edu"::String,         # url
   port=18000::Integer,                                # port
   patts=["*"]::Array{String,1},                       # channel/loc/data
   mode="DATA"::String,                                # SeedLink mode
+  a=600::Real,                                        # keepalive interval (s)
+  f=true::Bool,                                       # safe (checks existence)
   r=60::Real,                                         # refresh interval (s)
-  ka=600::Real,                                       # keepalive interval (s)
   s=0::Union{Real,DateTime,String},                   # start (time/dialup mode)
   t=300::Union{Real,DateTime,String},                 # end (time mode only)
-  safe=true::Bool,                                    # safe (checks existence)
   strict=true::Bool,                                  # strict (exit on errors)
   v=0::Int,                                           # verbosity
   w=false::Bool) = begin
   S = SeisData()
-  C = SeedLink!(S, sta=sta, addr=addr, port=port, patts=patts, mode=mode,
-                r=r, ka=ka, s=s, t=t, safe=safe, strict=strict, v=v, w=w)
+  C = SeedLink!(S, sta, addr=addr, port=port, patts=patts, mode=mode,
+                r=r, a=a, s=s, t=t, f=f, strict=strict, v=v, w=w)
   return (C,S)
 end
+
+# Methods when supplying a config file or string
 function SeedLink!(S::SeisData,
-  config_file::String;
+  cfg::String;
   addr="rtserve.iris.washington.edu"::String,         # url
   port=18000::Integer,                                # port
   patts=["*"]::Array{String,1},                       # channel/loc/data
   mode="DATA"::String,                                # SeedLink mode
+  a=600::Real,                                        # keepalive interval (s)
+  f=true::Bool,                                       # safe (checks existence)
   r=60::Real,                                         # refresh interval (s)
-  ka=600::Real,                                       # keepalive interval (s)
   s=0::Union{Real,DateTime,String},                   # start (time/dialup mode)
   t=300::Union{Real,DateTime,String},                 # end (time mode only)
-  safe=true::Bool,                                    # safe (checks existence)
   strict=true::Bool,                                  # strict (exit on errors)
   v=0::Int,                                           # verbosity
   w=false::Bool)
 
-  isfile(config_file) || error(string("File not found: ", config_file))
-  conf = filter(i -> !startswith(strip(i, ['\r', '\n']), ['\#','\*']), open(readlines, config_file))
-  sta = Array{String,1}()
-  patts = Array{String,1}()
-  for i = 1:length(conf)
-    try
-      (nn, sss, sel) = split(strip(conf[i],['\r','\n']), ' ', limit=3)
-      ch = join([sss, nn],' ')
-      if isempty(sel)
-        push!(sta, ch)
-        push!(patts, "")
-      else
-        sel = collect(split(strip(sel), ' '))
-        for j = 1:length(sel)
-          push!(sta, ch)
-          push!(patts, sel[j])
-        end
-      end
-    catch
-      (nn, sss) = split(strip(conf[i],['\r','\n']), ' ')
-      push!(sta, nn)
-      push!(patts,"")
-    end
-  end
-  C = SeedLink!(S, sta, addr=addr, port=port, patts=patts, mode=mode,
-                r=r, ka=ka, s=s, t=t, safe=safe, strict=strict, v=v, w=w)
+  Q = SL_parse(cfg)
+  C = SeedLink!(S, Q[:,1], addr=addr, port=port, patts=Q[:,2], mode=mode,
+                r=r, a=a, s=s, t=t, f=f, strict=strict, v=v, w=w)
   return C
 end
 
-"""
-    info_xml = SLinfo(level=LEVEL::String, addr=URL::String, port=PORT::Integer)
-
-    Retrieve XML output of SeedLink command "INFO `LEVEL`" from server `URL:PORT`. Returns formatted XML.
-
-    `LEVEL` must be one of "ID", "CAPABILITIES", "STATIONS", "STREAMS", "GAPS", "CONNECTIONS", "ALL".
-
-"""
-function SLinfo(;level="STATIONS"::String,                  # level
-                addr="rtserve.iris.washington.edu"::String, # url
-                port=18000::Integer                         # port
-                )
-  conn = connect(TCPSocket(),addr,port)
-  write(conn, string("INFO ", level, "\r"))
-  eof(conn)
-  B = takebuf_array(conn.buffer)
-  N = length(B)
-  while (Char(B[end]) != '\0' || rem(N,520) > 0)
-    eof(conn)
-    append!(B, takebuf_array(conn.buffer))
-    N = length(B)
-  end
-  close(conn)
-  buf = IOBuffer(N)
-  write(buf, B)
-  seekstart(buf)
-  xml_str = ""
-  while !eof(buf)
-    skip(buf, 64)
-    xml_str *= join(map(x -> Char(x), read(buf, UInt8, 456)))
-  end
-  return parse_string(replace(xml_str,"\0",""))
+function SeedLink(cfg::String;
+  addr="rtserve.iris.washington.edu"::String,         # url
+  port=18000::Integer,                                # port
+  patts=["*"]::Array{String,1},                       # channel/loc/data
+  mode="DATA"::String,                                # SeedLink mode
+  a=600::Real,                                        # keepalive interval (s)
+  f=true::Bool,                                       # safe (checks existence)
+  r=60::Real,                                         # refresh interval (s)
+  s=0::Union{Real,DateTime,String},                   # start (time/dialup mode)
+  t=300::Union{Real,DateTime,String},                 # end (time mode only)
+  strict=true::Bool,                                  # strict (exit on errors)
+  v=0::Int,                                           # verbosity
+  w=false::Bool)
+  S = SeisData()
+  Q = SL_parse(cfg)
+  C = SeedLink!(S, Q[:,1], addr=addr, port=port, patts=Q[:,2], mode=mode,
+                r=r, a=a, s=s, t=t, f=f, strict=strict, v=v, w=w)
+  return (C,S)
 end
-
-function getSLver(vline)
-  # Versioning will break if SeedLink switches to VV.PPP.NNN format
-  ver = 0.0
-  vinfo = split(vline)
-  for i in vinfo
-    if startswith(i, 'v')
-      try
-        ver = parse(i[2:end])
-        return ver
-      end
-    end
-  end
-end
-
-"""
-    X = has_sta(sta::Array{String,1}, url)
-
-    Check that stations in `sta` are available via SeedLink from `url`.
-"""
-has_sta(sta::Array{String,1}, url::String; port=18000::Integer) = check_sta_exists(sta, SLinfo(level="STATIONS", addr=url, port=port))
-has_sta(sta::String, url::String; port=18000::Integer) = has_sta([sta], url, port=port)
-
-function has_stream(sta::Array{String,1}, patts::Array{String,1}, url::String;
-  port=18000::Integer,
-  to=1800::Real)
-
-  tag = ["seedname","location","type"]
-
-  xdoc = SLinfo(level="STREAMS", addr=url, port=port)
-  xstreams = get_elements_by_tagname(root(xdoc), "station")
-  L = length(xstreams)
-  ids = Array{String,1}(L)
-  for i = 1:1:L
-    ids[i] = string(attribute(xstreams[i], "name")," ",attribute(xstreams[i], "network"))
-  end
-  N = length(sta)
-  x = falses(N)
-  for i = 1:1:N
-    # Assumes the combination of network name and station name is unique
-    K = findfirst(ids .== sta[i])
-    if K > 0
-      (lc,d) = split(patts[i],'.')
-
-      # Syntax requires that contains(string, "") returns true for any string
-      ll = replace(lc[1:2],"?","")
-      cc = replace(lc[3:5],"?","")
-      pat = [cc, ll, d]
-
-      t = Inf
-      streams = get_elements_by_tagname(xstreams[K], "stream")
-      if !isempty(streams)
-        S = length(streams)
-        for j = 1:1:S
-          xel = streams[j]
-          if cmatch(xel, pat, tag)
-            tstr = replace(string(attribute(xel,"end_time"))," ","T")
-            t = min(t, time()-d2u(Dates.DateTime(tstr)))
-          end
-        end
-      end
-
-      # Treat station as "present" if there's a match
-      if minimum(t) < to
-        x[i] = true
-        break
-      end
-    end
-  end
-  return x
-end
-
-cmatch(xel, pat, tag) = prod([contains(attribute(xel,tag[i]),pat[i]) for i=1:length(pat)])

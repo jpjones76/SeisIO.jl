@@ -31,9 +31,9 @@ function parse_FDSN_xml(xsta::XMLDocument)
         for (n,i) in enumerate(["Latitude", "Longitude", "Elevation", "Azmiuth", "Dip"])
           el = find_element(c, i)
           if el != nothing
-            loc[n] = parse(content(el))
+            loc[n] = parse(Float64, content(el))
             if i == "Dip"
-              loc[n] += 90.0
+              loc[n] = 90.0-loc[n]
             end
           end
         end
@@ -111,7 +111,8 @@ function FDSNprep!(S::SeisData,
     S.gain[i] = 1.0
     S.loc[i] = vec(locs[:,k])
     S.resp[i] = resps[k]
-    note(S, i, string("normfac = ", @sprintf("%.5e",normfacs[k])))
+    #note(S, i, string("normfac = ", @sprintf("%.5e",normfacs[k])))
+    S.misc[i]["normfac"] = normfacs[k]
   end
   return S
 end
@@ -142,7 +143,7 @@ Retrieve data from an FDSN HTTP server. Returns a SeisData struct. See FDSN docu
 Real     & DateTime & Add `s` seconds to `t` and sort\\
 DateTime & Real     & Add `t` seconds to `s` and sort\\
 String   &          & Convert `s` \rightarrow DateTime, sort\\
-         & String   & Convert `t` \rightarrow DateTime, sort\\
+& String   & Convert `t` \rightarrow DateTime, sort\\
 Int      & Real     & Read `t`seconds relative to current time\\
 \end{tabular}
 ``
@@ -159,50 +160,86 @@ Int      & Real     & Read `t`seconds relative to current time\\
 * Northern California Earthquake Data Center, US: http://service.ncedc.org/fdsnws/
 * GFZ Potsdam, DE: http://geofon.gfz-potsdam.de/fdsnws/
 """
-function FDSNget(; src="IRIS"::String,
-                   net="UW,CC"::String,
-                   sta="PALM,TDH,VLL"::String,
-                   loc="*"::String,
-                   cha="???"::String,
-                   q="data"::String,
-                   Q="B"::String,
-                   s=0::Union{Real,DateTime,String},
-                   t=600::Union{Real,DateTime,String},
-                   v=false::Bool,
-                   vv=false::Bool,
-                   w=false::Bool,
-                   y=true::Bool,
-                   si=true::Bool,
-                   to=10::Real)
+function FDSNget(C::Array{String,1};
+  d=','::Char,
+  src="IRIS"::String,
+  q="data"::String,
+  Q="B"::String,
+  s=0::Union{Real,DateTime,String},
+  t=(-600)::Union{Real,DateTime,String},
+  v=false::Bool,
+  vv=false::Bool,
+  w=false::Bool,
+  y=true::Bool,
+  si=true::Bool,
+  to=10::Real)
+
+  seis = SeisData()
   d0, d1 = parsetimewin(s, t)
   uhead = get_uhead(src)
-  utail = @sprintf("net=%s&sta=%s&loc=%s&cha=%s&start=%s&end=%s", net, sta, loc, cha, d0, d1)
-  station_url = string(uhead, "station/1/query?level=response&", utail)
-  data_url = string(uhead, @sprintf("dataselect/1/query?quality=%s&",Q), utail)
-  (v || vv) && println("data url = ", data_url)
+  for j = 1:1:length(C)
+    utail = string(C[j], "&start=", d0, "&end=", d1)
+    station_url = string(uhead, "station/1/query?level=response&", utail)
+    vv && println("station url = ", station_url)
+    data_url = string(uhead, "dataselect/1/query?quality=", Q, "&", utail)
+    (v || vv) && println("data url = ", data_url)
 
-  # Get data
-  R = get(data_url, timeout=to, headers=webhdr())
-  w && savereq(R.data, "mseed", net, sta, loc, cha, string(d0), string(d1), Q)
-  tmp = IOBuffer(R.data)
-  S = parsemseed(tmp, v=v, vv=vv)
-
-  # Detailed source logging
-  usrc = split(uhead, '/', keep=false)
-  usrc = "FDSN " * " " * ascii(usrc[startswith(usrc[1],"http") ? 2 : 1])
-  for i = 1:S.n
-    note(S, i, usrc)
-  end
-
-  # Automatically incorporate station information from web XML retrieval
-  if si
-    R = get(station_url, timeout=to, headers=webhdr())
+    # Get data
+    R = get(data_url, timeout=to, headers=webhdr())
+    w && savereq(R.data, "mseed", Q[j,:], d0, d1, Q)
     tmp = IOBuffer(R.data)
-    ids, units, gains, normfacs, locs, resps = parse_FDSN_xml(parse_string(join(readlines(tmp))))
-    FDSNprep!(S, ids, units, gains, normfacs, locs, resps)
+    S = parsemseed(tmp, v=v, vv=vv)
+
+    # Detailed source logging
+    usrc = split(uhead, '/', keep=false)
+    usrc = "FDSN " * " " * ascii(usrc[startswith(usrc[1],"http") ? 2 : 1])
+    for i = 1:S.n
+      note(S, i, usrc)
+    end
+
+    # Automatically incorporate station information from web XML retrieval
+    if si
+      R = get(station_url, timeout=to, headers=webhdr())
+      tmp = IOBuffer(R.data)
+      ids, units, gains, normfacs, locs, resps = parse_FDSN_xml(parse_string(join(readlines(tmp))))
+      FDSNprep!(S, ids, units, gains, normfacs, locs, resps)
+    end
+    if y
+      sync!(S, s=d0, t=d1)
+    end
+    seis += S
   end
-  if y
-    sync!(S, s=d0, t=d1)
-  end
-  return S
+  return seis
 end
+
+FDSNget(;
+    src="IRIS"::String,
+    net="UW,CC"::String,
+    sta="PALM,TDH,VLL"::String,
+    loc="*"::String,
+    cha="*"::String,
+    d=','::Char,
+    q="data"::String,
+    Q="B"::String,
+    s=0::Union{Real,DateTime,String},
+    t=600::Union{Real,DateTime,String},
+    v=false::Bool,
+    vv=false::Bool,
+    w=false::Bool,
+    y=true::Bool,
+    si=true::Bool,
+    to=10::Real) = FDSNget([string("net=",net,"&sta=",sta,"&loc=",loc,"&cha=",cha)], d=d, src=src, q=q, Q=Q, s=s, t=t, v=v, vv=vv, w=w, y=y, si=si, to=to)
+
+FDSNget(S::String;
+  src="IRIS"::String,
+  d=','::Char,
+  q="data"::String,
+  Q="B"::String,
+  s=0::Union{Real,DateTime,String},
+  t=600::Union{Real,DateTime,String},
+  v=false::Bool,
+  vv=false::Bool,
+  w=false::Bool,
+  y=true::Bool,
+  si=true::Bool,
+  to=10::Real) = FDSNget(SL_parse(S, fdsn=true, delim=d), d=d, src=src, q=q, Q=Q, s=s, t=t, v=v, vv=vv, w=w, y=y, si=si, to=to)

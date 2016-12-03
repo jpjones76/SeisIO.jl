@@ -105,7 +105,7 @@ References
 
 UW
 ===
-UW files are event-oriented, typically used to archive earthquake data; a typical event is described by a pickfile and a corresponding data file. If a datafile name (ending in `*W`) is passed to a read command, it searches for a pickfile in the datafile directory; similarity, if a pickfile name (ending in `*[a-z]`) is used, it searches the pickfile directory for the corresponding data file.
+UW files are event-oriented records, typically used to archive earthquake data; a typical event is described by a pickfile and a corresponding data file. If a datafile name (ending in `*W`) is passed to a read command, it searches for a pickfile in the datafile directory; similarity, if a pickfile name (ending in `*[a-z]`) is used, it searches the pickfile directory for the corresponding data file.
 
 *Expected endianness: big*
 
@@ -113,17 +113,17 @@ UW files are event-oriented, typically used to archive earthquake data; a typica
 Associated functions
 --------------------
 
-* ``r_uw``: read UW pickfile and/or datafile to dictionary
 
-* ``readuw``: read UW pickfile and/or datafile to SeisData
+* ``readuw``: read UW pickfile and/or datafile into a SeisEvent object
 
-* ``readuwpf``: read UW pickfile to dictionary
+* ``uwpf``: read UW pickfile into a SeisHdr object
 
-* ``readuwdf``: read UW datafile to dictionary
+* ``uwpf!``: update SeisEvent header with pickfile info
 
-* ``uwtoseis``: convert UW dictionary to SeisData
+* ``uwdf``: read UW datafile into a SeisData object
 
-(No online references for this file format are known to exist)
+
+(No online references for this file format are known to exist; its use largely predates the internet)
 
 
 
