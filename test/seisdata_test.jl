@@ -120,7 +120,7 @@ S += readsac(sac_file)                                   # SAC
 @test_approx_eq(S.t[S.n][end,2], 0.0)
 
 println("......SEGY...")
-S += readsegy(segy_file, f="nmt")                        # SEGY rev 0 mod PASSCAL
+S += readsegy(segy_file, nmt=true)                       # PASSCAL SEGY r0
 println("......UW...")
 @test_approx_eq(S.t[S.n][1,1], 1.0)
 @test_approx_eq(S.t[S.n][end,1], length(S.x[S.n]))
