@@ -26,7 +26,7 @@ Current Format Support
 
 mini-SEED
 =========
-SEED is an archival format maintained by the International Federation of Digital Seismograph Networks. The data format is widely used and highly versatile, but often criticized as intractably monolithic; the most comprehensive example of SEED documentation is a 224-page .pdf manual (excluding appendices), yet even this is incomplete.
+SEED is an archival format maintained by the International Federation of Digital Seismograph Networks. The data format is widely used and highly versatile, but often criticized as intractably monolithic; the most comprehensive example of SEED documentation is a mostly-complete 224-page .pdf manual (excluding appendices).
 
 The mini-SEED reader currently doesn't have a full range of packet decoders; currently supported formats include Int16, Int32, Float, Double, Steim1, and Steim2.
 
