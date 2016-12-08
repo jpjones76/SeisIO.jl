@@ -28,7 +28,7 @@ mini-SEED
 =========
 The mini-SEED reader doesn't have a full range of data decoders yet. Currently supported data formats include Int16, Int32, Float, Double, Steim1, and Steim2. Future updates will add Int24, Steim3, and the various GEOSCOPE encodings.
 
-*Expected endianness: big*
+*Endian: big*
 
 
 Associated functions
@@ -43,7 +43,9 @@ Associated functions
 
 SAC
 ===
-*Expected endianness: little*
+SAC stands for Seismic Analysis Code. Among the most portable and intuitive seismic data formats, SAC was developed by Lawrence Livermore National Laboratory for use with the eponymous data processing application.
+
+*Endian: little*
 
 
 Associated functions
@@ -64,32 +66,33 @@ Associated functions
 * ``writesac``: write SeisData object or SAC dictionary to SAC file
 
 
+References
+----------
+#. `SAC data format intro <https://ds.iris.edu/ds/nodes/dmc/kb/questions/2/sac-file-format/>`_
+
+#. `SAC data file format <https://ds.iris.edu/files/sac-manual/manual/file_format.html>`_
+
+#. `SAC homepage <https://seiscode.iris.washington.edu/projects/sac>`_
 
 .. _segy:
 
 SEG Y
 =====
-SEG Y rev 0 (and rev 1, to a lesser degree) doesn't enforce strict channel header formats. There is no guarantee that SEG Y files from all industry sources will parse correctly with ``readsegy``.
+The SEG Y (sometimes SEG-Y) file format was developed by the Society of Exploration Geophysicists (SEG). Modified versions of SEG Y are used by PASSCAL, New Mexico Tech, and others.
 
-An added keyword (``fmt="nmt"``) is required to parse PASSCAL SEG Y trace files. The modified file format used by IRIS/PASSCAL/NMT lacks the 3600-byte record header (3200-byte textural header + 400-byte file header). In addition, PASSCAL SEG Y assumes little endian byte order.
+An added keyword (``nmt=true``) is required to parse PASSCAL SEG Y trace files. The modified file format used by IRIS/PASSCAL/NMT lacks a 3600-byte record header (3200-byte text header + 400-byte file header). In addition, PASSCAL SEG Y assumes little endian byte order.
 
-*Expected endianness: big for standard SEGY, little for PASSCAL/NMT*
+*Caution*: SEG Y trace header fields are not rigidly defined by any central authority and are notoriously self-incompatibile. There is no guarantee that SEG Y files from unverified sources will parse correctly with ``readsegy`` (or *any* program, for that matter). This is especially problematic with proprietary industry data, as some companies fill the last 60 bytes of the trace header with non-standard field definitions.
+
+*Endian: big for standard SEG Y, little for PASSCAL/NMT SEG Y*
 
 
 Associated functions
 --------------------
 
-* ``prunesegy!``: delete junk headers from a SEGY dictionary
-
-* ``r_segy``: read SEGY file to SeisData object
-
 * ``readsegy``: read SEGY file to SeisData object
 
-* ``segyhdr``: dump headers to STDOUT
-
-* ``segytosac``: convert SEGY dictionary to SAC dictionary
-
-* ``segytoseis``: convert SEGY dictionary to SeisData object
+* ``segyhdr``: dump column-aligned headers to STDOUT
 
 
 References
@@ -105,9 +108,9 @@ References
 
 UW
 ===
-UW files are event-oriented records, typically used to archive earthquake data; a typical event is described by a pickfile and a corresponding data file. If a datafile name (ending in `*W`) is passed to a read command, it searches for a pickfile in the datafile directory; similarity, if a pickfile name (ending in `*[a-z]`) is used, it searches the pickfile directory for the corresponding data file.
+The University of Washington data format uses event-oriented records, typically to archive earthquake data; an event is described by a pickfile and the corresponding data file, whose filenames are identical, except for the last character. If a datafile name (ending in `*W`) is passed to ``readuw``, it searches for a pickfile in the datafile directory. Similarity, if a pickfile name (ending in `*[a-z]`) is used, ``readuw`` searches the pickfile directory for the corresponding data file.
 
-*Expected endianness: big*
+*Endian: big*
 
 
 Associated functions
@@ -123,7 +126,7 @@ Associated functions
 * ``uwdf``: read UW datafile into a SeisData object
 
 
-(No online references for this file format are known to exist; its use largely predates the internet)
+(No online references for this file format are known to exist; its creation predates the world wide web)
 
 
 
@@ -131,9 +134,14 @@ Associated functions
 
 Win32 file format
 =================
-Because win32 favors dividing contiguous data into small (typically one-minute) files, readwin32 has basic wildcard functionality for data file names. All data files matching the wildcard are read in lexicographical order and synchronized. However, readwin32 requires a channel information file as a mandatory second argument.
+Win32 is the standard seismic data format of NIED (Japan). It is widely used in Japan, but rare elsewhere.
 
-*Expected endianness: big*
+*Endian: big*
+
+References
+----------
+
+#. `How to use the Hi-net data <http://www.hinet.bosai.go.jp/about_data/?LANG=en>`_
 
 
 Associated functions
@@ -141,14 +149,16 @@ Associated functions
 
 * ``readwin32``: read win32 files to SeisData
 
-* ``r_win32``: read win32 files to dictionary
-
-* ``win32toseis``: convert win32 dictionary to SeisData
+*Warnings*
+---------
+#. Although the Win32 data format is technically open, accessing documentation requires an NIED login, which is not available to the general public.
+#. Redistribution of Win32 files is prohibited.
+#. Win32 channel files are not synchronized among different network operators, leaving them prone to human error; non-NIED channel files supplied by NIED data requests may contain inconsistencies, particularly in instrument gains.
 
 
 Batch Read
 ==========
-The utility ``batch_read`` speeds up file read using parallel file read to shared arrays. The result is an order of magnitude speedup relative to reading files one at a time.
+The utility ``batch_read`` speeds up file read using parallel file read to shared arrays. The result is an order of magnitude speedup relative to reading files one at a time. Currently, SAC and SEG Y data formats work with ``batch_read``.
 
 
 Syntax
