@@ -10,7 +10,7 @@ parsemseed, readmseed, parsesl, readmseed, parserec,           # Formats/mSEED.j
 rlennasc,                                                      # Formats/LennartzAsc.jl
 prunesac!, chksac, sachdr, sactoseis, get_sac_keys, parse_sac, # Formats/SAC.jl
 rsac, readsac, wsac, writesac,                                 #
-readsegy, segyhdr, pruneseg, segytosac, segytoseis, r_segy,    # Formats/SEGY.jl
+readsegy, segyhdr,                                             # Formats/SEGY.jl
 readuw, uwdf, uwpf, uwpf!,                                     # Formats/UW.jl
 readwin32, win32toseis, r_win32,                               # Formats/Win32.jl
 batch_read,                                                    # Formats/BatchProc.jl

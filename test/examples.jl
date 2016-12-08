@@ -1,12 +1,10 @@
 using SeisIO
 
-# IRIS SeedLink server
-println("SeedLink example: TIME mode, 3 stations, IRIS server")
+# IRIS SeedLink session
 sta = ["GPW UW"; "MBW UW"; "SHUK UW"]
 seis = SeedLink(sta, s=0, t=60)
 
-# US FDSN get, multiple stations
-println("FDSNget example: 5 stations, 2 networks, all channels, last 600 seconds")
+# US FDSNget example: 5 stations, 2 networks, all channels, last 600 seconds
 STA = "HOOD,PALM,TIMB,HIYU,TDH"
 CHA = "*"
 NET = "CC,UW"
@@ -14,13 +12,11 @@ T = -600
 S = now()
 seis = FDSNget(net=NET, sta=STA, cha=CHA, s=S, t=T)
 
-# Iris web service, single station, written to SAC
-println("irisws example saved as mini-SEED")
+# Iris web service, single station, written to miniseed
 seis = irisws(net="CC", sta="TIMB", cha="EHZ", t=-300, fmt="miniseed")
 writesac(seis)
 
-# Iris web service, multiple stations, saved to SeisIO native
-println("IRISget example: 6 channels, 10 minutes, synchronized, saved in SeisIO format")
+# IRISget example: 6 channels, 10 minutes, synchronized, saved in SeisIO format"
 STA = ["UW.HOOD.BHZ"; "UW.HOOD.BHN"; "UW.HOOD.BHE"; "CC.TIMB.EHZ"; "CC.TIMB.EHN"; "CC.TIMB.EHE"]
 S = "2016-05-16T14:50:00"
 T = 600

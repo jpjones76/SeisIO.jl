@@ -1,34 +1,16 @@
 # ============================================================================
 # Utility functions not for export
-settracecode(S::Dict{String,Any}) = (tc = ["Local", "GMT", "Other", "UTC"];
-  try S["tc"] = tc[S["tc"]]; end)
-
-function getsegunit(i)
-  i == -1 && return "other"
-  i == 1 && return "Pa"
-  i == 2 && return "V"
-  i == 3 && return "mV"
-  i == 4 && return "A"
-  i == 5 && return "m"
-  i == 6 && return "m/s"
-  i == 7 && return "m/s^2"
-  i == 8 && return "N"
-  i == 9 && return "W"
-  return "unknown"
+function trid(i; fs=2000::Real)
+  S = ["DH", "HZ", "H1", "H2", "HZ", "HT", "HR"]
+  return string(getbandcode(fs, fc=10.0), S[i])
 end
 
-function getsegchantype(i; fs=2000::Real, fc=15::Real)
-  i == 11 && return string(getbandcode(fs, fc=fc), "DH")
-  i == 12 && return string(getbandcode(fs, fc=fc), "HZ")
-  i == 13 && return string(getbandcode(fs, fc=fc), "H1")
-  i == 14 && return string(getbandcode(fs, fc=fc), "H2")
-  i == 15 && return string(getbandcode(fs, fc=fc), "HZ")
-  i == 16 && return string(getbandcode(fs, fc=fc), "HT")
-  i == 17 && return string(getbandcode(fs, fc=fc), "HR")
-  return "???"
-end
-
-function auto_coords(lat, lon, coord_scale, coord_units)
+function auto_coords(xy::Array{Int32,1}, c::Array{Int16,1})
+  xy == Int32[0,0] && return (0.0, 0.0)
+  lon = xy[1]
+  lat = xy[2]
+  coord_scale = c[1]
+  coord_units = c[2]
   if coord_scale < 0
     coord_scale = -1 / coord_scale
   end
@@ -38,356 +20,214 @@ function auto_coords(lat, lon, coord_scale, coord_units)
       iflg = lon < 0 ? -1 : 1
       x = 111132.95
       D = sqrt(lat^2+lon^2) / x
-      lat /= x
-      d = cos(D * pi / 180)
-      D = acos(d / cos(lat * pi / 180))
-      lon = (iflg*D)*180/pi
+      lat = lat/x
+      d = cosd(D)
+      D = acosd(d / cosd(lat))
+      lon = (iflg*D)
   else
-    lat = Float32(lat/3600)
-    lon = Float32(lon/3600)
+    lat = Float64(lat/3600.0)
+    lon = Float64(lon/3600.0)
   end
   return lat, lon
 end
 
-function hdr_strings()
-  Trace = ["lineSeq", "reelSeq", "eventN", "chanN", "enSrcPt", "cdp", "cdpN"]
-  Short1 = ["traceCode", "vertSum", "horSum", "dataUse"]
-  SrcRec = ["stel", "evel", "evdp", "recDat", "srcDat", "srcWater", "grpWater"]
-  Coord = ["stla", "stlo", "evla", "evlo"]
-  Short2 = ["coordUnits", "weatherV", "subweatherV", "srcUpholeT",
-    "recUpholeT", "srcStaticC", "recStaticC", "totalStatic", "lagA",
-    "lagB", "delay", "muteS", "muteE", "sampLen", "sampDT",
-    "gainType", "gainConst", "initGain", "correlated", "sweepSF",
-    "sweepEF", "sweepL", "sweepType", "sweepTapS",
-    "sweepTapE", "taperType", "aliasF", "aliasSlope",
-    "notchF", "notchSlope", "fl", "fh", "lowCutSlope",
-    "highCutSlope", "nzyear", "nzjday", "nzhour", "nzmin", "nzsec", "tc",
-    "traceWtFac", "geopRollPos1", "geopFirstTr", "geophLastTr",
-    "gapSize", "taperOvertravel"]
-  return (Trace, Short1, SrcRec, Coord, Short2)
-end
+function do_trace(f::IO, fast::Bool, nmt::Bool; fh=zeros(Int16, 4)::Array{Int16,1}, fname=""::String)
+  ftypes = Array{DataType,1}([UInt32, Int32, Int16, Any, Float32, Any, Any, Int8]) # Note: type 1 is IBM Float32
+  shorts = Array{Int16, 1}(53)
+  ints   = Array{Int32, 1}(19)
 
-# """
-#   F, S = segstd(sid)
-#
-# Parse standard-format SEG Y stream sid with values in big endian byte order.
-# This is the default for most industry SEG Y rev 1 data.
-#
-#   F, S = segstd(sid, b=false)
-#
-# Parse standard-format SEGY stream sid in little endian byte order.
-# """
-function segstd(fid; b=true::Bool)
-  F = Dict{String,Any}()
-  types = [UInt32, Int32, Int16, Any, Float32, Any, Any, Int8]
-
-  # Header strings
-  h_s = ["nTrace", "nAux", "dt", "dtOrig", "ns",
-    "nsOrig", "fmt", "ensFold", "traceSort", "vertSumCode",
-    "sweepFS", "sweepFE", "sweepLen", "sweepType",
-    "sweepCha", "sweepTapLS", "sweepTapLE",
-    "taperType", "corrTraces", "binGain",
-    "ampRecMethod", "measSys", "impSigPol",
-    "vibPolCode"]
-
-  # Trace strings
-  reel_s, short_s_1, sr_s, coord_s, short_s_2 = hdr_strings()
-  long_s = ["cdpX", "cdpY", "inline3D", "crossline3D", "shotPoint"]
-  short_s_3 = ["transConstExp", "transUnit", "traceID", "timeSc", "srcType"]
-
-  txtHdr                    = join(read(fid, Cchar, 3200))
-  F["job"]                  = read(fid, Int32)
-  F["line"]                 = read(fid, Int32)
-  F["reel"]                 = read(fid, Int32)
-  h_v                       = read(fid, Int16, 24)
-  skip(fid, 240)
-  F["rev"]                  = read(fid, UInt16)
-  F["fixedLen"]             = read(fid, Int16)
-  nETH                      = read(fid, Int16)
-  skip(fid, 94)
-  merge!(F, Dict(zip(h_s,h_v)))
-  b && [F[i] = bswap(F[i]) for i in collect(keys(F))]
-  if nETH > 0
-    extTxtHdr = Array{String,1}(nETH)
-    for i = 1:1:nETH
-      extTxtHdr[i]          = replace(join(read(fid, Cchar, 3200)),"\0"," ")
-    end
-    F["extTxtHdr"] = extTxtHdr
+  # First part of trace header is quite standard
+  ints[1:7]   = read(f, Int32, 7)
+  shorts[1:4] = read(f, Int16, 4)
+  ints[8:15]  = read(f, Int32, 8)
+  shorts[5:6] = read(f, Int16, 2)
+  ints[16:19] = read(f, Int32, 4)
+  shorts[7:52]= read(f, Int16, 46)
+  if !nmt
+    shorts = [bswap(i) for i in shorts]
+    ints = [bswap(i) for i in ints]
+  end
+  if !fast
+    shorts_k = ["trid", "nvs", "nhs", "duse", "scalel", "scalco", "counit", "wevel", "swevel", "sut", "gut", "sstat", "gstat", "tstat", "laga", "lagb", "delrt", "muts", "mute", "ns", "dt", "gain", "igc", "igi", "corr", "sfs", "sfe", "slen", "styp", "stas", "stae", "tatyp", "afilf", "afils", "nofilf", "nofils", "lcf", "hcf", "lcs", "hcs", "year", "day", "hour", "min", "sec", "timbas", "trwf", "grnors", "grnofr", "grnlof", "gaps", "otrav"]
+    ints_k   = ["tracl", "tracr", "fldr", "tracf", "ep", "cdp", "cdpt", "offset", "gelev", "selev", "sdepth", "gdel", "sdel", "swdep", "gwdep", "sx", "sy", "gx", "gy"]
+    misc = Dict(zip([shorts_k; ints_k],[shorts; ints]))
   end
 
-  # Process header
-  F["rev"]     = min(F["rev"], 1)
-  F["txtHdr"]  = replace(txtHdr,"\0"," ")
-  F["fmt"]     = types[F["fmt"]]
+  # Here, PASSCAL/NMT wants to be a unique, special snowflake.
+  if nmt
+    chars       = read(f, UInt8, 20)
+    dt          = read(f, Int32)
+    fmt         = read(f, Int16)
+    shorts[53]  = read(f, Int16)
+    skip(f, 12)
+    scale_fac   = read(f, Float32)
+    skip(f, 4)
+    n           = read(f, Int32)
+    skip(f, 8)
+    x           = read(f, fmt == 1 ? Int32 : Int16, shorts[20] == 32767 ? n : shorts[20])
+    close(f)
 
-  S = Array{Dict{String,Any},1}(F["nTrace"])
-  for k = 1:1:F["nTrace"]
-    T = Dict{String,Any}()
-    reel_v                  = read(fid, Int32, 7)
-    short_v_1               = read(fid, Int16, 4)
-    sr_v                    = read(fid, Int32, 8)
-    sr_scale                = read(fid, Int16)
-    coord_scale             = read(fid, Int16)
-    coord_v                 = read(fid, Int32, 4)
-    short_v_2               = read(fid, Int16, 46)
-    long_v                  = read(fid, Int32, 5)
-    T["shotPtScalar"]       = read(fid, Int16)
-    T["traceUnit"]          = read(fid, Int16)
-    T["transConstMant"]     = read(fid, Int32)
-    short_v_3               = read(fid, Int16, 5)
-    T["srcEnDirMant"]       = read(fid, Int32)
-    T["srcEnDirExp"]        = read(fid, Int16)
-    T["srcMeasMant"]        = read(fid, Int32)
-    T["srcMeasExp"]         = read(fid, Int16)
-    T["srcMeasUnit"]        = read(fid, Int16)
-    skip(fid, 8)
-    merge!(T, Dict(zip(reel_s, reel_v)),
-              Dict(zip(short_s_1, short_v_1)),
-              Dict(zip(sr_s, sr_v.*sr_scale)),
-              Dict(zip(coord_s, coord_scale.*coord_v)),
-              Dict(zip(short_s_2, short_v_2)),
-              Dict(zip(long_s, long_v)),
-              Dict(zip(short_s_3, short_v_3)))
-    b && [T[i] = bswap(T[i]) for i in collect(keys(T))]
-    T["npts"] = F["ns"] > 0 ? F["ns"] : T["sampLen"]
-    T["data"] = read(fid, F["fmt"], T["npts"])
-    if b
-      T["data"] = [bswap(i) for i in T["data"]]
+    # trace processing
+    fs    = 1.0e6 / Float64(shorts[21] == 1 ? dt: shorts[21])
+    gain  = Float64((shorts[23]*10.0^(shorts[24]/10.0))/scale_fac)
+    lat, lon  = auto_coords(ints[18:19], shorts[6:7])
+    el    = Float64(ints[8]*shorts[5])
+    sta   = String(chars[1:6])
+    #inst  = String(chars[7:14])
+    inst  = "00"
+
+    c = strip(replace(String(chars[15:18]),"\0",""))
+    if uppercase(c) in ["Z","N","E"]
+      cha = string(getbandcode(fs), 'H', c[1])
+    elseif length(c) < 2
+      cha = "YYY"
+    else
+      cha = c
     end
+  else
+    (dt, n, fmt) = fh
+    skip(f, 22)
+    trace_unit  = bswap(read(f, Int16))
+    trans_mant  = bswap(read(f, Int32))
+    shorts2     = [bswap(i) for i in read(f, Int16, 5)]
+    skip(f, 22)
+    x           = [bswap(i) for i in read(f, ftypes[fmt], n)]
 
-    # Processing
-    settracecode(T)
-    T["units"] = getsegunit(T["traceUnit"])
-    T["stla"], T["stlo"] = auto_coords(T["stla"], T["stlo"], coord_scale,
-      T["coordUnits"])
-    T["nzmsec"] = T["lagA"] # msec is set here when converting from HNAS
-
-    # Set sample rate
-    T["delta"] = T["sampDT"]/1.0e6
-    T["src"] = "segy"
-
-    # Merge into S
-    S[k] = T
+    # not sure about this; where did this formula come from...?
+    gain  = trans_mant*10.0^(shorts2[1] + sum(shorts[23:24])/10.0) # *2.0^shorts[47]
+    fs    = 1.0e6 / Float64(shorts[21])
+    lat   = 0.0
+    lon   = 0.0
+    el    = Float64(ints[12]*shorts[5])
+    sta   = @sprintf("%04i", shorts2[3])
+    inst  = "00"
+    cha   = shorts[1] in 11:1:17 ? trid(shorts[1]-10, fs=fs) : "YYY"
   end
-  close(fid)
-  return F,S
+
+  # Trace info
+  (m,d)     = j2md(shorts[41], shorts[42])
+  ts        = round(Int, d2u(DateTime(shorts[41], m, d, shorts[43], shorts[44], shorts[45]))*1000000 +
+                   (shorts[53] + sum(shorts[15:17]))*1000)
+  loc       = [0.0, 0.0, el, 0.0, 0.0]
+  t         = [1 ts; length(x) 0]
+  x         = map(Float64, x)
+  src       = string(nmt ? "PASSCAL " : "", "SEG-Y,", u2d(time()), ",", fname)
+  id        = uppercase(replace(join(["", sta, inst, cha], '.'), "\0", ""))
+  chan      = SeisChannel(name=id, id=id, loc=loc, gain=gain, fs=fs, src=src, t=t, x=x, units="unknown")
+  if !fast
+    if !nmt
+      merge!(misc, Dict{String,Any}(zip(["trans_ex", "trans_un", "dev_id", "time_c", "src_typ"], shorts2)))
+      misc["trace_un"] = trace_unit
+      misc["trans_ma"] = trace_unit
+    end
+    chan.misc = deepcopy(misc)
+  end
+  return chan
 end
 # ============================================================================
 
 """
-    prunesegy!(S)
+    seis = readsegy(fname)
 
-Prune irrelevant standard headers from SEGY dictionary S.
+Read SEG-Y file `fname` into SeisData object `seis`.
+
+### Keywords
+* `nmt=true` for PASSCAL/NMT modified SEG-Yr0
+* `fast=false` to store full SEG-Y headers as a dictionary in `seis.misc`.
 """
-function prunesegy!(S)
-  # Common headers
-  for i in ["enSrcPt", "cdp", "cdpN", "vertSum", "horSum", "dataUse", "recDat",
-    "srcDat", "srcWater", "grpWater", "coordUnits", "weatherV", "subweatherV",
-    "srcUpholeT", "recUpholeT", "srcStaticC", "recStaticC", "totalStatic",
-    "lagA", "lagB", "delay", "muteS", "muteE", "sampLen", "sampDT",
-    "correlated", "sweepSF", "sweepEF", "sweepL", "sweepType", "sweepTapS",
-    "sweepTapE", "taperType", "aliasF", "aliasSlope","notchF", "notchSlope",
-    "fl", "fh", "lowCutSlope", "highCutSlope", "tc", "geopRollPos1",
-    "geopFirstTrace", "geopLastTrace", "gapSize", "taperOvertravel"]
-      delete!(S,i)
-  end
-  try
-    # PASSCAL/NMT-specific headers
-    for i in ["dataForm", "trigyear", "trigjday", "trighour", "statDelay",
-              "trigmin", "trigsec", "trigmsec"]
-      delete!(S,i)
-    end
-  end
-  return S
-end
-
-
-""""
-      S = parse_seg(f)
-
-Parse SEGY stream f (Segy rev 0 mod_PASSCAL/NMT).
-
-      S = parse_seg(f, fmt = "std")
-
-Parse SEGY stream f (Segy rev 0 mod_PASSCAL/NMT).
-"""
-function parse_seg(fid; f="nmt"::String, h=false::Bool)
-  if Base.in(f,["passcal", "nmt"])
-    S = Dict{String,Any}()
-
-    # Strings
-    reel_s, short_s_1, sr_s,
-      coord_s, short_s_2 = hdr_strings()
-    trig_s = ["dataForm", "nzmsec", "trigyear", "trigjday", "trighour",
-              "trigmin", "trigsec", "trigmsec"]
-
-    # Read channel header
-    reel_v      = read(fid, Int32, 7)
-    short_v_1   = read(fid, Int16, 4)
-    sr_v        = read(fid, Int32, 8)
-    sr_scale    = read(fid, Int16)
-    coord_scale = read(fid, Int16)
-    coord_v     = read(fid, Int32, 4)
-    short_v_2   = read(fid, Int16, 46)
-    merge!(S, Dict(zip(reel_s, reel_v)),
-              Dict(zip(short_s_1, map(Int32, short_v_1))),
-              Dict(zip(sr_s, map(Float32,sr_v.*sr_scale))),
-              Dict(zip(coord_s, map(Float32, coord_scale.*coord_v))),
-              Dict(zip(short_s_2, map(Int32, short_v_2))))
-    S["kstnm"]      = strip(String(read(fid, UInt8, 6)),['\0', '\ '])
-    S["kinst"]      = strip(String(read(fid, UInt8, 8)),['\0', '\ '])
-    S["kcmpnm"]     = strip(String(read(fid, UInt8, 4)),['\0', '\ '])
-    S["statDelay"]  = read(fid, Int16)
-    samp_rate       = 1.0e6/read(fid, Int32)
-    trig_v          = read(fid, Int16, 8); merge!(S, Dict(zip(trig_s, trig_v)))
-    S["scale_fac"]  = read(fid, Float32)
-    S["iinst"]      = read(fid, UInt16)
-    skip(fid, 2)
-    npts            = read(fid, Int32)
-    S["depmax"]     = read(fid, Int32)
-    S["depmin"]     = read(fid, Int32)
-
-    # Read data
-    S["npts"] = S["sampLen"] == 32767 ? npts : S["sampLen"]
-    S["data"]       = read(fid, S["dataForm"] == 0 ? Int16 : Int32, S["npts"])
-    close(fid)
-
-    # Processing
-    settracecode(S)
-    S["delta"] = Float32((S["sampDT"] == 1 ? samp_rate : S["sampDT"])/1.0e6)
-    S["stla"], S["stlo"] = auto_coords(S["stla"], S["stlo"],
-                                       coord_scale, S["coordUnits"])
-    S["src"] = "segy_PASSCAL"
-    return S
+function readsegy(fname::String; nmt=false::Bool, fast=true::Bool)
+  fname = realpath(fname)
+  f = open(fname, "r")
+  if nmt
+    seis = do_trace(f, fast, true, fname=fname)
   else
-    F, S = segstd(fid)
-    if h
-      return F, S
-    else
-      return S
+    if !fast
+      fhd = Dict{String,Any}()
+    end
+    fh = Array{Int16,1}(27)
+    seis = SeisData()
+
+    # File header
+    txthdr        = join(read(f, Cchar, 3200))
+    ids           = read(f, Int32, 3)
+    fh[1:24]      = read(f, Int16, 24)
+
+    # My sample files have the last three Int16s stored in little endian order...???
+    fh = [bswap(i) for i in fh]
+
+    skip(f, 240)
+    fh[25:27]     = read(f, Int16, 3)
+    skip(f, 94)
+
+    # Process file header
+    ids = [bswap(i) for i in ids]
+
+    if fh[end] > 0
+      nh = fh[end]
+      if fast
+        skip(f, 3200*nh)
+      else
+        fhd["exthdr"] = [replace(join(read(f, Cchar, 3200)),"\0"," ") for i = 1:1:nh]
+      end
+    end
+
+    # Done
+    if !fast
+      merge!(fhd, Dict{String,Any}(zip(["jobid", "lineid", "reelid", "ntr", "naux", "filedt", "origdt", "filenx",
+      "orignx", "fmt", "cdpfold", "trasort", "vsum", "swst", "swen0", "swlen", "swtyp", "tapnum", "swtapst", "swtapen",
+      "taptyp", "corrtra", "bgainrec", "amprec", "msys", "zupdn", "vibpol", "segyver", "isfixed", "ntxthdr"],
+      [ids; fh])))
+    end
+
+    # Channel headers
+    for i = 1:1:fh[1]
+      seis += do_trace(f, fast, false, fh=fh[[3,5,7]])
+      merge!(seis.misc[1], fhd)
     end
   end
+  close(f)
+  return seis
 end
 
-
 """
-    S = segytosac(SEG)
+    segyhdr(f)
 
-    Convert SEG Y dictionary SEG to SAC dictionary S. Only operates on a
-single-channel dictionary; for standard SEG Y dictionaries, operate on one
-channel `k` at a time with `S = segy2sac(SEG[k])`.
+Print formatted, sorted SEG-Y headers of file `f` to STDOUT. Pass keyword argument `nmt=true` for PASSCAL/NMT modified SEG-Yr0 files.
 """
-function segytosac(SEG::Dict{String,Any})
-  S = Dict{String,Any}()
-
-  # Create SAC headers
-  S["b"] = Float32(0)
-  S["e"] = Float32(SEG["npts"] * SEG["delta"])
-  S["internal4"] = Int32(0)
-  S["iftype"] = Int32(1)
-  S["leven"] = Int32(1)
-  S["lpspol"] = Int32(0)
-  S["lcalda"] = Int32(1)
-
-  for i in ("delta", "evdp", "evel", "evla", "evlo", "kcmpnm", "kinst", "kstnm",
-            "npts", "nzhour", "nzjday", "nzmin", "nzsec", "nzyear", "scale",
-            "stdp", "stel", "stla", "stlo", "data")
-    try; S[i] = SEG[i]; end
-  end
-
-  # Trigger time ==> P arrival
-  if haskey(SEG, "trigyear")
-    try
-      m0, d0 = j2md(SEG["nzjday"], SEG["nzyear"])
-      m1, d1 = j2md(SEG["trigjday"], SEG["trigyear"])
-      d1 = DateTime(SEG["nzyear"], m0, d0, SEG["nzhour"],
-                    SEG["nzmin"], SEG["nzsec"], SEG["nzmsec"])
-      d2 = DateTime(SEG["trigyear"], m1, d1, SEG["trighour"],
-                    SEG["trigmin"], SEG["trigsec"], SEG["trigmsec"])
-      S["a"] = Float32((d1-d2).value * 1.0e-6)
+function segyhdr(fname::String; nmt=false::Bool)
+  seis = readsegy(fname::String; nmt=nmt, fast=false)
+  if nmt
+    @printf(STDOUT, "NMT SEG-Y HEADER: %s\n", realpath(fname))
+    for k in sort(collect(keys(seis.misc)))
+      @printf(STDOUT, "%10s: %s\n", k, string(seis.misc[k]))
     end
-  end
-  return S
-end
-
-"""
-    r_segy(fid::String; [f="nmt","std"])
-
-Read a SEG Y file into dictionary. Specify f="nmt" for PASSCAL/NMT SEG Y rev 0.
-"""
-r_segy(fid::String; f="nmt"::String) = parse_seg(open(fid,"r"), f=f)
-
-"""
-    segyhdr(S::Dict{String,Any})
-
-Print SEG Y headers to STDOUT.
-"""
-segyhdr(S::Dict{String,Any}) = [(i != "data" && (println(i, ": ", S[i]))) for i in sort(collect(keys(S)))]
-
-"""
-    S = segytoseis(SEG::Dict{String,Any})
-
-Convert SEG Y dictionary `SEG` to a SeisData object.
-"""
-function segytoseis(S::Dict{String,Any})
-  fs = 1/S["delta"]
-  if haskey(S, "kstnm")
-    sta = S["kstnm"]
-    cmp = S["kcmpnm"]
-    if (isempty(cmp) || cmp == "NC")
-      cmp = "YYY"
-      loc = @sprintf("%02i",S["chanN"])
-    elseif cmp in ["Z","N","E"]
-      cmp = string(getbandcode(fs),'H',cmp[1])
-      loc = ""
-    else
-      loc = ""
-    end
-    name = join([S["kstnm"],S["kcmpnm"]," ",S["kinst"]])
-    id   = join(["",sta,loc,cmp],'.')
   else
-    cmp = getsegchantype(S["traceCode"], fs=fs)
-    sta = @sprintf("%04i", S["traceID"])
-    name = join([sta,cmp],'.')
-    id = join(["",sta,"",cmp],'.')
-  end
-  x = S["data"]
-  t = [1 round(Int,sac2epoch(S)/μs); length(x) 0]
-  gain = 1.0
-  units = "unknown"
-  loc = zeros(5)
-
-  # Try to determine scale factor automatically
-  if S["src"] == "segy_PASSCAL"
-    gain = S["scale_fac"] / S["gainConst"]
-    if gain == Inf || gain <= 0
-      gain = 1.0
+    W = displaysize(STDOUT)[2]-2
+    S = fill("", length(seis.misc[1])+1)
+    p = 1
+    w = 22
+    @printf(STDOUT, "SEG-Y HEADER: %s\n", realpath(fname))
+    for i = 1:1:seis.n
+      if p > 1
+        s = @sprintf("       %3i/%i", i, seis.n)
+      else
+        s = @sprintf(" Trace %3i/%i", i, seis.n)
+      end
+      S[1] *= s
+      S[1] *= " "^(22-length(s))
+      for (j,k) in enumerate(sort(collect(keys(seis.misc[i]))))
+        s = string(seis.misc[i][k])
+        S[j+1] *= @sprintf("%10s: %s%s", k, s, " "^(10-length(s)))
+      end
+      if p+2*w > W || i == seis.n
+        [println(S[j]) for j=1:length(S)]
+        println("")
+        S = fill("", length(seis.misc[i])+1)
+        p = 1
+      else
+        p += w
+      end
     end
-  elseif haskey(S,"transConstMant")
-    # I have little confidence in this formula; not sure about traceWtFac;
-    # not sure if exponent uses gainConst/10 or gainConst/20 from dB
-    gain = (2.0^S["traceWtFac"]) * S["transConstMant"] * 10.0^(S["transConstExp"]+(S["gainConst"]/10.0))
   end
-  x = x.*gain
-  haskey(S,"transUnit") && (units = getsegunit(S["transUnit"]))
-  haskey(S, "stla") && (loc = [S["stla"]; S["stlo"]; S["stel"]; 0; 0])
-
-  # Not going to bother converting misc SEGY stuff for now
-  return SeisChannel(name=name, id=id, x=x, t=t, gain=1.0, fs=fs, units=units,
-    src=S["src"], loc=loc)
-end
-segytoseis(SEG::Array{Dict{String,Any},1}) = (S = SeisData();
-  [S += segytoseis(SEG[i]) for i=1:length(SEG)]; return S)
-
-
-"""
-    readsegy(fname::String; [f="nmt","std"])
-
-Read a SEG Y file into a SeisData object. Specify f="nmt" for PASSCAL/NMT SEG
-Y rev 0.
-"""
-function readsegy(fname::String; f="std"::String)
-  S = segytoseis(parse_seg(open(fname,"r"), f=f))
-  note(S, fname)
-  return(S)
+  return nothing
 end

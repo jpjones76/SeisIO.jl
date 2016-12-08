@@ -1,42 +1,28 @@
-getcha(cf) = (f = open(cf, "r"); F = readlines(f); close(f); return F)
-
-function get_netStr(orgID,netID)
-  fname = string(Pkg.dir(),"/SeisIO/src/FileFormats/jpcodes.csv")
-  isfile(fname) || return "Unknown"
-  nets = readdlm(fname, ';')
-  i = find((nets[:,1].==orgID).*(nets[:,2].==netID))
-  if isempty(i)
-    return "Unknown"
-  else
-    return nets[i[1],:]
-  end
-end
+# =======================================================
+# Auxiliary functions not for export
 
 # stupid, but effective
 function int4_2c(s::Array{Int32,1})
-  p = map(Int32, [-8,4,2,1])
+  p = Int32[-8,4,2,1]
   return dot(p, s[1:4]), dot(p, s[5:8])
 end
 
 function win32dict(Nh::UInt16, cinfo::String, hexID::String, StartTime::Float64, orgID::String, netID::String)
-  k = Dict{String,Any}()
-  k["hexID"] = hexID
-  k["orgID"] = orgID
-  k["netID"] = netID
-  k["netName"] = get_netStr(orgID,netID)
-  k["locID"] = @sprintf("%i%i", parse(orgID), parse(netID))
-  parse(k["locID"]) > 99 && (warn(string("hexID = ", hexID, "locID > 99, loc code can't be set.")); k["locID"] = "")
-  k["data"] = Array{Int32,1}()
-  k["OldTime"] = 0
-  k["seisSum"] = 0
-  k["seisN"] = 0
-  k["seisNN"] = 0
-  k["startTime"] = StartTime
-  k["gapStart"] = Array{Int64,1}(0)
-  k["gapEnd"] = Array{Int64,1}(0)
-  k["fs"] = Float32(Nh)
+  k = Dict{String,Any}("hexID" => hexID, "orgID" => orgID, "netID" => netID, "data" => Array{Int32,1}(),
+    "OldTime" => 0, "seisSum" => 0, "seisN" => 0, "seisNN" => 0, "startTime" => StartTime,
+    "locID" => @sprintf("%i%i", parse(orgID), parse(netID)), "gapStart" => Array{Int64,1}(0), "gapEnd" => Array{Int64,1}(0), "fs" => Float32(Nh))
+
+  # Ensure my locID kluge doesn't produce garbage
+  parse(k["locID"]) > 99 && (warn(string("For hexID = ", hexID, ", locID > 99; location ID unset.")); k["locID"] = "")
+
+  # Get local (Japanese) network and subnet
+  nets = readdlm(string(Pkg.dir(),"/SeisIO/src/Formats/jpcodes.csv"), ';')
+  i = find((nets[:,1].==orgID).*(nets[:,2].==netID))
+  k["netName"] = isempty(i) ? "Unknown" : nets[i[1],:]
+
+  # Entries from channel line
   c = split(cinfo)
-  k["scale"] = parse(c[13]) / (parse(c[8]) * 10^(parse(c[12])/20))
+  k["scale"] = Float64(parse(c[13]) / (parse(c[8]) * 10^(parse(c[12])/20)))
   k["lineDelay"] = Float32(parse(c[3])/1000)
   k["unit"] = c[9]
   k["fc"] = Float32(1/parse(c[10]))
@@ -44,31 +30,28 @@ function win32dict(Nh::UInt16, cinfo::String, hexID::String, StartTime::Float64,
   k["loc"] = [parse(c[14]), parse(c[15]), parse(c[16])]
   k["pCorr"] = parse(Float32, c[17])
   k["sCorr"] = parse(Float32, c[18])
-  # A comment column isn't strictly required by the win format specs
   k["comment"] = length(c) > 18 ? c[19] : ""
   return k
 end
 
-function getcid(Chans, ch)
+function getcid(Chans::Array{String,1}, hexID::String)
   for i = 1:1:length(Chans)
     L = split(Chans[i])
-    if L[1] == ch
+    if L[1] == hexID
       return i, join(L[4:5],'.')
     end
   end
   return -1, ""
 end
+# =======================================================
 
 """
-    S = r_win32(filestr, chanfile)
+    S = readwin32(filestr, chanfile)
 
-Read all win32 data matching string pattern `filestr`, with corresponding
-channel file `chanfile`, into dictionary S. Keys correspond to win32
-
-
+Read all win32 files matching pattern `filestr` into SeisData object `S` using channel file `chanfile`.
 """
-function r_win32(filestr::String, cf::String; v=false)
-  Chans = getcha(cf)
+function readwin32(filestr::String, cf::String; v=false::Bool)
+  Chans = readlines(cf)
   seis = Dict{String,Any}()
   files = lsw(filestr)
   nf = 0
@@ -131,8 +114,10 @@ function r_win32(filestr::String, cf::String; v=false)
           V = read(fid, fmt, N)
           x[2:end] = [bswap(i) for i in V]
         end
-        # cumsum doesn't work on int32...?
+
+        # cumsum doesn't work on Int32 in Julia as of 0.4.x
         [x[i] += x[i-1] for i in 2:1:length(x)]
+
         # Account for time gaps
         gap = NewTime - seis[id]["OldTime"] - 1
         if ((gap > 0) && (seis[id]["OldTime"] > 0))
@@ -155,6 +140,7 @@ function r_win32(filestr::String, cf::String; v=false)
     close(fid)
     nf += 1
   end
+
   # Fill data gaps
   for i in collect(keys(seis))
     J = length(seis[i]["gapStart"])
@@ -174,72 +160,41 @@ function r_win32(filestr::String, cf::String; v=false)
   end
   seis["fname"] = filestr
   seis["cfile"] = cf
-  return seis
-end
 
-function win32toseis(D = Dict{String,Any}())
-  K = sort(collect(keys(D)))
-  seis = SeisData()
+  S = SeisData()
+  K = sort(collect(keys(seis)))
+
+  # Create SeisData object from this mess
   for k in K
-    !isa(D[k],Dict{String,Any}) && continue
-    fs = D[k]["fs"]
-    units = D[k]["unit"]
-    (net, sta, chan_stub) = split(k, '.')
-    fc = D[k]["fc"]
-    hc = D[k]["hc"]
-    b = getbandcode(fs, fc = fc)                  # Band code
-    g = 'H'                                       # Gain code
-    c = chan_stub[1]                              # Channel code
-    c == 'U' && (c = 'Z')                         # Nope
-    cha = string(b,g,c)
-    loc = D[k]["locID"]
-    # Location codes are based on Japanese numeric network codes
-    # This is done because the SEED standard currently only has one Japanese
-    # network listed; JMA, under code "JP"
+    !isa(seis[k], Dict{String,Any}) && continue
 
-    id = join(["JP", sta, loc, cha], '.')
-    # There will be issues here; Japanese files use NIED or local station
-    # names, which don't necessarily match international station names. See e.g.
-    # http://data.sokki.jmbsc.or.jp/cdrom/seismological/catalog/appendix/apendixe.htm
-    # for an example of the (lack of) correspondence
+    fs    = seis[k]["fs"]
+    units = seis[k]["unit"]
+    x     = map(Float64, seis[k]["data"])
+    t     = [1 round(Int,seis[k]["startTime"]/μs); length(seis[k]["data"]) 0]
+    src   = string("Win32,", u2d(time()), ",", filestr)
+    notes = [string(" Channel file ", seis["cfile"]); string("  Location comment: ", seis[k]["comment"])]
+    misc  = Dict{String,Any}(i => seis[k][i] for i in ("hexID", "orgID", "netID", "fc", "hc", "pCorr", "sCorr", "lineDelay", "comment"))
 
-    x = map(Float64, D[k]["data"].*D[k]["scale"])
-    t = [1 round(Int,D[k]["startTime"]/μs); length(D[k]["data"]) 0]
-    src = "win32"
-    notes = [string(now, "  Record source: ", D[k]["netName"]);
-             string(now, "  Location comment: ", D[k]["comment"]);
-             string(now, "  Read from file ", D["fname"]);
-             string(now, "  Channel file ", D["cfile"])]
-    misc = Dict{String,Any}()
     if units == "m/s"
-      resp = fctopz(fc, hc=hc, units=units)
+      resp = fctopz(seis[k]["fc"], hc=seis[k]["hc"], units=units)
     else
       resp = Array{Complex{Float64},2}(0,2)
     end
-    [misc[sk] = D[k][sk] for sk in ("hexID", "orgID", "netID", "fc", "hc", "pCorr", "sCorr", "lineDelay", "comment")]
 
-    seis += SeisChannel(id=id,
-      name=k,
-      x=x,
-      t=t,
-      gain=1.0,
-      fs=fs,
-      units=units,
-      loc=[D[k]["loc"]; 0; 0],
-      misc=misc,
-      src=src,
-      resp=resp,
-      notes=notes)
+    # There will be issues here. Japanese files use NIED or local station
+    # names, which don't necessarily match international station names. See e.g.
+    # http://data.sokki.jmbsc.or.jp/cdrom/seismological/catalog/appendix/apendixe.htm
+    # for an example of the (lack of) correspondence
+    (net, sta, chan_stub) = split(k, '.')
+    b = getbandcode(fs, fc = seis[k]["fc"])       # Band code
+    g = 'H'                                       # Gain code
+    c = chan_stub[1]                              # Channel code
+    c == 'U' && (c = 'Z')                         # Nope
+
+    id    = join(["JP", sta, seis[k]["locID"], string(b,g,c)], '.')
+
+    S += SeisChannel(id=id, name=k, x=x, t=t, gain=seis[k]["scale"], fs=fs, units=units, loc=[seis[k]["loc"]; 0; 0], misc=misc, src=src, resp=resp, notes=notes)
   end
-  return seis
+  return S
 end
-
-"""
-    S = readwin32(filestr, chanfile)
-
-Read all win32 data matching string pattern `filestr`, with corresponding
-channel file `chanfile`; return a seisdata object S.
-
-"""
-readwin32(f::String, c::String; v=false::Bool) = (
-  D = r_win32(f, c, v=v); return(win32toseis(D)))
