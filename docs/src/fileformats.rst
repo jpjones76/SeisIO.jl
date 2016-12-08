@@ -26,7 +26,9 @@ Current Format Support
 
 mini-SEED
 =========
-The mini-SEED reader doesn't have a full range of data decoders yet. Currently supported data formats include Int16, Int32, Float, Double, Steim1, and Steim2. Future updates will add Int24, Steim3, and the various GEOSCOPE encodings.
+SEED is an archival format maintained by the International Federation of Digital Seismograph Networks. The data format is widely used and highly versatile, but often criticized as intractably monolithic; the most comprehensive example of SEED documentation is a 224-page .pdf manual (excluding appendices), yet even this is incomplete.
+
+The mini-SEED reader currently doesn't have a full range of packet decoders; currently supported formats include Int16, Int32, Float, Double, Steim1, and Steim2.
 
 *Endian: big*
 
@@ -36,14 +38,18 @@ Associated functions
 
 * ``readmseed``: read mini-SEED file to SeisData
 
+References
+----------
+#. `SEED format manual, v2.4 <http://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf>`_
 
+#. `SEED format channel naming <http://www.fdsn.org/seed_manual/SEEDManual_V2.4_Appendix-A.pdf>`_
 
 
 .. _sac1:
 
 SAC
 ===
-SAC stands for Seismic Analysis Code. Among the most portable and intuitive seismic data formats, SAC was developed by Lawrence Livermore National Laboratory for use with the eponymous data processing application.
+Among the most portable and intuitive seismic data formats, Seismic Analysis Code (SAC) was developed by Lawrence Livermore National Laboratory (USA) for use with the eponymous data processing application.
 
 *Endian: little*
 
@@ -78,11 +84,11 @@ References
 
 SEG Y
 =====
-The SEG Y (sometimes SEG-Y) file format was developed by the Society of Exploration Geophysicists (SEG). Modified versions of SEG Y are used by PASSCAL, New Mexico Tech, and others.
+The SEG Y (sometimes SEG-Y) file format was developed by the Society of Exploration Geophysicists (USA). Modified versions of SEG Y are used by PASSCAL, New Mexico Tech, and others.
 
 An added keyword (``nmt=true``) is required to parse PASSCAL SEG Y trace files. The modified file format used by IRIS/PASSCAL/NMT lacks a 3600-byte record header (3200-byte text header + 400-byte file header). In addition, PASSCAL SEG Y assumes little endian byte order.
 
-*Caution*: SEG Y trace header fields are not rigidly defined by any central authority and are notoriously self-incompatibile. There is no guarantee that SEG Y files from unverified sources will parse correctly with ``readsegy`` (or *any* program, for that matter). This is especially problematic with proprietary industry data, as some companies fill the last 60 bytes of the trace header with non-standard field definitions.
+*Caution*: SEG Y trace header fields are not rigidly defined by any central authority. As such, there is no guarantee that industry SEG Y files will be readable; this issue is widely known and not endemic to SeisIO. Proprietary industry files are often problematic because many companies fill the last 60 bytes of the trace header with non-standard fields.
 
 *Endian: big for standard SEG Y, little for PASSCAL/NMT SEG Y*
 
@@ -134,7 +140,7 @@ Associated functions
 
 Win32 file format
 =================
-Win32 is the standard seismic data format of NIED (Japan). It is widely used in Japan, but rare elsewhere.
+Win32 is the standard seismic data format of NIED (Japan). It is widely used in Japan, but rare elsewhere. Data are typically divided into files that each contain a one-minute segment of data from a selection of channels on a network. Within each file, data are stored in variable-precision 1 s segments by channel.
 
 *Endian: big*
 
@@ -151,9 +157,9 @@ Associated functions
 
 *Warnings*
 ---------
-#. Although the Win32 data format is technically open, accessing documentation requires an NIED login, which is not available to the general public.
-#. Redistribution of Win32 files is prohibited.
-#. Win32 channel files are not synchronized among different network operators, leaving them prone to human error; non-NIED channel files supplied by NIED data requests may contain inconsistencies, particularly in instrument gains.
+#. Although the Win32 data format is technically open, accessing documentation requires an NIED login. NIED access is not available to the general public.
+#. Redistribution of Win32 files is strictly prohibited.
+#. Win32 channel files are not synchronized among different network operators, leaving them prone to human error. Non-NIED channel files supplied by NIED data requests may contain inconsistencies, particularly in instrument gains.
 
 
 Batch Read
