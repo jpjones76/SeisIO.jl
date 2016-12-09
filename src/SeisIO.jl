@@ -8,11 +8,10 @@ wseis,                                                         # Types/write.jl
 rseis,                                                         # Types/read.jl
 parsemseed, readmseed, parsesl, readmseed, parserec,           # Formats/mSEED.jl
 rlennasc,                                                      # Formats/LennartzAsc.jl
-prunesac!, chksac, sachdr, sactoseis, get_sac_keys, parse_sac, # Formats/SAC.jl
-rsac, readsac, wsac, writesac,                                 #
+readsac, rsac, sachdr, writesac, wsac,                         # Formats/SAC.jl
 readsegy, segyhdr,                                             # Formats/SEGY.jl
 readuw, uwdf, uwpf, uwpf!,                                     # Formats/UW.jl
-readwin32, win32toseis, r_win32,                               # Formats/Win32.jl
+readwin32,                                                     # Formats/Win32.jl
 batch_read,                                                    # Formats/BatchProc.jl
 FDSNget,                                                       # Web/FDSN.jl
 IRISget, irisws,                                               # Web/IRIS.jl

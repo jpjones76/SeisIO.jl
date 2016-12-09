@@ -2,9 +2,18 @@ using DSP:tukey, resample
 
 # ============================================================================
 # Logging
-note(S::SeisChannel, s::AbstractString) = (S.notes = cat(1, S.notes, string(now(), "  ", s)))
-note(S::SeisData, i::Integer, s::AbstractString) = push!(S.notes[i], string(now(), "  ", s))
+note(S::SeisChannel, s::AbstractString) = (S.notes = cat(1, S.notes, string(timestamp(), "  ", s)))
+note(S::SeisData, i::Integer, s::AbstractString) = push!(S.notes[i], string(timestamp(), "  ", s))
 note(S::SeisData, s1::AbstractString, s2::AbstractString) = note(S, findname(s1, S), s2)
+
+# Truncate source
+function srctrunc(src::String)
+  length(src) <= 120 && return src
+  s = split(src,',')
+  L = 114-length(s[1])-length(s[2])
+  s[3] = s[3][1:L]*"..."
+  return join(s,',')
+end
 
 # In case all we care about is a header match
 """

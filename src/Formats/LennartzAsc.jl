@@ -4,7 +4,8 @@
 Read Lennartz-type ASCII file fname with pseudo-header info in first line.
 """
 
-function rlennasc(fname::String)
+function rlennasc(f::String)
+  fname = realpath(f)
   S = SeisChannel()
   fid = open(fname, "r")
   h = split(readline(fid))
@@ -22,6 +23,6 @@ function rlennasc(fname::String)
   S.id = join(["", sta, "", cmp], '.')
   S.t = [1 ts; length(S.x) 0]
   S.x = x[:,1]
-  S.src = "lennartz ascii"
+  S.src = join(["rlennasc",timestamp(),realpath(f)],',')
   return S
 end

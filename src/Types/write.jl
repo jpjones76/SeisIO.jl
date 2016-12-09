@@ -126,12 +126,12 @@ end
 function w_struct(io::IOStream, S::SeisData)
   write(io, UInt32(S.n))
   for i = 1:S.n
-    writestr_fixlen(io, S.name[i], 26)                                # name
+    writestr_fixlen(io, S.name[i], 32)                                # name
     writestr_fixlen(io, S.id[i], 15)                                  # id
-    writestr_fixlen(io, S.src[i], 26)                                 # src
+    writestr_fixlen(io, srctrunc(S.src[i]), 120)                      # src
     write(io, S.fs[i])                                                # fs
     write(io, S.gain[i])                                              # gain
-    writestr_fixlen(io, S.units[i], 26)                               # units
+    writestr_fixlen(io, S.units[i], 32)                               # units
     if !isempty(S.loc[i])
       write(io, S.loc[i])                                             # loc
     else

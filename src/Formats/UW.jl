@@ -1,6 +1,6 @@
 # ============================================================================
 # Utility functions not for export
-function nextline(pf, c::Char)
+function nextline(pf::IO, c::Char)
   tmpstring = chomp(readline(pf))
   while tmpstring[1] != c
     tmpstring = chomp(readline(pf))
@@ -12,7 +12,7 @@ function nextline(pf, c::Char)
   return tmpstring
 end
 
-function getpf(froot, lc)
+function getpf(froot::String, lc::Array{UInt8,1})
   for i in lc
     p = string(froot, Char(i))
     if isfile(p)
@@ -201,11 +201,12 @@ Read University of Washington-format seismic data file `df` into SeisData struct
 Specify verbose mode (for debugging).
 """
 function uwdf(datafile::String; v=false::Bool)
+  fname = realpath(datafile)
   dconst = -11676096000
   D = Dict{String,Any}()
 
   # Open data file
-  fid = open(datafile, "r")
+  fid = open(fname, "r")
 
   # Process master header
   N = bswap(read(fid, Int16))
@@ -327,13 +328,14 @@ function uwdf(datafile::String; v=false::Bool)
   end
   close(fid)
 
+  src = join(["readuw",timestamp(),fname],',')
   return SeisData(n=N, name=id, id=id, fs=fs, x=X, t=T,
     loc=repmat([zeros(Float64,5)],N),
     resp=repmat([complex(zeros(Float64,2,2))],N),
     misc=[Dict{String,Any}() for i = 1:N],
     notes=[[""] for i = 1:N],
     gain=ones(Float64,N),
-    src=repmat(["uwdf"],N),
+    src=repmat([src],N),
     units=repmat(["counts"],N))
 end
 
@@ -359,7 +361,7 @@ function readuw(filename::String; v=false::Bool)
   pf = ""
   df = ""
   ec = UInt8(filename[end])
-  lc = collect(0x61:1:0x7a)
+  lc = collect(UInt8, 0x61:1:0x7a)
   if Base.in(ec, lc)
     pf = filename
     df = filename[1:end-1]*"W"
@@ -372,7 +374,6 @@ function readuw(filename::String; v=false::Bool)
     isfile(df) || error("Invalid filename stub (no corresponding data file)!")
     pf = getpf(froot, lc)
   end
-  src_stub = ""
 
   # File read wrappers
   if isfile(df)
@@ -380,24 +381,18 @@ function readuw(filename::String; v=false::Bool)
     v && println("Reading datafile ", df)
     S = SeisEvent(data=uwdf(df, v=v))
     v && println("Done reading data file.")
-    src_stub *= df
 
     # Pickfile wrapper
     if isfile(pf)
       v && println("Reading pickfile ", pf)
       uwpf!(S, pf)
       v && println("Done reading pick file.")
-      src_stub = string(src_stub[1:end-1],"[",pf[end],",W]")
     else
       v && println("Skipping pickfile (not found or not given)")
-    end
-    for i=1:1:S.data.n
-      S.data.src[i] = src_stub
     end
   else
     # Pickfile only
     S = SeisEvent(hdr=uwpf(pf, v=v))
-    src_stub *= pf
   end
   return S
 end

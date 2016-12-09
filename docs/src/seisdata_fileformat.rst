@@ -80,16 +80,16 @@ Channel data
 ------------
 Each channel in the current SeisData object has its own set of channel data.
 
-.. csv-table:: Fixed channel information (100 bytes)
+.. csv-table:: Fixed channel information (255 bytes)
   :header: Field, T, N
   :widths: 32, 5, 5
 
-  ``name``,c,26
+  ``name``,c,32
   ``id``,c,15
-  ``src``,c,26
+  ``src``,c,120
   ``fs``,f64,1
   ``gain``,f64,1
-  ``units``,c,26
+  ``units``,c,32
   ``loc``,f64,5
 
 ``resp``
