@@ -1,4 +1,6 @@
 const μs = 1.0e-6
+const sμ = 1000000.0
+const sm = 1000.0
 
 u2d(k::Real) = Dates.unix2datetime(k)
 d2u(k::DateTime) = Dates.datetime2unix(k)

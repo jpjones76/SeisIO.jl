@@ -1,16 +1,7 @@
 # test.sac was generated in SAC 101.6a with "fg seismogram; write test.sac"
 sac_file = "SampleFiles/test.sac"
 
-get_sac_fw(k::String) = ((F, I, C) = SeisIO.get_sac_keys(); findfirst(F .== k))
-get_sac_iw(k::String) = ((F, I, C) = SeisIO.get_sac_keys(); findfirst(I .== k))
-
-println("...header accuracy...")
-@test_approx_eq(get_sac_fw("b"), 6)
-@test_approx_eq(get_sac_fw("unused7"), 70)
-@test_approx_eq(get_sac_iw("npts"), 10)
-@test_approx_eq(get_sac_iw("iftype"), 16)
-
-println("...file read to dict...")
+println("...fast file read...")
 SAC1 = readsac(sac_file)
 @test_approx_eq(SAC1.fs, 100.0)
 @test_approx_eq(length(SAC1.x), 1000)

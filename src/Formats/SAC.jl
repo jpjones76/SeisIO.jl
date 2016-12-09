@@ -1,5 +1,3 @@
-const sμ = 1000000.0
-const sm = 1000.0
 const nul_f = -12345.0f0
 const nul_i = Int32(-12345)
 const nul_s = "-12345  "

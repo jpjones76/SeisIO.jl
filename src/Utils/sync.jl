@@ -1,3 +1,5 @@
+using DSP: resample, tukey
+
 function get_sync_t(s::Union{String,DateTime}, t::Array{Int64,1}, k::Array{Int64,1})
   isa(s, DateTime) && return round(Int, d2u(s)/μs)
   if s == "max"

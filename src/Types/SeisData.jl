@@ -1,5 +1,4 @@
 # To do: Abstract type
-using DSP: resample, tukey
 import Base.in
 import Base:getindex, setindex!, append!, deleteat!, delete!, +, -, isequal,
 search, push!, merge!,  length, start, done, next, size, sizeof, ==,
