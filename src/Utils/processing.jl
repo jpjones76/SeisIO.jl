@@ -1,4 +1,5 @@
 using SeisIO
+using DSP: tukey
 
 function autotuk!(x::Array{Float64,1}, v::Array{Int64,1}, u::Int)
   g = find(diff(v) .> 1)
