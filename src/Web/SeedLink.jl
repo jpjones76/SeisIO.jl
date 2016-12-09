@@ -2,7 +2,7 @@ using LightXML: attribute, root, get_elements_by_tagname, parse_string, XMLDocum
 using Requests: get
 using SeisIO
 
-cmatch(xel, pat, tag) = prod([contains(attribute(xel,tag[i]),pat[i]) for i=1:length(pat)])
+#cmatch(xel, pat, tag) = prod([contains(attribute(xel,tag[i]),pat[i]) for i=1:length(pat)])
 
 """
     info_xml = SLinfo(level=LEVEL::String, addr=URL::String, port=PORT::Integer)
@@ -90,7 +90,7 @@ function has_stream(sta::Array{String,1}, patts::Array{String,1}, url::String;
         S = length(streams)
         for j = 1:1:S
           xel = streams[j]
-          if cmatch(xel, pat, tag)
+          if prod([contains(attribute(xel,tag[i]),pat[i]) for i=1:length(pat)])
             tstr = replace(string(attribute(xel,"end_time"))," ","T")
             t = min(t, time()-d2u(Dates.DateTime(tstr)))
           end
@@ -107,12 +107,7 @@ function has_stream(sta::Array{String,1}, patts::Array{String,1}, url::String;
   return x
 end
 
-
-
-
-
-
-function getSLver(vline)
+function getSLver(vline::String)
   # Versioning will break if SeedLink switches to VV.PPP.NNN format
   ver = 0.0
   vinfo = split(vline)
@@ -201,7 +196,7 @@ function SeedLink!(S::SeisData,
   Ns = length(sta)
   Np = length(patts)
   if patts[1] == "*"
-    patts = repmat(["?????.D"], Ns)
+    patts = fill("?????.D", Ns)
   elseif Np < Ns
     patts[Np+1:end] = patts[Np]
   end
@@ -218,7 +213,7 @@ function SeedLink!(S::SeisData,
 
   for i = Ns:-1:1
     if !h[i]
-      warn(string(addr, " doesn't have ", sta[i], "; deleted from req."))
+      warn(string(addr, " doesn't currently have ", sta[i], "; deleted from req."))
       deleteat!(sta, i)
       deleteat!(patts,i)
     end
@@ -229,6 +224,9 @@ function SeedLink!(S::SeisData,
     warn("No channels in the current request were found. Exiting SeedLink!...")
     return 0
   end
+
+  # Source for logging
+  src = join(["SeedLink!", timestamp(), join([addr,port],':')],',')
 
   # ==========================================================================
   # connection and server info retrieval
@@ -340,7 +338,7 @@ function SeedLink!(S::SeisData,
           (v > 1) && @printf(STDOUT, "%s: Processing packets ", string(now()))
           while !eof(buf)
             pkt_id = String(read(buf,UInt8,8))
-            parserec(S, buf)
+            parserec(S, buf, src=src)
             (v > 1) && @printf(STDOUT, "%s, ", pkt_id)
           end
           (v > 1) && @printf(STDOUT, "\b\b...done current packet dump.\n")

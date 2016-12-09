@@ -1,3 +1,49 @@
+# =============================================================
+# Utility functions not for export
+function bitsplit(x,b,n)
+  m = Int(b/n)
+  y = zeros(m,length(x))
+  for j = 1:1:length(x)
+    s = bits(x[j])[end-b+1:end]
+    for i = 1:1:m
+      if s.data[1+(i-1)*n] == 0x30
+        os = 0
+      else
+        os = 2^(n-1)
+      end
+      y[i,j] = parse(Int, string(s[2+(i-1)*n:i*n]), 2) - os
+    end
+  end
+  return y
+end
+
+function ParseUnenc(D, N, swap)
+  if swap
+    d = zeros(N)
+    for i = 1:1:N
+      d[i] = bswap(D[i])
+    end
+  else
+    d = D[1:nsamp]
+  end
+  return d
+end
+
+function blk_time(sid; b=true::Bool)
+  (yr,jd)       = read(sid, UInt16, 2)
+  (HH,MM,SS)    = read(sid, UInt8, 3)
+  skip(sid, 1)
+  sss           = read(sid, UInt16, 1)
+  if b
+    yr = ntoh(yr)
+    jd = ntoh(jd)
+    sss = ntoh(sss)
+  end
+  sss = sss*1.0e-4
+  return (yr,jd,HH,MM,SS,sss)
+end
+# =============================================================
+
 """
 S = readmseed(fname)
 
@@ -33,19 +79,19 @@ Parse stream `sid` of mini-SEED data. Assumes `sid` is a mini-SEED stream
 in big-Endian format. Modifies Seis, a SeisData object.
 
 """
-function parsemseed(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::Bool, fclose=true::Bool, fmt=10::Int)
+function parsemseed(S::SeisData, sid::IO; swap=false::Bool, v=false::Bool, vv=false::Bool, fclose=true::Bool, fmt=10::Int, src="parsemseed,,"::String)
   while !eof(sid)
-    parserec(S, sid, swap=swap, v=v, vv=vv, fmt=fmt)
+    parserec(S, sid, swap=swap, v=v, vv=vv, fmt=fmt, src=src)
   end
   fclose && close(sid)
   return S
 end
-parsemseed(sid; swap=false::Bool, v=false::Bool, vv=false::Bool, fclose=true::Bool, fmt=10::Int) = (
+parsemseed(sid::IO; swap=false::Bool, v=false::Bool, vv=false::Bool, fclose=true::Bool, fmt=10::Int, src="parsemseed,,"::String) = (
   S = SeisData();
-  parsemseed(S, sid, swap=swap, v=v, vv=vv, fclose=fclose, fmt=fmt);
+  parsemseed(S, sid, swap=swap, v=v, vv=vv, fclose=fclose, fmt=fmt, src=src);
   return S)
 
-function parserec(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::Bool, fmt=10::Int)
+function parserec(S::SeisData, sid::IO; swap=false::Bool, v=false::Bool, vv=false::Bool, fmt=10::Int, src="parserec,,"::String)
   L   = 0
   nx  = 2^12
   wo  = 1
@@ -108,7 +154,7 @@ function parserec(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::B
   if isempty(channel)
     seisdata_id = join([strip(chid[11:12]), strip(chid[1:5]),
     strip(chid[6:7]), strip(chid[8:10])], '.')
-    push!(S, SeisChannel(name = chid, id = seisdata_id, fs = 1/dt, src="mseed"))
+    push!(S, SeisChannel(name = chid, id = seisdata_id, fs = 1/dt, src=src))
     channel = S.n
     te = 0
   else
@@ -124,6 +170,7 @@ function parserec(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::B
   for i = 1:1:NBlk
     BlocketteType = ntoh(read(sid, UInt16))
     vv && @printf(STDOUT, "Blockette %i of %i: type %i.\n", i, NBlk, BlocketteType)
+
     if BlocketteType == 100
       # [100] Sample Rate Blockette (12 bytes)
       # V 2.3 – Introduced in  SEED Version 2.3
@@ -133,6 +180,7 @@ function parserec(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::B
       vv && @printf(STDOUT, "BlocketteType 100, with fs = %.3e.\n", true_dt)
       nsk -= 12
       # Not sure how to handle this, don't know units
+
     elseif BlocketteType == 201
       # [201] Murdock Event Detection Blockette (60 bytes)
       # First encountered 2016-10-26
@@ -154,6 +202,7 @@ function parserec(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::B
       push!(S.misc[channel]["Events"],
             d2u(DateTime(eyr, emo, edy, eHH, eMM, eSS, 0)) + ems + TimeCorrection)
       skip(sid, 32)
+
     elseif BlocketteType == 500
       #  [500] Timing Blockette (200 bytes)
       skip(sid, 1)
@@ -177,6 +226,7 @@ function parserec(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::B
         println("clock_status: ", clock_status)
       end
       nsk -= 200
+
     elseif BlocketteType == 1000
       # [1000] Data Only SEED Blockette (8 bytes)
       # V 2.3 – Introduced in SEED Version 2.3
@@ -185,6 +235,7 @@ function parserec(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::B
       wo  = wob
       nx  = 2^L
       nsk -= 8
+
     elseif BlocketteType == 1001
       # [1001] Data Extension Blockette  (8 bytes)
       # V 2.3 – Introduced in SEED Version 2.3
@@ -193,6 +244,7 @@ function parserec(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::B
       skip(sid, 2)
       TimeCorrection += mu/1.0e6
       nsk -= 8
+
     elseif BlocketteType == 2000
       # [2000] Variable Length Opaque Data Blockette
       # V 2.3 – Introduced in SEED Version 2.3
@@ -209,6 +261,7 @@ function parserec(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::B
       S.misc[channel][ri * "_header"] = collect[header_fields]
       S.misc[channel][ri * "_data"] = opaque_data
       nsk -= blk_length
+
     else
       # I have yet to find any other BlocketteType in an IRIS stream/archive
       # Similar reports from C. Trabant @ IRIS
@@ -365,57 +418,4 @@ function parserec(S::SeisData, sid; swap=false::Bool, v=false::Bool, vv=false::B
   # Append data
   append!(S.x[channel], d)
   return S
-end
-
-"""
-    d = bitsplit(x,B,N)
-
-Splits B-bit unsigned int X into signed N-bit array
-"""
-function bitsplit(x,b,n)
-  m = Int(b/n)
-  y = zeros(m,length(x))
-  for j = 1:1:length(x)
-    s = bits(x[j])[end-b+1:end]
-    for i = 1:1:m
-      if s.data[1+(i-1)*n] == 0x30
-        os = 0
-      else
-        os = 2^(n-1)
-      end
-      y[i,j] = parse(Int, string(s[2+(i-1)*n:i*n]), 2) - os
-    end
-  end
-  return y
-end
-
-"""
-    d = ParseUnenc(D, N, swap)
-
-Parse N samples of unencoded data D; byteswap if swap = true
-"""
-function ParseUnenc(D, N, swap)
-  if swap
-    d = zeros(N)
-    for i = 1:1:N
-      d[i] = bswap(D[i])
-    end
-  else
-    d = D[1:nsamp]
-  end
-  return d
-end
-
-function blk_time(sid; b=true::Bool)
-  (yr,jd)       = read(sid, UInt16, 2)
-  (HH,MM,SS)    = read(sid, UInt8, 3)
-  skip(sid, 1)
-  sss           = read(sid, UInt16, 1)
-  if b
-    yr = ntoh(yr)
-    jd = ntoh(jd)
-    sss = ntoh(sss)
-  end
-  sss = sss*1.0e-4
-  return (yr,jd,HH,MM,SS,sss)
 end

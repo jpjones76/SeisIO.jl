@@ -1,6 +1,6 @@
 # ============================================================================
 # Utility functions not for export
-function trid(i; fs=2000::Real)
+function trid(i::Int16; fs=2000::Real)
   S = ["DH", "HZ", "H1", "H2", "HZ", "HT", "HR"]
   return string(getbandcode(fs, fc=10.0), S[i])
 end
@@ -111,7 +111,7 @@ function do_trace(f::IO, fast::Bool, nmt::Bool; fh=zeros(Int16, 4)::Array{Int16,
   loc       = [0.0, 0.0, el, 0.0, 0.0]
   t         = [1 ts; length(x) 0]
   x         = map(Float64, x)
-  src       = string(nmt ? "PASSCAL " : "", "SEG-Y,", u2d(time()), ",", fname)
+  src       = join([string("readsegy/", nmt ? "PASSCAL " : "", "SEG-Y,"), timestamp(), fname],',')
   id        = uppercase(replace(join(["", sta, inst, cha], '.'), "\0", ""))
   chan      = SeisChannel(name=id, id=id, loc=loc, gain=gain, fs=fs, src=src, t=t, x=x, units="unknown")
   if !fast

@@ -62,26 +62,22 @@ function irisws(;net="UW"::String,
   req = get(url, timeout=to, headers=webhdr())
   w && savereq(req.data, fmt, net, sta, loc, cha, d0, d1, "R", c=true)
   if fmt == "sacbl"
-    tmp = IOBuffer(req.data)
-    D = prunesac(parse_sac(tmp))
-    D["src"] = "irisws/timeseries"
-    return D
+    seis = read_sac_stream(IOBuffer(req.data))
+    seis.src = join([string("irisws/",fmt), u2d(time()), url], ',')
   elseif fmt == "miniseed"
-    tmp = IOBuffer(req.data)
-    S = parsemseed(tmp, v=v)
-    S.src[1] = "irisws/timeseries"
-    note(S, 1, "Data retrieved in mseed format")
-    return S
+    seis = parsemseed(IOBuffer(req.data), v=v)[1]
+    seis.src = join([string("irisws/",fmt), u2d(time()), url], ',')
   else
     if v
       warn(@sprintf("Unusual format spec; returning unparsed data stream in format=%s",fmt))
     end
-    return req.data
+    seis = req.data
   end
+  return seis
 end
 
 # =============================================================================
-"""
+""""
 IRISget: CLI for arbitrary IRIS time-series web requests
 
     S = IRISget(chanlist)

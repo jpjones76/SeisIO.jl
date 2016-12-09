@@ -172,7 +172,7 @@ function readwin32(filestr::String, cf::String; v=false::Bool)
     units = seis[k]["unit"]
     x     = map(Float64, seis[k]["data"])
     t     = [1 round(Int,seis[k]["startTime"]/μs); length(seis[k]["data"]) 0]
-    src   = string("Win32,", u2d(time()), ",", filestr)
+    src   = join(["readwin32", timestamp(), filestr],',')
     notes = [string(" Channel file ", seis["cfile"]); string("  Location comment: ", seis[k]["comment"])]
     misc  = Dict{String,Any}(i => seis[k][i] for i in ("hexID", "orgID", "netID", "fc", "hc", "pCorr", "sCorr", "lineDelay", "comment"))
 

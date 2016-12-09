@@ -18,7 +18,7 @@ println("...data accuracy...")
 
 println("Lennartz ASCII...")
 A = rlennasc(lenn_file)
-@test_approx_eq(A.src=="lennartz ascii",true)
+@test_approx_eq(contains(A.src,"rlennasc"),true)
 @test_approx_eq(A.fs, 62.5)
 S += A
 

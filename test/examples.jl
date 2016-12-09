@@ -2,14 +2,14 @@ using SeisIO
 
 # IRIS SeedLink session
 sta = ["GPW UW"; "MBW UW"; "SHUK UW"]
-seis = SeedLink(sta, s=0, t=60)
+seis = SeedLink(sta, s=(-60), t=60)
 
 # US FDSNget example: 5 stations, 2 networks, all channels, last 600 seconds
 STA = "HOOD,PALM,TIMB,HIYU,TDH"
 CHA = "*"
 NET = "CC,UW"
 T = -600
-S = now()
+S = u2d(time())
 seis = FDSNget(net=NET, sta=STA, cha=CHA, s=S, t=T)
 
 # Iris web service, single station, written to miniseed

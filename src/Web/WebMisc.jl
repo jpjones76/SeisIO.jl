@@ -3,7 +3,7 @@
 webhdr() = Dict("UserAgent" => "Julia-SeisIO-FSDN.jl/0.0.1")
 hashfname(str::Array{String,1}, ext::String) = string(hash(str), ".", ext)
 
-function get_uhead(src)
+function get_uhead(src::String)
   if src == "IRIS"
     uhead = "http://service.iris.edu/fdsnws/"
   elseif src == "GFZ"

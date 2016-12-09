@@ -18,5 +18,6 @@ end
 # Equality
 isequal(S::SeisEvent, T::SeisEvent) = minimum([isequal(S.hdr, T.hdr), isequal(S.data, T.data)])
 ==(S::SeisEvent, T::SeisEvent) = isequal(S,T)
+isempty(S::SeisEvent) = isempty(S.data)*isempty(S.hdr)
 
 ## To do: SeisCat

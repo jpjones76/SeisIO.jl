@@ -3,7 +3,7 @@ using DSP: resample, tukey
 import Base.in
 import Base:getindex, setindex!, append!, deleteat!, delete!, +, -, isequal,
 search, push!, merge!,  length, start, done, next, size, sizeof, ==,
-filter, filt!, sort!, sort #, isempty
+filter, filt!, sort!, sort, isempty
 
 # No way to define a SeisData as an array of SeisChannels; indexing relations
 # become impossible. BUT we CAN define a SeisChannel as a single-channel
@@ -178,8 +178,8 @@ function setindex!(S::SeisData, T::SeisData, I::Range)
   return S
 end
 
-#isempty(t::SeisChannel) = minimum([isempty(t.(i)) for i in fieldnames(t)])
-#isempty(t::SeisData) = (t.n == 0)
+isempty(t::SeisChannel) = minimum([isempty(t.(i)) for i in fieldnames(t)])
+isempty(t::SeisData) = (t.n == 0)
 length(t::SeisData) = t.n
 size(S::SeisData) = println(summary(S))
 function sizeof(S::SeisData)
@@ -282,7 +282,26 @@ function merge!(S::SeisChannel, U::SeisChannel)
   (S.t, S.x) = xtmerge(S.t, S.x, T.t, T.x, T.fs)          # merge time and data
   merge!(S.misc, T.misc)                                  # merge misc
   S.notes = cat(1, S.notes, T.notes)                      # merge notes
+
   note(S, @sprintf("Merged %i samples", length(T.x)))
+
+  # Source logging
+  if isempty(S.src)
+    if !isempty(U.src)
+      S.src = deepcopy(U.src)
+    end
+    note(S, "Old src was empty")
+  else
+    if isempty(U.src)
+      note(S, "Merged data had empty src")
+    else
+      src = split(S.src,",")
+      src[1]*="+"
+      S.src = join(src,',')
+      note(S, string("+src: ",U.src))
+    end
+  end
+
   return S
 end
 merge(S::SeisChannel, T::SeisChannel) = (U = deepcopy(S); merge!(S,T); return(S))

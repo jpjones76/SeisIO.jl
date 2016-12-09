@@ -2,6 +2,7 @@ const μs = 1.0e-6
 
 u2d(k::Real) = Dates.unix2datetime(k)
 d2u(k::DateTime) = Dates.datetime2unix(k)
+timestamp() = u2d(time())
 
 """
     t = tzcorr()

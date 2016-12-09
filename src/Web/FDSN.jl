@@ -193,9 +193,7 @@ function FDSNget(C::Array{String,1};
     # Detailed source logging
     usrc = split(uhead, '/', keep=false)
     usrc = "FDSN " * " " * ascii(usrc[startswith(usrc[1],"http") ? 2 : 1])
-    for i = 1:S.n
-      note(S, i, usrc)
-    end
+    S.src = fill(join(["FDSNget",timestamp(),usrc],','), S.n)
 
     # Automatically incorporate station information from web XML retrieval
     if si
