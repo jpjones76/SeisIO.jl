@@ -1,48 +1,350 @@
-# =============================================================
-# Utility functions not for export
-function bitsplit(x,b,n)
-  m = Int(b/n)
-  y = zeros(m,length(x))
-  for j = 1:1:length(x)
-    s = bits(x[j])[end-b+1:end]
-    for i = 1:1:m
-      if s.data[1+(i-1)*n] == 0x30
-        os = 0
-      else
-        os = 2^(n-1)
-      end
-      y[i,j] = parse(Int, string(s[2+(i-1)*n:i*n]), 2) - os
-    end
+const steimvals = flipdim(collect(0x00000000:0x00000002:0x0000001e),1)
+
+function unpack!(x::Array{Float64,1}, k::Int, v::UInt32, s::UInt8, c::UInt8, n::UInt8)
+  r = 0x20-c
+  for i = 0x01:0x01:n
+    k+=1
+    x[k] = Float64(>>(signed(<<(v,s)), r))
+    s+=c
   end
-  return y
+  return k
 end
 
-function ParseUnenc(D, N, swap)
-  if swap
-    d = zeros(N)
-    for i = 1:1:N
-      d[i] = bswap(D[i])
-    end
-  else
-    d = D[1:nsamp]
-  end
-  return d
-end
-
-function blk_time(sid; b=true::Bool)
+function blk_time(sid::IOStream, b::Bool)
   (yr,jd)       = read(sid, UInt16, 2)
   (HH,MM,SS)    = read(sid, UInt8, 3)
   skip(sid, 1)
   sss           = read(sid, UInt16, 1)
   if b
-    yr = ntoh(yr)
-    jd = ntoh(jd)
-    sss = ntoh(sss)
+    yr = bswap(yr)
+    jd = bswap(jd)
+    sss = bswap(sss)
   end
-  sss = sss*1.0e-4
-  return (yr,jd,HH,MM,SS,sss)
+  f_sss = Float64(sss)*1.0e-4
+  return (yr,jd,HH,MM,SS,f_sss)
 end
-# =============================================================
+
+function parserec!(S::SeisData, sid::IO, swap::Bool, v::Int)
+  fmt = 0x0a
+  L   = 0x00
+  nx  = 0x1000
+  wo  = 0x01
+  p_start = position(sid)
+
+  # =========================================================================
+  # Fixed section of data header (48 bytes)
+  hdr                         = String(read(sid, UInt8, 20))
+  (yr,jd)                     = read(sid, UInt16, 2)
+  (HH,MM,SS,unused)           = read(sid, UInt8, 4)
+  (msec,nsamp)                = read(sid, UInt16, 2)
+  (rateFac,rateMult)          = read(sid, Int16, 2)
+  (AFlag,IOFlag,DQFlag,NBlk)  = read(sid, UInt8, 4)
+  TimeCorrection              = read(sid, Int32)
+  (OffsetBeginData,NBos)      = read(sid, UInt16, 2)
+  SeqNo     = hdr[1:6]
+  seed_id   = hdr[9:20]
+  # =========================================================================
+  # Fixed header
+
+  # Post-read header processing
+  if (position(sid) - p_start < 64 && (yr > 0x0bc2 || yr < 0x079e))
+    swap = Bool(true)
+  end
+  if swap
+    yr               = bswap(yr)
+    jd               = bswap(jd)
+    msec             = bswap(msec)
+    nsamp            = bswap(nsamp)
+    rateFac          = bswap(rateFac)
+    rateMult         = bswap(rateMult)
+    TimeCorrection   = bswap(TimeCorrection)
+    OffsetBeginData  = bswap(OffsetBeginData)
+    NBos             = bswap(NBos)
+  end
+
+  TC = Float64(TimeCorrection) / 1.0e4
+  ms = Float64(msec) / 1.0e4
+  RF = Float64(rateFac)
+  RM = Float64(rateMult)
+  nsamp = Int(nsamp)
+
+  # Generate dt
+  if RF > 0.0 && RM > 0.0
+    dt = 1.0/(RF*RM)
+  elseif RF > 0.0
+    dt = -1.0*RM/RF
+  elseif RM > 0.0
+    dt = -1.0*RF/RM
+  else
+    dt = RF*RM
+  end
+
+  # =========================================================================
+  # New channel for Seis if needed
+  id = replace(join([seed_id[11:12], seed_id[1:5], seed_id[6:7], seed_id[8:10]], '.')," ","")
+  channel = findfirst(S.id .== id)
+  if channel == 0
+    S += SeisChannel(name=seed_id, id=id, fs=1.0/dt)
+    note!(S, S.n, "Channel initialized")
+    channel = S.n
+    te = 0
+  else
+    # I assume fs doesn't change within a SeisData structure
+    te = sum(S.t[channel][:,2]) + round(Int, length(S.x[channel])*dt*sμ)
+  end
+  # =========================================================================
+
+  # Blockettes
+  nsk = OffsetBeginData-0x0030
+  for i = 0x01:0x01:NBlk
+    BlocketteType = ntoh(read(sid, UInt16))
+
+    if BlocketteType == 0x0064
+      # [100] Sample Rate Blockette (12 bytes)
+      # V 2.3 – Introduced in  SEED Version 2.3
+      # skip(sid, 2)
+      # true_dt = ntoh(read(sid, Float32))
+      skip(sid, 10)
+      nsk -= 0x000c
+      # Not sure how to handle this, don't know units
+
+    elseif BlocketteType == 0x00c9
+      # [201] Murdock Event Detection Blockette (60 bytes)
+      # First encountered 2016-10-26
+
+      skip(sid, 16)
+      (eyr,ejd)           = read(sid, UInt16, 2)
+      (eHH,eMM,eSS,enull) = read(sid, UInt8, 4)
+      ems                 = read(sid, UInt16)
+      skip(sid, 32)
+      nsk -= 0x003c
+
+      if swap
+        eyr               = ntoh(eyr)
+        ejd               = ntoh(ejd)
+        ems               = ntoh(ems)
+      end
+      f_ems     = Float64(ems)/1.0e4
+      emo, edy  = j2md(Int16(eyr), Int16(ejd))
+      t_evt     = round(Int, sμ*(d2u(DateTime(eyr, emo, edy, eHH, eMM, eSS, 0)) + f_ems + TC))
+      misc_keys = collect(keys(getfield(S, :misc)[channel]))
+      if findfirst(misc_keys.=="Events") == 0
+        S.misc[channel]["Events"] = Array{Int64,1}(t_evt)
+      else
+        push!(S.misc[channel]["Events"], t_evt)
+      end
+
+    elseif BlocketteType == 0x01f4
+      #  [500] Timing Blockette (200 bytes)
+      # Never encountered in wild
+
+      skip(sid, 1)
+      vco_correction    = ntoh(read(sid, Float32))
+      time_of_exception = blk_time(sid, swap)
+      μsec              = read(sid, Int8)
+      reception_quality = read(sid, UInt8)
+      exception_count   = ntoh(read(sid, UInt16))
+      exception_type    = read(sid, UInt8, 16)
+      clock_model       = read(sid, UInt8, 32)
+      clock_status      = read(sid, UInt8, 128)
+      if v > 1
+        println(STDOUT, "BlocketteType 500.")
+        println(STDOUT, "VCO correction: ", vco_correction)
+        println(STDOUT, "Time of exception: ", time_of_exception)
+        println(STDOUT, "μsec: ", μsec)
+        println(STDOUT, "reception quality: ", reception_quality)
+        println(STDOUT, "exception_count: ", exception_count)
+        println(STDOUT, "exception_type: ", exception_type)
+        println(STDOUT, "clock_model: ", clock_model)
+        println(STDOUT, "clock_status: ", clock_status)
+      end
+      nsk -= 0x00c8
+
+    elseif BlocketteType == 0x03e8
+      # [1000] Data Only SEED Blockette (8 bytes)
+      # V 2.3 – Introduced in SEED Version 2.3
+      (null1, null2, fmt, wo, L, null3) = read(sid, UInt8, 6)
+      nsk -= 0x0008
+      nx  = UInt16(2^L)
+
+    elseif BlocketteType == 0x03e9
+      # [1001] Data Extension Blockette  (8 bytes)
+      # V 2.3 – Introduced in SEED Version 2.3
+      # Never encountered in wild
+      skip(sid, 3)
+      mu = read(sid, UInt8)
+      skip(sid, 2)
+      nsk -= 0x0008
+      TC += Float64(mu)/1.0e6
+
+    elseif BlocketteType == 0x07d0
+      # [2000] Variable Length Opaque Data Blockette
+      # V 2.3 – Introduced in SEED Version 2.3
+      # Never encountered in wild
+      nextblk_pos         = ntoh(read(sid, UInt16)) + p_start
+      blk_length          = ntoh(read(sid, UInt16))
+      opaque_data_offset  = ntoh(read(sid, UInt16))
+      record_number       = ntoh(read(sid, UInt32))
+      (word_order, flags, n_header_fields)  = read(sid, UInt8, 3)
+      header_fields       = [String(i) for i in split(String(read(sid, UInt8, signed(opaque_data_offset)-15)), '\~', limit=n_header_fields)]
+      opaque_data         = read(sid, UInt8, blk_length - opaque_data_offset)
+
+      # Store to S.misc[i]
+      ri = string(record_number)
+      S.misc[channel][ri * "_flags"] = bits(flags)
+      S.misc[channel][ri * "_header"] = header_fields
+      S.misc[channel][ri * "_data"] = opaque_data
+      nsk -= blk_length
+
+    else
+      # I have yet to find any other BlocketteType in an IRIS stream/archive
+      # Similar reports from C. Trabant @ IRIS
+      error(string("No support for BlocketteType ", BlocketteType))
+    end
+  end
+  # =========================================================================
+  if nsk > 0x0000
+    skip(sid, Int(nsk))
+  end
+
+  # =========================================================================
+  # Data: Adapted from rdmseed.m by Francois Beauducel <beauducel@ipgp.fr>, Institut de Physique du Globe de Paris
+  (mo,dy) = j2md(Int16(yr), Int16(jd))
+
+  # Determine start time
+  dts = round(Int64, sμ*(d2u(DateTime(yr, mo, dy, HH, MM, SS, 0)) + ms + TC)) - te
+  if te == 0
+    S.t[channel] = Array{Int64,2}([1 dts; nsamp 0])
+  else
+    if v > 1
+      println(STDOUT, "Old end = ", te, ", New start = ", d2u(DateTime(yr, mo, dy, HH, MM, SS, 0)) + ms + TC, ", diff = ", dts, " μs")
+    end
+    S.t[channel] = S.t[channel][1:end-1,:]
+    if dts > round(Int64, dt*sμ)
+      S.t[channel] = vcat(S.t[channel], [length(S.x[channel])+1 dts])
+    end
+    S.t[channel] = vcat(S.t[channel], [length(S.x[channel])+nsamp 0])
+  end
+
+  x = Array{Float64,1}(nsamp)
+
+  # ASCII
+  if fmt == 0x00
+    x = map(Float64, read(sid, Int8, nx-OffsetBeginData))
+
+  # Int16
+  elseif fmt in [0x01, 0x03, 0x04, 0x05]
+    if fmt == 0x01
+      T = Int16
+    elseif fmt == 0x03
+      T = Int32
+    elseif fmt == 0x04
+      T = Float32
+    elseif fmt == 0x05
+      T = Float64
+    end
+    d = read(sid, T, div(nx-OffsetBeginData,sizeof(T)))
+    if swap
+      d = [ntoh(i) for i in d]
+    end
+    x = map(Float64, d)
+
+  # Steim1 or Steim2
+  elseif fmt in [0x0a, 0x0b]
+    nf = div(nx-OffsetBeginData,0x0040)
+    frame32 = transpose(read(sid, UInt32, 16, nf))
+
+    # Check for byte swap
+    if swap && wo == 0x01
+      for i = 1:1:size(frame32,1)
+        for j = 1:1:size(frame32,2)
+          frame32[i,j] = bswap(frame32[i,j])
+        end
+      end
+    end
+    x0 = Float64(signed(frame32[1,2]))
+    xn = Float64(signed(frame32[1,3]))
+    k = 0
+
+    if fmt == 0x0a
+      for i = 1:1:nf
+        for j = 1:1:16
+          ff = (frame32[i,1] >> steimvals[j]) & 0x00000003
+          tmp = frame32[i,j]
+          if ff == 0x00000001
+            k = unpack!(x, k, tmp, 0x00, 0x08, 0x04)
+          elseif ff == 0x00000002
+            k = unpack!(x, k, tmp, 0x00, 0x10, 0x02)
+          elseif ff == 0x00000003
+            k+=1
+            x[k] = Float64(signed(tmp))
+          end
+        end
+      end
+
+    else
+      for i = 1:1:nf
+        for j = 1:1:16
+          ff = (frame32[i,1] >> steimvals[j]) & 0x00000003
+          tmp = frame32[i,j]
+          if ff == 0x00000001
+            k = unpack!(x, k, tmp, 0x00, 0x08, 0x04)
+          else
+            d = tmp >> 0x0000001e
+            if ff == 0x00000002
+              if d == 0x00000001
+                k+=1
+                x[k] = Float64(>>(signed(<<(tmp,2)), 2))
+              elseif d == 0x00000002
+                k = unpack!(x, k, tmp, 0x02, 0x0f, 0x02)
+              elseif d == 0x00000003
+                k = unpack!(x, k, tmp, 0x02, 0x0a, 0x03)
+              end
+            elseif ff == 0x00000003
+              if d == 0x00000000
+                k = unpack!(x, k, tmp, 0x02, 0x06, 0x05)
+              elseif d == 0x00000001
+                k = unpack!(x, k, tmp, 0x02, 0x05, 0x06)
+              else
+                k = unpack!(x, k, tmp, 0x04, 0x04, 0x07)
+              end
+            end
+          end
+        end
+      end
+    end
+
+    if wo != 1
+      x = flipdim(x,1)
+    end
+    x[1] = x0
+    cumsum!(x, x, 1)
+
+    # Check that we read correct # of samples
+    if length(x) != nsamp
+      warn(string("RDMSEED: data integrity -- extracted ", length(x), " points, expected ", nsamp, "!"))
+    end
+
+    # Check data values
+    if abs(x[end] - xn) > eps()
+      warn(string("RDMSEED: data integrity -- steim", fmt-0x09, " sequence #", SeqNo, " integrity check failed, last_data=", x[end], ", should be xn=", xn))
+    end
+  else
+    error(@sprintf("Decoding for fmt = %i NYI!",fmt))
+  end
+
+  # Append data
+  append!(S.x[channel], x)
+  return S
+end
+
+function parsemseed!(S::SeisData, sid::IO, swap::Bool, v::Int)
+  while !eof(sid)
+    parserec!(S, sid, swap, v)
+  end
+  return S
+end
+parsemseed(sid::IO, swap::Bool, v::Int) = (S = SeisData(); parsemseed!(S, sid, swap, v); return S)
 
 """
 S = readmseed(fname)
@@ -51,371 +353,20 @@ Read file fname in big-Endian mini-SEED format. Returns a SeisData structure.
 Note: Limited functionality; cannot currently handle full SEED files or most
 non-data blockettes.
 """
-function readmseed(fname::String; swap=false::Bool, v=false::Bool, vv=false::Bool)
-  nproc  = 0
-  ef     = 10
-  chno   = 1
-  S      = SeisData()
-
+function readmseed(fname::String; swap=false::Bool, v=0::Int)
+  S = SeisData()
   if isfile(fname)
     fid = open(fname, "r")
     skip(fid, 6)
     ftype = read(fid, Char)
     if search("DRMQ",ftype) == 0
-      error( "Scan failed due to invalid file type")
+      error("Scan failed due to invalid file type")
     end
     seek(fid, 0)
-    return parsemseed(S, fid, swap=swap, v=v, vv=vv, fclose=true)
+    parsemseed!(S, fid, swap, v)
+    close(fid)
   else
-    error(@printf("Invalid file name: %s\n",fname))
+    error("Invalid file name!")
   end
-  return S
-end
-
-"""
-parsemseed(Seis, sid)
-
-Parse stream `sid` of mini-SEED data. Assumes `sid` is a mini-SEED stream
-in big-Endian format. Modifies Seis, a SeisData object.
-
-"""
-function parsemseed(S::SeisData, sid::IO; swap=false::Bool, v=false::Bool, vv=false::Bool, fclose=true::Bool, fmt=10::Int, src="parsemseed,,"::String)
-  while !eof(sid)
-    parserec(S, sid, swap=swap, v=v, vv=vv, fmt=fmt, src=src)
-  end
-  fclose && close(sid)
-  return S
-end
-parsemseed(sid::IO; swap=false::Bool, v=false::Bool, vv=false::Bool, fclose=true::Bool, fmt=10::Int, src="parsemseed,,"::String) = (
-  S = SeisData();
-  parsemseed(S, sid, swap=swap, v=v, vv=vv, fclose=fclose, fmt=fmt, src=src);
-  return S)
-
-function parserec(S::SeisData, sid::IO; swap=false::Bool, v=false::Bool, vv=false::Bool, fmt=10::Int, src="parserec,,"::String)
-  L   = 0
-  nx  = 2^12
-  wo  = 1
-  p_start = position(sid)
-
-  # =========================================================================
-  # Fixed section of data header (48 bytes)
-  hdr                         = String(read(sid, UInt8, 20))
-  (yr,jd)                     = read(sid, UInt16, 2)
-  (HH,MM,SS,unused)           = read(sid, UInt8, 4)
-  (ms,nsamp)                  = read(sid, UInt16, 2)
-  (rateFac,rateMult)          = read(sid, Int16, 2)
-  (AFlag,IOFlag,DQFlag,NBlk)  = read(sid, UInt8, 4)
-  TimeCorrection              = read(sid, Int32)
-  (OffsetBeginData,NBos)      = read(sid, UInt16, 2)
-  SeqNo = hdr[1:6]
-  chid  = hdr[9:20]
-  # =========================================================================
-  # Fixed header
-
-  # Post-read header processing
-  if ((position(sid)-p_start) < 64 && (yr > 3010 || yr < 1950))
-    swap = true
-  end
-  if swap
-    yr               = ntoh(yr)
-    jd               = ntoh(jd)
-    ms               = ntoh(ms)
-    nsamp            = ntoh(nsamp)
-    rateFac          = ntoh(rateFac)
-    rateMult         = ntoh(rateMult)
-    TimeCorrection   = ntoh(TimeCorrection)
-    OffsetBeginData  = ntoh(OffsetBeginData)
-    NBos             = ntoh(NBos)
-  end
-  # Units of 0.0001 s...? Seriously?
-  TimeCorrection /= 1.0e4
-  ms /= 1.0e4
-  if vv
-    println("position = ", position(sid), ", OffsetBeginData = ", OffsetBeginData, ", NBos = ", NBos, " hdr = ", hdr)
-    println("time (y,j,h,m,s,ms) = ", yr, ", ", jd, ", ", HH, ", ", MM, ", ", SS, ", ", ms)
-    println("position = ", position(sid), ", NBos = ", NBos)
-  end
-  # Generate dt
-  if rateFac > 0 && rateMult > 0
-    dt = 1.0/Float64(rateFac*rateMult)
-  elseif rateFac > 0 && rateMult < 0
-    dt = -1.0*Float64(rateMult/rateFac)
-  elseif rateFac < 0 && rateMult > 0
-    dt = -1.0*Float64(rateFac/rateMult)
-  else
-    dt = Float64(rateFac*rateMult)
-  end
-  if vv
-    println("rateFac = ", rateFac, ", rateMult = ", rateMult, ", dt = ", dt)
-  end
-  # =========================================================================
-  # Update Seis if necessary
-  channel = find(S.name .== chid)
-  if isempty(channel)
-    seisdata_id = join([strip(chid[11:12]), strip(chid[1:5]),
-    strip(chid[6:7]), strip(chid[8:10])], '.')
-    push!(S, SeisChannel(name = chid, id = seisdata_id, fs = 1/dt, src=src))
-    channel = S.n
-    te = 0
-  else
-    # I assume fs doesn't change within a SeisData structure
-    channel = channel[1]
-    dt = 1/S.fs[channel]
-    te = sum(S.t[channel][:,2]) + length(S.x[channel])*round(Int,dt/μs)
-  end
-
-  # =========================================================================
-  # Blockettes
-  nsk = OffsetBeginData-48
-  for i = 1:1:NBlk
-    BlocketteType = ntoh(read(sid, UInt16))
-    vv && @printf(STDOUT, "Blockette %i of %i: type %i.\n", i, NBlk, BlocketteType)
-
-    if BlocketteType == 100
-      # [100] Sample Rate Blockette (12 bytes)
-      # V 2.3 – Introduced in  SEED Version 2.3
-      skip(sid, 2)
-      true_dt = ntoh(read(sid, Float32))
-      skip(sid, 4)
-      vv && @printf(STDOUT, "BlocketteType 100, with fs = %.3e.\n", true_dt)
-      nsk -= 12
-      # Not sure how to handle this, don't know units
-
-    elseif BlocketteType == 201
-      # [201] Murdock Event Detection Blockette (60 bytes)
-      # First encountered 2016-10-26
-      # Mostly irrelevant, but event detections might be useful
-      skip(sid, 16)
-      (eyr,ejd)           = read(sid, UInt16, 2)
-      (eHH,eMM,eSS,enull) = read(sid, UInt8, 4)
-      ems                 = read(sid, UInt16)
-      if swap
-        eyr               = ntoh(eyr)
-        ejd               = ntoh(ejd)
-        ems               = ntoh(ems)
-      end
-      ems /= 1.0e4
-      if !haskey(S.misc[channel], "Events")
-        S.misc[channel]["Events"] = Array{Int,1}()
-      end
-      emo,edy = j2md(eyr, ejd)
-      push!(S.misc[channel]["Events"],
-            d2u(DateTime(eyr, emo, edy, eHH, eMM, eSS, 0)) + ems + TimeCorrection)
-      skip(sid, 32)
-
-    elseif BlocketteType == 500
-      #  [500] Timing Blockette (200 bytes)
-      skip(sid, 1)
-      vco_correction = ntoh(read(sid, Float32))
-      time_of_exception = blk_time(sid, b=swap)           # This is a tuple
-      μsec = read(sid, Int8)
-      reception_quality = read(sid, UInt8)
-      exception_count = ntoh(read(sid, UInt16))
-      exception_type = ascii(read(io, UInt8, 16))
-      clock_model = ascii(read(io, UInt8, 32))
-      clock_status = ascii(read(io, UInt8, 128))
-      if vv
-        println("BlocketteType 500.")
-        println("VCO correction: ", vco_correction)
-        println("Time of exception: ", time_of_exception)
-        println("μsec: ", μsec)
-        println("reception quality: ", reception_quality)
-        println("exception_count: ", exception_count)
-        println("exception_type: ", exception_type)
-        println("clock_model: ", clock_model)
-        println("clock_status: ", clock_status)
-      end
-      nsk -= 200
-
-    elseif BlocketteType == 1000
-      # [1000] Data Only SEED Blockette (8 bytes)
-      # V 2.3 – Introduced in SEED Version 2.3
-      (null1, null2, fmt, wo, L, null3) = read(sid, UInt8, 6)
-      wob = parse(Int, string(wo))
-      wo  = wob
-      nx  = 2^L
-      nsk -= 8
-
-    elseif BlocketteType == 1001
-      # [1001] Data Extension Blockette  (8 bytes)
-      # V 2.3 – Introduced in SEED Version 2.3
-      skip(sid, 3)
-      mu = read(sid, UInt8)
-      skip(sid, 2)
-      TimeCorrection += mu/1.0e6
-      nsk -= 8
-
-    elseif BlocketteType == 2000
-      # [2000] Variable Length Opaque Data Blockette
-      # V 2.3 – Introduced in SEED Version 2.3
-      nextblk_pos = ntoh(read(sid, UInt16)) + p_start
-      blk_length = ntoh(read(sid, UInt16))
-      opaque_data_offset = ntoh(read(sid, UInt16))
-      record_number = ntoh(read(sid, UInt32))
-      (word_order, flags, n_header_fields)  = read(sid, UInt8, 3)
-      header_fields = collect(split(ascii(read(io, UInt8, opaque_data_offset-15)), '\~')[1:n_header_fields])
-      opaque_data = read(io, UInt8, blk_length - opaque_data_offset)
-      # Store in S.misc[i]
-      ri = string(record_number)
-      S.misc[channel][ri * "_flags"] = bits(flags)
-      S.misc[channel][ri * "_header"] = collect[header_fields]
-      S.misc[channel][ri * "_data"] = opaque_data
-      nsk -= blk_length
-
-    else
-      # I have yet to find any other BlocketteType in an IRIS stream/archive
-      # Similar reports from C. Trabant @ IRIS
-      error(@sprintf("No support for BlocketteType %i", BlocketteType))
-    end
-  end
-  # =========================================================================
-  if nsk > 0
-    skip(sid, nsk)
-  end
-
-
-  # =========================================================================
-
-  # =========================================================================
-  # Data: Adapted from rdmseed.m by Francois Beauducel <beauducel@ipgp.fr>,
-  #                                 Institut de Physique du Globe de Paris
-  mo,dy = j2md(yr, jd)
-
-  # Determine start time relative to end of data channel
-  ts = d2u(DateTime(yr, mo, dy, HH, MM, SS, 0)) + ms + TimeCorrection - te
-  if vv
-    @printf(STDOUT, "%s %04i %02i/%02i %02i:%02i:%02i.%03i, dt = %0.02e, Nsamp = %i, NBos = %i\n",
-                    hdr, yr, mo, dy, HH, MM, SS, ms*1.0e4, dt, nsamp, NBos)
-    #println("ts = ", ts, " te = ", te) # Not useful
-  end
-  if te  == 0
-    S.t[channel] = [1 round(Int,ts/μs); nsamp 0]
-  else
-    S.t[channel] = S.t[channel][1:end-1,:]
-    if ts-te > dt
-      S.t[channel] = [S.t[channel]; [length(S.x[channel])+1 ts-te]]
-    end
-    S.t[channel] = [S.t[channel]; [length(S.x[channel])+nsamp 0]]
-  end
-
-  # Data Read
-  if fmt == 0
-    # ASCII
-    d = read(sid, Cchar, nx - OffsetBeginData)
-  elseif fmt == 1
-    # INT16
-    dd = read(sid, Int16, Int(ceil((nx - OffsetBeginData)/2)))
-    d = ParseUnenc(dd, nsamp, swap)
-  elseif fmt == 2
-    # Int24
-    error("Int24 NYI")
-  elseif fmt == 3
-    # Int32
-    dd = read(sid, Int32, Int(ceil((nx - OffsetBeginData)/4)))
-    d = ParseUnenc(dd, nsamp, swap)
-  elseif fmt == 4
-    # Float
-    dd = read(sid, Float32, Int(ceil((nx - OffsetBeginData)/4)))
-    d = ParseUnenc(dd, nsamp, swap)
-  elseif fmt == 5
-    # Double
-    dd = read(sid, Float64, Int(ceil((nx - OffsetBeginData)/8)))
-    d = ParseUnenc(dd, nsamp, swap)
-  elseif fmt == 10 || fmt == 11
-    # Steim1 or Steim2 is the default; I haven't coded Steim3 because I've
-    # never seen it and have no reason to believe it's in use.
-    steim = find(fmt.==[10,11])[1]
-    frame32 = read(sid, UInt32, 16, Int((nx - OffsetBeginData)/64))
-
-    # Check for byte swap
-    if swap && wo == 1
-      for i = 1:1:size(frame32,1)
-        for j = 1:1:size(frame32,2)
-          frame32[i,j] = bswap(frame32[i,j])
-        end
-      end
-    end
-
-    # Get and parse nibbles
-    vals = repmat(flipdim(collect(UInt32(0):UInt32(2):UInt32(30)),1), 1, size(frame32,2))
-    nibbles = (repmat(frame32[1,:]', 16, 1) .>> vals) & 3
-
-    x0 = bitsplit(frame32[2,1],32,32)[1]
-    xn = bitsplit(frame32[3,1],32,32)[1]
-
-    if steim == 1
-      ddd = NaN*ones(4,length(frame32))
-      for i = 1:1:3
-        k = find(nibbles .== i)
-        if !isempty(k)
-          ddd[1:2^(3-i),k] = bitsplit(frame32[k],32,2^(i+2))
-        end
-      end
-    elseif steim == 2
-      ddd = ones(7,length(frame32)).*NaN
-
-      k = find(nibbles .== 1)
-      if !isempty(k)
-        ddd[1:4,k] = bitsplit(frame32[k],32,8)
-      end
-
-      k = find(nibbles .== 2)
-      if !isempty(k)
-        dnib = frame32[k] .>> 30
-        for i = 1:1:3
-          kk = k[find(dnib .== i)]
-          if !isempty(kk)
-            ddd[1:i,kk] = bitsplit(frame32[kk],30,Int(30/i))
-          end
-        end
-      end
-
-      k = find(nibbles .== 3)
-      if !isempty(k)
-        dnib = frame32[k] .>> 30
-        kk = k[find(dnib .== 0)]
-        if !isempty(kk)
-          ddd[1:5,kk] = bitsplit(frame32[kk],30,6)
-        end
-        kk = k[find(dnib .== 1)]
-        if !isempty(kk)
-          ddd[1:6,kk] = bitsplit(frame32[kk],30,5)
-        end
-        kk = k[find(dnib .== 2)]
-        if !isempty(kk)
-          ddd[1:7,kk] = bitsplit(frame32[kk],28,4)
-        end
-      end
-    end
-
-    if wo != 1
-      ddd = flipdim(ddd,1)
-    end
-    dd = ddd[find(isnan(ddd).==false)]
-
-    # Check that we read correct # of samples
-    if length(dd) != nsamp
-      warn(@sprintf("RDMSEED: data integrity -- extracted %i points, expected %i!",
-      length(dd), nsamp))
-      nsamp = minimum([nsamp, length(dd)])
-    end
-    d = cumsum(cat(1,x0,dd[2:nsamp]),1)
-
-    # Check data values
-    if abs(d[end] - xn) > eps()
-      warn(string("RDMSEED: data integrity -- ",
-      @sprintf("steim%i sequence #%s ", steim, SeqNo),
-      @sprintf("integrity check failed, last_data=%d, Xn=%d.\n",
-      d[end], xn)))
-    end
-    if nsamp == 0
-      d = Float64[]
-    end
-  else
-    # I'll add more someday but I've literally never seen anything but steim
-    error(@sprintf("Decoding for fmt = %i NYI!",fmt))
-  end
-  # Append data
-  append!(S.x[channel], d)
   return S
 end

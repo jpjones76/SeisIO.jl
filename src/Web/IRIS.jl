@@ -46,7 +46,7 @@ function irisws(;net="UW"::String,
   w=false::Bool,
   s=0::Union{Real,DateTime,String},
   t=(-3600)::Union{Real,DateTime,String},
-  v=false::Bool,
+  v=0::Int,
   to=10::Real)
 
   if fmt == "mseed"
@@ -57,21 +57,25 @@ function irisws(;net="UW"::String,
   URLbase = "http://service.iris.edu/irisws/timeseries/1/query?"
   URLtail =  @sprintf("net=%s&sta=%s&loc=%s&cha=%s&starttime=%s&endtime=%s&scale=AUTO&demean=true&output=%s", net, sta, loc, cha, d0, d1, fmt)
   url = string(URLbase,URLtail)
-  v && println(url)
-
+  v>0 && println(url)
+  seis = SeisData()
   req = get(url, timeout=to, headers=webhdr())
-  w && savereq(req.data, fmt, net, sta, loc, cha, d0, d1, "R", c=true)
-  if fmt == "sacbl"
-    seis = read_sac_stream(IOBuffer(req.data))
-    seis.src = join([string("irisws/",fmt), u2d(time()), url], ',')
-  elseif fmt == "miniseed"
-    seis = parsemseed(IOBuffer(req.data), v=v)[1]
-    seis.src = join([string("irisws/",fmt), u2d(time()), url], ',')
-  else
-    if v
-      warn(@sprintf("Unusual format spec; returning unparsed data stream in format=%s",fmt))
+  if req.status == 200
+    w && savereq(req.data, fmt, net, sta, loc, cha, d0, d1, "R", c=true)
+    if fmt == "sacbl"
+      seis += read_sac_stream(IOBuffer(req.data))
+      seis.src[1] = url
+      note!(seis, "+src: irisws "*url)
+    elseif fmt == "miniseed"
+      seis += parsemseed(IOBuffer(req.data), false, v)[1]
+      seis.src[1] = url
+      note!(seis, "+src: irisws "*url)
+    else
+      if v
+        warn(@sprintf("Unusual format spec; returning unparsed data stream in format=%s",fmt))
+      end
+      seis = req.data
     end
-    seis = req.data
   end
   return seis
 end
@@ -88,9 +92,9 @@ Get (up to) the last hour of IRIS near-real-time data from every channel in chan
 
 Get synchronized trace data from the IRIS http server.
 
-    S = IRISget(chanlist, s=StartTime, t=Duration, sync=false, v=0, to=5, w=false)
+    S = IRISget(chanlist, s=StartTime, t=Duration, y=false, v=0, to=5, w=false)
 
-Get desynchronized trace data (not resampled) from IRIS http server with a 5-second timeout on HTTP requests.
+Get desynchronized trace data from IRIS http server with a 5-second timeout on HTTP requests.
 
 ## Arguments
 * `chanlist`: Array of channel identification strings, formated either [net].[sta].[chan] or [net]\_[sta]\_[chan]
@@ -113,8 +117,8 @@ Get desynchronized trace data (not resampled) from IRIS http server with a 5-sec
 function IRISget(chanlist::Array{String,1};
   s=0::Union{Real,DateTime,String},
   t=(-3600)::Union{Real,DateTime,String},
-  sync=true::Bool,
-  v=false::Bool,
+  y=true::Bool,
+  v=0::Int,
   w=false::Bool,
   to=10::Real)
 
@@ -123,13 +127,13 @@ function IRISget(chanlist::Array{String,1};
   dt = (DateTime(d1)-DateTime(d0)).value
   if length(chanlist)*dt > 1.0e13
     error("Request too large! Please limit requests to K*t < 1.0e7 seconds")
-  elseif v
+  elseif v>0
     @printf("Requesting %i seconds of data from %i channels.\n", dt,            length(chanlist))
   end
 
   # was: global seis = SeisData() ... if there are errors, revert
   seis = SeisData()
-  v && println("IRIS web fetch begins...")
+  v>0 && println("IRIS web fetch begins...")
   killflag = falses(K)
   for k = 1:1:K
     c = split(chanlist[k],['.','_'])
@@ -141,21 +145,77 @@ function IRISget(chanlist::Array{String,1};
       CCC = String(c[3])
     end
     try
-      S = irisws(net=String(c[1]), sta=String(c[2]), loc=LL, cha=CCC, fmt="mseed", s=d0, t=d1, v=v, to=to, w=w)
-      push!(seis, S[1])
+      seis += irisws(net=String(c[1]), sta=String(c[2]), loc=LL, cha=CCC, fmt="mseed", s=d0, t=d1, v=v, to=to, w=w)
     catch
       warn(@sprintf("Couldn't retrieve %s in specified time window (%s -- %s)!\n", chanlist[k], d0, d1))
     end
   end
-  if sync
-    v && println("Synchronizing data now...")
+  if y == true
+    v>0 && println("Synchronizing data now...")
     sync!(seis, s=d0, t=d1)
   end
   return seis
 end
 
 # Chanlist passed as a string
-IRISget(chanlist::String; s=0::Union{Real,DateTime,String}, t=3600::Union{Real,DateTime,String}, sync=true::Bool, v=false::Bool, w=false::Bool, to=10::Real) = IRISget(split(chanlist,','), s=s, t=t, sync=sync, v=v, w=w, to=to)
+IRISget(chanlist::String; s=0::Union{Real,DateTime,String}, t=3600::Union{Real,DateTime,String}, y=true::Bool, v=0::Int, w=false::Bool, to=10::Real) = IRISget(split(chanlist,','), s=s, t=t, y=y, v=v, w=w, to=to)
 
 # Chanlist passed as an array
-IRISget(chanlist::Array{String,2}; s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String},  sync=true::Bool,  v=false::Bool,  w=false::Bool,  to=10::Real) = IRISget([join(chanlist[i,:],'.') for i = 1:size(chanlist,1)], s=0::Union{Real,DateTime,String},  t=(-3600)::Union{Real,DateTime,String}, sync=true::Bool,  v=false::Bool,  w=false::Bool,  to=10::Real)
+IRISget(chanlist::Array{String,2}; s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String},  y=true::Bool, v=false::Bool, w=false::Bool, to=10::Real) = IRISget([join(chanlist[i,:],'.') for i = 1:size(chanlist,1)], s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String}, y=true::Bool,  v=0::Int, w=false::Bool, to=10::Real)
+
+
+"""
+    T = get_pha(Δ::Float64, z::Float64)
+
+Command-line interface to IRIS online travel time calculator, which calls TauP (1-3). Returns a matrix of strings.
+
+Specify `Δ` in decimal degrees, `z` in km.
+
+### Keyword Arguments and Default Values
+* `pha="ttall"`: comma-separated string of phases to return, e.g. "P,S,ScS"
+* `model="iasp91"`: velocity model
+* `to=10.0`: ste web request timeout, in seconds
+* `v=0`: verbosity
+
+### References
+(1) IRIS travel time calculator: https://service.iris.edu/irisws/traveltime/1/
+(2) TauP manual: http://www.seis.sc.edu/downloads/TauP/taup.pdf
+(3) Crotwell, H. P., Owens, T. J., & Ritsema, J. (1999). The TauP Toolkit:
+Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.
+"""
+function get_pha(Δ::Float64, z::Float64;
+  phases=""::String,
+  model="iasp91"::String,
+  to=10.0::Real,
+  v=0::Int)
+
+  # Generate URL and do web query
+  if isempty(phases)
+    #pq = ""
+    #pq = "&phases=p,s,P,S,pS,PS,sP,SP,Pn,Sn,PcP,Pdiff,Sdiff,PKP,PKiKP,PKIKP"
+    pq = "&phases=ttall"
+  else
+    pq = string("&phases=", phases)
+  end
+
+  url = string("http://service.iris.edu/irisws/traveltime/1/query?", "distdeg=", Δ, "&evdepth=", z, pq, "&model=", model, "&mintimeonly=true&noheader=true")
+  v > 0 && println(STDOUT, "url = ", url)
+  R = get(url, timeout=to, headers=webhdr())
+  if R.status == 200
+    req = readall(R)
+    v > 0 && println(STDOUT, "Request result:\n", req)
+
+    # Parse results
+    phase_data = split(req, '\n')
+    sa_prune!(phase_data)
+    Nf = length(split(phase_data[1]))
+    Np = length(phase_data)
+    Pha = Array{String,2}(Np, Nf)
+    for p = 1:Np
+      Pha[p,1:Nf] = split(phase_data[p])
+    end
+  else
+    Pha = Array{String,2}(0, 0)
+  end
+  return Pha
+end

@@ -1,70 +1,80 @@
-VERSION >= v"0.5.0" && __precompile__(true)
 module SeisIO
+using Blosc
+using DSP
+using LightXML
+using Requests: get
+VERSION >= v"0.5.0" && __precompile__(true)
 
-export SeisChannel, SeisData, findname, findid, hasid, hasname,# Types/SeisData.jl
-SeisHdr,                                                       # Types/SeisHdr.jl
-SeisEvent,                                                     # Types/SeisEvent.jl
-wseis,                                                         # Types/write.jl
-rseis,                                                         # Types/read.jl
-parsemseed, readmseed, parsesl, readmseed, parserec,           # Formats/mSEED.jl
+const datafields = [:name, :id, :fs, :gain, :loc, :misc, :notes, :resp, :src, :units, :t, :x]
+const hdrfields = [:id, :ot, :loc, :mag, :int, :mt, :np, :pax, :src, :notes, :misc]
+
+
+export SeisChannel, SeisData, SeisEvent, SeisHdr,              # Data Types
+batch_read,                                                    # Formats/batch_read.jl
+parsemseed!, parsemseed, readmseed, parserec!,                 # Formats/mSEED.jl
 rlennasc,                                                      # Formats/LennartzAsc.jl
 readsac, rsac, sachdr, writesac, wsac,                         # Formats/SAC.jl
 readsegy, segyhdr,                                             # Formats/SEGY.jl
 readuw, uwdf, uwpf, uwpf!,                                     # Formats/UW.jl
 readwin32,                                                     # Formats/Win32.jl
-batch_read,                                                    # Formats/BatchProc.jl
-FDSNget,                                                       # Web/FDSN.jl
+rseis, read_misc,                                              # Types/read.jl
+gapfill, gapfill!, ungap, ungap!, sync, sync!,                 # Types/sync.jl
+wseis, write_misc,                                             # Types/write.jl
+chansort, chansort!, findid, hasid, note!, pull,               # Types/SeisData.jl
+evq, FDSN_evt, FDSNget, FDSNsta,                                # Web/FDSN.jl
 IRISget, irisws,                                               # Web/IRIS.jl
-SeedLink, SeedLink!, has_sta, SLinfo,                          # Web/SeedLink.jl
-SL_parse, min_req,                                             # Web/SL_parse.jl
-get_sta,                                                       # Web/WebMisc.jl
-pull, getbandcode, prune!, purge, purge!, chan_sort, note,     # Utils/misc.jl
-autotap!, autotuk,                                             # Utils/processing.jl
-gapfill, ungap!, ungap, sync!, sync, gapfill!,                 # Utils/sync.jl
-randseischa, randseisdata, randseisevent, randseishdr,         # Utils/randseis.jl
-fctopz, translate_resp, equalize_resp!,                        # Utils/resp.jl
-parsetimewin, j2md, md2j, sac2epoch, u2d, d2u, tzcorr,         # Utils/time_aux.jl
-t_expand, xtmerge, xtjoin!
+SeedLink, SeedLink!, SL_info, has_sta, has_stream,             # Web/SeedLink.jl
+SL_config, SL_minreq!,                                         # Web/SL_config.jl
+webhdr, FDSNsta,                                               # Web/WebMisc.jl
+gapfill, gapfill!, gcdist, getbandcode, lsw,                   # Utils/
+fctopz, mkresp, translate_resp,                                # Utils/resp.jl
+d2u, j2md, md2j, parsetimewin, sac2epoch, timestamp, u2d,      # Utils/time.jl
+distaz!,                                                       # Misc/event_misc.jl
+autotap!, autotuk, equalize_resp!, namestrip,                  # Misc/processing.jl
+pol_sort, prune!, purge!,
+randseischannel, randseisdata, randseisevent, randseishdr      # Misc/randseis.jl
 
-# SeisData is designed as a universal, gap-tolerant "working" format for
-# geophysical timeseries data
-include("Types/SeisData.jl")      # SeisData, SeisChan classes for channel data
-include("Types/SeisHdr.jl")       # Dataless headers for events (SeisHdr)
-include("Types/SeisEvent.jl")     # Event header with data
-include("Types/read.jl")          # Read
-include("Types/write.jl")         # Write
-include("Types/show.jl")          # Display
+# Everything depends on time.jl
+include("Utils/time.jl")
 
-# Auxiliary time and file functions
-include("Utils/randseis.jl")      # Create random SeisData for testing purposes
-include("Utils/misc.jl")          # Utilities that don't fit elsewhere
-include("Utils/time_aux.jl")      # Time functions
-include("Utils/file_aux.jl")      # File functions
-include("Utils/resp.jl")          # Instrument responses
-include("Utils/sync.jl")          # Synchronization
-include("Utils/processing.jl")    # Very basic processing
+# Utilities that don't require SeisIO types to work
+include("Utils/autotuk.jl")
+include("Utils/bandcode.jl")
+include("Utils/gcdist.jl")
+include("Utils/lsw.jl")
+include("Utils/gap.jl")
+include("Utils/resp.jl")
 
-# Data converters
-include("Formats/SAC.jl")         # IRIS/USGS standard
-include("Formats/SEGY.jl")        # Society for Exploration Geophysicists
-include("Formats/mSEED.jl")       # Monolithic, but a worldwide standard
-include("Formats/UW.jl")          # University of Washington
-include("Formats/Win32.jl")       # NIED (Japan)
-include("Formats/LennartzAsc.jl") # Lennartz ASCII (mostly a readdlm wrapper)
-include("Formats/BatchProc.jl")   # Batch read
+# Types and core type functionality
+include("Types/SeisData.jl")
+include("Types/SeisChannel.jl")
+include("Types/SeisHdr.jl")
+include("Types/SeisEvent.jl")
+include("Types/read.jl")
+include("Types/show.jl")
+include("Types/sync.jl")
+include("Types/write.jl")
+
+# Miscellaneous SeisIO-dependent functions
+include("Misc/event_misc.jl")
+include("Misc/processing.jl")
+include("Misc/randseis.jl")
+
+# Data formats
+include("Formats/batch_read.jl")
+include("Formats/mSEED.jl")
+include("Formats/LennartzAsc.jl")
+include("Formats/SAC.jl")
+include("Formats/SEGY.jl")
+include("Formats/UW.jl")
+include("Formats/Win32.jl")
 
 # Web clients
-include("Web/IRIS.jl")            # IRISws command line client
 include("Web/FDSN.jl")
+include("Web/IRIS.jl")            # IRISws command line client
 include("Web/SeedLink.jl")
-include("Web/SL_parse.jl")
+include("Web/SLConfig.jl")
 include("Web/WebMisc.jl")         # Common functions for web data access
-
-# Submodule SeisPol
-module Events
-export evq, distaz!, get_pha, get_evt, get_sta
-include("Submodules/Events.jl")
-end
 
 module Polarization
 export seispol, polhist, seispol!, seis_orient!

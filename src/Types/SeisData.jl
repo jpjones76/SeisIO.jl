@@ -1,414 +1,261 @@
-# To do: Abstract type
-import Base.in
-import Base:getindex, setindex!, append!, deleteat!, delete!, +, -, isequal,
-search, push!, merge!,  length, start, done, next, size, sizeof, ==,
-filter, filt!, sort!, sort, isempty
+import Base:in, getindex, setindex!, append!, deleteat!, delete!, +, -, isequal,
+merge!, merge, length, start, done, next, size, sizeof, ==, isempty
 
-# No way to define a SeisData as an array of SeisChannels; indexing relations
-# become impossible. BUT we CAN define a SeisChannel as a single-channel
-# SeisData instance
-"""
-    S = SeisChannel()
-
-Create a single channel instance of univariate geophysical data. See
-documentation for information on fields.
-"""
-type SeisChannel
-  name::String
-  id::String
-  fs::Float64
-  gain::Float64
-  loc::Array{Float64,1}
-  misc::Dict{String,Any}
-  notes::Array{String,1}
-  resp::Array{Complex{Float64},2}
-  src::String
-  t::Array{Int64,2}
-  x::Array{Float64,1}
-  units::String
-
-  SeisChannel(;name=""::String,
-          id=""::String,
-          fs=0.0::Float64,
-          gain=1.0::Float64,
-          loc=Array{Float64,1}()::Array{Float64,1},
-          misc=Dict{String,Any}()::Dict{String,Any},
-          notes=Array{String,1}()::Array{String,1},
-          resp=Array{Complex{Float64},2}(0,2)::Array{Complex{Float64},2},
-          src=""::String,
-          t=Array{Int64,2}(0,2)::Array{Int64,2},
-          x=Array{Float64,1}()::Array{Float64,1},
-          units=""::String) = begin
-     return new(name, id, fs, gain, loc, misc, notes, resp, src, t, x, units)
-  end
-end
-
-
-"""
-    S = SeisData()
-
-Create a multichannel structure for univariate geophysical data. A SeisData
-structure has the same fields as a SeisChannel, but values for individual
-channels cannot be set at creation.
-
-"""
+# This is type-stable for S = SeisData() but not for keyword args
 type SeisData
   n::Int64
+  c::Array{TCPSocket,1}                       # connections
   name::Array{String,1}                       # name
   id::Array{String,1}                         # id
+  loc::Array{Array{Float64,1},1}              # loc
   fs::Array{Float64,1}                        # fs
   gain::Array{Float64,1}                      # gain
-  loc::Array{Array{Float64,1},1}              # loc
+  resp::Array{Array{Complex{Float64},2},1}    # resp
+  units::Array{String,1}                      # units
   misc::Array{Dict{String,Any},1}             # misc
   notes::Array{Array{String,1},1}             # notes
-  resp::Array{Array{Complex{Float64},2},1}    # resp
   src::Array{String,1}                        # src
   t::Array{Array{Int64,2},1}                  # time
   x::Array{Array{Float64,1},1}                # data
-  units::Array{String,1}                      # units
 
-  SeisData(;
-    n=0::Int64,
-    name=Array{String,1}(),                   # name
-    id=Array{String,1}(),                     # id
-    fs=Array{Float64,1}(),                    # fs
-    gain=Array{Float64,1}(),                  # gain
-    loc=Array{Array{Float64,1},1}(),          # loc
-    misc=Array{Dict{String,Any},1}(),         # misc
-    notes=Array{Array{String,1},1}(),         # notes
-    resp=Array{Array{Complex{Float64},2},1}(),# resp
-    src=Array{String,1}(),                    # src
-    t=Array{Array{Int64,2},1}(),              # time
-    x=Array{Array{Float64,1},1}(),            # data
-    units=Array{String,1}()                   # units
-    ) = begin
-      return new(n, name, id, fs, gain, loc, misc, notes, resp, src, t, x, units)
+  function SeisData(n::Int64)
+    n = max(n,0)
+    name = Array{String,1}(n)
+    id = Array{String,1}(n)
+    notes = Array{Array{String,1},1}(n)
+    src = Array{String,1}(n)
+    misc = Array{Dict{String,Any},1}(n)
+    t = timestamp()
+    n0 = tnote("Channel initialized")
+    s0 = "SeisData"
+    for i = 1:n
+      name[i] = string("Channel ",i)
+      notes[i] = Array{String,1}([identity(n0)])
+      src[i] = identity(s0)
+      misc[i] = Dict{String,Any}()
+    end
+    new(n,
+      Array{TCPSocket,1}(0),
+      name,
+      collect(repeated("....",n)),
+      collect(repeated(zeros(Float64,5),n)),
+      collect(repeated(0.0,n)),
+      collect(repeated(1.0,n)),
+      collect(repeated(Array{Complex{Float64}}(0,2),n)),
+      collect(repeated("",n)),
+      misc,
+      notes,
+      src,
+      collect(repeated(Array{Int64,2}(0,2),n)),
+      collect(repeated(Array{Float64,1}(0),n)))
   end
 
-  function SeisData(T...)
+  function SeisData(U...)
     S = SeisData()
-    for i = 1:1:length(T)
-      if isa(T[i],SeisChannel) || isa(T[i],SeisData)
-        merge!(S, T[i])
+    for i = 1:1:length(U)
+      if isa(U[i],SeisData)
+        merge!(S, U[i])
       else
-        warn(string("Tried to join non-SeisChannel into SeisData (arg",
-          @sprintf("%i", i), "); skipped."))
+        warn(string("Tried to join incompatible type into SeisData at arg ", i, "; skipped."))
       end
     end
     return S
   end
 end
-
-# don't include S.n when looping over the arrays of S
-datafields(S::Union{SeisChannel,SeisData}) = (filter(i -> i ∉ [:n], fieldnames(S)))
-headerfields(S::Union{SeisChannel,SeisData}) = (filter(i ->
-  i ∉ [:n, :name, :t, :x, :misc, :notes, :src], fieldnames(S)))
+SeisData() = SeisData(0)
 
 # ============================================================================
-# Indexing, search, iteration, size
+# Indexing, searching, iteration, size
 # s = S[j] returns a SeisChannel struct
 # s = S[i:j] returns a SeisData struct
 # S[i:j].foo = bar won't work
 
-# Array of hashes for each header field
-function headerhash(S::Union{SeisData,SeisChannel})
-  F = headerfields(S)
-  N = isa(S,SeisChannel) ? 1 : S.n
-  H = Array{UInt64,2}(length(F), N)
-  for (i,v) in enumerate(F)
-    F = getfield(S, v)
-    for n = 1:N
-      H[i,n] = hash(F[n])
-    end
+function getindex(S::SeisData, J::Array{Int,1})
+  U = SeisData()
+  [setfield!(U, f, getfield(S,f)[J]) for f in datafields]
+  setfield!(U, :n, length(J))
+  return U
+end
+getindex(S::SeisData, J::UnitRange) = getindex(S, collect(J))
+
+in(s::String, S::SeisData) = in(s, S.id)
+findid(n::String, S::SeisData) = findfirst(S.id .== n)
+findid(S::SeisData, n::String) = findfirst(S.id .== n)
+findid(S::SeisData, T::SeisData) = [findfirst(S.id .== T.id[i]) for i=1:1:T.n]
+hasid(s::String, S::SeisData) = in(s, S.id)
+hasname(s::String, S::SeisData) = in(s, S.name)
+
+setindex!(S::SeisData, U::SeisData, J::Array{Int,1}) = (
+  [(getfield(S, f))[J] = getfield(U, f) for f in datafields];
+  return S)
+setindex!(S::SeisData, U::SeisData, J::UnitRange) = setindex!(S, U, collect(J))
+setindex!(S::SeisData, U::SeisData, j::Int) = setindex!(S, U, [j])
+
+function isempty(S::SeisData)
+  if S.n == 0
+    return true
+  else
+    return minimum([isempty(S.x[i]) for i=1:1:S.n]::Array{Bool,1})
   end
-  return H
 end
 
-# alias "in" to match on ID
-in(id::AbstractString, S::SeisData) = in(id, S.id)
-findname(n::AbstractString, S::SeisData) = findfirst(S.name .== n)
-findname(S::SeisData, n::AbstractString) = findfirst(S.name .== n)
-findid(n::AbstractString, S::SeisData) = findfirst(S.id .== n)
-findid(S::SeisData, n::AbstractString) = findfirst(S.id .== n)
-findid(S::SeisData, T::SeisChannel) = findfirst(S.id .== T.id)
-hasid(id::AbstractString, S::SeisData) = in(id, S.id)
-hasname(name::AbstractString, S::SeisData) = in(name, S.name)
+isequal(S::SeisData, U::SeisData) = minimum([hash(getfield(S,i))==hash(getfield(U,i)) for i in datafields]::Array{Bool,1})
+==(S::SeisData, U::SeisData) = isequal(S,U)::Bool
 
-# getindex returns a SeisChannel
-function getindex(S::SeisData, J::Union{Range,Array{Integer,1}})
-  isa(J, Range) && (J = collect(J))
-  T = SeisData()
-  local U = deepcopy(S)
-  [push!(T, U[j]) for j in J]
-  return T
+function sizeof(S::SeisData)
+  N = Array{Int,1}(length(datafields))
+  M = Array{Int,1}(length(datafields))
+  [M[i] = sizeof(getfield(S,f)) for (i,f) in enumerate(datafields)]
+  [N[i] = sum([M[j] = sizeof(V) for (j,V) in enumerate(getfield(S,f))]) for (i,f) in enumerate(datafields)]
+  return sum(N) + sum(M)
 end
+# ============================================================================
 
-# I can only make this work with a dict
-function getindex(S::SeisData, j::Int)
-  A = Dict{String,Any}()
-  [A[string(v)] = deepcopy(getfield(S, v)[j]) for v in datafields(S)]
-  return SeisChannel(name=A["name"],
-                 id=A["id"],
-                 fs=A["fs"],
-                 gain=A["gain"],
-                 loc=A["loc"],
-                 misc=A["misc"],
-                 notes=A["notes"],
-                 resp=A["resp"],
-                 src=A["src"],
-                 t=A["t"],
-                 x=A["x"],
-                 units=A["units"])
-end
+# ============================================================================
+# Append, delete, sort
+append!(S::SeisData, U::SeisData)  = (
+  [setfield!(S, i, append!(getfield(S,i), getfield(U,i))) for i in datafields];
+  S.n += U.n;
+  return S)
 
-# overwrite a SeisData channel with a SeisChannel
-setindex!(S::SeisData, T::SeisChannel, i::Int) =
-  #([S.(v)[i] = T.(v) for v in datafields(T)])
-  ([S.(v)[i] = getfield(T,v) for v in datafields(T)])
+# Delete methods are aliased to -
+deleteat!(S::SeisData, j::Int)          = ([deleteat!(getfield(S, i),j) for i in datafields]; S.n -= 1; return S)
+deleteat!(S::SeisData, J::UnitRange)    = (collect(J); [deleteat!(S, j) for j in sort(J, rev=true)]; return S)
+deleteat!(S::SeisData, J::Array{Int,1}) = ([deleteat!(S, j) for j in sort(J, rev=true)]; return S)
+delete!(S::SeisData, j::Int)            = deleteat!(S, j)
+delete!(S::SeisData, J::UnitRange)      = deleteat!(S, J)
+delete!(S::SeisData, J::Array{Int,1})   = deleteat!(S, J)
+delete!(S::SeisData, r::Regex)          = deleteat!(S, find([ismatch(r, i) for i in S.id]))
+delete!(S::SeisData, s::String)         = delete!(S, Regex(s))
+-(S::SeisData, i::Int)                  = deleteat!(S,i)  # By channel #
+-(S::SeisData, J::Array{Int,1})         = deleteat!(S,J)  # By array of channel #s
+-(S::SeisData, J::Range)                = deleteat!(S,J)  # By range of channel #s
+-(S::SeisData, s::String)               = delete!(S,s)    # By channel id string
+-(S::SeisData, r::Regex)                = delete!(S,r)    # By channel id regex
 
-# overwrite a range of SeisData channels with another SeisData struct
-function setindex!(S::SeisData, T::SeisData, I::Range)
-  length(I) != T.n && error("Range of indices exceeds size of T")
-  for value in datafields(T)
-    for (i,j) in enumerate(I)
-      S.(value)[j] = T.(value)[i]
-    end
-  end
+# Extract
+"""
+    T = pull(S::SeisData, n::String)
+
+Extract the first channel named `n` from `S` and return it as a new SeisData structure. The corresponding channel in `S` is deleted.
+
+    T = pull(S::SeisData, i::integer)
+
+Extract channel `i` from `S` as a new SeisData struct, deleting it from `S`.
+"""
+pull(S::SeisData, n::String) = (i = findid(n, S); T = deepcopy(getindex(S, i));
+  deleteat!(S,i); note!(T,"Extracted from another SeisData object"); return T)
+pull(S::SeisData, J::UnitRange) = (T = deepcopy(getindex(S, J)); deleteat!(S,J);
+    note!(T,"Extracted from a SeisData object"); return T)
+pull(S::SeisData, J::Array{Integer,1}) = (T = deepcopy(getindex(S, J)); deleteat!(S,J);
+        note!(T,"Extracted from a SeisData object"); return T)
+
+
+# Sorting
+"""
+chansort!(S::SeisData, [rev=false])
+
+In-place sort of channels in object S by `S.id`. Specify `rev=true` to reverse the sort order.
+"""
+function chansort!(S::SeisData; rev=false::Bool)
+  j = sortperm(S.id, rev=rev)
+  [setfield!(S,i,getfield(S,i)[j]) for i in datafields]
   return S
 end
-
-isempty(t::SeisChannel) = minimum([isempty(t.(i)) for i in fieldnames(t)])
-isempty(t::SeisData) = (t.n == 0)
-length(t::SeisData) = t.n
-size(S::SeisData) = println(summary(S))
-function sizeof(S::SeisData)
-  #   n   fs=1, gain=1, loc=5, name=26, id=15, units=26, src=26
-  n = 1 + S.n*100
-  for i = 1:S.n
-    n += (sizeof(S.resp[i]) + sizeof(S.t[i]) + sizeof(S.x[i]))
-    K = sort(collect(keys(S.misc[i])))
-    n += length(join(K,","))
-    for k in K
-      v = S.misc[i][k]
-      if isa(v, Array)
-        if isa(v[1], AbstractString)
-          n += length(join(v[:]))
-        elseif isa(v[1], Number)
-          n += sizeof(v)
-        end
-      elseif isa(v, Number)
-        n += sizeof(v)
-      elseif isa(v, AbstractString)
-        n += length(v)
-      end
-    end
-  end
-  return n
-end
-function sizeof(S::SeisChannel)
-  #   fs=1, gain=1, loc=5, name=12, id=15, units=16, src=16
-  n = 100 + sizeof(S.resp) + sizeof(S.t) + sizeof(S.x)
-  K = sort(collect(keys(S.misc)))
-  n += length(join(K,","))
-  for k in K
-    v = S.misc[k]
-    if isa(v, Array)
-      if isa(v[1], AbstractString)
-        n += length(join(v[:]))
-      elseif isa(v[1], Number)
-        n += sizeof(v)
-      end
-    elseif isa(v, Number)
-      n += sizeof(v)
-    elseif isa(v, AbstractString)
-      n += length(v)
-    end
-  end
-  return n
-end
-
-# ============================================================================
-# Equality
-isequal(S::SeisChannel, T::SeisChannel) = (
-  minimum([isequal(hash(getfield(S,v)), hash(getfield(T,v)))
-    for v in fieldnames(S)]))
-isequal(S::SeisData, T::SeisData) = (
-  minimum([isequal(hash(getfield(S, v)), hash(getfield(T, v)))
-    for v in fieldnames(S)]))
-
-# ============================================================================
-
-# ============================================================================
-# Append, delete
-push!(S::SeisData, T::SeisChannel) = ([push!(getfield(S,i),getfield(T,i)) for i in fieldnames(T)]; S.n += 1)
-append!(S::SeisData, T::SeisData) = ([push!(S,T[i]) for i = 1:S.n])
-deleteat!(S::SeisData, j::Int) = ([deleteat!(getfield(S, i),j) for i in datafields(S)];
-  S.n -= 1; return S)
-deleteat!(S::SeisData, J::Range) = (collect(J); [deleteat!(S, j)
-  for j in sort(J, rev=true)]; return S)
-deleteat!(S::SeisData, J::Array{Int,1}) = ([deleteat!(S, j)
-  for j in sort(J, rev=true)]; return S)
-delete!(S::SeisData, j::Int) = deleteat!(S, j)
-delete!(S::SeisData, J::Range) = deleteat!(S, J)
-delete!(S::SeisData, J::Array{Int,1}) = deleteat!(S, J)
+chansort(S::SeisData; rev=false::Bool) = (T = deepcopy(S); j = sortperm(T.id, rev=rev); [setfield!(T,i,getfield(T,i)[j]) for i in datafields]; return(T))
 
 # ============================================================================
 # Merge and extract
 # Dealing with sparse time difference representations
 
-
 """
-    merge!(S::SeisChannel, T::SeisChannel)
+    merge!(S::SeisData, U::SeisData)
 
-Merge two SeisChannel structures. For data points, a single-pass merge-and-prune
-operation is applied to data value pairs whose timestamps are separated by less
-than half the sampling interval; times ti, tj corresponding to merged samples
-xi, xj are averaged.
+Merge two SeisData structures. For timeseries data, a single-pass merge-and-prune operation is applied to value pairs whose sample times are separated by less than half the sampling interval; pairs of non-NaN x_i, x_j with |t_i-t_j| < (1/2*S.fs) are averaged.
+
+`merge!` always invokes `chansort!` to ensure the "+" operator is commutative.
 """
-function merge!(S::SeisChannel, U::SeisChannel)
-  S.id == U.id || error("Channel header mismatch!")
+function merge!(S::SeisData, U::SeisData)
+  J = Array{Int64,1}()
+  for j = 1:1:U.n
+    merged = false
+    for i = 1:1:S.n
+      if S.id[i] == U.id[j]
+        # Merge condition: same fs, neither empty
+        if S.fs[i] == U.fs[j] && !isempty(U.x[j]) && !isempty(S.x[i])
+          x = deepcopy(U.x[j])::Array{Float64,1}
+          if S.gain[i] != U.gain[j]
+            x = x.*(S.gain[i]/U.gain[j])
+          end
+          V = xtmerge(S.t[i], U.t[j], S.x[i], x, S.fs[i])
+          S.t[i] = deepcopy(V[1])
+          S.x[i] = deepcopy(V[2])
+          merge!(S.misc[i], U.misc[j])
+          S.notes[i] = Array{String,1}([S.notes[i]; U.notes[j]])
+          notestr = string("Merged ", length(x), " samples")
+          if S.name[i] != U.name[j]
+            notestr = string(notestr, " (pre-merge channel name was ",U.name[j],")")
+          end
+          note!(S, i, notestr)
+          merged = true
 
-  # Empty channel(s)
-  isempty(U.x) && (return S)
-  isempty(S.x) && ([setfield!(S,i,deepcopy(getfield(U,i))) for i in fieldnames(S)]; return S)
+        # Replace an empty S.x with the corresponding U.x
+        elseif isempty(S.x[i])
+          S.x[i]    = deepcopy(U.x[j])
+          S.t[i]    = deepcopy(U.t[j])
+          S.fs[i]   = copy(U.fs[j])
+          S.gain[i] = copy(U.gain[j])
+          merged = true
 
-  # Two full channels
-  S.fs != U.fs && error("Sampling frequency mismatch; correct manually.")
-  T = deepcopy(U)
-  if !isapprox(S.gain,T.gain)
-    (T.x .*= (S.gain/T.gain); T.gain = copy(S.gain))      # rescale T.x to match S.x
-  end
-  (S.t, S.x) = xtmerge(S.t, S.x, T.t, T.x, T.fs)          # merge time and data
-  merge!(S.misc, T.misc)                                  # merge misc
-  S.notes = cat(1, S.notes, T.notes)                      # merge notes
+        # Warn if U.x is empty, but do nothing else
+        elseif isempty(U.x[j])
+          warn(string("Trying to merge empty (dataless) channel ", U.id[j], "; ignored."))
+          merged = true
 
-  note(S, @sprintf("Merged %i samples", length(T.x)))
-
-  # Source logging
-  if isempty(S.src)
-    if !isempty(U.src)
-      S.src = deepcopy(U.src)
+        # Warn of possibly strange behavior with inequal fs
+        elseif S.fs[i] != U.fs[j]
+          warn(string("Tried to merge two of ", U.id[j], " with different fs values; the second will be appended."))
+        end
+        if !isempty(U.src[j])
+          note!(S, string("+src:", U.src[j]))
+        end
+      end
     end
-    note(S, "Old src was empty")
-  else
-    if isempty(U.src)
-      note(S, "Merged data had empty src")
-    else
-      src = split(S.src,",")
-      src[1]*="+"
-      S.src = join(src,',')
-      note(S, string("+src: ",U.src))
-    end
-  end
-
-  return S
-end
-merge(S::SeisChannel, T::SeisChannel) = (U = deepcopy(S); merge!(S,T); return(S))
-
-"""
-    merge!(S::SeisData, T::SeisChannel)
-
-Merge a SeisChannel structure into a SeisData structure.
-"""
-function merge!(S::SeisData, U::SeisChannel)
-  isempty(U.x) && return S
-  i = find(S.id .== U.id)
-  (isempty(i) || isempty(S.x)) && return push!(S, U)
-  i = i[1]
-  S.fs[i] != U.fs && return push!(S,U)
-  T = deepcopy(U)
-  if !isapprox(S.gain[i],T.gain)
-    (T.x .*= (S.gain[i]/T.gain); T.gain = copy(S.gain[i]))        # rescale T.x to match S.x
-  end
-  (S.t[i], S.x[i]) = xtmerge(S.t[i], S.x[i], T.t, T.x, T.fs)      # time, data
-  merge!(S.misc[i], T.misc)                                       # misc
-  S.notes[i] = cat(1, S.notes[i], T.notes)                        # notes
-  note(S, i, @sprintf("Merged %i samples", length(T.x)))
-  return S
-end
-
-"""
-    merge!(S::SeisData, T::SeisData)
-
-Merge SeisData structure `T` into SeisData structure `S`. If multiple channels
-of `S` have identical headers to channel `T[i]`, `T[i]` is only merged into the
-first match.
-"""
-function merge!(S::SeisData, T::SeisData)
-  isempty(T.x) && (return S)
-  for i = 1:T.n
-    try
-      merge!(S, T[i])
-    catch err
-      warn(err)
-      push!(S, T[i])
+    # If still unmerged at i=S.n, push index to J
+    if !merged
+      push!(J,j)
     end
   end
-  return S
+  if !isempty(J)
+    append!(S, U[J])
+  end
+  return chansort!(S)
 end
+
+merge(S::SeisData, U::SeisData) = (return merge!(deepcopy(S),U))
++(S::SeisData, U::SeisData) = (return merge!(S,U))
 
 # ============================================================================
-# Arithmetic operations
-
-# Adding a SeisChannel to SeisData merges it
-+(S::SeisData, T::SeisChannel) = (U = deepcopy(S); merge!(U,T); return U)
-+(S::SeisData, T::SeisData) = (U = deepcopy(S); merge!(U,T); return U)
-function +(S::SeisChannel, T::SeisChannel)
-  if S.id == T.id
-    U = deepcopy(S)
-    return merge!(U,T)
-  else
-    return SeisData(S, T)
-  end
+# Annotation
+function tnote(s::String)
+  str = string(timestamp(), ": ", s)
+  L = min(length(str),256)
+  return str[1:L]
 end
 
-# Adding a string to SeisData writes a note; if the string begins with a
-# channel name, the note is restricted to the given channel, else it's
+# Adding a string to SeisData writes a note; if the string mentions a channel
+# name or ID, the note is restricted to the given channels(s), else it's
 # added to all channels
-function +(S::SeisData, s::String)
-  local T = deepcopy(S)
-  name,note = split(s, r"[:]", limit=2)
-  t = split(string(now()), 'T')[2]
-  try
-    i = findname(name, S)
-    cat(1, T.notes[i], string(t, "  ", note))
-  catch
-    try
-      i = findid(name, S)
-      cat(1, T.notes[i], string(t, "  ", note))
-    catch
-      [cat(1, T.notes[i], string(t, "  ", note)) for i in 1:S.n]
+function note!(S::SeisData, s::String)
+  j = find(maximum([[findfirst(contains(s,i)) for i in S.name] [findfirst(contains(s,i)) for i in S.id]],2).>0)
+  if !isempty(j)
+    [push!(S.notes[i], tnote(s)) for i in j]
+  else
+    for i = 1:1:S.n
+      push!(S.notes[i], tnote(s))
     end
   end
-  return T
+  return S
 end
 
-# Adding a string to a SeisChannel simply appends it to the "notes" setion
-+(S::SeisChannel, s::String) = cat(1, S.notes, string(string(now()), 'T')[2], "  ", s)
-
-# Rules for deleting
--(S::SeisData, i::Int) = deleteat!(S,i)                       # By channel #
--(S::SeisData, J::Array{Int64,1}) = deleteat!(S,J)            # By array of channel #s
--(S::SeisData, J::Range) = deleteat!(S,J)                     # By range of channel #s
--(S::SeisData, str::String) = ([deleteat!(S,k) for k in unique([find(S.id .== str); find(S.name .== str)])]; return S) #Name or ID match
--(S::SeisData, T::SeisChannel) = ([deleteat!(S,i) for i in find(S.id .== T.i)]; return S) # By SeisChannel
-
-# Tests for equality
-==(S::SeisChannel, T::SeisChannel) = isequal(S,T)
-==(S::SeisData, T::SeisData) = isequal(S,T)
-
-# Sorting
-"""
-    sort!(S, [rev=false])
-
-In-place sort of channels in SeisData object S by S.id. Specify rev=true
-to reverse the sort order.
-"""
-sort!(S::SeisData; rev=false::Bool) = (j = sortperm(S.id, rev=rev); [setfield!(S,i,getfield(S,i)[j]) for i in datafields(S)])
-
-"""
-    T = sort(S, [rev=false])
-
-Sort channels in SeisData object S by S.id. Specify rev=true for reverse order.
-"""
-sort(S::SeisData; rev=false::Bool) = (T = deepcopy(S); j = sortperm(T.id, rev=rev); [setfield!(T,i,getfield(T,i)[j]) for i in datafields(T)]; return(T))
+note!(S::SeisData, i::Integer, s::String) = push!(S.notes[i], tnote(s))
