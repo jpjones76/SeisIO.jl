@@ -24,13 +24,13 @@ function win32dict(Nh::UInt16, cinfo::String, hexID::String, StartTime::Float64,
   c = split(cinfo)
   k["scale"] = Float64(parse(c[13]) / (parse(c[8]) * 10^(parse(c[12])/20)))
   k["lineDelay"] = Float32(parse(c[3])/1000)
-  k["unit"] = c[9]
+  k["unit"] = String(c[9])
   k["fc"] = Float32(1/parse(c[10]))
   k["hc"] = Float32(parse(c[11]))
   k["loc"] = [parse(c[14]), parse(c[15]), parse(c[16])]
   k["pCorr"] = parse(Float32, c[17])
   k["sCorr"] = parse(Float32, c[18])
-  k["comment"] = length(c) > 18 ? c[19] : ""
+  k["comment"] = length(c) > 18 ? String(c[19]) : ""
   return k
 end
 
@@ -48,15 +48,15 @@ end
 """
     S = readwin32(filestr, chanfile)
 
-Read all win32 files matching pattern `filestr` into SeisData object `S` using channel file `chanfile`.
+Read all win32 files matching pattern `filestr` into SeisData object `S`, with channel info stored in `chanfile`.
 """
-function readwin32(filestr::String, cf::String; v=false::Bool)
+function readwin32(filestr::String, cf::String; v=0::Int)
   Chans = readlines(cf)
   seis = Dict{String,Any}()
   files = lsw(filestr)
   nf = 0
   for fname in files
-    v && println("Processing ", fname)
+    v>0 && println("Processing ", fname)
     fid = open(fname, "r")
     skip(fid, 4)
     while !eof(fid)
@@ -151,15 +151,8 @@ function readwin32(filestr::String, cf::String; v=false::Bool)
         ei = seis[i]["gapEnd"][j]
         seis[i]["data"][si:ei] = av
       end
-      warn(@sprintf("Replaced %i missing data in %s with %0.2f",
-            seis[i]["seisNN"], i, av))
-    end
-    for j in ("seisN", "seisNN", "seisSum", "OldTime", "gapStart", "gapEnd")
-      delete!(seis[i],j)
     end
   end
-  seis["fname"] = filestr
-  seis["cfile"] = cf
 
   S = SeisData()
   K = sort(collect(keys(seis)))
@@ -168,33 +161,38 @@ function readwin32(filestr::String, cf::String; v=false::Bool)
   for k in K
     !isa(seis[k], Dict{String,Any}) && continue
 
-    fs    = seis[k]["fs"]
+    fs    = Float64(seis[k]["fs"])
     units = seis[k]["unit"]
     x     = map(Float64, seis[k]["data"])
     t     = [1 round(Int,seis[k]["startTime"]/μs); length(seis[k]["data"]) 0]
-    src   = join(["readwin32", timestamp(), filestr],',')
-    notes = [string(" Channel file ", seis["cfile"]); string("  Location comment: ", seis[k]["comment"])]
+    src   = filestr
     misc  = Dict{String,Any}(i => seis[k][i] for i in ("hexID", "orgID", "netID", "fc", "hc", "pCorr", "sCorr", "lineDelay", "comment"))
 
     if units == "m/s"
-      resp = fctopz(seis[k]["fc"], hc=seis[k]["hc"], units=units)
+      resp = map(Complex{Float64}, fctopz(seis[k]["fc"], hc=seis[k]["hc"], units=units))
     else
       resp = Array{Complex{Float64},2}(0,2)
     end
 
     # There will be issues here. Japanese files use NIED or local station
-    # names, which don't necessarily match international station names. See e.g.
+    # names, which don't necessarily use international station or network codes. See e.g.
     # http://data.sokki.jmbsc.or.jp/cdrom/seismological/catalog/appendix/apendixe.htm
     # for an example of the (lack of) correspondence
     (net, sta, chan_stub) = split(k, '.')
     b = getbandcode(fs, fc = seis[k]["fc"])       # Band code
     g = 'H'                                       # Gain code
-    c = chan_stub[1]                              # Channel code
-    c == 'U' && (c = 'Z')                         # Nope
-
+    if chan_stub[1] == 'U'
+      c = 'Z'                                     # Nope
+    else
+      c = chan_stub[1]                            # Channel code
+    end
     id    = join(["JP", sta, seis[k]["locID"], string(b,g,c)], '.')
 
-    S += SeisChannel(id=id, name=k, x=x, t=t, gain=seis[k]["scale"], fs=fs, units=units, loc=[seis[k]["loc"]; 0; 0], misc=misc, src=src, resp=resp, notes=notes)
+    C = SeisChannel(id=id, name=k, x=x, t=t, gain=seis[k]["scale"], fs=fs, units=units, loc=[seis[k]["loc"]; 0.0; 0.0], misc=misc, src=src, resp=resp)
+    note!(C, string("+src: readwin32 ", fname))
+    note!(C, string("channel file: ", cf))
+    note!(C, string("location comment: ", seis[k]["comment"]))
+    S += C
   end
   return S
 end

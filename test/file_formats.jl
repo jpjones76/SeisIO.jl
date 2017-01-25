@@ -1,10 +1,11 @@
-segy_file = "SampleFiles/02.050.02.01.34.0572.6"
-lenn_file = "SampleFiles/0215162000.c00"
-uw_root = "SampleFiles/99062109485W"
-sac_file = "SampleFiles/test.sac"
+path = Base.source_dir()
+lenn_file = string(path, "/SampleFiles/0215162000.c00")
+segy_file = string(path, "/SampleFiles/02.050.02.01.34.0572.6")
+uw_root = string(path, "/SampleFiles/99062109485W")
+sac_file = string(path, "/SampleFiles/test.sac")
 
 println("SEGY...")
-SEG = readsegy(segy_file, nmt=true, fast=false)
+SEG = readsegy(segy_file, nmt=true, full=true)
 println("...header accuracy...")
 @test_approx_eq(1/SEG.gain, 1.9073486328125e-6)
 @test_approx_eq(SEG.misc["year"], 2002)
@@ -20,6 +21,7 @@ println("Lennartz ASCII...")
 A = rlennasc(lenn_file)
 @test_approx_eq(contains(A.src,"rlennasc"),true)
 @test_approx_eq(A.fs, 62.5)
+S = SeisData()
 S += A
 
 println("UW...")
@@ -36,5 +38,7 @@ i = findfirst(W.data.id.=="UW.TDH..EHZ")
 @test_approx_eq(W.data.misc[i]["t_p"][1], 67.183)
 i = findfirst(W.data.id.=="UW.VFP..EHZ")
 @test_approx_eq(W.data.misc[i]["t_d"][1], 19.0)
+
+S += W.data
 
 println("...done!")

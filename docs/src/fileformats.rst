@@ -26,7 +26,7 @@ Current Format Support
 
 mini-SEED
 =========
-SEED is an archival format maintained by the International Federation of Digital Seismograph Networks. The data format is widely used and highly versatile, but often criticized as intractably monolithic; the most comprehensive example of SEED documentation is a mostly-complete 224-page .pdf manual (excluding appendices).
+SEED is an archival format maintained by the International Federation of Digital Seismograph Networks. The data format is widely used and highly versatile, but often criticized as monolithic; the most complete example of SEED documentation is a 224-page .PDF with multiple appendices.
 
 The mini-SEED reader currently doesn't have a full range of packet decoders; currently supported formats include Int16, Int32, Float, Double, Steim1, and Steim2.
 
@@ -84,11 +84,11 @@ References
 
 SEG Y
 =====
-The SEG Y (sometimes SEG-Y) file format was developed by the Society of Exploration Geophysicists (USA). Modified versions of SEG Y are used by PASSCAL, New Mexico Tech, and others.
+The SEG Y (sometimes SEG-Y or SEGY) file format was developed by the Society of Exploration Geophysicists (USA). Modified versions of SEG Y are used by PASSCAL, New Mexico Tech, and others.
 
-An added keyword (``nmt=true``) is required to parse PASSCAL SEG Y trace files. The modified file format used by IRIS/PASSCAL/NMT lacks a 3600-byte record header (3200-byte text header + 400-byte file header). In addition, PASSCAL SEG Y assumes little endian byte order.
+An added keyword (``nmt=true``) is required to parse PASSCAL SEG Y trace files. The modified file format used by IRIS, PASSCAL, and NMT lacks the 3600-byte record header (3200-byte text header + 400-byte file header). In addition, unlike standard SEG Y, PASSCAL SEG Y assumes little endian byte order.
 
-*Caution*: SEG Y trace header fields are not rigidly defined by any central authority. As such, there is no guarantee that industry SEG Y files will be readable; this issue is widely known and not endemic to SeisIO. Proprietary industry files are often problematic because many companies fill the last 60 bytes of the trace header with non-standard fields.
+*Caution*: SEG Y trace header fields are not rigidly defined by any central authority. As such, there is no guarantee that industry SEG Y files will be readable; this issue is widely known and by no means endemic to SeisIO. Proprietary industry files are often problematic because many companies fill the last 60 bytes of the trace header with non-standard fields.
 
 *Endian: big for standard SEG Y, little for PASSCAL/NMT SEG Y*
 
@@ -114,7 +114,7 @@ References
 
 UW
 ===
-The University of Washington data format uses event-oriented records, typically to archive earthquake data; an event is described by a pickfile and the corresponding data file, whose filenames are identical, except for the last character. If a datafile name (ending in `*W`) is passed to ``readuw``, it searches for a pickfile in the datafile directory. Similarity, if a pickfile name (ending in `*[a-z]`) is used, ``readuw`` searches the pickfile directory for the corresponding data file.
+The University of Washington data format uses event-oriented records, typically to archive earthquake data; an event is described by a pickfile and the corresponding data file, whose filenames are identical except for the last character. If a datafile (name ending in `*W`) is passed to ``readuw``, it searches for a corresponding pickfile (ending in `*[a-z]`) in the same directory. Similarity, if a pickfile name is passed to ``readuw``, it searches the pickfile directory for the corresponding data file.
 
 *Endian: big*
 
@@ -140,7 +140,7 @@ Associated functions
 
 Win32 file format
 =================
-Win32 is the standard seismic data format of NIED (Japan). It is widely used in Japan, but rare elsewhere. Data are typically divided into files that each contain a one-minute segment of data from a selection of channels on a network. Within each file, data are stored in variable-precision 1 s segments by channel.
+Win32 is the standard seismic data format of NIED (Japan). It is widely used in Japan but rare elsewhere. Data are typically divided into files that each contain a one-minute segment of data from a selection of channels on a network. Data within each file are stored in 1 s segments by channel as variable-precision integers.
 
 *Endian: big*
 
@@ -159,7 +159,7 @@ Associated functions
 ---------
 #. Although the Win32 data format is technically open, accessing documentation requires an NIED login. NIED access is not available to the general public.
 #. Redistribution of Win32 files is strictly prohibited.
-#. Win32 channel files are not synchronized among different network operators, leaving them prone to human error. Non-NIED channel files supplied by NIED data requests may contain inconsistencies, particularly in instrument gains.
+#. Win32 channel files are not synchronized by a central authority. Non-NIED channel files supplied by NIED data requests may contain inconsistencies, particularly in instrument gains.
 
 
 Batch Read

@@ -1,31 +1,44 @@
 using Base.Test, Compat
 using SeisIO
+path = Base.source_dir()
+println(STDOUT, path)
+
+include(path*"/../src/SeisIO.jl")
 
 println("begin tests:")
 
-println("timeaux...")
-include("./timeaux_test.jl")
+println("time (time.jl)...")
+include(path*"/time.jl")
 
-println("SAC i/o...")
-include("./sac_test.jl")
+println("read/write \"misc\" dictionary (misc_rw.jl)...")
+include(path*"/misc_rw.jl")
 
-println("seisdata...")
-include("./seisdata_test.jl")
+println("SAC (sac.jl)...")
+include(path*"/sac.jl")
 
-println("randseis and native file i/o...")
-include("./fileio_test.jl")
+println("SeisData test 1 (seisdata1.jl)...")
+include(path*"/seisdata1.jl")
 
-println("other (non-SAC) file formats...")
-include("./file_formats.jl")
+println("seisdata test 2 (seisdata2.jl)...")
+include(path*"/seisdata2.jl")
 
-println("FDSN data queries...")
-include("./fdsn_test.jl")
+println("randseis and native format i/o (native_io.jl)...")
+include(path*"/native_io.jl")
 
-println("IRIS web services...")
-include("./iris_test.jl")
+println("other (non-SAC) file formats (file_formats.jl)...")
+include(path*"/file_formats.jl")
 
-println("SEEDlink client...")
-include("./seedlink_test.jl")
+println("FDSN XML parsing...")
+include(path*"/xml.jl")
+
+println("FDSN data queries (fdsn.jl)...")
+include(path*"/fdsn.jl")
+
+println("IRIS web services (iris.jl)...")
+include(path*"/iris.jl")
+
+println("SEEDlink client (seedlink.jl)...")
+include(path*"/seedlink.jl")
 
 println("To test for faithful SAC write of SeisIO in SAC:")
 println("     (1) Type `wsac(SL)` at the Julia prompt.")
@@ -33,4 +46,4 @@ println("     (2) Open a terminal, change to the current directory, and start SA
 println("     (4) type `r *GPW*SAC *MBW*SAC; qdp off; plot1; lh default`.")
 println("     (5) Report any irregularities.")
 
-println("To run the canonical examples type include(\"", dirname(Base.source_path()), "/examples.jl\")")
+println("To run the canonical examples type include(\"", path, "/examples.jl\")")

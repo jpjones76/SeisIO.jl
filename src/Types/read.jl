@@ -11,119 +11,75 @@ function readstr_varlen(io::IOStream)
 end
 
 function read_string_array(io::IOStream)
-  nd = read(io, UInt8)
-  if nd > 0
-    sep = Char(read(io, UInt8))
-    d = read(io, Int64, nd)
-    l = read(io, Int64)
-    if l > 0
-      return reshape(collect(split(String(read(io, UInt8, l)), sep)), tuple(d[:]...))
-    else
-      return Array{String,1}()
-    end
+  nd = Int64(read(io, UInt8))
+  d = read(io, Int64, nd)
+  if d==[0]
+    S = Array{String,1}()
   else
-    return Array{String,1}()
+    sep = Char(read(io, UInt8))
+    l = read(io, Int64)
+    S = reshape([String(j) for j in split(String(read(io, UInt8, l)), sep)], tuple(d[:]...))
   end
+  return S
 end
 
-# ID codes and their meanings
-# 1 	  Char
-# 2     UInt (*)
-# 3     Int (*)
-# 4     Float (*)
-# 5     Complex Float (*)
-# 6     String
-# 11 	  Array of Chars
-# 12    Array of UInts (*)
-# 13    Array of Ints (*)
-# 14    Array of Floats (*)
-# 15    Complex Array of Complex Float (*)
-# 16    Array of Strings
-#
-# (*)   subcode stored as variable p = precision, in bytes
-function read_misc(io::IOStream)
-  n_reads = read(io, Int64)
-  D = Dict{String,Any}()
-  n_reads == 0 && (skip(io, 8); return D)
-  Q = read(io, Int64)
-  P = position(io)
-  seek(io, Q)
-  ksep = Char(read(io, UInt8))
-  N = read(io, Int64)
-  kstr = String(read(io, UInt8, N))
-  K = split(kstr, ksep)
-  Q = position(io)
-  seek(io, P)
-  for nnn = 1:n_reads
-    #println("Beginning read at ", position(io), " for key ", K[nnn])
-    id = read(io, UInt8)
-    id == 1 && (v = read(io, Char))
-    if id == 2
-      # wtf is p?
-      p = read(io, UInt8)
-      p == 1 && (v = read(io, UInt8))
-      p == 2 && (v = read(io, UInt16))
-      p == 4 && (v = read(io, UInt32))
-      p == 8 && (v = read(io, UInt64))
-      p == 16 && (v = read(io, UInt128))
-    end
-    if id == 3
-      p = read(io, UInt8)
-      p == 1 && (v = read(io, Int8))
-      p == 2 && (v = read(io, Int16))
-      p == 4 && (v = read(io, Int32))
-      p == 8 && (v = read(io, Int64))
-      p == 16 && (v = read(io, Int128))
-    end
-    if id == 4
-      p = read(io, UInt8)
-      p == 4 && (v = read(io, Float32))
-      p == 8 && (v = read(io, Float64))
-    end
-    if id == 5
-      p = read(io, UInt8)
-      p == 8 && (r = read(io, Float32); i = read(io, Float32))
-      p == 16 && (r = read(io, Float32); i = read(io, Float64))
-      v = complex(r,i)
-    end
-    id == 6 && (l = read(io, Int64); v = String(read(io, UInt8, l)))
+findtype(c::UInt8, T::Array{Type,1}) = T[findfirst([sizeof(i)==2^c for i in T])]
+function code2typ(c::UInt8)
+  t = Any::Type
+  if c >= 0x80
+    t = Array{code2typ(c-0x80)}
+  elseif c >= 0x40
+    t = Complex{code2typ(c-0x40)}
+  elseif c >= 0x30
+    t = findtype(c-0x2f, Array{Type,1}(subtypes(AbstractFloat)))
+  elseif c >= 0x20
+    t = findtype(c-0x20, Array{Type,1}(subtypes(Signed)))
+  elseif c >= 0x10
+    t = findtype(c-0x10, Array{Type,1}(subtypes(Unsigned)))
+  elseif c == 0x01
+    t = String
+  elseif c == 0x00
+    t = Char
+  else
+    t = Any
+  end
+  return t
+end
 
-    id == 11 && (nd = read(io, UInt8); d = read(io, Int64, nd);
-      v = read(io, Char, tuple(d[:]...)))
-    if Base.in(id, 12:15)
-      p = read(io, UInt8)
-      nd = read(io, UInt8)
-      d = read(io, Int64, Int(nd))
+function read_misc(io::IOStream)
+  D = Dict{String,Any}()
+  L = read(io, Int64)
+  if L > 0
+    l = read(io, Int64)
+    ksep = Char(read(io, UInt8))
+    kstr = String(read(io, UInt8, l))
+    K = collect(split(kstr, ksep))
+    m=0
+    for i in K
+      m+=1
+      T = code2typ(read(io, UInt8))
+      if T <: Array{String}
+        D[i] = read_string_array(io)
+      elseif T <: Array
+        N = read(io, UInt8)
+        d = tuple(read(io, Int64, N)[:]...)
+        t = eltype(T)
+        if t <: Complex
+          τ = eltype(real(t))
+          rr = read(io, τ, d)
+          ii = read(io, τ, d)
+          D[i] = rr + ii.*im
+        else
+          D[i] = read(io, t, d)
+        end
+      elseif T == String
+        n = read(io, Int64)
+        D[i] = join(String(read(io, UInt8, n)))
+      else
+        D[i] = read(io, T)
+      end
     end
-    if id == 12
-      p == 1 && (v = read(io, UInt8, tuple(d[:]...)))
-      p == 2 && (v = read(io, UInt16, tuple(d[:]...)))
-      p == 4 && (v = read(io, UInt32, tuple(d[:]...)))
-      p == 8 && (v = read(io, UInt64, tuple(d[:]...)))
-      p == 16 && (v = read(io, UInt128, tuple(d[:]...)))
-    end
-    if id == 13
-      p == 1 && (v = read(io, Int8, tuple(d[:]...)))
-      p == 2 && (v = read(io, Int16, tuple(d[:]...)))
-      p == 4 && (v = read(io, Int32, tuple(d[:]...)))
-      p == 8 && (v = read(io, Int64, tuple(d[:]...)))
-      p == 16 && (v = read(io, Int128, tuple(d[:]...)))
-    end
-    if id == 14
-      p == 4 && (v = read(io, Float32, tuple(d[:]...)))
-      p == 8 && (v = read(io, Float64, tuple(d[:]...)))
-    end
-    if id == 15
-      p == 4 && (r = read(io, Float32, tuple(d[:]...));
-        i = read(io, Float32, tuple(d[:]...)))
-      p == 8 && (r = read(io, Float64, tuple(d[:]...));
-        i = read(io, Float64, tuple(d[:]...)))
-      v = complex(r,i)
-    end
-    id == 16 && (v = read_string_array(io))
-    D[K[nnn]] = v
-    end
-  seek(io, Q)
+  end
   return D
 end
 
@@ -132,61 +88,79 @@ end
 
 # SeisHdr
 function r_seishdr(io::IOStream)
-  S = SeisHdr()
-  setfield!(S, :id, read(io, Int64))
-  setfield!(S, :time, u2d(read(io, Int64)/1.0e6))
-  for i in [:lat, :lon, :dep]
-    setfield!(S, i, read(io, Float64))
+  H = SeisHdr()
+  i64 = read(io, Int64, 5)
+  m = read(io, Float32)
+  f64 = read(io, Float64, 26)
+  u8 = read(io, UInt8, 4+sum(i64[3:5]))
+  misc = read_misc(io)
+
+  setfield!(H, :id, i64[1])
+  setfield!(H, :ot, u2d(i64[2]*μs))
+  setfield!(H, :mag, (m, Char(u8[1]), Char(u8[2])))
+  c = u8[3]
+  k = 4+i64[3]
+  setfield!(H, :int, (u8[4], String(u8[5:k])))
+  setfield!(H, :src, String(u8[k+1:k+i64[4]]))
+  if i64[5] > 0
+    k += i64[4]
+    n = u8[k+1:k+i64[5]]
+    setfield!(H, :notes, [String(j) for j in split(String(n),Char(c))])
   end
-  setfield!(S, :mag, read(io, Float32))
-  setfield!(S, :contrib_id, read(io, Int64))
-  for i in [:mag_auth, :auth, :cat, :contrib, :loc_name]
-    setfield!(S, i, readstr_varlen(io))
-  end
-  return S
+  setfield!(H, :loc, f64[1:3])
+  setfield!(H, :mt, f64[4:11])
+  setfield!(H, :np, [(f64[12], f64[13], f64[14]), (f64[15], f64[16], f64[17])])
+  setfield!(H, :pax, [(f64[18], f64[19], f64[20]), (f64[21], f64[22], f64[23]), (f64[24], f64[25], f64[26])])
+  setfield!(H, :misc, misc)
+  return H
 end
 
 # SeisData, SeisChannel
 function r_seisdata(io::IOStream)
-  S = SeisData()
   N = convert(Int64, read(io, UInt32))
-  for n = 1:1:N
-    name = strip(String(read(io, UInt8, 32)))
-    id = strip(String(read(io, UInt8, 15)))
-    src = strip(String(read(io, UInt8, 120)))
-    fs = read(io, Float64)
-    gain = read(io, Float64)
-    units = strip(String(read(io, UInt8, 32)))
-    loc = read(io, Float64, 5)
-    R = read(io, UInt8)
-    if R > 0
-      rr = read(io, Float64, R)
-      ri = read(io, Float64, R)
-      resp = reshape(complex(rr,ri), Int(R/2), 2)
-    else
-      resp = Array{Complex{Float64},2}(0, 2)
+  S = SeisData(N)
+  for i = 1:1:N
+
+    # int
+    i64 = read(io, Int64, 8)
+    if i64[1] > 0
+      S.t[i] = reshape(read(io, Int64, i64[1]), div(i64[1],2), 2)
     end
-    misc = read_misc(io)
-    notes = read_string_array(io)
-    T = read(io, Int64)
-    if T > 0
-      if fs > 0.0
-        ti = read(io, Int64, T)
-        tv = read(io, Int64, T)
-        t = [ti tv]
-      else
-        t = reshape(read(io, Int64, T), T, 1)
-      end
-    else
-      t = Array{Int64,2}()
+
+    # float
+    S.fs[i] = read(io, Float64)
+    S.gain[i] = read(io, Float64)
+
+    # float arrays
+    S.loc[i] = read(io, Float64, 5)
+    if i64[2] > 0
+      rr = read(io, Float64, i64[2])
+      ri = read(io, Float64, i64[2])
+      S.resp[i] = reshape(complex(rr,ri), div(i64[2],2), 2)
     end
-    X = read(io, Int64)
-    if X > 0
-      x = read(io, Float64, X)
+
+    # U8
+    c = read(io, UInt8)
+    y = read(io, UInt8)
+
+    # U8 array
+    S.id[i]   = strip(String(read(io, UInt8, 15)))
+    S.units[i]= String(read(io, UInt8, i64[3]))
+    S.src[i]  = String(read(io, UInt8, i64[4]))
+    S.name[i] = String(read(io, UInt8, i64[5]))
+    notes     = String(read(io, UInt8, i64[6]))
+    xz         = read(io, UInt8, i64[7])
+    S.misc[i] = read_misc(io)
+
+    # Postprocessing
+    Y = code2typ(y)
+    S.x[i] = Array{Y,1}(i64[8])
+    Blosc.decompress!(S.x[i], xz)
+    if length(notes) > 0
+      S.notes[i] = [String(j) for j in split(String(notes),Char(c))]
     else
-      x = Array{Float64,1}()
+      S.notes[i] = Array{String,1}()
     end
-    S += SeisChannel(name=name, id=id, fs=fs, gain=gain, units=units, loc=loc, resp=resp, misc=misc, notes=notes, t=t, x=x)
   end
   return S
 end
@@ -210,10 +184,10 @@ function rseis(fname::String; v=false::Bool)
   c = String(read(io, UInt8, 6))
   c == "SEISIO" || (close(io); error("Not a SeisIO file!"))
   ver = read(io, Float32)
-  L = read(io, UInt64)
+  L = read(io, Int64)
   T = String(read(io, UInt8, L))
   V = read(io, UInt64, L)
-  A = Array{Any,1}()
+  A = Array{Union{SeisData,SeisChannel,SeisHdr,SeisEvent},1}()
   if v
     @printf(STDOUT, "Reading %i total objects from file %s.\n", L, fname)
   end
@@ -236,9 +210,5 @@ function rseis(fname::String; v=false::Bool)
     push!(A, S)
   end
   close(io)
-  if L == 1
-    return A[1]
-  else
-    return A
-  end
+  return A
 end

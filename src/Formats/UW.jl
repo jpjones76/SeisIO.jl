@@ -3,7 +3,7 @@
 function nextline(pf::IO, c::Char)
   tmpstring = chomp(readline(pf))
   while tmpstring[1] != c
-    tmpstring = chomp(readline(pf))
+    tmpstring = readline(pf)
     if eof(pf)
       tmpstring = -1
       break
@@ -30,14 +30,15 @@ Read University of Washington-format seismic pick info from pickfile `f` into he
 
 *Caution*: Low-level reader. *No* sanity checks are done to ensure `S` and `f` are the same event!
 """
-function uwpf!(S::SeisEvent, pickfile::String; v=false::Bool)
-  (pf, H) = uwpf(pickfile, v=v, u=true)
+function uwpf!(S::SeisEvent, pickfile::String; v=0::Int)
+  setfield!(S, :hdr, uwpf(pickfile, v))
   N = S.data.n
 
-  # Pick lines
-  seekstart(pf)
+  # Pick lines (requires reopening/rereading file)
+  pf = open(pickfile, "r")
   m = 0
   pline = nextline(pf,'.')
+  v>2 && println(STDOUT, pline)
   while pline != -1
     m += 1
     sta = pline[2:4]
@@ -65,26 +66,24 @@ function uwpf!(S::SeisEvent, pickfile::String; v=false::Bool)
     end
     pline = nextline(pf,'.')
   end
-  v && println("Processed ", m, " pick lines.")
+  v>0 && println(STDOUT, "Processed ", m, " pick lines.")
   close(pf)
-  S.hdr = deepcopy(H)
+
   return S
 end
 
 """
-    H = uwpf(hf)
+    H = uwpf(hf, v::Int)
 
-Read University of Washington-format seismic pick file `hf` into SeisHdr `H`.
+Read University of Washington-format seismic pick file `hf` into SeisHdr `H`. `v` controls verbosity, set `v>0` for verbose debug mode.
 
-    H = uwpf(hf, v=true)
-
-Specify verbose mode (for debugging).
 """
-function uwpf(pickfile::String; v=false::Bool, u=false::Bool)
+
+function uwpf(pickfile::String, v::Int)
   pf = open(pickfile, "r")
   seekstart(pf)
   A = nextline(pf,'A')
-  v && println(A)
+  v>0  && println(STDOUT, A)
   c = 0
   if length(A) == 75 || length(A) == 12
     y = 0
@@ -112,7 +111,7 @@ function uwpf(pickfile::String; v=false::Bool, u=false::Bool)
     # Set start time of each channel
     ot += nh[1]
     dep = nh[2]
-    mag = nh[3]
+    mag = Float32(nh[3])
 
     # Lat, Lon, Dep, Mag
     lat = (parse(evla[1:3]) + parse(evla[5:6])/60 + parse(evla[7:8])/6000) * (evla[4] == 'S' ? -1.0 : 1.0)
@@ -158,7 +157,7 @@ function uwpf(pickfile::String; v=false::Bool, u=false::Bool)
       push!(D["mech_lines"], mline)
       mline = nextline(pf,'M')
     end
-    v && println("Processed ", m, " focal mechanism lines.")
+    v>0 && println(STDOUT, "Processed ", m, " focal mechanism lines.")
   end
 
   # Comment lines
@@ -180,15 +179,10 @@ function uwpf(pickfile::String; v=false::Bool, u=false::Bool)
       end
       cline = nextline(pf,'C')
     end
-    v && println("Processed ", m, " comment lines.")
+    v>0 && println(STDOUT, "Processed ", m, " comment lines.")
   end
-  H = SeisHdr(time=u2d(ot), lat=lat, lon=lon, dep=dep, mag=mag, mag_typ=mag_typ, loc_name=loc_name, id=event_id)
-  if u
-    return (pf, H)
-  else
-    close(pf)
-    return (D, H)
-  end
+  close(pf)
+  return SeisHdr(ot=u2d(ot), loc=[lat, lon, dep], mag=(mag, 'c', ' '), id=event_id, misc=D)
 end
 
 """
@@ -200,7 +194,7 @@ Read University of Washington-format seismic data file `df` into SeisData struct
 
 Specify verbose mode (for debugging).
 """
-function uwdf(datafile::String; v=false::Bool)
+function uwdf(datafile::String; v=0::Int)
   fname = realpath(datafile)
   dconst = -11676096000
   D = Dict{String,Any}()
@@ -218,17 +212,17 @@ function uwdf(datafile::String; v=false::Bool)
   extras = replace(String(read(fid, UInt8, 10)),"\0"," ")
   comment = replace(String(read(fid, UInt8, 80)),"\0"," ")
 
-  # Set M time using lmin and lsec GREGORIAN MINUTES JESUS CHRIST WTF
+  # Set M time with lmin and lsec GREGORIAN MINUTES JESUS CHRIST WTF
   uw_ot = lmin*60 + lsec*1.0e-6 + dconst
 
   # Seek EOF to get number of structures
   seekend(fid)
   skip(fid, -4)
   nstructs = bswap(read(fid, Int32))
-  v && println("nstructs=", nstructs)
+  v>0 && println(STDOUT, "nstructs=", nstructs)
   structs_os = (-12*nstructs)-4
   tc_os = 0
-  v && println("structs_os=", structs_os)
+  v>0 && println(STDOUT, "structs_os=", structs_os)
 
   # Set version of UW seismic data file (char may be empty, leave code as-is!)
   uwformat = extras[3] == '2' ? 2 : 1
@@ -261,7 +255,7 @@ function uwdf(datafile::String; v=false::Bool)
     end
   end
   N = Int64(N)
-  v && println("Processing ", N , " channels.")
+  v>0 && println(STDOUT, "Processing ", N , " channels.")
 
   # Write time corrections
   timecorr = zeros(Float32, N)
@@ -318,9 +312,7 @@ function uwdf(datafile::String; v=false::Bool)
     id = [replace(String(s[:,i]),"\0","") for i=1:N]
     X = Array{Array{Float64,1},1}(N)
     T = Array{Array{Int64,2},1}(N)
-    #println("To read: ", N, " channels")
     for i = 1:1:N
-      #println("Channel ", i, ": ", id[i], " (offset =", ch_os[i],", Nx=", ch_len[i], ")")
       seek(fid, ch_os[i])
       X[i] = [bswap(j) for j in read(fid, f[i], ch_len[i])]
       T[i] = [1 round(Int, ch_time[i]*1000000); length(X[i]) 0]
@@ -328,15 +320,16 @@ function uwdf(datafile::String; v=false::Bool)
   end
   close(fid)
 
-  src = join(["readuw",timestamp(),fname],',')
-  return SeisData(n=N, name=id, id=id, fs=fs, x=X, t=T,
-    loc=repmat([zeros(Float64,5)],N),
-    resp=repmat([complex(zeros(Float64,2,2))],N),
-    misc=[Dict{String,Any}() for i = 1:N],
-    notes=[[""] for i = 1:N],
-    gain=ones(Float64,N),
-    src=repmat([src],N),
-    units=repmat(["counts"],N))
+  src = fname
+  S = SeisData(N)
+  setfield!(S, :name, id)
+  setfield!(S, :id, id)
+  setfield!(S, :fs, fs)
+  setfield!(S, :x, X)
+  setfield!(S, :t, T)
+  setfield!(S, :src, repmat([src],N))
+  setfield!(S, :units, repmat(["counts"],N))
+  note!(S, string("+src: readuw ", fname))
 end
 
 """
@@ -354,12 +347,12 @@ Read University of Washington-format seismic data in file `f` into SeisEvent `S`
 
 Read data file 99062109485W and pick file 99062109485o in the current working directory.
 """
-function readuw(filename::String; v=false::Bool)
+function readuw(filename::String; v=0::Int)
 
   # Identify pickfile and datafile
   filename = realpath(filename)
-  pf = ""
-  df = ""
+  pf = String("")
+  df = String("")
   ec = UInt8(filename[end])
   lc = collect(UInt8, 0x61:1:0x7a)
   if Base.in(ec, lc)
@@ -378,21 +371,21 @@ function readuw(filename::String; v=false::Bool)
   # File read wrappers
   if isfile(df)
     # Datafile wrapper
-    v && println("Reading datafile ", df)
+    v>0 && println(STDOUT, "Reading datafile ", df)
     S = SeisEvent(data=uwdf(df, v=v))
-    v && println("Done reading data file.")
+    v>0 && println(STDOUT, "Done reading data file.")
 
     # Pickfile wrapper
     if isfile(pf)
-      v && println("Reading pickfile ", pf)
+      v>0 && println(STDOUT, "Reading pickfile ", pf)
       uwpf!(S, pf)
-      v && println("Done reading pick file.")
+      v>0 && println(STDOUT, "Done reading pick file.")
     else
-      v && println("Skipping pickfile (not found or not given)")
+      v>0 && println(STDOUT, "Skipping pickfile (not found or not given)")
     end
   else
     # Pickfile only
-    S = SeisEvent(hdr=uwpf(pf, v=v))
+    S = SeisEvent(hdr=uwpf(pf, v))
   end
   return S
 end

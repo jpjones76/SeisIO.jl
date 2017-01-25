@@ -1,50 +1,81 @@
-import Base:summary, isequal
+import Base:isequal, sizeof, ==
+unset_3tup = tuple(0.0,0.0,0.0)
 
 """
+SeisHdr structures contain event header data for use with SeisIO.
+
     S = SeisHdr()
 
-Create a seismic header. Fields can be initialized by name at creation. For example:
+Initialize an empty seismic header structure. Fields can also be initialized at creation with keywords. For example:
 
-    S = SeisHdr(cat="NEIC", mag=3.3)
+    S = SeisHdr(m=(1.1,'l'), loc=(45.37, -121.69, 6.8))
 
-Create a seismic header with S.cat="NEIC" and S.mag=3.3. Unspecified fields are set to system defaults.
+Create a SeisHdr structure with magnitude 1.1 (Ml) and location 45.37N, 121.69W, z=6.8 km. Fields not specified at creation are initialized to SeisIO defaults.
+
+| kw  | Type                        | Meaning                       |
+|:----|:-----                       |:--------                      |
+| id  | Int64                       | Event ID                      |
+| ot  | DateTime                    | Origin time                   |
+| loc | Array{Float64, 1}           | Hypocenter                    |
+| m   | Tuple{Float32, Char, Char}  | (Magnitude, Scale)            |
+| i   | Tuple{UInt8, String}        | (Intensity, Scale)            |
+| mt  | Array{Float64,1}            | Moment tensor: (1-6) tensor,  |
+|     |                             | (7) scalar moment, (8) \%DC   |
+| np  | Array{Tuple{3xFloat64}, 1}  | Nodal planes                  |
+| pax | Array{Tuple{3xFloat64}, 1}  | Principal axes                |
+| src | String                      | Data source (URL/filename)    |
+
+Designate magnitude scale with an appropriate subscript, e.g. 'w', 'b' for M_wb. Use '?' for unknown.
 """
 type SeisHdr
   id::Int64
-  time::DateTime
-  lat::Float64
-  lon::Float64
-  dep::Float64
-  mag::Float32
-  mag_typ::String
-  mag_auth::String
-  auth::String
-  cat::String
-  contrib::String
-  contrib_id::Int64
-  loc_name::String
+  ot::DateTime
+  loc::Array{Float64,1}
+  mag::Tuple{Float32,Char,Char}
+  int::Tuple{UInt8,String}
+  mt::Array{Float64,1}
+  np::Array{Tuple{Float64,Float64,Float64},1}
+  pax::Array{Tuple{Float64,Float64,Float64},1}
+  src::String
+  notes::Array{String,1}
+  misc::Dict{String,Any}
+  # mag_auth::String
+  # auth::String
+  # cat::String
+  # contrib::String
+  # contrib_id::Int64
 
-  # Very ill-defined behavior seems to follow from the use of keywords .type or .*_type
+  function SeisHdr(id::Int64,
+    ot::DateTime,
+    loc::Array{Float64,1},
+    mag::Tuple{Float32,Char,Char},
+    int::Tuple{UInt8,String},
+    mt::Array{Float64,1},
+    np::Array{Tuple{Float64,Float64,Float64},1},
+    pax::Array{Tuple{Float64,Float64,Float64},1},
+    src::String,
+    notes::Array{String,1},
+    misc::Dict{String,Any})
 
-  SeisHdr(; id=0::Int64,
-            time=now()::DateTime,
-            lat=0.0::Float64,
-            lon=0.0::Float64,
-            dep=0.0::Float64,
-            mag=(-5.0f0)::Float32,
-            mag_typ="No mag"::String,
-            mag_auth=""::String,
-            auth="None"::String,
-            cat="None"::String,
-            contrib=""::String,
-            contrib_id=0::Int64,
-            loc_name="Annywn, beneath the waves"::String) = begin
-     return new(id, time, lat, lon, dep, mag, mag_typ, mag_auth, auth,
-              cat, contrib, contrib_id, loc_name)
+    return new(id, ot, loc, mag, int, mt, np, pax, src, notes, misc)
   end
 end
+SeisHdr(; id=0::Int64,
+          ot=now()::DateTime,
+          loc=zeros(Float64, 3)::Array{Float64,1},
+          mag=(-5.0f0, '?', ' ')::Tuple{Float32,Char,Char},
+          int=(0x00, "MMI")::Tuple{UInt8,String},
+          mt=zeros(Float64, 8)::Array{Float64,1},
+          np=[unset_3tup, unset_3tup]::Array{Tuple{Float64,Float64,Float64},1},
+          pax=[unset_3tup, unset_3tup, unset_3tup]::Array{Tuple{Float64,Float64,Float64},1},
+          src=""::String,
+          notes=Array{String,1}()::Array{String,1},
+          misc=Dict{String,Any}()::Dict{String,Any}) = SeisHdr(id, ot, loc, mag, int, mt, np, pax, src, notes, misc)
 
 # =============================================================================
-# Equality
-isequal(S::SeisHdr, T::SeisHdr) = minimum([isequal(hash(getfield(S,v)), hash(getfield(T,v))) for v in fieldnames(S)])
+# Methods from Base
+sizeof(S::SeisHdr) = sum([sizeof(getfield(S,i)) for i in hdrfields]::Array{Int,1})
+isequal(S::SeisHdr, U::SeisHdr) = minimum([hash(getfield(S,i))==hash(getfield(U,i)) for i in hdrfields]::Array{Bool,1})
 ==(S::SeisHdr, T::SeisHdr) = isequal(S,T)
+
+note!(S::SeisHdr, s::String) = push!(S.notes, tnote(s))
