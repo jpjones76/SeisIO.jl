@@ -21,7 +21,7 @@ rseis, read_misc,                                              # Types/read.jl
 gapfill, gapfill!, ungap, ungap!, sync, sync!,                 # Types/sync.jl
 wseis, write_misc,                                             # Types/write.jl
 chansort, chansort!, findid, hasid, note!, pull,               # Types/SeisData.jl
-evq, FDSN_evt, FDSNget, FDSNsta,                                # Web/FDSN.jl
+FDSNevq, FDSNevt, FDSNget, FDSNsta,                                # Web/FDSN.jl
 IRISget, irisws,                                               # Web/IRIS.jl
 SeedLink, SeedLink!, SL_info, has_sta, has_stream,             # Web/SeedLink.jl
 SL_config, SL_minreq!,                                         # Web/SL_config.jl

@@ -17,8 +17,8 @@ Create a SeisHdr structure with magnitude 1.1 (Ml) and location 45.37N, 121.69W,
 | id  | Int64                       | Event ID                      |
 | ot  | DateTime                    | Origin time                   |
 | loc | Array{Float64, 1}           | Hypocenter                    |
-| m   | Tuple{Float32, Char, Char}  | (Magnitude, Scale)            |
-| i   | Tuple{UInt8, String}        | (Intensity, Scale)            |
+| mag | Tuple{Float32, Char, Char}  | (Magnitude, Scale)            |
+| int | Tuple{UInt8, String}        | (Intensity, Scale)            |
 | mt  | Array{Float64,1}            | Moment tensor: (1-6) tensor,  |
 |     |                             | (7) scalar moment, (8) \%DC   |
 | np  | Array{Tuple{3xFloat64}, 1}  | Nodal planes                  |

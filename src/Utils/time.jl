@@ -142,6 +142,20 @@ end
     d0, d1 = parsetimewin(s, t)
 
 Convert times `s` and `t` to DateTime objects and sorts s.t. d0 < d1.
+
+### Time Specification
+`s` and `t` can be real numbers, DateTime objects, or ASCII strings. Strings must follow the format "yyyy-mm-ddTHH:MM:SS.nnn", e.g. `s="2016-03-23T11:17:00.333"`. Exact behavior depends on the data types of s and t:
+
+| **s** | **t** | **Behavior**                         |
+|:------|:------|:-------------------------------------|
+| DT    | DT    | Sort                                 |
+| R     | DT    | Add `s` seconds to `t`, then sort    |
+| DT    | R     | Add `t` seconds to `s`, then sort    |
+| S     | R, DT | Convert `s` → DateTime, then sort    |
+| R, DT | S     | Convert `t` → DateTime, then sort    |
+| R     | R     | `s` and `t' are seconds from `now()` |
+
+(above, R = Real, DT = DateTime, S = String, I = Integer)
 """
 function parsetimewin(s::DateTime, t::DateTime)
   if s < t

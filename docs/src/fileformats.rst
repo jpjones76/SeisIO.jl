@@ -11,11 +11,11 @@ Current Format Support
 
 * :ref:`mini-SEED <mseed>`: `SEED <https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf>`_ has become a worldwide standard for seismic data archival; mini-SEED archives are special SEED volumes that contain only data records.
 
-* :ref:`SAC <sac1>`:sup:`(a)`: `SAC <https://ds.iris.edu/files/sac-manual/manual/file_format.html>`_ is a popular seismic data standard, very easy to use, developed at Lawrence Livermore National Laboratory.
+* :ref:`SAC <sac1>`:sup:`(a)`: `SAC <https://ds.iris.edu/files/sac-manual/manual/file_format.html>`_ is a popular seismic data standard developed at Lawrence Livermore National Laboratory, noted for ease of use.
 
 * :ref:`SEGY <segy>`:sup:`(a)`: `SEG Y <http://wiki.seg.org/wiki/SEG_Y>`_ is the standard data archival format of the Society for Exploration Geophysicists.
 
-* :ref:`UW <uw>`: The University of Washington seismic data format was used from the 1970s through mid-2000s; legacy support is included with SeisIO.
+* :ref:`UW <uw>`: The University of Washington seismic data format was used from the 1970s through the 2000s; legacy support is included with SeisIO.
 
 * :ref:`Win32 <win32>`: `WIN <http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html>`_ is a seismic data format developed and used by the NIED (National Research Institute for Earth Science and Disaster Prevention), Japan.
 
@@ -35,8 +35,7 @@ The mini-SEED reader currently doesn't have a full range of packet decoders; cur
 
 Associated functions
 --------------------
-
-* ``readmseed``: read mini-SEED file to SeisData
+ ``parsemseed!, parsemseed, readmseed, parserec!``
 
 References
 ----------
@@ -57,19 +56,7 @@ Among the most portable and intuitive seismic data formats, Seismic Analysis Cod
 Associated functions
 --------------------
 
-* ``chksac``: check for valid SAC header structure
-
-* ``prunesac!``: delete unset headers from a SAC dictionary
-
-* ``r_sac``: read SAC file to dictionary
-
-* ``readsac``: read SAC file to SeisData object
-
-* ``sachdr``: dump headers to STDOUT
-
-* ``sactoseis``: convert SAC dictionary to SeisData
-
-* ``writesac``: write SeisData object or SAC dictionary to SAC file
+``batch_read, readsac, sachdr, wsac``
 
 
 References
@@ -96,9 +83,7 @@ An added keyword (``nmt=true``) is required to parse PASSCAL SEG Y trace files. 
 Associated functions
 --------------------
 
-* ``readsegy``: read SEGY file to SeisData object
-
-* ``segyhdr``: dump column-aligned headers to STDOUT
+``batch_read, readsegy, segyhdr``
 
 
 References
@@ -122,18 +107,12 @@ The University of Washington data format uses event-oriented records, typically 
 Associated functions
 --------------------
 
-
-* ``readuw``: read UW pickfile and/or datafile into a SeisEvent object
-
-* ``uwpf``: read UW pickfile into a SeisHdr object
-
-* ``uwpf!``: update SeisEvent header with pickfile info
-
-* ``uwdf``: read UW datafile into a SeisData object
+``readuw, uwdf, uwpf, uwpf!``
 
 
-(No online references for this file format are known to exist; its creation predates the world wide web)
-
+Notes
+-----
+#. No online references for this file format are known to exist; its creation predates the world wide web.
 
 
 .. _win32:
@@ -153,27 +132,30 @@ References
 Associated functions
 --------------------
 
-* ``readwin32``: read win32 files to SeisData
+``readwin32``
 
-*Warnings*
----------
+
+Notes
+-----
 #. Although the Win32 data format is technically open, accessing documentation requires an NIED login. NIED access is not available to the general public.
 #. Redistribution of Win32 files is strictly prohibited.
-#. Win32 channel files are not synchronized by a central authority. Non-NIED channel files supplied by NIED data requests may contain inconsistencies, particularly in instrument gains.
+#. Win32 channel files are not synchronized by a central authority. Non-NIED channel files supplied by NIED data requests may contain inconsistencies.
 
 
 Batch Read
 ==========
-The utility ``batch_read`` speeds up file read using parallel file read to shared arrays. The result is an order of magnitude speedup relative to reading files one at a time. Currently, SAC and SEG Y data formats work with ``batch_read``.
+``batch_read`` uses parallel file reading to shared arrays. The result memory-intensive but very fast, typically an order of magnitude speedup relative to reading files one at a time. Currently, SAC and SEG Y data formats work with ``batch_read``.
 
 
-Syntax
-------
-``S = batch_read(FILESTR, ftype=FMT, fs=FS)``
+Usage
+-----
+::
 
-Read files matching FILESTR of format FMT and resample to FS Hz. If FS isn't specified, files are resampled to match the first file read.
+  @everywhere using SeisIO
+  S = batch_read(FILESTR, ftype=FMT, fs=FS)
 
-``FILESTR`` supports wildcards in filenames, but not directory names. Thus, ``batch_read("/data/PALM_EHZ_CC/2015.16*SAC")`` will read all files in ``/data/PALM_EHZ_CC/`` that begin with "2015.16" and end with "SAC"; ``batch_read("/data2/Hood/*/2015.16*SAC")`` will result in an error.
+
+``FILESTR`` supports wildcards in filenames, but not directory names.
 
 
 Supported keywords
@@ -181,7 +163,7 @@ Supported keywords
 
 ``ftype=FT`` (ASCIIString): File type. Default is :ref:`"SAC" <sac1>`.
 
-``fs=FS`` (Float64): Resample data to ``FS`` Hz.
+``fs=FS`` (Float64): Resample data to ``FS`` Hz. The default is to use the sampling frequency of the first file read.
 
 Supported file formats
 ----------------------
@@ -189,3 +171,7 @@ Supported file formats
 :ref:`SAC <sac1>`: use keyword ``ftype="SAC"``
 
 :ref:`PASSCAL SEG Y <segy>`: use keyword ``ftype="NMT"`` or ``ftype="PASSCAL"``
+
+Example
+-------
+``batch_read("/data/PALM_EHZ_CC/2015.16*SAC")``

@@ -20,7 +20,7 @@ seis = IRISget(STA, s=S, t=T, y=true)
 wseis(seis, "20160516145000.data.seis")
 
 # The Tohoku-Oki great earthquake, from IRIS FDSN, recorded by boreholes in WA (USA)
-S = FDSN_evt("201103110547", "PB B004  EH?,PB B004  BS?,PB B001  BS?,PB B001  EH?")
+S = FDSNevt("201103110547", "PB B004  EH?,PB B004  BS?,PB B001  BS?,PB B001  EH?")
 wseis("201103110547.evt.seis", S)
 
 # IRIS SeedLink session in TIME mode

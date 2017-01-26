@@ -9,30 +9,17 @@ irisws: CLI for single-channel IRIS time-series web requests
 Retrieves data from a single channel from an IRIS http server at station STA, channel CHA, network NET, location LL. Returns a SeisData struct.
 
 ## Arguments
-* `net`, `sta`, `loc`, `cha`, `fmt`: ASCII strings. No wildcards!
-* `s`: Start time. See below for options and behaviors.
-* `t`: Duration in seconds or data end time. See below for options and behaviors.
+* `net`, `sta`, `loc`, `cha`, `fmt`: ASCII strings, no wildcards allowed
+* `s`: Start time. Type `?parsetimewin` for details.
+* `t`: End time.  Type `?parsetimewin` for details.
 * `to`: Timeout in seconds.
 * `w`: Write to file in current directory
 * See also IRISWS documentation at http://service.iris.edu/irisws/timeseries/1/
 
-### Time Specification
-`s` and `t` can be real numbers, DateTime objects, or ASCII strings. Strings must follow the format "yyyy-mm-ddTHH:MM:SS", e.g. `s="2016-03-23T11:17:00"`. Exact behavior depends on the data types of s and t: (R = Real, DT = DateTime, S = String, I = Integer)
-
-| **s** | **t** | **Behavior**                         |
-|:------|:------|:-------------------------------------|
-| R     | DT    | Add `s` seconds to `t`, then sort    |
-| R, DT | R     | Add `t` seconds to `s`, then sort    |
-| S     | R, DT | Convert `s` → DateTime, then sort    |
-| R, DT | S     | Convert `t` → DateTime, then sort    |
-| R     | R     | `s` is seconds relative to `now()`   |
-|       |       | `t` is seconds from `s`              |
-
 ### Examples
-* `S = irisws(net="CC", sta="PALM", cha="EHN", t=120)`: Get two minutes of data from component EHN, station TIMB, network CC (Cascade Volcano Observatory, USGS), up to (roughly) the beginning of the current minute.
-* `S = irisws(net="HV", sta="MOKD", cha="HHZ", s="2012-01-01T00:00:00", t=3600)`: get an hour of data ending at 2012-01-01, 00:00:00 UTC, from component HHZ,
-station MOKD, network HV (Hawai'i Volcano Observatory).
-* `S = irisws(net="CC", sta="TIMB", cha="EHZ", t=600, fmt="mseed")`: Get the last 10 minutes of data from CC.TIMB.EHZ (Cascade Volcano Observatory, Timberline Lodge, OR, US) in miniseed format.
+* `S = irisws(net="CC", sta="PALM", cha="EHN", t=(-120))`: Get two minutes of data from component EHN, station TIMB, network CC (Cascade Volcano Observatory, USGS), up to (roughly) the beginning of the current minute.
+* `S = irisws(net="HV", sta="MOKD", cha="HHZ", s="2012-01-01T00:00:00", t=(-3600))`: get an hour of data ending at 2012-01-01, 00:00:00 UTC, from component HHZ, station MOKD, network HV (Hawai'i Volcano Observatory).
+* `S = irisws(net="CC", sta="TIMB", cha="EHZ", t=(-600), fmt="mseed")`: Get the last 10 minutes of data from CC.TIMB.EHZ (Cascade Volcano Observatory, Timberline Lodge, OR, US) in miniseed format.
 
 ### Notes
 * Traces are de-meaned and stage zero gains are removed, but instrument responses are otherwise unchanged.

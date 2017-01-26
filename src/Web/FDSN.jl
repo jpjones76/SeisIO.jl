@@ -149,32 +149,15 @@ FDSNget: CLI for FDSN time-series data requests.
 Retrieve data from an FDSN HTTP server. Returns a SeisData struct. See FDSN documentation at http://service.iris.edu/fdsnws/dataselect/1/
 
 ## Possible Keywords
-* `net`, `sta`, `loc`, `cha`: Strings. Wildcards OK.
-* `s`: Start time (see below)
-* `t`: End time (see below)
+* `s`: Start time (type ?parsetimewin for details)
+* `t`: End time (type ?parsetimewin for details)
 * `to`: Timeout in seconds
 * `Q`: Quality code (FDSN/IRIS). Caution: `Q="R"` fails with many queries
 * `w`: Write raw download directly to file
 * `y`: Synchronize start and end times of channels and fill time gaps
 
-### Time Specification
-`s` and `t` can be real numbers, DateTime objects, or ASCII strings. Strings must follow the format "yyyy-mm-ddTHH:MM:SS", e.g. `s="2016-03-23T11:17:00"`. Exact behavior depends on the data types of s and t:
-
-``\ \begin{tabular}{ c c l }
-\bf{s} & \bf{t} &  \bf{Behavior}
-Real     & DateTime & Add `s` seconds to `t` and sort\\
-DateTime & Real     & Add `t` seconds to `s` and sort\\
-String   &          & Convert `s` \rightarrow DateTime, sort\\
-& String   & Convert `t` \rightarrow DateTime, sort\\
-Int      & Real     & Read `t`seconds relative to current time\\
-\end{tabular}
-``
-
-* **Relative fill**: Pass a numeric value to keyword `t` to set end time relative to start time in seconds.
-* **Backwards fill**: Specify a negative number for `t` for backwards fill from `s`.
-
 ### Example
-* `S = FDSNget(net="CC,UW", sta="SEP,SHW,HSR,VALT", cha="*", t=600)`: Get the last 10 minutes of data from short-period stations SEP, SHW, and HSR, Mt. St. Helens, USA.
+* `S = FDSNget(net="CC,UW", sta="SEP,SHW,HSR,VALT", cha="*", t=(-600))`: Get the last 10 minutes of data from short-period stations SEP, SHW, and HSR, Mt. St. Helens, USA.
 
 ### Some FDSN Servers
 * Incorporated Research Institutions for Seismology, US: http://service.iris.edu/fdsnws/
@@ -183,12 +166,11 @@ Int      & Real     & Read `t`seconds relative to current time\\
 * GFZ Potsdam, DE: http://geofon.gfz-potsdam.de/fdsnws/
 """
 function FDSNget(C::Array{String,1};
-  d=','::Char,
   src="IRIS"::String,
   q="data"::String,
   Q="B"::String,
   s=0::Union{Real,DateTime,String},
-  t=(-600)::Union{Real,DateTime,String},
+  t=(-300)::Union{Real,DateTime,String},
   v=0::Int,
   w=false::Bool,
   y=true::Bool,
@@ -273,16 +255,16 @@ FDSNget(S::String;
   to=10::Real) = FDSNget(SL_config(S, fdsn=true, delim=d), d=d, src=src, q=q, Q=Q, s=s, t=t, v=v, w=w, y=y, si=si, to=to)
 
 """
-    S = evq(t)
+    S = FDSNevq(t)
 
 Multi-server query for the events with the closest origin time to`t`. `t`
 should be a string formatted YYYY-MM-DDThh:mm:ss with times given in UTC
 (e.g. "2001-02-08T18:54:32"). Returns a SeisHdr array.
 
 Incomplete string queries are read to the nearest fully specified time
-constraint, e.g., evq("2001-02-08") returns the nearest event to 2001-02-08T00:00:00
+constraint, e.g., FDSNevq("2001-02-08") returns the nearest event to 2001-02-08T00:00:00
 UTC. If no event is found on any server within one day of the specified search
-time, evq exits with an error.
+time, FDSNevq exits with an error.
 
 Additional arguments can be passed at the command line for more fine-grained control:
 * `w=N`: search `N` seconds around `t` for events. (default: 86400)
@@ -294,7 +276,7 @@ Additional arguments can be passed at the command line for more fine-grained con
 * `dep=[DEP_MIN DEP_MAX]`: Specify a depth range in km.
 * `src=SRC`: Only query server **SRC**. Specify as a string. Type `?FDSNget` for servers and meanings.
 """
-function evq(ts::String;
+function FDSNevq(ts::String;
   dep=[-30.0 700.0]::Array{Float64,2},
   lat=[-90.0 90.0]::Array{Float64,2},
   lon=[-180.0 180.0]::Array{Float64,2},
@@ -439,13 +421,13 @@ function FDSNsta(CC::String;
 end
 
 """
-    FDSN_evt(evt::String, cc::String)
+    FDSNevt(evt::String, cc::String)
 
 Get trace data for event `evt`, channels `cc`. Auto-filled with auxiliary functions.
 
-See also: `evq`, `FDSNsta`, `distaz!`
+See also: `FDSNevq`, `FDSNsta`, `distaz!`
 """
-function FDSN_evt(evt::String, cc::String;
+function FDSNevt(evt::String, cc::String;
   mag=[6.0 9.9]::Array{Float64,2},
   to=10.0::Real,
   pha="P"::String,
@@ -459,7 +441,7 @@ function FDSN_evt(evt::String, cc::String;
   Q = SL_config(cc, fdsn=true)
 
   # Create header
-  h = evq(evt, mag=mag, to=to, v=v)[1]   # Get event of interest with evq
+  h = FDSNevq(evt, mag=mag, to=to, v=v)[1]   # Get event of interest with FDSNevq
   v > 0 && println(STDOUT, now(), ": header query complete.")
 
   # Create channel data

@@ -1,8 +1,8 @@
 using Base.Test, Compat
 
-# evq
-println(STDOUT, "...evq...")
-S = evq("201103110547", mag=[3.0 9.9], n=10, src="all");
+# FDSNevq
+println(STDOUT, "...FDSNevq...")
+S = FDSNevq("201103110547", mag=[3.0 9.9], n=10, src="all");
 
 # FDSNsta
 println(STDOUT, "...FDSN station query (seismometers + strainmeters)...")
@@ -12,9 +12,9 @@ S = FDSNsta(CC)
 @test_approx_eq(findfirst(S.id .== "PB.B001..EHZ")>0, true)
 @test_approx_eq(findfirst(S.id .== "CC.VALT..BHZ")>0, true)
 
-# FDSN_evt
+# FDSNevt
 println(STDOUT, "...FDSN event request...")
-S = FDSN_evt("201103110547", "PB B004  EH?,PB B004  BS?,PB B001  BS?,PB B001  EH?")
+S = FDSNevt("201103110547", "PB B004  EH?,PB B004  BS?,PB B001  BS?,PB B001  EH?")
 
 # US Test
 println(STDOUT, "...IRIS FDSN data request...")

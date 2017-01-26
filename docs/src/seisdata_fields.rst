@@ -6,127 +6,92 @@
 .. _seisdata_fields:
 
 **********************************
-:mod:`Appendix A: SeisData Fields`
+:mod:`Appendix A: Structure and Field Descriptions`
 **********************************
-All field names use lowercase letters. SeisData and SeisChannel types have identical field types; SeisData objects have the additional field ``n``.
 
+Types introduced in SeisIO:
 
-Field Names and Meanings
-========================
-* ``n``: (SeisData only) number of channels
+* SeisChannel: Container for one channel of univariate data
+* SeisData: Container for multiple channels of univariate data
+* SeisHdr: Seismic event header
+* SeisEvent: Composite type for events with header and trace data
 
-* ``id``: unique channel identifier, formated using the subfields ``nn.sssss.ll.ccc``. Contains no whitespace.
+All field names use lowercase letters.
 
-  * ``nn``: two-letter network code
+SeisChannel Fields
+==================
+====    =====               =====
+Name    Type\ :sup:`(a)`    Meaning
+====    =====               =====
+id      s                   unique channel identifier formated ``nn.sssss.ll.ccc`` (net.sta.loc.chan).\ :sup:`(b)`
+name    s                   channel name
+src     s                   description of data source
+units   s                   units of dependent variable (`UCUM specification <http://unitsofmeasure.org/trac>`_ expected)
+fs      f64                 sampling frequency in Hz
+gain    f64                 scalar to convert **x** to SI units in "flat" part of frequency spectrum\ :sup:`(c)`
+loc     Array{f64,1}        sensor location: [lat, lon, ele, azimuth, incidence]\ :sup:`(d)`
+resp    Array{cf64,2}       complex instrument response with zeros in ``resp[i][:,1]``, poles in ``resp[i][:,2]``
+misc    Dict{s,Any}         miscellaneous information\ :sup:`(e)`
+notes   Array{s,1}          timestamped notes; use ``note!`` to annotate
+t       Array{i64,2}        time gaps:ref:`(see below) <seisdata_t>`
+x       Array{f64,1}        univariate data
+====    =====     =====
 
-  * ``sssss``: station code, up to five characters
+SeisData Fields
+===============
+As SeisChannel, plus
 
-  * ``ll``: location code, typically numeric
+====   =====               =====
+Name   Type\ :sup:`(a)`    Meaning
+====   =====               =====
+n      i64                 number of channels
+c      Array{TCPSocket,1}  array of TCP connections
+====   =====               =====
 
-  * ``ccc``: channel code; follow the `SEED format appendices  <http://www.fdsn.org/seed_manual/SEEDManual_V2.4_Appendix-A.pdf>`_
+SeisHdr Fields
+===============
+====    =====                       =====
+Name    Type\ :sup:`(a)`            Meaning
+====    =====                       =====
+ id     i64                         event ID
+ ot     DateTime                    origin time
+ loc    Array{f64, 1}               hypocenter
+ mag    Tuple{f32, c, c}            magnitude, mag. scale
+ int    Tuple{u8, s}                intensity, int. scale
+ mt     Array{f64, 1}               moment tensor: (1-6) tensor, (7) scalar moment, (8) \%dc
+ np     Array{Tuple{3xf64},1}       nodal planes
+ pax    Array{Tuple{3xf64},1}       principal axes
+ src    s                           data source (e.g. url/filename)
+====    =====                       =====
 
-* ``name``: unique freeform string for channel name\ :sup:`(a)`
+SeisEvent Fields
+================
+====    =====                       =====
+Name    Type                        Meaning
+====    =====                       =====
+ hdr    SeisHdr                     event header
+ data   SeisData                    trace data
+====    =====                       =====
 
-* ``src``: freeform string describing data source\ :sup:`(a)`
+:sup:`(a)` Abbreviations: s = String, c = Char, f = Float, i = Signed Integer, u = Unsigned Integer.
 
-*  ``fs``: sampling frequency in Hz
+:sup:`(b)` Subfields of ``id`` should contain only alphanumeric characters.
 
-* ``gain``: scalar value by which data are divided to obtain measurements in SI units in the "flat" part of the frequency spectrum
+:sup:`(c)` Gain has an identical meaning to the "Stage 0 gain" of FDSN XML.
 
-* ``units``: units of the dependent variable (MKS is recommended, with "m/s" for velocity and "m/s/s" for acceleration)\ :sup:`(a)`
+:sup:`(d)` azimuth is clockwise from North; incidence of 0 = vertical; both use degrees
 
-* ``loc``: sensor location, a 5-entry vector of the form [lat, lon, ele, |thgr|, |phgr|]
+:sup:`(e)` Always use typed arrays in ``misc`` (e.g. ``Array{Float64,1}``, never ``Array{Any,1}``). Only (subtypes of) Char, Complex, Real, and String can be saved in SeisIO native file format.
 
-  * lat: latitude in decimal degrees (+ = North)
-
-  * lon: longitude in decimal degrees (+ = East)
-
-  * ele: elevation in meters above sea level
-
-  * |thgr|: channel azimuth in degrees clockwise from North
-
-  * |phgr|: channel incidence in degrees from vertical
-
-* ``resp``: complex instrument response (poles and zeros), with zeros in ``resp[:,1]`` and poles in ``resp[:,2]``
-
-* ``misc``: dictionary of miscellaneous information
-
-* ``notes``: array of notes
-
-* ``t``: pseudo-sparse two-column array of times :ref:`(see below) <seisdata_t>`
-
-* ``x``: vector of sample data
-
-
-:sup:`(a)` Only the first 26 characters of each channel's ``name``, ``units``, and ``src`` strings are written to file. Longer strings are truncated.
-
-
-Notes on Specific Fields
-========================
-
-``id``
-------
-Subfields of ``id`` should contain alphanumeric characters.  An ``id`` value shouldn't contain whitespace. Never set a ``name`` field to an ``id`` field of a different channel.
-
-``gain``
---------
-The ``gain`` field has an identical meaning to the "Stage 0" gain of FDSN/SeedLink station/channel XML files.
-
-``misc``
---------
-Always use static types to declare arrays in ``misc`` (e.g. ``Array{Float64,N}``; never ``Array{Any,N}``). Although values in ``misc`` can be of any type, there are strict limitations on what value types can be saved to disk:
-
-Scalars and single-type arrays of the follwoing types are OK: ``Char, Complex64, Complex128, DirectIndexString, Float32, Float64, Integer, Unsigned``. Other types will be ignored during file write and warning messages will be given when non-writable values are encountered. Subtypes of the listed types are OK; for example, ``ASCIIString`` and ``Array{ASCIIString,N}`` are both supported.
-
-``notes``
----------
-The ``notes`` array grows automatically as data are modified. Any ``merge`` or ``sync`` operation is automatically noted. Additional notes can be written manually using the ``note`` command.
+Time Convention
+---------------
 
 .. _seisdata_t:
 
-``t``
------
-For *time series data* ``x``, ``t`` is a sparse delta-compressed representation of *time gaps in microseconds* in ``x``. The first column stores *indices*; the second column stores *gap lengths*.
+The units of ``t`` are *integer microseconds*, measured from Unix epoch time (1970-01-01T00:00:00.000).
 
-* The second column of the first row, i.e. ``t[1,2]``, always stores the *time of the first sample* in ``x`` relative to the Unix epoch (e.g. ``t[1,2] = 10`` means the time series begins at 1970-01-01T00:00:00.000010 UTC).
+For *regularly sampled* data (``fs > 0.0``), each ``t`` is a sparse delta-compressed representation of *time gaps* in the corresponding ``x``. The first column stores indices of gaps; the second, gap lengths.
 
-* The last row of ``t`` should always take the form ``[length(x) 0.0]``.
+Within each time field, ``t[1,2]`` stores the time of the first sample of the corresponding ``x``. The last row of each ``t`` should always take the form ``[length(x) 0]``. Other rows take the form ``[(starting index of gap) (length of gap)]``.
 
-* Other rows should take the form ``[(starting index of gap in x) (length of gap)]``.
-
-For *irregularly sampled data* (``fs = 0``), ``t`` is a dense delta-compressed representation of *time stamps in microseconds for each sample*. ``t`` for irregularly sampled data has a single column, but is treated by Julia as a two-dimensiona array (not a one-dimensional vector).
-
-
-*********************************
-:mod:`Appendix B: SeisHdr Fields`
-*********************************
-All field names use lowercase letters.
-
-
-Field Names and Meanings
-========================
-* ``id``: event ID
-
-* ``time``: origin time
-
-* ``lat``: source latitude; + = North
-
-* ``lon``: source longitude; + = East
-
-*  ``dep``: source depth in km; + = down
-
-* ``mag``: magnitude
-
-* ``mag_typ``: magnitude type (scale)
-
-* ``mag_auth``: magnitude author
-
-* ``auth``: event author
-
-* ``cat``: source catalog
-
-* ``contrib``: solution contributor
-
-* ``contrib_id``: contributor numeric ID
-
-* ``loc_name``: freeform location name
+For *irregularly sampled data* (``fs = 0``), ``t`` is a dense delta-compressed representation of *time stamps corresponding to each sample*.
