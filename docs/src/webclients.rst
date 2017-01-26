@@ -148,28 +148,29 @@ The SeisIO web clients use a similar set of keywords; a full glossary is provide
   :delim: ;
   :widths: 8, 8, 8, 8, 24
 
-  a; 240; r; SL; keepalive interval (s)
-  cha; "EHZ"; s; IRIS; channel code
+  a; 240; R; SL; keepalive interval (s)
+  cha; "EHZ"; S; IRIS; channel code
   f; 0x00; u8; SL; safety check level
-  g; 3600; r; SL; maxmum gap since last packet received
-  loc; "--"; s; IRIS; instrument location [1]
-  mode; "DATA"; s; SL; mode (DATA/TIME/FETCH)
-  net; "UW"; s; IRIS; network code
-  patts; ["*"]; A(s,1); SL; channel/loc/data (accepts ``patts=["*"]`` as a wildcard)
-  port; 18000; i64; SL; port number
-  Q; "R"; s; F, I; quality (uses standard `FDSN/IRIS codes <https://ds.iris.edu/ds/nodes/dmc/manuals/breq_fast/#quality-option>`_ [2])
-  r; 20; r; SL; refresh interval (s)
-  s; 0; U(r,d,s); All; start time
-  src; "IRIS"; s; F,I; source name
-  sta; "TDH"; s; IRIS; station code
-  strict; false; b; SL; strict mode (exit on errors)
-  t; ±300 [3]; U(r,d,s); All; end time
-  to; 10; r; F,I; timeout (s)
-  url; (iris); s; SL; url
-  v; 0; i; All; verbosity level
-  w; false; b; All; write download directly to file? [4]
-  y; false; b; F,I; synchronize channel times and fill gaps?
+  g; 3600; R; SL; maxmum gap since last packet received
+  loc; "--"; S; IRIS; instrument location [1]_
+  mode; "DATA"; S; SL; mode (DATA/TIME/FETCH)
+  net; "UW"; S; IRIS; network code
+  patts; ["*"]; A(S,1); SL; channel/loc/data (accepts ``patts=["*"]`` as a wildcard)
+  port; 18000; I64; SL; port number
+  Q; "R"; S; F, I; quality (uses standard `FDSN/IRIS codes <https://ds.iris.edu/ds/nodes/dmc/manuals/breq_fast/#quality-option>`_ [2]_ )
+  r; 20; R; SL; refresh interval (s)
+  s; 0; U(R,DT,S); All; start time
+  src; "IRIS"; S; F,I; source name
+  sta; "TDH"; S; IRIS; station code
+  strict; false; B; SL; strict mode (exit on errors)
+  t; ±300 [3]_; U(R,D,S); All; end time
+  to; 10; R; F,I; timeout (s)
+  url; (iris); S; SL; url
+  v; 0; I; All; verbosity level
+  w; false; B; All; write download directly to file? [4]_
+  y; false; B; F,I; synchronize channel times and fill gaps?
 
+(for types, A = Array, B = Boolean, DT = DateTime, F = Float, I = Integer, R = Real, S = String, u = Unsigned, U = Union)
 
 Web Client Time Specification
 #############################
@@ -183,7 +184,7 @@ Web Client Time Specification
   DT; DT; Sort only
   R; DT; Add ``s`` seconds to ``t``
   DT; R; Add ``t`` seconds to ``s``
-  S; R; Convert ``s`` to DateTime, add ``t`` [5]
+  S; R; Convert ``s`` to DateTime, add ``t`` [5]_
   R; S; Convert ``t`` to DateTime, add ``s``
   R; R; Add ``s, t`` seconds to ``now()``
 
