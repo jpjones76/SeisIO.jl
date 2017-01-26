@@ -163,8 +163,8 @@ function show_conn(io::IO, C::Array{TCPSocket,1})
     m = 1
     for c in C
       if isopen(c)
-        (addr,port) = getsockname(c)
-        println(io, " "^os, "(", m, ") ", addr, ":", Int(port))
+        (url,port) = getsockname(c)
+        println(io, " "^os, "(", m, ") ", url, ":", Int(port))
       else
         println(io, " "^os, "(", m, ") (closed)")
       end

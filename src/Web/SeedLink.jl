@@ -9,7 +9,7 @@ function check_sta_exists(sta::Array{String,1}, xstr::String)
   return x
 end
 
-function check_stream_exists(sta::Array{String,1}, pat::Array{String,1}, xstr::String; to=7200::Real)
+function check_stream_exists(sta::Array{String,1}, pat::Array{String,1}, xstr::String; g=7200::Real)
   tag = ["seedname","location","type"]
   N = length(sta)
   x = falses(N)
@@ -45,7 +45,7 @@ function check_stream_exists(sta::Array{String,1}, pat::Array{String,1}, xstr::S
       end
 
       # Treat station as "present" if there's a match
-      if minimum(t) < to
+      if minimum(t) < g
         x[i] = true
         break
       end
@@ -54,59 +54,17 @@ function check_stream_exists(sta::Array{String,1}, pat::Array{String,1}, xstr::S
   return x
 end
 
-# function check_stream_exists(sta::Array{String,1}, pat::Array{String,1}, xstr::String; to=7200::Real)
-#   xst = xp_parse(xstr).elements
-#   L = length(xstreams)
-#   N = length(sta)
-#   x = falses(N)
-#   for i = 1:1:N
-#     t = Inf
-#     (nn,ss) = split(sta[i], " ", limit=2, keep=true)
-#     (lc,d) = split(pat[i], '.', limit=2, keep=true)
-#     ll = replace(lc[1:2],"?","")
-#     cc = replace(lc[3:5],"?","")
-#     dd = replace(d, "?", "")
-#     for j = 1:1:length(xst)
-#       if x[i] == false
-#         if isa(xst[j], LibExpat.ETree)
-#           y = xst[j].attr
-#           if haskey(y, "name") && haskey(y, "network")
-#             if contains(y["network"], nn) && contains(y["name"], ss)
-#               streams = xst[j].elements
-#               for k = 1:1:length(streams)
-#                 z = streams[k].attr
-#                 if haskey(z, "location") && haskey(z, "type") && haskey(z, "seedname")
-#                   if contains(z["location"],ll) && contains(z["type"],dd) && contains(z["seedname"], cc)
-#                     t = min(t, time()-d2u(Dates.DateTime( replace(z["end_time"]," ","T"))))
-#                     if t < to
-#                       x[i] = true
-#                       break
-#                     end
-#                   end
-#                 end
-#               end
-#             end
-#           end
-#         end
-#       else
-#         break
-#       end
-#     end
-#   end
-#   return x
-# end
-
 """
-    info_xml = SL_info(level=LEVEL::String, addr=URL::String, port=PORT::Integer)
+    info_xml = SL_info(level=LEVEL::String, url=URL::String, port=PORT::Integer)
 
 Retrieve XML output of SeedLink command "INFO `LEVEL`" from server `URL:PORT`. Returns formatted XML. `LEVEL` must be one of "ID", "CAPABILITIES", "STATIONS", "STREAMS", "GAPS", "CONNECTIONS", "ALL".
 
 """
 function SL_info(;level="STATIONS"::String,                  # level
-                addr="rtserve.iris.washington.edu"::String, # url
+                url="rtserve.iris.washington.edu"::String, # url
                 port=18000::Integer                         # port
                 )
-  conn = connect(TCPSocket(),addr,port)
+  conn = connect(TCPSocket(),url,port)
   write(conn, string("INFO ", level, "\r"))
   eof(conn)
   B = takebuf_array(conn.buffer)
@@ -133,7 +91,7 @@ end
 
 Check that stations in `sta` are available via SeedLink from `url`. Returns a BitArray with one value per entry in `sta.`
 """
-has_sta(sta::Array{String,1}, url::String; port=18000::Integer) = check_sta_exists(sta, SL_info(level="STATIONS", addr=url, port=port))
+has_sta(sta::Array{String,1}, url::String; port=18000::Integer) = check_sta_exists(sta, SL_info(level="STATIONS", url=url, port=port))
 has_sta(sta::String, url::String; port=18000::Integer) = has_sta([sta], url, port=port)
 
 """
@@ -146,7 +104,7 @@ Check that streams matching `streams`, `patts` exist at SeedLink server `url`. R
 As above, with keywords to set port number `N` (default: 18000) and timeout `M` seconds (default: 7200). If t > M seconds since last packet received, a stream is treated as missing.
 """
 has_stream(sta::Array{String,1}, pat::Array{String,1}, url::String;
-  port=18000::Int, to=7200::Real) = check_stream_exists(sta, pat, SL_info(level="STREAMS", addr=url, port=port), to=to)
+  port=18000::Int, g=7200::Real) = check_stream_exists(sta, pat, SL_info(level="STREAMS", url=url, port=port), g=g)
 
 function getSLver(vline::String)
   # Versioning will break if SeedLink switches to VV.PPP.NNN format
@@ -182,7 +140,7 @@ Specify as `kw=value`, e.g., `SeedLink!(S, sta, mode="TIME", r=120)`.
 
 | Name   | Default | Type            | Description                      |
 |:-------|:--------|:----------------|:---------------------------------|
-| addr   | (iris)  | String          | url, no "http://"                |
+| url    | (iris)  | String          | url, no "http://"                |
 | port   | 18000   | Integer         | port number                      |
 | patts  | ["*"]   | Array{String,1} | channel/loc/data strings (2)     |
 | mode   | "DATA"  | String          | TIME, DATA, or FETCH             |
@@ -198,13 +156,13 @@ Specify as `kw=value`, e.g., `SeedLink!(S, sta, mode="TIME", r=120)`.
 
 (1) Type `?parsetimewin` for time window syntax help
 (2) If `length(patt) < length(sta)`, `patt[end]` is repeated to `length(sta)`
-(3) 0x01 = check if stations exist at `addr`; 0x02 = check for recent data at `addr`
+(3) 0x01 = check if stations exist at `url`; 0x02 = check for recent data at `url`
 (4) A stream with no data for `g` seconds is considered offline if `f=0x02`.
 (5) File name is auto-generated. Each `SeedLink!` call uses a unique file.
 """
 function SeedLink!(S::SeisData,
   sta::Array{String,1};                               # net/sta
-  addr="rtserve.iris.washington.edu"::String,         # url
+  url="rtserve.iris.washington.edu"::String,         # url
   port=18000::Integer,                                # port
   patts=["*"]::Array{String,1},                       # channel/loc/data
   mode="DATA"::String,                                # SeedLink mode
@@ -241,17 +199,17 @@ function SeedLink!(S::SeisData,
 
   if f==0x02
     v>0 && println("Checking for recent matching streams (may take 60 s)...")
-    h = has_stream(sta, patts, addr, port=port, g=g)
+    h = has_stream(sta, patts, url, port=port, g=g)
   elseif f==0x01
     v>0 && println("Checking that request exists (may take 60 s)...")
-    h = has_sta(sta, addr, port=port)
+    h = has_sta(sta, url, port=port)
   else
     h = trues(Ns)
   end
 
   for i = Ns:-1:1
     if !h[i]
-      warn(string(addr, " doesn't currently have ", sta[i], "; deleted from req."))
+      warn(string(url, " doesn't currently have ", sta[i], "; deleted from req."))
       deleteat!(sta, i)
       deleteat!(patts,i)
     end
@@ -264,11 +222,11 @@ function SeedLink!(S::SeisData,
   end
 
   # Source for logging
-  src = join([addr,port],':')
+  src = join([url,port],':')
 
   # ==========================================================================
   # connection and server info retrieval
-  push!(S.c, connect(TCPSocket(),addr,port))
+  push!(S.c, connect(TCPSocket(),url,port))
   q = length(S.c)
 
   # version, server info
@@ -406,7 +364,7 @@ end
 
 # If no SeisData object supplied, create/return one
 SeedLink(sta::Array{String,1};
-  addr="rtserve.iris.washington.edu"::String,         # url
+  url="rtserve.iris.washington.edu"::String,          # url
   port=18000::Integer,                                # port
   patts=["*"]::Array{String,1},                       # channel/loc/data
   mode="DATA"::String,                                # SeedLink mode
@@ -419,7 +377,7 @@ SeedLink(sta::Array{String,1};
   v=0::Int,                                           # verbosity
   w=false::Bool) = begin
   S = SeisData()
-  SeedLink!(S, sta, addr=addr, port=port, patts=patts, mode=mode,
+  SeedLink!(S, sta, url=url, port=port, patts=patts, mode=mode,
                 r=r, a=a, s=s, t=t, f=f, strict=strict, v=v, w=w)
   return S
 end
@@ -427,7 +385,7 @@ end
 # Methods when supplying a config file or string
 function SeedLink!(S::SeisData,
   cfg::String;
-  addr="rtserve.iris.washington.edu"::String,         # url
+  url="rtserve.iris.washington.edu"::String,          # url
   port=18000::Integer,                                # port
   patts=["*"]::Array{String,1},                       # channel/loc/data
   mode="DATA"::String,                                # SeedLink mode
@@ -441,13 +399,13 @@ function SeedLink!(S::SeisData,
   w=false::Bool)
 
   Q = SL_config(cfg)
-  SeedLink!(S, Q[:,1], addr=addr, port=port, patts=Q[:,2], mode=mode,
+  SeedLink!(S, Q[:,1], url=url, port=port, patts=Q[:,2], mode=mode,
                 r=r, a=a, s=s, t=t, f=f, strict=strict, v=v, w=w)
   return S
 end
 
 function SeedLink(cfg::String;
-  addr="rtserve.iris.washington.edu"::String,         # url
+  url="rtserve.iris.washington.edu"::String,          # url
   port=18000::Integer,                                # port
   patts=["*"]::Array{String,1},                       # channel/loc/data
   mode="DATA"::String,                                # SeedLink mode
@@ -461,7 +419,7 @@ function SeedLink(cfg::String;
   w=false::Bool)
   S = SeisData()
   Q = SL_config(cfg)
-  SeedLink!(S, Q[:,1], addr=addr, port=port, patts=Q[:,2], mode=mode,
+  SeedLink!(S, Q[:,1], url=url, port=port, patts=Q[:,2], mode=mode,
                 r=r, a=a, s=s, t=t, f=f, strict=strict, v=v, w=w)
   return S
 end

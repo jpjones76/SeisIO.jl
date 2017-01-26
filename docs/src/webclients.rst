@@ -6,30 +6,57 @@
 
 SeedLink
 ########
-`SeedLink <https://www.seiscomp3.org/wiki/doc/applications/seedlink>`_ is a TCP/IP-based data transmission protocol. It can be used to receive real-time data to whatever degree lag allows. It can also retrieve recent data in TIME acquisition mode.
+`SeedLink <https://www.seiscomp3.org/wiki/doc/applications/seedlink>`_ is a TCP/IP-based data transmission protocol for near-real-time access.
 
 
 SeedLink client
 ================
-``SeedLink`` is an experimental client for the SeedLink protocol in TIME acquisition mode. It can receive real-time data for a limited (user-specified) duration. A channel list (array of ASCII strings) or config filename (ASCII string) must be given as the first argument. All other arguments are passed as :ref:`keywords <web_client_keywords>`.
+``SeedLink!(S, ...)`` invokes a native Julia SeedLink client on SeisData object ``S``. A channel list (array of ASCII strings) or config filename (ASCII string) must be passed as the first argument. Other other arguments are passed as keywords.
 
 
-Channel Specification
----------------------
-If passing a list of channels as a keyword, construct an array of ASCII strings of the form ["sssss nn", "sssss nn", (etc.)], where nn is the two-letter network code and sssss is the station code.
-
-If using a config file, the expected format is identical to `SLtool <http://ds.iris.edu/ds/nodes/dmc/software/downloads/slinktool/>`_ config files, nn sssss (selectors). Selectors should follow `SeedLink <https://www.seiscomp3.org/wiki/doc/applications/seedlink>`_ specifications, with ? indicating a wildcard; see Examples.
-
-
-Example
--------
-Download a minute of real-time data from stations GPW (Glacier Peak, WA, USA) and MBW (Mt. Baker, WA, USA) to a SeisData object named seis:
-
+Valid Channel Specification
+---------------------------
 ::
 
-  sta = ["GPW UW"; "MBW UW"]
-  seis = SeedLink(sta, t=60.0)
+  nn sssss llccc.d
+  nn sssss ccc.d
+  nn sssss ccc
+  nn sssss
 
+n = network, s = station, l = location, c = channel, d = data flag; field length corresponds to expected number of characters. Selectors should follow `SeedLink offical specifications <https://www.seiscomp3.org/wiki/doc/applications/seedlink>`_ with ? indicating a wildcard; see Examples.
+
+If passing a list of channels, construct an array of ASCII strings, e.g. ``["UW TDH","CC VALT BHZ.D"]``
+
+If using a config file, the expected format is identical to `SLtool <http://ds.iris.edu/ds/nodes/dmc/software/downloads/slinktool/>`_ config files.
+
+Working with SeedLink
+---------------------
+``SeedLink!(S, ...)`` operates on SeisData object ``S`` by appending a new TCP/IP connection handle to ``S.c``. Data are periodically parsed until the connection is closed. One SeisData object can support multiple connections provided each connection's streams feed different channels.
+
+``close(S.c[i])`` ends a SeedLink connection. After the next refresh interval, remaining data in ``S.c[i]`` are parsed.
+
+``!deleteat(S.c, i)`` removes a handle to a connection.
+
+``SeedLink!(... , w=true)`` directly writes packets from a SeedLink connection to file.
+
+``S = SeedLink(...)`` creates a new SeisData object fed by a new SeedLink connection.
+
+Checking for Dead Streams
+-------------------------
+Not every data stream is always active.
+
+``has_stream`` checks the time gaps of specified streams. Streams with two hours or more since last packet received return ``false``. Keyword ``g=XX`` sets the maximum allowed gap in seconds.
+
+
+``has_sta`` checks whether a station exists on a given server.
+
+``SeedLink!(... f=0x01)`` calls ``has_sta`` automatically, before initiating the new session.
+
+``SeedLink!(... f=0x02)`` calls ``has_stream`` automatically, before initiating the new session.
+
+Associated Functions
+====================
+``has_sta, has_stream, parsetimewin, SeedLink!, SeedLink, SL_config, SL_info, SL_minreq!``
 
 
 FDSN
@@ -37,33 +64,41 @@ FDSN
 `FDSN <http://www.fdsn.org/>`_ is a global organization that supports seismology research. The FDSN web protocol offers near-real-time access to data from thousands of instruments across the world.
 
 
-FDSN client
-===========
-``FDSNget`` is a highly customizable wrapper to FDSN services. All arguments to FDSNget are :ref:`keywords <web_client_keywords>`.
+FDSN clients
+============
+``FDSNevq`` queries FDSN for events, and, if successful, returns the event headers.
 
+``FDSNevt`` retrieves event headers and data in a user-specified phase window.
+
+``FDSNget`` is a highly customizable wrapper to FDSN data access. All arguments are keywords.
+
+``FDSNsta`` retrieves and parses station information.
 
 Public FDSN servers
 --------------------
 * IRIS, WA, USA: http://service.iris.edu/fdsnws/
 
-* Réseau Sismologique et Géodesique Français, FR: http://ws.resif.fr/fdsnws/
+* Réseau Sismologique et Géodesique Français, FR: http://ws.resif.fr/fdsnws/ (data only)
 
 * Northern California Earthquake Data Center, CA, USA: http://service.ncedc.org/fdsnws/
 
 * GFZ Potsdam, DE: http://geofon.gfz-potsdam.de/fdsnws/
 
 
-Example
--------
-Download 10 minutes of data from 4 stations at Mt. St. Helens (WA, USA), delete the low-gain channels, and save to the current directory:
+.. Example
+.. -------
+.. Download 10 minutes of data from 4 stations at Mt. St. Helens (WA, USA), delete the low-gain channels, and save to the current directory:
+..
+.. ::
+..
+..   S = FDSNget(net="CC,UW", sta="SEP,SHW,HSR,VALT", cha="*", t=600)
+..   S -= "SHW    ELZUW"
+..   S -= "HSR    ELZUW"
+..   writesac(S)
 
-::
-
-  S = FDSNget(net="CC,UW", sta="SEP,SHW,HSR,VALT", cha="*", t=600)
-  S -= "SHW    ELZUW"
-  S -= "HSR    ELZUW"
-  writesac(S)
-
+Associated Functions
+====================
+``FDSNevq, FDSNevt, FDSNget, FDSNsta, parsetimewin``
 
 
 IRIS
@@ -80,22 +115,26 @@ The channel list should be an array of channel identification strings, formated 
 
 Notes
 -----
-* Trace data are de-meaned and the stage zero gain is removed; however, instrument response is unchanged.
+* Trace data are de-meaned, but instrument response is unchanged.
 
 * The IRIS web server doesn't return station coordinates.
 
 * Wildcards in the channel list are not supported.
 
 
-Example
--------
-Request 10 minutes of continuous data recorded during the May 2016 earthquake swarm at Mt. Hood, OR, USA:
+.. Example
+.. -------
+.. Request 10 minutes of continuous data recorded during the May 2016 earthquake swarm at Mt. Hood, OR, USA:
+..
+.. ::
+..
+..   STA = ["UW.HOOD.BHZ"; "UW.HOOD.BHN"; "UW.HOOD.BHE"; "CC.TIMB.EHZ"; "CC.TIMB.EHN"; "CC.TIMB.EHE"]
+..   TS = "2016-05-16T14:50:00"; TE = 600
+..   S = IRISget(STA, s=TS, t=TE)
 
-::
-
-  STA = ["UW.HOOD.BHZ"; "UW.HOOD.BHN"; "UW.HOOD.BHE"; "CC.TIMB.EHZ"; "CC.TIMB.EHN"; "CC.TIMB.EHE"]
-  TS = "2016-05-16T14:50:00"; TE = 600
-  S = IRISget(STA, s=TS, t=TE)
+Associated Functions
+====================
+``IRISget, irisws, parsetimewin``
 
 .. _web_client_keywords:
 
@@ -103,56 +142,54 @@ Web Client Keywords
 ###################
 The SeisIO web clients use a similar set of keywords; a full glossary is provided below. For client-specific keywords, the client(s) that support each keyword are listed in parenthesis.
 
-
-* ``N`` (SeedLink): Number of 520-byte mini-SEED packets to buffer before calling the parser subroutine. Setting this value too high can make the length of the data returned unreliable.
-
-* ``Q`` (FDSNget, IRISget): Quality. Uses standard `FDSN/IRIS codes <https://ds.iris.edu/ds/nodes/dmc/manuals/breq_fast/#quality-option>`_. ``Q=R`` is not recommended and will not work on some FDSN servers.
-
-* ``loc`` (FDSNget): Location code. Specify wildcard with ``loc=""--"``.
-
-* ``net``, ``sta``, ``cha`` (FDSNget): ASCII strings. Wildcards are OK; specify with "???".
-
-* ``patts`` (SeedLink): Array of selector patterns. Do not use if a config file name is passed as the first argument to SeedLink.
-
-* ``port`` (SeedLink): Connection port. Defaults to 18000.
-
-* ``s``: Start time. :ref:`See below <time_syntax>` for how to specify ``s`` and ``t``.
-
-* ``t``: End time. :ref:`See below <time_syntax>` for how to specify ``s`` and ``t``.
-
-* ``to`` (FDSNget, IRISget): Timeout in seconds.
-
-* ``v``: Verbose mode (boolean).
-
-* ``vv``: Very verbose mode (boolean).
-
-* ``w``: Write (boolean). If w=true, the file from each data request is written to disk as an mSEED or SAC file before it's read into SeisIO. File names generated by w=true are coded with a hash based on the arguments passed to the invoking program.
-
-* ``y``: Synchronize (boolean).
-
-
-.. _time_syntax:
-
-Time Syntax
-===========
-The "time" keywords ``s`` and ``t`` can be real numbers, DateTime objects, or ASCII strings. Strings must follow the format ``yyyy-mm-ddTHH:MM:SS``, e.g. ``s="2016-03-23T11:17:00"``.
+====    ====      =====     ======    =====
+kw      def       type      srvc      Meaning
+====    ====      =====     ======    =====
+a       240       r         SL        keepalive interval (s)
+cha     "EHZ"     s         IRIS      channel code
+f       0x00      u8        SL        safety check level
+g       3600      r         SL        maximum gap since last packet received
+loc     "--"      s         IRIS      instrument location [#]
+mode    "DATA"    s         SL        mode (DATA, TIME, or FETCH)
+net     "UW"      s         IRIS      network code
+patts   ["*"]     A(s,1)    SL        channel/loc/data. Use ``patts=["*"]`` as a wildcard.
+port    18000     i64       SL        port number
+Q       "R"       s         F,I       quality; uses standard `FDSN/IRIS codes <https://ds.iris.edu/ds/nodes/dmc/manuals/breq_fast/#quality-option>`_ [#]
+r       20        r         SL        refresh interval (s)
+s       0         U(r,d,s)  All       start time
+src     "IRIS"    s         F,I       source name [#]
+sta     "TDH"     s         IRIS      station code
+strict  true      b         SL        strict mode (exit on errors)
+t       ±300      U(r,d,s)  All       end time
+to      10        r         F,I       timeout (s)
+url     (iris)    s         SL        url
+v       0         i         All       verbosity level
+w       false     b         All       write download directly to file?
+y       false     b         F,I       synchronize channel times and fill gaps?
+====    ====      =====     ======    =====
 
 
-Time Specification for Backwards Fill
--------------------------------------
-Passing an Int or Float64 with keyword ``t=T`` sets the mode to backwards fill. Retrieved data begin ``T`` seconds before ``s=S``. ``T`` is interpreted as a *duration in seconds*.
+Web Client Time Specification
+#############################
+``d0,d1 = parsetimewin(s,t)`` converts input times to a sorted pair of DateTime objects. Behavior depends on the data types of the inputs:
 
-* ``s=0``: Ends at the *start of the current minute*.
+====        ====        ======
+type(s)     type(t)     Behavior
+====        ====        ======
+DT          DT          Sort only
+R           DT          Add ``s`` seconds to ``t``
+DT          R           Add ``t`` seconds to ``s``
+S           R           Convert ``s`` to DateTime, add ``t`` [#]
+R           S           Convert ``t`` to DateTime, add ``s``
+R           R           Add ``s, t`` seconds to ``now()``
+====        ====        ======
 
-* ``s=F``, an Integer or Float64: ``F`` is treated as *Unix (Epoch) time in seconds*.
+(above, R = Real, DT = DateTime, S = String, I = Integer)
 
-* ``s=D``, a DateTime object or ASCIIString value: Backfill *ends* at ``D``.
+.. rubric:: Footnotes
 
-
-Time Specification for Range Retrieval
---------------------------------------
-Passing a string or DateTime object D with keyword ``t=T`` sets the mode to range retrieval. Retrieved data *begin* at ``s=S`` and *end* at ``t=T``.  Keyword ``s`` has the following types and interpretations in range retrieval mode:
-
-* ``s=D``, another DateTime object or ASCIIString: range retrieval *starts* at ``S``.
-
-* ``S=F``, an Integer or Float64: ``F`` is considered a *Unix (Epoch) time in seconds*.
+.. [#] Use ``loc="--"`` for seismic instruments with empty location codes.
+.. [#] ``Q=R`` is not recommended and will not work on some FDSN servers.
+.. [#] Default is ``t=-300`` for IRIS and FDSN, ``t=300`` for SeedLink; the difference arises because IRIS and FDSN clients archive data.
+.. [#] If ``w=true``, a file name is automatically generated based on the request parameters.
+.. [#] String inputs for ``s`` and/or ``t`` must take the form YYYY-MM-DDThh:mm:ss.nnn, where ``T`` is the uppercase character "T" and ``nnn`` denotes microseconds.

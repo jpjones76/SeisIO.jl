@@ -16,7 +16,7 @@ A major update to SeisIO is now live. Improvements include:
 ## Known Issues (2017-01-24)
 * Type-stability is impossible when initializing types with keyword arguments; keyword arguments can't be type-stable in the Julia language. This is unlikely to change. For strict type-stability, you can initialize an empty structure (e.g. `C=SeisChannel()`), then set field values manually (e.g. `setfield!(C, :fs, 100)`).
 * Documentation is behind and will be updated in the coming days. Event functionality is almost completely undocumented.
-* Some functions were renamed for consistency, particularly with respect to web services (e.g. "getevt" is now "FDSN_evt"). These are not yet documented.
+* Some functions were renamed for consistency, particularly with respect to web services (e.g. "getevt" is now "FDSNevt"). These are not yet documented.
 * readmseed uses exorbitant amounts of memory; I managed to reduce this to order of magnitude less than previous versions, but still e.g. 42 MB for a 1.3 MB file (previously ~450 MB). Suggestions for more efficient memory allocation are welcome. Other file formats don't have this problem.
 
 # Current Functionality
