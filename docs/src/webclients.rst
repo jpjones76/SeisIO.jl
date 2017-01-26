@@ -142,31 +142,33 @@ Web Client Keywords
 ###################
 The SeisIO web clients use a similar set of keywords; a full glossary is provided below. For client-specific keywords, the client(s) that support each keyword are listed in parenthesis.
 
-====    ====      =====     ======    =====
-kw      def       type      srvc      Meaning
-====    ====      =====     ======    =====
-a       240       r         SL        keepalive interval (s)
-cha     "EHZ"     s         IRIS      channel code
-f       0x00      u8        SL        safety check level
-g       3600      r         SL        maximum gap since last packet received
-loc     "--"      s         IRIS      instrument location [#]
-mode    "DATA"    s         SL        mode (DATA, TIME, or FETCH)
-net     "UW"      s         IRIS      network code
-patts   ["*"]     A(s,1)    SL        channel/loc/data. Use ``patts=["*"]`` as a wildcard.
-port    18000     i64       SL        port number
-Q       "R"       s         F,I       quality; uses standard `FDSN/IRIS codes <https://ds.iris.edu/ds/nodes/dmc/manuals/breq_fast/#quality-option>`_ [#]
-r       20        r         SL        refresh interval (s)
-s       0         U(r,d,s)  All       start time
-src     "IRIS"    s         F,I       source name [#]
-sta     "TDH"     s         IRIS      station code
-strict  true      b         SL        strict mode (exit on errors)
-t       ±300      U(r,d,s)  All       end time
-to      10        r         F,I       timeout (s)
-url     (iris)    s         SL        url
-v       0         i         All       verbosity level
-w       false     b         All       write download directly to file?
-y       false     b         F,I       synchronize channel times and fill gaps?
-====    ====      =====     ======    =====
+
+.. csv-table:: List of keywords
+  :header: kw, def, type, srvc, meaning
+  :delim: ;
+  :widths: 8, 8, 8, 8, 24
+
+  a; 240; r; SL; keepalive interval (s)
+  cha; "EHZ"; s; IRIS; channel code
+  f; 0x00; u8; SL; safety check level
+  g; 3600; r; SL; maxmum gap since last packet received
+  loc; "--"; s; IRIS; instrument location [#]
+  mode; "DATA"; s; SL; mode (DATA/TIME/FETCH)
+  net; "UW"; s; IRIS; network code
+  patts; ["*"]; A(s,1); SL; channel/loc/data (accepts ``patts=["*"]`` as a wildcard)
+  port; 18000; i64; SL; port number
+  Q; "R"; s; F, I; quality (uses standard `FDSN/IRIS codes <https://ds.iris.edu/ds/nodes/dmc/manuals/breq_fast/#quality-option>`_ [#])
+  r; 20; r; SL; refresh interval (s)
+  s; 0; U(r,d,s); All; start time
+  src; "IRIS"; s; F,I; source name [#]
+  sta; "TDH"; s; IRIS; station code
+  strict; false; b; SL; strict mode (exit on errors)
+  t; ±300 [#]; U(r,d,s); All; end time
+  to; 10; r; F,I; timeout (s)
+  url; (iris); s; SL; url
+  v; 0; i; All; verbosity level
+  w; false; b; All; write download directly to file?
+  y; false; b; F,I; synchronize channel times and fill gaps?
 
 
 Web Client Time Specification
