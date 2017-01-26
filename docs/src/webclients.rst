@@ -152,22 +152,22 @@ The SeisIO web clients use a similar set of keywords; a full glossary is provide
   cha; "EHZ"; s; IRIS; channel code
   f; 0x00; u8; SL; safety check level
   g; 3600; r; SL; maxmum gap since last packet received
-  loc; "--"; s; IRIS; instrument location [#]
+  loc; "--"; s; IRIS; instrument location [1]
   mode; "DATA"; s; SL; mode (DATA/TIME/FETCH)
   net; "UW"; s; IRIS; network code
   patts; ["*"]; A(s,1); SL; channel/loc/data (accepts ``patts=["*"]`` as a wildcard)
   port; 18000; i64; SL; port number
-  Q; "R"; s; F, I; quality (uses standard `FDSN/IRIS codes <https://ds.iris.edu/ds/nodes/dmc/manuals/breq_fast/#quality-option>`_ [#])
+  Q; "R"; s; F, I; quality (uses standard `FDSN/IRIS codes <https://ds.iris.edu/ds/nodes/dmc/manuals/breq_fast/#quality-option>`_ [2])
   r; 20; r; SL; refresh interval (s)
   s; 0; U(r,d,s); All; start time
-  src; "IRIS"; s; F,I; source name [#]
+  src; "IRIS"; s; F,I; source name
   sta; "TDH"; s; IRIS; station code
   strict; false; b; SL; strict mode (exit on errors)
-  t; ±300 [#]; U(r,d,s); All; end time
+  t; ±300 [3]; U(r,d,s); All; end time
   to; 10; r; F,I; timeout (s)
   url; (iris); s; SL; url
   v; 0; i; All; verbosity level
-  w; false; b; All; write download directly to file?
+  w; false; b; All; write download directly to file? [4]
   y; false; b; F,I; synchronize channel times and fill gaps?
 
 
@@ -175,23 +175,24 @@ Web Client Time Specification
 #############################
 ``d0,d1 = parsetimewin(s,t)`` converts input times to a sorted pair of DateTime objects. Behavior depends on the data types of the inputs:
 
-====        ====        ======
-type(s)     type(t)     Behavior
-====        ====        ======
-DT          DT          Sort only
-R           DT          Add ``s`` seconds to ``t``
-DT          R           Add ``t`` seconds to ``s``
-S           R           Convert ``s`` to DateTime, add ``t`` [#]
-R           S           Convert ``t`` to DateTime, add ``s``
-R           R           Add ``s, t`` seconds to ``now()``
-====        ====        ======
+.. csv-table::
+  :header: type(s), type(t), behavior
+  :delim: ;
+  :widths: 8, 8, 24
+
+  DT; DT; Sort only
+  R; DT; Add ``s`` seconds to ``t``
+  DT; R; Add ``t`` seconds to ``s``
+  S; R; Convert ``s`` to DateTime, add ``t`` [5]
+  R; S; Convert ``t`` to DateTime, add ``s``
+  R; R; Add ``s, t`` seconds to ``now()``
 
 (above, R = Real, DT = DateTime, S = String, I = Integer)
 
 .. rubric:: Footnotes
 
-.. [#] Use ``loc="--"`` for seismic instruments with empty location codes.
-.. [#] ``Q=R`` is not recommended and will not work on some FDSN servers.
-.. [#] Default is ``t=-300`` for IRIS and FDSN, ``t=300`` for SeedLink; the difference arises because IRIS and FDSN clients archive data.
-.. [#] If ``w=true``, a file name is automatically generated based on the request parameters.
-.. [#] String inputs for ``s`` and/or ``t`` must take the form YYYY-MM-DDThh:mm:ss.nnn, where ``T`` is the uppercase character "T" and ``nnn`` denotes microseconds.
+.. [1] Use ``loc="--"`` for seismic instruments with empty location codes.
+.. [2] ``Q=R`` is not recommended and will not work on some FDSN servers.
+.. [3] Default is ``t=-300`` for IRIS and FDSN, ``t=300`` for SeedLink; the difference arises because IRIS and FDSN clients archive data.
+.. [4] If ``w=true``, a file name is automatically generated based on the request parameters.
+.. [5] String inputs for ``s`` and/or ``t`` must take the form YYYY-MM-DDThh:mm:ss.nnn, where ``T`` is the uppercase character "T" and ``nnn`` denotes microseconds.
