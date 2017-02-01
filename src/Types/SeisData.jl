@@ -1,5 +1,5 @@
 import Base:in, getindex, setindex!, append!, deleteat!, delete!, +, -, isequal,
-merge!, merge, length, start, done, next, size, sizeof, ==, isempty
+merge!, merge, length, start, done, next, size, sizeof, ==, isempty, sort!, sort
 
 # This is type-stable for S = SeisData() but not for keyword args
 type SeisData
@@ -79,11 +79,15 @@ end
 getindex(S::SeisData, J::UnitRange) = getindex(S, collect(J))
 
 in(s::String, S::SeisData) = in(s, S.id)
+
+"""
+    findid(S::SeisData, n::String)
+
+Get the index to the first channel of S where `(S.id.==n) == true`.
+"""
 findid(n::String, S::SeisData) = findfirst(S.id .== n)
 findid(S::SeisData, n::String) = findfirst(S.id .== n)
 findid(S::SeisData, T::SeisData) = [findfirst(S.id .== T.id[i]) for i=1:1:T.n]
-hasid(s::String, S::SeisData) = in(s, S.id)
-hasname(s::String, S::SeisData) = in(s, S.name)
 
 setindex!(S::SeisData, U::SeisData, J::Array{Int,1}) = (
   [(getfield(S, f))[J] = getfield(U, f) for f in datafields];
@@ -111,6 +115,33 @@ function sizeof(S::SeisData)
 end
 # ============================================================================
 
+
+# ============================================================================
+# Annotation
+
+# Adding a string to SeisData writes a note; if the string mentions a channel
+# name or ID, the note is restricted to the given channels(s), else it's
+# added to all channels
+"""
+    note!(S::SeisData, s::String)
+
+Append a timestamped note to `S.notes`. If `txt` mentions a channel name or ID, only the corresponding channel is annotated; otherwise, all channels are annotated.
+
+"""
+function note!(S::SeisData, s::String)
+  j = find(maximum([[findfirst(contains(s,i)) for i in S.name] [findfirst(contains(s,i)) for i in S.id]],2).>0)
+  if !isempty(j)
+    [push!(S.notes[i], tnote(s)) for i in j]
+  else
+    for i = 1:1:S.n
+      push!(S.notes[i], tnote(s))
+    end
+  end
+  return S
+end
+
+note!(S::SeisData, i::Integer, s::String) = push!(S.notes[i], tnote(s))
+
 # ============================================================================
 # Append, delete, sort
 append!(S::SeisData, U::SeisData)  = (
@@ -135,15 +166,15 @@ delete!(S::SeisData, s::String)         = delete!(S, Regex(s))
 
 # Extract
 """
-    T = pull(S::SeisData, n::String)
+    T = pull(S::SeisData, id::String)
 
-Extract the first channel named `n` from `S` and return it as a new SeisData structure. The corresponding channel in `S` is deleted.
+Extract the first channel with id=`id` from `S` and return it as a new SeisData structure. The corresponding channel in `S` is deleted.
 
     T = pull(S::SeisData, i::integer)
 
 Extract channel `i` from `S` as a new SeisData struct, deleting it from `S`.
 """
-pull(S::SeisData, n::String) = (i = findid(n, S); T = deepcopy(getindex(S, i));
+pull(S::SeisData, s::String) = (i = findid(S, s); T = deepcopy(getindex(S, i));
   deleteat!(S,i); note!(T,"Extracted from another SeisData object"); return T)
 pull(S::SeisData, J::UnitRange) = (T = deepcopy(getindex(S, J)); deleteat!(S,J);
     note!(T,"Extracted from a SeisData object"); return T)
@@ -153,16 +184,16 @@ pull(S::SeisData, J::Array{Integer,1}) = (T = deepcopy(getindex(S, J)); deleteat
 
 # Sorting
 """
-chansort!(S::SeisData, [rev=false])
+sort!(S::SeisData, [rev=false])
 
 In-place sort of channels in object S by `S.id`. Specify `rev=true` to reverse the sort order.
 """
-function chansort!(S::SeisData; rev=false::Bool)
+function sort!(S::SeisData; rev=false::Bool)
   j = sortperm(S.id, rev=rev)
   [setfield!(S,i,getfield(S,i)[j]) for i in datafields]
   return S
 end
-chansort(S::SeisData; rev=false::Bool) = (T = deepcopy(S); j = sortperm(T.id, rev=rev); [setfield!(T,i,getfield(T,i)[j]) for i in datafields]; return(T))
+sort(S::SeisData; rev=false::Bool) = (T = deepcopy(S); j = sortperm(T.id, rev=rev); [setfield!(T,i,getfield(T,i)[j]) for i in datafields]; return(T))
 
 # ============================================================================
 # Merge and extract
@@ -173,7 +204,7 @@ chansort(S::SeisData; rev=false::Bool) = (T = deepcopy(S); j = sortperm(T.id, re
 
 Merge two SeisData structures. For timeseries data, a single-pass merge-and-prune operation is applied to value pairs whose sample times are separated by less than half the sampling interval; pairs of non-NaN x_i, x_j with |t_i-t_j| < (1/2*S.fs) are averaged.
 
-`merge!` always invokes `chansort!` to ensure the "+" operator is commutative.
+`merge!` always invokes `sort!` to ensure the "+" operator is commutative.
 """
 function merge!(S::SeisData, U::SeisData)
   J = Array{Int64,1}()
@@ -229,33 +260,8 @@ function merge!(S::SeisData, U::SeisData)
   if !isempty(J)
     append!(S, U[J])
   end
-  return chansort!(S)
+  return sort!(S)
 end
 
 merge(S::SeisData, U::SeisData) = (return merge!(deepcopy(S),U))
 +(S::SeisData, U::SeisData) = (return merge!(S,U))
-
-# ============================================================================
-# Annotation
-function tnote(s::String)
-  str = string(timestamp(), ": ", s)
-  L = min(length(str),256)
-  return str[1:L]
-end
-
-# Adding a string to SeisData writes a note; if the string mentions a channel
-# name or ID, the note is restricted to the given channels(s), else it's
-# added to all channels
-function note!(S::SeisData, s::String)
-  j = find(maximum([[findfirst(contains(s,i)) for i in S.name] [findfirst(contains(s,i)) for i in S.id]],2).>0)
-  if !isempty(j)
-    [push!(S.notes[i], tnote(s)) for i in j]
-  else
-    for i = 1:1:S.n
-      push!(S.notes[i], tnote(s))
-    end
-  end
-  return S
-end
-
-note!(S::SeisData, i::Integer, s::String) = push!(S.notes[i], tnote(s))

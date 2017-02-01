@@ -9,7 +9,7 @@ A = SeisData(3);
 @code_warntype setindex!(A, C, 3)
 
 # equality, emptiness, sizeof
-@test_approx_eq(S==S,true)
+@assert(S==S)
 @code_warntype S==S
 @code_warntype S==T
 @code_warntype isequal(S,T)

@@ -79,6 +79,12 @@ merge!(C::SeisChannel, D::SeisChannel) = (S = SeisData(C); merge!(S, SeisData(D)
 push!(S::SeisData, C::SeisChannel) = merge!(S, SeisData(C))
 +(S::SeisData, C::SeisChannel) = merge!(S,C)
 +(C::SeisChannel, D::SeisChannel) = merge!(C,D)
+
+"""
+    findid(S::SeisData, C::SeisChannel)
+
+Get the index to the first channel of S where `S.id.==C.id == true`.
+"""
 findid(S::SeisData, C::SeisChannel) = findfirst(S.id .== C.id)
 findid(C::SeisChannel, S::SeisData) = findfirst(S,C)
 

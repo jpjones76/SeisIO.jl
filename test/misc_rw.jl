@@ -60,13 +60,13 @@ D["241"] = collect(rand(Complex{Float32}, rand(4:24)))
 D["242"] = collect(rand(Complex{Float64}, rand(4:24)))
 
 io = open("crapfile.bin","w")
-write_misc(io, D)
+SeisIO.write_misc(io, D)
 close(io)
 
 io = open("crapfile.bin","r")
-DD = read_misc(io)
+DD = SeisIO.read_misc(io)
 close(io)
 
-[@test_approx_eq(D[k]==DD[k],true) for k in sort(collect(keys(D)))]
+[@assert(D[k]==DD[k]) for k in sort(collect(keys(D)))]
 
 rm("crapfile.bin")

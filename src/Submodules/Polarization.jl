@@ -1,6 +1,5 @@
-using DSP
-using Distributions
 using SeisIO
+using Distributions
 #using HistUtils: gdm, qchd
 #export seispol, seisvpol, polhist, polexpand
 
@@ -464,6 +463,6 @@ function polexpand{K,T}(P::Dict{T,K}, W::Dict)
 end
 
 
-# Note that I'm using (M*X')' = X*M' above, → this is M' from IRIS' formula
+# Note that I use (M*X')' = X*M' above, → this is M' from IRIS' formula
 # Keeping X as a two-column matrix should be much faster.
 rot2d(ϕ) = [cosd(ϕ) -sind(ϕ); sind(ϕ) cosd(ϕ)]

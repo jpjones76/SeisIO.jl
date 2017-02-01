@@ -9,7 +9,7 @@ wseis(S, savfile1)
 
 println("...SeisData file read...")
 R = rseis(savfile1, v=true)
-@test_approx_eq(R[1]==S, true)
+@assert(R[1]==S)
 
 println("...SeisHdr file write...")
 H = SeisHdr()
@@ -20,7 +20,7 @@ wseis(H, savfile2)
 
 println("...SeisHdr file read...")
 K = rseis(savfile2)
-@test_approx_eq(K[1]==H, true)
+@assert(K[1]==H)
 
 println("...SeisEvent file write...")
 EV = SeisEvent(hdr=H, data=S)
@@ -29,7 +29,7 @@ wseis(EV, savfile3)
 println("...SeisEvt file read...")
 E2 = rseis(savfile3, v=true)
 
-@test_approx_eq(E2[1]==EV, true)
+@assert(E2[1]==EV)
 
 rm(savfile1)
 rm(savfile2)

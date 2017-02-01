@@ -5,7 +5,7 @@ uw_root = string(path, "/SampleFiles/99062109485W")
 sac_file = string(path, "/SampleFiles/test.sac")
 
 println("SEGY...")
-SEG = readsegy(segy_file, nmt=true, full=true)
+SEG = readsegy(segy_file, passcal=true, full=true)
 println("...header accuracy...")
 @test_approx_eq(1/SEG.gain, 1.9073486328125e-6)
 @test_approx_eq(SEG.misc["year"], 2002)
@@ -19,7 +19,7 @@ println("...data accuracy...")
 
 println("Lennartz ASCII...")
 A = rlennasc(lenn_file)
-@test_approx_eq(contains(A.src,"rlennasc"),true)
+@assert(contains(A.src,"rlennasc"))
 @test_approx_eq(A.fs, 62.5)
 S = SeisData()
 S += A
@@ -28,8 +28,8 @@ println("UW...")
 W = readuw(uw_root)
 println("...header accuracy...")
 for i in ["UW.WWVB..TIM","UW.TCG..TIM","UW.SSO..EHZ","UW.VLM..EHZ"]
-  @test_approx_eq(isempty(find(W.data.id.==i)), false)
-  @test_approx_eq(isempty(find(W.data.name.==i)), false)
+  @assert(!isempty(find(W.data.id.==i)))
+  @assert(!isempty(find(W.data.name.==i)))
   n = findfirst(W.data.id.==i)
   @test_approx_eq(W.data.fs[n],100.0)
 end

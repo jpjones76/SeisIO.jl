@@ -9,11 +9,6 @@ function get_sync_t(s::Union{String,DateTime}, t::Array{Int64,1}, k::Array{Int64
   end
 end
 
-"""
-    gapfill!(x, t, fs)
-
-Fill gaps in x, as specified in t, assuming sampling rate fs
-"""
 function gapfill!(x::Array{Float64,1}, t::Array{Int64,2}, fs::Float64; m=true::Bool, w=true::Bool)
   (fs == 0 || isempty(x)) && (return x)
   mx = m ? mean(x[!isnan(x)]) : NaN

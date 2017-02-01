@@ -1,4 +1,5 @@
 vSeisIO() = Float32(0.2)
+vJulia() = parse(Float32, string(VERSION.major,".",VERSION.minor))
 Blosc.set_compressor("blosclz")
 
 # ===========================================================================
@@ -215,19 +216,21 @@ function wseis(f::String, S...)
   (L == 0) && return
   T = Array(UInt8, L)
   V = zeros(UInt64, L)
-  fid = open(f, "w")
+  io = open(f, "w")
 
   # Write begins
-  write(fid, "SEISIO".data)
-  write(fid, vSeisIO())
-  write(fid, L)
-  skip(fid, 9*L)            # Leave blank space for an index at the start of the file
+  write(io, "SEISIO".data)
+  write(io, vSeisIO())
+  write(io, vJulia())
+  write(io, L)
+  pp = position(io)
+  skip(io, 9*L)            # Leave blank space for an index at the start of the file
 
   for i = 1:L
     if !(typeof(S[i]) <: U)
       warn(string("Object of incompatible type passed to wseis at ",i+1,"; skipped!"))
     else
-      V[i] = Int64(position(fid))
+      V[i] = Int64(position(io))
       if typeof(S[i]) == SeisChannel
         seis = SeisData(S[i])
       else
@@ -240,14 +243,14 @@ function wseis(f::String, S...)
       elseif typeof(S[i]) == SeisEvent
         T[i] = UInt8('E')
       end
-      w_struct(fid, seis)
+      w_struct(io, seis)
     end
   end
-  seek(fid, 18)
+  seek(io, pp)
 
   # Index format: array of object types, array of byte indices
-  write(fid, T)
-  write(fid, V)
-  close(fid)
+  write(io, T)
+  write(io, V)
+  close(io)
 end
 wseis(S::Union{SeisData,SeisChannel,SeisHdr,SeisEvent}, f::String) = wseis(f, S)

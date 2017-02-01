@@ -28,12 +28,11 @@ function pop_rand!(D::Dict{String,Any}, N::Int)
 end
 
 
-"""
-    (i,c,u) = getyp2codes(b::Char)
-
-Using band code `b`, generate quasi-sane random instrument char code (`i`) and
-channel char code (`c`), plus unit string `u`.
-"""
+#
+#    (i,c,u) = getyp2codes(b::Char)
+#
+# Using band code `b`, generate quasi-sane random instrument char code (`i`)
+# and channel char code (`c`), plus unit string `u`.
 function getyp2codes(b::Char)
   if rand() > 0.2
     # Neglecting gravimeters ('G') and mass position sensors ('M')
@@ -110,11 +109,9 @@ function getyp2codes(b::Char)
   return i,c,u
 end
 
-"""
-    populate_chan!(S::SeisChannel)
-
-Populate all empty fields of S with quasi-random values.
-"""
+#    populate_chan!(S::SeisChannel)
+#
+# Populate all empty fields of S with quasi-random values.
 function populate_chan!(S::SeisChannel; c=false::Bool)
   fc_vals = Float64[1/120 1/60 1/30 0.2 1.0 1.0 1.0 2.0 4.5 15.0]
   fs_vals = Float64[0.1, 1.0, 2.0, 5.0, 10.0, 20.0, 25.0, 40.0, 50.0, 60.0, 62.5,
@@ -189,12 +186,12 @@ function populate_chan!(S::SeisChannel; c=false::Bool)
 end
 
 """
-    randseischa()
+    randseischannel()
 
 Generate a random channel of seismic data as a SeisChannel.
 
 """
-randseischa(; c=false::Bool) = (S = populate_chan!(SeisChannel(), c=c); return S)
+randseischannel(; c=false::Bool) = (S = populate_chan!(SeisChannel(), c=c); return S)
 
 """
     populate_seis!(S::SeisData)
@@ -226,7 +223,7 @@ function populate_seis!(S::SeisData; c=false::Bool)
   end
 end
 populate_seis!(S::SeisData, N::Int; c=false::Bool) = ([push!(S,
-  randseischa(c=c)) for n = 1:N])
+  randseischannel(c=c)) for n = 1:N])
 
 """
     randseisdata()
@@ -242,6 +239,11 @@ randseisdata(; c=false::Bool) = (S = SeisData();
 randseisdata(i::Int; c=false::Bool) = (S = SeisData();
   populate_seis!(S, i, c=c); return S)
 
+"""
+    randseishdr()
+
+Generate a SeisHdr structure filled with random values.
+"""
 function randseishdr()
   H = SeisHdr()
   setfield!(H, :id, rand(1:2^62))
@@ -264,13 +266,6 @@ function randseisevent(; c=false::Bool)
   return SeisEvent(hdr=randseishdr(), data=D)
 end
 
-"""
-    add_fake_net_code!(S, NET)
-
-Insert arbitrary network code NET at the start of all IDs with no specified
-network (i.e. IDs that begin with a '.'). Only the first two characters of NET
-are used.
-"""
 function add_fake_net_code!(S::SeisData, str::String)
   if length(str) > 2
     str = str[1:2]

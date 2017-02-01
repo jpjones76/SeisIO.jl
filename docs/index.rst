@@ -12,12 +12,19 @@ SeisIO is a collection of utilities for reading and downloading geophysical time
 Contents
 ********
 .. toctree::
+   :caption: Table of Contents
    :maxdepth: 3
 
-   src/intro.rst
-   src/webclients.rst
-   src/fileformats.rst
-   src/utils.rst
+   src/intro
+
    src/seisdata.rst
-   src/seisdata_fields.rst
-   src/seisdata_fileformat.rst
+
+   src/Formats/fileformats.rst
+
+   src/Web/webclients.rst
+
+   src/Appendices/function_list.rst
+   src/Appendices/seisdata_fields.rst
+   src/Appendices/seisdata_fileformat.rst
+   src/Appendices/web_syntax.rst
+   src/Appendices/examples.rst

@@ -15,14 +15,14 @@ SAC2 = readsac(sac_file, full=true)
 
 println("...writesac with missing headers...")
 writesac(SAC2)
-@test_approx_eq(isfile("1981.088.10.38.14.009..CDV...R.SAC"), true)
+@assert(isfile("1981.088.10.38.14.009..CDV...R.SAC"))
 rm("1981.088.10.38.14.009..CDV...R.SAC")
 
 println("...writesac with all headers...")
 SAC1.id = "VU.CDV..NUL"
 SAC1.name = "VU.CDV..NUL"
 writesac(SAC1)
-@test_approx_eq(isfile("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC"), true)
+@assert(isfile("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC"))
 rm("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")
 
 println("...done!")

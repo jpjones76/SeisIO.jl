@@ -1,34 +1,26 @@
-using Requests.get
-
-# =============================================================================
 """
 irisws: CLI for single-channel IRIS time-series web requests
 
-    S = irisws(net="NET", sta="STA", loc="LL", cha="CHA", s=StartTime, t=Duration, w=false)
+    S = irisws(CHAN_ID, s=t1, t=t2)
 
-Retrieves data from a single channel from an IRIS http server at station STA, channel CHA, network NET, location LL. Returns a SeisData struct.
+Retrieve data at times `t1 < t < t2` from the IRIS http server from channel `CHAN_ID`, formatted NET.STA.LOC.CHA (e.g. "PB.B004.01.BS1"); leave `LOC` field blank to set to "--" (e.g. "UW.ELK..EHZ").
 
-## Arguments
-* `net`, `sta`, `loc`, `cha`, `fmt`: ASCII strings, no wildcards allowed
-* `s`: Start time. Type `?parsetimewin` for details.
-* `t`: End time.  Type `?parsetimewin` for details.
+## Allowed Keywords
+* `s`, `t`: Time window specifiers. See `?parsetimewin` for details.
 * `to`: Timeout in seconds.
 * `w`: Write to file in current directory
-* See also IRISWS documentation at http://service.iris.edu/irisws/timeseries/1/
 
 ### Examples
-* `S = irisws(net="CC", sta="PALM", cha="EHN", t=(-120))`: Get two minutes of data from component EHN, station TIMB, network CC (Cascade Volcano Observatory, USGS), up to (roughly) the beginning of the current minute.
-* `S = irisws(net="HV", sta="MOKD", cha="HHZ", s="2012-01-01T00:00:00", t=(-3600))`: get an hour of data ending at 2012-01-01, 00:00:00 UTC, from component HHZ, station MOKD, network HV (Hawai'i Volcano Observatory).
-* `S = irisws(net="CC", sta="TIMB", cha="EHZ", t=(-600), fmt="mseed")`: Get the last 10 minutes of data from CC.TIMB.EHZ (Cascade Volcano Observatory, Timberline Lodge, OR, US) in miniseed format.
+* `S = irisws("CC.PALM..ENH", t=(-120))`: Get two minutes of data from component EHN, station TIMB, network CC (Cascade Volcano Observatory, USGS), up to (roughly) the beginning of the current minute.
+* `S = irisws("HV.MOKD..HHZ", s="2012-01-01T00:00:00", t=(-3600))`: get an hour of data ending at 2012-01-01, 00:00:00 UTC, from component HHZ, station MOKD, network HV (Hawai'i Volcano Observatory).
+* `S = irisws("CC.TIB..EHZ", t=(-600), fmt="mseed")`: Get the last 10 minutes of data from Cascade Volcano Observatory, Timberline Lodge, OR, US, in miniseed format.
 
 ### Notes
 * Traces are de-meaned and stage zero gains are removed, but instrument responses are otherwise unchanged.
+* See IRISWS documentation at http://service.iris.edu/irisws/timeseries/1/
 
 """
-function irisws(;net="UW"::String,
-  sta="TDH"::String,
-  loc="--"::String,
-  cha="EHZ"::String,
+function irisws(cha::String;
   fmt="sacbl"::String,
   w=false::Bool,
   s=0::Union{Real,DateTime,String},
@@ -41,8 +33,14 @@ function irisws(;net="UW"::String,
   end
 
   d0, d1 = parsetimewin(s, t)
+  c = parse_chstr(cha)[1,:]
+  if isempty(c[3])
+    c[3] = "--"
+  end
+
+
   URLbase = "http://service.iris.edu/irisws/timeseries/1/query?"
-  URLtail =  @sprintf("net=%s&sta=%s&loc=%s&cha=%s&starttime=%s&endtime=%s&scale=AUTO&demean=true&output=%s", net, sta, loc, cha, d0, d1, fmt)
+  URLtail = build_stream_query(c,d0,d1)*"&scale=AUTO&demean=true&output="*fmt
   url = string(URLbase,URLtail)
   v>0 && println(url)
   seis = SeisData()
@@ -67,41 +65,39 @@ function irisws(;net="UW"::String,
   return seis
 end
 
-# =============================================================================
-""""
-IRISget: CLI for arbitrary IRIS time-series web requests
+"""
+IRISget: CLI for IRIS time-series web requests
 
-    S = IRISget(chanlist)
+    S = IRISget(C)
 
-Get (up to) the last hour of IRIS near-real-time data from every channel in chanlist.
+Get (up to) the last hour of IRIS near-real-time data from every channel in C.
 
-    S = IRISget(chanlist, s=StartTime, t=EndTime)
+    S = IRISget(C, s=StartTime, t=EndTime)
 
 Get synchronized trace data from the IRIS http server.
 
-    S = IRISget(chanlist, s=StartTime, t=Duration, y=false, v=0, to=5, w=false)
+    S = IRISget(C, s=StartTime, t=Duration, y=false, v=0, to=5, w=false)
 
 Get desynchronized trace data from IRIS http server with a 5-second timeout on HTTP requests.
 
 ## Arguments
-* `chanlist`: Array of channel identification strings, formated either [net].[sta].[chan] or [net]\_[sta]\_[chan]
-* `s`: Either an end time (for backwards fill) or a start time (for range retrieval). See below for allowed types and specifications
-* `t`: Either duration in seconds [default: 3600] (for backwards fill) or an end time (for range retrieval). See below for types and specifications
+* `C`: Type `?chanspec` for details.
+* `s`, `t`: Time window bounds. See `?parsetimewin` for details.
 * `v`: Verbosity
-* `w`: Write downloaded data to file in the current directory
+* `w`: Write downloaded data directly to file in the current directory
 * `to`: Timeout in seconds. [default: 10]
 
 ### Examples
-1. `c = ["UW.TDH.EHZ"; "UW.VLL.EHZ"; "CC.TIMB.EHZ"]; seis = IRISget(c, t=3600)`: Retrieve the last hour of data from the three named short-period vertical channels (on and near Mt. Hood, OR).
-2. `seis = IRISget(["HV.MOKD.HHN"; "HV.WILD.HNN"], s="2016-04-04T00:00:00", t="2016-04-04T00:10:00",v=3);` : Retrieve an hour of data beginning at 00:00:00 UTC, 2016-04-04, from the two named N-S channels of Mauna Loa broadbands.
+1. `c = ["UW.TDH..EHZ", "UW.VLL..EHZ", "CC.TIMB..EHZ"]; seis = IRISget(c, t=(-3600))`: Retrieve the last hour of data from the three named short-period vertical channels (on and near Mt. Hood, OR).
+2. `seis = IRISget(["HV.MOKD..HHN", "HV.WILD..HNN"], s="2016-04-04T00:00:00", t="2016-04-04T00:10:00",v=2);` : Retrieve an hour of data beginning at 00:00:00 UTC, 2016-04-04, from two N-S channels of Mauna Loa broadband seismometers.
 
 ### Notes
 * Traces are de-meaned and stage zero gains are removed, but instrument responses are otherwise unchanged.
 * The IRIS web server doesn't provide station coordinates.
-* Wildcards in the channel list are not supported.
+* Wildcards in channel IDs are not supported.
 
 """
-function IRISget(chanlist::Array{String,1};
+function IRISget(C::Array{String,1};
   s=0::Union{Real,DateTime,String},
   t=(-3600)::Union{Real,DateTime,String},
   y=true::Bool,
@@ -109,32 +105,22 @@ function IRISget(chanlist::Array{String,1};
   w=false::Bool,
   to=10::Real)
 
-  K = length(chanlist)
+  K = length(C)
   d0, d1 = parsetimewin(s, t)
   dt = (DateTime(d1)-DateTime(d0)).value
-  if length(chanlist)*dt > 1.0e13
-    error("Request too large! Please limit requests to K*t < 1.0e7 seconds")
+  if length(C)*dt > 1.0e10
+    error("Request too large! Please limit requests to #_channels*t_seconds < 1.0e10")
   elseif v>0
-    @printf("Requesting %i seconds of data from %i channels.\n", dt,            length(chanlist))
+    @printf("Requesting %i seconds of data from %i channels.\n", dt, length(C))
   end
 
-  # was: global seis = SeisData() ... if there are errors, revert
   seis = SeisData()
   v>0 && println("IRIS web fetch begins...")
-  killflag = falses(K)
   for k = 1:1:K
-    c = split(chanlist[k],['.','_'])
-    if length(c) == 4
-      LL = String(c[3])
-      CCC = String(c[4])
-    else
-      LL = "--"
-      CCC = String(c[3])
-    end
     try
-      seis += irisws(net=String(c[1]), sta=String(c[2]), loc=LL, cha=CCC, fmt="mseed", s=d0, t=d1, v=v, to=to, w=w)
+      seis += irisws(C[k], fmt="mseed", s=d0, t=d1, v=v, to=to, w=w)
     catch
-      warn(@sprintf("Couldn't retrieve %s in specified time window (%s -- %s)!\n", chanlist[k], d0, d1))
+      warn(@sprintf("Couldn't retrieve %s in specified time window (%s -- %s)!\n", C[k], d0, d1))
     end
   end
   if y == true
@@ -144,11 +130,11 @@ function IRISget(chanlist::Array{String,1};
   return seis
 end
 
-# Chanlist passed as a string
-IRISget(chanlist::String; s=0::Union{Real,DateTime,String}, t=3600::Union{Real,DateTime,String}, y=true::Bool, v=0::Int, w=false::Bool, to=10::Real) = IRISget(split(chanlist,','), s=s, t=t, y=y, v=v, w=w, to=to)
+# C passed as a string
+IRISget(C::String; s=0::Union{Real,DateTime,String}, t=3600::Union{Real,DateTime,String}, y=true::Bool, v=0::Int, w=false::Bool, to=10::Real) = IRISget(map(String, split(C, ',')), s=s, t=t, y=y, v=v, w=w, to=to)
 
-# Chanlist passed as an array
-IRISget(chanlist::Array{String,2}; s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String},  y=true::Bool, v=false::Bool, w=false::Bool, to=10::Real) = IRISget([join(chanlist[i,:],'.') for i = 1:size(chanlist,1)], s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String}, y=true::Bool,  v=0::Int, w=false::Bool, to=10::Real)
+# C passed as a 2d array
+IRISget(C::Array{String,2}; s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String},  y=true::Bool, v=false::Bool, w=false::Bool, to=10::Real) = IRISget([join(C[i,:],'.') for i = 1:size(C,1)], s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String}, y=true::Bool,  v=0::Int, w=false::Bool, to=10::Real)
 
 
 """
@@ -178,8 +164,6 @@ function get_pha(Δ::Float64, z::Float64;
 
   # Generate URL and do web query
   if isempty(phases)
-    #pq = ""
-    #pq = "&phases=p,s,P,S,pS,PS,sP,SP,Pn,Sn,PcP,Pdiff,Sdiff,PKP,PKiKP,PKIKP"
     pq = "&phases=ttall"
   else
     pq = string("&phases=", phases)

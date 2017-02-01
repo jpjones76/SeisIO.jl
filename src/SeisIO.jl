@@ -8,30 +8,28 @@ VERSION >= v"0.5.0" && __precompile__(true)
 const datafields = [:name, :id, :fs, :gain, :loc, :misc, :notes, :resp, :src, :units, :t, :x]
 const hdrfields = [:id, :ot, :loc, :mag, :int, :mt, :np, :pax, :src, :notes, :misc]
 
-
 export SeisChannel, SeisData, SeisEvent, SeisHdr,              # Data Types
 batch_read,                                                    # Formats/batch_read.jl
-parsemseed!, parsemseed, readmseed, parserec!,                 # Formats/mSEED.jl
+readmseed,                                                     # Formats/mSEED.jl
 rlennasc,                                                      # Formats/LennartzAsc.jl
 readsac, rsac, sachdr, writesac, wsac,                         # Formats/SAC.jl
 readsegy, segyhdr,                                             # Formats/SEGY.jl
 readuw, uwdf, uwpf, uwpf!,                                     # Formats/UW.jl
 readwin32,                                                     # Formats/Win32.jl
-rseis, read_misc,                                              # Types/read.jl
-gapfill, gapfill!, ungap, ungap!, sync, sync!,                 # Types/sync.jl
-wseis, write_misc,                                             # Types/write.jl
-chansort, chansort!, findid, hasid, note!, pull,               # Types/SeisData.jl
-FDSNevq, FDSNevt, FDSNget, FDSNsta,                                # Web/FDSN.jl
+rseis,                                                         # Types/read.jl
+ungap, ungap!, sync, sync!,                                    # Types/sync.jl
+wseis,                                                         # Types/write.jl
+findid, note!, pull,                                           # Types/SeisData.jl
+FDSNevq, FDSNevt, FDSNget, FDSNsta,                            # Web/FDSN.jl
 IRISget, irisws,                                               # Web/IRIS.jl
-SeedLink, SeedLink!, SL_info, has_sta, has_stream,             # Web/SeedLink.jl
-SL_config, SL_minreq!,                                         # Web/SL_config.jl
-webhdr, FDSNsta,                                               # Web/WebMisc.jl
-gapfill, gapfill!, gcdist, getbandcode, lsw,                   # Utils/
-fctopz, mkresp, translate_resp,                                # Utils/resp.jl
-d2u, j2md, md2j, parsetimewin, sac2epoch, timestamp, u2d,      # Utils/time.jl
+SeedLink, SeedLink!, SL_info, has_sta, has_live_stream,        # Web/SeedLink.jl
+chanspec, webhdr,                                              # Web/WebMisc.jl
+gcdist, getbandcode,                                           # Utils/
+fctopz, translate_resp,                                        # Utils/resp.jl
+d2u, j2md, md2j, parsetimewin, timestamp, u2d,                 # Utils/time.jl
 distaz!,                                                       # Misc/event_misc.jl
-autotap!, autotuk, equalize_resp!, namestrip,                  # Misc/processing.jl
-pol_sort, prune!, purge!,
+autotap!, equalize_resp!, namestrip!,                          # Misc/processing.jl
+pol_sort, purge!,
 randseischannel, randseisdata, randseisevent, randseishdr      # Misc/randseis.jl
 
 # Everything depends on time.jl
@@ -44,6 +42,7 @@ include("Utils/gcdist.jl")
 include("Utils/lsw.jl")
 include("Utils/gap.jl")
 include("Utils/resp.jl")
+include("Utils/tnote.jl")
 
 # Types and core type functionality
 include("Types/SeisData.jl")
@@ -70,11 +69,13 @@ include("Formats/UW.jl")
 include("Formats/Win32.jl")
 
 # Web clients
+include("Web/parse_chstr.jl")
+include("Web/WebMisc.jl")         # Common functions for web data access
+
 include("Web/FDSN.jl")
 include("Web/IRIS.jl")            # IRISws command line client
 include("Web/SeedLink.jl")
-include("Web/SLConfig.jl")
-include("Web/WebMisc.jl")         # Common functions for web data access
+# include("Web/SLConfig.jl")
 
 module Polarization
 export seispol, polhist, seispol!, seis_orient!

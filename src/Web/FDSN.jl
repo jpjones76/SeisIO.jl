@@ -1,3 +1,5 @@
+# =============================================================================
+# No export
 function LightXML_plunge(xtmp::Array{LightXML.XMLElement,1}, str::AbstractString)
   xtmp2 = Array{LightXML.XMLElement,1}()
   for i=1:1:length(xtmp)
@@ -139,25 +141,28 @@ function FDSN_sta_xml(string_data::String)
   end
   return ID, LOC, UNITS, GAIN, RESP, NAME, MISC
 end
+# =============================================================================
 
 """
 FDSNget: CLI for FDSN time-series data requests.
 
-    S = FDSNget(net="NN", sta="SSSSS", loc="LL", cha="CCC", s=TS,
-                t=TE, to=TO, w=false, y=true)
+    S = FDSNget(CHAN_IDS, s=TS, t=TE, to=TO, w=false, y=true)
 
-Retrieve data from an FDSN HTTP server. Returns a SeisData struct. See FDSN documentation at http://service.iris.edu/fdsnws/dataselect/1/
+Retrieve data from an FDSN HTTP server for the channels in CHAN_IDS, formatted NET.STA.LOC.CHA; leave `LOC` field blank to set to "--" (e.g. "UW.ELK..EHZ"). Returns a SeisData struct. See FDSN documentation at http://service.iris.edu/fdsnws/dataselect/1/
+
+## Channel ID specification
+Type `?chanspec` for details
 
 ## Possible Keywords
 * `s`: Start time (type ?parsetimewin for details)
 * `t`: End time (type ?parsetimewin for details)
 * `to`: Timeout in seconds
-* `Q`: Quality code (FDSN/IRIS). Caution: `Q="R"` fails with many queries
+* `q`: Quality code (FDSN/IRIS). Caution: `q='R'` fails with many queries
 * `w`: Write raw download directly to file
 * `y`: Synchronize start and end times of channels and fill time gaps
 
 ### Example
-* `S = FDSNget(net="CC,UW", sta="SEP,SHW,HSR,VALT", cha="*", t=(-600))`: Get the last 10 minutes of data from short-period stations SEP, SHW, and HSR, Mt. St. Helens, USA.
+* `S = FDSNget("UW.SEP..EHZ,UW.SHW..EHZ,UW.HSR..EHZ", t=(-600))`: Get the last 10 minutes of data from vertical-component short-period stations SEP, SHW, and HSR, Mt. St. Helens, USA.
 
 ### Some FDSN Servers
 * Incorporated Research Institutions for Seismology, US: http://service.iris.edu/fdsnws/
@@ -165,10 +170,9 @@ Retrieve data from an FDSN HTTP server. Returns a SeisData struct. See FDSN docu
 * Northern California Earthquake Data Center, US: http://service.ncedc.org/fdsnws/
 * GFZ Potsdam, DE: http://geofon.gfz-potsdam.de/fdsnws/
 """
-function FDSNget(C::Array{String,1};
+function FDSNget(C::Array{String,2};
   src="IRIS"::String,
-  q="data"::String,
-  Q="B"::String,
+  q='B'::Char,
   s=0::Union{Real,DateTime,String},
   t=(-300)::Union{Real,DateTime,String},
   v=0::Int,
@@ -178,19 +182,20 @@ function FDSNget(C::Array{String,1};
   to=10::Real)
 
   seis = SeisData()
+  minreq!(C)
+  v > 1 && println(STDOUT, "Most compact request form = ", C)
   d0, d1 = parsetimewin(s, t)
   uhead = get_uhead(src)
-  for j = 1:1:length(C)
-    utail = string(C[j], "&start=", d0, "&end=", d1)
-    data_url = string(uhead, "dataselect/1/query?quality=", Q, "&", utail)
+  for j = 1:1:size(C,1)
+    utail = build_stream_query(C[j,:], d0, d1)
+    data_url = string(uhead, "dataselect/1/query?quality=", q, "&", utail)
     v > 0 && println(STDOUT, "data url = ", data_url)
 
     # Get data
     R = get(data_url, timeout=to, headers=webhdr())
     if R.status == 200
-      w && savereq(R.data, "mseed", Q[j,:], d0, d1, Q)
-      tmp = IOBuffer(R.data)
-      S = parsemseed(tmp, false, v)
+      w && savereq(R.data, "mseed", C[j,1], C[j,2], C[j,3], C[j,4], d0, d1, string(q))
+      S = parsemseed(IOBuffer(R.data), false, v)
 
       # Detailed source logging
       S.src = collect(repeated(data_url, S.n))
@@ -224,40 +229,32 @@ function FDSNget(C::Array{String,1};
   return seis
 end
 
-FDSNget(;
-    src="IRIS"::String,
-    net="UW,CC"::String,
-    sta="PALM,TDH,VLL"::String,
-    loc="*"::String,
-    cha="*"::String,
-    d=','::Char,
-    q="data"::String,
-    Q="B"::String,
-    s=0::Union{Real,DateTime,String},
-    t=600::Union{Real,DateTime,String},
-    v=0::Int,
-    w=false::Bool,
-    y=true::Bool,
-    si=true::Bool,
-    to=10::Real) = FDSNget([string("net=",net,"&sta=",sta,"&loc=",loc,"&cha=",cha)], d=d, src=src, q=q, Q=Q, s=s, t=t, v=v, w=w, y=y, si=si, to=to)
-
 FDSNget(S::String;
   src="IRIS"::String,
-  d=','::Char,
-  q="data"::String,
-  Q="B"::String,
+  q='B'::Char,
   s=0::Union{Real,DateTime,String},
   t=600::Union{Real,DateTime,String},
   v=0::Int,
   w=false::Bool,
   y=true::Bool,
   si=true::Bool,
-  to=10::Real) = FDSNget(SL_config(S, fdsn=true, delim=d), d=d, src=src, q=q, Q=Q, s=s, t=t, v=v, w=w, y=y, si=si, to=to)
+  to=10::Real) = FDSNget(parse_chstr(S, fdsn=true), src=src, q=q, s=s, t=t, v=v, w=w, y=y, si=si, to=to)
+
+FDSNget(S::Array{String,1};
+  src="IRIS"::String,
+  q='B'::Char,
+  s=0::Union{Real,DateTime,String},
+  t=600::Union{Real,DateTime,String},
+  v=0::Int,
+  w=false::Bool,
+  y=true::Bool,
+  si=true::Bool,
+  to=10::Real) = FDSNget(parse_charr(S, fdsn=true), src=src, q=q, s=s, t=t, v=v, w=w, y=y, si=si, to=to)
 
 """
-    S = FDSNevq(t)
+    H = FDSNevq(t)
 
-Multi-server query for the events with the closest origin time to`t`. `t`
+Multi-server query for the events with the closest origin time to `t`. `t`
 should be a string formatted YYYY-MM-DDThh:mm:ss with times given in UTC
 (e.g. "2001-02-08T18:54:32"). Returns a SeisHdr array.
 
@@ -307,7 +304,7 @@ function FDSNevq(ts::String;
 
   # Do multi-server query (not tested)
   if lowercase(src) == "all"
-    sources = ["IRIS", "NCSN", "GFZ"]
+    sources = ["IRIS", "NCEDC", "GFZ"]
   else
     sources = split(src,",")
   end
@@ -347,9 +344,11 @@ end
 """
     S = FDSNsta(CF)
 
-Retrieve station/channel info for SeedLink-formatted parameter file (or string) `CF` as an empty SeisData structure. Type `?SeedLink` for keyword options.
+Retrieve station/channel info for formatted parameter file (or string) `CF` as an empty SeisData structure.
+
+See also: `?SeedLink` for keyword options, `?chanspec` for channel ID specifications.
 """
-function FDSNsta(stations::Array{String,1};
+function FDSNsta(CC::Array{String,2};
   src="IRIS"::String,
   st="2011-01-08T00:00:00"::Union{Real,DateTime,String},
   et="2011-01-09T00:00:00"::Union{Real,DateTime,String},
@@ -359,9 +358,9 @@ function FDSNsta(stations::Array{String,1};
   d0, d1 = parsetimewin(st, et)
   uhead = string(get_uhead(src), "station/1/query?")
   seis = SeisData()
-  for i = 1:1:size(stations,1)
-    utail = string("&starttime=", d0, "&endtime=", d1, "&format=text&level=channel")
-    sta_url = string(uhead, stations[i], utail)
+  for j = 1:1:size(CC,1)
+    utail = build_stream_query(CC[j,:], d0, d1) * "&format=text&level=channel"
+    sta_url = string(uhead, utail)
     v > 0 && println(STDOUT, "Retrieving station data from URL = ", sta_url)
     R = get(sta_url, timeout=to, headers=webhdr())
     if R.status == 200
@@ -406,15 +405,14 @@ function FDSNsta(stations::Array{String,1};
   end
   return seis
 end
-function FDSNsta(CC::String;
+function FDSNsta(C::String;
   st="2011-01-08T00:00:00"::Union{Real,DateTime,String},
   et="2011-01-09T00:00:00"::Union{Real,DateTime,String},
   src="IRIS"::String,
   to=60::Real,
   v=0::Int)
 
-  #(sta,cha) = parse_chan_str(CC)
-  Q = SL_config(CC, fdsn=true)
+  Q = parse_chstr(C, fdsn=true)
   v > 0 && println(STDOUT, "station query =", Q)
   S = FDSNsta(Q, src=src, st=st, et=et, to=to, v=v)
   return S
@@ -438,7 +436,7 @@ function FDSNevt(evt::String, cc::String;
   v > 0 && println(STDOUT, now(), ": request begins.")
 
   # Parse channel config
-  Q = SL_config(cc, fdsn=true)
+  Q = parse_chstr(cc)
 
   # Create header
   h = FDSNevq(evt, mag=mag, to=to, v=v)[1]   # Get event of interest with FDSNevq
@@ -492,11 +490,7 @@ function FDSNevt(evt::String, cc::String;
     end
     s = string(u2d(d2u(S.hdr.ot) + s))
     t = string(u2d(d2u(S.hdr.ot) + t))
-    (NET, STA, LOC, CHA) = split(S.data.id[i],".")
-    if isempty(LOC)
-      LOC = "--"
-    end
-    C = FDSNget(net=NET, sta=STA, loc=LOC, cha=CHA, s=s, t=t, si=false, y=false, v=v)
+    C = FDSNget(S.data.id[i], s=s, t=t, si=false, y=false, v=v)
     v > 1 && println(STDOUT, "FDSNget output:\n", C)
     if C.n == 0
       bads[i] = true

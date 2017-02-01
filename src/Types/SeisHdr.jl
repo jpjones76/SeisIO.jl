@@ -8,7 +8,7 @@ SeisHdr structures contain event header data for use with SeisIO.
 
 Initialize an empty seismic header structure. Fields can also be initialized at creation with keywords. For example:
 
-    S = SeisHdr(m=(1.1,'l'), loc=(45.37, -121.69, 6.8))
+    S = SeisHdr(mag=(1.1f0,'l',' '), loc=[45.37, -121.69, 6.8])
 
 Create a SeisHdr structure with magnitude 1.1 (Ml) and location 45.37N, 121.69W, z=6.8 km. Fields not specified at creation are initialized to SeisIO defaults.
 

@@ -71,7 +71,7 @@ function SL_config(C::String; fdsn=false::Bool, delim=','::Char)
   L = size(R,1)
   if fdsn
     # SL_minreq returns a string matrix in the form ["NET" "STA" "LOC" "CHA"]
-    SL_minreq!(R)
+    minreq!(R)
     L = size(R,1)
     Q = Array{String,1}(L)
     for i = 1:1:L
@@ -115,36 +115,3 @@ function pat_parse(pat)
   end
   return (loc, cha, t)
 end
-
-# Purpose: Create the most compact set of requests, one per row
-"""
-    SL_minreq!(S::Array{String,2})
-
-Reduce `S` to the most compact possible set of SeedLink request query strings that completely cover its string requests.
-"""
-function SL_minreq!(S::Array{String,2})
-  d = ','
-  (M,N) = size(S)
-  K = Array{Int64,1}(N)
-  T = Array{String,2}(M,N)
-  for n = 1:N
-    for m = 1:M
-      T[m,n] = join(S[m,1:N.!=n],d)
-    end
-    K[n] = length(unique(T[:,n]))
-  end
-  (L,J) = findmin(K)
-  if L != M
-    V = T[:,J]
-    U = unique(V)
-    Q = Array{String,2}(L,N)
-    for i = 1:1:L
-      j = find(V.==U[i])
-      Q[i,1:N.!=J] = split(V[j[1]],d)
-      Q[i,J] = join(S[j,J],d)
-    end
-    S = Q
-  end
-  return S
-end
-SL_minreq!(S::Array{String,1}, T::Array{String,1}) = SL_minreq!(hcat(S,T))

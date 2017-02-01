@@ -3,9 +3,9 @@ const μs = 1.0e-6
 const datafields = [:name, :id, :fs, :gain, :loc, :misc, :notes, :resp, :src, :units, :t, :x]
 const hdrfields = [:id, :ot, :loc, :mag, :int, :mt, :np, :pax, :src, :notes, :misc]
 
-test_fields_preserved(S1::SeisData, S2::SeisData, x::Int, y::Int) = @test_approx_eq(minimum([getfield(S1,f)[x]==getfield(S2,f)[y] for f in datafields]),true)
+test_fields_preserved(S1::SeisData, S2::SeisData, x::Int, y::Int) = @assert(minimum([getfield(S1,f)[x]==getfield(S2,f)[y] for f in datafields]))
 test_fields_preserved(S1::SeisChannel, S2::SeisData, y::Int) =
-  @test_approx_eq(minimum([getfield(S1,f)==getfield(S2,f)[y] for f in datafields]),true)
+  @assert(minimum([getfield(S1,f)==getfield(S2,f)[y] for f in datafields]))
 
 function sizetest(S::SeisData, nt::Int)
   @test_approx_eq(S.n, nt)
@@ -59,7 +59,7 @@ D = S[i_targ:i_targ+1]
 test_fields_preserved(D,S,2,i_targ+1)
 
 println(STDOUT,"in...")
-@test_approx_eq("XX.TMP01.00.BHZ" in S.id, true)
+@assert("XX.TMP01.00.BHZ" in S.id)
 
 println(STDOUT,"findid...")
 @test_approx_eq(findid("CC.LON..BHZ",S),findid(S,"CC.LON..BHZ"))
@@ -75,10 +75,10 @@ test_fields_preserved(C, S, 3)
 
 println(STDOUT,"isempty...")
 D = SeisData()
-@test_approx_eq(isempty(D),true)
+@assert(isempty(D))
 
 println(STDOUT,"equality (reflexive)...")
-@test_approx_eq(S==S,true)
+@assert(S==S)
 
 println(STDOUT,"append!...")
 append!(S, T)
@@ -135,13 +135,13 @@ sizetest(U, 2)
 
 println(STDOUT,"..two identical channel ids...")
 U = S[4] + T[3]
-@test_approx_eq(typeof(U)==SeisData,true)
-@test_approx_eq(U.id[1]==S.id[4],true)
-@test_approx_eq(U.id[1]==T.id[3],true)
+@assert(typeof(U)==SeisData)
+@assert(U.id[1]==S.id[4])
+@assert(U.id[1]==T.id[3])
 
 println(STDOUT,"pull...")
 C = pull(S,4)
-@test_approx_eq(C.name=="Channel 4",true)
+@assert(C.name=="Channel 4")
 
 println(STDOUT,"note!...")
 str1 = "ADGJALMGFLSFMGSLMFLChannel 5 sucks"
