@@ -1,0 +1,324 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>File Formats &mdash; SeisIO 0.1.0 beta documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="SeisIO 0.1.0 beta documentation" href="../../index.html"/>
+        <link rel="next" title="Web Clients" href="../Web/webclients.html"/>
+        <link rel="prev" title="SeisIO Data Types" href="../seisdata.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> SeisIO
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../seisdata.html">SeisIO Data Types</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">File Formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#format-descriptions-and-notes">Format Descriptions and Notes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usage-warnings">Usage Warnings</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../Web/webclients.html">Web Clients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/function_list.html">Appendix A: Alphabetical Function List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisdata_fields.html">Appendix B: Structure and Field Descriptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisdata_fileformat.html">Appendix C: SeisIO File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/web_syntax.html">Appendix D: Web Keywords and Syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/examples.html">Appendix E: Web Client Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">SeisIO</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+    <li>File Formats</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/src/Formats/fileformats.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="file-formats">
+<h1>File Formats<a class="headerlink" href="#file-formats" title="Permalink to this headline">¶</a></h1>
+<p>Current format support: (e = endianness)</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="14%" />
+<col width="4%" />
+<col width="82%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Format</th>
+<th class="head">e</th>
+<th class="head">Functions</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>miniSEED</td>
+<td>b</td>
+<td>readmseed</td>
+</tr>
+<tr class="row-odd"><td>SAC</td>
+<td>l</td>
+<td>readsac, sachdr, writesac, batch_read</td>
+</tr>
+<tr class="row-even"><td>SEG Y</td>
+<td>b</td>
+<td>readsegy, segyhdr</td>
+</tr>
+<tr class="row-odd"><td>P-SEG Y</td>
+<td>l</td>
+<td>readsegy, segyhdr, batch_read</td>
+</tr>
+<tr class="row-even"><td>UW</td>
+<td>b</td>
+<td>readuw, uwpf!, uwpf, uwdf</td>
+</tr>
+<tr class="row-odd"><td>win32</td>
+<td>b</td>
+<td>readwin32</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="format-descriptions-and-notes">
+<h2>Format Descriptions and Notes<a class="headerlink" href="#format-descriptions-and-notes" title="Permalink to this headline">¶</a></h2>
+<p><strong>miniSEED</strong>: SEED stands for Standard for the Exchange of Earthquake Data. miniSEED is a SEED variant format that contains only data packets. <a class="footnote-reference" href="#id9" id="id1">[1]</a></p>
+<p><strong>SAC</strong>: a fast, straightforward format developed for the Seismic Analysis Code application, supported by virtually every programming language. <a class="footnote-reference" href="#id10" id="id2">[2]</a> <a class="footnote-reference" href="#id11" id="id3">[3]</a> <a class="footnote-reference" href="#id12" id="id4">[4]</a></p>
+<p><strong>SEG Y</strong>: data format used by the Society for Exploration Geophysicists<sup>(a)</sup> <a class="footnote-reference" href="#id13" id="id5">[5]</a></p>
+<p><strong>P-SEG Y</strong>: A modified SEG Y format developed by PASSCAL/New Mexico Tech. <a class="footnote-reference" href="#id14" id="id6">[6]</a></p>
+<p><strong>UW</strong>: the University of Washington data format was designed for event archival. A UW event is described by a pickfile and a corresponding data file, whose names are identical except for the last character, e.g. 99062109485o, 99062109485W.<sup>(b)</sup></p>
+<p><strong>Win32</strong> : data format developed by the NIED (National Research Institute for Earth Science and Disaster Prevention), Japan. Data are typically divided into files that contain a minute of continuous data from channels on a single network or subnet; data within each file are stored by channel as variable-precision integers in 1s segments. Channel information for each stream is retrieved from a channel information file.<sup>(c)</sup> <a class="footnote-reference" href="#id15" id="id7">[7]</a> <a class="footnote-reference" href="#id16" id="id8">[8]</a></p>
+<div class="section" id="usage-warnings">
+<h3>Usage Warnings<a class="headerlink" href="#usage-warnings" title="Permalink to this headline">¶</a></h3>
+<p><sup>(a)</sup>  SEG Y is supported up to and including rev 1. Trace header fields in SEG Y are not rigidly defined by any central authority, only &#8220;recommended&#8221;. As such, industry SEG Y files may be unreadable. This issue is widely known, not correctable, and by no means endemic to SeisIO.</p>
+<p><sup>(b)</sup>  No online documentation for the UW data format is known to exist. Please contact the SeisIO creators if additional help is needed to read these files.</p>
+<p><sup>(c)</sup>  Win32 channel information files are not synchronized by any central authority, date stamped, or automatically maintained; thus, inconsistencies in channel parameters (e.g. gains) are possible. Please remember that redistribution of Win32 files is strictly prohibited by the NIED.</p>
+<p class="rubric">External References</p>
+<table class="docutils footnote" frame="void" id="id9" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>FDSN SEED manual: <a class="reference external" href="https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf">https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id10" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>SAC data format intro: <a class="reference external" href="https://ds.iris.edu/ds/nodes/dmc/kb/questions/2/sac-file-format/">https://ds.iris.edu/ds/nodes/dmc/kb/questions/2/sac-file-format/</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id11" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>SAC file format: <a class="reference external" href="https://ds.iris.edu/files/sac-manual/manual/file_format.html">https://ds.iris.edu/files/sac-manual/manual/file_format.html</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id12" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[4]</a></td><td>SAC software homepage: <a class="reference external" href="https://seiscode.iris.washington.edu/projects/sac">https://seiscode.iris.washington.edu/projects/sac</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id13" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[5]</a></td><td>SEG Y Wikipedia page: <a class="reference external" href="http://wiki.seg.org/wiki/SEG_Y">http://wiki.seg.org/wiki/SEG_Y</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id14" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id6">[6]</a></td><td>PASSCAL SEG Y trace files: <a class="reference external" href="https://www.passcal.nmt.edu/content/seg-y-what-it-is">https://www.passcal.nmt.edu/content/seg-y-what-it-is</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id15" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id7">[7]</a></td><td>How to use Hi-net data: <a class="reference external" href="http://www.hinet.bosai.go.jp/about_data/?LANG=en">http://www.hinet.bosai.go.jp/about_data/?LANG=en</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id16" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id8">[8]</a></td><td>WIN data format (in Japanese): <a class="reference external" href="http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html">http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html</a></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../Web/webclients.html" class="btn btn-neutral float-right" title="Web Clients" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../seisdata.html" class="btn btn-neutral" title="SeisIO Data Types" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Joshua Jones.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1.0 beta',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
