@@ -4,41 +4,48 @@ A minimalist, platform-agnostic package for working with univariate geophysical 
 # Documentation
 http://seisio.readthedocs.org
 
-# Current Status (2017-01-24)
-A major update to SeisIO is now live. Improvements include:
-* Type stability for nearly all methods and custom types.
+# CHANGELOG
+## 2017-01-31
+The introduction of today's changes marks the first stable SeisIO release. Please test and report all issues.
+* Documentation was completely rewritten.
+* All web functions now use the channel naming convention NET.STA.LOC.CHA.
+* Renamed several web function keywords for uniformity.
+* All web functions that require channel input now accept a config. filename, a String, or a String array.
+* Keyword initialization in new SeisData objects has been permanently disabled.
+* The native SeisIO file format has changed.
+* `prune!(S)` is now `merge!(S)`
+* A few unused functions and accidental exports were removed.
+
+## 2017-01-24
+* Type stability for nearly all methods
 * Complete rewrite of mini-SEED resulting in 2 orders of magnitude speedup
 * Faster read times for SAC, SEG Y, and UW data formats
-* Better XML parsing
+* Improved XML parsing
 * batch_read works again
-* Event functionality is no longer a submodule
+* Event functions are no longer in a submodule
+* SeisIO now includes Blosc among its dependencies.
 
-## Known Issues (2017-01-25)
-* Type-stability is impossible when initializing types with keyword arguments; keyword arguments can't be type-stable in the Julia language. This is unlikely to change. For strict type-stability, you can initialize an empty structure (e.g. `C=SeisChannel()`), then set field values manually (e.g. `setfield!(C, :fs, 100)`).
-* Documentation is behind and in the process of being updated. Event functionality is almost completely undocumented.
-* Some functions were renamed for consistency, particularly with respect to web services (e.g. "getevt" is now "FDSNevt"). These are not yet fully documented.
-* readmseed uses exorbitant amounts of memory; I managed to reduce this to order of magnitude less than previous versions, but still e.g. 42 MB for a 1.3 MB file (previously ~450 MB). Suggestions for more efficient memory allocation are welcome. Other file formats don't have this problem.
+## Known Issues (2017-01-31)
+* Type stability is impossible when initializing types with keyword arguments; keyword arguments can't be type-stable in the Julia language. This is unlikely to change unless the language itself changes. For strict type stability, initialize an empty structure, then set field values manually (e.g. `C=SeisChannel(); setfield!(C, :fs, 100)`).
+* readmseed uses an exorbitant amount of memory. The 2017-01-24 update reduced its memory consumption by two orders of magnitude, but the requirement to read a file is still ~30x the file size (e.g. 42 MB for a 1.3 MB file). Suggestions for improvement here would be especially welcome.
 
 # Current Functionality
 SeisIO presently includes three web clients, readers for several data formats, and writers for SAC and a native SeisIO format. Utility functions allow synchronization, seamless data merging, and padding time gaps.
 
 ## Web clients
-* SeedLink: ``SeedLink!, SeedLink``
-* FDSN (data, event, and station queries): ``FDSNget, FDSNevq, FDSNsta``
-* IRIS timeseries: ``IRISget``
+* SeedLink
+* FDSN (data, event, and station queries)
+* IRIS timeseries
 
 ## Readable File Formats
-* SAC <sup>(a)</sup>
-* mini-SEED
-* SEG Y (PASSCAL/NMT) <sup>(a)</sup>
-* SEG Y (Standard)
+* SAC
+* miniSEED
+* SEG Y (industry standard and PASSCAL/NMT)
 * Win32
 * UW
 
-<sup>(a)</sup> Supported by ``batch_read``.
-
 # Acknowledgements
-mini-SEED routines are based on rdmseed.m for Matlab, written by by Francois Beauducel, Institut de Physique du Globe de Paris (France). Many thanks to Robert Casey and Chad Trabant (IRIS, USA) for discussions of IRIS web services, and Douglas Neuhauser (UC Berkeley Seismological Laboratory, USA) for discussions of the SAC data format.
+miniSEED routines were originally based on rdmseed.m for Matlab by Francois Beauducel, Institut de Physique du Globe de Paris (France). Many thanks to Robert Casey and Chad Trabant (IRIS, USA) for discussions of IRIS web services, and Douglas Neuhauser (UC Berkeley Seismological Laboratory, USA) for discussions of the SAC data format.
 
 # References
 1. IRIS (2010), SEED Reference Manual: SEED Format Version 2.4, May 2010, IFDSN/IRIS/USGS, http://www.iris.edu
