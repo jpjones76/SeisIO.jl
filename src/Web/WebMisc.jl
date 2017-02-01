@@ -2,6 +2,7 @@
 # Utility functions not for export
 webhdr() = Dict("UserAgent" => "Julia-SeisIO-FSDN.jl/0.0.1")
 hashfname(str::Array{String,1}, ext::String) = string(hash(str), ".", ext)
+chansplit(C::String) = map(String, split(C,['.','_'],limit=4,keep=true))
 
 function get_uhead(src::String)
   if src == "IRIS"
@@ -10,7 +11,7 @@ function get_uhead(src::String)
     uhead = "http://geofon.gfz-potsdam.de/fdsnws/"
   elseif src == "RESIF"
     uhead = "http://ws.resif.fr/fdsnws/"
-  elseif src == "NCSN"
+  elseif src == "NCEDC"
     uhead = "http://service.ncedc.org/fdsnws/"
   else
     uhead = src
@@ -45,4 +46,3 @@ function savereq(D::Array{UInt8,1}, ext::String, net::String, sta::String,
   close(f)
   return nothing
 end
-# ============================================================================

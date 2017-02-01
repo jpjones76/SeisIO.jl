@@ -21,7 +21,7 @@ end
 
 Translate frequency response of `X`, sampled at `fs`, from `resp_old` to `resp_new`. zeros are in resp[:,1], poles in resp[:,2]. Specify gain with keyword `gain`.
 """
-function translate_resp{T}(X::Array{T,1}, fs::T, resp_old::Array{Complex{T},2}, resp_new::Array{Complex{T},2}; gain=1.0::T)
+function translate_resp{T}(X::Array{T,1}, fs::T, resp_old::Array{Complex{T},2}, resp_new::Array{Complex{T},2}; gain=1.0::T, hc_old=1.0::T, hc_new=1.0::T)
   pp = 2.0*Float64(pi)
   if resp_old==resp_new
     warn("resp_old==resp_new; gain normalized, nothing else to do.")

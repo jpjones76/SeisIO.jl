@@ -125,23 +125,9 @@ function md2j{T}(y::T, m::T, d::T)
 end
 
 """
-    t = sac2epoch(S)
-
-Generate epoch time `t` from SAC dictionary `S`. `S` must contain all relevant
-time headers (NZYEAR, NZJDAY, NZHOUR, NZMIN, NZSEC, NSMSEC).
-"""
-function sac2epoch(S::Dict{String,Any})
-  y = convert(Int64,S["nzyear"])
-  j = convert(Int64,S["nzjday"])
-  m,d = j2md(y,j)
-  b = [convert(Int64,i) for i in [S["nzhour"] S["nzmin"] S["nzsec"] S["nzmsec"]]]
-  return d2u(DateTime(y,m,d,b[1],b[2],b[3],b[4]))
-end
-
-"""
     d0, d1 = parsetimewin(s, t)
 
-Convert times `s` and `t` to DateTime objects and sorts s.t. d0 < d1.
+Convert times `s` and `t` to strings and sorts s.t. d0 < d1.
 
 ### Time Specification
 `s` and `t` can be real numbers, DateTime objects, or ASCII strings. Strings must follow the format "yyyy-mm-ddTHH:MM:SS.nnn", e.g. `s="2016-03-23T11:17:00.333"`. Exact behavior depends on the data types of s and t:

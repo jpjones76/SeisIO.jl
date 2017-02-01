@@ -1,10 +1,10 @@
 
 """
-    prune!(S)
+    merge!(S::SeisData)
 
-Merge all channels from S with redundant fields.
+Merge all channels of S with redundant fields.
 """
-function prune!(S::SeisData)
+function merge!(S::SeisData)
   hs = headerhash(S)
   k = falses(S.n)
   m = falses(S.n)
@@ -23,7 +23,7 @@ function prune!(S::SeisData)
   any(k) && (delete!(S, find(k)))
   return S
 end
-prune(S::SeisData) = (T = deepcopy(S); prune!(T); return(T))
+merge(S::SeisData) = (T = deepcopy(S); merge!(T); return(T))
 
 """
     purge!(S)
@@ -39,13 +39,15 @@ end
 purge(S::SeisData) = (T = deepcopy(S); purge!(T); return(T))
 
 """
-    namestrip(s::String)
+    namestrip!(s::String)
 
 Remove bad characters from S: \,, \\, !, \@, \#, \$, \%, \^, \&, \*, \(, \),
   \+, \/, \~, \`, \:, \|, and whitespace.
 """
-namestrip(S::String) = strip(S, ['\,', '\\', '!', '\@', '\#', '\$',
-  '\%', '\^', '\&', '\*', '\(', '\)', '\+', '\/', '\~', '\`', '\:', '\|', ' '])
+namestrip!(S::String) = (strip(S, ['\,', '\\', '!', '\@', '\#', '\$',
+  '\%', '\^', '\&', '\*', '\(', '\)', '\+', '\/', '\~', '\`', '\:', '\|', ' ']); return S)
+namestrip!(S::Array{String,1}) = [namestrip!(i) for i in S]
+namestrip!(S::SeisData) = [namestrip!(i) for i in S.name]
 
 """
     T = pol_sort(S::SeisData)

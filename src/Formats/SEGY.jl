@@ -31,7 +31,7 @@ function auto_coords(xy::Array{Int32,1}, c::Array{Int16,1})
   return lat, lon
 end
 
-function do_trace(f::IO; full=false::Bool, nmt=false::Bool, fh=zeros(Int16,3)::Array{Int16,1}, src=""::String)
+function do_trace(f::IO; full=false::Bool, passcal=false::Bool, fh=zeros(Int16,3)::Array{Int16,1}, src=""::String)
   ftypes = Array{DataType,1}([UInt32, Int32, Int16, Any, Float32, Any, Any, Int8]) # Note: type 1 is IBM Float32
   shorts = Array{Int16, 1}(53)
   ints   = Array{Int32, 1}(19)
@@ -43,7 +43,7 @@ function do_trace(f::IO; full=false::Bool, nmt=false::Bool, fh=zeros(Int16,3)::A
   shorts[5:6] = read(f, Int16, 2)
   ints[16:19] = read(f, Int32, 4)
   shorts[7:52]= read(f, Int16, 46)
-  if nmt
+  if passcal
     chars       = read(f, UInt8, 20)
     dt          = read(f, Int32)
     fmt         = read(f, Int16)
@@ -116,7 +116,7 @@ function do_trace(f::IO; full=false::Bool, nmt=false::Bool, fh=zeros(Int16,3)::A
   setfield!(chan, :t, t)
   setfield!(chan, :x, x)
   if full == true
-    if nmt == false
+    if passcal == false
       merge!(misc, Dict{String,Any}(zip(["trans_ex", "trans_un", "dev_id", "time_c", "src_typ"], shorts2)))
       misc["trace_un"] = trace_unit
       misc["trans_ma"] = trace_unit
@@ -134,14 +134,14 @@ end
 Read SEG-Y file `fname` into SeisData object `seis`.
 
 ### Keywords
-* `nmt=true` for PASSCAL/NMT modified SEG-Yr0
+* `passcal=true` for PASSCAL/NMT modified SEG-Yr0
 * `full=true` to store full SEG-Y headers as a dictionary in `seis.misc`.
 """
-function readsegy(fname::String; nmt=false::Bool, full=false::Bool)
+function readsegy(fname::String; passcal=false::Bool, full=false::Bool)
   fname = realpath(fname)
   f = open(fname, "r")
-  if nmt == true
-    seis = do_trace(f, full=full, nmt=nmt, src=fname)
+  if passcal == true
+    seis = do_trace(f, full=full, passcal=passcal, src=fname)
     seis.src = fname
   else
     fh = Array{Int16,1}(27)
@@ -177,7 +177,7 @@ function readsegy(fname::String; nmt=false::Bool, full=false::Bool)
 
     # Channel headers
     for i = 1:1:fh[1]
-      seis += do_trace(f, full=full, nmt=nmt, fh=fh[[3,5,7]], src=fname)
+      seis += do_trace(f, full=full, passcal=passcal, fh=fh[[3,5,7]], src=fname)
       seis.src[seis.n] = fname
       if full == true
         merge!(seis.misc[i], fhd)
@@ -191,11 +191,11 @@ end
 """
     segyhdr(f)
 
-Print formatted, sorted SEG-Y headers of file `f` to STDOUT. Pass keyword argument `nmt=true` for PASSCAL/NMT modified SEG-Yr0 files.
+Print formatted, sorted SEG-Y headers of file `f` to STDOUT. Pass keyword argument `passcal=true` for PASSCAL/NMT modified SEG-Yr0 files.
 """
-function segyhdr(fname::String; nmt=false::Bool)
-  seis = readsegy(fname::String; nmt=nmt, full=true)
-  if nmt
+function segyhdr(fname::String; passcal=false::Bool)
+  seis = readsegy(fname::String; passcal=passcal, full=true)
+  if passcal
     @printf(STDOUT, "NMT SEG-Y HEADER: %s\n", realpath(fname))
     for k in sort(collect(keys(seis.misc)))
       @printf(STDOUT, "%10s: %s\n", k, string(seis.misc[k]))

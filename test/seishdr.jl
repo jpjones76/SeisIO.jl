@@ -4,7 +4,7 @@ println(STDOUT, "SeisHdr test (seishdr_test.jl)...")
 H = randseishdr()
 wseis("seis.hdr", H)
 H2 = rseis("seis.hdr")[1]
-@test_approx_eq(H==H2, true)
+@assert(H==H2)
 rm("seis.hdr")
 
 #  What is this...? Comes up in randseishdr()

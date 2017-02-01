@@ -1,65 +1,156 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Intro &mdash; SeisIO 0.0.1 documentation</title>
-    
-    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     '0.0.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="SeisIO 0.0.1 documentation" href="../index.html" />
-    <link rel="next" title="Web Clients" href="webclients.html" />
-    <link rel="prev" title="SeisIO" href="../index.html" /> 
-  </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="webclients.html" title="Web Clients"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="../index.html" title="SeisIO"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SeisIO 0.0.1 documentation</a> &raquo;</li> 
-      </ul>
-    </div>  
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Introduction &mdash; SeisIO 0.1.0 beta documentation</title>
+  
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="SeisIO 0.1.0 beta documentation" href="../index.html"/>
+        <link rel="next" title="SeisIO Data Types" href="seisdata.html"/>
+        <link rel="prev" title="SeisIO" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> SeisIO
+          
+
+          
+          </a>
+
+          
             
-  <div class="section" id="intro">
-<h1><code class="xref py py-mod docutils literal"><span class="pre">Intro</span></code><a class="headerlink" href="#intro" title="Permalink to this headline">¶</a></h1>
-<p>SeisIO was created as a framework for working with geophysical time series data. The project is home to an ever-expanding set of web clients and file read formats.</p>
-<div class="section" id="how-seisio-works">
-<h2>How SeisIO Works<a class="headerlink" href="#how-seisio-works" title="Permalink to this headline">¶</a></h2>
-<p>Data are loaded into minimalist containers called <a class="reference internal" href="seisdata.html#seisdata"><span class="std std-ref">SeisData and SeisObj</span></a>, which track record times and other necessary quantities for further processing. SeisObj containers hold a single data channel each. SeisData containers hold multiple channels at once.</p>
-<p>New data, including data for existing channels from new sources, can be merged into SeisData containers (or placed in new SeisData containers) using built-in Julia commands. Unwanted data channels can be removed by matching on a channel&#8217;s ID, name, or index within a SeisData structure.</p>
-<p>Data can be saved to native SeisData format or to SAC.</p>
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#updating">Updating</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="seisdata.html">SeisIO Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Formats/fileformats.html">File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Web/webclients.html">Web Clients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Appendices/function_list.html">Appendix A: Alphabetical Function List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Appendices/seisdata_fields.html">Appendix B: Structure and Field Descriptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Appendices/seisdata_fileformat.html">Appendix C: SeisIO File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Appendices/web_syntax.html">Appendix D: Web Keywords and Syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Appendices/examples.html">Appendix E: Web Client Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">SeisIO</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>Introduction</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/src/intro.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>SeisIO is a framework for working with geophysical time series data. The project is home to an expanding set of web clients, file format readers, and analysis utilities.</p>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>SeisIO stores data in minimalist data types that track record times and other necessary quantities for further processing. New data are easily merged into existing structures with basic commands like <code class="docutils literal"><span class="pre">+</span></code>. Unwanted channels can be removed just as easily. Data can be saved to a native SeisIO format or written to SAC.</p>
 </div>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
@@ -77,79 +168,80 @@
 <span class="n">using</span> <span class="n">SeisIO</span>
 </pre></div>
 </div>
-<p>Be aware that <code class="docutils literal"><span class="pre">workspace()</span></code> clears the Julia session&#8217;s memory, equivalent to <code class="docutils literal"><span class="pre">clear</span> <span class="pre">all</span></code> in Matlab/Octave. Save all work before updating.</p>
+<p>Please be aware that <code class="docutils literal"><span class="pre">workspace()</span></code> clears the Julia session&#8217;s memory. Save work before updating.</p>
 </div>
 <div class="section" id="dependencies">
 <h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
-<p>DSP, Requests, LightXML, PyPlot</p>
+<p>Blosc, DSP, LightXML, Requests; these should be installed automatically when SeisIO is added with Pkg.clone.</p>
 </div>
 </div>
 
 
+           </div>
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="../index.html">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#"><code class="docutils literal"><span class="pre">Intro</span></code></a><ul>
-<li><a class="reference internal" href="#how-seisio-works">How SeisIO Works</a></li>
-<li><a class="reference internal" href="#installation">Installation</a></li>
-<li><a class="reference internal" href="#updating">Updating</a></li>
-<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
-</ul>
-</li>
-</ul>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="seisdata.html" class="btn btn-neutral float-right" title="SeisIO Data Types" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../index.html" class="btn btn-neutral" title="SeisIO" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="../index.html"
-                        title="previous chapter">SeisIO</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="webclients.html"
-                        title="next chapter"><code class="docutils literal"><span class="pre">Web</span> <span class="pre">Clients</span></code></a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/src/intro.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Joshua Jones.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="webclients.html" title="Web Clients"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="../index.html" title="SeisIO"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SeisIO 0.0.1 documentation</a> &raquo;</li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &copy; Copyright 2016, Joshua Jones.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1.0 beta',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
 </html>

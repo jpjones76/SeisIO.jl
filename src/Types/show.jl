@@ -203,7 +203,7 @@ function show(io::IO, S::SeisData)
   show_t(io, S.t[1:N], w, W, N<nc)
   show_x(io, S.x[1:N], w, W, N<nc)
   show_conn(io, S.c)
-  return
+  return nothing
 end
 
 function show(io::IO, S::SeisChannel)
@@ -213,18 +213,18 @@ function show(io::IO, S::SeisChannel)
   D = Array{String,1}(25)
   nx = length(S.x)
   println(io, "SeisChannel with ", nx, " samples")
-  show_str(io, [S.id], W, W, "id", false)
-  show_str(io, [S.name], W, W, "name", false)
-  [show_str(io, [string(S.loc[j])], W, W, loc_str[j], false) for j=1:1:5]
-  show_str(io, [string(S.fs)], W, W, "fs", false)
-  show_str(io, [float_str(S.gain)], W, W, "gain", false)
-  resp_str(io, [S.resp], W, W, false)
-  show_str(io, [S.units], W, W, "units",false)
-  show_str(io, [string(length(S.misc), " entries")], W, W, "MISC", false)
-  show_str(io, [string(length(S.notes), " entries")], W, W, "NOTES", false)
-  show_str(io, [S.src], W, W, "src", false)
-  show_t(io, [S.t], W, W, false)
-  show_x(io, [S.x], W, W, false)
+  show_str(io, [S.id], w, W, "id", false)
+  show_str(io, [S.name], w, W, "name", false)
+  [show_str(io, [string(S.loc[j])], w, W, loc_str[j], false) for j=1:1:5]
+  show_str(io, [string(S.fs)], w, W, "fs", false)
+  show_str(io, [float_str(S.gain)], w, W, "gain", false)
+  resp_str(io, [S.resp], w, W, false)
+  show_str(io, [S.units], w, W, "units",false)
+  show_str(io, [string(length(S.misc), " entries")], w, W, "MISC", false)
+  show_str(io, [string(length(S.notes), " entries")], w, W, "NOTES", false)
+  show_str(io, [S.src], w, W, "src", false)
+  show_t(io, [S.t], w, W, false)
+  show_x(io, [S.x], w, W, false)
   return nothing
 end
 show(S::SeisData) = show(STDOUT, S)

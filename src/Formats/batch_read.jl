@@ -4,7 +4,7 @@
 Batch read all SAC files matching string FILESTR. **All files matching FILESTR
 must contain data from the same channel**.
 
-    seis = batch_read(FILESTR, ftype="NMT")
+    seis = batch_read(FILESTR, ftype="PASSCAL")
 
 Batch read all SEGY (PASSCAL) files matching string FILESTR. **All files matching
 FILESTR must contain data from the same channel**.
@@ -31,7 +31,7 @@ function batch_read(files::Array{String,1}; ftype="SAC"::String, fs=0.0::Float64
     fmt = Array{Type,1}(collect(repeated(Float32, NF)))
     id = getsach(files, ts, nx, gain, rr)
     os = 632
-  elseif ftype == "NMT" || ftype == "PASSCAL"
+  elseif ftype == "PASSCAL"
     (id, fmt) = getsegh(files, ts, nx, gain, rr)
     os = 240
   end
