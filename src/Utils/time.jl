@@ -8,6 +8,31 @@ timestamp(t::Int64) = String(Dates.format(u2d(t/sμ), "yyyy-mm-ddTHH:MM:SS"))
 
 # =========================================================
 # Not for export
+
+function t_expand(t::Array{Int64,2}, fs::Float64)
+  fs == 0 && return cumsum(t[:,1])
+  dt = round(Int, 1/(fs*μs))
+  tt = dt.*ones(Int64, t[end,1])
+  tt[t[:,1]] += t[:,2]
+  return cumsum(tt)
+end
+
+function t_collapse(tt::Array{Int64,1}, fs::Float64)
+  if fs == 0.0
+    t = Array{Int64,2}([tt[1]; diff(tt)::Array{Int64,1}])
+  else
+    dt = round(Int, 1.0/(fs*μs))
+    ts = Array{Int64,1}([dt; diff(tt)::Array{Int64,1}])
+    L = length(tt)
+    i = find(ts .!= dt)
+    t = Array{Int64,2}([[1 tt[1]];[i ts[i].-dt]])
+  end
+  if isempty(i) || i[end] != L
+    t = vcat(t, hcat(L,0))
+  end
+  return t
+end
+
 function xtmerge(t1::Array{Int64,2}, t2::Array{Int64,2}, x1::Array{Float64,1}, x2::Array{Float64,1}, fs::Float64)
   t = [t_expand(t1, fs); t_expand(t2, fs)]
 
@@ -56,29 +81,6 @@ function xtjoin!(x::Array{Float64,1}, t::Array{Int64,1}, half_samp::Int64)
   return (x, t)::Tuple{Array{Float64,1},Array{Int64,1}}
 end
 
-function t_expand(t::Array{Int64,2}, fs::Float64)
-  fs == 0 && return cumsum(t[:,1])
-  dt = round(Int, 1/(fs*μs))
-  tt = dt.*ones(Int64, t[end,1])
-  tt[t[:,1]] += t[:,2]
-  return cumsum(tt)
-end
-
-function t_collapse(tt::Array{Int64,1}, fs::Float64)
-  if fs == 0.0
-    t = Array{Int64,2}([tt[1]; diff(tt)::Array{Int64,1}])
-  else
-    dt = round(Int, 1.0/(fs*μs))
-    ts = Array{Int64,1}([dt; diff(tt)::Array{Int64,1}])
-    L = length(tt)
-    i = find(ts .!= dt)
-    t = Array{Int64,2}([[1 tt[1]];[i ts[i].-dt]])
-  end
-  if isempty(i) || i[end] != L
-    t = vcat(t, hcat(L,0))
-  end
-  return t
-end
 # =========================================================
 
 """
