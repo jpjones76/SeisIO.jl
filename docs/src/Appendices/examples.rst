@@ -10,7 +10,7 @@ FDSN
 1. Download 10 minutes of data from four stations at Mt. St. Helens (WA, USA), delete the low-gain channels, and save as SAC files in the current directory.
 ::
 
-  S = FDSNget("CC.VALT, UW.SEP, UW.SHW, UW.HSR", t=600)
+  S = FDSNget("CC.VALT, UW.SEP, UW.SHW, UW.HSR", t=-600)
   S -= "SHW.ELZ..UW"
   S -= "HSR.ELZ..UW"
   writesac(S)
