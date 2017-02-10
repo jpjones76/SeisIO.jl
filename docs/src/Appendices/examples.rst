@@ -38,6 +38,7 @@ FDSN
 5. A request to FDSN Potsdam, not synchronized, with some verbosity
 
 ::
+
   ts = "2011-03-11T06:00:00"
   te = "2011-03-11T06:05:00"
   R = FDSNget("GE.BKB..BH?", src="GFZ", s=ts, t=te, v=1, y=false)
