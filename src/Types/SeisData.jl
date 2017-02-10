@@ -53,7 +53,7 @@ type SeisData
   function SeisData(U...)
     S = SeisData()
     for i = 1:1:length(U)
-      if isa(U[i],SeisData)
+      if typeof(U[i]) in [SeisChannel,SeisData]
         merge!(S, U[i])
       else
         warn(string("Tried to join incompatible type into SeisData at arg ", i, "; skipped."))
