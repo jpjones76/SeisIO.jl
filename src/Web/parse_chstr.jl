@@ -5,7 +5,7 @@ function parse_charr(chan_in::Array{String,1}; d='.'::Char, fdsn=false::Bool)
 
     # Initial pass to parse to string array
     for i = 1:1:N
-      chan_line = [String(j) for j in split(chan_in[i], d, keep=true, limit=5)]
+      chan_line = [strip(String(j)) for j in split(chan_in[i], d, keep=true, limit=5)]
       L = length(chan_line)
       if L < 2
         continue
@@ -23,7 +23,7 @@ function parse_chstr(chan_in::String; d=','::Char, fdsn=false::Bool)
   if isfile(chan_in)
     return parse_chstr(join([strip(j, ['\r','\n']) for j in filter(i -> !startswith(i, ['\#','\*']), open(readlines, chan_in))],','))
   else
-    chan_data = [String(j) for j in split(chan_in, d)]
+    chan_data = [strip(String(j)) for j in split(chan_in, d)]
     for j = 1:1:length(chan_data)
 
       # Build array
