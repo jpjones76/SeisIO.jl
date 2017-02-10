@@ -75,7 +75,7 @@ IRISws
 
   STA = "UW.HOOD..BH?, CC.TIMB..EH?"
   S = Dates.DateTime(Dates.year(now()))
-  T = 600
+  T = -600
   seis = IRISget(STA, s=S, t=T, y=true)
   wseis(seis, "20160516145000.data.seis")
 
