@@ -132,13 +132,17 @@ function populate_chan!(S::SeisChannel; c=false::Bool)
     sta = uppercase(randstring(4))
     S.id = join([net,sta,"",chan],'.')                                  # id
   end
-  (isempty(S.units) || S.units == "unknown") && (S.units = units)       # units
+  (isempty(S.units) || S.units == "unknown") && (S.units = rand(irregular_units))  # units
   (isempty(S.gain) || isnan(S.gain)) && (S.gain = rand()*10^rand(5:10)) # gain
   isempty(S.loc) && (S.loc = [90, 180, 500, 90, 45].*(rand(5)-0.5))     # loc
 
   # Need this even if S had an ID value when populate_chan! was called
-  ccode = split(S.id, '.')[4][2]
-
+  cha = split(S.id, '.')[4]
+  if isempty(cha)
+    ccode = 'Y'
+  else
+    ccode = [2]
+  end
   # Random miscellany
   if isempty(S.misc)
     pop_rand!(S.misc, rand(4:24))
@@ -168,8 +172,7 @@ function populate_chan!(S::SeisChannel; c=false::Bool)
     if irreg
       L+=2
       S.x = rand(L) .* 10.^(rand(1:10, L))
-      t = [round(Int,ts/μs); round(Int, diff(sort(rand(2:Lx, L)))/(μs*S.fs))]
-      S.t = reshape(t, L, 1)
+      t = [Int64(0) round(Int, ts/μs); zeros(Int64, L-1) round(Int, diff(sort(rand(2:1:Lx, L)))/(μs*S.fs))]
       S.fs = 0
       S.units = rand(irregular_units)
     else

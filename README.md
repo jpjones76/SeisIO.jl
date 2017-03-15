@@ -5,8 +5,34 @@ A minimalist, platform-agnostic package for working with univariate geophysical 
 http://seisio.readthedocs.org
 
 # CHANGELOG
+## 2017-03-15
+* SeisData merge has been rewritten for greater functionality.
+  + Merge speed improved by orders of magnitude for multiple SeisData objects
+  + `merge!(S,T)` combines two SeisData structures S,T in S.
+  + `mseis!(S,...)` merges multiple SeisData structures into S. (This command will handle as many SeisData objects as system memory allows, e.g. `mseis!(S1, S2, S3, S4, S5)`, etc.).
+  + `S = merge(A)` merges an array of SeisData objects into a new object S.
+* Arithmetic operators for SeisData objects have been standardized:
+  + `S + T` appends T to S without merging.
+  + `S * T` merges T into S via `merge(S,T)`.
+  + `S - T` removes traces whose IDs match T from S.
+  + `S ÷ T` is undefined at present but may eventually provide unmerge functionality.
+  + Generally, `S+T-T = S`, but `S-T+T != S`.
+  + Arithmetic operators no longer operate in place. `S+T` creates a new SeisData object; `S` is not modified.
+* Web functions no longer synchronize request outputs by default. Instead, data requests can be synchronized with the keyword argument y=true.
+* Minor changes to `sync!`:
+  + No longer de-means traces.
+  + No longer cosine tapers around gaps.
+* SeisIO now includes an internal version of the "ls" command; this is not exported to prevent conflicting with other third-party modules, so access with `SeisIO.ls`.
+* Automatic file write with IRISget and FDSNget now generates file names that follow the IRIS-style naming convention `YY.JJJ.HH.MM.SS.sss.(id).ext`.
+* Fixed a bug that broke the .t field on channels where length(S[i].x) = 1.
+* Single-object files can now be written by specifying `sf=true` when calling wseis. By default, single-object file names use IRIS-style naming conventions.
+* Promoted the Polarization submodule to a separate GitHub project.
+* Minor bugfixes: randseischannel, randseisdata, randseisevent, autotap!, IRISget, SeisIO.parserec!, SeisIO.ls, SeisIO,autotuk!
+* *In progress*: SeisIO data files will soon include searchable indices at the end of each file.
+  + This change is backwards-compatible and won't affect the ability to read existing files.
+  + The file index will store trace IDs of each SeisIO object written, start times, end times, and byte indices.
+
 ## 2017-01-31
-The introduction of today's changes marks the first stable SeisIO release. Please test and report all issues.
 * Documentation was completely rewritten.
 * All web functions now use the channel naming convention NET.STA.LOC.CHA.
 * Renamed several web function keywords for uniformity.
@@ -16,18 +42,8 @@ The introduction of today's changes marks the first stable SeisIO release. Pleas
 * `prune!(S)` is now `merge!(S)`
 * A few unused functions and accidental exports were removed.
 
-## 2017-01-24
-* Type stability for nearly all methods
-* Complete rewrite of mini-SEED resulting in 2 orders of magnitude speedup
-* Faster read times for SAC, SEG Y, and UW data formats
-* Improved XML parsing
-* batch_read works again
-* Event functions are no longer in a submodule
-* SeisIO now includes Blosc among its dependencies.
-
-## Known Issues (2017-01-31)
-* Type stability is impossible when initializing types with keyword arguments; keyword arguments can't be type-stable in the Julia language. This is unlikely to change unless the language itself changes. For strict type stability, initialize an empty structure, then set field values manually (e.g. `C=SeisChannel(); setfield!(C, :fs, 100)`).
-* readmseed uses an exorbitant amount of memory. The 2017-01-24 update reduced its memory consumption by two orders of magnitude, but the requirement to read a file is still ~30x the file size (e.g. 42 MB for a 1.3 MB file). Suggestions for improvement here would be especially welcome.
+## Known Issues (2017-03-17)
+* readmseed uses an exorbitant amount of memory (~32x file size). This may be endemic to the data format.
 
 # Current Functionality
 SeisIO presently includes three web clients, readers for several data formats, and writers for SAC and a native SeisIO format. Utility functions allow synchronization, seamless data merging, and padding time gaps.

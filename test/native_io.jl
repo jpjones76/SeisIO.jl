@@ -6,7 +6,6 @@ savfile3 = "test.evt"
 S = randseisdata(c=false)
 println("...SeisData file write...")
 wseis(S, savfile1)
-
 println("...SeisData file read...")
 R = rseis(savfile1, v=true)
 @assert(R[1]==S)

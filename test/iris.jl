@@ -20,7 +20,7 @@ en = -60.0
 (d0,d1) = parsetimewin(st,en)
 U = IRISget(chans, s=d0, t=d1)
 @assert(isempty(U)==false)
-
+sync!(U)
 L = [length(U.x[i])/U.fs[i] for i = 1:U.n]
 t = [U.t[i][1,2] for i = 1:U.n]
 L_min = minimum(L)

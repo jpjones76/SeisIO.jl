@@ -1,4 +1,4 @@
-import Base:in, +, -, convert, isequal, length, merge!, merge, push!, sizeof
+import Base:in, +, -, *, convert, isequal, length, push!, sizeof
 
 type SeisChannel
   name::String
@@ -34,8 +34,8 @@ end
 
 # Use of keywords is (extremely) non-type-stable and not recommended
 SeisChannel(;
-            name=""::String,
-            id=""::String,
+            name="New Channel"::String,
+            id="...YYY"::String,
             loc=zeros(Float64,5)::Array{Float64,1},
             fs=0.0::Float64,
             gain=1.0::Float64,
@@ -43,7 +43,7 @@ SeisChannel(;
             units=""::String,
             src=""::String,
             misc=Dict{String,Any}()::Dict{String,Any},
-            notes=Array{String,1}()::Array{String,1},
+            notes=Array{String,1}([tnote("Channel initialized")])::Array{String,1},
             t=Array{Int64,2}(0,2)::Array{Int64,2},
             x=Array{Float64,1}(0)::Array{Float64,1}
             ) = SeisChannel(name, id, loc, fs, gain, resp, units, src, misc, notes, t, x)
@@ -73,12 +73,16 @@ function SeisData(C::SeisChannel)
   return S
 end
 convert(::Type{SeisData}, C::SeisChannel) = SeisData(C)
-merge!(S::SeisData, C::SeisChannel) = merge!(S,SeisData(C))
-merge!(C::SeisChannel, S::SeisData) = merge!(SeisData(C),S)
-merge!(C::SeisChannel, D::SeisChannel) = (S = SeisData(C); merge!(S, SeisData(D)); return S);
-push!(S::SeisData, C::SeisChannel) = merge!(S, SeisData(C))
-+(S::SeisData, C::SeisChannel) = merge!(S,C)
-+(C::SeisChannel, D::SeisChannel) = merge!(C,D)
++(S::SeisData, C::SeisChannel) = (T = deepcopy(S); return T + SeisData(C))
++(C::SeisChannel, D::SeisChannel) = SeisData(C,D)
+
+push!(S::SeisData, C::SeisChannel)  = (
+  [setfield!(S, i, push!(getfield(S,i), getfield(C,i))) for i in datafields];
+  S.n += 1;
+  return S)
+
+isequal(S::SeisChannel, U::SeisChannel) = minimum([hash(getfield(S,i))==hash(getfield(U,i)) for i in datafields]::Array{Bool,1})
+==(S::SeisChannel, U::SeisChannel) = isequal(S,U)::Bool
 
 """
     findid(S::SeisData, C::SeisChannel)

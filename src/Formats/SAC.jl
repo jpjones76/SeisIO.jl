@@ -186,9 +186,10 @@ function sachdr(fname::String)
 end
 
 """
-    wsac(S::SeisData; ts=false, v=true)
+    writesac(S::Union{SeisData,SeisEvent}; ts=false, v=true)
 
-Write all data in SeisData structure `S` to auto-generated SAC files.
+Write all data in SeisData structure `S` to auto-generated SAC files. If S is a
+SeisEvent, event header information is also written.
 """
 function writesac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=true::Bool)
   if ts
@@ -198,8 +199,8 @@ function writesac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=true::Bool)
   end
   tdata = Array{Float32}(0)
   if isa(S, SeisEvent)
-    evt_info = Array{Float32,1}([S.hdr.lat, S.hdr.lon, S.hdr.dep, nul_f, S.hdr.mag])
-    t_evt = d2u(S.hdr.time)
+    evt_info = map(Float32, vcat(S.hdr.loc, nul_f, S.hdr.mag[1]))
+    t_evt = d2u(S.hdr.ot)
     evid  = S.hdr.id == 0 ? nul_s : String(S.hdr.id)
     EvL   = length(evid)
     N     = S.data.n
@@ -231,5 +232,11 @@ end
 writesac(S::SeisChannel; ts=false::Bool, v=true::Bool) = writesac(SeisData(S), ts=ts, v=v)
 
 rsac(fname::String; full=false::Bool) = readsac(fname, full=full)
+
+"""
+    wsac(S::SeisData; ts=false, v=true)
+
+Write all data in SeisData structure `S` to auto-generated SAC files.
+"""
 wsac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=true::Bool) = writesac(S, ts=ts, v=v)
 wsac(S::SeisChannel; ts=false::Bool, v=true::Bool) = writesac(SeisData(S), ts=ts, v=v)

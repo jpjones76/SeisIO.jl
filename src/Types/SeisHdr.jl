@@ -61,7 +61,7 @@ type SeisHdr
   end
 end
 SeisHdr(; id=0::Int64,
-          ot=now()::DateTime,
+          ot=u2d(0)::DateTime,
           loc=zeros(Float64, 3)::Array{Float64,1},
           mag=(-5.0f0, '?', ' ')::Tuple{Float32,Char,Char},
           int=(0x00, "MMI")::Tuple{UInt8,String},

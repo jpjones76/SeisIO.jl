@@ -10,7 +10,7 @@ FDSN
 1. Download 10 minutes of data from four stations at Mt. St. Helens (WA, USA), delete the low-gain channels, and save as SAC files in the current directory.
 ::
 
-  S = FDSNget("CC.VALT, UW.SEP, UW.SHW, UW.HSR", t=600)
+  S = FDSNget("CC.VALT, UW.SEP, UW.SHW, UW.HSR", t=-600)
   S -= "SHW.ELZ..UW"
   S -= "HSR.ELZ..UW"
   writesac(S)
@@ -25,7 +25,7 @@ FDSN
 3. 5 stations, 2 networks, all channels, data from the last 600 seconds
 ::
 
-  CHA = ["CC.PALM, UW.HOOD, UW.TIMB, CC.HIYU, UW.TDH"]
+  CHA = "CC.PALM, UW.HOOD, UW.TIMB, CC.HIYU, UW.TDH"
   TS = u2d(time())
   TT = -600
   S = FDSNget(CHA, s=TS, t=TT)
@@ -38,6 +38,7 @@ FDSN
 5. A request to FDSN Potsdam, not synchronized, with some verbosity
 
 ::
+
   ts = "2011-03-11T06:00:00"
   te = "2011-03-11T06:05:00"
   R = FDSNget("GE.BKB..BH?", src="GFZ", s=ts, t=te, v=1, y=false)
@@ -45,16 +46,22 @@ FDSN
 ***********
 IRISws
 ***********
-1. Get synchronized trace data from IRISws from ``TS`` to ``TE`` at channels ``C``
+1. Get desynchronized trace data from IRISws from ``TS`` to ``TT`` at channels ``CHA``
 
 ::
 
-  S = IRISget(C, s=TS, t=TE)
+  CHA = "UW.TDH..EHZ, UW.VLL..EHZ, CC.VALT..BHZ"
+  TS = u2d(time()-86400)
+  TT = 600
+  S = IRISget(CHA, s=TS, t=TT)
 
-2. Get desynchronized trace data from IRISws with a 5-second timeout on HTTP requests, written directly to disk.
+2. Get synchronized trace data from IRISws with a 55-second timeout on HTTP requests, written directly to disk.
 ::
 
-  S = IRISget(C, s=TS, t=TE, y=false, vto=5, w=true)
+  CHA = "UW.TDH..EHZ, UW.VLL..EHZ, CC.VALT..BHZ"
+  TS = u2d(time())
+  TT = -600
+  S = IRISget(CHA, s=TS, t=TT, y=true, to=55, w=true)
 
 3. Request 10 minutes of continuous vertical-component data from a small May 2016 earthquake swarm at Mt. Hood, OR, USA:
 ::
@@ -63,22 +70,13 @@ IRISws
   TS = "2016-05-16T14:50:00"; TE = 600
   S = IRISget(STA, s=TS, t=TE)
 
-4. Iris web service, single station, written to miniseed
+4. Iris web service, single station (CC.TIMB, Mt. Hood), vertical component, last 300 seconds of data, write to miniseed
 ::
 
   seis = irisws("CC.TIMB..EHZ", t=-300, fmt="miniseed")
   writesac(seis)
 
-5. IRISget example: 6 channels, 10 minutes, synchronized, saved in SeisIO format"
-::
-
-  STA = "UW.HOOD..BH?, CC.TIMB..EH?"
-  S = Dates.DateTime(Dates.year(now()))
-  T = 600
-  seis = IRISget(STA, s=S, t=T, y=true)
-  wseis(seis, "20160516145000.data.seis")
-
-6. Grabbing data from a predetermined time window in two different formats
+5. Grabbing data from a predetermined time window in two different formats
 ::
 
   ts = "2016-03-23T23:10:00"

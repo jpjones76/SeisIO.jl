@@ -43,7 +43,7 @@ s2u = ungap(s2)
 @test_approx_eq(length(s2.x)/s2.fs + μs*sum(s2.t[2:end-1,2]), length(s2u.x)/s2u.fs)
 
 println("...channel add + simple merge...")
-S += (s1 + s2)
+S += (s1 * s2)
 
 # Do in-place operations only change leftmost variable?
 @test_approx_eq(length(s1.x), 100)
@@ -52,7 +52,7 @@ S += (s1 + s2)
 # expected behavior for S = s1+s2
 # (0) length[s.x[1]] = 250
 # (1) S.x[1][1:50] = s1.x[1:50]
-# (2) S.x[1][51:75] = mean(s1.x[51:75] + s2.x[1:25])
+# (2) S.x[1][51:75] = 0.5.*(s1.x[51:75] + s2.x[1:25])
 # (3) S.x[1][76:100] = s1.x[76:100]
 # (4) S.x[1][101:125] = mean(S.x[1])
 # (5) S.x[1][126:250] = s2.x[126:250]
@@ -66,7 +66,7 @@ S += (s1 + s2)
 @test_approx_eq(length(S.name), 1)
 @test_approx_eq(length(S.t),1)
 @test_approx_eq(length(S.x),1)
-@test_approx_eq(true, S.id[1]=="DEAD.STA..EHZ")
+@assert(S.id[1]=="DEAD.STA..EHZ")
 ungap!(S, m=false, w=false)
 @test_approx_eq(length(S.x[1]), 260)
 @test_approx_eq(S.x[1][1:50], s1.x[1:50])
@@ -80,10 +80,10 @@ ungap!(S, m=false, w=false)
 # Auto-tapering after a merge
 T = deepcopy(S)
 ii = find(isnan(S.x[1]))
-T.x[1] -= mean(T.x[1][!isnan(T.x[1])])
+# T.x[1] -= mean(T.x[1][!isnan(T.x[1])])
 autotap!(S)
-@test_approx_eq(0, length(find(isnan(S.x[1]))))   # No more NaNs?
-@test_approx_eq(sum(diff(S.x[1][ii])), 0)         # All NaNs filled w/same val?
+@assert(length(find(isnan(S.x[1])))==0)           # No more NaNs?
+@assert(sum(diff(S.x[1][ii]))==0)                 # All NaNs filled w/same val?
 @test_approx_eq(T.x[1][12:90], S.x[1][12:90])     # Un-windowed vals untouched?
 
 println("...channel delete...")
@@ -96,8 +96,8 @@ end
 @assert(isempty(S))
 
 println("...a more difficult merge...")
-S += (s1 + s3)
-S += (s2 + s4)
+S *= (s1 * s3)
+S *= (s2 * s4)
 @test_approx_eq(S.n, 2)
 @test_approx_eq(length(S.fs), 2)
 @test_approx_eq(length(S.gain), 2)
@@ -112,7 +112,7 @@ ungap!(S, m=false, w=false)
 println("...auto-resample on merge...")
 @test_approx_eq(length(S.x[1]), 350)
 println("...gain correction on merge...")
-@test_approx_eq(S.x[1][101], s4.x[1]/10)
+@test_approx_eq(S.x[1][101]/S.gain[1], s4.x[1]/s4.gain)
 
 println("...direct reading of supported file formats...")
 println("......SAC...")
@@ -146,7 +146,7 @@ s5 = SeisChannel(fs = 100.0, gain = 32.0, name = "DEAD.STA.EHE", id = "DEAD.STA.
 s6 = SeisChannel(fs = 100.0, gain = 32.0, name = "UNNAMED", id = "DEAD.STA..EHE",
   t = [1 t1+30000000; 200 0], x=randn(200))
 println("...channel add...")
-T = (s5 + s6)
+T = (s5 * s6)
 ungap!(T)
 @test_approx_eq(length(T.x[1]),3200)
 println("...done!")

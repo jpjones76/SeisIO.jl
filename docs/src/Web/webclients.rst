@@ -44,10 +44,14 @@ Incorporated Research Institutions for Seismology `(IRIS) <http://www.iris.edu/>
 
 Get near-real-time data from channels in ``C``. ``IRISget`` is a wrapper to the `IRIS timeseries web service <http://service.iris.edu/irisws/timeseries/1/>`_. See :ref:`data keywords list <dkw>` and :ref:`channel id syntax <cid>` for options.
 
+Usage Notes
+-----------
 
-* Trace data are de-meaned and stage zero gains are removed.
+* Stage zero gains are removed from trace data; all IRIS data will appear to have a gain of 1.0.
 
 * Wildcards in channel IDs aren't allowed.
+
+* Channel spec *must* include the net, sta, cha fields; thus, CHA = "CC.VALT..BHZ" is OK; CHA = "CC.VALT" is not.
 
 
 ********

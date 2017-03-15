@@ -24,6 +24,7 @@ S = FDSNget(fname, s=0, t=T, v=1)
 @assert(isempty(S)==false)
 !isempty(find(S.id .== "UW.SHW..ELZ")) && (S -= "UW.SHW..ELZ")
 !isempty(find(S.id .== "UW.HSR..ELZ")) && (S -= "UW.HSR..ELZ")
+sync!(S)
 L = [length(S.x[i])/S.fs[i] for i = 1:S.n]
 t = [S.t[i][1,2] for i = 1:S.n]
 L_min = minimum(L)

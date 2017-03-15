@@ -10,16 +10,19 @@ timestamp(t::Int64) = String(Dates.format(u2d(t/sμ), "yyyy-mm-ddTHH:MM:SS"))
 # Not for export
 
 function t_expand(t::Array{Int64,2}, fs::Float64)
-  fs == 0 && return cumsum(t[:,1])
-  dt = round(Int, 1/(fs*μs))
+  fs == 0.0 && return cumsum(t[:,2])
+  t[end,1] == 1 && return [t[1,2]]
+  dt = round(Int, 1.0/(fs*SeisIO.μs))
   tt = dt.*ones(Int64, t[end,1])
-  tt[t[:,1]] += t[:,2]
+  for i = 1:1:size(t,1)
+    tt[t[i,1]] += t[i,2]
+  end
   return cumsum(tt)
 end
 
 function t_collapse(tt::Array{Int64,1}, fs::Float64)
   if fs == 0.0
-    t = Array{Int64,2}([tt[1]; diff(tt)::Array{Int64,1}])
+    t = Array{Int64,2}([Int64(0) tt[1]; zeros(Int64, length(tt)) diff(tt)::Array{Int64,1}])
   else
     dt = round(Int, 1.0/(fs*μs))
     ts = Array{Int64,1}([dt; diff(tt)::Array{Int64,1}])
@@ -31,54 +34,6 @@ function t_collapse(tt::Array{Int64,1}, fs::Float64)
     t = vcat(t, hcat(L,0))
   end
   return t
-end
-
-function xtmerge(t1::Array{Int64,2}, t2::Array{Int64,2}, x1::Array{Float64,1}, x2::Array{Float64,1}, fs::Float64)
-  t = [t_expand(t1, fs); t_expand(t2, fs)]
-
-  # Sort
-  i = sortperm(t)
-  t = t[i]
-  x = [x1; x2][i]
-
-  if fs == 0.0
-    half_samp = Int64(0)
-  else
-    half_samp = round(Int, 0.5/(fs*μs))
-  end
-  if minimum(diff(t)) < half_samp
-    xtjoin!(x, t, half_samp)
-  end
-  if half_samp > 0.0
-    return (t_collapse(t, fs), x)
-  else
-    return (reshape(t, length(t), 1), x)
-  end
-end
-
-function xtjoin!(x::Array{Float64,1}, t::Array{Int64,1}, half_samp::Int64)
-  J0 = find(diff(t) .< half_samp)
-  while !isempty(J0)
-    J1 = J0.+1
-    K = [isnan(x[J0]) isnan(x[J1])]
-
-    # Average points that are either both NaN or neither Nan
-    ii = find(K[:,1].==K[:,2])
-    i0 = J0[ii]
-    i1 = J1[ii]
-    t[i0] = round(Int, 0.5*(t[i0]+t[i1]))
-    x[i0] = 0.5*(x[i0]+x[i1])
-
-    # Delete pairs with only one NaN (and delete i1, while we're here)
-    i3 = find(K[:,1].*!K[:,2])
-    i4 = find(!K[:,1].*K[:,2])
-    II = sort([J0[i3]; J1[i4]; i1])
-    deleteat!(t, II)
-    deleteat!(x, II)
-
-    J0 = find(diff(t) .< half_samp)
-  end
-  return (x, t)::Tuple{Array{Float64,1},Array{Int64,1}}
 end
 
 # =========================================================

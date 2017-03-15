@@ -32,7 +32,7 @@ V = SeisData(5);
 t1 = B.t[1]; t2 = A.t[1]; x1 = B.x[1]; x2 = A.x[1]; fs = B.fs[1];
 t_tmp = t_expand(t1, fs);
 @code_warntype t_collapse(t_tmp, fs)
-@code_warntype xtmerge(t1,x1,t2,x2,fs);
+# @code_warntype xtmerge(t1,x1,t2,x2,fs);
 x = randn(1024); t = rand(Int, 1024); half_samp = 50000;
 @code_warntype xtjoin!(x,t,half_samp)
 @code_warntype t_expand(t1, fs)
