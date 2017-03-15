@@ -1,19 +1,16 @@
 import Base:length, show, size, summary
-const os=10
+const os=8
 
 si(w::Int, i::Int) = os + w*(i-1)
 showtail(io::IO, b::Bool) = b ? "..." : ""
-float_str(x::Float64) = @sprintf("%.03e", x)
+float_str(x::Float64) = @sprintf("%.3e", x)
 
 function str_trunc(str::String, w::Integer)
   d = str.data
   L = length(d)
   if L > w
-    l1 = floor(Int, (w-3)/4)
-    l2 = floor(Int, 3*(w-3)/4)
-    s3s = d[1:l1]
-    s3e = d[end-l2+1:end]
-    d = String([s3s;"...".data;s3e]).data
+    s3 = d[1:w-4]
+    d = String([s3; "...".data]).data
   else
     d = d[1:min(w,L)]
   end
@@ -52,18 +49,9 @@ function show_int(io::IO, D::Array{Int,1}, W::Int, w::Int, s::String, b::Bool)
 end
 
 maxgap(t::Array{Int64,2}) = @sprintf("%g", μs*maximum(t[2:end,2]))
-function ngaps(t::Array{Int64,2})
-  ng = size(t,1)-2
-  if ng <= 0
-    s2 = "None"
-  else
-    s2 = string(ng, " (max ", maxgap(t), " s)")
-  end
-  return s2
-end
+ngaps(t::Array{Int64,2}) = max(0, size(t,1)-2)
 function show_t(io::IO, T::Array{Array{Int64,2},1}, w::Int, W::Int, b::Bool)
-  sd1 = str_head("START", W::Int)
-  sd2 = str_head("GAPS", W::Int)
+  sd1 = str_head("T", W::Int)
   p = os
   for i = 1:length(T)
     if isempty(T[i])
@@ -72,35 +60,37 @@ function show_t(io::IO, T::Array{Array{Int64,2},1}, w::Int, W::Int, b::Bool)
       s = timestamp(T[i][1,2])
     end
     sd1[p+1:p+length(s)] = s.data
-    s2 = ngaps(T[i])
-    sd2[p+1:p+length(s2)] = s2.data
+    ng = string("(", ngaps(T[i]), " gaps)").data
+    sd1[p+2+length(s):p+1+length(s)+length(ng)] = ng
     p += w
   end
   println(io, replace(String(sd1),'\0',' '), showtail(io, b))
-  println(io, replace(String(sd2),'\0',' '), showtail(io, b))
   return
 end
 
 function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, b::Bool)
   N = length(X)
   str = zeros(UInt8, W, 6)
-  str[os-3:os,1] = "NX: ".data
-  str[os-2:os,2] = "X: ".data
+  str[os-2:os,1] = "X: ".data
   p = os
   i = 1
   while p < W && i <= N
     L = length(X[i])
-    s = string(L)
-    str[p+1:p+length(s),1] = s.data
+    Lx = string("(nx = ", L, ")")
     if isempty(X[i])
       str[p+1:p+7,1] = "(empty)".data
     else
-      for k = 2:1:min(6,L)
-        s = float_str(X[i][k-1])
-        if L > 5 && k==6
-          s = "..."
+      for k = 1:1:min(6,L+2)
+        if k <= length(X[i])
+          s = float_str(X[i][k])
         end
-        str[p+1:p+length(s),k] = s.data
+        if (L > 5 && k==5) || (L == length(X[i])+1 && length(X[i]) > 1)
+          s = "  ..."
+        end
+        if k == min(6, length(X[i])+2)
+          s = Lx
+        end
+        str[p+1:p+length(s.data),k] = s.data
       end
     end
     p += w
@@ -119,8 +109,7 @@ end
 function resp_str(io::IO, X::Array{Array{Complex{Float64},2},1}, w::Int, W::Int, b::Bool)
   N = length(X)
   sd = zeros(UInt8, W, 2)
-  sd[os-6:os,1] = "ZEROS: ".data
-  sd[os-6:os,2] = "POLES: ".data
+  sd[os-5:os-1,1] = "RESP:".data
   p = os
   i = 1
   while p < W && i <= N
@@ -133,8 +122,8 @@ function resp_str(io::IO, X::Array{Array{Complex{Float64},2},1}, w::Int, W::Int,
       zstr = ""
       pstr = ""
       for j = 1:1:L
-        zstr *= string(float_str(real(R[j,1])), "+", float_str(imag(R[j,1])), "i")
-        pstr *= string(float_str(real(R[j,2])), "+", float_str(imag(R[j,2])), "i")
+        zstr *= string(float_str(real(R[j,1])), " + ", float_str(imag(R[j,1])), "i")
+        pstr *= string(float_str(real(R[j,2])), " + ", float_str(imag(R[j,2])), "i")
         if L > 1 && j < L
           zstr *= ", "
           pstr *= ", "
@@ -175,41 +164,41 @@ function show_conn(io::IO, C::Array{TCPSocket,1})
 end
 
 summary(S::SeisHdr) = string(typeof(S), ", ", locsum(S.loc), ", mag = ", magsum(S.mag))
-summary(S::SeisData) = string("type ", typeof(S), " with ", S.n, " channel",
-  S.n == 1 ? "" : "s")
-summary(S::SeisEvent) = string(typeof(S), " with ", S.data.n, " channel",
+summary(S::SeisData) = string(typeof(S), " with ", S.n, " channel",  S.n == 1 ? "" : "s")
+summary(S::SeisEvent) = string("Event ", S.hdr.id, ": ", typeof(S), " with ", S.data.n, " channel",
   S.data.n == 1 ? "" : "s")
 summary(S::SeisChannel) = string(typeof(S), " with ", length(S.x), " sample",
   (length(S.x) == 1 ? "" : "s"), ", gaps: ", ngaps(S.t))
 
 function show(io::IO, S::SeisData)
-  loc_str = ["lat", "lon", "ele", "az", "inc"]
+  # loc_str = ["lat", "lon", "ele", "az", "inc"]
   W = max(80,displaysize(io)[2]-2)-os
-  w = 32
+  w = min(W, 36)
   nc = getfield(S, :n)
   N = min(nc, floor(Int, (W-os-3)/(w+1)))
   D = Array{String,1}(25)
   println(io, "SeisData with ", nc, " channels (", N, " shown)")
   show_str(io, S.id[1:N], w, W, "id", N<nc)
   show_str(io, S.name[1:N], w, W, "name", N<nc)
-  [show_str(io, [@sprintf("%.03f", S.loc[i][j]) for i=1:1:N], w, W, loc_str[j], N<nc) for j=1:1:5]
+  show_str(io, [@sprintf("%0.03f, %0.03f, %0.03f", S.loc[i][1], S.loc[i][2], S.loc[i][3]) for i = 1:1:N], w, W, "loc", N<nc)
   show_str(io, [@sprintf("%.04g", S.fs[i]) for i = 1:N], w, W, "fs", N<nc)
   show_str(io, [@sprintf("%.03e", S.gain[i]) for i = 1:N], w, W, "gain", N<nc)
   resp_str(io, S.resp[1:N], w, W, N<nc)
   show_str(io, S.units[1:N], w, W, "units",N<nc)
-  show_str(io, [string(length(S.misc[i]), " entries") for i = 1:1:N],w,W,"MISC",N<nc)
-  show_str(io, [string(length(S.notes[i]), " entries") for i = 1:1:N],w,W,"NOTES",N<nc)
   show_str(io, S.src[1:N], w, W, "src", N<nc)
+  show_str(io, [string(length(S.notes[i]), " entries") for i = 1:1:N],w,W,"NOTES",N<nc)
+  show_str(io, [string(length(S.misc[i]), " items") for i = 1:1:N],w,W,"MISC",N<nc)
   show_t(io, S.t[1:N], w, W, N<nc)
   show_x(io, S.x[1:N], w, W, N<nc)
   show_conn(io, S.c)
   return nothing
 end
+show(S::SeisData) = show(STDOUT, S)
 
 function show(io::IO, S::SeisChannel)
   loc_str = ["lat", "lon", "ele", "az", "inc"]
   W = max(80,displaysize(io)[2]-2)-os
-  w = 32
+  w = min(W, 36)
   D = Array{String,1}(25)
   nx = length(S.x)
   println(io, "SeisChannel with ", nx, " samples")
@@ -220,33 +209,29 @@ function show(io::IO, S::SeisChannel)
   show_str(io, [float_str(S.gain)], w, W, "gain", false)
   resp_str(io, [S.resp], w, W, false)
   show_str(io, [S.units], w, W, "units",false)
-  show_str(io, [string(length(S.misc), " entries")], w, W, "MISC", false)
-  show_str(io, [string(length(S.notes), " entries")], w, W, "NOTES", false)
   show_str(io, [S.src], w, W, "src", false)
+  show_str(io, [string(length(S.notes), " entries")], w, W, "NOTES", false)
+  show_str(io, [string(length(S.misc), " items")], w, W, "MISC", false)
   show_t(io, [S.t], w, W, false)
   show_x(io, [S.x], w, W, false)
   return nothing
 end
-show(S::SeisData) = show(STDOUT, S)
+show(S::SeisChannel) = show(STDOUT, S)
 
-magsum(mag::Tuple{Float32, Char, Char}) = string(mag[1], " (M_", String([mag[2], mag[3]]), ")")
-locsum(loc::Array{Float64,1}) = string(loc[1], "\U00B0\N, ", loc[2], "\U00B0\E, z=", loc[3], "km")
+magsum(mag::Tuple{Float32, Char, Char}) = string("M_", mag[2], mag[3], " ", mag[1])
+locsum(loc::Array{Float64,1}) = string(loc[1], "\U00B0\N, ", loc[2], "\U00B0\E, ", loc[3], "km")
 function show(io::IO, S::SeisHdr)
   W = max(80,displaysize(io)[2]-2)-os
-  println(io, "      ID: ", S.id)
-  println(io, "      OT: ", S.ot)
-  println(io, "     LOC: ", locsum(S.loc))
-  println(io, "     MAG: ", magsum(S.mag))
-  println(io, "     INT: ", S.int[1], " (", S.int[2], ")")
-  println(io, "      MT: ", S.mt[1:6], " (M\u2080=", S.mt[7], ", %DC=", S.mt[8], ")")
-  println(io, "     NP1: ", S.np[1])
-  println(io, "     NP2: ", S.np[2])
-  println(io, "    P-AX: ", S.pax[1])
-  println(io, "    T-AX: ", S.pax[2])
-  println(io, "    N-AX: ", S.pax[3])
-  println(io, "     SRC: ", String(str_trunc(S.src, W)))
-  println(io, "    MISC: ", length(S.misc), " entries")
-  println(io, "   NOTES: ", length(S.notes), " entries")
+  println(io, "    ID: ", S.id)
+  println(io, "    OT: ", S.ot)
+  println(io, "   LOC: ", locsum(S.loc))
+  println(io, "   MAG: ", magsum(S.mag), " (", S.int[2], " ", S.int[1], ")")
+  println(io, "    MT: ", S.mt[1:6], " (M\u2080=", S.mt[7], ", %DC=", S.mt[8], ")")
+  println(io, "    NP: ", S.np[1], ", ", S.np[2])
+  println(io, "  AXES: ", S.pax[1],", ", S.pax[2], ", ", S.pax[3])
+  println(io, "   SRC: ", String(str_trunc(S.src, W)))
+  println(io, " NOTES: ", length(S.notes), " entries")
+  println(io, "  MISC: ", length(S.misc), " items")
   return nothing
 end
 show(S::SeisHdr) = show(STDOUT, S)
@@ -254,13 +239,11 @@ show(S::SeisHdr) = show(STDOUT, S)
 function show(io::IO, S::SeisEvent)
   println(io, summary(S))
   println(io, "\n(.hdr)")
-  show(S.hdr)
+  show(io, S.hdr)
   println(io, "\n(.data)")
-  show(S.data)
+  println(io, "SeisIO.SeisData with ", S.data.n, " channels")
   return nothing
 end
 show(S::SeisEvent) = show(STDOUT, S)
 
 length(t::Union{SeisChannel,SeisEvent}) = summary(t)
-size(t::Union{SeisChannel,SeisEvent}) = summary(t)
-size(t::SeisHdr) = magsum(t) # lol

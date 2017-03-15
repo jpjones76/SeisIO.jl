@@ -1,30 +1,3 @@
-
-"""
-    merge!(S::SeisData)
-
-Merge all channels of S with redundant fields.
-"""
-function merge!(S::SeisData)
-  hs = headerhash(S)
-  k = falses(S.n)
-  m = falses(S.n)
-  for i = 1:1:S.n-1
-    for j = i+1:1:S.n
-      if isequal(hs[:,i], hs[:,j])
-        k[j] = true
-        if !m[j]
-          T = S[j]
-          merge!(S, T)
-          m[j] = true
-        end
-      end
-    end
-  end
-  any(k) && (delete!(S, find(k)))
-  return S
-end
-merge(S::SeisData) = (T = deepcopy(S); merge!(T); return(T))
-
 """
     purge!(S)
 
@@ -105,9 +78,9 @@ function pol_sort(S::SeisData;
     end
   end
 
-  T = SeisData()
+  T = SeisData(length(j))
   for i = 1:length(j)
-    T += S[j[i]]
+    T[i] = S[j[i]]
   end
   return T
 end
@@ -115,7 +88,7 @@ end
 """
     autotap!(S::SeisData)
 
-Data in `S.x` are de-meaned and cosine tapered around time gaps in `S.t`, then gaps are filled with zeros.
+Data in `S.x` are cosine tapered around time gaps in `S.t`, then gaps are filled with zeros.
 
 """
 function autotap!(U::SeisData)
@@ -125,57 +98,17 @@ function autotap!(U::SeisData)
   for i = 1:U.n
     (U.fs[i] == 0 || isempty(U.x[i])) && continue
     j = find(!isnan(U.x[i]))
-    mx = mean(U.x[i][j])
-    U.x[i][j] .-= mx
-
+    μ = mean(U.x[i][j])
     u = max(20, round(Int, 0.2*U.fs[i]))
 
     # Check for NaNs and window around them
-    autotuk!(U.x[i], find(!isnan(U.x[i])), u)
+    autotuk!(U.x[i], j, u)
 
-    # Replace NaNs with zeros
-    U.x[i][find(isnan(U.x[i]))] = 0.0
-    note!(U, i, "De-meaned, auto-tapered, and ungapped data; replaced all NaNs with zeros.")
+    # Then replace NaNs with the mean
+    U.x[i][isnan(U.x[i])] = μ
+    note!(U, i, "+p: tapered and ungapped data; replaced NaNs with mean of non-NaNs.")
   end
-  return U
-end
-
-"""
-    equalize_resp!(S::SeisData, resp_new::Array{Complex{T},2})
-
-Translate all data in S.x to instrument response resp_new. zeros are in resp[:,1], poles in resp[:,2]. If channel `i` has key `S.misc[i]["hc"]`, this is used as the critical damping constant, else a value of 1.0 is assumed.
-"""
-function equalize_resp!{T}(S::SeisData, resp_new::Array{Complex{T},2})
-  pp = 2.0*Float64(pi)
-  for i = 1:1:S.n
-    if haskey(S.misc[i],"hc")
-      h = S.misc[i]["hc"]
-    else
-      h = 1.0
-    end
-    X = S.x[i]
-    Nx = length(X)
-    N2 = nextpow2(Nx)
-    fs = S.fs[i]
-    f = [collect(0:N2/2); collect(-N2/2+1:-1)]*fs/N2
-
-    # Old instrument response
-    F0 = resp_f(S.resp[i], S.gain[i], h, f, fs) #hc_old*freqs(mkresp(S.resp[i], S.gain[i]), f, fs)
-
-    # New instrument response
-    F1 = resp_f(resp_new, 1.0, 1.0/sqrt(2), f, fs)
-
-    # FFT
-    xf = fft([X; zeros(T, N2-Nx)])
-    rf = F1.*conj(F0)./(F0.*conj(F0).+eps())
-
-    # Changes: x, resp, gain, misc["normfac"]
-    S.x[i] = real(ifft(xf.*rf))[1:Nx]
-    S.resp[i] = resp_new
-    S.gain[i] = 1.0
-    S.misc[i]["hc"] = 1.0
-  end
-  return S
+  return nothing
 end
 
 """
@@ -190,19 +123,14 @@ function autotap!(U::SeisChannel)
   ungap!(U, m=false, w=false)
 
   j = find(!isnan(U.x))
-  mx = mean(U.x[j])
-  u = round(Int, max(20,0.2*U.fs))
-
-  # remove mean
-  U.x[j] .-= mx
+  μ = mean(U.x[j])
+  u = max(20, round(Int, 0.2*U.fs))
 
   # Then check for NaNs
-  autotuk!(U.x, find(!isnan(U.x)), u)
+  autotuk!(U.x, j, u)
 
-  # Then replace NaNs with zeros
-  U.x[find(isnan(U.x))] = 0
-
-  # And note it
-  note!(U, "De-meaned, auto-tapered, and ungapped data; replaced all NaNs with zeros.")
-  return U
+  # Then replace NaNs with the mean
+  U.x[isnan(U.x)] = μ
+  note!(U, "+p: tapered and ungapped data; replaced NaNs with mean of non-NaNs.")
+  return nothing
 end

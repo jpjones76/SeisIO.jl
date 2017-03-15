@@ -1,5 +1,5 @@
-import Base:in, getindex, setindex!, append!, deleteat!, delete!, +, -, isequal,
-merge!, merge, length, start, done, next, size, sizeof, ==, isempty, sort!, sort
+import Base:in, getindex, setindex!, append!, deleteat!, delete!, +, -, *, isequal,
+length, start, done, next, size, sizeof, ==, isempty, sort!, sort, endof
 
 # This is type-stable for S = SeisData() but not for keyword args
 type SeisData
@@ -25,7 +25,6 @@ type SeisData
     notes = Array{Array{String,1},1}(n)
     src = Array{String,1}(n)
     misc = Array{Dict{String,Any},1}(n)
-    t = timestamp()
     n0 = tnote("Channel initialized")
     s0 = "SeisData"
     for i = 1:n
@@ -37,7 +36,7 @@ type SeisData
     new(n,
       Array{TCPSocket,1}(0),
       name,
-      collect(repeated("....",n)),
+      collect(repeated("...YYY",n)),
       collect(repeated(zeros(Float64,5),n)),
       collect(repeated(0.0,n)),
       collect(repeated(1.0,n)),
@@ -53,8 +52,8 @@ type SeisData
   function SeisData(U...)
     S = SeisData()
     for i = 1:1:length(U)
-      if isa(U[i],SeisData)
-        merge!(S, U[i])
+      if typeof(U[i]) in [SeisChannel,SeisData]
+        append!(S, U[i])
       else
         warn(string("Tried to join incompatible type into SeisData at arg ", i, "; skipped."))
       end
@@ -69,6 +68,7 @@ SeisData() = SeisData(0)
 # s = S[j] returns a SeisChannel struct
 # s = S[i:j] returns a SeisData struct
 # S[i:j].foo = bar won't work
+endof(S::SeisData) = S.n
 
 function getindex(S::SeisData, J::Array{Int,1})
   U = SeisData()
@@ -143,26 +143,46 @@ end
 note!(S::SeisData, i::Integer, s::String) = push!(S.notes[i], tnote(s))
 
 # ============================================================================
-# Append, delete, sort
+# Append, add, delete, sort
 append!(S::SeisData, U::SeisData)  = (
   [setfield!(S, i, append!(getfield(S,i), getfield(U,i))) for i in datafields];
   S.n += U.n;
   return S)
++(S::SeisData, U::SeisData) = (T = deepcopy(S); return append!(T, U))
 
 # Delete methods are aliased to -
 deleteat!(S::SeisData, j::Int)          = ([deleteat!(getfield(S, i),j) for i in datafields]; S.n -= 1; return S)
-deleteat!(S::SeisData, J::UnitRange)    = (collect(J); [deleteat!(S, j) for j in sort(J, rev=true)]; return S)
-deleteat!(S::SeisData, J::Array{Int,1}) = ([deleteat!(S, j) for j in sort(J, rev=true)]; return S)
+deleteat!(S::SeisData, J::Array{Int,1}) = (sort!(J); [deleteat!(getfield(S, f), J) for f in datafields]; S.n -= length(J))
+deleteat!(S::SeisData, K::UnitRange)    = (J = collect(K); deleteat!(S, J))
+
+# With this convention, S+U-U = S
+function deleteat!(S::SeisData, U::SeisData)
+  id = flipdim(U.id,1)
+  J = Array{Int64,1}(0)
+  for i in id
+    j = findlast(S.id.==i)
+    (j > 0) && push!(J,j)
+  end
+  deleteat!(S, J)
+  return nothing
+end
+
+# Delete by Regex match or exact ID match
+delete!(S::SeisData, r::Regex)          = deleteat!(S, find([ismatch(r, i) for i in S.id]))
+delete!(S::SeisData, s::String)         = (i = findlast(S.id.==s); (i > 0) && deleteat!(S, i))
+
+# Nothing more than aliasing, really
 delete!(S::SeisData, j::Int)            = deleteat!(S, j)
 delete!(S::SeisData, J::UnitRange)      = deleteat!(S, J)
 delete!(S::SeisData, J::Array{Int,1})   = deleteat!(S, J)
-delete!(S::SeisData, r::Regex)          = deleteat!(S, find([ismatch(r, i) for i in S.id]))
-delete!(S::SeisData, s::String)         = delete!(S, Regex(s))
--(S::SeisData, i::Int)                  = deleteat!(S,i)  # By channel #
--(S::SeisData, J::Array{Int,1})         = deleteat!(S,J)  # By array of channel #s
--(S::SeisData, J::Range)                = deleteat!(S,J)  # By range of channel #s
--(S::SeisData, s::String)               = delete!(S,s)    # By channel id string
--(S::SeisData, r::Regex)                = delete!(S,r)    # By channel id regex
+
+# Subtraction
+-(S::SeisData, i::Int)          = (U = deepcopy(S); deleteat!(U,i); return U)  # By channel #
+-(S::SeisData, J::Array{Int,1}) = (U = deepcopy(S); deleteat!(U,J); return U)  # By array of channel #s
+-(S::SeisData, J::Range)        = (U = deepcopy(S); deleteat!(U,J); return U)  # By range of channel #s
+-(S::SeisData, s::String)       = (U = deepcopy(S); delete!(U,s); return U)    # By channel id string
+-(S::SeisData, r::Regex)        = (U = deepcopy(S); delete!(U,r); return U)    # By channel id regex
+-(S::SeisData, T::SeisData)     = (U = deepcopy(S); delete!(U,T); return U)    # Remove all channels in one SeisData from another
 
 # Extract
 """
@@ -194,74 +214,3 @@ function sort!(S::SeisData; rev=false::Bool)
   return S
 end
 sort(S::SeisData; rev=false::Bool) = (T = deepcopy(S); j = sortperm(T.id, rev=rev); [setfield!(T,i,getfield(T,i)[j]) for i in datafields]; return(T))
-
-# ============================================================================
-# Merge and extract
-# Dealing with sparse time difference representations
-
-"""
-    merge!(S::SeisData, U::SeisData)
-
-Merge two SeisData structures. For timeseries data, a single-pass merge-and-prune operation is applied to value pairs whose sample times are separated by less than half the sampling interval; pairs of non-NaN x_i, x_j with |t_i-t_j| < (1/2*S.fs) are averaged.
-
-`merge!` always invokes `sort!` to ensure the "+" operator is commutative.
-"""
-function merge!(S::SeisData, U::SeisData)
-  J = Array{Int64,1}()
-  for j = 1:1:U.n
-    merged = false
-    for i = 1:1:S.n
-      if S.id[i] == U.id[j]
-        # Merge condition: same fs, neither empty
-        if S.fs[i] == U.fs[j] && !isempty(U.x[j]) && !isempty(S.x[i])
-          x = deepcopy(U.x[j])::Array{Float64,1}
-          if S.gain[i] != U.gain[j]
-            x = x.*(S.gain[i]/U.gain[j])
-          end
-          V = xtmerge(S.t[i], U.t[j], S.x[i], x, S.fs[i])
-          S.t[i] = deepcopy(V[1])
-          S.x[i] = deepcopy(V[2])
-          merge!(S.misc[i], U.misc[j])
-          S.notes[i] = Array{String,1}([S.notes[i]; U.notes[j]])
-          notestr = string("Merged ", length(x), " samples")
-          if S.name[i] != U.name[j]
-            notestr = string(notestr, " (pre-merge channel name was ",U.name[j],")")
-          end
-          note!(S, i, notestr)
-          merged = true
-
-        # Replace an empty S.x with the corresponding U.x
-        elseif isempty(S.x[i])
-          S.x[i]    = deepcopy(U.x[j])
-          S.t[i]    = deepcopy(U.t[j])
-          S.fs[i]   = copy(U.fs[j])
-          S.gain[i] = copy(U.gain[j])
-          merged = true
-
-        # Warn if U.x is empty, but do nothing else
-        elseif isempty(U.x[j])
-          warn(string("Trying to merge empty (dataless) channel ", U.id[j], "; ignored."))
-          merged = true
-
-        # Warn of possibly strange behavior with inequal fs
-        elseif S.fs[i] != U.fs[j]
-          warn(string("Tried to merge two of ", U.id[j], " with different fs values; the second will be appended."))
-        end
-        if !isempty(U.src[j])
-          note!(S, string("+src:", U.src[j]))
-        end
-      end
-    end
-    # If still unmerged at i=S.n, push index to J
-    if !merged
-      push!(J,j)
-    end
-  end
-  if !isempty(J)
-    append!(S, U[J])
-  end
-  return sort!(S)
-end
-
-merge(S::SeisData, U::SeisData) = (return merge!(deepcopy(S),U))
-+(S::SeisData, U::SeisData) = (return merge!(S,U))

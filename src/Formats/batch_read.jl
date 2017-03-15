@@ -96,7 +96,7 @@ function batch_read(files::Array{String,1}; ftype="SAC"::String, fs=0.0::Float64
   end
   return S
 end
-batch_read(filestr::String; ftype="SAC"::String, fs=0.0::Float64) = batch_read(lsw(filestr), ftype=ftype, fs=fs)
+batch_read(filestr::String; ftype="SAC"::String, fs=0.0::Float64) = batch_read(SeisIO.ls(filestr), ftype=ftype, fs=fs)
 
 # =============================================================================
 function segy_geth(j::Int64,

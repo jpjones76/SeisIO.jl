@@ -38,7 +38,8 @@ function parserec!(S::SeisData, sid::IO, swap::Bool, v::Int)
   (HH,MM,SS,unused)           = read(sid, UInt8, 4)
   (msec,nsamp)                = read(sid, UInt16, 2)
   (rateFac,rateMult)          = read(sid, Int16, 2)
-  (AFlag,IOFlag,DQFlag,NBlk)  = read(sid, UInt8, 4)
+  flags                       = read(sid, UInt8, 3)
+  NBlk                        = read(sid, UInt8)
   TimeCorrection              = read(sid, Int32)
   (OffsetBeginData,NBos)      = read(sid, UInt16, 2)
   SeqNo     = hdr[1:6]
@@ -62,8 +63,8 @@ function parserec!(S::SeisData, sid::IO, swap::Bool, v::Int)
     NBos             = bswap(NBos)
   end
 
-  TC = Float64(TimeCorrection) / 1.0e4
-  ms = Float64(msec) / 1.0e4
+  TC = flags[2] == 0x01 ? 0.0e0 : Float64(TimeCorrection) * 1.0e-4
+  ms = Float64(msec) * 1.0e-4
   RF = Float64(rateFac)
   RM = Float64(rateMult)
   nsamp = Int(nsamp)
@@ -84,10 +85,15 @@ function parserec!(S::SeisData, sid::IO, swap::Bool, v::Int)
   id = replace(join([seed_id[11:12], seed_id[1:5], seed_id[6:7], seed_id[8:10]], '.')," ","")
   channel = findfirst(S.id .== id)
   if channel == 0
-    S += SeisChannel(name=seed_id, id=id, fs=1.0/dt)
-    note!(S, S.n, "Channel initialized")
+    # S += SeisChannel(name=seed_id, id=id, fs=1.0/dt)
+    # channel = findfirst(S.id.==id)
+    push!(S, SeisChannel())
     channel = S.n
+    S.name[channel] = seed_id
+    S.id[channel] = id
+    S.fs[channel] = 1.0/dt
     te = 0
+    v > 1 && println(STDOUT, "Added channel: ", S.id[channel])
   else
     # I assume fs doesn't change within a SeisData structure
     te = sum(S.t[channel][:,2]) + round(Int, length(S.x[channel])*dt*sμ)
@@ -217,7 +223,7 @@ function parserec!(S::SeisData, sid::IO, swap::Bool, v::Int)
     S.t[channel] = Array{Int64,2}([1 dts; nsamp 0])
   else
     if v > 1
-      println(STDOUT, "Old end = ", te, ", New start = ", d2u(DateTime(yr, mo, dy, HH, MM, SS, 0)) + ms + TC, ", diff = ", dts, " μs")
+      println(STDOUT, "Old end = ", te, ", New start = ", round(Int, sμ*(d2u(DateTime(yr, mo, dy, HH, MM, SS, 0)) + ms + TC)), ", diff = ", dts, " μs")
     end
     S.t[channel] = S.t[channel][1:end-1,:]
     if dts > round(Int64, dt*sμ)
@@ -322,12 +328,12 @@ function parserec!(S::SeisData, sid::IO, swap::Bool, v::Int)
 
     # Check that we read correct # of samples
     if length(x) != nsamp
-      warn(string("RDMSEED: data integrity -- extracted ", length(x), " points, expected ", nsamp, "!"))
+      println(STDOUT, string("RDMSEED: data integrity -- extracted ", length(x), " points, expected ", nsamp, "!"))
     end
 
     # Check data values
     if abs(x[end] - xn) > eps()
-      warn(string("RDMSEED: data integrity -- steim", fmt-0x09, " sequence #", SeqNo, " integrity check failed, last_data=", x[end], ", should be xn=", xn))
+      println(STDOUT, string("RDMSEED: data integrity -- steim", fmt-0x09, " sequence #", SeqNo, " integrity check failed, last_data=", x[end], ", should be xn=", xn))
     end
   else
     error(@sprintf("Decoding for fmt = %i NYI!",fmt))
@@ -335,7 +341,12 @@ function parserec!(S::SeisData, sid::IO, swap::Bool, v::Int)
 
   # Append data
   append!(S.x[channel], x)
-  return S
+
+  # Delete padding
+  if S.t[channel][end,1] != length(S.x[channel])
+    resize!(S.x[channel], S.t[channel][end,1])
+  end
+  return nothing
 end
 
 function parsemseed!(S::SeisData, sid::IO, swap::Bool, v::Int)

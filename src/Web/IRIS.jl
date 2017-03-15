@@ -16,7 +16,7 @@ Retrieve data at times `t1 < t < t2` from the IRIS http server from channel `CHA
 * `S = irisws("CC.TIB..EHZ", t=(-600), fmt="mseed")`: Get the last 10 minutes of data from Cascade Volcano Observatory, Timberline Lodge, OR, US, in miniseed format.
 
 ### Notes
-* Traces are de-meaned and stage zero gains are removed, but instrument responses are otherwise unchanged.
+* Stage zero gains are removed from traces, but instrument responses are otherwise unchanged.
 * See IRISWS documentation at http://service.iris.edu/irisws/timeseries/1/
 
 """
@@ -26,27 +26,29 @@ function irisws(cha::String;
   s=0::Union{Real,DateTime,String},
   t=(-3600)::Union{Real,DateTime,String},
   v=0::Int,
-  to=10::Real)
+  to=30::Real)
 
   if fmt == "mseed"
     fmt = "miniseed"
   end
 
   d0, d1 = parsetimewin(s, t)
-  c = parse_chstr(cha)[1,:]
+  c = (parse_chstr(cha)[1,:])[1:min(end,4)]
   if isempty(c[3])
     c[3] = "--"
   end
 
 
   URLbase = "http://service.iris.edu/irisws/timeseries/1/query?"
-  URLtail = build_stream_query(c,d0,d1)*"&scale=AUTO&demean=true&output="*fmt
+  URLtail = build_stream_query(c,d0,d1)*"&scale=AUTO&output="*fmt
   url = string(URLbase,URLtail)
   v>0 && println(url)
   seis = SeisData()
   req = get(url, timeout=to, headers=webhdr())
   if req.status == 200
-    w && savereq(req.data, fmt, net, sta, loc, cha, d0, d1, "R", c=true)
+    if w
+      savereq(req.data, fmt, c[1], c[2], c[3], c[4], d0, d1, "R")
+    end
     if fmt == "sacbl"
       seis += read_sac_stream(IOBuffer(req.data))
       seis.src[1] = url
@@ -61,6 +63,12 @@ function irisws(cha::String;
       end
       seis = req.data
     end
+  else
+    warn("Request could not be completed! Text dump follows:")
+    println(STDOUT, String(req.data))
+    seis = SeisChannel()
+    c[3] = strip(c[3],'-')
+    setfield!(seis, :id, join(c, '.'))
   end
   return seis
 end
@@ -100,10 +108,10 @@ Get desynchronized trace data from IRIS http server with a 5-second timeout on H
 function IRISget(C::Array{String,1};
   s=0::Union{Real,DateTime,String},
   t=(-3600)::Union{Real,DateTime,String},
-  y=true::Bool,
+  y=false::Bool,
   v=0::Int,
   w=false::Bool,
-  to=10::Real)
+  to=30::Real)
 
   K = length(C)
   d0, d1 = parsetimewin(s, t)
@@ -117,11 +125,7 @@ function IRISget(C::Array{String,1};
   seis = SeisData()
   v>0 && println("IRIS web fetch begins...")
   for k = 1:1:K
-    try
-      seis += irisws(C[k], fmt="mseed", s=d0, t=d1, v=v, to=to, w=w)
-    catch
-      warn(@sprintf("Couldn't retrieve %s in specified time window (%s -- %s)!\n", C[k], d0, d1))
-    end
+    seis += irisws(C[k], fmt="mseed", s=d0, t=d1, v=v, to=to, w=w)
   end
   if y == true
     v>0 && println("Synchronizing data now...")
@@ -131,10 +135,10 @@ function IRISget(C::Array{String,1};
 end
 
 # C passed as a string
-IRISget(C::String; s=0::Union{Real,DateTime,String}, t=3600::Union{Real,DateTime,String}, y=true::Bool, v=0::Int, w=false::Bool, to=10::Real) = IRISget(map(String, split(C, ',')), s=s, t=t, y=y, v=v, w=w, to=to)
+IRISget(C::String; s=0::Union{Real,DateTime,String}, t=3600::Union{Real,DateTime,String}, y=false::Bool, v=0::Int, w=false::Bool, to=10::Real) = IRISget(map(String, split(C, ',')), s=s, t=t, y=y, v=v, w=w, to=to)
 
 # C passed as a 2d array
-IRISget(C::Array{String,2}; s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String},  y=true::Bool, v=false::Bool, w=false::Bool, to=10::Real) = IRISget([join(C[i,:],'.') for i = 1:size(C,1)], s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String}, y=true::Bool,  v=0::Int, w=false::Bool, to=10::Real)
+IRISget(C::Array{String,2}; s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String}, y=false::Bool, v=false::Bool, w=false::Bool, to=10::Real) = IRISget([join(C[i,:],'.') for i = 1:size(C,1)], s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String}, y=false::Bool,  v=0::Int, w=false::Bool, to=10::Real)
 
 
 """

@@ -119,7 +119,7 @@ Data Query Keywords
   q; 'R'; c; FD, IW; quality (uses standard `FDSN/IRIS codes <https://ds.iris.edu/ds/nodes/dmc/manuals/breq_fast/#quality-option>`_ [#]_ )
   r; 20; R; SL; refresh interval (s)
   s; 0; U(R,DT,S); All; start time
-  src; "IRIS"; S; FD,IW; :ref:`source institution<fdsn_src>`
+  src; "IRIS"; S; FD,IW; :ref:`source institution<FDSN_src>`
   x; false; B; SL; strict mode (exit on errors)
   t; 300 [#]_; U(R,D,S); All; end time
   to; 10; R; FD,IW; timeout (s)
@@ -137,7 +137,7 @@ Data Query Keywords
 .. [#] Default is ``t=-300`` for IRIS and FDSN, ``t=300`` for SeedLink; the sign difference arises because of differences in service scope.
 .. [#] If ``w=true``, a file name is automatically generated from the request parameters.
 
-.. _fdsn_src:
+.. _FDSN_src:
 
 ``src`` Options
 ===============
@@ -171,6 +171,6 @@ Event Query Keywords
   lon | A{F64,2}  | \[-180.0 180.0\]  | longitude range in degrees
   mag | A{F64,2}  | \[6.0 9.9\]       | magnitude range
   n   | Int       | 1                 | return N events with closest origin times
-  src | String    | \"IRIS\"          | :ref:`source institution<fdsn_src>`
+  src | String    | \"IRIS\"          | :ref:`source institution<FDSN_src>`
   w   | Int       | 86400             | search W seconds around T for events
   x   | Bool      | false             | treat T as exact to one second; overrides w

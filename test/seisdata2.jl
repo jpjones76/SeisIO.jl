@@ -112,11 +112,11 @@ println(STDOUT,"merge!, no common channels...")
 (S,T) = mktestseis()
 A=deepcopy(S[5])
 B=deepcopy(T[4])
-T+=S[1]
+T*=S[1]
 sizetest(T, 5)
 
 println(STDOUT,"merge!, one common channel...")
-S+=T[2]
+S*=T[2]
 sizetest(S, 5)
 
 println(STDOUT,"...time merge functionality...")
@@ -126,15 +126,16 @@ println(STDOUT,"...time merge functionality...")
 println(STDOUT,"merge!, common channels + seisdata splat...")
 (S,T) = mktestseis()
 U = SeisData(S,T)
+merge!(U)
 sizetest(U, 7)
 
 println(STDOUT,"merge! (two independent channels)...")
 println(STDOUT,"...w/no common channels...")
-U = S[1] + T[2]
+U = S[1] * T[2]
 sizetest(U, 2)
 
 println(STDOUT,"..two identical channel ids...")
-U = S[4] + T[3]
+U = S[4] * T[3]
 @assert(typeof(U)==SeisData)
 @assert(U.id[1]==S.id[4])
 @assert(U.id[1]==T.id[3])
@@ -142,15 +143,16 @@ U = S[4] + T[3]
 println(STDOUT,"pull...")
 C = pull(S,4)
 @assert(C.name=="Channel 4")
+@assert(S.n==4)
+@assert(findfirst(S.name.=="Channel 4")==0)
 
 println(STDOUT,"note!...")
 str1 = "ADGJALMGFLSFMGSLMFLChannel 5 sucks"
 str2 = "HIGH SNR ON THIS CHANNEL"
 note!(S,str2)
 note!(S,str1)
-
-@test_approx_eq(findfirst([maximum([contains(S.notes[i][j],str1) for j = 1:length(S.notes[i])]) for i = 1:S.n]), 4)
-@test_approx_eq(length(find([maximum([contains(S.notes[i][j],str2) for j = 1:length(S.notes[i])]) for i = 1:S.n])), S.n)
+@assert(findfirst([maximum([contains(S.notes[i][j],str1) for j = 1:length(S.notes[i])]) for i = 1:S.n])==4)
+@assert(length(find([maximum([contains(S.notes[i][j],str2) for j = 1:length(S.notes[i])]) for i = 1:S.n]))==S.n)
 
 # merge test: when we merge, does each field have exactly 7 entries?
 merge!(S,T)

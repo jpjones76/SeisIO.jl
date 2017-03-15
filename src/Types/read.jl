@@ -23,7 +23,7 @@ function read_string_array(io::IOStream)
   return S
 end
 
-findtype(c::UInt8, T::Array{Type,1}) = T[findfirst([sizeof(i)==2^c for i in T])]
+findtype(c::UInt8, N::Array{Int64,1}) = findfirst(N.==2^c)
 function code2typ(c::UInt8)
   t = Any::Type
   if c >= 0x80
@@ -31,11 +31,17 @@ function code2typ(c::UInt8)
   elseif c >= 0x40
     t = Complex{code2typ(c-0x40)}
   elseif c >= 0x30
-    t = findtype(c-0x2f, Array{Type,1}(subtypes(AbstractFloat)))
+    T = Array{Type,1}([BigFloat, Float16, Float32, Float64])
+    N = Int[24, 2, 4, 8]
+    t = T[findtype(c-0x2f, N)]
   elseif c >= 0x20
-    t = findtype(c-0x20, Array{Type,1}(subtypes(Signed)))
+    T = Array{Type,1}([Int128, Int16, Int32, Int64, Int8])
+    N = Int[16, 2, 4, 8, 1]
+    t = T[findtype(c-0x20, N)]
   elseif c >= 0x10
-    t = findtype(c-0x10, Array{Type,1}(subtypes(Unsigned)))
+    T = Array{Type,1}([UInt128, UInt16, UInt32, UInt64, UInt8])
+    N = Int[16, 2, 4, 8, 1]
+    t = T[findtype(c-0x10, N)]
   elseif c == 0x01
     t = String
   elseif c == 0x00
@@ -54,11 +60,10 @@ function read_misc(io::IOStream)
     ksep = Char(read(io, UInt8))
     kstr = String(read(io, UInt8, l))
     K = collect(split(kstr, ksep))
-    m=0
     for i in K
-      m+=1
-      T = code2typ(read(io, UInt8))
-      if T <: Array{String}
+      t = read(io, UInt8)
+      T = code2typ(t)
+      if t == 0x81
         D[i] = read_string_array(io)
       elseif T <: Array
         N = read(io, UInt8)
@@ -66,15 +71,13 @@ function read_misc(io::IOStream)
         t = eltype(T)
         if t <: Complex
           τ = eltype(real(t))
-          rr = read(io, τ, d)
-          ii = read(io, τ, d)
-          D[i] = rr + ii.*im
+          D[i] = complex(read(io, τ, d), read(io, τ, d))
         else
           D[i] = read(io, t, d)
         end
       elseif T == String
         n = read(io, Int64)
-        D[i] = join(String(read(io, UInt8, n)))
+        D[i] = String(read(io, UInt8, n))
       else
         D[i] = read(io, T)
       end
@@ -87,7 +90,7 @@ end
 # r_struct methods
 
 # SeisHdr
-function r_seishdr(io::IOStream)
+function rhdr(io::IOStream)
   H = SeisHdr()
   i64 = read(io, Int64, 5)
   m = read(io, Float32)
@@ -116,7 +119,8 @@ function r_seishdr(io::IOStream)
 end
 
 # SeisData, SeisChannel
-function r_seisdata(io::IOStream)
+function rdata(io::IOStream)
+  Base.gc_enable(false)
   N = convert(Int64, read(io, UInt32))
   S = SeisData(N)
   for i = 1:1:N
@@ -134,9 +138,7 @@ function r_seisdata(io::IOStream)
     # float arrays
     S.loc[i] = read(io, Float64, 5)
     if i64[2] > 0
-      rr = read(io, Float64, i64[2])
-      ri = read(io, Float64, i64[2])
-      S.resp[i] = reshape(complex(rr,ri), div(i64[2],2), 2)
+      S.resp[i] = reshape(complex(read(io, Float64, i64[2]), read(io, Float64, i64[2])), div(i64[2],2), 2)
     end
 
     # U8
@@ -148,68 +150,104 @@ function r_seisdata(io::IOStream)
     S.units[i]= String(read(io, UInt8, i64[3]))
     S.src[i]  = String(read(io, UInt8, i64[4]))
     S.name[i] = String(read(io, UInt8, i64[5]))
-    notes     = String(read(io, UInt8, i64[6]))
-    xz         = read(io, UInt8, i64[7])
-    S.misc[i] = read_misc(io)
-
-    # Postprocessing
-    Y = code2typ(y)
-    S.x[i] = Array{Y,1}(i64[8])
-    Blosc.decompress!(S.x[i], xz)
-    if length(notes) > 0
-      S.notes[i] = [String(j) for j in split(String(notes),Char(c))]
+    if i64[6] > 0
+      S.notes[i] = map(String, split(String(read(io, UInt8, i64[6])), Char(c)))
     else
-      S.notes[i] = Array{String,1}()
+      S.notes[i] = Array{String,1}([""])
     end
+    if y == 0x32
+      S.x[i]  = Blosc.decompress(Float64, read(io, UInt8, i64[7]))
+    elseif y == 0x31
+      S.x[i]  = Blosc.decompress(Float32, read(io, UInt8, i64[7]))
+    else
+      S.x[i]  = Blosc.decompress(code2typ(y), read(io, UInt8, i64[7]))
+    end
+    S.misc[i] = read_misc(io)
   end
+  Base.gc_enable(true)
   return S
 end
 
-r_seisevt(io::IOStream) = (
+revent(io::IOStream) = (
   S = SeisEvent();
-  setfield!(S, :hdr, r_seishdr(io));
-  setfield!(S, :data, r_seisdata(io));
+  setfield!(S, :hdr, rhdr(io));
+  setfield!(S, :data, rdata(io));
   return S
   )
 
 
 """
-    rseis(FNAME::String)
+    rseis(fstr::String)
 
-Read SeisIO file FNAME.
+Read SeisIO files matching file string ``fstr`` into memory.
 
 """
-function rseis(fname::String; v=false::Bool)
-  io = open(fname, "r")
-  c = String(read(io, UInt8, 6))
-  c == "SEISIO" || (close(io); error("Not a SeisIO file!"))
-  ver = read(io, Float32)
-  jv = read(io, Float32)
-  L = read(io, Int64)
-  T = String(read(io, UInt8, L))
-  V = read(io, UInt64, L)
-  A = Array{Union{SeisData,SeisChannel,SeisHdr,SeisEvent},1}()
-  if v
-    @printf(STDOUT, "Reading %i total objects from file %s.\n", L, fname)
-  end
-  for i = 1:1:L
-    if T[i] == 'D'
-      S = r_seisdata(io)
-    elseif T[i] == 'H'
-      S = r_seishdr(io)
-    elseif T[i] == 'E'
-      S = r_seisevt(io)
-    end
-    if v
-      if i == L
-        ei = position(io)
+function rseis(files::Array{String,1}; v=0::Int)
+  A = Array{Any,1}(0)
+
+  for f in files
+    io = open(f, "r")
+    (String(read(io, UInt8, 6)) == "SEISIO") || (close(io); error("Not a SeisIO file!"))
+    r = read(io, Float32)
+    j = read(io, Float32)
+    L = read(io, Int64)
+    C = read(io, UInt8, L)
+    B = read(io, UInt64, L)
+    (v > 0) && @printf(STDOUT, "Reading %i total objects from file %s.\n", L, f)
+    for i = 1:1:L
+      if C[i] == 0x48
+        push!(A, rhdr(io))
+      elseif C[i] == 0x45
+        push!(A, revent(io))
       else
-        ei = V[i+1]
+        push!(A, rdata(io))
       end
-      @printf(STDOUT, "Read type %s object, bytes %i:%i.\n", typeof(S), V[i], ei)
+      (v > 0) && @printf(STDOUT, "Read %s object from %s, bytes %i:%i.\n", typeof(A[end]), f, B[i], ((i == L) ? position(io) : B[i+1]))
     end
-    push!(A, S)
+    close(io)
   end
-  close(io)
   return A
 end
+rseis(fstr::String; v=0::Int) = rseis(ls(fstr), v=v)
+
+"""
+    rseis(fstr::String)
+
+Read SeisIO files matching file string ``fstr`` into memory.
+
+"""
+function rseis(files::Array{String,1}, c::Array{Int,1}; v=0::Int)
+  A = Array{Any,1}(0)
+
+  for f in files
+    io = open(f, "r")
+    (String(read(io, UInt8, 6)) == "SEISIO") || (close(io); error("Not a SeisIO file!"))
+    r = read(io, Float32)
+    j = read(io, Float32)
+    L = read(io, Int64)
+    C = read(io, UInt8, L)
+    B = read(io, UInt64, L)
+    (v > 0) && @printf(STDOUT, "Reading %i total objects from file %s.\n", L, f)
+    for k = 1:1:length(c)
+      if c[k] > length(L)
+        warn(string("Skipped file=", f, ", k=", c[k], " (no such record \#)"))
+        continue
+      else
+        i = c[k]
+        seek(io, B[i])
+        if C[i] == 0x48
+          push!(A, rhdr(io))
+        elseif C[i] == 0x45
+          push!(A, revent(io))
+        else
+          push!(A, rdata(io))
+        end
+        (v > 0) && @printf(STDOUT, "Read %s object from %s, bytes %i:%i.\n", typeof(A[end]), f, B[i], ((i == L) ? position(io) : B[i+1]))
+      end
+    end
+    close(io)
+  end
+  return A
+end
+rseis(fstr::Array{String,1}, c::Int; v=0::Int) = rseis(fstr, Int[c], v=v)
+rseis(fstr::String, c::Int; v=0::Int) = rseis(ls(fstr), Int[c], v=v)

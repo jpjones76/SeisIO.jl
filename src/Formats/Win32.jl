@@ -53,7 +53,7 @@ Read all win32 files matching pattern `filestr` into SeisData object `S`, with c
 function readwin32(filestr::String, cf::String; v=0::Int)
   Chans = readlines(cf)
   seis = Dict{String,Any}()
-  files = lsw(filestr)
+  files = SeisIO.ls(filestr)
   nf = 0
   for fname in files
     v>0 && println("Processing ", fname)

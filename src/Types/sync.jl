@@ -8,7 +8,7 @@ function ungap!(S::SeisChannel; m=true::Bool, w=true::Bool)
   N = size(S.t,1)-2
   (N ≤ 0 || S.fs == 0) && return S
   gapfill!(S.x, S.t, S.fs, m=m, w=w)
-  note!(S, @sprintf("Filled %i gaps (sum = %i microseconds)", N, sum(S.t[2:end-1,2])))
+  note!(S, @sprintf("+p: filled %i gaps (sum = %i microseconds)", N, sum(S.t[2:end-1,2])))
   S.t = [reshape(S.t[1,:],1,2); [length(S.x) 0]]
   return S
 end
@@ -17,7 +17,7 @@ function ungap!(S::SeisData; m=true::Bool, w=true::Bool)
     N = size(S.t[i],1)-2
     (N ≤ 0 || S.fs[i] == 0) && continue
     gapfill!(S.x[i], S.t[i], S.fs[i], m=m, w=w)
-    note!(S, i, @sprintf("Filled %i gaps (sum = %i microseconds)", N, sum(S.t[i][2:end-1,2])))
+    note!(S, i, @sprintf("+p: filled %i gaps (sum = %i microseconds)", N, sum(S.t[i][2:end-1,2])))
     S.t[i] = [reshape(S.t[i][1,:],1,2); [length(S.x[i]) 0]]
   end
   return S
@@ -59,24 +59,22 @@ Start time can be synchronized to a variety of values:
 """
 function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
   s="max"::Union{String,DateTime}, t="max"::Union{String,DateTime},
-  v=false::Bool)
+  v=false::Bool, z=true::Bool)
 
-  for i = 1:S.n
-    S.x[i] -= mean(S.x[i])
-  end
-  ungap!(S, m=false, w=false)
-  autotap!(S)
+  # PREPROCESS
+  z && deleteat!(S, find([isempty(S.x[i]) for i =1:1:S.n])) # delete (zap) empty channels
+  ungap!(S, m=false, w=false)                               # ungap
 
   # Resample
   if resample && S.n > 1
     f0 = fs == 0 ? minimum(S.fs[S.fs .> 0]) : fs
-    N = floor(Int64, f0*(t_end-t_start)*μs)-1
+    N = floor(Int64, f0*(t_end-t_start)*SeisIO.μs)-1
     for i = 1:S.n
       S.fs[i] == 0 && continue
       isapprox(S.fs[i],f0) && continue
       S.x[i] = resample(S.x[i], f0/S.fs[i])
       S.fs[i] = f0
-      note!(S, i, @sprintf("Resampled to %.1f", f0))
+      note!(S, i, @sprintf("+p resampled from %.1f Hz to %.1f Hz.", f1, f0))
     end
   end
 
@@ -95,64 +93,54 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
   k = find((S.fs .> 0).*[!isempty(S.x[i]) for i=1:S.n])
   for i in k
     start_times[i] = S.t[i][1,2]
-    end_times[i] = start_times[i] + round(Int, length(S.x[i])/(μs*S.fs[i]))
+    end_times[i] = start_times[i] + round(Int, (length(S.x[i])-1)/(SeisIO.μs*S.fs[i]))
   end
   # Do not edit order of operations -------------------------------------------
 
   # Start and end times
-  t_start = get_sync_t(s, start_times, k)
-  t_end = get_sync_t(t, end_times, k)
+  t_start = SeisIO.get_sync_t(s, start_times, k)
+  t_end = SeisIO.get_sync_t(t, end_times, k)
   t_end <= t_start && error("No time overlap with given start \& end times!")
   if v
-    @printf(STDOUT, "Synching %.2f seconds of data\n", (t_end - t_start)*μs)
+    @printf(STDOUT, "Synching %.2f seconds of data\n", (t_end - t_start)*SeisIO.μs)
     println("t_start = ", t_start, " μs from epoch")
     println("t_end = ", t_end, " μs from epoch")
   end
-  sstr = string(Dates.unix2datetime(t_start*μs))
-  tstr = string(Dates.unix2datetime(t_end*μs))
+  sstr = string(Dates.unix2datetime(t_start*SeisIO.μs))
+  tstr = string(Dates.unix2datetime(t_end*SeisIO.μs))
 
   # Loop over non-timeseries data
   for i in c
     t = cumsum(S.t[i][:,2])
-    j = find(t_start .< t .< t_end)
+    j = find(t_start .≤ t .< t_end)
     S.x[i] = S.x[i][j]
     if isempty(j)
       S.t[i] = Array{Int64,2}()
-      note!(S, i, @sprintf("Channel emptied; no samples in range %s--%s.", sstr, tstr))
+      note!(S, i, @sprintf("+p: channel emptied; no samples in range %s--%s.", sstr, tstr))
     else
       t = t[j]
       t = [t[1]; diff(t)]
       S.t[i] = reshape(t,length(t),1)
-      note!(S, i, @sprintf("Samples outside range %s--%s pulled.", sstr, tstr))
+      note!(S, i, @sprintf("+p: samples outside range %s--%s pulled.", sstr, tstr))
     end
   end
 
-  # Timeserires data
-  # PRE LOOP: fill empty items
-  for i = 1:S.n
-    if length(S.x[i]) == 0 && S.fs[i] > 0
-      S.x[i] = zeros(1 + round(Int, S.fs[i]*(t_end-t_start)*μs))
-      S.t[i] = [1 t_start; length(S.x[i]) t_end]
-      note!(S, i, "Replaced empty data array with zeros.")
-    end
-  end
-
-  # FIRST LOOP: START TIMES.
+  # Synchronization loop
   for i in k
-    fμs = S.fs[i]*μs
+    fμs = S.fs[i]*SeisIO.μs
     dt = round(Int, 1/fμs)
     mx = mean(S.x[i])
 
     # truncate X to values within bounds
-    t = t_expand(S.t[i], S.fs[i])
-    j = find(t_start .< t .< t_end)
+    t = SeisIO.t_expand(S.t[i], S.fs[i])
+    j = find(t_start .≤ t .< t_end)
     S.x[i] = S.x[i][j]
 
     # prepend points to time series data that begin late
     if (start_times[i] - t_start) >= dt
       ni = round(Int, (start_times[i]-t_start)*fμs)
       prepend!(S.x[i], collect(repeated(mx, ni)))
-      note!(S, i, join(["Prepended ", ni, " values."]))
+      note!(S, i, join(["+p: prepended ", ni, " values."]))
     end
     end_times[i] = t_start + round(Int, length(S.x[i])/fμs)
 
@@ -160,10 +148,10 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
     if (t_end - end_times[i]) >= dt
       ii = round(Int, (t_end-end_times[i])*fμs)
       append!(S.x[i], collect(repeated(mx, ii)))
-      note!(S, i, join(["Appended ", ii, " values."]))
+      note!(S, i, join(["+p: appended ", ii, " values."]))
     end
     S.t[i] = [1 t_start; length(S.x[i]) 0]
-    note!(S, i, "Synched to "*sstr*" -- "*tstr)
+    note!(S, i, "+p: synched to "*sstr*" -- "*tstr)
   end
   return S
 end

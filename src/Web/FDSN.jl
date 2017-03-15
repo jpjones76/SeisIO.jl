@@ -177,7 +177,7 @@ function FDSNget(C::Array{String,2};
   t=(-300)::Union{Real,DateTime,String},
   v=0::Int,
   w=false::Bool,
-  y=true::Bool,
+  y=false::Bool,
   si=true::Bool,
   to=10::Real)
 
@@ -236,7 +236,7 @@ FDSNget(S::String;
   t=600::Union{Real,DateTime,String},
   v=0::Int,
   w=false::Bool,
-  y=true::Bool,
+  y=false::Bool,
   si=true::Bool,
   to=10::Real) = FDSNget(parse_chstr(S, fdsn=true), src=src, q=q, s=s, t=t, v=v, w=w, y=y, si=si, to=to)
 
@@ -247,7 +247,7 @@ FDSNget(S::Array{String,1};
   t=600::Union{Real,DateTime,String},
   v=0::Int,
   w=false::Bool,
-  y=true::Bool,
+  y=false::Bool,
   si=true::Bool,
   to=10::Real) = FDSNget(parse_charr(S, fdsn=true), src=src, q=q, s=s, t=t, v=v, w=w, y=y, si=si, to=to)
 
@@ -364,7 +364,7 @@ function FDSNsta(CC::Array{String,2};
     v > 0 && println(STDOUT, "Retrieving station data from URL = ", sta_url)
     R = get(sta_url, timeout=to, headers=webhdr())
     if R.status == 200
-      ch_data = readall(R)
+      ch_data = readstring(R)
       v > 0 && println(STDOUT, ch_data)
       ch_data = split(ch_data,"\n")
       for n = 2:1:size(ch_data,1)-1

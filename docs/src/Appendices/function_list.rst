@@ -55,7 +55,7 @@ Retrieve SeedLink information at level ``v`` from ``url``. Returns XML as a stri
 
 .. function:: autotap!(S)
 
-De-mean ``S.x`` and cosine tapered around time gaps in ``S.t``, then fill time gaps with zeros.
+Cosine taper each channel in S around time gaps, then fill time gaps with the mean of non-NaN data points.
 
 .. function:: S = batch_read(fstr)
 
@@ -73,9 +73,11 @@ Alias to ``Dates.datetime2unix``.
 
 Fill ``T`` with great-circle distance, azimuth, and back-azimuth for each channel. Writes to ``evt.data.misc``.
 
-.. function:: equalize_resp!(S, resp_new)
+.. function:: equalize_resp!(S, resp_new::Array, hc_new=HC, C=CH)
 
-Translate all data in SeisData structure ``S`` to instrument response ``resp_new``. Expected structure of ``resp_new`` is a complex two-column matrix with zeros in ``resp[:,1]``, poles in ``resp[:,2]``. If channel ``i`` has key ``S.misc[i]["hc"]``, the corresponding value is used as the critical damping constant; otherwise a value of 1.0 is assumed.
+Translate all data in SeisData structure ``S`` to instrument response ``resp_new``. Expected structure of ``resp_new`` is a complex Float64 2d array with zeros in ``resp[:,1]``, poles in ``resp[:,2]``. If channel ``i`` has key ``S.misc[i]["hc"]``, the corresponding value is used as the critical damping constant; otherwise a value of 1.0 is assumed.
+
+Keyword ``hc_new`` specifies the new critical damping constant. Keyword ``C`` specifies an array of channel numbers on which to operate; by default, every channel with fs > 0.0 is affected.
 
 .. function:: resp = fctopz(fc)
 
