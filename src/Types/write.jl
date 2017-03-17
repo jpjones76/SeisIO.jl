@@ -312,8 +312,12 @@ function wseis(S...; sf=false::Bool, path="./"::String, pref=""::String, name=""
         f0 = isempty(pref) ? autoname(getfield(seis,:t)) : pref
         C = UInt8['D']
         ID = join(seis.id,'\0').data
-        TS = vcat([seis.t[j][1,2] for j=1:1:seis.n]...)
-        TE = TS .+ vcat([seis.t[j][2:end,2] for j=1:1:seis.n]...) .+ map(Int64, round(1.0e6.*[length(seis.x[j]) for j=1:1:seis.n]./seis.fs))
+        TS = Array{Int64,1}(seis.n)
+        TE = Array{Int64,1seis.n}()
+        for j = 1:1:seis.n
+          TS[j] = seis.t[j][1,2]
+          TE[j] = TS[j] + sum(seis.t[j][2:end,2]) + round(Int64, 1.0e6*length(seis.x[j])/seis.fs[j])
+        end
 
       elseif typeof(seis) == SeisHdr
         f0 = isempty(pref) ? autoname(getfield(seis),:ot) : pref
@@ -326,9 +330,12 @@ function wseis(S...; sf=false::Bool, path="./"::String, pref=""::String, name=""
         f0 = isempty(pref) ? (d2u(seis.hdr.ot) == 0.0 ? autoname(getfield(getfield(seis,:data),:t)) : autoname(getfield(getfield(seis,:hdr),:ot))) : pref
         C = UInt8['E']
         ID = join(seis.data.id,'\0').data
-        TS = vcat([seis.data.t[j][1,2] for j=1:1:seis.data.n]...)
-        TE = TS .+ vcat([seis.data.t[j][2:end,2] for j=1:1:seis.data.n]...) .+ map(Int64, round(1.0e6.*[length(seis.data.x[j]) for j=1:1:seis.data.n]./seis.data.fs))
-
+        TS = Array{Int64,1}(seis.n)
+        TE = Array{Int64,1seis.n}()
+        for j = 1:1:seis.n
+          TS[j] = seis.data.t[j][1,2]
+          TE[j] = TS[j] + sum(seis.data.t[j][2:end,2]) + round(Int64, 1.0e6*length(seis.data.x[j])/seis.data.fs[j])
+        end
       end
       io = open(path*"/"*join([f0, n0, suff],'.'), "w")
       write(io, "SEISIO".data)
