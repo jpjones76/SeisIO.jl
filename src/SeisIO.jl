@@ -26,7 +26,7 @@ gcdist, getbandcode, ls,                                      # Utils/
 fctopz, translate_resp, equalize_resp!,                       # Utils/resp.jl
 d2u, j2md, md2j, parsetimewin, timestamp, u2d,                # Utils/time.jl
 distaz!,                                                      # Misc/event_misc.jl
-autotap!, namestrip!, pol_sort, purge!,                       # Misc/processing.jl
+autotap!, namestrip!, purge!,                                 # Misc/processing.jl
 randseischannel, randseisdata, randseisevent, randseishdr     # Misc/randseis.jl
 
 # Everything depends on time.jl, which calls SeisIO.ls

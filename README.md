@@ -5,6 +5,16 @@ A minimalist, platform-agnostic package for working with univariate geophysical 
 http://seisio.readthedocs.org
 
 # CHANGELOG
+## Current
+* Moved pol_sort to the Polarization project.
+* SeisIO data files now include searchable indices at the end of each file.
+  + This change is backwards-compatible and won't affect the ability to read existing files.
+  + A file index contains the following information, written in this order:
+    - (length = ∑\_j∑\_i length(S.id[i])\_i) IDs for each trace in each object
+    - (length = 3∑\_j S.n\_j) start and end times and byte indices of each trace in each object. (time unit = integer μs from Unix epoch)
+    - Byte index to start of IDs.
+    - Byte index to start of Ints.
+
 ## 2017-03-15
 * SeisData merge has been rewritten for greater functionality.
   + Merge speed improved by orders of magnitude for multiple SeisData objects
@@ -28,9 +38,6 @@ http://seisio.readthedocs.org
 * Single-object files can now be written by specifying `sf=true` when calling wseis. By default, single-object file names use IRIS-style naming conventions.
 * Promoted the Polarization submodule to a separate GitHub project.
 * Minor bugfixes: randseischannel, randseisdata, randseisevent, autotap!, IRISget, SeisIO.parserec!, SeisIO.ls, SeisIO,autotuk!
-* *In progress*: SeisIO data files will soon include searchable indices at the end of each file.
-  + This change is backwards-compatible and won't affect the ability to read existing files.
-  + The file index will store trace IDs of each SeisIO object written, start times, end times, and byte indices.
 
 ## 2017-01-31
 * Documentation was completely rewritten.

@@ -97,18 +97,7 @@ If ``i`` is a string, extract the first channel from ``S`` with ``id=i`` and ret
 Remove all empty channels from ``S``. Empty channels are defined as the set of all channel indices ``i`` s.t. ``isempty(S.x[i]) = true``.
 
 
-Search, Sort
-=============
-.. function:: sort!(S, rev=false)
-
-In-place sort of channels in SeisData struct ``S`` by S.id. Specify ``rev=true`` to reverse the sort order.
-
-.. function:: i = findid(S, C)
-
-Return the index of the first channel in ``S`` with id matching ``C``. If ``C`` is a string, ``findid`` is equivalent to ``findfirst(S.id.==C)``; if ``C`` is a SeisChannel, ``findid`` is equivalent to ``findfirst(S.id.==C.id)``.
-
-
-Save, Load
+Read, Write
 ==========
 .. function:: rsac(fname::String)
 
@@ -129,6 +118,19 @@ Specify ``ts=true`` to write time stamps. Time stamped SAC files created by Seis
   :noindex:
 
 Write SeisIO data from S to ``fname``. Supports splat expansion for writing multiple objects, e.g. ``wseis(fname, S, T, U)`` writes ``S``, ``T``, and ``U`` to ``fname``.
+
+To write arrays of SeisIO objects to file, use "splat" notation: for example, for an array ``A`` of type ``Array{SeisEvent,1}``, use syntax ``wseis(fname, A...)``.
+
+
+Search, Sort
+=============
+.. function:: sort!(S, rev=false)
+
+In-place sort of channels in SeisData struct ``S`` by S.id. Specify ``rev=true`` to reverse the sort order.
+
+.. function:: i = findid(S, C)
+
+Return the index of the first channel in ``S`` with id matching ``C``. If ``C`` is a string, ``findid`` is equivalent to ``findfirst(S.id.==C)``; if ``C`` is a SeisChannel, ``findid`` is equivalent to ``findfirst(S.id.==C.id)``.
 
 
 Miscellaneous
