@@ -77,7 +77,7 @@ function FDSN_sta_xml(string_data::String)
   ID    = Array{String,1}(N)
   NAME  = Array{String,1}(N)
   LOC   = Array{Array{Float64,1}}(N)
-  UNITS = collect(repeated("unknown",N))
+  UNITS = collect(Main.Base.Iterators.repeated("unknown",N))
   GAIN  = Array{Float64,1}(N)
   RESP  = Array{Array{Complex{Float64},2}}(N)
   MISC  = Array{Dict{String,Any}}(N)
@@ -198,7 +198,7 @@ function FDSNget(C::Array{String,2};
       S = parsemseed(IOBuffer(R.data), false, v)
 
       # Detailed source logging
-      S.src = collect(repeated(data_url, S.n))
+      S.src = collect(Main.Base.Iterators.repeated(data_url, S.n))
 
       # Automatically incorporate station information from web XML retrieval
       if si
@@ -334,7 +334,7 @@ function FDSNevq(ts::String;
   if isempty(ot)
     return catalog
   else
-    k = sortperm(abs(ot.-tsi))
+    k = sortperm(abs.(ot.-tsi))
     n0 = min(length(k),n)
     n0 < n && warn(string("Catalog only contains ", n0, " events (original request was n=", n,")"))
     return catalog[k[1:n0]]

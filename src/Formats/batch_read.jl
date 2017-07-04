@@ -22,13 +22,13 @@ function batch_read(files::Array{String,1}; ftype="SAC"::String, fs=0.0::Float64
   NF = length(files)
 
   # Parallelize file info read into shared arrays
-  ts = SharedArray(Int64, (NF,))
-  nx = SharedArray(Int32, (NF,))
-  rr = SharedArray(Float32, (NF,))
-  gain = SharedArray(Float32, (NF,))
+  ts = SharedArray{Int64,1}(NF)
+  nx = SharedArray{Int32,1}(NF)
+  rr = SharedArray{Float32,1}(NF)
+  gain = SharedArray{Float32,1}(NF)
 
   if ftype == "SAC"
-    fmt = Array{Type,1}(collect(repeated(Float32, NF)))
+    fmt = Array{Type,1}(collect(Main.Base.Iterators.repeated(Float32, NF)))
     id = getsach(files, ts, nx, gain, rr)
     os = 632
   elseif ftype == "PASSCAL"
@@ -44,18 +44,18 @@ function batch_read(files::Array{String,1}; ftype="SAC"::String, fs=0.0::Float64
     dt = Float64(1/fs)
   end
   DT = round(Int, dt*1.0e6)
-  OS = Array{Int64,1}(collect(repeated(os, NF)))
-  NN = ceil(Int, nx.*rr./dt)
+  OS = Array{Int64,1}(collect(Main.Base.Iterators.repeated(os, NF)))
+  NN = ceil.(Int, nx.*rr./dt)
   ei = cumsum(NN)
   si = convert(SharedArray{Int64,1}, [0; ei[1:end-1]])
   ll = ei[end]
 
   # Shared arrays
-  xx = SharedArray(Float64, (ll,))
-  tt = SharedArray(Int64, (ll,))
+  xx = SharedArray{Float64,1}(ll)
+  tt = SharedArray{Int64,1}(ll)
 
   # Parallel read into shared array
-  rr = convert(SharedArray{Float64,1}, map(Int64, rr.*1.0e6) ./ DT)
+  rr = convert(SharedArray{Float64,1}, round.(Int64, rr.*1.0e6) ./ DT)
   par_read(files, nx, rr, si, fmt, gain, ts, DT, os, tt, xx)
 
   # loop over each unique ID
@@ -89,7 +89,7 @@ function batch_read(files::Array{String,1}; ftype="SAC"::String, fs=0.0::Float64
     end
 
     # Rearrange and prune T, X
-    xtjoin!(x1, t1, div(DT, 2))
+    xtmerge!(t1, x1, div(DT, 2))
 
     # Reassign, collapse to sparse, done.
     S += SeisChannel(id=u, name=u, t=t_collapse(t1, fs), x=x1, src=ftype, fs=fs)
@@ -203,7 +203,7 @@ function read_bat(j::Int64, fname::String, DT::Int64, os::Int64,
     lx = length(x)
     i = si[j]
     xx[i+1:i+lx] = x
-    tt[i+1:i+lx] = cumsum([ts[j]; collect(repeated(DT, lx-1))])
+    tt[i+1:i+lx] = cumsum([ts[j]; collect(Main.Base.Iterators.repeated(DT, lx-1))])
     return
   end
 

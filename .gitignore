@@ -3,3 +3,6 @@
 *.jl.mem
 internal_tests/
 dev/
+devel/
+deprecated/
+test_0.5/

@@ -6,11 +6,11 @@ showtail(io::IO, b::Bool) = b ? "..." : ""
 float_str(x::Float64) = @sprintf("%.3e", x)
 
 function str_trunc(str::String, w::Integer)
-  d = str.data
+  d = Vector{UInt8}(str)
   L = length(d)
   if L > w
     s3 = d[1:w-4]
-    d = String([s3; "...".data]).data
+    d = Vector{UInt8}(String([s3; Vector{UInt8}("...")]))
   else
     d = d[1:min(w,L)]
   end
@@ -19,8 +19,8 @@ end
 
 function str_head(s::String, W::Int)
   sd = ones(UInt8, W)*0x20
-  sd[os-1-length(s):os-2] = uppercase(s).data
-  sd[os-1:os] = ": ".data
+  sd[os-1-length(s):os-2] = Vector{UInt8}(uppercase(s))
+  sd[os-1:os] = Vector{UInt8}(": ")
   return sd
 end
 
@@ -59,8 +59,8 @@ function show_t(io::IO, T::Array{Array{Int64,2},1}, w::Int, W::Int, b::Bool)
     else
       s = timestamp(T[i][1,2])
     end
-    sd1[p+1:p+length(s)] = s.data
-    ng = string("(", ngaps(T[i]), " gaps)").data
+    sd1[p+1:p+length(s)] = Vector{UInt8}(s)
+    ng = Vector{UInt8}(string("(", ngaps(T[i]), " gaps)"))
     sd1[p+2+length(s):p+1+length(s)+length(ng)] = ng
     p += w
   end
@@ -71,14 +71,14 @@ end
 function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, b::Bool)
   N = length(X)
   str = zeros(UInt8, W, 6)
-  str[os-2:os,1] = "X: ".data
+  str[os-2:os,1] = Vector{UInt8}("X: ")
   p = os
   i = 1
   while p < W && i <= N
     L = length(X[i])
     Lx = string("(nx = ", L, ")")
     if isempty(X[i])
-      str[p+1:p+7,1] = "(empty)".data
+      str[p+1:p+7,1] = Vector{UInt8}("(empty)")
     else
       for k = 1:1:min(6,L+2)
         if k <= length(X[i])
@@ -90,7 +90,7 @@ function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, b::Bool)
         if k == min(6, length(X[i])+2)
           s = Lx
         end
-        str[p+1:p+length(s.data),k] = s.data
+        str[p+1:p+length(Vector{UInt8}(s)),k] = Vector{UInt8}(s)
       end
     end
     p += w
@@ -109,7 +109,7 @@ end
 function resp_str(io::IO, X::Array{Array{Complex{Float64},2},1}, w::Int, W::Int, b::Bool)
   N = length(X)
   sd = zeros(UInt8, W, 2)
-  sd[os-5:os-1,1] = "RESP:".data
+  sd[os-5:os-1,1] = Vector{UInt8}("RESP:")
   p = os
   i = 1
   while p < W && i <= N
@@ -136,8 +136,8 @@ function resp_str(io::IO, X::Array{Array{Complex{Float64},2},1}, w::Int, W::Int,
       end
     end
     q = length(zstr)
-    sd[p+1:p+q,1] = zstr.data
-    sd[p+1:p+q,2] = pstr.data
+    sd[p+1:p+q,1] = Vector{UInt8}(zstr)
+    sd[p+1:p+q,2] = Vector{UInt8}(pstr)
     p += w
     i += 1
   end

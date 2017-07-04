@@ -36,17 +36,17 @@ type SeisData
     new(n,
       Array{TCPSocket,1}(0),
       name,
-      collect(repeated("...YYY",n)),
-      collect(repeated(zeros(Float64,5),n)),
-      collect(repeated(0.0,n)),
-      collect(repeated(1.0,n)),
-      collect(repeated(Array{Complex{Float64}}(0,2),n)),
-      collect(repeated("",n)),
+      collect(Main.Base.Iterators.repeated("...YYY",n)),
+      collect(Main.Base.Iterators.repeated(zeros(Float64,5),n)),
+      collect(Main.Base.Iterators.repeated(0.0,n)),
+      collect(Main.Base.Iterators.repeated(1.0,n)),
+      collect(Main.Base.Iterators.repeated(Array{Complex{Float64}}(0,2),n)),
+      collect(Main.Base.Iterators.repeated("",n)),
       misc,
       notes,
       src,
-      collect(repeated(Array{Int64,2}(0,2),n)),
-      collect(repeated(Array{Float64,1}(0),n)))
+      collect(Main.Base.Iterators.repeated(Array{Int64,2}(0,2),n)),
+      collect(Main.Base.Iterators.repeated(Array{Float64,1}(0),n)))
   end
 
   function SeisData(U...)

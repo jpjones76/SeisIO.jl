@@ -10,8 +10,8 @@ T = irisws("CC.JRO..BHZ", s=ts, t=te, fmt="miniseed")
 sync!(S, s=ts, t=te)
 sync!(T, s=ts, t=te)
 
-@test_approx_eq(length(S.x[1]), length(T.x[1]))
-@test_approx_eq(S.x[1], T.x[1])
+@test ≈(length(S.x[1]), length(T.x[1]))
+@test ≈(S.x[1], T.x[1])
 
 println("...IRISget...")
 chans = ["UW.TDH..EHZ", "UW.VLL..EHZ", "UW.HOOD..BHZ"]

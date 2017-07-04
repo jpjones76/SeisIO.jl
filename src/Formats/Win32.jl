@@ -93,7 +93,7 @@ function readwin32(filestr::String, cf::String; v=0::Int)
         if C == 0
           V = read(fid, UInt8, Int(N/2))
           for i = 1:1:length(V)
-            x1,x2 = int4_2c(map(Int32, bits(V[i]).data - 0x30))
+            x1,x2 = int4_2c(map(Int32, Vector{UInt8}(bits(V[i])) - 0x30)) # was: x1,x2 = int4_2c(map(Int32, bits(V[i]).data - 0x30))
             if i < N/2
               x[2*i:2*i+1] = [x1 x2]
             else
