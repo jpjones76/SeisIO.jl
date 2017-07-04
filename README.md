@@ -5,7 +5,10 @@ A minimalist, platform-agnostic package for working with univariate geophysical 
 http://seisio.readthedocs.org
 
 # CHANGELOG
-## Current
+## Current (2017-07-04)
+* Updated for Julia v0.6.0. Compatibility with earlier versions is not guaranteed. Please report any deprecation warnings!
+
+## 2017-04-19
 * Moved pol_sort to the Polarization project.
 * SeisIO data files now include searchable indices at the end of each file.
   + This change is backwards-compatible and won't affect the ability to read existing files.
@@ -23,7 +26,7 @@ http://seisio.readthedocs.org
   + `S = merge(A)` merges an array of SeisData objects into a new object S.
 * Arithmetic operators for SeisData objects have been standardized:
   + `S + T` appends T to S without merging.
-  + `S * T` merges T into S via `merge(S,T)`.
+  + `S * T` merges T into S, equivalent to `merge(S,T)`.
   + `S - T` removes traces whose IDs match T from S.
   + `S ÷ T` is undefined at present but may eventually provide unmerge functionality.
   + Generally, `S+T-T = S`, but `S-T+T != S`.
@@ -39,18 +42,9 @@ http://seisio.readthedocs.org
 * Promoted the Polarization submodule to a separate GitHub project.
 * Minor bugfixes: randseischannel, randseisdata, randseisevent, autotap!, IRISget, SeisIO.parserec!, SeisIO.ls, SeisIO,autotuk!
 
-## 2017-01-31
-* Documentation was completely rewritten.
-* All web functions now use the channel naming convention NET.STA.LOC.CHA.
-* Renamed several web function keywords for uniformity.
-* All web functions that require channel input now accept a config. filename, a String, or a String array.
-* Keyword initialization in new SeisData objects has been permanently disabled.
-* The native SeisIO file format has changed.
-* `prune!(S)` is now `merge!(S)`
-* A few unused functions and accidental exports were removed.
-
-## Known Issues (2017-03-17)
-* readmseed uses an exorbitant amount of memory (~32x file size). This may be endemic to the data format.
+## Known Issues (2017-07-04)
+* readmseed uses an exorbitant amount of memory (~32x file size).
+* Julia 0.6.0 slowed batch_read execution time by roughly a factor of 4; it currently offers only ~10-20% speedup over standard file read methods and is not useful in present form. This is slated for an eventual rewrite.
 
 # Current Functionality
 SeisIO presently includes three web clients, readers for several data formats, and writers for SAC and a native SeisIO format. Utility functions allow synchronization, seamless data merging, and padding time gaps.
