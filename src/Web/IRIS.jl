@@ -177,7 +177,7 @@ function get_pha(Δ::Float64, z::Float64;
   v > 0 && println(STDOUT, "url = ", url)
   R = get(url, timeout=to, headers=webhdr())
   if R.status == 200
-    req = readall(R)
+    req = readstring(R)     # readall(R) deprecated, 0.5.2
     v > 0 && println(STDOUT, "Request result:\n", req)
 
     # Parse results

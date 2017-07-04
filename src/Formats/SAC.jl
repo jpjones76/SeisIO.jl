@@ -47,8 +47,8 @@ end
 function fill_sac(S::SeisChannel, ts::Bool, leven::Bool)
   fv = nul_f.*ones(Float32, 70)
   iv = nul_i.*ones(Int32, 40)
-  cv = repmat(nul_s.data, 24)
-  cv[17:24] = (" "^8).data
+  cv = repmat(Vector{UInt8}(nul_s), 24)
+  cv[17:24] = Vector{UInt8}(" "^8)
 
   # Ints
   tt = [parse(Int32, i) for i in split(string(u2d(S.t[1,2]*μs)),r"[\.\:T\-]")]
@@ -68,7 +68,7 @@ function fill_sac(S::SeisChannel, ts::Bool, leven::Bool)
   fv[6] = 0.0f0
   fv[7] = Float32(dt*length(S.x) + sum(S.t[2:end,2])*μs)
   if !isempty(S.loc)
-    if maximum(abs(S.loc)) > 0.0
+    if maximum(abs.(S.loc)) > 0.0
       fv[32:34] = S.loc[1:3]
       fv[58:59] = S.loc[4:5]
     end
@@ -81,11 +81,11 @@ function fill_sac(S::SeisChannel, ts::Bool, leven::Bool)
   ss = Array{String,1}(4)
   for i = 1:1:4
     ss[i] = String(id[i])
-    s = ss[i].data
+    s = Vector{UInt8}(ss[i])
     Ls = length(s)
     L = Lc[i]
     c = ci[i]
-    cv[c:c+L-1] = cat(1, s, repmat(" ".data, L-Ls))
+    cv[c:c+L-1] = cat(1, s, Vector{UInt8}(" "^(L-Ls)))
   end
 
   # Assign a filename
@@ -217,7 +217,7 @@ function writesac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=true::Bool)
     if isa(S, SeisEvent)
       fv[40:44] = evt_info
       fv[8] = t_evt - b*μs
-      cv[9+EvL:24] = cat(1, nn.data, repmat(" ".data, 16-EvL))
+      cv[9+EvL:24] = cat(1, Vector{UInt8}(nn), Vector{UInt8}(" "^(16-EvL)))
     end
 
     # Data

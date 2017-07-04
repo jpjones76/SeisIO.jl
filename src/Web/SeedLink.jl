@@ -93,11 +93,12 @@ function SL_info(level::String,                    # level
   conn = connect(TCPSocket(),u,p)
   write(conn, string("INFO ", level, "\r"))
   eof(conn)
-  B = takebuf_array(conn.buffer)
+  # B = takebuf_array(conn.buffer)
+  B = take!(conn.buffer) # This is really counterintuitive syntax, if it even works...
   N = length(B)
   while (Char(B[end]) != '\0' || rem(N,520) > 0)
     eof(conn)
-    append!(B, takebuf_array(conn.buffer))
+    append!(B, take!(conn.buffer)) # This is really counterintuitive syntax, if it even works...
     N = length(B)
   end
   close(conn)
@@ -202,7 +203,7 @@ Specify as `kw=value`, e.g., `SeedLink!(S, sta, mode="TIME", r=120)`.
 | w      | false   | Bool            | write raw packets to disk? (6)   |
 
 (1) Type `?parsetimewin` for time window syntax help
-(2) If `length(patt) < length(sta)`, `patt[end]` is repeated to `length(sta)`
+(2) If `length(patt) < length(sta)`, `patt[end]` repeats to `length(sta)`
 (3) 0x01 = check if stations exist at `u`; 0x02 = check for recent data at `u`
 (4) A stream with no data for `g` seconds is considered offline if `f=0x02`.
 (5) File name is auto-generated. Each `SeedLink!` call uses a unique file.

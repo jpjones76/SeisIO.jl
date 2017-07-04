@@ -17,24 +17,36 @@ function listfiles(d::String, p::AbstractString)
 end
 
 function ls(s::String)
-  isdir(s) && return readdir(s)
-  isfile(s) && return(Array{String,1}([s]))
-  c = Char['/', '\\']
-  K = split(realpath(s), c)
-
-  if length(K) == 1
-    return listfiles(pwd(), K[1])
+  if is_windows() == false
+    # works in v >= 0.5.2
+    return filter(x -> !isempty(x), map(String, split(readstring(`bash -c "ls -1 $s"`), "\n")))
   else
-    F = Array{String,1}(K[1:1])
-    for i = 1:1:length(K)-1
-      β = Array{String,1}()
-      for j = 1:1:length(F)
-        α = listfiles(string(F[j],"/"), K[i+1])
-        append!(β, String[string(F[j],"/",α[k]) for k=1:1:length(α)])
+    isdir(s) && return readdir(s)
+    isfile(s) && return(Array{String,1}([s]))
+
+    # The syntax below takes advantage of the fact that realpath in Windows
+    # doesn't test for existence and hence won't break on wildcards.
+    c = Char['/', '\\']
+    K = split(realpath(s), c)
+
+    if length(K) == 1
+      return listfiles(pwd(), K[1])
+    else
+      F = Array{String,1}(K[1:1])
+      for i = 1:1:length(K)-1
+        β = Array{String,1}()
+        for j = 1:1:length(F)
+          α = listfiles(string(F[j],"/"), K[i+1])
+          append!(β, String[string(F[j],"/",α[k]) for k=1:1:length(α)])
+        end
+        F = deepcopy(β)
       end
-      F = deepcopy(β)
+      return F
     end
-    return F
+    # The two-liner below works about as well as "dir" ever has
+    # which is to say, not robustly. Nonetheless, it can work.
+    # s = replace(s, "/", "\\")
+    # return map(String, filter(x -> !isempty(x), split(readstring(`cmd /c dir /b $s`), "\r\n")))
   end
 end
 ls() = readdir(pwd())
@@ -48,3 +60,11 @@ ls() = readdir(pwd())
 # cd("F:/Research/DLP"); ls("poo.seis")
 # cd("F:/Research/DLP"); ls("dlp.seis")
 # ls("C:\\Users\\Josh\\*hist")
+
+# WORKING IN LINUX AS OF 2017-07-03
+# ls("/data2/Research")
+# ls("/data2/Research/Yellowstone/*.txt")
+# cd("/data2/Research/DLP"); ls("*seis")
+# cd("/data2/Research/DLP"); ls("poo.seis")
+# cd("/data2/Research/DLP"); ls("dlp.seis")
+# ls("/win/Users/Josh/*hist")

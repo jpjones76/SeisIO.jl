@@ -71,7 +71,7 @@ function read_misc(io::IOStream)
         t = eltype(T)
         if t <: Complex
           τ = eltype(real(t))
-          D[i] = complex(read(io, τ, d), read(io, τ, d))
+          D[i] = complex.(read(io, τ, d), read(io, τ, d))
         else
           D[i] = read(io, t, d)
         end

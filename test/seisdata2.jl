@@ -8,9 +8,9 @@ test_fields_preserved(S1::SeisChannel, S2::SeisData, y::Int) =
   @assert(minimum([getfield(S1,f)==getfield(S2,f)[y] for f in datafields]))
 
 function sizetest(S::SeisData, nt::Int)
-  @test_approx_eq(S.n, nt)
-  @test_approx_eq(maximum([length(getfield(S,i)) for i in datafields]), nt)
-  @test_approx_eq(minimum([length(getfield(S,i)) for i in datafields]), nt)
+  @test ≈(S.n, nt)
+  @test ≈(maximum([length(getfield(S,i)) for i in datafields]), nt)
+  @test ≈(minimum([length(getfield(S,i)) for i in datafields]), nt)
   return nothing
 end
 
@@ -24,7 +24,7 @@ function mktestseis()
 
   S = SeisData(5)
   S.id = ["XX.TMP01.00.BHZ","XX.TMP01.00.BHN","XX.TMP01.00.BHE","CC.LON..BHZ","UW.SEP..EHZ"]
-  S.fs = collect(repeated(100.0, S.n))
+  S.fs = collect(Main.Base.Iterators.repeated(100.0, S.n))
   S.fs[4] = 20.0
   for i = 1:S.n
     os1 = round(Int, 1/(S.fs[i]*μs))
@@ -35,7 +35,7 @@ function mktestseis()
   T = SeisData(4)
   T.name = ["Channel 6", "Channel 7", "Channel 8", "Channel 9"]
   T.id = ["XX.TMP02.00.EHZ","XX.TMP03.00.EHN","CC.LON..BHZ","UW.SEP..EHZ"]
-  T.fs = collect(repeated(100.0, T.n))
+  T.fs = collect(Main.Base.Iterators.repeated(100.0, T.n))
   T.fs[3] = 20.0
   for i = 1:T.n
     T.x[i] = randn(Int(L1*T.fs[i]))
@@ -62,9 +62,9 @@ println(STDOUT,"in...")
 @assert("XX.TMP01.00.BHZ" in S.id)
 
 println(STDOUT,"findid...")
-@test_approx_eq(findid("CC.LON..BHZ",S),findid(S,"CC.LON..BHZ"))
-@test_approx_eq(findid(S,"CC.LON..BHZ"),4)
-@test_approx_eq(findid(S,C),3)
+@test ≈(findid("CC.LON..BHZ",S),findid(S,"CC.LON..BHZ"))
+@test ≈(findid(S,"CC.LON..BHZ"),4)
+@test ≈(findid(S,C),3)
 
 println(STDOUT,"setindex!...")
 A = SeisData(3)
@@ -88,16 +88,16 @@ println(STDOUT,"deleteat!, delete! (by channel index)...")
 C = deepcopy(S[4])
 deleteat!(S, 4)
 sizetest(S, 8)
-@test_approx_eq(findfirst(S.name.==C.name),0)
+@test ≈(findfirst(S.name.==C.name),0)
 
 C = deepcopy(S[3:4])
 delete!(S,3:4)
 nt = 6
-@test_approx_eq(S.n, nt)
-@test_approx_eq(maximum([length(getfield(S,i)) for i in datafields]), nt)
-@test_approx_eq(minimum([length(getfield(C,i)) for i in datafields]), 2)
-@test_approx_eq(findfirst(S.name.==C.name[1]).*findfirst(S.id.==C.id[1]),0)
-@test_approx_eq(findfirst(S.name.==C.name[2]).*findfirst(S.id.==C.id[2]),0)
+@test ≈(S.n, nt)
+@test ≈(maximum([length(getfield(S,i)) for i in datafields]), nt)
+@test ≈(minimum([length(getfield(C,i)) for i in datafields]), 2)
+@test ≈(findfirst(S.name.==C.name[1]).*findfirst(S.id.==C.id[1]),0)
+@test ≈(findfirst(S.name.==C.name[2]).*findfirst(S.id.==C.id[2]),0)
 
 println(STDOUT,"deleteat!, delete! (id string)...")
 s = "CC.LON..BHZ"
@@ -120,8 +120,8 @@ S*=T[2]
 sizetest(S, 5)
 
 println(STDOUT,"...time merge functionality...")
-@test_approx_eq(S.t[2][2,1], 1+length(A.x))
-@test_approx_eq(S.t[2][2,2], (5-1/S.fs[2])*1.0e6)
+@test ≈(S.t[2][2,1], 1+length(A.x))
+@test ≈(S.t[2][2,2], (5-1/S.fs[2])*1.0e6)
 
 println(STDOUT,"merge!, common channels + seisdata splat...")
 (S,T) = mktestseis()
@@ -157,6 +157,6 @@ note!(S,str1)
 # merge test: when we merge, does each field have exactly 7 entries?
 merge!(S,T)
 n_targ = 7
-@test_approx_eq(S.n, n_targ)
-@test_approx_eq(maximum([length(getfield(S,i)) for i in datafields]), n_targ)
-@test_approx_eq(minimum([length(getfield(S,i)) for i in datafields]), n_targ)
+@test ≈(S.n, n_targ)
+@test ≈(maximum([length(getfield(S,i)) for i in datafields]), n_targ)
+@test ≈(minimum([length(getfield(S,i)) for i in datafields]), n_targ)

@@ -12,7 +12,7 @@ function autotuk!(x::Array{Float64,1}, v::Array{Int64,1}, u::Int)
         N = k-j+1
         resize!(y, N)
         y[:] = x[j:k]
-        μ = collect(repeated(mean(y), N))
+        μ = collect(Main.Base.Iterators.repeated(mean(y), N))
         x[j:k] = ((y-μ).*tukey(N, u/N))+μ
       else
         warn(string("Time window too small, x[", j, ":", k, "]; replaced with zeros."))

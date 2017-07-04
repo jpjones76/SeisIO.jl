@@ -5,13 +5,13 @@ sac_file = path*"/SampleFiles/test.sac"
 
 println("...fast file read...")
 SAC1 = readsac(sac_file)
-@test_approx_eq(SAC1.fs, 100.0)
-@test_approx_eq(length(SAC1.x), 1000)
+@test ≈(SAC1.fs, 100.0)
+@test ≈(length(SAC1.x), 1000)
 
 println("...full file read...")
 SAC2 = readsac(sac_file, full=true)
-@test_approx_eq(1/SAC1.fs, SAC2.misc["delta"])
-@test_approx_eq(length(SAC1.x), SAC2.misc["npts"])
+@test ≈(1/SAC1.fs, SAC2.misc["delta"])
+@test ≈(length(SAC1.x), SAC2.misc["npts"])
 
 println("...writesac with missing headers...")
 writesac(SAC2)
