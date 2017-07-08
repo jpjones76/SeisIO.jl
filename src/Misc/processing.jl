@@ -34,7 +34,7 @@ function autotap!(U::SeisData)
 
   for i = 1:U.n
     (U.fs[i] == 0 || isempty(U.x[i])) && continue
-    j = find(!isnan(U.x[i]))
+    j = find((isnan.(U.x[i])).==false)
     μ = mean(U.x[i][j])
     u = max(20, round(Int, 0.2*U.fs[i]))
 
@@ -42,7 +42,7 @@ function autotap!(U::SeisData)
     autotuk!(U.x[i], j, u)
 
     # Then replace NaNs with the mean
-    U.x[i][isnan(U.x[i])] = μ
+    U.x[i][isnan.(U.x[i])] = μ
     note!(U, i, "+p: tapered and ungapped data; replaced NaNs with mean of non-NaNs.")
   end
   return nothing

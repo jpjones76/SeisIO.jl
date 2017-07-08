@@ -60,8 +60,8 @@ sleep(dt)
 for i = 1:length(T.c)
   close(T.c[i])
 end
+sleep(dt/2.0)
 @assert(isempty(T)==false)
-sleep(dt/2)
 println("...moving on now.")
 sync!(T)
 

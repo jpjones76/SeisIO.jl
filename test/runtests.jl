@@ -1,7 +1,8 @@
 using Base.Test, Compat
 using SeisIO
 path = Base.source_dir()
-println(STDOUT, path)
+warn("Tests require 5-10 minutes to fully execute.")
+println(STDOUT, now(), ": tests begin, source_dir = ", path)
 
 include(path*"/../src/SeisIO.jl")
 

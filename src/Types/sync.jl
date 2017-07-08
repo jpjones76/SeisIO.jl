@@ -139,7 +139,7 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
     # prepend points to time series data that begin late
     if (start_times[i] - t_start) >= dt
       ni = round(Int, (start_times[i]-t_start)*fμs)
-      prepend!(S.x[i], collect(repeated(mx, ni)))
+      prepend!(S.x[i], collect(Main.Base.Iterators.repeated(mx, ni)))
       note!(S, i, join(["+p: prepended ", ni, " values."]))
     end
     end_times[i] = t_start + round(Int, length(S.x[i])/fμs)
@@ -147,7 +147,7 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
     # append points to time series data that end early
     if (t_end - end_times[i]) >= dt
       ii = round(Int, (t_end-end_times[i])*fμs)
-      append!(S.x[i], collect(repeated(mx, ii)))
+      append!(S.x[i], collect(Main.Base.Iterators.repeated(mx, ii)))
       note!(S, i, join(["+p: appended ", ii, " values."]))
     end
     S.t[i] = [1 t_start; length(S.x[i]) 0]

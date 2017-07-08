@@ -1,4 +1,4 @@
-gc_ctr(lat, lon) = (atan(tan(lat*π/180.0)*0.9933056), lon*π/180.0)
+gc_ctr(lat::Array{Float64,1}, lon::Array{Float64,1}) = (atan.(tan.(lat*π/180.0)*0.9933056), lon*π/180.0)
 gc_unwrap!(t::Array{Float64,1}) = (t[t .< 0] .+= 2.0*π; return t)
 
 """
@@ -21,10 +21,10 @@ function gcdist(src::Array{Float64,1}, rec::Array{Float64,2})
   Δϕ = ϕ2 - ϕ1
   Δλ = λ2 - λ1
 
-  a = sin(Δϕ/2.0) .* sin(Δϕ/2.0) + cos(ϕ1) .* cos(ϕ2) .* sin(Δλ/2.0) .* sin(Δλ/2.0)
-  Δ = 2.0 .* atan2(sqrt(a), sqrt(1.0 - a))
-  A = atan2(sin(Δλ).*cos(ϕ2), cos(ϕ1).*sin(ϕ2) - sin(ϕ1).*cos(ϕ2).*cos(Δλ))
-  B = atan2(-1.0.*sin(Δλ).*cos(ϕ1), cos(ϕ2).*sin(ϕ1) - sin(ϕ2).*cos(ϕ1).*cos(Δλ))
+  a = sin.(Δϕ/2.0) .* sin.(Δϕ/2.0) + cos.(ϕ1) .* cos.(ϕ2) .* sin.(Δλ/2.0) .* sin.(Δλ/2.0)
+  Δ = 2.0 .* atan2.(sqrt.(a), sqrt.(1.0 - a))
+  A = atan2.(sin.(Δλ).*cos.(ϕ2), cos.(ϕ1).*sin.(ϕ2) - sin.(ϕ1).*cos.(ϕ2).*cos.(Δλ))
+  B = atan2.(-1.0.*sin.(Δλ).*cos.(ϕ1), cos.(ϕ2).*sin.(ϕ1) - sin.(ϕ2).*cos.(ϕ1).*cos.(Δλ))
 
   # convert to degrees
   return (Δ.*180.0/π, gc_unwrap!(A).*180.0/π, gc_unwrap!(B).*180.0/π )

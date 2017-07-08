@@ -172,18 +172,18 @@ function xtmerge!(t::Array{Int64,1}, x::Array{Float64,1}, d::Int64)
   J0 = find(diff(t) .< d)
   while !isempty(J0)
     J1 = J0.+1
-    K = [isnan(x[J0]) isnan(x[J1])]
+    K = [isnan.(x[J0]) isnan.(x[J1])]
 
     # Average nearly-overlapping x that are either both NaN or neither Nan
     ii = find(K[:,1].==K[:,2])
     i0 = J0[ii]
     i1 = J1[ii]
-    t[i0] = div(t[i0].+t[i1],2)
+    t[i0] = div.(t[i0].+t[i1], 2)
     x[i0] = 0.5.*(x[i0].+x[i1])
 
     # Delete nearly-overlapping x with only one NaN (and delete all x ∈ i1)
-    i3 = find(K[:,1].*!K[:,2])
-    i4 = find(!K[:,1].*K[:,2])
+    i3 = find(K[:,1].*(K[:,2].==false))
+    i4 = find((K[:,1].==false).*K[:,2])
     II = sort([J0[i4]; J1[i3]; i1])
     deleteat!(t, II)
     deleteat!(x, II)
@@ -267,7 +267,7 @@ function merge!(S::SeisData)
         w[1] += 1
         (nn,ss,ll,cc) = map(String, split(identity(id), "."))
         lc = Array{String,1}(n-1)
-        l0 = (length(ll) == 1) ? UInt8[0x30, ll.data[1]] : ((length(ll) > 1) ? ll.data[1:2] : ones(UInt8,2).*0x30)
+        l0 = (length(ll) == 1) ? UInt8[0x30, UInt8(ll[1])] : ((length(ll) > 1) ? Vector{UInt8}(ll[1:2]) : ones(UInt8,2).*0x30)
         for (j,u) in enumerate(ul)
           # Stupid bug in Julia compiler: for loops that start at j>1 can be compiled as type "Core.Box", which is slow
           j == 1 && continue

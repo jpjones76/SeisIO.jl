@@ -11,7 +11,7 @@ end
 
 function gapfill!(x::Array{Float64,1}, t::Array{Int64,2}, fs::Float64; m=true::Bool, w=true::Bool)
   (fs == 0 || isempty(x)) && (return x)
-  mx = m ? mean(x[!isnan(x)]) : NaN
+  mx = m ? mean(x[isnan.(x).==false]) : NaN
   u = round(Int, max(20,0.2*fs))
   for i = size(t,1):-1:2
     # Gap fill

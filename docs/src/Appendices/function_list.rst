@@ -103,6 +103,10 @@ Check that streams with channel identifiers ``C`` have data < ``G`` seconds old 
 
 Check that station identifiers ``C`` exist at SeedLink server ``url``. Returns a Boolean array.
 
+.. function:: s = ls(path)
+
+Wrapper to /bin/ls; returns output as a string array. In Windows, provides similar functionality to *nix ls. ``ls()`` with no arguments lists contents of cwd.
+
 .. function:: S = irisws(C)
 
 Get near-real-time data from a single channel ``C``.

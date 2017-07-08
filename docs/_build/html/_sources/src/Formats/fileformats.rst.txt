@@ -48,7 +48,7 @@ Usage Warnings
 .. **********
 .. Batch Read
 .. **********
-.. The function ``batch_read`` speeds up file read for SAC and SEG Y data using shared arrays and efficient parallelization. The result is an order of magnitude speedup relative to ``readsac`` or ``readsegy``, though the process can be memory-intensive.
+.. The function ``batch_read`` speeds up file read for SAC and SEG Y data using shared arrays and efficient parallelization. Currently only provides a slight speedup due to Julia v0.6 slowing parallelization with @async; slated for rewrite.
 ..
 ..
 .. Usage

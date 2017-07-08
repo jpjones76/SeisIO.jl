@@ -13,9 +13,9 @@ end
 autoname(t::Array{Array{Int64,2}}) = autoname(isempty(t) ? u2d(0) : u2d(minimum([t[i][1,2] for i=1:length(t)])/1000000))
 
 function writestr_fixlen(io::IOStream, s::String, L::Integer)
-  o = (" "^L).data
+  o = Vector{UInt8}(" "^L)
   L = min(L, length(s))
-  o[1:L] = s.data
+  o[1:L] = Vector{UInt8}(s)
   write(io, o)
   return
 end
@@ -24,7 +24,7 @@ function writestr_varlen(io::IOStream, s::String)
   L = Int64(length(s))
   write(io, L)
   if L > 0
-    write(io, s.data)
+    write(io, Vector{UInt8}(s))
   end
   return
 end
@@ -68,7 +68,8 @@ function write_string_array(io, v::Array{String})
   if d != [0]
     sep = get_separator(join(v))
     vstr = join(v, sep)
-    write(io, UInt8(sep), Int64(length(vstr.data)), vstr.data)
+    write(io, UInt8(sep), Int64(length(Vector{UInt8}(vstr))), Vector{UInt8}(vstr))
+    # was: write(io, UInt8(sep), Int64(length(vstr.data)), vstr.data)
   end
 end
 write_string_array(io, v::String) = write_string_array(io, String[v])
@@ -126,9 +127,9 @@ function w_struct(io::IOStream, S::SeisData)
     end
 
     notes = join(S.notes[i], c)
-    units = S.units[i].data
-    src   = S.src[i].data
-    name  = S.name[i].data
+    units = Vector{UInt8}(S.units[i])
+    src   = Vector{UInt8}(S.src[i])
+    name  = Vector{UInt8}(S.name[i])
 
     # Int
     write(io, length(S.t[i]))
@@ -178,11 +179,11 @@ end
 function w_struct(io::IOStream, H::SeisHdr)
   m = getfield(H, :mag)
   i = getfield(H, :int)
-  s = getfield(H, :src).data
+  s = Vector{UInt8}(getfield(H, :src))
   a = getfield(H, :notes)
   c = get_separator(join(a))
-  n = join(a,c).data
-  j = i[2].data
+  n = Vector{UInt8}(join(a,c))
+  j = Vector{UInt8}(i[2])
 
   # int
   write(io, getfield(H, :id))                               # id
@@ -295,7 +296,7 @@ function wseis(S...; sf=false::Bool, path="./"::String, pref=""::String, name=""
 
     # fname → IO stream
     io = open(path*"/"*fname, "w")
-    write(io, "SEISIO".data)
+    write(io, Vector{UInt8}("SEISIO"))
     write(io, vSeisIO())
     write(io, vJulia())
     write(io, L)
@@ -311,7 +312,7 @@ function wseis(S...; sf=false::Bool, path="./"::String, pref=""::String, name=""
       if typeof(seis) == SeisData
         f0 = isempty(pref) ? autoname(getfield(seis,:t)) : pref
         C = UInt8['D']
-        ID = join(seis.id,'\0').data
+        ID = Vector{UInt8}(join(seis.id,'\0'))
         TS = Array{Int64,1}(seis.n)
         TE = Array{Int64,1seis.n}()
         for j = 1:1:seis.n
@@ -329,7 +330,7 @@ function wseis(S...; sf=false::Bool, path="./"::String, pref=""::String, name=""
       elseif typeof(seis) == SeisEvent
         f0 = isempty(pref) ? (d2u(seis.hdr.ot) == 0.0 ? autoname(getfield(getfield(seis,:data),:t)) : autoname(getfield(getfield(seis,:hdr),:ot))) : pref
         C = UInt8['E']
-        ID = join(seis.data.id,'\0').data
+        ID = Vector{UInt8}(join(seis.data.id,'\0'))
         TS = Array{Int64,1}(seis.n)
         TE = Array{Int64,1seis.n}()
         for j = 1:1:seis.n
@@ -338,7 +339,7 @@ function wseis(S...; sf=false::Bool, path="./"::String, pref=""::String, name=""
         end
       end
       io = open(path*"/"*join([f0, n0, suff],'.'), "w")
-      write(io, "SEISIO".data)
+      write(io, Vector{UInt8}("SEISIO"))
       write(io, vSeisIO())
       write(io, vJulia())
       write(io, Int64(1))
@@ -357,9 +358,9 @@ function wseis(S...; sf=false::Bool, path="./"::String, pref=""::String, name=""
       seis = (typeof(S[i]) == SeisChannel) ? SeisData(S[i]) : S[i]
       if typeof(seis) == SeisData
         C[i] = UInt8('D')
-        id = join(seis.id,'\0').data
+        id = Vector{UInt8}(join(seis.id,'\0'))
         ts = vcat([seis.t[j][1,2] for j=1:1:seis.n]...)
-        te = ts .+ vcat([sum(seis.t[j][2:end,2]) for j=1:1:seis.n]...) + map(Int64, round(1.0e6.*[length(seis.x[j]) for j=1:1:seis.n]./seis.fs))
+        te = ts .+ vcat([sum(seis.t[j][2:end,2]) for j=1:1:seis.n]...) + map(Int64, round.(1.0e6.*[length(seis.x[j]) for j=1:1:seis.n]./seis.fs))
       elseif typeof(seis) == SeisHdr
         C[i] = UInt8('H')
         id = Array{UInt8,1}()
@@ -367,9 +368,9 @@ function wseis(S...; sf=false::Bool, path="./"::String, pref=""::String, name=""
         te = Array{Int64,1}()
       elseif typeof(seis) == SeisEvent
         C[i] = UInt8('E')
-        id = join(seis.data.id,'\0').data
+        id = Vector{UInt8}(join(seis.data.id,'\0'))
         ts = vcat([seis.data.t[j][1,2] for j=1:1:seis.data.n]...)
-        te = ts .+ vcat([sum(seis.data.t[j][2:end,2]) for j=1:1:seis.data.n]...) + map(Int64, round(1.0e6.*[length(seis.data.x[j]) for j=1:1:seis.data.n]./seis.data.fs))
+        te = ts .+ vcat([sum(seis.data.t[j][2:end,2]) for j=1:1:seis.data.n]...) + map(Int64, round.(1.0e6.*[length(seis.data.x[j]) for j=1:1:seis.data.n]./seis.data.fs))
       end
       append!(TS, ts)
       append!(TE, te)

@@ -172,14 +172,14 @@ function populate_chan!(S::SeisChannel; c=false::Bool)
     if irreg
       L+=2
       S.x = rand(L) .* 10.^(rand(1:10, L))
-      t = [Int64(0) round(Int, ts/μs); zeros(Int64, L-1) round(Int, diff(sort(rand(2:1:Lx, L)))/(μs*S.fs))]
+      t = [Int64(0) round(Int, ts/μs); zeros(Int64, L-1) round.(Int, diff(sort(rand(2:1:Lx, L)))/(μs*S.fs))]
       S.fs = 0
       S.units = rand(irregular_units)
     else
       S.x = randn(Lx)
       t = zeros(2+L, 2)
       t[1,:] = [1 round(Int, ts/μs)]
-      t[2:L+1,:] = [rand(2:Lx, L, 1) round(Int, rand(L,1)./μs)]
+      t[2:L+1,:] = [rand(2:Lx, L, 1) round.(Int, rand(L,1)./μs)]
       t[L+2,:] = [Lx 0]
       S.t = sortrows(t)
     end
