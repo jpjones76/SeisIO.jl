@@ -138,7 +138,7 @@ function rdata(io::IOStream)
     # float arrays
     S.loc[i] = read(io, Float64, 5)
     if i64[2] > 0
-      S.resp[i] = reshape(complex(read(io, Float64, i64[2]), read(io, Float64, i64[2])), div(i64[2],2), 2)
+      S.resp[i] = reshape(complex.(read(io, Float64, i64[2]), read(io, Float64, i64[2])), div(i64[2],2), 2)
     end
 
     # U8
