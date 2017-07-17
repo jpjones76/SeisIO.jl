@@ -11,7 +11,7 @@ rseis, rseism,                                                # Types/read.jl
 mseis!,                                                       # Types/merge.jl
 ungap, ungap!, sync, sync!,                                   # Types/sync.jl
 batch_read,                                                   # Formats/batch_read.jl
-readmseed,                                                    # Formats/mSEED.jl
+readmseed, seeddef,                                           # Formats/mSEED.jl
 rlennasc,                                                     # Formats/LennartzAsc.jl
 readsac, rsac, sachdr, writesac, wsac,                        # Formats/SAC.jl
 readsegy, segyhdr,                                            # Formats/SEGY.jl
@@ -37,12 +37,14 @@ include("Utils/time.jl")
 # Utilities that don't require SeisIO types to work
 include("Utils/autotuk.jl")
 include("Utils/bandcode.jl")
+include("Utils/findid.jl")
 include("Utils/gcdist.jl")
 include("Utils/gap.jl")
 include("Utils/resp.jl")
 include("Utils/tnote.jl")
 
 # Types and core type functionality
+include("Types/SEED.jl")
 include("Types/SeisData.jl")
 include("Types/SeisChannel.jl")
 include("Types/SeisHdr.jl")
@@ -60,13 +62,13 @@ include("Misc/randseis.jl")
 include("Misc/equalize_resp.jl")
 
 # Data formats
-include("Formats/batch_read.jl")
 include("Formats/mSEED.jl")
 include("Formats/LennartzAsc.jl")
 include("Formats/SAC.jl")
 include("Formats/SEGY.jl")
 include("Formats/UW.jl")
 include("Formats/Win32.jl")
+include("Formats/batch_read.jl")
 
 # Web clients
 include("Web/parse_chstr.jl")

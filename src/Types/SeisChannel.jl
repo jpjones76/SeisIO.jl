@@ -76,20 +76,37 @@ convert(::Type{SeisData}, C::SeisChannel) = SeisData(C)
 +(S::SeisData, C::SeisChannel) = (T = deepcopy(S); return T + SeisData(C))
 +(C::SeisChannel, D::SeisChannel) = SeisData(C,D)
 
-push!(S::SeisData, C::SeisChannel)  = (
-  [setfield!(S, i, push!(getfield(S,i), getfield(C,i))) for i in datafields];
-  S.n += 1;
-  return S)
+# push!(S::SeisData, C::SeisChannel)  = (
+#   [setfield!(S, i, push!(getfield(S,i), getfield(C,i))) for i in datafields];
+#   S.n += 1;
+#   return S)
+function push!(S::SeisData, C::SeisChannel)
+  for i in datafields
+    setfield!(S, i, push!(getfield(S,i), getfield(C,i)))
+  end
+  S.n += 1
+  return
+end
 
 isequal(S::SeisChannel, U::SeisChannel) = minimum([hash(getfield(S,i))==hash(getfield(U,i)) for i in datafields]::Array{Bool,1})
 ==(S::SeisChannel, U::SeisChannel) = isequal(S,U)::Bool
 
 """
+    findid(C::SeisChannel, S::SeisData)
     findid(S::SeisData, C::SeisChannel)
 
-Get the index to the first channel of S where `S.id.==C.id == true`.
+Get the index to the first channel `c` in S where `S.id[c]==C.id`.
 """
-findid(S::SeisData, C::SeisChannel) = findfirst(S.id .== C.id)
-findid(C::SeisChannel, S::SeisData) = findfirst(S,C)
+function findid(C::SeisChannel, S::SeisData)
+  c = 0
+  for i = 1:1:S.n
+    if S.id[i] == C.id
+      c = i
+      break
+    end
+  end
+  return c
+end
+findid(S::SeisData, C::SeisChannel) = findid(C, S)
 
 sizeof(S::SeisChannel) = sum([sizeof(getfield(S,f)) for f in enumerate(datafields)]) + sizeof(getfield(S, :notes))
