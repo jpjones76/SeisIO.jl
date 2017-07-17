@@ -134,7 +134,7 @@ end
 Read SEG-Y file `fname` into SeisData object `seis`.
 
 ### Keywords
-* `passcal=true` for PASSCAL/NMT modified SEG-Yr0
+* `passcal=true` for PASSCAL/NMT modified SEG-Y
 * `full=true` to store full SEG-Y headers as a dictionary in `seis.misc`.
 """
 function readsegy(fname::String; passcal=false::Bool, full=false::Bool)
@@ -191,7 +191,7 @@ end
 """
     segyhdr(f)
 
-Print formatted, sorted SEG-Y headers of file `f` to STDOUT. Pass keyword argument `passcal=true` for PASSCAL/NMT modified SEG-Yr0 files.
+Print formatted, sorted SEG-Y headers of file `f` to STDOUT. Pass keyword argument `passcal=true` for PASSCAL/NMT modified SEG-Y.
 """
 function segyhdr(fname::String; passcal=false::Bool)
   seis = readsegy(fname::String; passcal=passcal, full=true)

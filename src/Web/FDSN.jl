@@ -208,9 +208,8 @@ function FDSNget(C::Array{String,2};
         if R.status == 200
           (ID, LOC, UNITS, GAIN, RESP, NAME, MISC) = FDSN_sta_xml(String(IOBuffer(R.data)))
           for i = 1:S.n
-            k = findfirst(ID .== S.id[i])
+            k = findid(S.id[i], ID)
             k == 0 && continue
-            S.id[i]     = ID[k]
             S.loc[i]    = LOC[k]
             S.units[i]  = UNITS[k]
             S.gain[i]   = GAIN[k]

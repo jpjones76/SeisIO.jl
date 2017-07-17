@@ -35,12 +35,13 @@ function check_stream_exists(S::Array{String,1}, xstr::String; g=7200::Real)
   x = falses(N)
 
   xstreams = get_elements_by_tagname(root(parse_string(xstr)), "station")
-  xid = [join([attribute(xstreams[i], "network"),attribute(xstreams[i], "name")],'.') for i=1:length(xstreams)]
+  xid = String[join([attribute(xstreams[i], "network"),attribute(xstreams[i], "name")],'.') for i=1:length(xstreams)]
   for i = 1:1:N
     # Assumes the combination of network name and station name is unique
     id = split(S[i], '.', keep=true)
     sid = join(id[1:2],'.')
-    K = findfirst(xid.==sid)
+    # K = findfirst(xid.==sid)
+    K = findid(sid, xid)
     if K > 0
       t = Inf
 

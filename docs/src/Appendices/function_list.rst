@@ -196,6 +196,10 @@ Print headers from SAC file ``fname`` to STDOUT.
 
 Print headers from SEG Y file ``fname`` to STDOUT. Specify ``passcal=true`` for PASSCAL SEG Y.
 
+.. function:: seeddef(f, v)
+
+Set default SEED value for field ``f`` to ``v``. Type ``?seeddef`` at the Julia prompt for a list of SEED defaults.
+
 .. function:: T = sort(S, rev=false)
 
 "Safe" sort of channels in SeisData struct ``S`` by S.id to a new SeisData structure. Specify ``rev=true`` to reverse the sort order.

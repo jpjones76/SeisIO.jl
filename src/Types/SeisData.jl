@@ -18,35 +18,53 @@ type SeisData
   t::Array{Array{Int64,2},1}                  # time
   x::Array{Array{Float64,1},1}                # data
 
-  function SeisData(n::Int64)
-    n = max(n,0)
-    name = Array{String,1}(n)
+  function SeisData()
+    return new(0,
+        Array{TCPSocket,1}(0),
+        Array{String,1}(0),
+        Array{String,1}(0),
+        Array{Array{Float64,1}}(0),
+        Array{Float64,1}(0),
+        Array{Float64,1}(0),
+        Array{Array{Complex{Float64},2}}(0),
+        Array{String,1}(0),
+        Array{Dict{String,Any},1}(0),
+        Array{String,1}(0),
+        Array{String,1}(0),
+        Array{Array{Int64,2}}(0),
+        Array{Array{Float64,1}}(0)
+        )
+  end
+
+  function SeisData(n::UInt)
     id = Array{String,1}(n)
+    name = Array{String,1}(n)
     notes = Array{Array{String,1},1}(n)
-    src = Array{String,1}(n)
     misc = Array{Dict{String,Any},1}(n)
+
     n0 = tnote("Channel initialized")
-    s0 = "SeisData"
     for i = 1:n
       name[i] = string("Channel ",i)
-      notes[i] = Array{String,1}([identity(n0)])
-      src[i] = identity(s0)
+      id[i] = string(".", i, "..YYY")
       misc[i] = Dict{String,Any}()
+      notes[i] = Array{String,1}([identity(n0)])
     end
-    new(n,
-      Array{TCPSocket,1}(0),
-      name,
-      collect(Main.Base.Iterators.repeated("...YYY",n)),
-      collect(Main.Base.Iterators.repeated(zeros(Float64,5),n)),
-      collect(Main.Base.Iterators.repeated(0.0,n)),
-      collect(Main.Base.Iterators.repeated(1.0,n)),
-      collect(Main.Base.Iterators.repeated(Array{Complex{Float64}}(0,2),n)),
-      collect(Main.Base.Iterators.repeated("",n)),
-      misc,
-      notes,
-      src,
-      collect(Main.Base.Iterators.repeated(Array{Int64,2}(0,2),n)),
-      collect(Main.Base.Iterators.repeated(Array{Float64,1}(0),n)))
+
+    return new(n,
+        Array{TCPSocket,1}(0),
+        name,
+        id,
+        collect(Main.Base.Iterators.repeated(zeros(Float64,5),n)),
+        collect(Main.Base.Iterators.repeated(0.0,n)),
+        collect(Main.Base.Iterators.repeated(1.0,n)),
+        collect(Main.Base.Iterators.repeated(Array{Complex{Float64}}(0,2),n)),
+        collect(Main.Base.Iterators.repeated("Unknown",n)),
+        misc,
+        notes,
+        collect(Main.Base.Iterators.repeated(string("SeisData(", n, ")"),n)),
+        collect(Main.Base.Iterators.repeated(Array{Int64,2}(0,2),n)),
+        collect(Main.Base.Iterators.repeated(Array{Float64,1}(0),n))
+        )
   end
 
   function SeisData(U...)
@@ -61,7 +79,7 @@ type SeisData
     return S
   end
 end
-SeisData() = SeisData(0)
+SeisData(n::Int) = n > 0 ? SeisData(UInt(n)) : SeisData()
 
 # ============================================================================
 # Indexing, searching, iteration, size
@@ -72,7 +90,11 @@ endof(S::SeisData) = S.n
 
 function getindex(S::SeisData, J::Array{Int,1})
   U = SeisData()
-  [setfield!(U, f, getfield(S,f)[J]) for f in datafields]
+  # [setfield!(U, f, getfield(S,f)[J]) for f in datafields]
+  # I guess this bug was fixed in 0.6
+  for f in datafields
+    setfield!(U, f, getfield(S,f)[J])
+  end
   setfield!(U, :n, length(J))
   return U
 end
@@ -81,13 +103,29 @@ getindex(S::SeisData, J::UnitRange) = getindex(S, collect(J))
 in(s::String, S::SeisData) = in(s, S.id)
 
 """
-    findid(S::SeisData, n::String)
+    findid(id::String, S::SeisData)
+    findid(S::SeisData, id::String)
 
-Get the index to the first channel of S where `(S.id.==n) == true`.
+Get the index to the first channel `c` in  S where `S.id[c]==id`.
 """
-findid(n::String, S::SeisData) = findfirst(S.id .== n)
-findid(S::SeisData, n::String) = findfirst(S.id .== n)
-findid(S::SeisData, T::SeisData) = [findfirst(S.id .== T.id[i]) for i=1:1:T.n]
+function findid(id::String, S::SeisData)
+  c = 0
+  for i = 1:1:S.n
+    if S.id[i] == id
+      c = i
+      break
+    end
+  end
+  return c
+end
+findid(S::SeisData, n::String) = findid(id, S)
+function findid(S::SeisData, T::SeisData)
+  tc = Array{Int,1}(T.n)
+  for i = 1:1:T.n
+    tc[i] = findid(T.id[n], S)
+  end
+  return tc
+end
 
 setindex!(S::SeisData, U::SeisData, J::Array{Int,1}) = (
   [(getfield(S, f))[J] = getfield(U, f) for f in datafields];
