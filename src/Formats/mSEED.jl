@@ -244,6 +244,11 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     println(STDOUT, "To parse = ", n, " data, fmt=", SEED.fmt)
   end
 
+  if xi+n > L
+    resize!(S.x[c], length(S.x[c]) + SEED.def.nx)
+    v > 1 && println(STDOUT, "Resized S.x[", c, "] to length ", length(S.x[c]))
+  end
+
   # ASCII
   if SEED.fmt == 0x00
     SEED.x[1:n] = map(Float64, read(sid, Int8, SEED.nx-SEED.u16[4]))
@@ -351,16 +356,11 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     if abs(SEED.x[n] - SEED.xn) > eps()
       println(STDOUT, string("RDMSEED: data integrity -- Steim-", SEED.fmt - 0x09, " sequence #", String(SEED.hdr[1:6]), " integrity check failed, last_data=", SEED.x[n], ", should be xn=", SEED.xn))
     end
+
+    unsafe_copy!(getfield(S,:x)[c], xi+1, SEED.x, 1, n)
   else
     error(@sprintf("Decoding for fmt = %i NYI!", SEED.fmt))
   end
-
-  # Append data
-  if xi+n > L
-    resize!(S.x[c], length(S.x[c]) + SEED.def.nx)
-    v > 0 && println(STDOUT, "Resized S.x[", c, "] to length ", length(S.x[c]))
-  end
-  unsafe_copy!(getfield(S,:x)[c], xi+1, SEED.x, 1, n)
 
   # Correct time matrix
   dts = round(Int, sμ*(d2u(DateTime(SEED.t[1:6]...)))) + SEED.t[7] + TC - te
