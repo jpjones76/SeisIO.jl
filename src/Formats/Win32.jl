@@ -35,7 +35,7 @@ function win32dict(Nh::UInt16, cinfo::String, hexID::String, StartTime::Float64,
 end
 
 function getcid(Chans::Array{String,1}, hexID::String)
-  for i = 1:1:length(Chans)
+  for i = 1:length(Chans)
     L = split(Chans[i])
     if L[1] == hexID
       return i, join(L[4:5],'.')
@@ -92,7 +92,7 @@ function readwin32(filestr::String, cf::String; v=0::Int)
 
         if C == 0
           V = read(fid, UInt8, Int(N/2))
-          for i = 1:1:length(V)
+          for i = 1:length(V)
             x1,x2 = int4_2c(map(Int32, Vector{UInt8}(bits(V[i])) - 0x30)) # was: x1,x2 = int4_2c(map(Int32, bits(V[i]).data - 0x30))
             if i < N/2
               x[2*i:2*i+1] = [x1 x2]
@@ -105,7 +105,7 @@ function readwin32(filestr::String, cf::String; v=0::Int)
           x[2:end] = read(fid, Int8, N)
         elseif C == 3
           V = read(fid, UInt8, 3*N)
-          for i = 1:1:N
+          for i = 1:N
             xi = join([bits(V[3*i]),bits(V[3*i-1]),bits(V[3*i-2])])
             x[i+1] = parse(Int32, xi, 2)
           end
@@ -116,7 +116,7 @@ function readwin32(filestr::String, cf::String; v=0::Int)
         end
 
         # cumsum doesn't work on Int32 in Julia as of 0.4.x
-        [x[i] += x[i-1] for i in 2:1:length(x)]
+        [x[i] += x[i-1] for i in 2:length(x)]
 
         # Account for time gaps
         gap = NewTime - seis[id]["OldTime"] - 1
@@ -146,7 +146,7 @@ function readwin32(filestr::String, cf::String; v=0::Int)
     J = length(seis[i]["gapStart"])
     if J > 0
       av = round(Int32, seis[i]["seisSum"]/seis[i]["seisN"])
-      for j = 1:1:J
+      for j = 1:J
         si = seis[i]["gapStart"][j]
         ei = seis[i]["gapEnd"][j]
         seis[i]["data"][si:ei] = av
@@ -164,7 +164,7 @@ function readwin32(filestr::String, cf::String; v=0::Int)
     fs    = Float64(seis[k]["fs"])
     units = seis[k]["unit"]
     x     = map(Float64, seis[k]["data"])
-    t     = [1 round(Int,seis[k]["startTime"]/μs); length(seis[k]["data"]) 0]
+    t     = [1 round(Int64,seis[k]["startTime"]/μs); length(seis[k]["data"]) 0]
     src   = filestr
     misc  = Dict{String,Any}(i => seis[k][i] for i in ("hexID", "orgID", "netID", "fc", "hc", "pCorr", "sCorr", "lineDelay", "comment"))
 

@@ -69,7 +69,7 @@ type SeisData
 
   function SeisData(U...)
     S = SeisData()
-    for i = 1:1:length(U)
+    for i = 1:length(U)
       if typeof(U[i]) in [SeisChannel,SeisData]
         append!(S, U[i])
       else
@@ -110,7 +110,7 @@ Get the index to the first channel `c` in  S where `S.id[c]==id`.
 """
 function findid(id::String, S::SeisData)
   c = 0
-  for i = 1:1:S.n
+  for i = 1:S.n
     if S.id[i] == id
       c = i
       break
@@ -118,10 +118,10 @@ function findid(id::String, S::SeisData)
   end
   return c
 end
-findid(S::SeisData, n::String) = findid(id, S)
+findid(S::SeisData, id::String) = findid(id, S)
 function findid(S::SeisData, T::SeisData)
   tc = Array{Int,1}(T.n)
-  for i = 1:1:T.n
+  for i = 1:T.n
     tc[i] = findid(T.id[n], S)
   end
   return tc
@@ -137,7 +137,7 @@ function isempty(S::SeisData)
   if S.n == 0
     return true
   else
-    return minimum([isempty(S.x[i]) for i=1:1:S.n]::Array{Bool,1})
+    return minimum([isempty(S.x[i]) for i=1:S.n]::Array{Bool,1})
   end
 end
 
@@ -171,7 +171,7 @@ function note!(S::SeisData, s::String)
   if !isempty(j)
     [push!(S.notes[i], tnote(s)) for i in j]
   else
-    for i = 1:1:S.n
+    for i = 1:S.n
       push!(S.notes[i], tnote(s))
     end
   end

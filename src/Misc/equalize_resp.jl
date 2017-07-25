@@ -8,7 +8,7 @@ hc_new=1.0/sqrt(2.0)::Float64, C=Int64[]::Array{Int64,1})
   pp = 2.0*Float64(pi)
   F1 = resp_f(resp_new, hc_new, f, fs)
   if isempty(C)
-    C = 1:1:S.n
+    C = 1:S.n
   end
   for i in C
     if S.resp[i] != resp_new && S.fs[i] > 0.0

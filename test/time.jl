@@ -19,4 +19,11 @@ d0, d1 = parsetimewin(s, t)
 @test ≈(365, md2j(2015,12,31))
 @test ≈(365, md2j(1900,12,31))
 
+# t_collapse, t_expand
+T = Int64[1 1451606400000000; 100001 30000000; 250001 12330000; 352303 99000000; 360001 0]
+fs = 100.0
+@test ≈(T, SeisIO.t_collapse(SeisIO.t_expand(T, fs), fs))
+@test ≈(T, SeisIO.w_time(SeisIO.t_win(T, fs), fs))
+
+
 println("...done!")

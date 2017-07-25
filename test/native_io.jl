@@ -12,7 +12,7 @@ R = rseis(savfile1, v=true)
 
 println("...SeisHdr file write...")
 H = SeisHdr()
-setfield!(H, :id, rand(0:1:2^62))
+setfield!(H, :id, rand(0:2^62))
 setfield!(H, :loc, [rand(0.0:0.1:90.0)*((-1)^rand(1:2)), rand(0.0:0.1:180.0)*((-1)^rand(1:2)), rand(0.0:0.1:640.0)])
 setfield!(H, :mag, (Float32(rand(-5.0:0.1:9.0)), randstring(1)[1], randstring(1)[1]))
 wseis(H, savfile2)

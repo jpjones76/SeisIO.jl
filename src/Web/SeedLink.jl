@@ -19,7 +19,7 @@ function check_sta_exists(sta::Array{String,1}, xstr::String)
   xid = join([join([attribute(xstreams[i], "network"),attribute(xstreams[i], "name")],'.') for i=1:length(xstreams)], ' ')
   N = length(sta)
   x = falses(N)
-  for i = 1:1:N
+  for i = 1:N
     id = split(sta[i], '.', keep=true)
     sid = join(id[1:2],'.')
     if contains(xid, sid)
@@ -36,7 +36,7 @@ function check_stream_exists(S::Array{String,1}, xstr::String; g=7200::Real)
 
   xstreams = get_elements_by_tagname(root(parse_string(xstr)), "station")
   xid = String[join([attribute(xstreams[i], "network"),attribute(xstreams[i], "name")],'.') for i=1:length(xstreams)]
-  for i = 1:1:N
+  for i = 1:N
     # Assumes the combination of network name and station name is unique
     id = split(S[i], '.', keep=true)
     sid = join(id[1:2],'.')
@@ -62,7 +62,7 @@ function check_stream_exists(S::Array{String,1}, xstr::String; g=7200::Real)
 
       R = get_elements_by_tagname(xstreams[K], "stream")
       if !isempty(R)
-        for j = 1:1:length(R)
+        for j = 1:length(R)
           if prod([contains(attribute(R[j], a[i]), p[i]) for i=1:length(p)]) == true
             te = replace(attribute(R[j], "end_time"), " ", "T")
             t = min(t, time()-d2u(Dates.DateTime(te)))
@@ -229,6 +229,7 @@ function SeedLink!(S::SeisData,
   # ==========================================================================
   # init, warnings, sanity checks
   Ns = size(sta,1)
+  SEED.swap = false
 
   # Refresh interval
   r = maximum([r, eps()])
@@ -379,7 +380,7 @@ function SeedLink!(S::SeisData,
           (v > 1) && @printf(STDOUT, "%s: Processing packets ", string(now()))
           while !eof(buf)
             pkt_id = String(read(buf,UInt8,8))
-            parserec!(S, buf, false, v)
+            parserec!(S, buf, v)
             (v > 1) && @printf(STDOUT, "%s, ", pkt_id)
           end
           (v > 1) && @printf(STDOUT, "\b\b...done current packet dump.\n")

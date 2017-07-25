@@ -1,7 +1,7 @@
 module SeisIO
 using Blosc, DSP, LightXML, Requests.get
-VERSION >= v"0.5.0" && __precompile__(true)
-
+__precompile__(true)
+path = Base.source_dir()
 const datafields = [:id, :name, :loc, :fs, :gain, :resp, :units, :src, :notes, :misc, :t, :x]
 const hdrfields = [:id, :ot, :loc, :mag, :int, :mt, :np, :pax, :src, :notes, :misc]
 
@@ -22,26 +22,23 @@ FDSNevq, FDSNevt, FDSNget, FDSNsta,                           # Web/FDSN.jl
 IRISget, irisws,                                              # Web/IRIS.jl
 SeedLink, SeedLink!, SL_info, has_sta, has_live_stream,       # Web/SeedLink.jl
 chanspec, webhdr,                                             # Web/WebMisc.jl
-gcdist, getbandcode, ls,                                      # Utils/
+gcdist, getbandcode, lcfs,                                    # Utils/
 fctopz, translate_resp, equalize_resp!,                       # Utils/resp.jl
-d2u, j2md, md2j, parsetimewin, timestamp, u2d,                # Utils/time.jl
+d2u, j2md, md2j, parsetimewin, timestamp, u2d,                # CoreUtils/time.jl
+t_win, w_time,
+ls,                                                           # CoreUtils/ls.jl
 distaz!,                                                      # Misc/event_misc.jl
-autotap!, namestrip!, purge!,                                 # Misc/processing.jl
+autotap!, namestrip!, purge!, unscale!, demean!,              # Misc/processing.jl
 randseischannel, randseisdata, randseisevent, randseishdr     # Misc/randseis.jl
 
-# Everything depends on time.jl, which calls SeisIO.ls
-include("Utils/ls.jl")
-include("Utils/time.jl")
-# include("Utils/seisfscan.jl")
+# Everything depends on these
+include("CoreUtils/ls.jl")
+include("CoreUtils/time.jl")
 
 # Utilities that don't require SeisIO types to work
-include("Utils/autotuk.jl")
-include("Utils/bandcode.jl")
-include("Utils/findid.jl")
-include("Utils/gcdist.jl")
-include("Utils/gap.jl")
-include("Utils/resp.jl")
-include("Utils/tnote.jl")
+for i in readdir(path*"/Utils")
+  include(joinpath("Utils",i))
+end
 
 # Types and core type functionality
 include("Types/SEED.jl")
@@ -56,19 +53,16 @@ include("Types/sync.jl")
 include("Types/write.jl")
 
 # Miscellaneous SeisIO-dependent functions
-include("Misc/event_misc.jl")
-include("Misc/processing.jl")
-include("Misc/randseis.jl")
-include("Misc/equalize_resp.jl")
+for i in readdir(path*"/Misc")
+  include(joinpath("Misc",i))
+end
 
 # Data formats
-include("Formats/mSEED.jl")
-include("Formats/LennartzAsc.jl")
-include("Formats/SAC.jl")
-include("Formats/SEGY.jl")
-include("Formats/UW.jl")
-include("Formats/Win32.jl")
-include("Formats/batch_read.jl")
+for i in readdir(path*"/Formats")
+  if endswith(i, ".jl")
+    include(joinpath("Formats",i))
+  end
+end
 
 # Web clients
 include("Web/parse_chstr.jl")
@@ -77,5 +71,4 @@ include("Web/WebMisc.jl")         # Common functions for web data access
 include("Web/FDSN.jl")
 include("Web/IRIS.jl")            # IRISws command line client
 include("Web/SeedLink.jl")
-# include("Web/SLConfig.jl")
 end

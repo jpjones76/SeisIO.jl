@@ -13,7 +13,7 @@ function ungap!(S::SeisChannel; m=true::Bool, w=true::Bool)
   return S
 end
 function ungap!(S::SeisData; m=true::Bool, w=true::Bool)
-  for i = 1:1:S.n
+  for i = 1:S.n
     N = size(S.t[i],1)-2
     (N ≤ 0 || S.fs[i] == 0) && continue
     gapfill!(S.x[i], S.t[i], S.fs[i], m=m, w=w)
@@ -62,8 +62,10 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
   v=false::Bool, z=true::Bool)
 
   # PREPROCESS
-  z && deleteat!(S, find([isempty(S.x[i]) for i =1:1:S.n])) # delete (zap) empty channels
+  z && deleteat!(S, find([isempty(S.x[i]) for i =1:S.n])) # delete (zap) empty channels
   ungap!(S, m=false, w=false)                               # ungap
+
+  S.n < 2 && return nothing                                 # pointless to continue
 
   # Resample
   if resample && S.n > 1
@@ -93,7 +95,7 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
   k = find((S.fs .> 0).*[!isempty(S.x[i]) for i=1:S.n])
   for i in k
     start_times[i] = S.t[i][1,2]
-    end_times[i] = start_times[i] + round(Int, (length(S.x[i])-1)/(SeisIO.μs*S.fs[i]))
+    end_times[i] = start_times[i] + round(Int64, (length(S.x[i])-1)/(SeisIO.μs*S.fs[i]))
   end
   # Do not edit order of operations -------------------------------------------
 
@@ -128,7 +130,7 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
   # Synchronization loop
   for i in k
     fμs = S.fs[i]*SeisIO.μs
-    dt = round(Int, 1/fμs)
+    dt = round(Int64, 1/fμs)
     mx = mean(S.x[i])
 
     # truncate X to values within bounds
@@ -138,22 +140,22 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
 
     # prepend points to time series data that begin late
     if (start_times[i] - t_start) >= dt
-      ni = round(Int, (start_times[i]-t_start)*fμs)
+      ni = round(Int64, (start_times[i]-t_start)*fμs)
       prepend!(S.x[i], collect(Main.Base.Iterators.repeated(mx, ni)))
       note!(S, i, join(["+p: prepended ", ni, " values."]))
     end
-    end_times[i] = t_start + round(Int, length(S.x[i])/fμs)
+    end_times[i] = t_start + round(Int64, length(S.x[i])/fμs)
 
     # append points to time series data that end early
     if (t_end - end_times[i]) >= dt
-      ii = round(Int, (t_end-end_times[i])*fμs)
+      ii = round(Int64, (t_end-end_times[i])*fμs)
       append!(S.x[i], collect(Main.Base.Iterators.repeated(mx, ii)))
       note!(S, i, join(["+p: appended ", ii, " values."]))
     end
     S.t[i] = [1 t_start; length(S.x[i]) 0]
     note!(S, i, "+p: synched to "*sstr*" -- "*tstr)
   end
-  return S
+  return nothing
 end
 
 """

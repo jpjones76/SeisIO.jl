@@ -80,7 +80,7 @@ function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, b::Bool)
     if isempty(X[i])
       str[p+1:p+7,1] = Vector{UInt8}("(empty)")
     else
-      for k = 1:1:min(6,L+2)
+      for k = 1:min(6,L+2)
         if k <= length(X[i])
           s = float_str(X[i][k])
         end
@@ -96,7 +96,7 @@ function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, b::Bool)
     p += w
     i += 1
   end
-  for i = 1:1:6
+  for i = 1:6
     if i == 1
       println(io, replace(String(str[:,i]),'\0',' '), showtail(io, b))
     else
@@ -121,7 +121,7 @@ function resp_str(io::IO, X::Array{Array{Complex{Float64},2},1}, w::Int, W::Int,
       L = size(R,1)
       zstr = ""
       pstr = ""
-      for j = 1:1:L
+      for j = 1:L
         zstr *= string(float_str(real(R[j,1])), " + ", float_str(imag(R[j,1])), "i")
         pstr *= string(float_str(real(R[j,2])), " + ", float_str(imag(R[j,2])), "i")
         if L > 1 && j < L
@@ -141,7 +141,7 @@ function resp_str(io::IO, X::Array{Array{Complex{Float64},2},1}, w::Int, W::Int,
     p += w
     i += 1
   end
-  [println(io, replace(String(sd[:,i]),'\0',' '), showtail(io,b)) for i=1:1:2]
+  [println(io, replace(String(sd[:,i]),'\0',' '), showtail(io,b)) for i=1:2]
   return
 end
 
@@ -180,14 +180,14 @@ function show(io::IO, S::SeisData)
   println(io, "SeisData with ", nc, " channels (", N, " shown)")
   show_str(io, S.id[1:N], w, W, "id", N<nc)
   show_str(io, S.name[1:N], w, W, "name", N<nc)
-  show_str(io, [@sprintf("%0.03f, %0.03f, %0.03f", S.loc[i][1], S.loc[i][2], S.loc[i][3]) for i = 1:1:N], w, W, "loc", N<nc)
+  show_str(io, [@sprintf("%0.03f, %0.03f, %0.03f", S.loc[i][1], S.loc[i][2], S.loc[i][3]) for i = 1:N], w, W, "loc", N<nc)
   show_str(io, [@sprintf("%.04g", S.fs[i]) for i = 1:N], w, W, "fs", N<nc)
   show_str(io, [@sprintf("%.03e", S.gain[i]) for i = 1:N], w, W, "gain", N<nc)
   resp_str(io, S.resp[1:N], w, W, N<nc)
   show_str(io, S.units[1:N], w, W, "units",N<nc)
   show_str(io, S.src[1:N], w, W, "src", N<nc)
-  show_str(io, [string(length(S.notes[i]), " entries") for i = 1:1:N],w,W,"NOTES",N<nc)
-  show_str(io, [string(length(S.misc[i]), " items") for i = 1:1:N],w,W,"MISC",N<nc)
+  show_str(io, [string(length(S.notes[i]), " entries") for i = 1:N],w,W,"NOTES",N<nc)
+  show_str(io, [string(length(S.misc[i]), " items") for i = 1:N],w,W,"MISC",N<nc)
   show_t(io, S.t[1:N], w, W, N<nc)
   show_x(io, S.x[1:N], w, W, N<nc)
   show_conn(io, S.c)
@@ -204,7 +204,7 @@ function show(io::IO, S::SeisChannel)
   println(io, "SeisChannel with ", nx, " samples")
   show_str(io, [S.id], w, W, "id", false)
   show_str(io, [S.name], w, W, "name", false)
-  [show_str(io, [string(S.loc[j])], w, W, loc_str[j], false) for j=1:1:5]
+  [show_str(io, [string(S.loc[j])], w, W, loc_str[j], false) for j=1:5]
   show_str(io, [string(S.fs)], w, W, "fs", false)
   show_str(io, [float_str(S.gain)], w, W, "gain", false)
   resp_str(io, [S.resp], w, W, false)

@@ -123,7 +123,7 @@ function rdata(io::IOStream)
   Base.gc_enable(false)
   N = convert(Int64, read(io, UInt32))
   S = SeisData(N)
-  for i = 1:1:N
+  for i = 1:N
 
     # int
     i64 = read(io, Int64, 8)
@@ -194,7 +194,7 @@ function rseis(files::Array{String,1}; v=0::Int)
     C = read(io, UInt8, L)
     B = read(io, UInt64, L)
     (v > 0) && @printf(STDOUT, "Reading %i total objects from file %s.\n", L, f)
-    for i = 1:1:L
+    for i = 1:L
       if C[i] == 0x48
         push!(A, rhdr(io))
       elseif C[i] == 0x45
@@ -228,7 +228,7 @@ function rseis(files::Array{String,1}, c::Array{Int,1}; v=0::Int)
     C = read(io, UInt8, L)
     B = read(io, UInt64, L)
     (v > 0) && @printf(STDOUT, "Reading %i total objects from file %s.\n", L, f)
-    for k = 1:1:length(c)
+    for k = 1:length(c)
       if c[k] > length(L)
         warn(string("Skipped file=", f, ", k=", c[k], " (no such record \#)"))
         continue

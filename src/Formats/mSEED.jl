@@ -37,7 +37,7 @@ end
 function parserec!(S::SeisData, sid::IO, v::Int)
   # =========================================================================
   # Fixed section of data header (48 bytes)
-  @inbounds for i = 1:1:20
+  @inbounds for i = 1:20
     SEED.hdr[i]   = read(sid, UInt8)
   end
   SEED.u16[1]     = read(sid, UInt16)
@@ -50,7 +50,7 @@ function parserec!(S::SeisData, sid::IO, v::Int)
   n               = read(sid, UInt16)
   SEED.r[1]       = read(sid, Int16)
   SEED.r[2]       = read(sid, Int16)
-  @inbounds for i = 1:1:4
+  @inbounds for i = 1:4
     SEED.u8[i]    = read(sid, UInt8)
   end
   tc              = read(sid, Int32)
@@ -71,7 +71,7 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     SEED.r[1] = bswap(SEED.r[1])
     SEED.r[2] = bswap(SEED.r[2])
     tc = bswap(tc)
-    @inbounds for i = 1:1:5
+    @inbounds for i = 1:5
       SEED.u16[i] = bswap(SEED.u16[i])
     end
     n = bswap(n)
@@ -126,7 +126,7 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     L = length(S.x[c])
     nt = size(S.t[c], 1)
     xi = S.t[c][nt, 1]
-    te = getindex(sum(S.t[c], 1), 2) + round(Int, L*SEED.dt*sμ)
+    te = getindex(sum(S.t[c], 1), 2) + round(Int64, L*SEED.dt*sμ)
   end
 
   # =========================================================================
@@ -150,10 +150,10 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     elseif bt == 0x00c9
       # [201] Murdock Event Detection Blockette (60 bytes)
       skip(sid, 2)
-      for j = 1:1:3
+      for j = 1:3
         SEED.B201.sig[j]    = read(sid, Float32)
       end
-      for j = 1:1:2
+      for j = 1:2
         SEED.B201.flags[j]  = read(sid, UInt8, 2)
       end
       blk_time!(SEED.B201.t, sid, SEED.bswap)
@@ -161,7 +161,7 @@ function parserec!(S::SeisData, sid::IO, v::Int)
       skip(sid, 32)
       SEED.nsk -= 0x003c
 
-      t_evt = round(Int, sμ*(d2u(DateTime(SEED.B201.t[1:6]..., 0)))) + SEED.B201.t[7] + TC
+      t_evt = round(Int64, sμ*(d2u(DateTime(SEED.B201.t[1:6]..., 0)))) + SEED.B201.t[7] + TC
       if haskey(S.misc[c], ["Events"])
         push!(S.misc[c]["Events"], t_evt)
       else
@@ -215,7 +215,7 @@ function parserec!(S::SeisData, sid::IO, v::Int)
       SEED.B2000.blk_length     = ntoh(read(sid, UInt16))
       SEED.B2000.odos           = ntoh(read(sid, UInt16))
       SEED.B2000.record_number  = ntoh(read(sid, UInt32))
-      for j = 1:1:3
+      for j = 1:3
         SEED.B2000.flags[j]       = read(sid, UInt8)
       end
       SEED.B2000.header_fields  = String[String(j) for j in split(String(read(sid, UInt8, Int(SEED.B2000.odos)-15)), '\~', keep=true, limit=SEED.B2000.flags[3])]
@@ -265,20 +265,17 @@ function parserec!(S::SeisData, sid::IO, v::Int)
       T = Float64
     end
     nv = div(SEED.nx - SEED.u16[4], sizeof(T))
-    d = read(sid, T, nv)
-    if SEED.swap
-      for i = 1:1:nv
-        d[i] = ntoh(d[i])
-      end
+    for i = 1:nv
+      SEED.x[i] = Float64(SEED.swap ? ntoh(read(sid, T)) : read(sid, T))
     end
-    unsafe_copy!(SEED.x, 1, d, 1, n)
+    unsafe_copy!(getfield(S,:x)[c], xi+1, SEED.x, 1, n)
 
   # Steim1 or Steim2
   elseif SEED.fmt in (0x0a, 0x0b)
     nf = div(SEED.nx-SEED.u16[4], 0x0040)
     SEED.k = 0
-    @inbounds for i = 1:1:nf
-      for j = 1:1:16
+    @inbounds for i = 1:nf
+      for j = 1:16
         SEED.u[1] = SEED.xs ? bswap(read(sid, UInt32)) : read(sid, UInt32)
         if j == 1
           SEED.u[2] = copy(SEED.u[1])
@@ -347,7 +344,7 @@ function parserec!(S::SeisData, sid::IO, v::Int)
 
     # Cumsum by hand
     xa = SEED.x0
-    @inbounds for i = 2:1:n
+    @inbounds for i = 2:n
       xa += SEED.x[i]
       SEED.x[i] = xa
  	  end
@@ -363,7 +360,7 @@ function parserec!(S::SeisData, sid::IO, v::Int)
   end
 
   # Correct time matrix
-  dts = round(Int, sμ*(d2u(DateTime(SEED.t[1:6]...)))) + SEED.t[7] + TC - te
+  dts = round(Int64, sμ*(d2u(DateTime(SEED.t[1:6]...)))) + SEED.t[7] + TC - te
   if te == 0
     S.t[c] = Array{Int64,2}(2,2)
     S.t[c][1] = one(Int64)
@@ -394,7 +391,7 @@ function parsemseed!(S::SeisData, sid::IO, v::Int)
   while !eof(sid)
     parserec!(S, sid, v)
   end
-  for i = 1:1:S.n
+  for i = 1:S.n
     if length(S.x[i]) > S.t[i][end,1]
       resize!(S.x[i], S.t[i][end,1])
     end
