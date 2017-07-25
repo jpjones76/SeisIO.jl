@@ -99,7 +99,7 @@ Get the index to the first channel `c` in S where `S.id[c]==C.id`.
 """
 function findid(C::SeisChannel, S::SeisData)
   c = 0
-  for i = 1:1:S.n
+  for i = 1:S.n
     if S.id[i] == C.id
       c = i
       break

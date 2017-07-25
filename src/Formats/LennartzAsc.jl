@@ -13,7 +13,7 @@ function rlennasc(f::String)
 
   sta = replace(h[3],"\'", "")
   S.fs = 1000/parse(h[5])
-  ts = round(Int, Dates.datetime2unix(DateTime(join([h[8],"T",h[9]])))/μs)
+  ts = round(Int64, Dates.datetime2unix(DateTime(join([h[8],"T",h[9]])))/μs)
 
   cmp = split(fname,'.')[end]
   x = readdlm(fid)

@@ -124,7 +124,7 @@ function IRISget(C::Array{String,1};
 
   seis = SeisData()
   v>0 && println("IRIS web fetch begins...")
-  for k = 1:1:K
+  for k = 1:K
     seis += irisws(C[k], fmt="mseed", s=d0, t=d1, v=v, to=to, w=w)
   end
   if y == true

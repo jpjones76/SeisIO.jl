@@ -234,7 +234,7 @@ Julia code for converting between data types and UInt8 type codes is given below
     return t
   end
 
-  tos(t::Type) = round(Int, log2(sizeof(t)))
+  tos(t::Type) = round(Int64, log2(sizeof(t)))
   function typ2code(t::Type)
     n = 0xff
     if t == Char

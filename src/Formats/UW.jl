@@ -43,7 +43,7 @@ function uwpf!(S::SeisEvent, pickfile::String; v=0::Int)
     m += 1
     sta = pline[2:4]
     cmp = pline[6:8]
-    for j = 1:1:N
+    for j = 1:N
       if contains(S.data.id[j], sta) && contains(S.data.id[j], cmp)
         p = search(pline, "(P P")
         if !isempty(p)
@@ -102,7 +102,7 @@ function uwpf(pickfile::String, v::Int)
   L = length(si)
 
   if length(A) > (14+y)
-    ah = [A[si[i]:ei[i]] for i=1:1:L]
+    ah = [A[si[i]:ei[i]] for i=1:L]
     # Parse numeric and string headers
     nh = [parse(ah[i]) for i in [1,4,6,7,8,9,10,11,12]]
     #    [sec, evdp, mag, numsta, numpha, gap, dmin, rms, err]
@@ -233,7 +233,7 @@ function uwdf(datafile::String; v=0::Int)
   if uwformat == 2
     seekend(fid)
     skip(fid, structs_os)
-    for i1 = 1:1:nstructs
+    for i1 = 1:nstructs
       structtag     = replace(String(read(fid, UInt8, 4)),"\0","")
       nstructs      = bswap(read(fid, Int32))
       byteoffset    = bswap(read(fid, Int32))
@@ -242,7 +242,7 @@ function uwdf(datafile::String; v=0::Int)
       elseif structtag == "TC2"
         fpos = position(fid)
         seek(fid, byteoffset)
-        for n = 1:1:nstructs
+        for n = 1:nstructs
           push!(chno,read(fid, Int32))
           push!(corr,read(fid, Int32))
         end
@@ -260,7 +260,7 @@ function uwdf(datafile::String; v=0::Int)
   # Write time corrections
   timecorr = zeros(Float32, N)
   if length(chno) > 0
-    for n = 1:1:length(chno)
+    for n = 1:length(chno)
       timecorr[chno[n]] = corr[n]*Float32(1.0e-6)
     end
   end
@@ -272,7 +272,7 @@ function uwdf(datafile::String; v=0::Int)
     f = Array{DataType,1}(N)
     I32 = Array{Int32,2}(6,N)  # chlen, offset, lmin, lsec, fs, expan1
     U8 = Array{UInt8,2}(32,N)  # (8 = 4*int16, unused) + name(8), tmp(4), compflg(4), chid(4)
-    for i = 1:1:N
+    for i = 1:N
       I32[1:6,i] = read(fid, Int32,  6)
       U8[1:32,i] = read(fid, UInt8, 32)
     end
@@ -312,10 +312,10 @@ function uwdf(datafile::String; v=0::Int)
     id = [replace(String(s[:,i]),"\0","") for i=1:N]
     X = Array{Array{Float64,1},1}(N)
     T = Array{Array{Int64,2},1}(N)
-    for i = 1:1:N
+    for i = 1:N
       seek(fid, ch_os[i])
       X[i] = [bswap(j) for j in read(fid, f[i], ch_len[i])]
-      T[i] = [1 round(Int, ch_time[i]*1000000); length(X[i]) 0]
+      T[i] = [1 round(Int64, ch_time[i]*1000000); length(X[i]) 0]
     end
   end
   close(fid)
@@ -354,7 +354,7 @@ function readuw(filename::String; v=0::Int)
   pf = String("")
   df = String("")
   ec = UInt8(filename[end])
-  lc = collect(UInt8, 0x61:1:0x7a)
+  lc = collect(UInt8, 0x61:0x7a)
   if Base.in(ec, lc)
     pf = filename
     df = filename[1:end-1]*"W"

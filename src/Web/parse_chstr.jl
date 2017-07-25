@@ -4,7 +4,7 @@ function parse_charr(chan_in::Array{String,1}; d='.'::Char, fdsn=false::Bool)
     default = ""
 
     # Initial pass to parse to string array
-    for i = 1:1:N
+    for i = 1:N
       chan_line = [strip(String(j)) for j in split(chan_in[i], d, keep=true, limit=5)]
       L = length(chan_line)
       if L < 2
@@ -24,7 +24,7 @@ function parse_chstr(chan_in::String; d=','::Char, fdsn=false::Bool)
     return parse_chstr(join([strip(j, ['\r','\n']) for j in filter(i -> !startswith(i, ['\#','\*']), open(readlines, chan_in))],','))
   else
     chan_data = [strip(String(j)) for j in split(chan_in, d)]
-    for j = 1:1:length(chan_data)
+    for j = 1:length(chan_data)
 
       # Build array
       tmp_data = map(String, split(chan_data[j], '.'))
@@ -74,7 +74,7 @@ function minreq!(S::Array{String,2})
     V = T[:,J]
     U = unique(V)
     Q = Array{String,2}(L,N)
-    for i = 1:1:L
+    for i = 1:L
       j = find(V.==U[i])
       Q[i,1:N.!=J] = split(V[j[1]],d)
       Q[i,J] = join(S[j,J],d)

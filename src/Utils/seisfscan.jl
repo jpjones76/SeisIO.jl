@@ -28,7 +28,7 @@ function seisfscan(fstr::String, ids::Array{String,1}; s=(-62167219200)::Real, t
 
   K = Array{BitArray{1}}(J)
   [K[j] = falses(1) for j = 1:J]
-  for f = 1:1:F
+  for f = 1:F
     # Open the file
     io = open(files[f], "r")
     seek(io, position(seekend(io))-24)
@@ -43,7 +43,7 @@ function seisfscan(fstr::String, ids::Array{String,1}; s=(-62167219200)::Real, t
     M = zeros(Int64, L, J)
 
     # Loop over each record's IDs to check for matches
-    for i = 1:1:L
+    for i = 1:L
       fids = split(ID[i], '\0', keep=true)
       N[i] = length(fids)
       for (j,id) in enumerate(ids)
@@ -54,10 +54,10 @@ function seisfscan(fstr::String, ids::Array{String,1}; s=(-62167219200)::Real, t
         end
       end
     end
-    if (s > -62167219200|| t < 253402257599) && maximum([maximum(K[j]) for j = 1:1:J]) == true
+    if (s > -62167219200|| t < 253402257599) && maximum([maximum(K[j]) for j = 1:J]) == true
 
       # Loop over each record to check start time
-      for i = 1:1:L
+      for i = 1:L
         for j = 1:length(ids)
           if M[i,j] > 0
             seek(io, y + 8*(M[i,j]-1))
@@ -71,9 +71,9 @@ function seisfscan(fstr::String, ids::Array{String,1}; s=(-62167219200)::Real, t
       end
 
       # Loop over each record to check end time
-      tf = maximum([maximum(K[j]) for j = 1:1:J])
+      tf = maximum([maximum(K[j]) for j = 1:J])
       if tf == true
-        for i = 1:1:L
+        for i = 1:L
           for j = 1:length(ids)
             if M[i,j] > 0
               seek(io, z + 8*(M[i,j]-1))

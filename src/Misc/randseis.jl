@@ -2,7 +2,7 @@
 OK = [0x00, 0x01, 0x10, 0x11, 0x12, 0x13, 0x14, 0x20, 0x21, 0x22, 0x23, 0x24, 0x30, 0x31, 0x32, 0x50, 0x51, 0x52, 0x53, 0x54, 0x60, 0x61, 0x62, 0x63, 0x64, 0x70, 0x71, 0x72, 0x80, 0x81, 0x90, 0x91, 0x92, 0x93, 0x94, 0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xb0, 0xb1, 0xb2, 0xd0, 0xd1, 0xd2, 0xd3, 0xd4, 0xe0, 0xe1, 0xe2, 0xe3, 0xe4, 0xf0, 0xf1, 0xf2]
 
 function pop_rand!(D::Dict{String,Any}, N::Int)
-  for n = 1:1:N
+  for n = 1:N
     t = code2typ(rand(OK))
     k = randstring(rand(2:12))
     if isa(Char, t)
@@ -172,13 +172,13 @@ function populate_chan!(S::SeisChannel; c=false::Bool)
     if irreg
       L+=2
       S.x = rand(L) .* 10.^(rand(1:10, L))
-      t = [Int64(0) round(Int, ts/μs); zeros(Int64, L-1) round.(Int, diff(sort(rand(2:1:Lx, L)))/(μs*S.fs))]
+      t = [Int64(0) round(Int64, ts/μs); zeros(Int64, L-1) round.(Int, diff(sort(rand(2:Lx, L)))/(μs*S.fs))]
       S.fs = 0
       S.units = rand(irregular_units)
     else
       S.x = randn(Lx)
       t = zeros(2+L, 2)
-      t[1,:] = [1 round(Int, ts/μs)]
+      t[1,:] = [1 round(Int64, ts/μs)]
       t[2:L+1,:] = [rand(2:Lx, L, 1) round.(Int, rand(L,1)./μs)]
       t[L+2,:] = [Lx 0]
       S.t = sortrows(t)
@@ -211,7 +211,7 @@ Add "c=true" to either function call to allow random channels of non-timeseries
 data (i.e. `c`ampaign channels, with no definable Fs).
 """
 function populate_seis!(S::SeisData; c=false::Bool)
-  for j = 1:1:S.n
+  for j = 1:S.n
     eflag = false
       for i in datafields(S)
         if isempty(S.(i)[j])
@@ -258,8 +258,8 @@ function randseishdr()
   setfield!(H, :np, [(rand(), rand(), rand()), (rand(), rand(), rand())])
   setfield!(H, :pax, [(rand(), rand(), rand()), (rand(), rand(), rand()), (rand(), rand(), rand())])
   setfield!(H, :src, randstring(rand(16:256)))
-  pop_rand!(H.misc, rand(4:1:24))
-  [note!(H, randstring(rand(16:1:256))) for i = 1:1:rand(3:1:18)]
+  pop_rand!(H.misc, rand(4:24))
+  [note!(H, randstring(rand(16:256))) for i = 1:rand(3:18)]
   return H
 end
 

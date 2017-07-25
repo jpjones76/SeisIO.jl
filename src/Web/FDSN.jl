@@ -2,7 +2,7 @@
 # No export
 function LightXML_plunge(xtmp::Array{LightXML.XMLElement,1}, str::AbstractString)
   xtmp2 = Array{LightXML.XMLElement,1}()
-  for i=1:1:length(xtmp)
+  for i=1:length(xtmp)
     append!(xtmp2, get_elements_by_tagname(xtmp[i], str))
   end
   return xtmp2
@@ -10,7 +10,7 @@ end
 
 function LightXML_find(xtmp::Array{LightXML.XMLElement,1}, str::String)
   S = split(str, "/")
-  for i=1:1:length(S)
+  for i=1:length(S)
     xtmp = LightXML_plunge(xtmp, S[i])
   end
   return xtmp
@@ -81,7 +81,7 @@ function FDSN_sta_xml(string_data::String)
   GAIN  = Array{Float64,1}(N)
   RESP  = Array{Array{Complex{Float64},2}}(N)
   MISC  = Array{Dict{String,Any}}(N)
-  for i = 1:1:N
+  for i = 1:N
     MISC[i] = Dict{String,Any}()
   end
   y = 0
@@ -122,7 +122,7 @@ function FDSN_sta_xml(string_data::String)
           xstages = LightXML_find(xresp[1], "Stage")
           for stage in xstages
             pz = LightXML_find(stage, "PolesZeros")
-            for j = 1:1:length(pz)
+            for j = 1:length(pz)
               append!(czs, [complex(LightXML_float!(0.0, z, "Real"), LightXML_float!(0.0, z, "Imaginary")) for z in LightXML_find(pz[j], "Zero")])
               append!(cps, [complex(LightXML_float!(0.0, p, "Real"), LightXML_float!(0.0, p, "Imaginary")) for p in LightXML_find(pz[j], "Pole")])
             end
@@ -131,7 +131,7 @@ function FDSN_sta_xml(string_data::String)
         NZ = length(czs)
         NP = length(cps)
         if NZ < NP
-          for z = NZ+1:1:NP
+          for z = NZ+1:NP
             push!(czs, complex(0.0,0.0))
           end
         end
@@ -186,7 +186,7 @@ function FDSNget(C::Array{String,2};
   v > 1 && println(STDOUT, "Most compact request form = ", C)
   d0, d1 = parsetimewin(s, t)
   uhead = get_uhead(src)
-  for j = 1:1:size(C,1)
+  for j = 1:size(C,1)
     utail = build_stream_query(C[j,:], d0, d1)
     data_url = string(uhead, "dataselect/1/query?quality=", q, "&", utail)
     v > 0 && println(STDOUT, "data url = ", data_url)
@@ -299,7 +299,7 @@ function FDSNevq(ts::String;
   ts = d2u(DateTime(ts))
   s = string(u2d(ts-w))
   t = string(u2d(ts+w))
-  tsi = round(Int, ts*sμ)
+  tsi = round(Int64, ts*sμ)
 
   # Do multi-server query (not tested)
   if lowercase(src) == "all"
@@ -325,7 +325,7 @@ function FDSNevq(ts::String;
       for i = 1:length(id)
         eh = SeisHdr(id=id[i], ot=ot_tmp[i], loc=loc[:,i], mag=(mm[i], msc[1,i], msc[2,i]), src=url)
         push!(catalog, eh)
-        push!(ot, round(Int, d2u(eh.ot)*sμ))
+        push!(ot, round(Int64, d2u(eh.ot)*sμ))
       end
       v > 1 && println(STDOUT, "catalog = ", catalog)
     end
@@ -357,7 +357,7 @@ function FDSNsta(CC::Array{String,2};
   d0, d1 = parsetimewin(st, et)
   uhead = string(get_uhead(src), "station/1/query?")
   seis = SeisData()
-  for j = 1:1:size(CC,1)
+  for j = 1:size(CC,1)
     utail = build_stream_query(CC[j,:], d0, d1) * "&format=text&level=channel"
     sta_url = string(uhead, utail)
     v > 0 && println(STDOUT, "Retrieving station data from URL = ", sta_url)
@@ -366,7 +366,7 @@ function FDSNsta(CC::Array{String,2};
       ch_data = readstring(R)
       v > 0 && println(STDOUT, ch_data)
       ch_data = split(ch_data,"\n")
-      for n = 2:1:size(ch_data,1)-1
+      for n = 2:size(ch_data,1)-1
         C = split(ch_data[n],"|")
         try
           #Network | Station | Location | Channel
@@ -461,7 +461,7 @@ function FDSNevt(evt::String, cc::String;
   # If a phase name is supplied, request window is spad s before that phase to epad s after next phase
   pstr = Array{String,1}(S.data.n)
   bads = falses(S.data.n)
-  for i = 1:1:S.data.n
+  for i = 1:S.data.n
     pdat = get_pha(S.data.misc[i]["dist"], S.hdr.loc[3], to=to, v=v)
     if pha == "all"
       j = get_phase_start(pdat)

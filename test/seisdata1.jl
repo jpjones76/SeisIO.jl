@@ -5,9 +5,9 @@ segy_file = path*"/SampleFiles/02.050.02.01.34.0572.6"
 uw_root = path*"/SampleFiles/99062109485W"
 const μs = 1.0e-6
 
-t1 = round(Int,time()/μs)
-ts = t1+round(Int,0.25/μs)
-te = t1+round(Int,0.75/μs)
+t1 = round(Int64,time()/μs)
+ts = t1+round(Int64,0.25/μs)
+te = t1+round(Int64,0.75/μs)
 fs1 = 50.0
 
 # s1 and s2 represent data from a fictitious channel

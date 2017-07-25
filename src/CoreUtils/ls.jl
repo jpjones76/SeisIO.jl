@@ -9,7 +9,7 @@ function listfiles(d::String, p::AbstractString)
     # start
     filter!(k->startswith(k, S[1]), F)
     # middle
-    length(S) > 2 && [filter!(k->contains(k, S[i]), F) for i = 2:1:length(S)-1]
+    length(S) > 2 && [filter!(k->contains(k, S[i]), F) for i = 2:length(S)-1]
     # end
     filter!(k->endswith(k, S[end]), F)
   end
@@ -33,11 +33,11 @@ function ls(s::String)
       return listfiles(pwd(), K[1])
     else
       F = Array{String,1}(K[1:1])
-      for i = 1:1:length(K)-1
+      for i = 1:length(K)-1
         β = Array{String,1}()
-        for j = 1:1:length(F)
+        for j = 1:length(F)
           α = listfiles(string(F[j],"/"), K[i+1])
-          append!(β, String[string(F[j],"/",α[k]) for k=1:1:length(α)])
+          append!(β, String[string(F[j],"/",α[k]) for k=1:length(α)])
         end
         F = deepcopy(β)
       end

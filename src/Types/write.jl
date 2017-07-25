@@ -30,7 +30,7 @@ function writestr_varlen(io::IOStream, s::String)
 end
 
 # allowed values in misc: char, string, numbers, and arrays of same.
-tos(t::Type) = round(Int, log2(sizeof(t)))
+tos(t::Type) = round(Int64, log2(sizeof(t)))
 function typ2code(t::Type)
   n = 0xff
   if t == Char
@@ -116,8 +116,8 @@ end
 # SeisData
 function w_struct(io::IOStream, S::SeisData)
   write(io, UInt32(S.n))
-  x = Array{UInt8,1}(maximum([sizeof(S.x[i]) for i=1:1:S.n]))
-  for i = 1:1:S.n
+  x = Array{UInt8,1}(maximum([sizeof(S.x[i]) for i=1:S.n]))
+  for i = 1:S.n
     c = get_separator(join(S.notes[i]))
     r = length(S.resp[i])
     l = Blosc.compress!(x, S.x[i], level=9)
@@ -257,7 +257,7 @@ function wseis(S...; sf=false::Bool, path="./"::String, pref=""::String, name=""
 
   # try to find a string to set as a filename
   b = trues(L)
-  for i = 1:1:L
+  for i = 1:L
     if (typeof(S[i]) <: U) == false
       b[i] = false
       if isa(S[i], String) && fname == ""
@@ -304,7 +304,7 @@ function wseis(S...; sf=false::Bool, path="./"::String, pref=""::String, name=""
     skip(io, sizeof(C)+sizeof(B))
   end
 
-  for i = 1:1:L
+  for i = 1:L
     seis = (typeof(S[i]) == SeisChannel) ? SeisData(S[i]) : S[i]
 
     if sf
@@ -315,7 +315,7 @@ function wseis(S...; sf=false::Bool, path="./"::String, pref=""::String, name=""
         ID = Vector{UInt8}(join(seis.id,'\0'))
         TS = Array{Int64,1}(seis.n)
         TE = Array{Int64,1seis.n}()
-        for j = 1:1:seis.n
+        for j = 1:seis.n
           TS[j] = seis.t[j][1,2]
           TE[j] = TS[j] + sum(seis.t[j][2:end,2]) + round(Int64, 1.0e6*length(seis.x[j])/seis.fs[j])
         end
@@ -333,7 +333,7 @@ function wseis(S...; sf=false::Bool, path="./"::String, pref=""::String, name=""
         ID = Vector{UInt8}(join(seis.data.id,'\0'))
         TS = Array{Int64,1}(seis.n)
         TE = Array{Int64,1seis.n}()
-        for j = 1:1:seis.n
+        for j = 1:seis.n
           TS[j] = seis.data.t[j][1,2]
           TE[j] = TS[j] + sum(seis.data.t[j][2:end,2]) + round(Int64, 1.0e6*length(seis.data.x[j])/seis.data.fs[j])
         end
@@ -359,8 +359,8 @@ function wseis(S...; sf=false::Bool, path="./"::String, pref=""::String, name=""
       if typeof(seis) == SeisData
         C[i] = UInt8('D')
         id = Vector{UInt8}(join(seis.id,'\0'))
-        ts = vcat([seis.t[j][1,2] for j=1:1:seis.n]...)
-        te = ts .+ vcat([sum(seis.t[j][2:end,2]) for j=1:1:seis.n]...) + map(Int64, round.(1.0e6.*[length(seis.x[j]) for j=1:1:seis.n]./seis.fs))
+        ts = vcat([seis.t[j][1,2] for j=1:seis.n]...)
+        te = ts .+ vcat([sum(seis.t[j][2:end,2]) for j=1:seis.n]...) + map(Int64, round.(1.0e6.*[length(seis.x[j]) for j=1:seis.n]./seis.fs))
       elseif typeof(seis) == SeisHdr
         C[i] = UInt8('H')
         id = Array{UInt8,1}()
@@ -369,8 +369,8 @@ function wseis(S...; sf=false::Bool, path="./"::String, pref=""::String, name=""
       elseif typeof(seis) == SeisEvent
         C[i] = UInt8('E')
         id = Vector{UInt8}(join(seis.data.id,'\0'))
-        ts = vcat([seis.data.t[j][1,2] for j=1:1:seis.data.n]...)
-        te = ts .+ vcat([sum(seis.data.t[j][2:end,2]) for j=1:1:seis.data.n]...) + map(Int64, round.(1.0e6.*[length(seis.data.x[j]) for j=1:1:seis.data.n]./seis.data.fs))
+        ts = vcat([seis.data.t[j][1,2] for j=1:seis.data.n]...)
+        te = ts .+ vcat([sum(seis.data.t[j][2:end,2]) for j=1:seis.data.n]...) + map(Int64, round.(1.0e6.*[length(seis.data.x[j]) for j=1:seis.data.n]./seis.data.fs))
       end
       append!(TS, ts)
       append!(TE, te)

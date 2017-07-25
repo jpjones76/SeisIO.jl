@@ -101,7 +101,7 @@ function do_trace(f::IO; full=false::Bool, passcal=false::Bool, fh=zeros(Int16,3
 
   # Trace info
   (m,d)     = j2md(shorts[41], shorts[42])
-  ts        = round(Int, d2u(DateTime(shorts[41], m, d, shorts[43], shorts[44], shorts[45]))*1000000 +
+  ts        = round(Int64, d2u(DateTime(shorts[41], m, d, shorts[43], shorts[44], shorts[45]))*1000000 +
                    (shorts[53] + sum(shorts[15:17]))*1000)
   loc       = [lat, lon, el, 0.0, 0.0]
   t         = [1 ts; length(x) 0]
@@ -168,7 +168,7 @@ function readsegy(fname::String; passcal=false::Bool, full=false::Bool)
       skip(f, 3200*nh)
     else
       fhd = Dict{String,Any}()
-      fhd["exthdr"] = [replace(join(read(f, Cchar, 3200)),"\0"," ") for i = 1:1:nh]
+      fhd["exthdr"] = [replace(join(read(f, Cchar, 3200)),"\0"," ") for i = 1:nh]
       merge!(fhd, Dict{String,Any}(zip(["jobid", "lineid", "reelid", "ntr", "naux", "filedt", "origdt", "filenx",
       "orignx", "fmt", "cdpfold", "trasort", "vsum", "swst", "swen0", "swlen", "swtyp", "tapnum", "swtapst", "swtapen",
       "taptyp", "corrtra", "bgainrec", "amprec", "msys", "zupdn", "vibpol", "segyver", "isfixed", "ntxthdr"],
@@ -176,7 +176,7 @@ function readsegy(fname::String; passcal=false::Bool, full=false::Bool)
     end
 
     # Channel headers
-    for i = 1:1:fh[1]
+    for i = 1:fh[1]
       seis += do_trace(f, full=full, passcal=passcal, fh=fh[[3,5,7]], src=fname)
       seis.src[seis.n] = fname
       if full == true
@@ -206,7 +206,7 @@ function segyhdr(fname::String; passcal=false::Bool)
     p = 1
     w = 22
     @printf(STDOUT, "SEG-Y HEADER: %s\n", realpath(fname))
-    for i = 1:1:seis.n
+    for i = 1:seis.n
       if p > 1
         s = @sprintf("       %3i/%i", i, seis.n)
       else

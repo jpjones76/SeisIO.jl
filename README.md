@@ -5,7 +5,14 @@ A minimalist, platform-agnostic package for working with univariate geophysical 
 http://seisio.readthedocs.org
 
 # CHANGELOG
-## Current (2017-07-16)
+## 2017-07-24
+* Several minor bug fixes and performance improvements
+* Added functions:
+  + `lcfs`: Lowest common fs
+  + `t_win`, `w_time`: Convert between SeisIO time representations and time windows
+  + `demean!`, `unscale!`: Basic processing operations
+
+## 2017-07-16
 * `readmseed` rewritten; performance improvements should be very noticeable.
   + Many bugfixes.
   + SeisIO now uses a small (~500k) memory-resident structure for SEED packets.
@@ -16,18 +23,8 @@ http://seisio.readthedocs.org
 ## 2017-07-04
 * Updated for Julia v0.6.0. Compatibility with earlier versions is not guaranteed. Please report any deprecation warnings!
 
-## 2017-04-19
-* Moved pol_sort to the Polarization project.
-* SeisIO data files now include searchable indices at the end of each file.
-  + This change is backwards-compatible and won't affect the ability to read existing files.
-  + A file index contains the following information, written in this order:
-    - (length = ∑\_j∑\_i length(S.id[i])\_i) IDs for each trace in each object
-    - (length = 3∑\_j S.n\_j) start and end times and byte indices of each trace in each object. (time unit = integer μs from Unix epoch)
-    - Byte index to start of IDs.
-    - Byte index to start of Ints.
-
-## Known Issues (2017-07-16)
-* Julia 0.6.0 slowed batch_read execution time by roughly a factor of 4; it currently offers only ~10-20% speedup over standard file read methods and is not useful in present form. This is slated for an eventual rewrite.
+## Known Issues (2017-07-24)
+* batch_read is no longer useful. Julia 0.6.0 slowed batch_read execution time by roughly a factor of 4; it currently offers only ~10-20% speedup over standard file read methods.
 * Rarely, SeedLink! can cause a Julia session to hang by failing to initialize a connection.
 
 # Current Functionality

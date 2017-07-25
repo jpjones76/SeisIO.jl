@@ -115,6 +115,12 @@ Get near-real-time data from a single channel ``C``.
 
 Convert Julian day ``j`` of year ``y`` to month, day. Returns a tuple.
 
+.. function:: f = lcfs(fs::Array{Float64,1})
+
+Find *L*owest *C*ommon *fs*, the lowest fs at which data sampled at each frequency in `fs` can be upsampled by repeating an integer number of copies of each sample value.
+
+For ridiculous or arbitrary combinations of sampling rates, e.g. `lcfs([62.5, 48.3, 3.0])`, you should really just use `DSP.resample` to approximate.
+
 .. function:: j = md2j(y, m, d)
 
 Convert month ``m``, day ``d`` of year ``y`` to Julian day ``j``.
@@ -216,6 +222,14 @@ Synchronize the start and end times of all trace data in SeisData structure ``S`
 
 "Safe" synchronize of start and end times of all trace data in SeisData structure ``S`` to a new structure ``U``.
 
+.. function:: w = t_win(T, fs)
+
+Convert matrix T from sparse delta-encoded time gaps to time windows (w[:,1]:w[:,2]) in integer μs from the Unix epoch (1970-01-01T00:00:00). Specify fs in Hz.
+
+``W = t_win(S::SeisData)``
+
+Convert S.t to time windows, as above, s.t. W[i] = t_win(S.t[i], S.fs[i])
+
 .. function:: timestamp()
 
 Return the current UTC time formatted yyyy-mm-ddTHH:MM:SS.
@@ -247,6 +261,10 @@ Parse UW event pick file ``pfname`` into SeisEvent structure ``evt``.
 .. function:: S = uwpf(pfname)
 
 Parse UW event pick file ``pfname`` into a new SeisEvent structure.
+
+fuinction:: w = w_time(W::Array{Int64,2}, fs::Float64)
+
+Convert matrix W from time windows (w[:,1]:w[:,2]) in integer μs from the Unix epoch (1970-01-01T00:00:00) to sparse delta-encoded time representation. Specify fs in Hz.
 
 .. function:: webhdr()
 

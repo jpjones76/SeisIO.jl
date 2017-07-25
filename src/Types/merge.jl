@@ -7,7 +7,7 @@ function fastmerge!(X::Array{Array{Float64,1}}, T::Array{Array{Int64,2},1},
   flag::BitArray{1}, w::Array{Int64,1}, id::String)
   c = indmax(ts[p])
   ω = p[c]
-  for k = 1:1:length(p)
+  for k = 1:length(p)
     k == c && continue
     κ = p[k]
     δs = (ts[κ] - ts[ω])
@@ -94,7 +94,7 @@ function ufar!(X::Array{Array{Float64,1}}, T::Array{Array{Int64,2},1},
   ts::Array{Int64,1}, te::Array{Int64,1})
 
   sμs = round(Int64, SeisIO.sμ/FS[c])
-  for k = 1:1:length(p)
+  for k = 1:length(p)
     κ = p[k]
 
     # Set S.t[κ][1,2] to integer \# of samples from epoch at reference fs
@@ -117,7 +117,7 @@ function ufar!(X::Array{Array{Float64,1}}, T::Array{Array{Int64,2},1},
     os = 1
 
     # Resample / translate each segment ----------------------------------
-    for j = 1:1:J
+    for j = 1:J
       j == 1 && continue
       si = T[κ][j-1,1]
       if j == J
@@ -258,7 +258,7 @@ function merge!(S::SeisData)
         # Check for simple polarity reversals
         if (ul[1][1:4] == ul[2][1:4]) && (mod(ul[1][5],180)==mod(ul[2][5],180))
           println(STDOUT, string(id, ": polarity reversal; sign of affected data will be flipped."))
-          fl = find([LOC[k]==ul[2] for k=1:1:K])
+          fl = find([LOC[k]==ul[2] for k=1:K])
           P[fl] = -1.0
         end
       else
@@ -322,16 +322,16 @@ function merge!(S::SeisData)
     G = Array{Array{Int64,1},1}(0)
     c = 0
     ω = 0
-    @inbounds for k = 1:1:K
+    @inbounds for k = 1:K
       κ = C[k]
       if haskey(S.misc[κ], "hc")
         HC[k] = S.misc[κ]["hc"]
       end
       ts[k] = S.t[κ][1,2]
       if fs > 0.0
-        te[k] = sum(S.t[κ][:,2]) + S.t[κ][end,1]*round(Int, SeisIO.sμ/S.fs[κ])
+        te[k] = sum(S.t[κ][:,2]) + S.t[κ][end,1]*round(Int64, SeisIO.sμ/S.fs[κ])
         ng[k] = max(0, size(S.t[κ],1)-2)
-        for j = 1:1:k-1
+        for j = 1:k-1
           if min(ts[j]<te[k], te[j]>ts[k]) == true
             groups[j,k] = true
             groups[k,j] = true
@@ -359,7 +359,7 @@ function merge!(S::SeisData)
 
     # GAIN, SRC ==============================================================
     g = GAIN[c]
-    @inbounds for k = 1:1:K
+    @inbounds for k = 1:K
       m = P[k] * g / GAIN[k]
       if !isapprox(m, 1.0)
         X[k] .*= m
@@ -397,7 +397,7 @@ function merge!(S::SeisData)
     end
 
     # Loop over each eligible group to merge them ___________________________
-    for k = 1:1:length(G)
+    for k = 1:length(G)
       p = G[k]
       ufar!(X, T, HC, FS, RESP, p, p[indmax(ts[p])], ts, te)
       if maximum(ng[p]) == 0
@@ -406,7 +406,7 @@ function merge!(S::SeisData)
         τ = Array{Int64,1}(0)
         χ = Array{Float64,1}(0)
         n = indmax(ts[p])
-        for q = 1:1:length(p)
+        for q = 1:length(p)
           k = p[q]
           append!(τ, SeisIO.t_expand(T[k], fs))
           append!(χ, X[k])
@@ -433,7 +433,7 @@ function merge!(S::SeisData)
       deleteat!(RESP, dels)
     end
     if fs > 0.0
-      ufar!(X, T, HC, FS, RESP, collect(1:1:length(X)), indmax(ts), ts, te)
+      ufar!(X, T, HC, FS, RESP, collect(1:length(X)), indmax(ts), ts, te)
     end
 
     # We arrange their X values according to end time, from earliest to latest
@@ -445,7 +445,7 @@ function merge!(S::SeisData)
     ti = Array{Int64,1}(0)
     tv = Array{Int64,1}(0)
     ll = Int64(0)
-    for k = 1:1:length(p)
+    for k = 1:length(p)
       κ = p[k]
 
       # Push start time if k=1 or a gap exists
@@ -463,7 +463,7 @@ function merge!(S::SeisData)
       # All other rows, second column is preserved
       λ = size(T[κ],1)
       if λ > 2
-        for ri = 2:1:(T[κ][λ,2] == 0 ? λ-1 : λ)
+        for ri = 2:(T[κ][λ,2] == 0 ? λ-1 : λ)
           push!(tv, T[κ][ri,2])
           push!(ti, T[κ][ri,1]+n)
         end
@@ -500,9 +500,9 @@ See also: merge!
 """
 function merge(A::Array{SeisIO.SeisData,1})
   L::Int64 = length(A)
-  n = sum([A[i].n for i = 1:1:L])
+  n = sum([A[i].n for i = 1:L])
   T = SeisData(n)
-  [setfield!(T, f, vcat([getfield(A[i],f) for i = 1:1:L]...)) for f in SeisIO.datafields]
+  [setfield!(T, f, vcat([getfield(A[i],f) for i = 1:L]...)) for f in SeisIO.datafields]
   return merge!(T)
 end
 merge(S::SeisData, U::SeisData) = merge(Array{SeisData,1}([S,U]))
@@ -524,7 +524,7 @@ function mseis!(S...)
   L = Int64(length(S))
   (L < 2) && return
   (typeof(S[i]) == SeisData) || error("Target must be type SeisData!")
-  for i = 2:1:L
+  for i = 2:L
     if !(typeof(S[i]) <: U)
       warn(string("Object of incompatible type passed to wseis at ",i+1,"; skipped!"))
       continue

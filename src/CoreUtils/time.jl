@@ -12,9 +12,10 @@ timestamp(t::Int64) = String(Dates.format(u2d(t/sμ), "yyyy-mm-ddTHH:MM:SS"))
 function t_expand(t::Array{Int64,2}, fs::Float64)
   fs == 0.0 && return cumsum(t[:,2])
   t[end,1] == 1 && return [t[1,2]]
-  dt = round(Int, 1.0/(fs*SeisIO.μs))
+  dt = round(Int64, 1.0/(fs*SeisIO.μs))
   tt = dt.*ones(Int64, t[end,1])
-  for i = 1:1:size(t,1)
+  tt[1] -= dt
+  for i = 1:size(t,1)
     tt[t[i,1]] += t[i,2]
   end
   return cumsum(tt)
@@ -24,7 +25,7 @@ function t_collapse(tt::Array{Int64,1}, fs::Float64)
   if fs == 0.0
     t = Array{Int64,2}([Int64(0) tt[1]; zeros(Int64, length(tt)) diff(tt)::Array{Int64,1}])
   else
-    dt = round(Int, 1.0/(fs*μs))
+    dt = round(Int64, 1.0/(fs*μs))
     ts = Array{Int64,1}([dt; diff(tt)::Array{Int64,1}])
     L = length(tt)
     i = find(ts .!= dt)
@@ -37,6 +38,46 @@ function t_collapse(tt::Array{Int64,1}, fs::Float64)
 end
 
 # =========================================================
+
+"""
+    w = t_win(T::Array{Int64,2}, fs::Float64)
+
+Convert matrix T from sparse delta-encoded time gaps to time windows (w[:,1]:w[:,2]) in integer μs from the Unix epoch (1970-01-01T00:00:00). Specify fs in Hz.
+
+    W = t_win(S::SeisData)
+
+Convert S.t to time windows s.t. W[i] = t_win(S.t[i], S.fs[i]).
+"""
+function t_win(T::Array{Int64,2}, fs::Float64)
+  n = size(T,1)-1
+  w0 = Int64(0)
+  W = Array{Int64,2}(n,2)
+  @inbounds for i = 1:n
+    W[i,1] = T[i,2] + w0
+    W[i,2] = W[i,1] + round(Int64, SeisIO.sμ*Float64(T[i+1,1]-T[i,1])/fs)
+    w0 = W[i,2]
+  end
+  return W
+end
+
+"""
+    w = w_time(W::Array{Int64,2}, fs::Float64)
+
+Convert matrix W from time windows (w[:,1]:w[:,2]) in integer μs from the Unix epoch (1970-01-01T00:00:00) to sparse delta-encoded time representation. Specify fs in Hz.
+"""
+function w_time(W::Array{Int64,2}, fs::Float64)
+  w2 = Int64(0)
+  n = size(W,1)
+  T = Array{Int64,2}(n+1,2)
+  T[1,1] = Int64(1)
+  @inbounds for i = 1:n
+    T[i,2] = W[i,1] - w2
+    T[i+1,1] = T[i,1] - round(Int64, (W[i,1]-W[i,2])*SeisIO.μs*fs)
+    w2 = W[i,2]
+  end
+  T[n+1,2] = Int64(0)
+  return T
+end
 
 """
     t = tzcorr()

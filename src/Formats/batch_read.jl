@@ -43,7 +43,7 @@ function batch_read(files::Array{String,1}; ftype="SAC"::String, fs=0.0::Float64
   else
     dt = Float64(1/fs)
   end
-  DT = round(Int, dt*1.0e6)
+  DT = round(Int64, dt*1.0e6)
   OS = Array{Int64,1}(collect(Main.Base.Iterators.repeated(os, NF)))
   NN = ceil.(Int, nx.*rr./dt)
   ei = cumsum(NN)
@@ -127,7 +127,7 @@ function segy_geth(j::Int64,
 
   # trace processing
   (m,d) = j2md(ti[1],ti[2])
-  ts[j] = round(Int, d2u(DateTime(ti[1],m,d,ti[3],ti[4],ti[5]))*1.0e6 + (ms + sum(vals[1:4]))*1000)
+  ts[j] = round(Int64, d2u(DateTime(ti[1],m,d,ti[3],ti[4],ti[5]))*1.0e6 + (ms + sum(vals[1:4]))*1000)
   nx[j] = vals[7] == 32767 ? npts : Int32(vals[7])
   rr[j] = (vals[8] == 1 ? dt : Float32(vals[8]))*1.0f-6
   gain[j] = (scale_fac > 0.0 && vals[9] > 0) ? (scale_fac / Float32(vals[9])) : 1.0f0
@@ -175,7 +175,7 @@ function sac_geth(j::Int64, fname::String,
   # Parse ints
   nx[j] = iv[10]
   (m,d) = j2md(iv[1],iv[2])
-  ts[j] = round(Int, d2u(DateTime(iv[1],m,d,iv[3],iv[4],iv[5]))*1.0e6
+  ts[j] = round(Int64, d2u(DateTime(iv[1],m,d,iv[3],iv[4],iv[5]))*1.0e6
             + (iv[6]*1000) + (fv[6] == -12345.0 ? 0.0 : fv[6])*1000)
   return id
 end

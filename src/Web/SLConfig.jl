@@ -74,14 +74,14 @@ function SL_config(C::String; fdsn=false::Bool, delim=','::Char)
     minreq!(R)
     L = size(R,1)
     Q = Array{String,1}(L)
-    for i = 1:1:L
+    for i = 1:L
       Q[i] = string("net=", R[i,1], "&sta=", R[i,2], "&loc=", R[i,3], "&cha=", R[i,4])
     end
     return Q
   else
     # Otherwise simply reformat for use with SeedLink
     Q = Array{String,2}(L,2)
-    for i = 1:1:L
+    for i = 1:L
       Q[i,1] = join([R[i,2],R[i,1]],' ')
       Q[i,2] = join([join([R[i,3],R[i,4]]),R[i,5]],'.')
     end

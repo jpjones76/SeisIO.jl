@@ -79,7 +79,7 @@ function fill_sac(S::SeisChannel, ts::Bool, leven::Bool)
   ci = [169, 1, 25, 161]
   Lc = [8, 16, 8, 8]
   ss = Array{String,1}(4)
-  for i = 1:1:4
+  for i = 1:4
     ss[i] = String(id[i])
     s = Vector{UInt8}(ss[i])
     Ls = length(s)
@@ -207,7 +207,7 @@ function writesac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=true::Bool)
   else
     N     = S.n
   end
-  for i = 1:1:N
+  for i = 1:N
     T = isa(S, SeisEvent) ? S.data[i] : S[i]
     b = T.t[1,2]
     dt = 1/T.fs

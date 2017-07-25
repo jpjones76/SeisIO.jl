@@ -19,15 +19,15 @@ function mktestseis()
   L1 = 10
   os = 5
   tt = time()
-  t1 = round(Int, tt/μs)
-  t2 = round(Int, (L0+os)/μs) + t1
+  t1 = round(Int64, tt/μs)
+  t2 = round(Int64, (L0+os)/μs) + t1
 
   S = SeisData(5)
   S.id = ["XX.TMP01.00.BHZ","XX.TMP01.00.BHN","XX.TMP01.00.BHE","CC.LON..BHZ","UW.SEP..EHZ"]
   S.fs = collect(Main.Base.Iterators.repeated(100.0, S.n))
   S.fs[4] = 20.0
   for i = 1:S.n
-    os1 = round(Int, 1/(S.fs[i]*μs))
+    os1 = round(Int64, 1/(S.fs[i]*μs))
     S.x[i] = randn(Int(L0*S.fs[i]))
     S.t[i] = [1 t1+os1; length(S.x[i]) 0]
   end
