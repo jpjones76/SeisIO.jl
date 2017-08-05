@@ -69,9 +69,21 @@ Type ``?chanspec`` to print detailed channel specification syntax to STDOUT.
 
 Alias to ``Dates.datetime2unix``.
 
+.. function:: del_sta!(S::SeisData, ssss::String)
+
+Delete channels with station names (second substring of ID) that match ``ssss``. Specify station names as they appears within IDs, e.g. for ID="UW.HOOD..BHZ" use station name "HOOD". Works on exact matches only.
+
 .. function:: distaz!(T::SeisEvent)
 
 Fill ``T`` with great-circle distance, azimuth, and back-azimuth for each channel. Writes to ``evt.data.misc``.
+
+.. function:: env!(S)
+
+Convert time-seris data in S.x to smoothed envelopes. Overwrites existing S.x.
+
+.. function:: U = env(S)
+
+Convert time-series data in S.x[i] to envelopes. T.x[i] contains the envelope of S.x[i].
 
 .. function:: equalize_resp!(S, resp_new::Array, hc_new=HC, C=CH)
 
