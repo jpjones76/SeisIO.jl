@@ -29,6 +29,8 @@ t_win, w_time,
 ls,                                                           # CoreUtils/ls.jl
 distaz!,                                                      # Misc/event_misc.jl
 autotap!, namestrip!, purge!, unscale!, demean!,              # Misc/processing.jl
+env, env!,                                                    # Misc/env.jl
+del_sta!,                                                     # Misc/del_sta.jl
 randseischannel, randseisdata, randseisevent, randseishdr     # Misc/randseis.jl
 
 # Everything depends on these

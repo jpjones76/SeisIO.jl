@@ -80,15 +80,6 @@ function w_time(W::Array{Int64,2}, fs::Float64)
 end
 
 """
-    t = tzcorr()
-
-Fast fix for timezone in Libc.strftime assuming local, not UTC. Returns a time
-zone correction in seconds; when calling Libc.strftime, add tzcorr() to an epoch
-time to obtain output in UTC.
-"""
-tzcorr() = (t = Libc.strftime("%z",time()); return -3600*parse(t[1:3])-60*parse(t[4:5]))
-
-"""
   m,d = j2md(y,j)
 
 Convert Julian day j of year y to month m, day d

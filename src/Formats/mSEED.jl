@@ -426,7 +426,6 @@ Keywords:
 """
 function readmseed(fname::String; swap=false::Bool, v=0::Int)
   S = SeisData(0)
-  SEED.id[[3,9,12]]=0x2e
   setfield!(SEED, :swap, swap)
 
   if isfile(fname)
