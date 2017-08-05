@@ -17,11 +17,12 @@ purge(S::SeisData) = (T = deepcopy(S); purge!(T); return(T))
 Remove the mean from all channels `i` with `S.fs[i] > 0.0`. Specify `all=true`
 to also remove the mean from irregularly sampled channels (with S.fs[i] == 0.0)
 
+Ignores NaNs.
 """
 function demean!(S::SeisData; all::Bool=false)
   @inbounds for i = 1:S.n
     (all==false && S.fs[i]<=0.0) && continue
-    K = find(isnan(S.x[i]))
+    K = find(isnan.(S.x[i]))
     if isempty(K)
       L = length(S.x[i])
       μ = sum(S.x[i])/Float64(L)

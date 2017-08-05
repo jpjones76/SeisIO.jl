@@ -5,6 +5,13 @@ A minimalist, platform-agnostic package for working with univariate geophysical 
 http://seisio.readthedocs.org
 
 # CHANGELOG
+## 2017-08-04
+* Fixed a mini-SEED bug where IDs were incorrectly set when streaming data.
+* Internal function `tzcorr()` is now part of PlotSeis.
+* Added functions:
+  + `env, env!`: Convert time-series data to envelopes
+  + `del_sta!`: Delete all channels matching a station string (2nd part of ID)
+
 ## 2017-07-24
 * Several minor bug fixes and performance improvements
 * Added functions:

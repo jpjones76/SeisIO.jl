@@ -76,12 +76,15 @@ mutable struct SeedVol
   steimvals::Array{UInt32,1}
 
   function SeedVol()
+    id = Array{UInt8,1}(15)
+    fill!(id, 0x20)
+    id[[3,9,12]] = 0x2e
     new(0x0a, 0x00, 0x1000, 0x01, 0x0000, false,    # fmt, lx, nx, wo, nsk, swap
 
         # header
         Vector{UInt8}(20),            # hdr::Vector{UInt8}
         Vector{UInt16}(5),            # u16::Vector{UInt16}
-        Array{UInt8,1}(15),           # id::Array{UInt8,1}
+        id,                           # id::Array{UInt8,1}
         Array{Int16,1}(2),            # r::Array{Int16,1}
 
         # computed
