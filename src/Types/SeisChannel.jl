@@ -58,14 +58,15 @@ end
 setindex!(S::SeisData, C::SeisChannel, j::Int) = (
   [(getfield(S, f))[j] = getfield(C, f) for f in datafields];
   return S)
-pull(S::SeisData, i::Integer) = (T = deepcopy(getindex(S, i)); deleteat!(S,i);
-  note!(T,String("Extracted from a SeisData object")); return T)
+
+function pull(S::SeisData, i::Integer)
+  T = deepcopy(getindex(S, i))
+  deleteat!(S,i)
+  return T
+end
 
 
 # ============================================================================
-# Annotation
-note!(S::SeisChannel, s::String) = push!(S.notes, tnote(s))
-
 # Conversion to and merge with SeisData
 function SeisData(C::SeisChannel)
   S = SeisData(1)
