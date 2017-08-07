@@ -330,6 +330,7 @@ function uwdf(datafile::String; v=0::Int)
   setfield!(S, :src, repmat([src],N))
   setfield!(S, :units, repmat(["counts"],N))
   note!(S, string("+src: readuw ", fname))
+  return S
 end
 
 """

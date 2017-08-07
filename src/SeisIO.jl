@@ -17,7 +17,7 @@ readsac, rsac, sachdr, writesac, wsac,                        # Formats/SAC.jl
 readsegy, segyhdr,                                            # Formats/SEGY.jl
 readuw, uwdf, uwpf, uwpf!,                                    # Formats/UW.jl
 readwin32,                                                    # Formats/Win32.jl
-findid, note!, pull,                                          # Types/SeisData.jl
+findid, pull,                                                 # Types/SeisData.jl
 FDSNevq, FDSNevt, FDSNget, FDSNsta,                           # Web/FDSN.jl
 IRISget, irisws,                                              # Web/IRIS.jl
 SeedLink, SeedLink!, SL_info, has_sta, has_live_stream,       # Web/SeedLink.jl
@@ -31,6 +31,7 @@ distaz!,                                                      # Misc/event_misc.
 autotap!, namestrip!, purge!, unscale!, demean!,              # Misc/processing.jl
 env, env!,                                                    # Misc/env.jl
 del_sta!,                                                     # Misc/del_sta.jl
+note!, clear_notes!,                                          # Misc/note.jl
 randseischannel, randseisdata, randseisevent, randseishdr     # Misc/randseis.jl
 
 # Everything depends on these

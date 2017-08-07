@@ -8,16 +8,20 @@ function autotuk!(x::Array{Float64,1}, v::Array{Int64,1}, u::Int)
     for i = 1:length(g)-1
       j = g[i]+1
       k = g[i+1]
-      if (k-j+1) > u
-        N = k-j+1
-        resize!(y, N)
-        y[:] = x[j:k]
-        μ = collect(Main.Base.Iterators.repeated(mean(y), N))
-        x[j:k] = ((y-μ).*tukey(N, u/N))+μ
-      else
-        warn(string("Time window too small, x[", j, ":", k, "]; replaced with zeros."))
-        x[j:k] = 0
-      end
+      N = k-j+1
+      resize!(y, N)
+      unsafe_copy!(y, 1, x, j, N)
+      μ = mean(y)
+      # x[j:k] = ((y.-μ).*tukey(N, u/N)).+μ
+      broadcast!(-, y, y, μ)
+      T = tukey(N, N > u ? u/N : 0.5)
+      broadcast!(*, y, y, tukey(N, u/N))
+      broadcast!(+, y, y, μ)
+      unsafe_copy!(x, j, y, 1, N)
+      # else
+      #   x[j:k] .*= tukey(N, 0.5)
+      #   warn(string("segment too small: x[", j, ":", k, "] was Hanning windowed."))
+      # end
     end
   end
   return x

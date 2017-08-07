@@ -26,6 +26,9 @@ include(path*"/seisdata2.jl")
 println("randseis and native format i/o (native_io.jl)...")
 include(path*"/native_io.jl")
 
+println("annotation and processing (note_proc.jl) ...")
+include(path*"/note_proc.jl")
+
 println("other (non-SAC) file formats (file_formats.jl)...")
 include(path*"/file_formats.jl")
 
