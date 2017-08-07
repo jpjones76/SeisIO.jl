@@ -31,8 +31,8 @@ L_min = minimum(L)
 L_max = maximum(L)
 t_min = minimum(t)
 t_max = maximum(t)
-@assert(L_max - L_min <= maximum(1./S.fs))
-@assert(t_max - t_min <= maximum(1./S.fs))
+@assert(L_max - L_min <= maximum(2.0./S.fs))
+@assert(t_max - t_min <= maximum(2.0./S.fs))
 
 # Potsdam test
 println(STDOUT, "...Potsdam FDSN data request...")
