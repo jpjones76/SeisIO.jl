@@ -206,13 +206,22 @@ Extract the first channel with id=`id` from `S` and return it as a new SeisData 
 
 Extract channel `i` from `S` as a new SeisData struct, deleting it from `S`.
 """
-pull(S::SeisData, s::String) = (i = findid(S, s); T = deepcopy(getindex(S, i));
-  deleteat!(S,i); note!(T,"Extracted from another SeisData object"); return T)
-pull(S::SeisData, J::UnitRange) = (T = deepcopy(getindex(S, J)); deleteat!(S,J);
-    note!(T,"Extracted from a SeisData object"); return T)
-pull(S::SeisData, J::Array{Integer,1}) = (T = deepcopy(getindex(S, J)); deleteat!(S,J);
-        note!(T,"Extracted from a SeisData object"); return T)
-
+function pull(S::SeisData, s::String)
+  i = findid(S, s)
+  T = deepcopy(getindex(S, i))
+  deleteat!(S,i)
+  return T
+end
+function pull(S::SeisData, J::UnitRange)
+  T = deepcopy(getindex(S, J))
+  deleteat!(S,J)
+  return T
+end
+function pull(S::SeisData, J::Array{Integer,1})
+  T = deepcopy(getindex(S, J))
+  deleteat!(S,J)
+  return T
+end
 
 # Sorting
 """

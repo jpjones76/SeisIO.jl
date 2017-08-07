@@ -43,12 +43,13 @@ for i in readdir(path*"/Utils")
   include(joinpath("Utils",i))
 end
 
-# Types and core type functionality
+# Types and core type functionality: do not change order of operations
 include("Types/SEED.jl")
 include("Types/SeisData.jl")
 include("Types/SeisChannel.jl")
 include("Types/SeisHdr.jl")
 include("Types/SeisEvent.jl")
+include("Types/note.jl")
 include("Types/merge.jl")
 include("Types/read.jl")
 include("Types/show.jl")

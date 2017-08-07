@@ -40,6 +40,9 @@ function note!(S::SeisData, id::String, s::String)
   return nothing
 end
 
+note!(H::SeisHdr, s::String) = push!(H.notes, tnote(s))
+note!(S::SeisChannel, s::String) = push!(S.notes, tnote(s))
+
 """
     clear_notes!(S::Union{SeisData,SeisChannel})
 
@@ -77,3 +80,5 @@ function clear_notes!(S::SeisData, id::String)
   push!(S.notes[i], tnote("notes cleared."))
   return nothing
 end
+
+clear_notes!(H::SeisHdr) = empty!(H.notes)
