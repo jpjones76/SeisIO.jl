@@ -28,8 +28,7 @@ function gapfill!(x::Array{Float64,1}, t::Array{Int64,2}, fs::Float64; m=true::B
       if N >= u
         x[j+1:k] .*= tukey(N, u/N)
       else
-        warn(string(@sprintf("Channel %i: Time window too small, ",i),
-        @sprintf("x[%i:%i]; replaced with mean.", j+1, k)))
+        warn(@sprintf("segment %i too short; x[%i:%i] replaced with mean(x).", i, j+1, k))
         x[j+1:k] = mx
       end
     end

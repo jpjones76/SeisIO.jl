@@ -4,13 +4,17 @@
 """
     env!(S::SeisData)
 
-In-place conversion to smoothed envelopes of S.x[i], ∀i : S.fs[i]>0.0. Type `?env` for keywords.
+In-place conversion to smoothed envelopes of S.x[i], ∀i : S.fs[i]>0.0. See `?env` for keyword list.
 
-*Warning*: Overwrites all existing S.x.
+*Warnings*
+* Overwrites existing S.x.
+* Currently always calls ungap!(S); avoid use on data with long time gaps.
 """
 function env!(S::SeisData; sync::Bool=false, edge::Float64=1.0, fl::Float64=1.0, fh::Float64=15.0, smooth::Bool=true, nk::Int64=25)
     if sync
         sync!(S)
+    else
+        ungap!(S)
     end
 
     # Build an array of indices to traces, sorted by trace length in descending order
@@ -150,6 +154,7 @@ Convert time-series data in S.x[i]. T.x[i] contains the envelope of S.x[i].
 | fh    | Float64   | 1.0           | High corner frequency (Hz)            |
 | nk    | Int64     | 25            | Length of Kalman filter (samples)     |
 
+*Warning:* Always at least calls ungap! on S.
 """
 function env(S::SeisData; sync::Bool=false, edge::Float64=1.0, fl::Float64=1.0, fh::Float64=15.0, smooth::Bool=true, nk::Int64=25)
     U = deepcopy(S)

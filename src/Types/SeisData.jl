@@ -42,7 +42,7 @@ type SeisData
     notes = Array{Array{String,1},1}(n)
     misc = Array{Dict{String,Any},1}(n)
 
-    n0 = tnote("Channel initialized")
+    n0 = tnote("channel initialized")
     for i = 1:n
       name[i] = string("Channel ",i)
       id[i] = string(".", i, "..YYY")
@@ -153,32 +153,6 @@ function sizeof(S::SeisData)
 end
 # ============================================================================
 
-
-# ============================================================================
-# Annotation
-
-# Adding a string to SeisData writes a note; if the string mentions a channel
-# name or ID, the note is restricted to the given channels(s), else it's
-# added to all channels
-"""
-    note!(S::SeisData, s::String)
-
-Append a timestamped note to `S.notes`. If `txt` mentions a channel name or ID, only the corresponding channel is annotated; otherwise, all channels are annotated.
-
-"""
-function note!(S::SeisData, s::String)
-  j = find(maximum([[findfirst(contains(s,i)) for i in S.name] [findfirst(contains(s,i)) for i in S.id]],2).>0)
-  if !isempty(j)
-    [push!(S.notes[i], tnote(s)) for i in j]
-  else
-    for i = 1:S.n
-      push!(S.notes[i], tnote(s))
-    end
-  end
-  return S
-end
-
-note!(S::SeisData, i::Integer, s::String) = push!(S.notes[i], tnote(s))
 
 # ============================================================================
 # Append, add, delete, sort

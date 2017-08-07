@@ -5,11 +5,17 @@ A minimalist, platform-agnostic package for working with univariate geophysical 
 http://seisio.readthedocs.org
 
 # CHANGELOG
+## 2017-08-07
+* Improved `note!` functionality and logging of basic processing operations.
+* New function: `clear_notes!` can delete notes for a given channel number or string ID.
+* Minor bug fix for `readuw`
+* Fixed a bug in how `ungap!` handled very short data segments (N < 20 samples).
+
 ## 2017-08-04
-* Fixed a mini-SEED bug where IDs were incorrectly set when streaming data.
-* Internal function `tzcorr()` is now part of PlotSeis.
+* Fixed a mini-SEED bug introduced 2017-07-16 where some IDs were set incorrectly.
+* Internal function `tzcorr()` moved to PlotSeis.
 * Added functions:
-  + `env, env!`: Convert time-series data to envelopes
+  + `env, env!`: Convert time-series data to envelopes (still in testing; gapped data not yet fully supported)
   + `del_sta!`: Delete all channels matching a station string (2nd part of ID)
 
 ## 2017-07-24

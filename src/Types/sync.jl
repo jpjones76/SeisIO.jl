@@ -8,7 +8,7 @@ function ungap!(S::SeisChannel; m=true::Bool, w=true::Bool)
   N = size(S.t,1)-2
   (N ≤ 0 || S.fs == 0) && return S
   gapfill!(S.x, S.t, S.fs, m=m, w=w)
-  note!(S, @sprintf("+p: filled %i gaps (sum = %i microseconds)", N, sum(S.t[2:end-1,2])))
+  note!(S, @sprintf("ungap! filled %i gaps (sum = %i microseconds)", N, sum(S.t[2:end-1,2])))
   S.t = [reshape(S.t[1,:],1,2); [length(S.x) 0]]
   return S
 end
@@ -17,7 +17,7 @@ function ungap!(S::SeisData; m=true::Bool, w=true::Bool)
     N = size(S.t[i],1)-2
     (N ≤ 0 || S.fs[i] == 0) && continue
     gapfill!(S.x[i], S.t[i], S.fs[i], m=m, w=w)
-    note!(S, i, @sprintf("+p: filled %i gaps (sum = %i microseconds)", N, sum(S.t[i][2:end-1,2])))
+    note!(S, i, @sprintf("ungap! filled %i gaps (sum = %i microseconds)", N, sum(S.t[i][2:end-1,2])))
     S.t[i] = [reshape(S.t[i][1,:],1,2); [length(S.x[i]) 0]]
   end
   return S
@@ -76,7 +76,7 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
       isapprox(S.fs[i],f0) && continue
       S.x[i] = resample(S.x[i], f0/S.fs[i])
       S.fs[i] = f0
-      note!(S, i, @sprintf("+p resampled from %.1f Hz to %.1f Hz.", f1, f0))
+      note!(S, i, @sprintf("sync! resampled from %.1f Hz to %.1f Hz.", f1, f0))
     end
   end
 
@@ -118,12 +118,12 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
     S.x[i] = S.x[i][j]
     if isempty(j)
       S.t[i] = Array{Int64,2}()
-      note!(S, i, @sprintf("+p: channel emptied; no samples in range %s--%s.", sstr, tstr))
+      note!(S, i, @sprintf("sync! emptied channel; no data in range %s--%s", sstr, tstr))
     else
       t = t[j]
       t = [t[1]; diff(t)]
       S.t[i] = reshape(t,length(t),1)
-      note!(S, i, @sprintf("+p: samples outside range %s--%s pulled.", sstr, tstr))
+      note!(S, i, @sprintf("sync! pulled samples outside range %s--%s", sstr, tstr))
     end
   end
 
@@ -142,7 +142,7 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
     if (start_times[i] - t_start) >= dt
       ni = round(Int64, (start_times[i]-t_start)*fμs)
       prepend!(S.x[i], collect(Main.Base.Iterators.repeated(mx, ni)))
-      note!(S, i, join(["+p: prepended ", ni, " values."]))
+      note!(S, i, string("sync! prepended ", ni, " values."))
     end
     end_times[i] = t_start + round(Int64, length(S.x[i])/fμs)
 
@@ -150,10 +150,10 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
     if (t_end - end_times[i]) >= dt
       ii = round(Int64, (t_end-end_times[i])*fμs)
       append!(S.x[i], collect(Main.Base.Iterators.repeated(mx, ii)))
-      note!(S, i, join(["+p: appended ", ii, " values."]))
+      note!(S, i, string("sync! appended ", ii, " values."))
     end
     S.t[i] = [1 t_start; length(S.x[i]) 0]
-    note!(S, i, "+p: synched to "*sstr*" -- "*tstr)
+    note!(S, i, string("sync! synchronized times to ", sstr, " -- ", tstr))
   end
   return nothing
 end

@@ -37,6 +37,7 @@ function demean!(S::SeisData; all::Bool=false)
         S.x[i][j] -= μ
       end
     end
+    note!(S, i, "demean! removed mean of S.x.")
   end
   return nothing
 end
@@ -49,11 +50,11 @@ to also remove the gain of irregularly-sampled channels (i.e., channels `i` : `S
 
 """
 function unscale!(S::SeisData; all::Bool=false)
-  for i = 1:S.n
+  @inbounds for i = 1:S.n
     (all==false && S.fs[i]<=0.0) && continue
     if S.gain[i] != 1.0
       scale!(S.x[i], 1.0/S.gain[i])
-      note!(S, string(S.id[i], " removed gain =", S.gain[i]))
+      note!(S, i, @sprintf("unscale! divided S.x by old gain %.3e", S.gain[i]))
       S.gain[i] = 1.0
     end
   end
@@ -74,8 +75,7 @@ namestrip!(S::SeisData) = [namestrip!(i) for i in S.name]
 """
     autotap!(S::SeisData)
 
-Data in `S.x` are cosine tapered around time gaps in `S.t`, then gaps are filled with zeros.
-
+Cosine taper data in channel `S.x[i]` around time gaps in `S.t[i]` and fill all gaps with the mean of `S.x[i]`.
 """
 function autotap!(U::SeisData)
   # Fill gaps with NaNs
@@ -83,24 +83,29 @@ function autotap!(U::SeisData)
 
   for i = 1:U.n
     (U.fs[i] == 0 || isempty(U.x[i])) && continue
-    j = find((isnan.(U.x[i])).==false)
-    μ = mean(U.x[i][j])
+    J = find((isnan.(U.x[i])).==false)
+    μ = mean(U.x[i][J])
     u = max(20, round(Int64, 0.2*U.fs[i]))
 
     # Check for NaNs and window around them
-    autotuk!(U.x[i], j, u)
+    autotuk!(U.x[i], J, u)
 
     # Then replace NaNs with the mean
-    U.x[i][isnan.(U.x[i])] = μ
-    note!(U, i, "+p: tapered and ungapped data; replaced NaNs with mean of non-NaNs.")
+    J = find(isnan.(U.x[i]))
+    if !isempty(J)
+      U.x[i][J] = μ
+      note!(U, i, "autotap! tapered and ungapped data; replaced NaNs with mean of non-NaNs.")
+    else
+      note!(U, i, "autotap! tapered and ungapped data.")
+    end
   end
   return nothing
 end
 
 """
-    !autotap(U)
+    !autotap(U::SeisChannel)
 
-Automatically cosine taper (Tukey window) all data in U
+Automatically cosine taper (Tukey window) all segments in `U` around time gaps, and fill all gaps with `mean(U.x)`.
 """
 function autotap!(U::SeisChannel)
   (U.fs == 0 || isempty(U.x)) && return
@@ -117,6 +122,6 @@ function autotap!(U::SeisChannel)
 
   # Then replace NaNs with the mean
   U.x[isnan(U.x)] = μ
-  note!(U, "+p: tapered and ungapped data; replaced NaNs with mean of non-NaNs.")
+  note!(U, "autotap! tapered and ungapped data; replaced NaNs with mean of non-NaNs.")
   return nothing
 end

@@ -65,6 +65,18 @@ Read files matching ``fstr`` into memory using parallel read and shared arrays. 
 
 Type ``?chanspec`` to print detailed channel specification syntax to STDOUT.
 
+.. clear_notes!(S::SeisData, i::Int64, s::String)
+
+Clear all notes from channel ``i`` of ``S``.
+
+``clear_notes!(S, id)``
+
+Clear all notes from the first channel in ``S`` whose id field exactly matches ``id``.
+
+``clear_notes!(S)``
+
+Clear all notes from every channel in ``S``.
+
 .. function:: t = d2u(DT::DateTime)
 
 Alias to ``Dates.datetime2unix``.
@@ -141,9 +153,17 @@ Convert month ``m``, day ``d`` of year ``y`` to Julian day ``j``.
 
 Remove bad characters from ``S``. Applied to a SeisData structure ``S``, ``namestrip!`` removes bad characters from ``S.name``.
 
-.. function:: note!(S, txt)
+.. function:: note!(S, n, txt)
 
-Append a timestamped note to ``S.notes``. If ``txt`` mentions a channel name or ID, only the corresponding channel is annotated; otherwise, all channels are annotated.
+Append a timestamped note to channel ``n`` of ``S``.
+
+``note!(S, id, txt)``
+
+Append a timestamped note to the first channel in ``S`` whose id field exactly matches ``id``.
+
+``note!(S, txt)``
+
+Fuzzy note: if ``txt`` mentions a channel name or ID, only the corresponding channel in ``S`` is annotated; otherwise, all channels are annotated with ``txt``.
 
 .. function:: (d0, d1) = parsetimewin(s, t)
 
