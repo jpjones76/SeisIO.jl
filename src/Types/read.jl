@@ -1,3 +1,5 @@
+Blosc.set_num_threads(Sys.CPU_CORES)
+
 # ===========================================================================
 # Auxiliary file read functions
 function readstr_varlen(io::IOStream)
