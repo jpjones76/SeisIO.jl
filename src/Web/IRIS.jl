@@ -135,10 +135,10 @@ function IRISget(C::Array{String,1};
 end
 
 # C passed as a string
-IRISget(C::String; s=0::Union{Real,DateTime,String}, t=3600::Union{Real,DateTime,String}, y=false::Bool, v=0::Int, w=false::Bool, to=10::Real) = IRISget(map(String, split(C, ',')), s=s, t=t, y=y, v=v, w=w, to=to)
+IRISget(C::String; s=0::Union{Real,DateTime,String}, t=3600::Union{Real,DateTime,String}, y=false::Bool, v=0::Int, w=false::Bool, to=30::Real) = IRISget(map(String, split(C, ',')), s=s, t=t, y=y, v=v, w=w, to=to)
 
 # C passed as a 2d array
-IRISget(C::Array{String,2}; s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String}, y=false::Bool, v=false::Bool, w=false::Bool, to=10::Real) = IRISget([join(C[i,:],'.') for i = 1:size(C,1)], s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String}, y=false::Bool,  v=0::Int, w=false::Bool, to=10::Real)
+IRISget(C::Array{String,2}; s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String}, y=false::Bool, v=false::Bool, w=false::Bool, to=30::Real) = IRISget([join(C[i,:],'.') for i = 1:size(C,1)], s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String}, y=false::Bool,  v=0::Int, w=false::Bool, to=30::Real)
 
 
 """
@@ -151,7 +151,7 @@ Specify `Δ` in decimal degrees, `z` in km.
 ### Keyword Arguments and Default Values
 * `pha="ttall"`: comma-separated string of phases to return, e.g. "P,S,ScS"
 * `model="iasp91"`: velocity model
-* `to=10.0`: ste web request timeout, in seconds
+* `to=30.0`: ste web request timeout, in seconds
 * `v=0`: verbosity
 
 ### References
@@ -163,7 +163,7 @@ Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.
 function get_pha(Δ::Float64, z::Float64;
   phases=""::String,
   model="iasp91"::String,
-  to=10.0::Real,
+  to=30.0::Real,
   v=0::Int)
 
   # Generate URL and do web query

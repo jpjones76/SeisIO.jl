@@ -179,7 +179,7 @@ function FDSNget(C::Array{String,2};
   w=false::Bool,
   y=false::Bool,
   si=true::Bool,
-  to=10::Real)
+  to=30::Real)
 
   seis = SeisData()
   minreq!(C)
@@ -237,7 +237,7 @@ FDSNget(S::String;
   w=false::Bool,
   y=false::Bool,
   si=true::Bool,
-  to=10::Real) = FDSNget(parse_chstr(S, fdsn=true), src=src, q=q, s=s, t=t, v=v, w=w, y=y, si=si, to=to)
+  to=30::Real) = FDSNget(parse_chstr(S, fdsn=true), src=src, q=q, s=s, t=t, v=v, w=w, y=y, si=si, to=to)
 
 FDSNget(S::Array{String,1};
   src="IRIS"::String,
@@ -248,7 +248,7 @@ FDSNget(S::Array{String,1};
   w=false::Bool,
   y=false::Bool,
   si=true::Bool,
-  to=10::Real) = FDSNget(parse_charr(S, fdsn=true), src=src, q=q, s=s, t=t, v=v, w=w, y=y, si=si, to=to)
+  to=30::Real) = FDSNget(parse_charr(S, fdsn=true), src=src, q=q, s=s, t=t, v=v, w=w, y=y, si=si, to=to)
 
 """
     H = FDSNevq(t)
@@ -279,7 +279,7 @@ function FDSNevq(ts::String;
   mag=[6.0 9.9]::Array{Float64,2},
   n=1::Int,
   src="IRIS"::String,
-  to=10::Real,
+  to=30::Real,
   w=600.0::Real,
   x=false::Bool,
   v=0::Int)
@@ -426,7 +426,7 @@ See also: `FDSNevq`, `FDSNsta`, `distaz!`
 """
 function FDSNevt(evt::String, cc::String;
   mag=[6.0 9.9]::Array{Float64,2},
-  to=10.0::Real,
+  to=30.0::Real,
   pha="P"::String,
   spad=1.0::Real,
   epad=0.0::Real,

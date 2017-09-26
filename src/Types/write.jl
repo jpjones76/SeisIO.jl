@@ -1,6 +1,7 @@
 vSeisIO() = Float32(0.2)
 vJulia() = parse(Float32, string(VERSION.major,".",VERSION.minor))
 Blosc.set_compressor("blosclz")
+Blosc.set_num_threads(Sys.CPU_CORES)
 
 # ===========================================================================
 # Auxiliary file write functions
