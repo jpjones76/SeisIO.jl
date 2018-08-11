@@ -29,7 +29,6 @@ SeisIO presently includes three web clients, readers for several data formats, a
 # Changelog
 ## 2018-08-10
 * Updated for Julia 0.7. Testing for 1.0.
-  + Please report all warnings produced.
 * `wseis` has changed:
   + New syntax: `wseis(filename, objects)`
   + Keywords are no longer accepted.
@@ -62,9 +61,6 @@ SeisIO presently includes three web clients, readers for several data formats, a
   + `lcfs`: Lowest common fs
   + `t_win`, `w_time`: Convert between SeisIO time representations and time windows
   + `demean!`, `unscale!`: Basic processing operations
-
-## 2017-07-04
-* Updated for Julia v0.6.0. Compatibility with earlier versions is not guaranteed. Please report any deprecation warnings!
 
 # Acknowledgements
 miniSEED routines are based on rdmseed.m for Matlab by Francois Beauducel, Institut de Physique du Globe de Paris (France). Many thanks to Robert Casey and Chad Trabant (IRIS, USA) for discussions of IRIS web services, and Douglas Neuhauser (UC Berkeley Seismological Laboratory, USA) for discussions of the SAC data format.
