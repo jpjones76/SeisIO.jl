@@ -1,7 +1,7 @@
 using Test, Compat, Dates, Random, SeisIO
 
 path = Base.source_dir()
-@warn("Tests require 5-10 minutes to fully execute.")
+println(stdout, "Tests require up to 20 minutes to execute.")
 println(stdout, Dates.now(), ": tests begin, source_dir = ", path)
 
 include(path*"/../src/SeisIO.jl")
