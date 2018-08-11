@@ -4,11 +4,29 @@ A minimalist, platform-agnostic package for working with univariate geophysical 
 # Documentation
 http://seisio.readthedocs.org
 
-# KNOWN ISSUES (2018-08-10)
+# Current Functionality
+SeisIO presently includes three web clients, readers for several data formats, and writers for SAC and a native SeisIO format. Utility functions allow synchronization, seamless data merging, and padding time gaps.
+
+## Web clients
+* SeedLink
+* FDSN (data, event, and station queries)
+* IRIS timeseries
+
+## Readable File Formats
+* SAC
+* miniSEED
+* SEG Y
+  + rev 0
+  + rev 1
+  + PASSCAL/NMT single-channel files
+* Win32
+* UW
+
+# Known Issues (2018-08-10)
 * Rarely, `SeedLink!` may cause a Julia session to hang when a connection fails to initialize.
 * Required packages LightXML and Blosc both generate "Deprecated syntax" warnings.
 
-# CHANGELOG
+# Changelog
 ## 2018-08-10
 * Updated for Julia 0.7. Testing for 1.0.
   + Please report all warnings produced.
@@ -48,28 +66,10 @@ http://seisio.readthedocs.org
 ## 2017-07-04
 * Updated for Julia v0.6.0. Compatibility with earlier versions is not guaranteed. Please report any deprecation warnings!
 
-# CURRENT FUNCTIONALITY
-SeisIO presently includes three web clients, readers for several data formats, and writers for SAC and a native SeisIO format. Utility functions allow synchronization, seamless data merging, and padding time gaps.
-
-## Web clients
-* SeedLink
-* FDSN (data, event, and station queries)
-* IRIS timeseries
-
-## Readable File Formats
-* SAC
-* miniSEED
-* SEG Y
-  + rev 0
-  + rev 1
-  + PASSCAL/NMT single-channel files
-* Win32
-* UW
-
-# ACKNOWLEGEMENTS
+# Acknowledgements
 miniSEED routines are based on rdmseed.m for Matlab by Francois Beauducel, Institut de Physique du Globe de Paris (France). Many thanks to Robert Casey and Chad Trabant (IRIS, USA) for discussions of IRIS web services, and Douglas Neuhauser (UC Berkeley Seismological Laboratory, USA) for discussions of the SAC data format.
 
-# REFERENCES
+# References
 1. IRIS (2010), SEED Reference Manual: SEED Format Version 2.4, May 2010, IFDSN/IRIS/USGS, http://www.iris.edu
 2. Trabant C. (2010), libmseed: the Mini-SEED library, IRIS DMC.
 3. Steim J.M. (1994), 'Steim' Compression, Quanterra Inc.
