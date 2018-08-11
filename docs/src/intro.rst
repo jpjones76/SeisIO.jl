@@ -12,16 +12,18 @@ SeisIO stores data in minimalist data types that track record times and other ne
 
 Installation
 ============
-From the Julia prompt:
+From the Julia prompt: press ``]`` to enter the Pkg environment, then type
 ::
+  add https://github.com/jpjones76/SeisIO.jl
 
-  Pkg.clone("https://github.com/jpjones76/SeisIO.jl")
+Exit the Pkg environment by pressing Control + C, then type:
+::
   using SeisIO
 
 
 Updating
 ========
-The usual update syntax for the Julia language is ``Pkg.update(); Using SeisIO``.
+From the Julia prompt: press ``]`` to enter the Pkg environment, then type ``update()``. You may need to restart the Julia REPL.
 
 Dependencies
 ============
