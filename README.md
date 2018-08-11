@@ -55,13 +55,6 @@ SeisIO presently includes three web clients, readers for several data formats, a
   + `env, env!`: Convert time-series data to envelopes (still in testing; gapped data not yet fully supported)
   + `del_sta!`: Delete all channels matching a station string (2nd part of ID)
 
-## 2017-07-24
-* Several minor bug fixes and performance improvements
-* Added functions:
-  + `lcfs`: Lowest common fs
-  + `t_win`, `w_time`: Convert between SeisIO time representations and time windows
-  + `demean!`, `unscale!`: Basic processing operations
-
 # Acknowledgements
 miniSEED routines are based on rdmseed.m for Matlab by Francois Beauducel, Institut de Physique du Globe de Paris (France). Many thanks to Robert Casey and Chad Trabant (IRIS, USA) for discussions of IRIS web services, and Douglas Neuhauser (UC Berkeley Seismological Laboratory, USA) for discussions of the SAC data format.
 
