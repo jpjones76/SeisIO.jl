@@ -15,6 +15,7 @@ Installation
 From the Julia prompt: press ``]`` to enter the Pkg environment, then type
 ::
   add https://github.com/jpjones76/SeisIO.jl
+  precompile
 
 Exit the Pkg environment by pressing Control + C, then type:
 ::
