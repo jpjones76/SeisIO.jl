@@ -1,6 +1,10 @@
 # SeisIO
 A minimalist, platform-agnostic package for working with univariate geophysical data.
 
+| **Build Status: Julia v0.7.0** |
+|:-------------------------------------------------------------------------------:|
+| [![](https://travis-ci.org/jpjones76/SeisIO.jl.svg?branch=master)](https://travis-ci.org/jpjones76/SeisIO.jl) [![Build status](https://ci.appveyor.com/api/projects/status/ocilv0u1sy41m934?svg=true)](https://ci.appveyor.com/project/jpjones76/seisio-jl) |
+
 # Documentation
 http://seisio.readthedocs.org
 
