@@ -5,7 +5,7 @@ import Base:*, merge!, merge
 function fastmerge!(X::Array{Array{Float64,1}}, T::Array{Array{Int64,2},1},
   ts::Array{Int64,1}, te::Array{Int64,1}, p::Array{Int64,1}, sμs::Int64,
   flag::BitArray{1}, w::Array{Int64,1}, id::String)
-  c = indmax(ts[p])
+  c = argmax(ts[p])
   ω = p[c]
   for k = 1:length(p)
     k == c && continue
@@ -63,18 +63,18 @@ function fastmerge!(X::Array{Array{Float64,1}}, T::Array{Array{Int64,2},1},
       # If not flagged, no match was found; average and warn
       if !ff
         X[ω][ω0:Lω] = 0.5*(xω + xκ)
-        warn(STDOUT, string(id, " (serious): data discrepancy! Two or more ",
+        @warn(stdout, string(id, " (serious): data discrepancy! Two or more ",
               "traces with different data at the same sample time(s)."))
         w[1] += 1
       else
-        warn(STDOUT, string(id, ": mismatched start times! Trace ", κ,
+        @warn(stdout, string(id, ": mismatched start times! Trace ", κ,
               " of id ", id, " adjusted ", (δt < 0 ? "+" : "") , -δt*sμs,
               " μs (", (δt < 0 ? "+" : ""), -δt, " sample", (abs(δt) > 1 ? "s" : ""),
               ")"))
         w[1] += 1
       end
     elseif xω != xκ
-      warn(STDOUT, string(id, " (serious): data discrepancy with X too short to align! Averaging!"))
+      @warn(stdout, string(id, " (serious): data discrepancy with X too short to align! Averaging!"))
       X[ω][ω0:Lω] = 0.5*(xω + xκ)
       w[1] += 1
     end
@@ -162,33 +162,33 @@ function xtmerge!(t::Array{Int64,1}, x::Array{Float64,1}, d::Int64)
   x[:] = x[i]
 
   # Check for duplicates
-  J0 = find((diff(t).==0).*(diff(x).==0))
+  J0 = findall((diff(t).==0).*(diff(x).==0))
   while !isempty(J0)
     deleteat!(x, J0)
     deleteat!(t, J0)
-    J0 = find(diff(t) .== 0)
+    J0 = findall(diff(t) .== 0)
   end
 
-  J0 = find(diff(t) .< d)
+  J0 = findall(diff(t) .< d)
   while !isempty(J0)
     J1 = J0.+1
     K = [isnan.(x[J0]) isnan.(x[J1])]
 
     # Average nearly-overlapping x that are either both NaN or neither Nan
-    ii = find(K[:,1].==K[:,2])
+    ii = findall(K[:,1].==K[:,2])
     i0 = J0[ii]
     i1 = J1[ii]
     t[i0] = div.(t[i0].+t[i1], 2)
     x[i0] = 0.5.*(x[i0].+x[i1])
 
     # Delete nearly-overlapping x with only one NaN (and delete all x ∈ i1)
-    i3 = find(K[:,1].*(K[:,2].==false))
-    i4 = find((K[:,1].==false).*K[:,2])
+    i3 = findall(K[:,1].*(K[:,2].==false))
+    i4 = findall((K[:,1].==false).*K[:,2])
     II = sort([J0[i4]; J1[i3]; i1])
     deleteat!(t, II)
     deleteat!(x, II)
 
-    J0 = find(diff(t) .< d)
+    J0 = findall(diff(t) .< d)
   end
   return nothing
 end
@@ -220,26 +220,26 @@ processed traces differ slightly in the overlap window.
 * If necessary, time series from the same channel sampled at different Fs will
 be resampled to the lowest Fs for that channel ID.
 
-`merge!` always invokes `sort!` before return to ensure that the "\*" operator is
+`merge!` always invokes `sort!` before return to ensure that the "*" operator is
 commutative.
 """
 function merge!(S::SeisData)
   U = unique(S.id)
-  A = Array{Array{Int64,1}}([find(S.id.==i) for i in U])
+  A = Array{Array{Int64,1}}([findall(S.id.==i) for i in U])
 
   # Initialize variables
   L = length(U)
   i = 0
-  w = Array{Int64,1}(1)
+  w = Array{Int64, 1}(undef, 1)
   w[1] = 0
   note_head = string(SeisIO.timestamp(), ": ")
-  β = Array{Int64,1}(0)
+  β = Array{Int64, 1}(undef, 0)
 
   while true
     (i ≥ length(U)) && break
     i += 1
     id = U[i]
-    C = find(S.id.==id)
+    C = findall(S.id.==id)
     K = length(C)
     (K == 1) && continue
 
@@ -257,22 +257,22 @@ function merge!(S::SeisData)
       if nl == 2
         # Check for simple polarity reversals
         if (ul[1][1:4] == ul[2][1:4]) && (mod(ul[1][5],180)==mod(ul[2][5],180))
-          println(STDOUT, string(id, ": polarity reversal; sign of affected data will be flipped."))
-          fl = find([LOC[k]==ul[2] for k=1:K])
+          println(stdout, string(id, ": polarity reversal; sign of affected data will be flipped."))
+          fl = findall([LOC[k]==ul[2] for k=1:K])
           P[fl] = -1.0
         end
       else
         # Generate a new ID by iterating on the location subfield ll
-        warn(string(id, ": LOC changes! Iterating over LOC field; separating by location."))
+        @warn(string(id, ": LOC changes! Iterating over LOC field; separating by location."))
         w[1] += 1
         (nn,ss,ll,cc) = map(String, split(identity(id), "."))
-        lc = Array{String,1}(n-1)
+        lc = Array{String,1}(undef, n-1)
         l0 = (length(ll) == 1) ? UInt8[0x30, UInt8(ll[1])] : ((length(ll) > 1) ? Vector{UInt8}(ll[1:2]) : ones(UInt8,2).*0x30)
         for (j,u) in enumerate(ul)
           # Stupid bug in Julia compiler: for loops that start at j>1 can be compiled as type "Core.Box", which is slow
           j == 1 && continue
           b = true
-          lh = find(LOC.==u)
+          lh = findall(LOC.==u)
           testid = join([nn,ss,ll,cc],".")
           while b
             if l0[2] == 0xff
@@ -287,7 +287,7 @@ function merge!(S::SeisData)
           S.id[C[lh]] = test_id
         end
         L += nl-1
-        C = find(S.id.==id)
+        C = findall(S.id.==id)
         K = length(C)
         P = ones(Float64, K)
       end
@@ -314,12 +314,12 @@ function merge!(S::SeisData)
 
     # Get start, end times of all traces in C
     HC = ones(Float64, K).*1.0/sqrt(2.0)
-    ts = Array{Int64,1}(K)
-    te = Array{Int64,1}(K)
-    ng = Array{Int64,1}(K)
+    ts = Array{Int64,1}(undef, K)
+    te = Array{Int64,1}(undef, K)
+    ng = Array{Int64,1}(undef, K)
     groups = falses(K,K)
     flag = trues(K)
-    G = Array{Array{Int64,1},1}(0)
+    G = Array{Array{Int64,1},1}(undef, 0)
     c = 0
     ω = 0
     @inbounds for k = 1:K
@@ -344,15 +344,15 @@ function merge!(S::SeisData)
 
     # Let c be the index in C to the member whose start time is earliest
     # Let ω be the corresponding index in S
-    c = indmax(te)
+    c = argmax(te)
     ω = C[c]
 
     # NAME ====================================================================
-    (length(unique(S.name[C])) == 1) || println(STDOUT, id, ": name changes across inputs; using most recent.")
+    (length(unique(S.name[C])) == 1) || println(stdout, id, ": name changes across inputs; using most recent.")
 
     # NOTES =================================================================
     D = C[C.!=ω]
-    S.notes[ω] = vcat(S.notes[ω], filter(n -> !contains(n,"Channel initialized"), vcat(getfield(S, :notes)[D]...)))
+    S.notes[ω] = vcat(S.notes[ω], filter(n -> !occursin("Channel initialized", n), vcat(getfield(S, :notes)[D]...)))
 
     # MISC ==================================================================
     merge!(S.misc[ω], getfield(S, :misc)[D]...)
@@ -372,24 +372,24 @@ function merge!(S::SeisData)
 
     # T, X, FS, RESP =========================================================
     if length(unique(FS)) != 1
-      warn(string(id, ": non-constant fs among merged traces; resampling to fs = ", fs, " Hz!"))
+      @warn(string(id, ": non-constant fs among merged traces; resampling to fs = ", fs, " Hz!"))
       w[1] += 1
     end
     if length(unique(RESP)) != 1
-      warn(string(id, ": non-constant resp among merged traces; correcting to p/z of trace ", ω))
+      @warn(string(id, ": non-constant resp among merged traces; correcting to p/z of trace ", ω))
       w[1] += 1
     end
 
     # Convert from BitArray to lists of overlapping traces ___________________
     if maximum(groups) == true
-      s = sum(groups,1)[:]          # How many traces group with each k?
+      s = sum(groups, dims=1)[:]            # How many traces group with each k?
       while maximum(s) > 0
-        p = find(s.>0)              # Indices of non-singleton groups
-        q = indmin(s[p])            # Find smallest non-singleton group
-        q = p[q]                    # column of group
-        p = find(groups[:,q])       # rows of other members in group
-        p = sort(unshift!(p,q))
-        if findfirst(G, p) == 0
+        p = findall(s.>0)                   # Indices of non-singleton groups
+        q = argmin(s[p])                    # Find smallest non-singleton group
+        q = p[q]                            # column of group
+        p = findall(groups[:,q])            # rows of other members in group
+        p = sort(pushfirst!(p,q))
+        if something(findfirst(isequal(p), G), 0) == 0 #findfirst(G, p) == 0
           push!(G, p)
         end
         s[q] = 0
@@ -399,13 +399,13 @@ function merge!(S::SeisData)
     # Loop over each eligible group to merge them ___________________________
     for k = 1:length(G)
       p = G[k]
-      ufar!(X, T, HC, FS, RESP, p, p[indmax(ts[p])], ts, te)
+      ufar!(X, T, HC, FS, RESP, p, p[argmax(ts[p])], ts, te)
       if maximum(ng[p]) == 0
         fastmerge!(X, T, ts, te, p, sμs, flag, w, id)
       else
-        τ = Array{Int64,1}(0)
-        χ = Array{Float64,1}(0)
-        n = indmax(ts[p])
+        τ = Array{Int64,1}(undef, 0)
+        χ = Array{Float64,1}(undef, 0)
+        n = argmax(ts[p])
         for q = 1:length(p)
           k = p[q]
           append!(τ, SeisIO.t_expand(T[k], fs))
@@ -422,7 +422,7 @@ function merge!(S::SeisData)
     end
 
     # Now all that's left are channels that can't merge with each other.
-    dels = find(flag.==false)
+    dels = findall(flag.==false)
     if !isempty(dels)
       deleteat!(ts, dels)
       deleteat!(te, dels)
@@ -433,7 +433,7 @@ function merge!(S::SeisData)
       deleteat!(RESP, dels)
     end
     if fs > 0.0
-      ufar!(X, T, HC, FS, RESP, collect(1:length(X)), indmax(ts), ts, te)
+      ufar!(X, T, HC, FS, RESP, collect(1:length(X)), argmax(ts), ts, te)
     end
 
     # We arrange their X values according to end time, from earliest to latest
@@ -442,8 +442,8 @@ function merge!(S::SeisData)
 
     # Then we adjust their times using simple differences. No t_expand.
     n = Int64(0)
-    ti = Array{Int64,1}(0)
-    tv = Array{Int64,1}(0)
+    ti = Array{Int64,1}(undef, 0)
+    tv = Array{Int64,1}(undef, 0)
     ll = Int64(0)
     for k = 1:length(p)
       κ = p[k]
@@ -481,7 +481,7 @@ function merge!(S::SeisData)
   sort!(β)
   deleteat!(S, β)
   if w[1] > 0
-    println(STDOUT, "Total warnings: ", w[1])
+    println(stdout, "Total warnings: ", w[1])
   end
   return sort!(S)
 end
@@ -526,7 +526,7 @@ function mseis!(S...)
   (typeof(S[i]) == SeisData) || error("Target must be type SeisData!")
   for i = 2:L
     if !(typeof(S[i]) <: U)
-      warn(string("Object of incompatible type passed to wseis at ",i+1,"; skipped!"))
+      @warn(string("Object of incompatible type passed to wseis at ",i+1,"; skipped!"))
       continue
     end
     if typeof(S[i]) == SeisData

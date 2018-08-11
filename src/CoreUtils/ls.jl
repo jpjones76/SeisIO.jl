@@ -1,6 +1,6 @@
 function listfiles(d::String, p::AbstractString)
   F = readdir(d)
-  S = split(p, '*', keep=true)
+  S = split(p, '*', keepempty=true)
 
   # Exact string
   if length(S) == 1
@@ -9,7 +9,7 @@ function listfiles(d::String, p::AbstractString)
     # start
     filter!(k->startswith(k, S[1]), F)
     # middle
-    length(S) > 2 && [filter!(k->contains(k, S[i]), F) for i = 2:length(S)-1]
+    length(S) > 2 && [filter!(k->occursin(S[i], k), F) for i = 2:length(S)-1]
     # end
     filter!(k->endswith(k, S[end]), F)
   end
@@ -17,12 +17,12 @@ function listfiles(d::String, p::AbstractString)
 end
 
 function ls(s::String)
-  if is_windows() == false
+  if Sys.iswindows() == false
     # works in v >= 0.5.2
-    return filter(x -> !isempty(x), map(String, split(readstring(`bash -c "ls -1 $s"`), "\n")))
+    return filter(x -> !isempty(x), map(String, split(read(`bash -c "ls -1 $s"`, String), "\n")))
   else
     isdir(s) && return readdir(s)
-    isfile(s) && return(Array{String,1}([s]))
+    safe_isfile(s) && return(Array{String,1}([s]))
 
     # The syntax below takes advantage of the fact that realpath in Windows
     # doesn't test for existence and hence won't break on wildcards.
@@ -45,8 +45,8 @@ function ls(s::String)
     end
     # The two-liner below works about as well as "dir" ever has
     # which is to say, not robustly. Nonetheless, it can work.
-    # s = replace(s, "/", "\\")
-    # return map(String, filter(x -> !isempty(x), split(readstring(`cmd /c dir /b $s`), "\r\n")))
+    # s = replace(s, "/" => "\\")
+    # return map(String, filter(x -> !isempty(x), split(read(`cmd /c dir /b $s`, String), "\r\n")))
   end
 end
 ls() = readdir(pwd())

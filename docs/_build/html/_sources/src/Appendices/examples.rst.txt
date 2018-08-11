@@ -130,13 +130,13 @@ SeedLink
 
   S = SeisData()
   SeedLink!(S, sta, mode="TIME", r=10.0, s=d0, t=d1)
-  println(STDOUT, "...first link initialized...")
+  println(stdout, "...first link initialized...")
 
   # Seedlink with a config file
   config_file = "seedlink.conf"
   SeedLink!(S, config_file, r=10.0, mode="TIME", s=d0, t=d1)
-  println(STDOUT, "...second link initialized...")
+  println(stdout, "...second link initialized...")
 
   # Seedlink with a config string
   SeedLink!(S, "CC.VALT..???, UW.ELK..EHZ", mode="TIME", r=10.0, s=d0, t=d1)
-  println(STDOUT, "...third link initialized...")
+  println(stdout, "...third link initialized...")

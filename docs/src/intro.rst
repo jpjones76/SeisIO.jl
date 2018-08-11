@@ -21,17 +21,8 @@ From the Julia prompt:
 
 Updating
 ========
-The usual update syntax for the Julia language is
-
-::
-
-  Pkg.update()
-  workspace()
-  using SeisIO
-
-Please be aware that ``workspace()`` clears the Julia session's memory. Save work before updating.
-
+The usual update syntax for the Julia language is ``Pkg.update(); Using SeisIO``.
 
 Dependencies
 ============
-Blosc, DSP, LightXML, Requests; these should be installed automatically when SeisIO is added with Pkg.clone.
+Blosc, DSP, LightXML, HTTP; these should be installed automatically when SeisIO is added.

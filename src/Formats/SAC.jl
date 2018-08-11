@@ -47,11 +47,11 @@ end
 function fill_sac(S::SeisChannel, ts::Bool, leven::Bool)
   fv = nul_f.*ones(Float32, 70)
   iv = nul_i.*ones(Int32, 40)
-  cv = repmat(Vector{UInt8}(nul_s), 24)
-  cv[17:24] = Vector{UInt8}(" "^8)
+  cv = repeat(codeunits(nul_s), 24)
+  cv[17:24] = codeunits(" "^8)
 
   # Ints
-  tt = [parse(Int32, i) for i in split(string(u2d(S.t[1,2]*μs)),r"[\.\:T\-]")]
+  tt = map(Int32, [Meta.parse(i) for i in split(string(u2d(S.t[1,2]*μs)),r"[\.\:T\-]")])
   length(tt) == 6 && append!(tt,0)
   y = tt[1]
   j = Int32(md2j(y, tt[2], tt[3]))
@@ -78,14 +78,14 @@ function fill_sac(S::SeisChannel, ts::Bool, leven::Bool)
   id = split(S.id,'.')
   ci = [169, 1, 25, 161]
   Lc = [8, 16, 8, 8]
-  ss = Array{String,1}(4)
+  ss = Array{String,1}(undef, 4)
   for i = 1:4
     ss[i] = String(id[i])
-    s = Vector{UInt8}(ss[i])
+    s = codeunits(ss[i])
     Ls = length(s)
     L = Lc[i]
     c = ci[i]
-    cv[c:c+L-1] = cat(1, s, Vector{UInt8}(" "^(L-Ls)))
+    cv[c:c+L-1] .= 0x20
   end
 
   # Assign a filename
@@ -101,9 +101,9 @@ end
 
 function read_sac_stream(f::IO, full=false::Bool)
   S = SeisChannel()
-  fv = read(f, Float32, 70)
-  iv = read(f, Int32, 40)
-  cv = read(f, UInt8, 192)
+  fv = read!(f, Array{Float32,1}(undef,70))
+  iv = read!(f, Array{Int32,1}(undef,40))
+  cv = read!(f, Array{UInt8,1}(undef,192))
 
   # floats
   setfield!(S, :fs, Float64(1/fv[1]))
@@ -118,7 +118,7 @@ function read_sac_stream(f::IO, full=false::Bool)
 
   # chars
   bads = ['\0',' ']
-  cs = replace(String(cv), "-12345","      ")
+  cs = replace(String(cv), "-12345" => "      ")
   sta = join(split(strip(cs[1:8], bads),'.')); sta = sta[1:min(length(sta),5)]
   ll = join(split(strip(cs[17:24], bads),'.')); ll = ll[1:min(length(ll),2)]
   cc = join(split(strip(cs[161:168], bads),'.')); cc = cc[1:min(length(cc),3)]
@@ -126,13 +126,13 @@ function read_sac_stream(f::IO, full=false::Bool)
   setfield!(S, :id, join([nn,sta,ll,cc],'.'))
 
   # Read data
-  setfield!(S, :x, Array{Float64,1}(read(f, Float32, iv[10])))
+  setfield!(S, :x, Array{Float64,1}(read!(f, Array{Float32, 1}(undef, iv[10])))) #(read(f, Float32, iv[10])))
 
   # Create dictionary if full headers are desired
   if full
     (fk, ik, ck) = get_sac_keys()
-    ii = find(fv .!= nul_f)
-    jj = find(iv .!= nul_i)
+    ii = findall(fv .!= nul_f)
+    jj = findall(iv .!= nul_i)
     S.misc = Dict{String,Any}(zip(fk[ii], fv[ii]))
     merge!(S.misc, Dict{String,Any}(zip(ik[jj], iv[jj])))
     m = Int32(0)
@@ -175,12 +175,12 @@ end
 """
     sachdr(f)
 
-Print formatted SAC headers from file `f` to STDOUT.
+Print formatted SAC headers from file `f` to stdout.
 """
 function sachdr(fname::String)
   seis = readsac(fname, true)
   for k in sort(collect(keys(seis.misc)))
-    println(STDOUT, uppercase(k), ": ", string(seis.misc[k]))
+    println(stdout, uppercase(k), ": ", string(seis.misc[k]))
   end
   return nothing
 end
@@ -197,7 +197,7 @@ function writesac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=true::Bool)
   else
     ift = Int32(1); leven = true
   end
-  tdata = Array{Float32}(0)
+  tdata = Array{Float32}(undef, 0)
   if isa(S, SeisEvent)
     evt_info = map(Float32, vcat(S.hdr.loc, nul_f, S.hdr.mag[1]))
     t_evt = d2u(S.hdr.ot)
@@ -217,7 +217,7 @@ function writesac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=true::Bool)
     if isa(S, SeisEvent)
       fv[40:44] = evt_info
       fv[8] = t_evt - b*μs
-      cv[9+EvL:24] = cat(1, Vector{UInt8}(nn), Vector{UInt8}(" "^(16-EvL)))
+      cv[9+EvL:24] = cat(1, codeunits(nn), codeunits(" "^(16-EvL)))
     end
 
     # Data
@@ -226,7 +226,7 @@ function writesac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=true::Bool)
 
     # Write to file
     write_sac_file(fname, fv, iv, cv, x, t=tdata, ts=ts)
-    v && @printf(STDOUT, "%s: Wrote file %s from SeisData channel %i\n", string(now()), fname, i)
+    v && @printf(stdout, "%s: Wrote file %s from SeisData channel %i\n", string(now()), fname, i)
   end
 end
 writesac(S::SeisChannel; ts=false::Bool, v=true::Bool) = writesac(SeisData(S), ts=ts, v=v)

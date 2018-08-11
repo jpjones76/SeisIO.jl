@@ -28,4 +28,4 @@ S1 = SeedLink(sta, mode="TIME", s=0, t=120)
 # IRIS SeedLink session in DATA mode
 S = SeisData()
 SeedLink!(S, "SampleFiles/SL_long_test.conf", mode="DATA")
-println(STDOUT, "When finished, close connection with command \"close(S.c[1])\"")
+println(stdout, "When finished, close connection with command \"close(S.c[1])\"")

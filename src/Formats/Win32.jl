@@ -10,26 +10,26 @@ end
 function win32dict(Nh::UInt16, cinfo::String, hexID::String, StartTime::Float64, orgID::String, netID::String)
   k = Dict{String,Any}("hexID" => hexID, "orgID" => orgID, "netID" => netID, "data" => Array{Int32,1}(),
     "OldTime" => 0, "seisSum" => 0, "seisN" => 0, "seisNN" => 0, "startTime" => StartTime,
-    "locID" => @sprintf("%i%i", parse(orgID), parse(netID)), "gapStart" => Array{Int64,1}(0), "gapEnd" => Array{Int64,1}(0), "fs" => Float32(Nh))
+    "locID" => @sprintf("%i%i", Meta.parse(orgID), Meta.parse(netID)), "gapStart" => Array{Int64,1}(0), "gapEnd" => Array{Int64,1}(0), "fs" => Float32(Nh))
 
   # Ensure my locID kluge doesn't produce garbage
-  parse(k["locID"]) > 99 && (warn(string("For hexID = ", hexID, ", locID > 99; location ID unset.")); k["locID"] = "")
+  Meta.parse(k["locID"]) > 99 && (@warn(string("For hexID = ", hexID, ", locID > 99; location ID unset.")); k["locID"] = "")
 
   # Get local (Japanese) network and subnet
   nets = readdlm(string(Pkg.dir(),"/SeisIO/src/Formats/jpcodes.csv"), ';')
-  i = find((nets[:,1].==orgID).*(nets[:,2].==netID))
+  i = findall((nets[:,1].==orgID).*(nets[:,2].==netID))
   k["netName"] = isempty(i) ? "Unknown" : nets[i[1],:]
 
   # Entries from channel line
   c = split(cinfo)
-  k["scale"] = Float64(parse(c[13]) / (parse(c[8]) * 10^(parse(c[12])/20)))
-  k["lineDelay"] = Float32(parse(c[3])/1000)
+  k["scale"] = Float64(Meta.parse(c[13]) / (Meta.parse(c[8]) * 10^(Meta.parse(c[12])/20)))
+  k["lineDelay"] = Float32(Meta.parse(c[3])/1000)
   k["unit"] = String(c[9])
-  k["fc"] = Float32(1/parse(c[10]))
-  k["hc"] = Float32(parse(c[11]))
-  k["loc"] = [parse(c[14]), parse(c[15]), parse(c[16])]
-  k["pCorr"] = parse(Float32, c[17])
-  k["sCorr"] = parse(Float32, c[18])
+  k["fc"] = Float32(1.0 / Meta.parse(c[10]))
+  k["hc"] = Float32(Meta.parse(c[11]))
+  k["loc"] = [Meta.parse(c[14]), Meta.parse(c[15]), Meta.parse(c[16])]
+  k["pCorr"] = Float32(Meta.parse(c[17]))
+  k["sCorr"] = Float32(Meta.parse(c[18]))
   k["comment"] = length(c) > 18 ? String(c[19]) : ""
   return k
 end
@@ -107,7 +107,7 @@ function readwin32(filestr::String, cf::String; v=0::Int)
           V = read(fid, UInt8, 3*N)
           for i = 1:N
             xi = join([bits(V[3*i]),bits(V[3*i-1]),bits(V[3*i-2])])
-            x[i+1] = parse(Int32, xi, 2)
+            x[i+1] = Meta.parse(Int32, xi, 2)
           end
         else
           fmt = (C == 2 ? Int16 : Int32)
@@ -121,7 +121,7 @@ function readwin32(filestr::String, cf::String; v=0::Int)
         # Account for time gaps
         gap = NewTime - seis[id]["OldTime"] - 1
         if ((gap > 0) && (seis[id]["OldTime"] > 0))
-          warn(@sprintf("Time gap detected! (%.1f s at %s, beginning %s)",
+          @warn(@sprintf("Time gap detected! (%.1f s at %s, beginning %s)",
                 gap, id,  Dates.unix2datetime(seis[id]["OldTime"])))
           push!(seis[id]["gapStart"], 1+length(seis[id]["data"]))
           P = seis[id]["fs"]*gap

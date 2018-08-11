@@ -15,7 +15,7 @@ end
 function getpf(froot::String, lc::Array{UInt8,1})
   for i in lc
     p = string(froot, Char(i))
-    if isfile(p)
+    if safe_isfile(p)
       return p
     end
   end
@@ -38,35 +38,35 @@ function uwpf!(S::SeisEvent, pickfile::String; v=0::Int)
   pf = open(pickfile, "r")
   m = 0
   pline = nextline(pf,'.')
-  v>2 && println(STDOUT, pline)
+  v>2 && println(stdout, pline)
   while pline != -1
     m += 1
     sta = pline[2:4]
     cmp = pline[6:8]
     for j = 1:N
-      if contains(S.data.id[j], sta) && contains(S.data.id[j], cmp)
-        p = search(pline, "(P P")
+      if occursin(sta, S.data.id[j]) && occursin(cmp, S.data.id[j])
+        p = something(findfirst("(P P", pline), 0:-1) #search(pline, "(P P")
         if !isempty(p)
           pl = split(pline[p[1]:end])
           S.data.misc[j]["p_pol"] = pl[3]
-          S.data.misc[j]["t_p"] = [parse(pl[4]), parse(pl[5]), parse(pl[6]), parse(pl[7][1:end-1])]
+          S.data.misc[j]["t_p"] = [Meta.parse(pl[4]), Meta.parse(pl[5]), Meta.parse(pl[6]), Meta.parse(pl[7][1:end-1])]
         end
-        s = search(pline, "(P S")
+        s = something(findfirst("(P S", pline), 0:-1) #search(pline, "(P S")
         if !isempty(s)
           pl = split(pline[s[1]:end])
           S.data.misc[j]["s_pol"] = pl[3]
-          S.data.misc[j]["t_s"] = [parse(pl[4]), parse(pl[5]), parse(pl[6]), parse(pl[7][1:end-1])]
+          S.data.misc[j]["t_s"] = [Meta.parse(pl[4]), Meta.parse(pl[5]), Meta.parse(pl[6]), Meta.parse(pl[7][1:end-1])]
         end
-        d = search(pline, "(D")
+        d = something(findfirst("(D", pline), 0:-1) #search(pline, "(D")
         if !isempty(d)
           pl = split(pline[d[1]:end])
-          S.data.misc[j]["t_d"] = parse(pl[2][1:end-1])
+          S.data.misc[j]["t_d"] = Meta.parse(pl[2][1:end-1])
         end
       end
     end
     pline = nextline(pf,'.')
   end
-  v>0 && println(STDOUT, "Processed ", m, " pick lines.")
+  v>0 && println(stdout, "Processed ", m, " pick lines.")
   close(pf)
 
   return S
@@ -78,12 +78,11 @@ end
 Read University of Washington-format seismic pick file `hf` into SeisHdr `H`. `v` controls verbosity, set `v>0` for verbose debug mode.
 
 """
-
 function uwpf(pickfile::String, v::Int)
   pf = open(pickfile, "r")
   seekstart(pf)
   A = nextline(pf,'A')
-  v>0  && println(STDOUT, A)
+  v>0  && println(stdout, A)
   c = 0
   if length(A) == 75 || length(A) == 12
     y = 0
@@ -95,16 +94,16 @@ function uwpf(pickfile::String, v::Int)
   D["type"] = A[2]
 
   # Start time
-  ot = d2u(DateTime(string(parse(Int, A[3:4+y]) + c)*A[5+y:12+y],"yyyymmddHHMM"))
+  ot = d2u(DateTime(string(Meta.parse(A[3:4+y]) + c)*A[5+y:12+y],"yyyymmddHHMM"))
 
-  si = [13,19,27,36,42,43,47,51,54,58,61,66,71,74]+y
-  ei = [18,26,35,41,42,46,49,53,57,60,65,70,72,75]+y
+  si = [13,19,27,36,42,43,47,51,54,58,61,66,71,74] .+ y
+  ei = [18,26,35,41,42,46,49,53,57,60,65,70,72,75] .+ y
   L = length(si)
 
   if length(A) > (14+y)
     ah = [A[si[i]:ei[i]] for i=1:L]
     # Parse numeric and string headers
-    nh = [parse(ah[i]) for i in [1,4,6,7,8,9,10,11,12]]
+    nh = [Meta.parse(ah[i]) for i in [1,4,6,7,8,9,10,11,12]]
     #    [sec, evdp, mag, numsta, numpha, gap, dmin, rms, err]
     (evla,evlo,qual,vmod) = (ah[2],ah[3],ah[13],ah[14])
 
@@ -114,8 +113,8 @@ function uwpf(pickfile::String, v::Int)
     mag = Float32(nh[3])
 
     # Lat, Lon, Dep, Mag
-    lat = (parse(evla[1:3]) + parse(evla[5:6])/60 + parse(evla[7:8])/6000) * (evla[4] == 'S' ? -1.0 : 1.0)
-    lon = (parse(evlo[1:4]) + parse(evlo[6:7])/60 + parse(evlo[8:9])/6000) * (evlo[5] == 'W' ? -1.0 : 1.0)
+    lat = (Meta.parse(evla[1:3]) + Meta.parse(evla[5:6])/60 + Meta.parse(evla[7:8])/6000) * (evla[4] == 'S' ? -1.0 : 1.0)
+    lon = (Meta.parse(evlo[1:4]) + Meta.parse(evlo[6:7])/60 + Meta.parse(evlo[8:9])/6000) * (evlo[5] == 'W' ? -1.0 : 1.0)
     mag_typ = "M_d (UW)"
 
   elseif length(A) > 12+y
@@ -134,7 +133,7 @@ function uwpf(pickfile::String, v::Int)
     eline[46:50], eline[51:55], eline[56:60], eline[61:65], eline[66:70], eline[76:79])
     for i in ("meanRMS", "sdAbout0", "sswres", "ndfr", "sdx", "sdy", "sdz",
       "sdt", "sdmag", "meanUncert")
-      D[i] = parse(D[i])
+      D[i] = Meta.parse(D[i])
     end
   end
 
@@ -142,8 +141,8 @@ function uwpf(pickfile::String, v::Int)
   seekstart(pf)
   sline = nextline(pf, 'S')
   if sline != -1
-    warn("Alternate magnitude found, M_d overwritten.")
-    (mag, mag_typ) = (parse(sline[1:5]), sline(6:8))
+    @warn("Alternate magnitude found, M_d overwritten.")
+    (mag, mag_typ) = (Meta.parse(sline[1:5]), sline(6:8))
   end
 
   # Focal mechanism line(s)
@@ -157,7 +156,7 @@ function uwpf(pickfile::String, v::Int)
       push!(D["mech_lines"], mline)
       mline = nextline(pf,'M')
     end
-    v>0 && println(STDOUT, "Processed ", m, " focal mechanism lines.")
+    v>0 && println(stdout, "Processed ", m, " focal mechanism lines.")
   end
 
   # Comment lines
@@ -170,19 +169,19 @@ function uwpf(pickfile::String, v::Int)
     D["comment"] = Array{String,1}()
     while cline != -1
       m += 1
-      if contains(cline, "NEAR")
+      if occursin("NEAR", cline)
         loc_name = strip(cline[8:end])
-      elseif contains(cline, "EVENT ID")
-        event_id = parse(Int, strip(cline[13:end]))
+    elseif occursin("EVENT ID", cline)
+        event_id = Meta.parse(strip(cline[13:end]))
       else
         push!(D["comment"], cline[3:end])
       end
       cline = nextline(pf,'C')
     end
-    v>0 && println(STDOUT, "Processed ", m, " comment lines.")
+    v>0 && println(stdout, "Processed ", m, " comment lines.")
   end
   close(pf)
-  return SeisHdr(ot=u2d(ot), loc=[lat, lon, dep], mag=(mag, 'c', ' '), id=event_id, misc=D)
+  return SeisHdr(ot=u2d(ot), loc=[lat, lon, dep], mag=(mag, "Mc"), id=event_id, misc=D)
 end
 
 """
@@ -208,9 +207,9 @@ function uwdf(datafile::String; v=0::Int)
   lmin = bswap(read(fid, Int32))
   lsec = bswap(read(fid, Int32))
   skip(fid, 8)
-  flags = [bswap(i) for i in read(fid, Int16, 10)]
-  extras = replace(String(read(fid, UInt8, 10)),"\0"," ")
-  comment = replace(String(read(fid, UInt8, 80)),"\0"," ")
+  flags = [bswap(i) for i in read!(fid, Array{Int16,1}(undef, 10))]
+  extras = replace(String(read!(fid, Array{UInt8,1}(undef, 10))), "\0" =>" ")
+  comment = replace(String(read!(fid, Array{UInt8,1}(undef, 80))), "\0" => " ")
 
   # Set M time with lmin and lsec GREGORIAN MINUTES JESUS CHRIST WTF
   uw_ot = lmin*60 + lsec*1.0e-6 + dconst
@@ -219,10 +218,10 @@ function uwdf(datafile::String; v=0::Int)
   seekend(fid)
   skip(fid, -4)
   nstructs = bswap(read(fid, Int32))
-  v>0 && println(STDOUT, "nstructs=", nstructs)
+  v>0 && println(stdout, "nstructs=", nstructs)
   structs_os = (-12*nstructs)-4
   tc_os = 0
-  v>0 && println(STDOUT, "structs_os=", structs_os)
+  v>0 && println(stdout, "structs_os=", structs_os)
 
   # Set version of UW seismic data file (char may be empty, leave code as-is!)
   uwformat = extras[3] == '2' ? 2 : 1
@@ -234,7 +233,7 @@ function uwdf(datafile::String; v=0::Int)
     seekend(fid)
     skip(fid, structs_os)
     for i1 = 1:nstructs
-      structtag     = replace(String(read(fid, UInt8, 4)),"\0","")
+      structtag     = replace(String(read!(fid, Array{UInt8,1}(undef,4))), "\0" => "")
       nstructs      = bswap(read(fid, Int32))
       byteoffset    = bswap(read(fid, Int32))
       if structtag == "CH2"
@@ -255,7 +254,7 @@ function uwdf(datafile::String; v=0::Int)
     end
   end
   N = Int64(N)
-  v>0 && println(STDOUT, "Processing ", N , " channels.")
+  v>0 && println(stdout, "Processing ", N , " channels.")
 
   # Write time corrections
   timecorr = zeros(Float32, N)
@@ -269,12 +268,12 @@ function uwdf(datafile::String; v=0::Int)
   if uwformat == 2
     seekend(fid)
     skip(fid, Int(-56*N + structs_os + tc_os))
-    f = Array{DataType,1}(N)
-    I32 = Array{Int32,2}(6,N)  # chlen, offset, lmin, lsec, fs, expan1
-    U8 = Array{UInt8,2}(32,N)  # (8 = 4*int16, unused) + name(8), tmp(4), compflg(4), chid(4)
+    f = Array{DataType,1}(undef, N)
+    I32 = Array{Int32,2}(undef,6,N)  # chlen, offset, lmin, lsec, fs, expan1
+    U8 = Array{UInt8,2}(undef,32,N)  # (8 = 4*int16, unused) + name(8), tmp(4), compflg(4), chid(4)
     for i = 1:N
-      I32[1:6,i] = read(fid, Int32,  6)
-      U8[1:32,i] = read(fid, UInt8, 32)
+      I32[1:6,i] = read!(fid, Array{Int32,1}(undef, 6))
+      U8[1:32,i] = read!(fid, Array{UInt8,1}(undef, 32))
     end
     I32 = [bswap(i) for i in I32]'
     U8 = U8'
@@ -291,7 +290,7 @@ function uwdf(datafile::String; v=0::Int)
     cha_u8 = U8[:,21:24]
 
     # Format codes
-    c = flipdim(fmt_u8, 1)
+    c = reverse(fmt_u8, dims=1)
     for i = 1:N
       f[i] = Int16
       for j = 1:4
@@ -308,13 +307,13 @@ function uwdf(datafile::String; v=0::Int)
       end
     end
 
-    s = cat(2, repmat([0x55 0x57 0x2e], N, 1), sta_u8, repmat([0x2e 0x2e], N, 1), cha_u8)'
-    id = [replace(String(s[:,i]),"\0","") for i=1:N]
-    X = Array{Array{Float64,1},1}(N)
-    T = Array{Array{Int64,2},1}(N)
+    s = cat(repeat([0x55 0x57 0x2e], N, 1), sta_u8, repeat([0x2e 0x2e], N, 1), cha_u8, dims=2)'
+    id = [replace(String(s[:,i]), "\0" => "") for i=1:N]
+    X = Array{Array{Float64,1},1}(undef,N)
+    T = Array{Array{Int64,2},1}(undef,N)
     for i = 1:N
       seek(fid, ch_os[i])
-      X[i] = [bswap(j) for j in read(fid, f[i], ch_len[i])]
+      X[i] = [bswap(j) for j in read!(fid, Array{f[i], 1}(undef, ch_len[i]))]
       T[i] = [1 round(Int64, ch_time[i]*1000000); length(X[i]) 0]
     end
   end
@@ -327,8 +326,8 @@ function uwdf(datafile::String; v=0::Int)
   setfield!(S, :fs, fs)
   setfield!(S, :x, X)
   setfield!(S, :t, T)
-  setfield!(S, :src, repmat([src],N))
-  setfield!(S, :units, repmat(["counts"],N))
+  setfield!(S, :src, repeat([src],N))
+  setfield!(S, :units, repeat(["counts"],N))
   note!(S, string("+src: readuw ", fname))
   return S
 end
@@ -365,24 +364,24 @@ function readuw(filename::String; v=0::Int)
     pf = getpf(froot, lc)
   else
     df = filename*"W"
-    isfile(df) || error("Invalid filename stub (no corresponding data file)!")
+    safe_isfile(df) || error("Invalid filename stub (no corresponding data file)!")
     pf = getpf(froot, lc)
   end
 
   # File read wrappers
-  if isfile(df)
+  if safe_isfile(df)
     # Datafile wrapper
-    v>0 && println(STDOUT, "Reading datafile ", df)
+    v>0 && println(stdout, "Reading datafile ", df)
     S = SeisEvent(data=uwdf(df, v=v))
-    v>0 && println(STDOUT, "Done reading data file.")
+    v>0 && println(stdout, "Done reading data file.")
 
     # Pickfile wrapper
-    if isfile(pf)
-      v>0 && println(STDOUT, "Reading pickfile ", pf)
+    if safe_isfile(pf)
+      v>0 && println(stdout, "Reading pickfile ", pf)
       uwpf!(S, pf)
-      v>0 && println(STDOUT, "Done reading pick file.")
+      v>0 && println(stdout, "Done reading pick file.")
     else
-      v>0 && println(STDOUT, "Skipping pickfile (not found or not given)")
+      v>0 && println(stdout, "Skipping pickfile (not found or not given)")
     end
   else
     # Pickfile only

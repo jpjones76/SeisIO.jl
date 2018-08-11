@@ -1,11 +1,11 @@
-Blosc.set_num_threads(Sys.CPU_CORES)
+Blosc.set_num_threads(Sys.CPU_THREADS)
 
 # ===========================================================================
 # Auxiliary file read functions
 function readstr_varlen(io::IOStream)
   L = read(io, Int64)
   if L > 0
-    str = String(read(io, UInt8, L))
+    str = String(read!(io, Array{UInt8, 1},(undef, L)))
   else
     str = ""
   end
@@ -14,13 +14,13 @@ end
 
 function read_string_array(io::IOStream)
   nd = Int64(read(io, UInt8))
-  d = read(io, Int64, nd)
+  d = read!(io, Array{Int64}(undef, nd))
   if d==[0]
     S = Array{String,1}()
   else
     sep = Char(read(io, UInt8))
     l = read(io, Int64)
-    S = reshape([String(j) for j in split(String(read(io, UInt8, l)), sep)], tuple(d[:]...))
+    S = reshape([String(j) for j in split(String(read!(io, Array{UInt8}(undef, l))), sep)], tuple(d[:]...))
   end
   return S
 end
@@ -60,7 +60,7 @@ function read_misc(io::IOStream)
   if L > 0
     l = read(io, Int64)
     ksep = Char(read(io, UInt8))
-    kstr = String(read(io, UInt8, l))
+    kstr = String(read!(io, Array{UInt8}(undef, l))) #kstr = String(read(io, UInt8, l))
     K = collect(split(kstr, ksep))
     for i in K
       t = read(io, UInt8)
@@ -69,17 +69,17 @@ function read_misc(io::IOStream)
         D[i] = read_string_array(io)
       elseif T <: Array
         N = read(io, UInt8)
-        d = tuple(read(io, Int64, N)[:]...)
+        d = tuple(read!(io, Array{Int64}(undef, N))[:]...) #d = tuple(read(io, Int64, N)[:]...)
         t = eltype(T)
         if t <: Complex
           τ = eltype(real(t))
-          D[i] = complex.(read(io, τ, d), read(io, τ, d))
+          D[i] = complex.(read!(io, Array{τ}(undef, d)), read!(io, Array{τ}(undef, d)))
         else
-          D[i] = read(io, t, d)
+          D[i] = read!(io, Array{t}(undef,  d)) #D[i] = read(io, t, d)
         end
       elseif T == String
         n = read(io, Int64)
-        D[i] = String(read(io, UInt8, n))
+        D[i] = String(read!(io, Array{UInt8}(undef, n))) #D[i] = String(read(io, UInt8, n))
       else
         D[i] = read(io, T)
       end
@@ -94,43 +94,55 @@ end
 # SeisHdr
 function rhdr(io::IOStream)
   H = SeisHdr()
-  i64 = read(io, Int64, 5)
-  m = read(io, Float32)
-  f64 = read(io, Float64, 26)
-  u8 = read(io, UInt8, 4+sum(i64[3:5]))
-  misc = read_misc(io)
 
-  setfield!(H, :id, i64[1])
-  setfield!(H, :ot, u2d(i64[2]*μs))
-  setfield!(H, :mag, (m, Char(u8[1]), Char(u8[2])))
-  c = u8[3]
-  k = 4+i64[3]
-  setfield!(H, :int, (u8[4], String(u8[5:k])))
-  setfield!(H, :src, String(u8[k+1:k+i64[4]]))
-  if i64[5] > 0
-    k += i64[4]
-    n = u8[k+1:k+i64[5]]
-    setfield!(H, :notes, [String(j) for j in split(String(n),Char(c))])
+  i64   = read!(io, Array{Int64, 1}(undef, 6))
+  m     = read(io, Float32)
+  f64   = read!(io, Array{Float64, 1}(undef, 26))
+  u8    = read!(io, Array{UInt8, 1}(undef, 2 + sum(i64[3:6])))
+  setfield!(H, :misc, read_misc(io))                                # Misc
+
+  # First two u8s are separator and intensity value
+  c = u8[1]
+  i0 = u8[2]
+
+  # parse i64 array
+  j = 3
+  k = 2 + i64[3]
+  setfield!(H, :id, i64[1])                                         # Event id
+  setfield!(H, :ot, u2d(i64[2]*μs))                                 # Origin time
+  setfield!(H, :mag, (m, String(u8[j:k])))                          # Magnitude
+  j = k + 1
+  k = k + i64[4]
+  setfield!(H, :int, (i0, String(u8[j:k])))                         # Intensity
+  j = k + 1
+  k = k + i64[5]
+  setfield!(H, :src, String(u8[j:k]))                               # Data source
+  if i64[6] > 0
+      j = k + 1
+      k = k + i64[6]
+      setfield!(H, :notes, Array{String,1}(split(u8[j:k], Char(c))))# Notes
   end
-  setfield!(H, :loc, f64[1:3])
-  setfield!(H, :mt, f64[4:11])
-  setfield!(H, :np, [(f64[12], f64[13], f64[14]), (f64[15], f64[16], f64[17])])
-  setfield!(H, :pax, [(f64[18], f64[19], f64[20]), (f64[21], f64[22], f64[23]), (f64[24], f64[25], f64[26])])
-  setfield!(H, :misc, misc)
+  setfield!(H, :loc, f64[1:3])                                      # Event location
+  setfield!(H, :mt, f64[4:11])                                      # Moment tensor
+  setfield!(H, :np, [(f64[12], f64[13], f64[14]),
+                    (f64[15], f64[16], f64[17])])                   # Nodal planes
+  setfield!(H, :pax, [(f64[18], f64[19], f64[20]),
+                      (f64[21], f64[22], f64[23]),
+                      (f64[24], f64[25], f64[26])])                 # Pricinpal axes
   return H
 end
 
 # SeisData, SeisChannel
 function rdata(io::IOStream)
-  Base.gc_enable(false)
+  Base.GC.enable(false)
   N = convert(Int64, read(io, UInt32))
   S = SeisData(N)
   for i = 1:N
 
     # int
-    i64 = read(io, Int64, 8)
+    i64 = read!(io, Array{Int64, 1}(undef, 8))
     if i64[1] > 0
-      S.t[i] = reshape(read(io, Int64, i64[1]), div(i64[1],2), 2)
+      S.t[i] = reshape(read!(io, Array{Int64, 1}(undef, i64[1])), div(i64[1],2), 2)
     end
 
     # float
@@ -138,9 +150,9 @@ function rdata(io::IOStream)
     S.gain[i] = read(io, Float64)
 
     # float arrays
-    S.loc[i] = read(io, Float64, 5)
+    S.loc[i] = read!(io, Array{Float64, 1}(undef, 5))
     if i64[2] > 0
-      S.resp[i] = reshape(complex.(read(io, Float64, i64[2]), read(io, Float64, i64[2])), div(i64[2],2), 2)
+      S.resp[i] = reshape(complex.(read!(io, Array{Float64, 1}(undef, i64[2])), read!(io, Array{Float64, 1}(undef, i64[2]))))
     end
 
     # U8
@@ -148,25 +160,25 @@ function rdata(io::IOStream)
     y = read(io, UInt8)
 
     # U8 array
-    S.id[i]   = strip(String(read(io, UInt8, 15)))
-    S.units[i]= String(read(io, UInt8, i64[3]))
-    S.src[i]  = String(read(io, UInt8, i64[4]))
-    S.name[i] = String(read(io, UInt8, i64[5]))
+    S.id[i]   = strip(String(read!(io, Array{UInt8, 1}(undef, 15))))
+    S.units[i]= String(read!(io, Array{UInt8, 1}(undef, i64[3])))
+    S.src[i]  = String(read!(io, Array{UInt8, 1}(undef, i64[4])))
+    S.name[i] = String(read!(io, Array{UInt8, 1}(undef, i64[5])))
     if i64[6] > 0
-      S.notes[i] = map(String, split(String(read(io, UInt8, i64[6])), Char(c)))
+      S.notes[i] = map(String, split(String(read!(io, Array{UInt8, 1}(undef, i64[6]))), Char(c)))
     else
       S.notes[i] = Array{String,1}([""])
     end
     if y == 0x32
-      S.x[i]  = Blosc.decompress(Float64, read(io, UInt8, i64[7]))
+      S.x[i]  = Blosc.decompress(Float64, read!(io, Array{UInt8, 1}(undef, i64[7])))
     elseif y == 0x31
-      S.x[i]  = Blosc.decompress(Float32, read(io, UInt8, i64[7]))
+      S.x[i]  = Blosc.decompress(Float32, read!(io, Array{UInt8, 1}(undef, i64[7])))
     else
-      S.x[i]  = Blosc.decompress(code2typ(y), read(io, UInt8, i64[7]))
+      S.x[i]  = Blosc.decompress(code2typ(y), read!(io, Array{UInt8, 1}(undef, i64[7])))
     end
     S.misc[i] = read_misc(io)
   end
-  Base.gc_enable(true)
+  Base.GC.enable(true)
   return S
 end
 
@@ -185,17 +197,17 @@ Read SeisIO files matching file string ``fstr`` into memory.
 
 """
 function rseis(files::Array{String,1}; v=0::Int)
-  A = Array{Any,1}(0)
+  A = Array{Any,1}(undef, 0)
 
   for f in files
     io = open(f, "r")
-    (String(read(io, UInt8, 6)) == "SEISIO") || (close(io); error("Not a SeisIO file!"))
+    (String(read!(io, Array{UInt8, 1}(undef, 6))) == "SEISIO") || (close(io); error("Not a SeisIO file!"))
     r = read(io, Float32)
     j = read(io, Float32)
     L = read(io, Int64)
-    C = read(io, UInt8, L)
-    B = read(io, UInt64, L)
-    (v > 0) && @printf(STDOUT, "Reading %i total objects from file %s.\n", L, f)
+    C = read!(io, Array{UInt8, 1}(undef, L))
+    B = read!(io, Array{UInt64, 1}(undef, L))
+    (v > 0) && @printf(stdout, "Reading %i total objects from file %s.\n", L, f)
     for i = 1:L
       if C[i] == 0x48
         push!(A, rhdr(io))
@@ -204,7 +216,7 @@ function rseis(files::Array{String,1}; v=0::Int)
       else
         push!(A, rdata(io))
       end
-      (v > 0) && @printf(STDOUT, "Read %s object from %s, bytes %i:%i.\n", typeof(A[end]), f, B[i], ((i == L) ? position(io) : B[i+1]))
+      (v > 0) && @printf(stdout, "Read %s object from %s, bytes %i:%i.\n", typeof(A[end]), f, B[i], ((i == L) ? position(io) : B[i+1]))
     end
     close(io)
   end
@@ -213,26 +225,26 @@ end
 rseis(fstr::String; v=0::Int) = rseis(ls(fstr), v=v)
 
 """
-    rseis(fstr::String)
+    rseis(fstr::String, K::Array{Int,1}; v=0::Int)
 
-Read SeisIO files matching file string ``fstr`` into memory.
+Read SeisIO files matching file string ``fstr`` into memory. Pass an array K to read only record indices in K from file.
 
 """
 function rseis(files::Array{String,1}, c::Array{Int,1}; v=0::Int)
-  A = Array{Any,1}(0)
+  A = Array{Any,1}(undef, 0)
 
   for f in files
     io = open(f, "r")
-    (String(read(io, UInt8, 6)) == "SEISIO") || (close(io); error("Not a SeisIO file!"))
+    (String(read!(io, Array{UInt8,1}(undef, 6))) == "SEISIO") || (close(io); error("Not a SeisIO file!"))
     r = read(io, Float32)
     j = read(io, Float32)
     L = read(io, Int64)
-    C = read(io, UInt8, L)
-    B = read(io, UInt64, L)
-    (v > 0) && @printf(STDOUT, "Reading %i total objects from file %s.\n", L, f)
+    C = read!(io, Array{UInt8, 1}(undef, L))
+    B = read!(io, Array{UInt64, 1}(undef, L))
+    (v > 0) && @printf(stdout, "Reading %i total objects from file %s.\n", L, f)
     for k = 1:length(c)
       if c[k] > length(L)
-        warn(string("Skipped file=", f, ", k=", c[k], " (no such record \#)"))
+        @warn(string("Skipped file=", f, ", k=", c[k], " (no such record #)"))
         continue
       else
         i = c[k]
@@ -244,7 +256,7 @@ function rseis(files::Array{String,1}, c::Array{Int,1}; v=0::Int)
         else
           push!(A, rdata(io))
         end
-        (v > 0) && @printf(STDOUT, "Read %s object from %s, bytes %i:%i.\n", typeof(A[end]), f, B[i], ((i == L) ? position(io) : B[i+1]))
+        (v > 0) && @printf(stdout, "Read %s object from %s, bytes %i:%i.\n", typeof(A[end]), f, B[i], ((i == L) ? position(io) : B[i+1]))
       end
     end
     close(io)

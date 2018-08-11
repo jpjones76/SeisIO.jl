@@ -4,7 +4,7 @@
 
 Convert critical frequency fc to a matrix of complex poles and zeros. zeros are in resp[:,1], poles in resp[:,2].
 """
-function fctopz{T}(fc::T; hc=1.0/sqrt(2)::T, units="m/s"::String)
+function fctopz(fc::T; hc=1.0/sqrt(2)::T, units="m/s"::String) where T
   pp = 2.0*pi
   if units == "m/s"
     cr = sqrt(complex(hc^2-1))
@@ -21,10 +21,9 @@ end
 
 Translate frequency response of `X`, sampled at `fs`, from `resp_old` to `resp_new`. zeros are in resp[:,1], poles in resp[:,2].
 """
-
-function translate_resp!{T}(X::Array{T,1}, fs::T,
+function translate_resp!(X::Array{T,1}, fs::T,
   resp_old::Array{Complex{T},2}, resp_new::Array{Complex{T},2};
-  hc_old=1.0/sqrt(2.0)::T, hc_new=1.0/sqrt(2.0)::T)
+  hc_old=1.0/sqrt(2.0)::T, hc_new=1.0/sqrt(2.0)::T) where T
 
   resp_old == resp_new && return nothing
   pp = 2.0*Float64(pi)
@@ -40,6 +39,5 @@ function translate_resp!{T}(X::Array{T,1}, fs::T,
 end
 
 mkresp(r,g) = convert(PolynomialRatio, ZeroPoleGain([2.0,r[:,1]], [2.0,r[:,2]], g))
-
-resp_f{T}(r::Array{Complex{T},2}, g::T, h::T, f::Array{T,1}, fs::T) = h*freqs(convert(PolynomialRatio, ZeroPoleGain([2.0; r[:,1]], [2.0; r[:,2]], g)), f, fs)
-resp_f{T}(r::Array{Complex{T},2}, h::T, f::Array{T,1}, fs::T) = h*freqs(convert(PolynomialRatio, ZeroPoleGain([2.0; r[:,1]], [2.0; r[:,2]], 1.0)), f, fs)
+resp_f(r::Array{Complex{T},2}, g::T, h::T, f::Array{T,1}, fs::T) where T = h*freqs(convert(PolynomialRatio, ZeroPoleGain([2.0; r[:,1]], [2.0; r[:,2]], g)), f, fs)
+resp_f(r::Array{Complex{T}, 2}, h::T, f::Array{T, 1}, fs::T) where T = h*freqs(convert(PolynomialRatio, ZeroPoleGain([2.0; r[:,1]], [2.0; r[:,2]], 1.0)), f, fs)

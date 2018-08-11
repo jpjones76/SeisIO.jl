@@ -28,7 +28,7 @@ function t_collapse(tt::Array{Int64,1}, fs::Float64)
     dt = round(Int64, 1.0/(fs*μs))
     ts = Array{Int64,1}([dt; diff(tt)::Array{Int64,1}])
     L = length(tt)
-    i = find(ts .!= dt)
+    i = findall(ts .!= dt)
     t = Array{Int64,2}([[1 tt[1]];[i ts[i].-dt]])
   end
   if isempty(i) || i[end] != L
@@ -51,7 +51,7 @@ Convert S.t to time windows s.t. W[i] = t_win(S.t[i], S.fs[i]).
 function t_win(T::Array{Int64,2}, fs::Float64)
   n = size(T,1)-1
   w0 = Int64(0)
-  W = Array{Int64,2}(n,2)
+  W = Array{Int64,2}(undef,n,2)
   @inbounds for i = 1:n
     W[i,1] = T[i,2] + w0
     W[i,2] = W[i,1] + round(Int64, SeisIO.sμ*Float64(T[i+1,1]-T[i,1])/fs)
@@ -68,7 +68,7 @@ Convert matrix W from time windows (w[:,1]:w[:,2]) in integer μs from the Unix 
 function w_time(W::Array{Int64,2}, fs::Float64)
   w2 = Int64(0)
   n = size(W,1)
-  T = Array{Int64,2}(n+1,2)
+  T = Array{Int64,2}(undef,n+1,2)
   T[1,1] = Int64(1)
   @inbounds for i = 1:n
     T[i,2] = W[i,1] - w2
@@ -84,7 +84,7 @@ end
 
 Convert Julian day j of year y to month m, day d
 """
-function j2md{T}(y::T, j::T)
+function j2md(y::T, j::T) where T
    if j > T(31)
       D = Array{T,1}([31,28,31,30,31,30,31,31,30,31,30,31])
       ((y%T(400) == T(0)) || (y%T(4) == T(0) && y%T(100) != T(0))) && (D[2]+=T(1))
@@ -107,7 +107,7 @@ end
 
 Convert month `m`, day `d` of year `y` to Julian day (day of year)
 """
-function md2j{T}(y::T, m::T, d::T)
+function md2j(y::T, m::T, d::T) where T
   D = Array{T,1}([31,28,31,30,31,30,31,31,30,31,30,31])
   ((y%400 == 0) || (y%4 == 0 && y%100 != 0)) && (D[2]+=1)
   return (sum(D[1:m-1]) + d)

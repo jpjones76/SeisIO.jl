@@ -1,6 +1,6 @@
 import Base:in, +, -, *, convert, isequal, length, push!, sizeof
 
-type SeisChannel
+mutable struct SeisChannel
   name::String
   id::String
   loc::Array{Float64,1}
@@ -39,13 +39,13 @@ SeisChannel(;
             loc=zeros(Float64,5)::Array{Float64,1},
             fs=0.0::Float64,
             gain=1.0::Float64,
-            resp=Array{Complex{Float64},2}(0,2)::Array{Complex{Float64},2},
+            resp=Array{Complex{Float64},2}(undef,0,2)::Array{Complex{Float64},2},
             units=""::String,
             src=""::String,
             misc=Dict{String,Any}()::Dict{String,Any},
             notes=Array{String,1}([tnote("Channel initialized")])::Array{String,1},
-            t=Array{Int64,2}(0,2)::Array{Int64,2},
-            x=Array{Float64,1}(0)::Array{Float64,1}
+            t=Array{Int64,2}(undef,0,2)::Array{Int64,2},
+            x=Array{Float64,1}(undef,0)::Array{Float64,1}
             ) = SeisChannel(name, id, loc, fs, gain, resp, units, src, misc, notes, t, x)
 
 in(s::String, C::SeisChannel) = C.id==s

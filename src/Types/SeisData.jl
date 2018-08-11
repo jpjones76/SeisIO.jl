@@ -2,7 +2,7 @@ import Base:in, getindex, setindex!, append!, deleteat!, delete!, +, -, *, isequ
 length, start, done, next, size, sizeof, ==, isempty, sort!, sort, endof
 
 # This is type-stable for S = SeisData() but not for keyword args
-type SeisData
+mutable struct SeisData
   n::Int64
   c::Array{TCPSocket,1}                       # connections
   name::Array{String,1}                       # name
@@ -20,27 +20,27 @@ type SeisData
 
   function SeisData()
     return new(0,
-        Array{TCPSocket,1}(0),
-        Array{String,1}(0),
-        Array{String,1}(0),
-        Array{Array{Float64,1}}(0),
-        Array{Float64,1}(0),
-        Array{Float64,1}(0),
-        Array{Array{Complex{Float64},2}}(0),
-        Array{String,1}(0),
-        Array{Dict{String,Any},1}(0),
-        Array{String,1}(0),
-        Array{String,1}(0),
-        Array{Array{Int64,2}}(0),
-        Array{Array{Float64,1}}(0)
+        Array{TCPSocket,1}(undef,0),
+        Array{String,1}(undef,0),
+        Array{String,1}(undef,0),
+        Array{Array{Float64,1}}(undef,0),
+        Array{Float64,1}(undef,0),
+        Array{Float64,1}(undef,0),
+        Array{Array{Complex{Float64},2},1}(undef,0),
+        Array{String,1}(undef,0),
+        Array{Dict{String,Any},1}(undef,0),
+        Array{String,1}(undef,0),
+        Array{String,1}(undef,0),
+        Array{Array{Int64,2}}(undef,0),
+        Array{Array{Float64,1}}(undef,0)
         )
   end
 
   function SeisData(n::UInt)
-    id = Array{String,1}(n)
-    name = Array{String,1}(n)
-    notes = Array{Array{String,1},1}(n)
-    misc = Array{Dict{String,Any},1}(n)
+    id = Array{String,1}(undef, n)
+    name = Array{String,1}(undef, n)
+    notes = Array{Array{String,1},1}(undef, n)
+    misc = Array{Dict{String,Any},1}(undef, n)
 
     n0 = tnote("channel initialized")
     for i = 1:n
@@ -51,19 +51,19 @@ type SeisData
     end
 
     return new(n,
-        Array{TCPSocket,1}(0),
+        Array{TCPSocket,1}(undef,0),
         name,
         id,
         collect(Main.Base.Iterators.repeated(zeros(Float64,5),n)),
         collect(Main.Base.Iterators.repeated(0.0,n)),
         collect(Main.Base.Iterators.repeated(1.0,n)),
-        collect(Main.Base.Iterators.repeated(Array{Complex{Float64}}(0,2),n)),
+        collect(Main.Base.Iterators.repeated(Array{Complex{Float64}}(undef,0,2),n)),
         collect(Main.Base.Iterators.repeated("Unknown",n)),
         misc,
         notes,
         collect(Main.Base.Iterators.repeated(string("SeisData(", n, ")"),n)),
-        collect(Main.Base.Iterators.repeated(Array{Int64,2}(0,2),n)),
-        collect(Main.Base.Iterators.repeated(Array{Float64,1}(0),n))
+        collect(Main.Base.Iterators.repeated(Array{Int64,2}(undef,0,2),n)),
+        collect(Main.Base.Iterators.repeated(Array{Float64,1}(undef,0),n))
         )
   end
 
@@ -73,7 +73,7 @@ type SeisData
       if typeof(U[i]) in [SeisChannel,SeisData]
         append!(S, U[i])
       else
-        warn(string("Tried to join incompatible type into SeisData at arg ", i, "; skipped."))
+        @warn(string("Tried to join incompatible type into SeisData at arg ", i, "; skipped."))
       end
     end
     return S
@@ -170,7 +170,7 @@ deleteat!(S::SeisData, K::UnitRange)    = (J = collect(K); deleteat!(S, J))
 # With this convention, S+U-U = S
 function deleteat!(S::SeisData, U::SeisData)
   id = flipdim(U.id,1)
-  J = Array{Int64,1}(0)
+  J = Array{Int64,1}(undef,0)
   for i in id
     j = findlast(S.id.==i)
     (j > 0) && push!(J,j)
@@ -180,7 +180,7 @@ function deleteat!(S::SeisData, U::SeisData)
 end
 
 # Delete by Regex match or exact ID match
-delete!(S::SeisData, r::Regex)          = deleteat!(S, find([ismatch(r, i) for i in S.id]))
+delete!(S::SeisData, r::Regex)          = deleteat!(S, findall([occursin(r, i) for i in S.id]))
 delete!(S::SeisData, s::String)         = (i = findlast(S.id.==s); (i > 0) && deleteat!(S, i))
 
 # Nothing more than aliasing, really
@@ -191,7 +191,7 @@ delete!(S::SeisData, J::Array{Int,1})   = deleteat!(S, J)
 # Subtraction
 -(S::SeisData, i::Int)          = (U = deepcopy(S); deleteat!(U,i); return U)  # By channel #
 -(S::SeisData, J::Array{Int,1}) = (U = deepcopy(S); deleteat!(U,J); return U)  # By array of channel #s
--(S::SeisData, J::Range)        = (U = deepcopy(S); deleteat!(U,J); return U)  # By range of channel #s
+-(S::SeisData, J::AbstractRange)= (U = deepcopy(S); deleteat!(U,J); return U)  # By range of channel #s
 -(S::SeisData, s::String)       = (U = deepcopy(S); delete!(U,s); return U)    # By channel id string
 -(S::SeisData, r::Regex)        = (U = deepcopy(S); delete!(U,r); return U)    # By channel id regex
 -(S::SeisData, T::SeisData)     = (U = deepcopy(S); delete!(U,T); return U)    # Remove all channels in one SeisData from another

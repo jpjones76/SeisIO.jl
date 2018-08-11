@@ -98,12 +98,12 @@ function parserec!(S::SeisData, sid::IO, v::Int)
   # Channel handling for S
 
   # Check this SEED id and whether or not it exists in S
-  unsafe_copy!(SEED.id, 1, SEED.hdr, 19, 2)
-  unsafe_copy!(SEED.id, 4, SEED.hdr, 9, 5)
-  unsafe_copy!(SEED.id, 10, SEED.hdr, 14, 2)
-  unsafe_copy!(SEED.id, 13, SEED.hdr, 16, 3)
+  unsafe_copyto!(SEED.id, 1, SEED.hdr, 19, 2)
+  unsafe_copyto!(SEED.id, 4, SEED.hdr, 9, 5)
+  unsafe_copyto!(SEED.id, 10, SEED.hdr, 14, 2)
+  unsafe_copyto!(SEED.id, 13, SEED.hdr, 16, 3)
   id = unsafe_string(pointer(SEED.id), 15)
-  id = replace(id, ' ', "")
+  id = replace(id, ' ' => "")
   c = findid(id, S)
 
   if c == 0
@@ -111,7 +111,7 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     C.name = id
     C.id = id
     C.fs = 1.0/SEED.dt
-    C.x = Array{Float64,1}(SEED.def.nx)
+    C.x = Array{Float64, 1}(undef, SEED.def.nx)
     push!(S, C)
 
     L = SEED.def.nx
@@ -120,13 +120,13 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     nt = 2
     xi = 0
 
-    (v > 1) && println(STDOUT, "Added channel: ", S.id[c])
+    (v > 1) && println(stdout, "Added channel: ", S.id[c])
   else
     # assumes fs doesn't change within a SeisData structure
     L = length(S.x[c])
     nt = size(S.t[c], 1)
     xi = S.t[c][nt, 1]
-    te = getindex(sum(S.t[c], 1), 2) + round(Int64, L*SEED.dt*sμ)
+    te = getindex(sum(S.t[c], dims=1),2) + round(Int64, L*SEED.dt*sμ)
   end
 
   # =========================================================================
@@ -136,8 +136,8 @@ function parserec!(S::SeisData, sid::IO, v::Int)
   @inbounds for i = 0x01:0x01:SEED.u8[4]
     bt = ntoh(read(sid, UInt16))    # always big-Endian? Undocumented
     if v > 2
-      println(STDOUT, "Position = ", position(sid))
-      println(STDOUT, "Blockette type to parse = ", bt)
+      println(stdout, "Position = ", position(sid))
+      println(stdout, "Blockette type to parse = ", bt)
     end
 
     if bt == 0x0064
@@ -165,7 +165,7 @@ function parserec!(S::SeisData, sid::IO, v::Int)
       if haskey(S.misc[c], ["Events"])
         push!(S.misc[c]["Events"], t_evt)
       else
-        S.misc[c]["Events"] = Array{Int64,1}([t_evt])
+        S.misc[c]["Events"] = Array{Int64, 1}([t_evt])
       end
 
     elseif bt == 0x01f4
@@ -208,7 +208,7 @@ function parserec!(S::SeisData, sid::IO, v::Int)
       odos::UInt16
       record_number::UInt32
       flags::Tuple{UInt8, UInt8, UInt8}
-      header_fields::Array{String,1}
+      header_fields::Array{String, 1}
       opaque_data::Vector{UInt8}
 
       # Always big-Endian?
@@ -218,7 +218,7 @@ function parserec!(S::SeisData, sid::IO, v::Int)
       for j = 1:3
         SEED.B2000.flags[j]       = read(sid, UInt8)
       end
-      SEED.B2000.header_fields  = String[String(j) for j in split(String(read(sid, UInt8, Int(SEED.B2000.odos)-15)), '\~', keep=true, limit=SEED.B2000.flags[3])]
+      SEED.B2000.header_fields  = String[String(j) for j in split(String(read(sid, UInt8, Int(SEED.B2000.odos)-15)), '~', keepempty=true, limit=SEED.B2000.flags[3])]
       SEED.B2000.opaque_data    = read(sid, UInt8, SEED.B2000.blk_length - SEED.B2000.odos)
 
       # Store to S.misc[i]
@@ -241,12 +241,12 @@ function parserec!(S::SeisData, sid::IO, v::Int)
   # Data: Adapted from rdmseed.m by Francois Beauducel <beauducel@ipgp.fr>, Institut de Physique du Globe de Paris
 
   if v > 2
-    println(STDOUT, "To parse = ", n, " data, fmt=", SEED.fmt)
+    println(stdout, "To parse = ", n, " data, fmt=", SEED.fmt)
   end
 
   if xi+n > L
     resize!(S.x[c], length(S.x[c]) + SEED.def.nx)
-    v > 1 && println(STDOUT, "Resized S.x[", c, "] to length ", length(S.x[c]))
+    v > 1 && println(stdout, "Resized S.x[", c, "] to length ", length(S.x[c]))
   end
 
   # ASCII
@@ -268,7 +268,7 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     for i = 1:nv
       SEED.x[i] = Float64(SEED.swap ? ntoh(read(sid, T)) : read(sid, T))
     end
-    unsafe_copy!(getfield(S,:x)[c], xi+1, SEED.x, 1, n)
+    unsafe_copyto!(getfield(S,:x)[c], xi+1, SEED.x, 1, n)
 
   # Steim1 or Steim2
   elseif SEED.fmt in (0x0a, 0x0b)
@@ -351,10 +351,10 @@ function parserec!(S::SeisData, sid::IO, v::Int)
 
     # Check data values
     if abs(SEED.x[n] - SEED.xn) > eps()
-      println(STDOUT, string("RDMSEED: data integrity -- Steim-", SEED.fmt - 0x09, " sequence #", String(SEED.hdr[1:6]), " integrity check failed, last_data=", SEED.x[n], ", should be xn=", SEED.xn))
+      println(stdout, string("RDMSEED: data integrity -- Steim-", SEED.fmt - 0x09, " sequence #", String(SEED.hdr[1:6]), " integrity check failed, last_data=", SEED.x[n], ", should be xn=", SEED.xn))
     end
 
-    unsafe_copy!(getfield(S,:x)[c], xi+1, SEED.x, 1, n)
+    unsafe_copyto!(getfield(S,:x)[c], xi+1, SEED.x, 1, n)
   else
     error(@sprintf("Decoding for fmt = %i NYI!", SEED.fmt))
   end
@@ -362,14 +362,14 @@ function parserec!(S::SeisData, sid::IO, v::Int)
   # Correct time matrix
   dts = round(Int64, sμ*(d2u(DateTime(SEED.t[1:6]...)))) + SEED.t[7] + TC - te
   if te == 0
-    S.t[c] = Array{Int64,2}(2,2)
+    S.t[c] = Array{Int64, 2}(undef, 2, 2)
     S.t[c][1] = one(Int64)
     S.t[c][2] = n
     S.t[c][3] = dts
     S.t[c][4] = zero(Int64)
   else
     if v > 1 && dts > 0
-      println(STDOUT, "Old end = ", te, ", New start = ", dts + te, ", diff = ", dts, " μs")
+      println(stdout, "Old end = ", te, ", New start = ", dts + te, ", diff = ", dts, " μs")
     end
     δt = S.t[c][nt,2]
 
@@ -428,7 +428,7 @@ function readmseed(fname::String; swap=false::Bool, v=0::Int)
   S = SeisData(0)
   setfield!(SEED, :swap, swap)
 
-  if isfile(fname)
+  if safe_isfile(fname)
     fid = open(fname, "r")
     skip(fid, 6)
     (search("DRMQ", read(fid, Char)) > 0) || error("Scan failed due to invalid file type")

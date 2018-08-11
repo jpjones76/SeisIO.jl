@@ -94,7 +94,7 @@ function ThemeNav () {
         if (anchor) {
             try {
                 var link = $('.wy-menu-vertical')
-                    .find('[href="' + anchor + '"]');
+                    .findall('[href="' + anchor + '"]');
                 $('.wy-menu-vertical li.toctree-l1 li.current')
                     .removeClass('current');
                 link.closest('li.toctree-l2').addClass('current');
@@ -136,8 +136,8 @@ function ThemeNav () {
     nav.toggleCurrent = function (elem) {
         var parent_li = elem.closest('li');
         parent_li.siblings('li.current').removeClass('current');
-        parent_li.siblings().find('li.current').removeClass('current');
-        parent_li.find('> ul li.current').removeClass('current');
+        parent_li.siblings().findall('li.current').removeClass('current');
+        parent_li.findall('> ul li.current').removeClass('current');
         parent_li.toggleClass('current');
     }
 

@@ -10,7 +10,7 @@ mutable struct Blk201
   flags::Array{UInt8, 1}
   t::Array{Int32,1}
   det::String
-  Blk201() = new(zeros(Float32, 3), zeros(UInt8, 2), Array{Int32,1}(7), "None")
+  Blk201() = new(zeros(Float32, 3), zeros(UInt8, 2), Array{Int32,1}(undef,7), "None")
 end
 
 #  [500] Timing Blockette (200 bytes)
@@ -23,7 +23,7 @@ mutable struct Blk500
   exception_type::String
   clock_model::String
   clock_status::String
-  Blk500() = new(0.0f0, Array{Int32,1}(7), Int8(0), Int8(0), 0x0000, "", "", "")
+  Blk500() = new(0.0f0, Array{Int32,1}(undef,7), Int8(0), Int8(0), 0x0000, "", "", "")
 end
 
 # [2000] Variable Length Opaque Data Blockette
@@ -34,7 +34,7 @@ mutable struct Blk2000
   flags::Array{UInt8,1}
   header_fields::Array{String,1}
   opaque_data::Vector{UInt8}
-  Blk2000() = new(0x0000, 0x0000, 0x00000000, zeros(UInt8, 3), String["a","b","c", "d", "e"], Vector{UInt8}(0))
+  Blk2000() = new(0x0000, 0x0000, 0x00000000, zeros(UInt8, 3), String["a","b","c", "d", "e"], Array{UInt8,1}(undef,0))
 end
 
 mutable struct SeedVol
@@ -76,39 +76,39 @@ mutable struct SeedVol
   steimvals::Array{UInt32,1}
 
   function SeedVol()
-    id = Array{UInt8,1}(15)
+    id = Array{UInt8,1}(undef, 15)
     fill!(id, 0x20)
-    id[[3,9,12]] = 0x2e
+    id[[3,9,12]] .= 0x2e
     new(0x0a, 0x00, 0x1000, 0x01, 0x0000, false,    # fmt, lx, nx, wo, nsk, swap
 
         # header
-        Vector{UInt8}(20),            # hdr::Vector{UInt8}
-        Vector{UInt16}(5),            # u16::Vector{UInt16}
-        id,                           # id::Array{UInt8,1}
-        Array{Int16,1}(2),            # r::Array{Int16,1}
+        Array{UInt8,1}(undef,20),           # hdr::Vector{UInt8}
+        Array{UInt16,1}(undef,5),           # u16::Vector{UInt16}
+        id,                                 # id::Array{UInt8,1}
+        Array{Int16,1}(undef, 2),           # r::Array{Int16,1}
 
         # computed
-        0.0,                          # dt::Float64
-        zeros(Int32,7),               # t::Array{Int32,1}
-        false,                        # xs::Bool
-        0,                            # k::Int
+        0.0,                                # dt::Float64
+        zeros(Int32,7),                     # t::Array{Int32,1}
+        false,                              # xs::Bool
+        0,                                  # k::Int
 
         # data-related
-        Array{Float64, 1}(65535),     # x::Array{Float64,1}
-        Array{UInt32, 1}(3),          # u::Array{UInt32, 1}
-        zero(Float64),                # x0::Float64
-        zero(Float64),                # xn::Float64
-        Array{UInt8,1}(4),            # u8::Array{UInt8,1}
+        Array{Float64, 1}(undef, 65535),    # x::Array{Float64,1}
+        Array{UInt32, 1}(undef, 3),         # u::Array{UInt32, 1}
+        zero(Float64),                      # x0::Float64
+        zero(Float64),                      # xn::Float64
+        Array{UInt8,1}(undef, 4),           # u8::Array{UInt8,1}
 
         # structure to hold SEED defaults
-        SeedDef(),                    # def::SeedDef
+        SeedDef(),                          # def::SeedDef
 
         # blockette fields
-        Blk201(),                     # B201:: Blk201
-        Blk500(),                     # B500:: Blk500
-        Blk2000(),                    # B2000:: Blk2000
+        Blk201(),                           # B201:: Blk201
+        Blk500(),                           # B500:: Blk500
+        Blk2000(),                          # B2000:: Blk2000
 
-        flipdim(collect(0x00000000:0x00000002:0x0000001e),1)    # steimvals::Array{UInt32,1}
+        reverse(collect(0x00000000:0x00000002:0x0000001e), dims=1)    # steimvals::Array{UInt32,1}
         )
   end
 end

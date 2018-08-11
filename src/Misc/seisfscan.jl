@@ -36,7 +36,7 @@ function seisfscan(fstr::String, ids::Array{String,1}; s=(-62167219200)::Real, t
     seek(io, x)
 
     # Get list of IDs in each record
-    ID = split(String(read(io, UInt8, y-x)), '\n', keep=true)
+    ID = split(String(read(io, UInt8, y-x)), '\n', keepempty=true)
     L = length(ID)
     N = zeros(Int64, L)
     [K[j] = falses(L) for j = 1:J]
@@ -44,7 +44,7 @@ function seisfscan(fstr::String, ids::Array{String,1}; s=(-62167219200)::Real, t
 
     # Loop over each record's IDs to check for matches
     for i = 1:L
-      fids = split(ID[i], '\0', keep=true)
+      fids = split(ID[i], '\0', keepempty=true)
       N[i] = length(fids)
       for (j,id) in enumerate(ids)
         n = findfirst(fids.==id)
@@ -89,7 +89,7 @@ function seisfscan(fstr::String, ids::Array{String,1}; s=(-62167219200)::Real, t
     # For all K[f,j] : maximum(K[f,j][i]) == true, append the filename and indices to D[id]
     for (j, id) in enumerate(ids)
       if maximum(K[j]) == true
-        push!(D[id], files[f] * "," * strip(string(find(K[j].==true)),[']','[']))
+        push!(D[id], files[f] * "," * strip(string(findall(K[j].==true)),[']','[']))
       end
     end
   end

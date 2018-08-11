@@ -22,7 +22,9 @@ note!(S::SeisData, i::Int64, s::String) = push!(S.notes[i], tnote(s))
 Append `s` to `S.notes` and time stamp. If `txt` contains a channel name or ID, only the channel mentioned is annotated; otherwise, all channels are annotated.
 """
 function note!(S::SeisData, s::String)
-  j = find(maximum([[findfirst(contains(s,i)) for i in S.name] [findfirst(contains(s,i)) for i in S.id]],2).>0)
+    J = [occursin(i, s) for i in S.name]
+    K = [occursin(i, s) for i in S.id]
+    j = findall(max.(J,K) .== true)
   if !isempty(j)
     [push!(S.notes[i], tnote(s)) for i in j]
   else

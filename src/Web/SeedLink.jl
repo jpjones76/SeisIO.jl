@@ -1,17 +1,30 @@
 # ========================================================================
 # Utility functions not for export
+function sync_add(r::Task)
+    spawns = get(task_local_storage(), :SPAWNS, ())
+    if spawns != ()
+        push!(spawns[1], r)
+        tls_r = get_task_tls(r)
+        tls_r[:SUPPRESS_EXCEPTION_PRINTING] = true
+    end
+    r
+end
+#yeah, that happened
+
 function getSLver(vline::String)
   # Versioning will break if SeedLink switches to VV.PPP.NNN format
   ver = 0.0
   vinfo = split(vline)
   for i in vinfo
-    if startswith(i, 'v')
-      try
-        ver = parse(i[2:end])
-        return ver
+      if startswith(i, 'v')
+          try
+              ver = Meta.parse(i[2:end])
+          catch
+              continue
+          end
       end
-    end
   end
+  return ver
 end
 
 function check_sta_exists(sta::Array{String,1}, xstr::String)
@@ -20,9 +33,9 @@ function check_sta_exists(sta::Array{String,1}, xstr::String)
   N = length(sta)
   x = falses(N)
   for i = 1:N
-    id = split(sta[i], '.', keep=true)
+    id = split(sta[i], '.', keepempty=true)
     sid = join(id[1:2],'.')
-    if contains(xid, sid)
+    if occursin(sid, xid)
       x[i] = true
     end
   end
@@ -38,7 +51,7 @@ function check_stream_exists(S::Array{String,1}, xstr::String; g=7200::Real)
   xid = String[join([attribute(xstreams[i], "network"),attribute(xstreams[i], "name")],'.') for i=1:length(xstreams)]
   for i = 1:N
     # Assumes the combination of network name and station name is unique
-    id = split(S[i], '.', keep=true)
+    id = split(S[i], '.', keepempty=true)
     sid = join(id[1:2],'.')
     # K = findfirst(xid.==sid)
     K = findid(sid, xid)
@@ -50,11 +63,11 @@ function check_stream_exists(S::Array{String,1}, xstr::String; g=7200::Real)
       cc = ""
       dd = ""
       if length(id) > 2
-        ll = replace(id[3],"?","")
+        ll = replace(id[3],"?"=>"")
         if length(id) > 3
-          cc = replace(id[4],"?","")
+          cc = replace(id[4],"?"=>"")
           if length(id) > 4
-            dd = replace(id[5],"?","")
+            dd = replace(id[5],"?"=>"")
           end
         end
       end
@@ -63,8 +76,8 @@ function check_stream_exists(S::Array{String,1}, xstr::String; g=7200::Real)
       R = get_elements_by_tagname(xstreams[K], "stream")
       if !isempty(R)
         for j = 1:length(R)
-          if prod([contains(attribute(R[j], a[i]), p[i]) for i=1:length(p)]) == true
-            te = replace(attribute(R[j], "end_time"), " ", "T")
+          if prod([occursin(p[i], attribute(R[j], a[i])) for i=1:length(p)]) == true
+            te = replace(attribute(R[j], "end_time"), " " => "T")
             t = min(t, time()-d2u(Dates.DateTime(te)))
           end
         end
@@ -103,15 +116,15 @@ function SL_info(level::String,                    # level
     N = length(B)
   end
   close(conn)
-  buf = IOBuffer(N)
+  buf = IOBuffer(read=true, write=true, maxsize=N)
   write(buf, B)
   seekstart(buf)
   xml_str = ""
   while !eof(buf)
     skip(buf, 64)
-    xml_str *= join(map(x -> Char(x), read(buf, UInt8, 456)))
+    xml_str *= join(map(x -> Char(x), read!(buf, Array{UInt8, 1}(undef, 456))))
   end
-  return replace(String(xml_str),"\0","")
+  return replace(String(xml_str),"\0" => "")
 end
 
 """
@@ -132,7 +145,7 @@ function has_sta(C::String, u::String; p=18000::Integer)
   end
   return check_sta_exists(sta, SL_info("STATIONS", u, p=p))
 end
-has_sta(sta::Array{String,1}, u::String; p=18000::Integer) = check_sta_exists([replace(i, " ", ".") for i in sta], SL_info("STATIONS", u, p=p))
+has_sta(sta::Array{String,1}, u::String; p=18000::Integer) = check_sta_exists([replace(i, " " => ".") for i in sta], SL_info("STATIONS", u, p=p))
 has_sta(sta::Array{String,2}, u::String; p=18000::Integer) = check_sta_exists([join(sta[i,:],'.') for i=1:size(sta,1)], SL_info("STATIONS", u, p=p))
 
 
@@ -181,9 +194,9 @@ Create a new SeisData structure `S` to acquire SeedLink data. Connection will be
 
 ### INPUTS
 * `S`: SeisData object
-* `sta`: Array{String, 1} formatted NET.STA.LOC.CHA.DFLAG, e.g. ["UW.TDH..EHZ.D",  "CC.HOOD..BH?.E"]. Use "?" to match any single character; leave LOC and CHA fields blank to select all. Don't use "\*" for wildcards, it isn't valid.
+* `sta`: Array{String, 1} formatted NET.STA.LOC.CHA.DFLAG, e.g. ["UW.TDH..EHZ.D",  "CC.HOOD..BH?.E"]. Use "?" to match any single character; leave LOC and CHA fields blank to select all. Don't use "*" for wildcards, it isn't valid.
 
-*Note*: When finished, close connection manually with `close(S.c[n])` where n is connection \#. If `w=true`, the next attempted packet dump after closing `C` will close the output file automatically.
+*Note*: When finished, close connection manually with `close(S.c[n])` where n is connection #. If `w=true`, the next attempted packet dump after closing `C` will close the output file automatically.
 
 ### KEYWORD ARGUMENTS
 Specify as `kw=value`, e.g., `SeedLink!(S, sta, mode="TIME", r=120)`.
@@ -233,11 +246,11 @@ function SeedLink!(S::SeisData,
 
   # Refresh interval
   r = maximum([r, eps()])
-  r < 10 && warn(string("r = ", r, " < 10 s; Julia may freeze if no packets arrive between consecutive read attempts."))
+  r < 10 && @warn(string("r = ", r, " < 10 s; Julia may freeze if no packets arrive between consecutive read attempts."))
 
   # keepalive interval
   if ka < 240
-    warn("KeepAlive interval increased to 240s as per IRIS netiquette guidelines.")
+    @warn("KeepAlive interval increased to 240s as per IRIS netiquette guidelines.")
     ka = 240
   end
 
@@ -253,14 +266,14 @@ function SeedLink!(S::SeisData,
 
   for i = Ns:-1:1
     if !h[i]
-      warn(string(u, " doesn't currently have ", sta[i], "; deleted from req."))
+      @warn(string(u, " doesn't currently have ", sta[i], "; deleted from req."))
       deleteat!(sta, i)
       deleteat!(patts,i)
     end
   end
   Ns = length(sta)
   if Ns == 0
-    warn("No channels in the current request were found. Exiting SeedLink!...")
+    @warn("No channels in the current request were found. Exiting SeedLink!...")
     return S
   end
 
@@ -298,7 +311,7 @@ function SeedLink!(S::SeisData,
   if mode in ["TIME", "FETCH"]
     if mode == "TIME"
       if (DateTime(d1)-u2d(time())).value < 0
-        warn("End time < time() in TIME mode; SeedLink may receive no data!")
+        @warn("End time < time() in TIME mode; SeedLink may receive no data!")
       end
       m_str = string("TIME ", s, " ", t, "\r")
     else
@@ -321,8 +334,8 @@ function SeedLink!(S::SeisData,
     (v > 1) && println("Sending: ", sel_str)
     write(S.c[q], sel_str)
     sel_resp = readline(S.c[q])
-    if contains(sel_resp,"ERROR")
-      warn(string("Error in select string ", patts[i], " (", sta[i], "previous selector, ", i==1?"*":patts[i-1], " used)."))
+    if occursin("ERROR", sel_resp) #contains(sel_resp,"ERROR")
+      @warn(string("Error in select string ", patts[i], " (", sta[i], "previous selector, ", i==1 ? "*" : patts[i-1], " used)."))
       if x
         close(S.c[q])
         error("Strict mode specified; exit w/error.")
@@ -330,27 +343,27 @@ function SeedLink!(S::SeisData,
         return S
       end
     end
-    (v > 1) && @printf(STDOUT, "Response: %s", sel_resp)
+    (v > 1) && @printf(stdout, "Response: %s", sel_resp)
 
     # station selector
     sta_str = string("STATION ", sta[i], "\r")
     (v > 1) && println("Sending: ", sta_str)
     write(S.c[q], sta_str)
     sta_resp = readline(S.c[q])
-    if contains(sel_resp,"ERROR")
-      warn(string("Error in station string ", sta[i], " (station excluded)."))
+    if occursin("ERROR", sel_resp) #contains(sel_resp,"ERROR")
+      @warn(string("Error in station string ", sta[i], " (station excluded)."))
       close(S.c[q])
       error("Strict mode specified; exit w/error.")
       deleteat!(S.c, q)
       return S
     end
-    (v > 1) && @printf(STDOUT, "Response: %s", sta_resp)
+    (v > 1) && @printf(stdout, "Response: %s", sta_resp)
 
     # mode
     (v > 1) && println("Sending: ", m_str)
     write(S.c[q], m_str)
     m_resp = readline(S.c[q])
-    (v > 1) && @printf(STDOUT, "Response: %s", m_resp)
+    (v > 1) && @printf(stdout, "Response: %s", m_resp)
   end
   write(S.c[q],"END\r")
   # ==========================================================================
@@ -361,7 +374,7 @@ function SeedLink!(S::SeisData,
     j = 0
     while true
       if !isopen(S.c[q])
-        println(STDOUT, timestamp(), ": SeedLink connection closed.")
+        println(stdout, timestamp(), ": SeedLink connection closed.")
         w && close(fid)
         break
       else
@@ -371,19 +384,19 @@ function SeedLink!(S::SeisData,
         τ = ceil(Int, r*(1+rand()))
         sleep(τ)
         eof(S.c[q])
-        N = floor(Int, nb_available(S.c[q])/520)
+        N = floor(Int, bytesavailable(S.c[q])/520)
         if N > 0
-          buf = IOBuffer(read(S.c[q], UInt8, 520*N))
+          buf = IOBuffer(read!(S.c[q], Array{UInt8, 1}(undef, 520*N)))
           if w
             write(fid, copy(buf))
           end
-          (v > 1) && @printf(STDOUT, "%s: Processing packets ", string(now()))
+          (v > 1) && @printf(stdout, "%s: Processing packets ", string(now()))
           while !eof(buf)
-            pkt_id = String(read(buf,UInt8,8))
+            pkt_id = String(read!(buf, Array{UInt8, 1}(undef, 8)))
             parserec!(S, buf, v)
-            (v > 1) && @printf(STDOUT, "%s, ", pkt_id)
+            (v > 1) && @printf(stdout, "%s, ", pkt_id)
           end
-          (v > 1) && @printf(STDOUT, "\b\b...done current packet dump.\n")
+          (v > 1) && @printf(stdout, "\b\b...done current packet dump.\n")
         end
 
         # SeedLink (non-standard) keep-alive gets sent every a seconds
@@ -400,7 +413,7 @@ function SeedLink!(S::SeisData,
       end
     end
   end
-  Base.sync_add(k)
+  sync_add(k)
   Base.enq_work(k)
   # ========================================================================
 
@@ -423,9 +436,9 @@ w=false::Bool)
   if isa(C, String)
     sta,pat = SeisIO.parse_sl(SeisIO.parse_chstr(C))
   elseif ndims(C) == 1
-    sta,pat = SeisIO.parse_sl(SeisIO.parse_charr(C))
+      sta,pat = SeisIO.parse_sl(SeisIO.parse_charr(C))
   else
-    sta, pat = parse_sl(C)
+    sta, pat = SeisIO.parse_sl(C)
   end
   SeedLink!(S, sta, pat, u=u, p=p, mode=mode, r=r, ka=ka, s=s, t=t, f=f, x=x, v=v, w=w)
   return S

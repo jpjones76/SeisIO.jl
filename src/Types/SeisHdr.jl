@@ -1,5 +1,5 @@
 import Base:isequal, sizeof, ==
-unset_3tup = tuple(0.0,0.0,0.0)
+unset_3tup = tuple(0.0, 0.0, 0.0)
 
 """
 SeisHdr structures contain event header data for use with SeisIO.
@@ -17,21 +17,21 @@ Create a SeisHdr structure with magnitude 1.1 (Ml) and location 45.37N, 121.69W,
 | id  | Int64                       | Event ID                      |
 | ot  | DateTime                    | Origin time                   |
 | loc | Array{Float64, 1}           | Hypocenter                    |
-| mag | Tuple{Float32, Char, Char}  | (Magnitude, Scale)            |
+| mag | Tuple{Float32, String}      | (Magnitude, Scale)            |
 | int | Tuple{UInt8, String}        | (Intensity, Scale)            |
 | mt  | Array{Float64,1}            | Moment tensor: (1-6) tensor,  |
-|     |                             | (7) scalar moment, (8) \%DC   |
+|     |                             | (7) scalar moment, (8) %DC    |
 | np  | Array{Tuple{3xFloat64}, 1}  | Nodal planes                  |
 | pax | Array{Tuple{3xFloat64}, 1}  | Principal axes                |
 | src | String                      | Data source (URL/filename)    |
 
 Designate magnitude scale with an appropriate subscript, e.g. 'w', 'b' for M_wb. Use '?' for unknown.
 """
-type SeisHdr
+mutable struct SeisHdr
   id::Int64
   ot::DateTime
   loc::Array{Float64,1}
-  mag::Tuple{Float32,Char,Char}
+  mag::Tuple{Float32,String}
   int::Tuple{UInt8,String}
   mt::Array{Float64,1}
   np::Array{Tuple{Float64,Float64,Float64},1}
@@ -48,7 +48,7 @@ type SeisHdr
   function SeisHdr(id::Int64,
     ot::DateTime,
     loc::Array{Float64,1},
-    mag::Tuple{Float32,Char,Char},
+    mag::Tuple{Float32,String},
     int::Tuple{UInt8,String},
     mt::Array{Float64,1},
     np::Array{Tuple{Float64,Float64,Float64},1},
@@ -63,11 +63,11 @@ end
 SeisHdr(; id=0::Int64,
           ot=u2d(0)::DateTime,
           loc=zeros(Float64, 3)::Array{Float64,1},
-          mag=(-5.0f0, '?', ' ')::Tuple{Float32,Char,Char},
-          int=(0x00, "MMI")::Tuple{UInt8,String},
-          mt=zeros(Float64, 8)::Array{Float64,1},
-          np=[unset_3tup, unset_3tup]::Array{Tuple{Float64,Float64,Float64},1},
-          pax=[unset_3tup, unset_3tup, unset_3tup]::Array{Tuple{Float64,Float64,Float64},1},
+          mag=(-5.0f0, "Ml")::Tuple{Float32, String},
+          int=(0x00, "MMI")::Tuple{UInt8, String},
+          mt=zeros(Float64, 8)::Array{Float64, 1},
+          np=[unset_3tup, unset_3tup]::Array{Tuple{Float64, Float64, Float64}, 1},
+          pax=[unset_3tup, unset_3tup, unset_3tup]::Array{Tuple{Float64, Float64, Float64},1},
           src=""::String,
           notes=Array{String,1}()::Array{String,1},
           misc=Dict{String,Any}()::Dict{String,Any}) = SeisHdr(id, ot, loc, mag, int, mt, np, pax, src, notes, misc)

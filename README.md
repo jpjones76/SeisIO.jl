@@ -4,7 +4,27 @@ A minimalist, platform-agnostic package for working with univariate geophysical 
 # Documentation
 http://seisio.readthedocs.org
 
+# KNOWN ISSUES (2018-08-10)
+* Rarely, `SeedLink!` may cause a Julia session to hang when a connection fails to initialize.
+* Required packages LightXML and Blosc both generate "Deprecated syntax" warnings.
+
 # CHANGELOG
+## 2018-08-10
+* Updated for Julia 0.7. Testing for 1.0.
+  + Please report all warnings produced.
+* `wseis` has changed:
+  + New syntax: `wseis(filename, objects)`
+  + Keywords are no longer accepted.
+* `SeisHdr` has changed:
+  + The field `:mag` (magnitude) is now Tuple(Float32, String) to allow freeform magnitude scale designations. (was: Tuple(Float32, Char, Char))
+* `batch_read` has been removed.
+* Switched to HTTP.jl due to Requests.jl being abandoned by its creators.
+  + In web requests, keyword `to=` (timeout) must now be an Integer. (was: Real)
+* SeisIO objects can no longer be saved in single-object files.
+* Notable bug fixes:
+  + Issues with `wseis` and `SeisHdr` objects should be corrected.
+  + Improved partial string matches for channel names and IDs.
+
 ## 2017-08-07
 * Improved `note!` functionality and logging of basic processing operations.
 * New function: `clear_notes!` can delete notes for a given channel number or string ID.
@@ -25,22 +45,10 @@ http://seisio.readthedocs.org
   + `t_win`, `w_time`: Convert between SeisIO time representations and time windows
   + `demean!`, `unscale!`: Basic processing operations
 
-## 2017-07-16
-* `readmseed` rewritten; performance improvements should be very noticeable.
-  + Many bugfixes.
-  + SeisIO now uses a small (~500k) memory-resident structure for SEED packets.
-  + SEED defaults can be changed with `seeddef`.
-* `findid` no longer relies on the ever-redoubtable combination of `findfirst` and String arrays.
-* Faster initialization of empty SeisData structs with `SeisData()`.
-
 ## 2017-07-04
 * Updated for Julia v0.6.0. Compatibility with earlier versions is not guaranteed. Please report any deprecation warnings!
 
-## Known Issues (2017-07-24)
-* batch_read is no longer useful. Julia 0.6.0 slowed batch_read execution time by roughly a factor of 4; it currently offers only ~10-20% speedup over standard file read methods.
-* Rarely, SeedLink! can cause a Julia session to hang by failing to initialize a connection.
-
-# Current Functionality
+# CURRENT FUNCTIONALITY
 SeisIO presently includes three web clients, readers for several data formats, and writers for SAC and a native SeisIO format. Utility functions allow synchronization, seamless data merging, and padding time gaps.
 
 ## Web clients
@@ -58,10 +66,10 @@ SeisIO presently includes three web clients, readers for several data formats, a
 * Win32
 * UW
 
-# Acknowledgements
+# ACKNOWLEGEMENTS
 miniSEED routines are based on rdmseed.m for Matlab by Francois Beauducel, Institut de Physique du Globe de Paris (France). Many thanks to Robert Casey and Chad Trabant (IRIS, USA) for discussions of IRIS web services, and Douglas Neuhauser (UC Berkeley Seismological Laboratory, USA) for discussions of the SAC data format.
 
-# References
+# REFERENCES
 1. IRIS (2010), SEED Reference Manual: SEED Format Version 2.4, May 2010, IFDSN/IRIS/USGS, http://www.iris.edu
 2. Trabant C. (2010), libmseed: the Mini-SEED library, IRIS DMC.
 3. Steim J.M. (1994), 'Steim' Compression, Quanterra Inc.

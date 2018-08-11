@@ -26,7 +26,7 @@ function irisws(cha::String;
   s=0::Union{Real,DateTime,String},
   t=(-3600)::Union{Real,DateTime,String},
   v=0::Int,
-  to=30::Real)
+  to=30::Int64)
 
   if fmt == "mseed"
     fmt = "miniseed"
@@ -44,28 +44,29 @@ function irisws(cha::String;
   url = string(URLbase,URLtail)
   v>0 && println(url)
   seis = SeisData()
-  req = get(url, timeout=to, headers=webhdr())
+  #req = get(url, timeout=to, headers=webhdr())
+  req = request("GET", url, webhdr(), readtimeout=to)
   if req.status == 200
     if w
-      savereq(req.data, fmt, c[1], c[2], c[3], c[4], d0, d1, "R")
+      savereq(req.body, fmt, c[1], c[2], c[3], c[4], d0, d1, "R")
     end
     if fmt == "sacbl"
-      seis += read_sac_stream(IOBuffer(req.data))
+      seis += read_sac_stream(IOBuffer(req.body))
       seis.src[1] = url
       note!(seis, "+src: irisws "*url)
     elseif fmt == "miniseed"
-      seis += parsemseed(IOBuffer(req.data), false, v)[1]
+      seis += parsemseed(IOBuffer(req.body), false, v)[1]
       seis.src[1] = url
       note!(seis, "+src: irisws "*url)
     else
       if v
-        warn(@sprintf("Unusual format spec; returning unparsed data stream in format=%s",fmt))
+        @warn(@sprintf("Unusual format spec; returning unparsed data stream in format=%s",fmt))
       end
-      seis = req.data
+      seis = req.body
     end
   else
-    warn("Request could not be completed! Text dump follows:")
-    println(STDOUT, String(req.data))
+    @warn("Request could not be completed! Text dump follows:")
+    println(stdout, String(req.body))
     seis = SeisChannel()
     c[3] = strip(c[3],'-')
     setfield!(seis, :id, join(c, '.'))
@@ -111,7 +112,7 @@ function IRISget(C::Array{String,1};
   y=false::Bool,
   v=0::Int,
   w=false::Bool,
-  to=30::Real)
+  to=30::Int64)
 
   K = length(C)
   d0, d1 = parsetimewin(s, t)
@@ -135,10 +136,10 @@ function IRISget(C::Array{String,1};
 end
 
 # C passed as a string
-IRISget(C::String; s=0::Union{Real,DateTime,String}, t=3600::Union{Real,DateTime,String}, y=false::Bool, v=0::Int, w=false::Bool, to=30::Real) = IRISget(map(String, split(C, ',')), s=s, t=t, y=y, v=v, w=w, to=to)
+IRISget(C::String; s=0::Union{Real,DateTime,String}, t=3600::Union{Real,DateTime,String}, y=false::Bool, v=0::Int, w=false::Bool, to=30::Int64) = IRISget(map(String, split(C, ',')), s=s, t=t, y=y, v=v, w=w, to=to)
 
 # C passed as a 2d array
-IRISget(C::Array{String,2}; s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String}, y=false::Bool, v=false::Bool, w=false::Bool, to=30::Real) = IRISget([join(C[i,:],'.') for i = 1:size(C,1)], s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String}, y=false::Bool,  v=0::Int, w=false::Bool, to=30::Real)
+IRISget(C::Array{String,2}; s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String}, y=false::Bool, v=false::Bool, w=false::Bool, to=30::Int64) = IRISget([join(C[i,:],'.') for i = 1:size(C,1)], s=0::Union{Real,DateTime,String}, t=(-3600)::Union{Real,DateTime,String}, y=false::Bool,  v=0::Int, w=false::Bool, to=30::Int64)
 
 
 """
@@ -151,7 +152,7 @@ Specify `Δ` in decimal degrees, `z` in km.
 ### Keyword Arguments and Default Values
 * `pha="ttall"`: comma-separated string of phases to return, e.g. "P,S,ScS"
 * `model="iasp91"`: velocity model
-* `to=30.0`: ste web request timeout, in seconds
+* `to=30.0`: ste web request timeout, in integer seconds
 * `v=0`: verbosity
 
 ### References
@@ -163,7 +164,7 @@ Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.
 function get_pha(Δ::Float64, z::Float64;
   phases=""::String,
   model="iasp91"::String,
-  to=30.0::Real,
+  to=30::Int64,
   v=0::Int)
 
   # Generate URL and do web query
@@ -174,23 +175,24 @@ function get_pha(Δ::Float64, z::Float64;
   end
 
   url = string("http://service.iris.edu/irisws/traveltime/1/query?", "distdeg=", Δ, "&evdepth=", z, pq, "&model=", model, "&mintimeonly=true&noheader=true")
-  v > 0 && println(STDOUT, "url = ", url)
-  R = get(url, timeout=to, headers=webhdr())
+  v > 0 && println(stdout, "url = ", url)
+  R = request("GET", url, webhdr(), readtimeout=to)
   if R.status == 200
-    req = readstring(R)     # readall(R) deprecated, 0.5.2
-    v > 0 && println(STDOUT, "Request result:\n", req)
+    # req = read(R, String)     # readall(R) deprecated, 0.5.2
+    req = String(take!(copy(IOBuffer(R.body))))
+    v > 0 && println(stdout, "Request result:\n", req)
 
     # Parse results
     phase_data = split(req, '\n')
     sa_prune!(phase_data)
     Nf = length(split(phase_data[1]))
     Np = length(phase_data)
-    Pha = Array{String,2}(Np, Nf)
+    Pha = Array{String, 2}(undef, Np, Nf)
     for p = 1:Np
       Pha[p,1:Nf] = split(phase_data[p])
     end
   else
-    Pha = Array{String,2}(0, 0)
+    Pha = Array{String,2}(undef, 0, 0)
   end
   return Pha
 end
