@@ -23,7 +23,7 @@ Exit the Pkg environment by pressing Control + C, then type:
 
 Updating
 ========
-From the Julia prompt: press ``]`` to enter the Pkg environment, then type ``update()``. You may need to restart the Julia REPL.
+From the Julia prompt: press ``]`` to enter the Pkg environment, then type ``update``. You may need to restart the Julia REPL after installing an updated version.
 
 Dependencies
 ============
