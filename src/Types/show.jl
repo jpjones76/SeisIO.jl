@@ -32,7 +32,7 @@ function show_str(io::IO, S::Array{String,1}, w::Int, W::Int, s::String, b::Bool
     d = str_trunc(S[i], w)
     sd[st+1:st+length(d)] = d
   end
-  println(io, replace(String(sd),'\0',' ') => showtail(io, b))
+  println(io, replace(String(sd),'\0' => ' ') => showtail(io, b))
   return
 end
 
@@ -44,7 +44,7 @@ function show_int(io::IO, D::Array{Int,1}, W::Int, w::Int, s::String, b::Bool)
     d = str_trunc(string(D[i]), w)
     sd[st+1:st+length(d)] = d
   end
-  println(io, string(replace(String(sd),'\0',' ') => showtail(io, b)))
+  println(io, string(replace(String(sd),'\0' => ' ') => showtail(io, b)))
   return
 end
 
@@ -64,7 +64,7 @@ function show_t(io::IO, T::Array{Array{Int64,2},1}, w::Int, W::Int, b::Bool)
     sd1[p+2+length(s):p+1+length(s)+length(ng)] = ng
     p += w
   end
-  println(io, replace(String(sd1),'\0',' ') => showtail(io, b))
+  println(io, replace(String(sd1),'\0' => ' ') => showtail(io, b))
   return
 end
 
@@ -98,7 +98,7 @@ function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, b::Bool)
   end
   for i = 1:6
     if i == 1
-      println(io, replace(String(str[:,i]),'\0',' ') => showtail(io, b))
+      println(io, replace(String(str[:,i]),'\0' => ' ') => showtail(io, b))
     else
       println(io, replace(String(str[:,i]),'\0' => ' '))
     end
@@ -176,7 +176,7 @@ function show(io::IO, S::SeisData)
   w = min(W, 36)
   nc = getfield(S, :n)
   N = min(nc, floor(Int, (W-os-3)/(w+1)))
-  D = Array{String,1}(25)
+  D = Array{String,1}(undef, 25)
   println(io, "SeisData with ", nc, " channels (", N, " shown)")
   show_str(io, S.id[1:N], w, W, "id", N<nc)
   show_str(io, S.name[1:N], w, W, "name", N<nc)
@@ -199,7 +199,7 @@ function show(io::IO, S::SeisChannel)
   loc_str = ["lat", "lon", "ele", "az", "inc"]
   W = max(80,displaysize(io)[2]-2)-os
   w = min(W, 36)
-  D = Array{String,1}(25)
+  D = Array{String,1}(undef,25)
   nx = length(S.x)
   println(io, "SeisChannel with ", nx, " samples")
   show_str(io, [S.id], w, W, "id", false)
