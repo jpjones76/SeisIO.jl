@@ -5,14 +5,18 @@ os:
   - osx
 julia:
   # - release
+  # - nightly
   - 0.7.0
 notifications:
   email: false
 # uncomment the following lines to override the default test script
-script:
-  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia -e 'Pkg.clone(pwd()); Pkg.build("SeisIO"); Pkg.test("SeisIO",coverage=true)'
-   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+#script:
+#  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+#  - julia -e 'Pkg.clone(pwd()); Pkg.build("SeisIO"); Pkg.test("SeisIO"; coverage=true)'
+#  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+# script:
+#   - julia -e 'Pkg.clone(pwd())'
+#   - julia -e 'Pkg.test("SeisIO",coverage=true)'
 # after_success:
 #   - julia -e julia -e 'Pkg.add("Documenter")'
 #   - julia -e 'cd(Pkg.dir("SeisIO")); include(joinpath("docs", "make.jl"))'
