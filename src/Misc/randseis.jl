@@ -4,11 +4,11 @@ OK = [0x00, 0x01, 0x10, 0x11, 0x12, 0x13, 0x14, 0x20, 0x21, 0x22, 0x23, 0x24, 0x
 function pop_rand!(D::Dict{String,Any}, N::Int)
   for n = 1:N
     t = code2typ(rand(OK))
-    k = randstring(rand(2:12))
+    k = Random.randstring(rand(2:12))
     if isa(Char, t)
       D[k] = rand(Char)
     elseif isa(String, t)
-      D[k] = randstring(rand(1:1000))
+      D[k] = Random.randstring(rand(1:1000))
     elseif Bool(t <: Real) == true
       D[k] = rand(t)
     elseif Bool(t <: Complex) == true
@@ -18,7 +18,7 @@ function pop_rand!(D::Dict{String,Any}, N::Int)
         if isa(y,Char)
           D[k] = Array{Char,1}([rand(Char) for i = 1:rand(Int, 1:256)])
         elseif isa(y,String)
-          D[k] = Array{String,1}([randstring(rand(1:256)) for i = 1:rand(Int, 1:64)])
+          D[k] = Array{String,1}([Random.randstring(rand(1:256)) for i = 1:rand(Int, 1:64)])
         elseif Bool(y <: Number) == true
           D[k] = rand(y, rand(1:1000))
         end
@@ -119,7 +119,7 @@ function populate_chan!(S::SeisChannel; c=false::Bool)
   bcodes = Char['V', 'L', 'M', 'M', 'B', 'S', 'S', 'S', 'S', 'S', 'S', 'H', 'S', 'E', 'E', 'C']
   seiscodes = ['H','L','N']
   irregular_units = ["K", "tonnes SO2", "rad", "W", "m"]
-  isempty(S.name) && (S.name = randstring(12))                          # name
+  isempty(S.name) && (S.name = Random.randstring(12))                          # name
   (isempty(S.fs) || S.fs == 0 || isnan(S.fs)) && (S.fs = rand(fs_vals))  # fs
   fc = rand(fc_vals[fc_vals .< S.fs/2])
 
@@ -128,8 +128,8 @@ function populate_chan!(S::SeisChannel; c=false::Bool)
     bcode = getbandcode(S.fs)
     (icode,ccode,units) = getyp2codes(bcode)
     chan = join([bcode, icode, ccode])
-    net = uppercase(randstring(2))
-    sta = uppercase(randstring(4))
+    net = uppercase(Random.randstring(2))
+    sta = uppercase(Random.randstring(4))
     S.id = join([net,sta,"",chan],'.')                                  # id
   end
   (isempty(S.units) || S.units == "unknown") && (S.units = rand(irregular_units))  # units
@@ -153,7 +153,7 @@ function populate_chan!(S::SeisChannel; c=false::Bool)
     if Base.in(ccode,seiscodes)
       i = rand(1:4)
       zstub = zeros(2*i, 1)
-      pstub = 10.*rand(i,1)
+      pstub = 10 .*rand(i,1)
       S.resp = [complex(zstub) complex([pstub; pstub],[pstub; -pstub])] # resp
     end
   end
@@ -171,7 +171,7 @@ function populate_chan!(S::SeisChannel; c=false::Bool)
     Lx = ceil(Int, S.fs)*(2^rand(8:12))
     if irreg
       L+=2
-      S.x = rand(L) .* 10.^(rand(1:10, L))
+      S.x = rand(L) .* 10 .^(rand(1:10, L))
       t = [Int64(0) round(Int64, ts/μs); zeros(Int64, L-1) round.(Int, diff(sort(rand(2:Lx, L)))/(μs*S.fs))]
       S.fs = 0
       S.units = rand(irregular_units)
@@ -181,7 +181,7 @@ function populate_chan!(S::SeisChannel; c=false::Bool)
       t[1,:] = [1 round(Int64, ts/μs)]
       t[2:L+1,:] = [rand(2:Lx, L, 1) round.(Int, rand(L,1)./μs)]
       t[L+2,:] = [Lx 0]
-      S.t = sortrows(t)
+      S.t = sortslices(t, dims=1)
     end
   end
   note!(S, "Created by function populate_chan!.")
@@ -252,14 +252,14 @@ function randseishdr()
   setfield!(H, :id, rand(1:2^62))
   setfield!(H, :ot, now())
   setfield!(H, :loc, [(rand(0.0:1.0:89.0)+rand())*-1.0^(rand(1:2)), (rand(0.0:1.0:179.0)+rand())*-1.0^(rand(1:2)), 50.0*randexp(Float64)])
-  setfield!(H, :mag, (6.0f0*rand(Float32), randstring(1)[1], randstring(1)[1]))
-  setfield!(H, :int, (UInt8(floor(Int, H.mag[1])), randstring(rand(2:4))))
+  setfield!(H, :mag, (6.0f0*rand(Float32), Random.randstring(1)[1], Random.randstring(1)[1]))
+  setfield!(H, :int, (UInt8(floor(Int, H.mag[1])), Random.randstring(rand(2:4))))
   setfield!(H, :mt, rand(Float64, 8))
   setfield!(H, :np, [(rand(), rand(), rand()), (rand(), rand(), rand())])
   setfield!(H, :pax, [(rand(), rand(), rand()), (rand(), rand(), rand()), (rand(), rand(), rand())])
-  setfield!(H, :src, randstring(rand(16:256)))
+  setfield!(H, :src, Random.randstring(rand(16:256)))
   pop_rand!(H.misc, rand(4:24))
-  [note!(H, randstring(rand(16:256))) for i = 1:rand(3:18)]
+  [note!(H, Random.randstring(rand(16:256))) for i = 1:rand(3:18)]
   return H
 end
 

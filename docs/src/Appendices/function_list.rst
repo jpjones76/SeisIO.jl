@@ -57,13 +57,9 @@ Retrieve SeedLink information at level ``v`` from ``url``. Returns XML as a stri
 
 Cosine taper each channel in S around time gaps, then fill time gaps with the mean of non-NaN data points.
 
-.. function:: S = batch_read(fstr)
-
-Read files matching ``fstr`` into memory using parallel read and shared arrays. The expected file type defaults to SAC; specify ``ftype="PASSCAL"`` for PASSCAL SEG Y.
-
 .. function:: chanspec()
 
-Type ``?chanspec`` to print detailed channel specification syntax to STDOUT.
+Type ``?chanspec`` to print detailed channel specification syntax to stdout.
 
 .. clear_notes!(S::SeisData, i::Int64, s::String)
 
@@ -228,11 +224,11 @@ Read SeisIO data from ``fname`` into an array of SeisIO-compatible structures.
 
 .. function:: sachdr(fname)
 
-Print headers from SAC file ``fname`` to STDOUT.
+Print headers from SAC file ``fname`` to stdout.
 
 .. function:: segyhdr(fname)
 
-Print headers from SEG Y file ``fname`` to STDOUT. Specify ``passcal=true`` for PASSCAL SEG Y.
+Print headers from SEG Y file ``fname`` to stdout. Specify ``passcal=true`` for PASSCAL SEG Y.
 
 .. function:: seeddef(f, v)
 

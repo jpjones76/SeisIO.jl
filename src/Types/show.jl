@@ -6,11 +6,11 @@ showtail(io::IO, b::Bool) = b ? "..." : ""
 float_str(x::Float64) = @sprintf("%.3e", x)
 
 function str_trunc(str::String, w::Integer)
-  d = Vector{UInt8}(str)
+  d = map(UInt8, collect(str))
   L = length(d)
   if L > w
     s3 = d[1:w-4]
-    d = Vector{UInt8}(String([s3; Vector{UInt8}("...")]))
+    d = map(UInt8, collect(String([s3; codeunits("...")])))
   else
     d = d[1:min(w,L)]
   end
@@ -19,8 +19,8 @@ end
 
 function str_head(s::String, W::Int)
   sd = ones(UInt8, W)*0x20
-  sd[os-1-length(s):os-2] = Vector{UInt8}(uppercase(s))
-  sd[os-1:os] = Vector{UInt8}(": ")
+  sd[os-1-length(s):os-2] = map(UInt8, collect(uppercase(s)))
+  sd[os-1:os] = codeunits(": ")
   return sd
 end
 
@@ -32,7 +32,7 @@ function show_str(io::IO, S::Array{String,1}, w::Int, W::Int, s::String, b::Bool
     d = str_trunc(S[i], w)
     sd[st+1:st+length(d)] = d
   end
-  println(io, replace(String(sd),'\0',' '), showtail(io, b))
+  println(io, replace(String(sd),'\0',' ') => showtail(io, b))
   return
 end
 
@@ -44,7 +44,7 @@ function show_int(io::IO, D::Array{Int,1}, W::Int, w::Int, s::String, b::Bool)
     d = str_trunc(string(D[i]), w)
     sd[st+1:st+length(d)] = d
   end
-  println(io, string(replace(String(sd),'\0',' '), showtail(io, b)))
+  println(io, string(replace(String(sd),'\0',' ') => showtail(io, b)))
   return
 end
 
@@ -59,26 +59,26 @@ function show_t(io::IO, T::Array{Array{Int64,2},1}, w::Int, W::Int, b::Bool)
     else
       s = timestamp(T[i][1,2])
     end
-    sd1[p+1:p+length(s)] = Vector{UInt8}(s)
-    ng = Vector{UInt8}(string("(", ngaps(T[i]), " gaps)"))
+    sd1[p+1:p+length(s)] = codeunits(s)
+    ng = map(UInt8, collect(string("(", ngaps(T[i]), " gaps)")))
     sd1[p+2+length(s):p+1+length(s)+length(ng)] = ng
     p += w
   end
-  println(io, replace(String(sd1),'\0',' '), showtail(io, b))
+  println(io, replace(String(sd1),'\0',' ') => showtail(io, b))
   return
 end
 
 function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, b::Bool)
   N = length(X)
   str = zeros(UInt8, W, 6)
-  str[os-2:os,1] = Vector{UInt8}("X: ")
+  str[os-2:os,1] = codeunits("X: ")
   p = os
   i = 1
   while p < W && i <= N
     L = length(X[i])
     Lx = string("(nx = ", L, ")")
     if isempty(X[i])
-      str[p+1:p+7,1] = Vector{UInt8}("(empty)")
+      str[p+1:p+7,1] = codeunits("(empty)")
     else
       for k = 1:min(6,L+2)
         if k <= length(X[i])
@@ -90,7 +90,7 @@ function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, b::Bool)
         if k == min(6, length(X[i])+2)
           s = Lx
         end
-        str[p+1:p+length(Vector{UInt8}(s)),k] = Vector{UInt8}(s)
+        str[p+1:p+length(codeunits(s)),k] = codeunits(s)
       end
     end
     p += w
@@ -98,9 +98,9 @@ function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, b::Bool)
   end
   for i = 1:6
     if i == 1
-      println(io, replace(String(str[:,i]),'\0',' '), showtail(io, b))
+      println(io, replace(String(str[:,i]),'\0',' ') => showtail(io, b))
     else
-      println(io, replace(String(str[:,i]),'\0',' '))
+      println(io, replace(String(str[:,i]),'\0' => ' '))
     end
   end
   return
@@ -109,7 +109,7 @@ end
 function resp_str(io::IO, X::Array{Array{Complex{Float64},2},1}, w::Int, W::Int, b::Bool)
   N = length(X)
   sd = zeros(UInt8, W, 2)
-  sd[os-5:os-1,1] = Vector{UInt8}("RESP:")
+  sd[os-5:os-1,1] = codeunits("RESP:")
   p = os
   i = 1
   while p < W && i <= N
@@ -136,18 +136,18 @@ function resp_str(io::IO, X::Array{Array{Complex{Float64},2},1}, w::Int, W::Int,
       end
     end
     q = length(zstr)
-    sd[p+1:p+q,1] = Vector{UInt8}(zstr)
-    sd[p+1:p+q,2] = Vector{UInt8}(pstr)
+    sd[p+1:p+q,1] = codeunits(zstr)
+    sd[p+1:p+q,2] = codeunits(pstr)
     p += w
     i += 1
   end
-  [println(io, replace(String(sd[:,i]),'\0',' '), showtail(io,b)) for i=1:2]
+  [println(io, replace(String(sd[:,i]),'\0' => ' '), showtail(io,b)) for i=1:2]
   return
 end
 
 function show_conn(io::IO, C::Array{TCPSocket,1})
   d = str_head("C", os)
-  println(io, replace(String(d),'\0',' '), sum([isopen(i) for i in C]), " open, ", length(C), " total")
+  println(io, replace(String(d),'\0' => ' '), sum([isopen(i) for i in C]), " open, ", length(C), " total")
   if !isempty(C)
     m = 1
     for c in C
@@ -193,7 +193,7 @@ function show(io::IO, S::SeisData)
   show_conn(io, S.c)
   return nothing
 end
-show(S::SeisData) = show(STDOUT, S)
+show(S::SeisData) = show(stdout, S)
 
 function show(io::IO, S::SeisChannel)
   loc_str = ["lat", "lon", "ele", "az", "inc"]
@@ -216,10 +216,10 @@ function show(io::IO, S::SeisChannel)
   show_x(io, [S.x], w, W, false)
   return nothing
 end
-show(S::SeisChannel) = show(STDOUT, S)
+show(S::SeisChannel) = show(stdout, S)
 
-magsum(mag::Tuple{Float32, Char, Char}) = string("M_", mag[2], mag[3], " ", mag[1])
-locsum(loc::Array{Float64,1}) = string(loc[1], "\U00B0\N, ", loc[2], "\U00B0\E, ", loc[3], "km")
+magsum(mag::Tuple{Float32, String}) = string(mag[2], " ", mag[1])
+locsum(loc::Array{Float64,1}) = string(loc[1], "°N, ", loc[2], "°E, ", loc[3], "km")
 function show(io::IO, S::SeisHdr)
   W = max(80,displaysize(io)[2]-2)-os
   println(io, "    ID: ", S.id)
@@ -234,7 +234,7 @@ function show(io::IO, S::SeisHdr)
   println(io, "  MISC: ", length(S.misc), " items")
   return nothing
 end
-show(S::SeisHdr) = show(STDOUT, S)
+show(S::SeisHdr) = show(stdout, S)
 
 function show(io::IO, S::SeisEvent)
   println(io, summary(S))
@@ -244,6 +244,6 @@ function show(io::IO, S::SeisEvent)
   println(io, "SeisIO.SeisData with ", S.data.n, " channels")
   return nothing
 end
-show(S::SeisEvent) = show(STDOUT, S)
+show(S::SeisEvent) = show(stdout, S)
 
 length(t::Union{SeisChannel,SeisEvent}) = summary(t)

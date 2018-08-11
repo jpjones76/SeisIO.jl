@@ -1,9 +1,10 @@
+using DelimitedFiles: readdlm
+
 """
     rlennasc(fname)
 
 Read Lennartz-type ASCII file fname with pseudo-header info in first line.
 """
-
 function rlennasc(f::String)
   fname = realpath(f)
   S = SeisChannel()
@@ -11,8 +12,8 @@ function rlennasc(f::String)
   h = split(readline(fid))
   ts = 0
 
-  sta = replace(h[3],"\'", "")
-  S.fs = 1000/parse(h[5])
+  sta = replace(h[3], "\'" => "")
+  S.fs = 1000/Meta.parse(h[5])
   ts = round(Int64, Dates.datetime2unix(DateTime(join([h[8],"T",h[9]])))/μs)
 
   cmp = split(fname,'.')[end]

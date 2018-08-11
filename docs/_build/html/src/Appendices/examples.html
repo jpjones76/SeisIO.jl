@@ -261,16 +261,16 @@ dt = en-st
 
 S = SeisData()
 SeedLink!(S, sta, mode=&quot;TIME&quot;, r=10.0, s=d0, t=d1)
-println(STDOUT, &quot;...first link initialized...&quot;)
+println(stdout, &quot;...first link initialized...&quot;)
 
 # Seedlink with a config file
 config_file = &quot;seedlink.conf&quot;
 SeedLink!(S, config_file, r=10.0, mode=&quot;TIME&quot;, s=d0, t=d1)
-println(STDOUT, &quot;...second link initialized...&quot;)
+println(stdout, &quot;...second link initialized...&quot;)
 
 # Seedlink with a config string
 SeedLink!(S, &quot;CC.VALT..???, UW.ELK..EHZ&quot;, mode=&quot;TIME&quot;, r=10.0, s=d0, t=d1)
-println(STDOUT, &quot;...third link initialized...&quot;)
+println(stdout, &quot;...third link initialized...&quot;)
 </pre></div>
 </div>
 </div>

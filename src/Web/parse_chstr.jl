@@ -1,11 +1,11 @@
 function parse_charr(chan_in::Array{String,1}; d='.'::Char, fdsn=false::Bool)
     N = size(chan_in,1)
-    chan_data = Array{String,2}(0,5)
+    chan_data = Array{String,2}(undef, 0, 5)
     default = ""
 
     # Initial pass to parse to string array
     for i = 1:N
-      chan_line = [strip(String(j)) for j in split(chan_in[i], d, keep=true, limit=5)]
+      chan_line = [strip(String(j)) for j in split(chan_in[i], d, keepempty=true, limit=5)]
       L = length(chan_line)
       if L < 2
         continue
@@ -15,13 +15,13 @@ function parse_charr(chan_in::Array{String,1}; d='.'::Char, fdsn=false::Bool)
       chan_data = vcat(chan_data, reshape(chan_line, 1, 5))
     end
 
-    return fdsn == true ? minreq!(chan_data) : chan_data
+    return fdsn == true ? minreq!(chan_data) : map(String, chan_data)
 end
 
 function parse_chstr(chan_in::String; d=','::Char, fdsn=false::Bool)
-  chan_out = Array{String,2}(0,5)
-  if isfile(chan_in)
-    return parse_chstr(join([strip(j, ['\r','\n']) for j in filter(i -> !startswith(i, ['\#','\*']), open(readlines, chan_in))],','))
+  chan_out = Array{String, 2}(undef, 0, 5)
+  if safe_isfile(chan_in)
+    return parse_chstr(join([strip(j, ['\r','\n']) for j in filter(i -> !startswith(i, ['#','*']), open(readlines, chan_in))],','))
   else
     chan_data = [strip(String(j)) for j in split(chan_in, d)]
     for j = 1:length(chan_data)
@@ -30,7 +30,7 @@ function parse_chstr(chan_in::String; d=','::Char, fdsn=false::Bool)
       tmp_data = map(String, split(chan_data[j], '.'))
       L = length(tmp_data)
       L < 5 && append!(tmp_data, collect(Main.Base.Iterators.repeated("",5-L)))
-      chan_out = cat(1, chan_out, reshape(tmp_data, 1, 5))
+      chan_out = cat(chan_out, reshape(tmp_data, 1, 5), dims=1)
     end
   end
   return fdsn == true ? minreq!(chan_out) : chan_out
@@ -61,8 +61,8 @@ Reduce `S` to the most compact possible set of SeedLink request query strings th
 function minreq!(S::Array{String,2})
   d = ','
   (M,N) = size(S)
-  K = Array{Int64,1}(N)
-  T = Array{String,2}(M,N)
+  K = Array{Int64, 1}(undef, N)
+  T = Array{String, 2}(undef, M, N)
   for n = 1:N
     for m = 1:M
       T[m,n] = join(S[m,1:N.!=n],d)
@@ -73,15 +73,15 @@ function minreq!(S::Array{String,2})
   if L != M
     V = T[:,J]
     U = unique(V)
-    Q = Array{String,2}(L,N)
+    Q = Array{String,2}(undef, L, N)
     for i = 1:L
-      j = find(V.==U[i])
+      j = findall(V.==U[i])
       Q[i,1:N.!=J] = split(V[j[1]],d)
       Q[i,J] = join(S[j,J],d)
     end
     S = Q
   end
-  return S
+  return map(String, S)
 end
 minreq!(S::Array{String,1}, T::Array{String,1}) = minreq!(hcat(S,T))
 minreq(S::Array{String,2}) = (T = deepcopy(S); minreq!(T); return T)

@@ -1,8 +1,8 @@
 function cfile_parse(C::String; delim=','::Char)
-  if isfile(C)
+  if safe_isfile(C)
     ccfg = [strip(j, ['\r','\n']) for j in filter(i -> !startswith(i, ['\#','\*']), open(readlines, C))]
   else
-    ccfg = split(C, delim, keep=false)
+    ccfg = split(C, delim, keepempty=false)
   end
   return map(String, ccfg)
 end
@@ -50,10 +50,10 @@ function SL_config(C::String; fdsn=false::Bool, delim=','::Char)
   # Parse C
   R = Array{String,2}(0,5)
   for i = 1:length(ccfg)
-    line = split(ccfg[i], ' ', limit=3, keep=false)
+    line = split(ccfg[i], ' ', limit=3, keepempty=false)
     if length(line) == 3
       (net, sta, rest) = line
-      P = split(rest,' ', keep=false)
+      P = split(rest,' ', keepempty=false)
       for pat in P
         (loc, cha, t) = pat_parse(pat)
         R = cat(1, R, [net sta loc cha t])
@@ -97,8 +97,8 @@ function pat_parse(pat)
   loc = "??"
   cha = "???"
   t = "?"
-  if contains(pat, ".")
-    (lc,t) = split(pat, '.', limit=2, keep=false)
+  if occursin(".", pat) #contains(pat, ".")
+    (lc,t) = split(pat, '.', limit=2, keepempty=false)
     if length(lc) >= 5
       loc = lc[1:2]           # LLCCC.T
       cha = lc[3:5]

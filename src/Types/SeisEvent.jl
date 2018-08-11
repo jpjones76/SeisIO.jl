@@ -6,7 +6,7 @@ import Base:isequal, isempty, ==
 Create a seismic event. A SeisEvent comprises a SeisHdr object (S.hdr) plus
 a SeisData object (S.data).
 """
-type SeisEvent
+mutable struct SeisEvent
   hdr::SeisHdr
   data::SeisData
 

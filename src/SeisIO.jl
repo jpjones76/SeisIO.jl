@@ -1,5 +1,6 @@
 module SeisIO
-using Blosc, DSP, LightXML, Requests.get
+using Blosc, Dates, DSP, LightXML, LinearAlgebra, Printf, Random, SharedArrays, Sockets, Statistics
+using HTTP: request
 __precompile__(true)
 path = Base.source_dir()
 const datafields = [:id, :name, :loc, :fs, :gain, :resp, :units, :src, :notes, :misc, :t, :x]
@@ -10,7 +11,6 @@ wseis, wseism,                                                # Types/write.jl
 rseis, rseism,                                                # Types/read.jl
 mseis!,                                                       # Types/merge.jl
 ungap, ungap!, sync, sync!,                                   # Types/sync.jl
-batch_read,                                                   # Formats/batch_read.jl
 readmseed, seeddef,                                           # Formats/mSEED.jl
 rlennasc,                                                     # Formats/LennartzAsc.jl
 readsac, rsac, sachdr, writesac, wsac,                        # Formats/SAC.jl
@@ -37,6 +37,7 @@ randseischannel, randseisdata, randseisevent, randseishdr     # Misc/randseis.jl
 # Everything depends on these
 include("CoreUtils/ls.jl")
 include("CoreUtils/time.jl")
+include("CoreUtils/safe_isfile.jl") # Temporary workaround for safe_isfile bad behaior in Windows
 
 # Utilities that don't require SeisIO types to work
 for i in readdir(path*"/Utils")

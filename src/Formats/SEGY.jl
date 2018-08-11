@@ -33,18 +33,18 @@ end
 
 function do_trace(f::IO; full=false::Bool, passcal=false::Bool, fh=zeros(Int16,3)::Array{Int16,1}, src=""::String)
   ftypes = Array{DataType,1}([UInt32, Int32, Int16, Any, Float32, Any, Any, Int8]) # Note: type 1 is IBM Float32
-  shorts = Array{Int16, 1}(53)
-  ints   = Array{Int32, 1}(19)
+  shorts = Array{Int16, 1}(undef, 53)
+  ints   = Array{Int32, 1}(undef, 19)
 
   # First part of trace header is quite standard
-  ints[1:7]   = read(f, Int32, 7)
-  shorts[1:4] = read(f, Int16, 4)
-  ints[8:15]  = read(f, Int32, 8)
-  shorts[5:6] = read(f, Int16, 2)
-  ints[16:19] = read(f, Int32, 4)
-  shorts[7:52]= read(f, Int16, 46)
+  ints[1:7]   = read!(f, Array{Int32, 1}(undef, 7))
+  shorts[1:4] = read!(f, Array{Int16,1}(undef, 4))
+  ints[8:15]  = read!(f, Array{Int32,1}(undef, 8))
+  shorts[5:6] = read!(f, Array{Int16,1}(undef, 2))
+  ints[16:19] = read!(f, Array{Int32,1}(undef, 4))
+  shorts[7:52]= read!(f, Array{Int16,1}(undef, 46))
   if passcal
-    chars       = read(f, UInt8, 20)
+    chars       = read!(f, Array{UInt8,1}(undef, 20))
     dt          = read(f, Int32)
     fmt         = read(f, Int16)
     shorts[53]  = read(f, Int16)
@@ -53,18 +53,18 @@ function do_trace(f::IO; full=false::Bool, passcal=false::Bool, fh=zeros(Int16,3
     skip(f, 4)
     n           = read(f, Int32)
     skip(f, 8)
-    x = map(Float64, read(f, fmt == Int16(1) ? Int32 : Int16, shorts[20] == Int16(32767) ? n : Int32(shorts[20])))
+    x = map(Float64, read!(f, Array{fmt == Int16(1) ? Int32 : Int16, 1}(undef, shorts[20] == Int16(32767) ? n : Int32(shorts[20]))))
     close(f)
 
     # trace processing
-    fs    = 1.0e6 / Float64(shorts[21] == Int16(1) ? dt: shorts[21])
+    fs    = 1.0e6 / Float64(shorts[21] == Int16(1) ? dt : shorts[21])
     gain  = Float64(shorts[23]) * 10.0^(Float64(shorts[24])/10.0) / Float64(scale_fac)
     lat, lon = auto_coords(ints[18:19], shorts[6:7])
     el    = Float64(ints[8]*shorts[5])
     sta   = String(chars[1:6])
     inst  = "00"
 
-    c = strip(replace(String(chars[15:18]),"\0",""))
+    c = strip(replace(String(chars[15:18]),"\0" => ""))
     if uppercase(c) in ["Z","N","E"]
       cha = string(getbandcode(fs), 'H', c[1])
     elseif length(c) < 2
@@ -79,9 +79,9 @@ function do_trace(f::IO; full=false::Bool, passcal=false::Bool, fh=zeros(Int16,3
     skip(f, 22)
     trace_unit  = bswap(read(f, Int16))
     trans_mant  = bswap(read(f, Int32))
-    shorts2     = [bswap(i) for i in read(f, Int16, 5)]
+    shorts2     = [bswap(i) for i in read!(f, Array{Int16,1}(undef,5))]
     skip(f, 22)
-    x           = map(Float64, [bswap(i) for i in read(f, ftypes[fmt], n)])
+    x           = map(Float64, [bswap(i) for i in read!(f, Array{ftypes[fmt],1}(undef,n))])
 
     # not sure about this; where did this formula come from...?
     gain  = Float64(trans_mant) * 10.0^(Float64(shorts2[1]+sum(shorts[23:24]))/10.0) # *2.0^shorts[47]
@@ -105,7 +105,7 @@ function do_trace(f::IO; full=false::Bool, passcal=false::Bool, fh=zeros(Int16,3
                    (shorts[53] + sum(shorts[15:17]))*1000)
   loc       = [lat, lon, el, 0.0, 0.0]
   t         = [1 ts; length(x) 0]
-  id        = uppercase(replace(join(["", sta, inst, cha], '.'), "\0", ""))
+  id        = uppercase(replace(join(["", sta, inst, cha], '.'), "\0" => ""))
   chan      = SeisChannel()
   setfield!(chan, :name, id)
   setfield!(chan, :id, id)
@@ -144,18 +144,18 @@ function readsegy(fname::String; passcal=false::Bool, full=false::Bool)
     seis = do_trace(f, full=full, passcal=passcal, src=fname)
     seis.src = fname
   else
-    fh = Array{Int16,1}(27)
+    fh = Array{Int16, 1}(undef, 27)
     seis = SeisData()
 
     # File header
-    txthdr        = join(read(f, Cchar, 3200))
-    ids           = read(f, Int32, 3)
-    fh[1:24]      = read(f, Int16, 24)
+    txthdr        = join(read!(f, Array{Cchar,1 }(undef, 3200)))
+    ids           = read!(f, Array{Int32, 1}(undef, 3))
+    fh[1:24]      = read!(f, Array{Int16, 1}(undef, 24))
 
     # My sample files have the Int16s in little endian order...?
     fh = [bswap(i) for i in fh]
     skip(f, 240)
-    fh[25:27] = read(f, Int16, 3)
+    fh[25:27] = read!(f, Array{Int16,1}(undef,3))
     skip(f, 94)
 
     # Process file header
@@ -168,7 +168,7 @@ function readsegy(fname::String; passcal=false::Bool, full=false::Bool)
       skip(f, 3200*nh)
     else
       fhd = Dict{String,Any}()
-      fhd["exthdr"] = [replace(join(read(f, Cchar, 3200)),"\0"," ") for i = 1:nh]
+      fhd["exthdr"] = [replace(join(read!(f, Array{Cchar,1 }(undef, 3200))), "\0" => " ") for i = 1:nh]
       merge!(fhd, Dict{String,Any}(zip(["jobid", "lineid", "reelid", "ntr", "naux", "filedt", "origdt", "filenx",
       "orignx", "fmt", "cdpfold", "trasort", "vsum", "swst", "swen0", "swlen", "swtyp", "tapnum", "swtapst", "swtapen",
       "taptyp", "corrtra", "bgainrec", "amprec", "msys", "zupdn", "vibpol", "segyver", "isfixed", "ntxthdr"],
@@ -191,21 +191,21 @@ end
 """
     segyhdr(f)
 
-Print formatted, sorted SEG-Y headers of file `f` to STDOUT. Pass keyword argument `passcal=true` for PASSCAL/NMT modified SEG-Y.
+Print formatted, sorted SEG-Y headers of file `f` to stdout. Pass keyword argument `passcal=true` for PASSCAL/NMT modified SEG-Y.
 """
 function segyhdr(fname::String; passcal=false::Bool)
   seis = readsegy(fname::String; passcal=passcal, full=true)
   if passcal
-    @printf(STDOUT, "NMT SEG-Y HEADER: %s\n", realpath(fname))
+    @printf(stdout, "NMT SEG-Y HEADER: %s\n", realpath(fname))
     for k in sort(collect(keys(seis.misc)))
-      @printf(STDOUT, "%10s: %s\n", k, string(seis.misc[k]))
+      @printf(stdout, "%10s: %s\n", k, string(seis.misc[k]))
     end
   else
-    W = displaysize(STDOUT)[2]-2
+    W = displaysize(stdout)[2]-2
     S = fill("", length(seis.misc[1])+1)
     p = 1
     w = 22
-    @printf(STDOUT, "SEG-Y HEADER: %s\n", realpath(fname))
+    @printf(stdout, "SEG-Y HEADER: %s\n", realpath(fname))
     for i = 1:seis.n
       if p > 1
         s = @sprintf("       %3i/%i", i, seis.n)

@@ -37,7 +37,7 @@ function env!(S::SeisData; sync::Bool=false, edge::Float64=1.0, fl::Float64=1.0,
     P = plan_rfft(X)
 
     # Trackers for changes
-    fs = maximum(S.fs[find(λ.==L[1])])
+    fs = maximum(S.fs[findall(λ.==L[1])])
     fs_last = fs
     nx_last = nx
 
@@ -52,7 +52,7 @@ function env!(S::SeisData; sync::Bool=false, edge::Float64=1.0, fl::Float64=1.0,
     # Create Hanning window
     if smooth
         hf = DSP.hanning(nk)
-        scale!(hf, 0.5/sum(hf))
+        rmul!(hf, 0.5/sum(hf))
         kf = DSP.ZeroPoleGain(Float64[], hf, 1.0)
         pr = DSP.PolynomialRatio(kf)
         ka = coefa(pr)
@@ -66,7 +66,7 @@ function env!(S::SeisData; sync::Bool=false, edge::Float64=1.0, fl::Float64=1.0,
         # Skip channels that are uninitialized or contain irregularly sampled data
         isapprox(L[i], 0.0) && continue
 
-        J = find(λ.==L[i])
+        J = findall(λ.==L[i])
         F = S.fs[J]
         k = sortperm(F)
         J = J[k]
@@ -81,7 +81,7 @@ function env!(S::SeisData; sync::Bool=false, edge::Float64=1.0, fl::Float64=1.0,
         for j in J
             # Remove mean
             fs = S.fs[j]
-            unsafe_copy!(X, 1, S.x[j], 1, nx)
+            unsafe_copyto!(X, 1, S.x[j], 1, nx)
             μ = mean(X)
             broadcast!(-, X, X, μ)
 
@@ -128,7 +128,7 @@ function env!(S::SeisData; sync::Bool=false, edge::Float64=1.0, fl::Float64=1.0,
             if smooth
                 SeisIO.filtfilt!(X, YS, kb, ka, kz, kp)
             end
-            unsafe_copy!(S.x[j], 1, X, 1, nx)
+            unsafe_copyto!(S.x[j], 1, X, 1, nx)
 
             # Update fs_last
             fs_last = fs
@@ -188,7 +188,7 @@ function filtfilt!(X::Array{Float64,1}, Y::Array{Float64,1}, b::Array{Float64,1}
     zi0 = copy(zi)
 
     # Extrapolate X into Y
-    unsafe_copy!(Y, p+1, X, 1, nx)
+    unsafe_copyto!(Y, p+1, X, 1, nx)
     y = 2*X[1]
     @inbounds for i = 1:p
         Y[i] = y - X[2+p-i]
@@ -199,10 +199,10 @@ function filtfilt!(X::Array{Float64,1}, Y::Array{Float64,1}, b::Array{Float64,1}
     end
 
     # Filtering
-    reverse!(filt!(Y, b, a, Y, scale!(zi0, zi, Y[1])))
-    filt!(Y, b, a, Y, scale!(zi0, zi, Y[1]))
+    reverse!(filt!(Y, b, a, Y, rmul!(zi0, zi, Y[1])))
+    filt!(Y, b, a, Y, rmul!(zi0, zi, Y[1]))
     reverse!(Y)
-    unsafe_copy!(X, 1, Y, p+1, nx)
+    unsafe_copyto!(X, 1, Y, p+1, nx)
     return nothing
 end
 
@@ -211,8 +211,8 @@ function my_stepstate(b::Vector{Float64}, a::Vector{Float64})
     scale_factor = a[1]
     if a[1] != 1.0
         r = 1.0/a[1]
-        scale!(a, r)
-        scale!(b, r)
+        rmul!(a, r)
+        rmul!(b, r)
     end
 
     bs = length(b)
@@ -256,7 +256,7 @@ end
  #
  #     if smooth
  #         hf = DSP.hanning(nk)
- #         scale!(hf, 0.5/sum(hf))
+ #         rmul!(hf, 0.5/sum(hf))
  #         kf = DSP.ZeroPoleGain(Float64[], hf, 1.0)
  #     end
  #
@@ -285,7 +285,7 @@ end
  #         if smooth
  #             S.x[i] = DSP.filtfilt(kf, X)
  #         else
- #             unsafe_copy!(S.x[i], 1, X, 1, nx)
+ #             unsafe_copyto!(S.x[i], 1, X, 1, nx)
  #         end
  #     end
  #     return nothing

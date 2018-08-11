@@ -1,53 +1,48 @@
-using Base.Test, Compat
-using SeisIO
+using Test, Compat, Dates, Random, SeisIO
+
 path = Base.source_dir()
-warn("Tests require 5-10 minutes to fully execute.")
-println(STDOUT, now(), ": tests begin, source_dir = ", path)
+@warn("Tests require 5-10 minutes to fully execute.")
+println(stdout, Dates.now(), ": tests begin, source_dir = ", path)
 
 include(path*"/../src/SeisIO.jl")
+include("get_ts_data.jl") # Handler for timeseries data functions
 
 println("begin tests:")
 
-println("time (time.jl)...")
-include(path*"/time.jl")
+println("time (test_time.jl)...")
+include(path*"/test_time.jl")
 
-println("read/write \"misc\" dictionary (misc_rw.jl)...")
-include(path*"/misc_rw.jl")
+println("read/write \"misc\" dictionary (test_misc_rw.jl)...")
+include(path*"/test_misc_rw.jl")
 
-println("SAC (sac.jl)...")
-include(path*"/sac.jl")
+println("SAC (test_sac.jl)...")
+include(path*"/test_sac.jl")
 
-println("SeisData test 1 (seisdata1.jl)...")
-include(path*"/seisdata1.jl")
+println("SeisData test 1 (test_seisdata_1.jl)...")
+include(path*"/test_seisdata_1.jl")
 
-println("seisdata test 2 (seisdata2.jl)...")
-include(path*"/seisdata2.jl")
+println("seisdata test 2 (test_seisdata_2.jl)...")
+include(path*"/test_seisdata_2.jl")
 
-println("randseis and native format i/o (native_io.jl)...")
-include(path*"/native_io.jl")
+println("randseis and native format i/o (test_native_io.jl)...")
+include(path*"/test_native_io.jl")
 
-println("annotation and processing (note_proc.jl) ...")
-include(path*"/note_proc.jl")
+println("annotation and processing (test_note_proc.jl) ...")
+include(path*"/test_note_proc.jl")
 
-println("other (non-SAC) file formats (file_formats.jl)...")
-include(path*"/file_formats.jl")
+println("other (non-SAC) file formats (test_file_formats.jl)...")
+include(path*"/test_file_formats.jl")
 
-println("FDSN XML parsing...")
-include(path*"/xml.jl")
+println("FDSN XML parsing (test_xml.jl)...")
+include(path*"/test_xml.jl")
 
-println("FDSN data queries (fdsn.jl)...")
-include(path*"/fdsn.jl")
+println("FDSN data queries (test_fdsn.jl)...")
+include(path*"/test_fdsn.jl")
 
-println("IRIS web services (iris.jl)...")
-include(path*"/iris.jl")
+println("IRIS web services (test_iris.jl)...")
+include(path*"/test_iris.jl")
 
-println("SEEDlink client (seedlink.jl)...")
-include(path*"/seedlink.jl")
+println("SEEDlink client (test_seedlink.jl)...")
+include(path*"/test_seedlink.jl")
 
-println("To test for faithful SAC write of SeisIO in SAC:")
-println("     (1) Type `wsac(SL)` at the Julia prompt.")
-println("     (2) Open a terminal, change to the current directory, and start SAC.")
-println("     (4) type `r *GPW*SAC *MBW*SAC; qdp off; plot1; lh default`.")
-println("     (5) Report any irregularities.")
-
-println("To run the canonical examples type include(\"", path, "/examples.jl\")")
+println("To run some canonical examples, execute this command: include(\"", path, "/examples.jl\")")

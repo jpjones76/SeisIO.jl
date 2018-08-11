@@ -16,7 +16,7 @@ function gapfill!(x::Array{Float64,1}, t::Array{Int64,2}, fs::Float64; m=true::B
   for i = size(t,1):-1:2
     # Gap fill
     g = round(Int64, fs*μs*t[i,2])
-    g < 0 && (warn(@sprintf("Negative time gap (i = %i, t = %.3f); skipped.", i, g)); continue)
+    g < 0 && (@warn(@sprintf("Negative time gap (i = %i, t = %.3f); skipped.", i, g)); continue)
     g == 0 && continue
     j = t[i-1,1]
     k = t[i,1]
@@ -28,7 +28,7 @@ function gapfill!(x::Array{Float64,1}, t::Array{Int64,2}, fs::Float64; m=true::B
       if N >= u
         x[j+1:k] .*= tukey(N, u/N)
       else
-        warn(@sprintf("segment %i too short; x[%i:%i] replaced with mean(x).", i, j+1, k))
+        @warn(@sprintf("segment %i too short; x[%i:%i] replaced with mean(x).", i, j+1, k))
         x[j+1:k] = mx
       end
     end

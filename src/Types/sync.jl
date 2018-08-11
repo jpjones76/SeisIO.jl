@@ -62,7 +62,7 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
   v=false::Bool, z=true::Bool)
 
   # PREPROCESS
-  z && deleteat!(S, find([isempty(S.x[i]) for i =1:S.n])) # delete (zap) empty channels
+  z && deleteat!(S, findall([isempty(S.x[i]) for i =1:S.n])) # delete (zap) empty channels
   ungap!(S, m=false, w=false)                               # ungap
 
   S.n < 2 && return nothing                                 # pointless to continue
@@ -85,14 +85,14 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
   end_times = zeros(Int64, S.n)
 
   # non-timeseries data
-  c = find(S.fs .== 0)
+  c = findall(S.fs .== 0)
   for i in c
     start_times[i] = S.t[i][1,2]
     end_times[i] = sum(S.t[i][:,2])
   end
 
   # non-null timeseries data
-  k = find((S.fs .> 0).*[!isempty(S.x[i]) for i=1:S.n])
+  k = findall((S.fs .> 0).*[!isempty(S.x[i]) for i=1:S.n])
   for i in k
     start_times[i] = S.t[i][1,2]
     end_times[i] = start_times[i] + round(Int64, (length(S.x[i])-1)/(SeisIO.μs*S.fs[i]))
@@ -102,9 +102,9 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
   # Start and end times
   t_start = SeisIO.get_sync_t(s, start_times, k)
   t_end = SeisIO.get_sync_t(t, end_times, k)
-  t_end <= t_start && error("No time overlap with given start \& end times!")
+  t_end <= t_start && error("No time overlap with given start & end times!")
   if v
-    @printf(STDOUT, "Synching %.2f seconds of data\n", (t_end - t_start)*SeisIO.μs)
+    @printf(stdout, "Synching %.2f seconds of data\n", (t_end - t_start)*SeisIO.μs)
     println("t_start = ", t_start, " μs from epoch")
     println("t_end = ", t_end, " μs from epoch")
   end
@@ -114,7 +114,7 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
   # Loop over non-timeseries data
   for i in c
     t = cumsum(S.t[i][:,2])
-    j = find(t_start .≤ t .< t_end)
+    j = findall(t_start .≤ t .< t_end)
     S.x[i] = S.x[i][j]
     if isempty(j)
       S.t[i] = Array{Int64,2}()
@@ -135,7 +135,7 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
 
     # truncate X to values within bounds
     t = SeisIO.t_expand(S.t[i], S.fs[i])
-    j = find(t_start .≤ t .< t_end)
+    j = findall(t_start .≤ t .< t_end)
     S.x[i] = S.x[i][j]
 
     # prepend points to time series data that begin late

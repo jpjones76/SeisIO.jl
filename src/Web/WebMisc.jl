@@ -2,7 +2,7 @@
 # Utility functions not for export
 webhdr() = Dict("UserAgent" => "Julia-SeisIO-FSDN.jl/0.0.1")
 hashfname(str::Array{String,1}, ext::String) = string(hash(str), ".", ext)
-# chansplit(C::String) = map(String, split(C,['.','_'],limit=4,keep=true))
+# chansplit(C::String) = map(String, split(C,['.','_'],limit=4,keepempty=true))
 
 function get_uhead(src::String)
   if src == "IRIS"
@@ -27,15 +27,15 @@ function savereq(D::Array{UInt8,1}, ext::String, net::String, sta::String,
     ext = "SAC"
   end
   ymd = split(s, r"[A-Z]")
-  (y,m,d) = split(ymd[1],"-")
-  j = md2j(parse(y),parse(m),parse(d))
-  i = replace(split(s, 'T')[2],':','.')
+  (y, m, d) = split(ymd[1],"-")
+  j = md2j(Meta.parse(y), Meta.parse(m), Meta.parse(d))
+  i = replace(split(s, 'T')[2],':' => '.')
   if loc == "--"
     loc = ""
   end
   fname = string(join([y, string(j), i, namestrip!(net), namestrip!(sta), namestrip!(loc), namestrip!(cha)],'.'), ".", q, ".", ext)
-  if isfile(fname)
-    warn(string("File ", fname, " contains an identical request. Overwriting."))
+  if safe_isfile(fname)
+    @warn(string("File ", fname, " contains an identical request. Overwriting."))
   end
   f = open(fname, "w")
   write(f, D)

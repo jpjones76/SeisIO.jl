@@ -9,11 +9,11 @@ Current format support: (e = endianness)
 +==========+===+=============================================================+
 | miniSEED | b | readmseed                                                   |
 +----------+---+-------------------------------------------------------------+
-| SAC      | l |   readsac, sachdr, writesac, batch_read                     |
+| SAC      | l |   readsac, sachdr, writesac                                 |
 +----------+---+-------------------------------------------------------------+
 | SEG Y    | b |   readsegy, segyhdr                                         |
 +----------+---+-------------------------------------------------------------+
-| P-SEG Y  | l |   readsegy, segyhdr, batch_read                             |
+| P-SEG Y  | l |   readsegy, segyhdr                                         |
 +----------+---+-------------------------------------------------------------+
 | UW       | b |   readuw, uwpf!, uwpf, uwdf                                 |
 +----------+---+-------------------------------------------------------------+
@@ -43,35 +43,6 @@ Usage Warnings
 :sup:`(b)`  No online documentation for the UW data format is known to exist. Please contact the SeisIO creators if additional help is needed to read these files.
 
 :sup:`(c)`  Win32 channel information files are not synchronized by any central authority, date stamped, or automatically maintained; thus, inconsistencies in channel parameters (e.g. gains) are possible. Please remember that redistribution of Win32 files is strictly prohibited by the NIED.
-
-
-.. **********
-.. Batch Read
-.. **********
-.. The function ``batch_read`` speeds up file read for SAC and SEG Y data using shared arrays and efficient parallelization. The result is an order of magnitude speedup relative to ``readsac`` or ``readsegy``, though the process can be memory-intensive.
-..
-..
-.. Usage
-.. =====
-.. ::
-..
-..   @everywhere using SeisIO
-..   S = batch_read(FILESTR, ftype=FMT, fs=FS)
-..
-.. Read files matching FILESTR of format FMT and resample to ``FS`` Hz. If ``FS`` isn't specified, files are resampled to match fs of the first file read.
-..
-.. ``FILESTR`` supports wildcards in file names, but not directory names.
-..
-..
-.. Supported Keywords
-.. ------------------
-.. .. csv-table::
-..   :header: kw, type, description
-..   :delim: |
-..   :widths: 8, 8, 24
-..
-..   ftype | String  | File type. Choose one of ``"SAC"`` (default, SAC) or ``"PASSCAL"`` (P-SEG Y).
-..   fs    | Float64 | Resample to ``fs`` Hz. By default, batch_read uses ``fs`` from the first file read.
 
 
 .. rubric:: External References
