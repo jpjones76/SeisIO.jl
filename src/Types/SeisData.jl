@@ -1,5 +1,5 @@
 import Base:in, getindex, setindex!, append!, deleteat!, delete!, +, -, *, isequal,
-length, start, done, next, size, sizeof, ==, isempty, sort!, sort, endof
+length, size, sizeof, ==, isempty, sort!, sort, lastindex
 
 # This is type-stable for S = SeisData() but not for keyword args
 mutable struct SeisData
@@ -86,7 +86,7 @@ SeisData(n::Int) = n > 0 ? SeisData(UInt(n)) : SeisData()
 # s = S[j] returns a SeisChannel struct
 # s = S[i:j] returns a SeisData struct
 # S[i:j].foo = bar won't work
-endof(S::SeisData) = S.n
+lastindex(S::SeisData) = S.n
 
 function getindex(S::SeisData, J::Array{Int,1})
   U = SeisData()
