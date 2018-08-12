@@ -25,7 +25,7 @@ Includes web clients, readers for several data formats, and writers for SAC and 
 
 ## Known Issues (2018-08-12)
 * Rarely, `SeedLink!` may cause a Julia session to hang when a connection fails to initialize.
-* IN Julia v0.7, LightXML and Blosc generate "deprecated syntax" warnings.
+* In Julia v0.7, LightXML and Blosc generate "deprecated syntax" warnings.
 * SeisIO has broken dependencies in Julia v1.0.
 
 ### Building for Julia 1.0.0
@@ -51,7 +51,7 @@ Four dependencies must be modified for SeisIO to work in Julia 1.0: DSP, Blosc, 
   + After saving your modifications, rebuild DSP:
   ```
   ]
-  (v1.0) pkg> build Blosc
+  (v1.0) pkg> build DSP
   ```
 * Compile and test SeisIO:
   ```
