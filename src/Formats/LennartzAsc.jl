@@ -13,7 +13,7 @@ function rlennasc(f::String)
   ts = 0
 
   sta = replace(h[3], "\'" => "")
-  S.fs = 1000/Meta.parse(h[5])
+  S.fs = 1000.0 / Base.parse(Float64, h[5])
   ts = round(Int64, Dates.datetime2unix(DateTime(join([h[8],"T",h[9]])))/μs)
 
   cmp = split(fname,'.')[end]
