@@ -51,7 +51,7 @@ function fill_sac(S::SeisChannel, ts::Bool, leven::Bool)
   cv[17:24] = codeunits(" "^8)
 
   # Ints
-  tt = map(Int32, [Meta.parse(i) for i in split(string(u2d(S.t[1,2]*μs)),r"[\.\:T\-]")])
+  tt = Int32[Base.parse(Int32, i) for i in split(string(u2d(S.t[1,2]*μs)),r"[\.\:T\-]")]
   length(tt) == 6 && append!(tt,0)
   y = tt[1]
   j = Int32(md2j(y, tt[2], tt[3]))
@@ -78,7 +78,7 @@ function fill_sac(S::SeisChannel, ts::Bool, leven::Bool)
   id = split(S.id,'.')
   ci = [169, 1, 25, 161]
   Lc = [8, 16, 8, 8]
-  ss = Array{String,1}(undef, 4)
+  ss = Array{String, 1}(undef, 4)
   for i = 1:4
     ss[i] = String(id[i])
     s = codeunits(ss[i])
@@ -101,9 +101,9 @@ end
 
 function read_sac_stream(f::IO, full=false::Bool)
   S = SeisChannel()
-  fv = read!(f, Array{Float32,1}(undef,70))
-  iv = read!(f, Array{Int32,1}(undef,40))
-  cv = read!(f, Array{UInt8,1}(undef,192))
+  fv = read!(f, Array{Float32, 1}(undef, 70))
+  iv = read!(f, Array{Int32, 1}(undef, 40))
+  cv = read!(f, Array{UInt8, 1}(undef, 192))
 
   # floats
   setfield!(S, :fs, Float64(1/fv[1]))
