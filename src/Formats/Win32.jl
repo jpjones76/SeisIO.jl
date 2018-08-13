@@ -1,40 +1,51 @@
+using DelimitedFiles: readdlm
 # =======================================================
 # Auxiliary functions not for export
 
 # stupid, but effective
-function int4_2c(s::Array{Int32,1})
+function int4_2c(s::Array{Int32, 1})
   p = Int32[-8,4,2,1]
   return dot(p, s[1:4]), dot(p, s[5:8])
 end
 
 function win32dict(Nh::UInt16, cinfo::String, hexID::String, StartTime::Float64, orgID::String, netID::String)
-  k = Dict{String,Any}("hexID" => hexID, "orgID" => orgID, "netID" => netID, "data" => Array{Int32,1}(),
-    "OldTime" => 0, "seisSum" => 0, "seisN" => 0, "seisNN" => 0, "startTime" => StartTime,
-    "locID" => @sprintf("%i%i", Meta.parse(orgID), Meta.parse(netID)), "gapStart" => Array{Int64,1}(0), "gapEnd" => Array{Int64,1}(0), "fs" => Float32(Nh))
+  D = Dict{String,Any}(   "hexID" => hexID,
+                          "orgID" => orgID,
+                          "netID" => netID,
+                          "data" => Array{Int32, 1}(undef, 0),
+                          "OldTime" => 0,
+                          "seisSum" => 0,
+                          "seisN" => 0,
+                          "seisNN" => 0,
+                          "startTime" => StartTime,
+                          "locID" => @sprintf("%i%i", Base.parse(Int64, orgID), Base.parse(Int64, netID)),
+                          "gapStart" => Array{Int64, 1}(undef, 0),
+                          "gapEnd" => Array{Int64, 1}(undef, 0),
+                          "fs" => Float32(Nh)   )
 
   # Ensure my locID kluge doesn't produce garbage
-  Meta.parse(k["locID"]) > 99 && (@warn(string("For hexID = ", hexID, ", locID > 99; location ID unset.")); k["locID"] = "")
+  Meta.parse(D["locID"]) > 99 && (@warn(string("For hexID = ", hexID, ", locID > 99; location ID unset.")); D["locID"] = "")
 
   # Get local (Japanese) network and subnet
   nets = readdlm(string(Pkg.dir(),"/SeisIO/src/Formats/jpcodes.csv"), ';')
   i = findall((nets[:,1].==orgID).*(nets[:,2].==netID))
-  k["netName"] = isempty(i) ? "Unknown" : nets[i[1],:]
+  D["netName"] = isempty(i) ? "Unknown" : nets[i[1],:]
 
   # Entries from channel line
   c = split(cinfo)
-  k["scale"] = Float64(Meta.parse(c[13]) / (Meta.parse(c[8]) * 10^(Meta.parse(c[12])/20)))
-  k["lineDelay"] = Float32(Meta.parse(c[3])/1000)
-  k["unit"] = String(c[9])
-  k["fc"] = Float32(1.0 / Meta.parse(c[10]))
-  k["hc"] = Float32(Meta.parse(c[11]))
-  k["loc"] = [Meta.parse(c[14]), Meta.parse(c[15]), Meta.parse(c[16])]
-  k["pCorr"] = Float32(Meta.parse(c[17]))
-  k["sCorr"] = Float32(Meta.parse(c[18]))
-  k["comment"] = length(c) > 18 ? String(c[19]) : ""
-  return k
+  D["scale"] = Float64(Meta.parse(c[13]) / (Meta.parse(c[8]) * 10.0^(Meta.parse(c[12])/20.0)))
+  D["lineDelay"] = Base.parse(Float32,c[3]) / 1000.0f0
+  D["unit"] = String(c[9])
+  D["fc"] = 1.0f0 / Base.parse(Float32, c[10])
+  D["hc"] = Base.parse(Float32,  c[11])
+  D["loc"] = Float32[Base.parse(Float32, c[14]), Base.parse(Float32, c[15]), Base.parse(Float32, c[16])]
+  D["pCorr"] = Base.parse(Float32, c[17])
+  D["sCorr"] = Base.parse(Float32, c[18])
+  D["comment"] = length(c) > 18 ? String(c[19]) : ""
+  return D
 end
 
-function getcid(Chans::Array{String,1}, hexID::String)
+function getcid(Chans::Array{String, 1}, hexID::String)
   for i = 1:length(Chans)
     L = split(Chans[i])
     if L[1] == hexID
@@ -74,7 +85,7 @@ function readwin32(filestr::String, cf::String; v=0::Int)
         c = string(bits(read(fid, UInt8)),bits(read(fid, UInt8)))
         C = parse(UInt8, c[1:4], 2)
         N = parse(UInt16, c[5:end], 2)
-        x = Array{Int32,1}(N)
+        x = Array{Int32, 1}(undef, N)
         Nh = copy(N)
 
         # Increment bytes read (this file), decrement N if not 4-bit
@@ -171,7 +182,7 @@ function readwin32(filestr::String, cf::String; v=0::Int)
     if units == "m/s"
       resp = map(Complex{Float64}, fctopz(seis[k]["fc"], hc=seis[k]["hc"], units=units))
     else
-      resp = Array{Complex{Float64},2}(0,2)
+      resp = Array{Complex{Float64}, 2}(undef, 0, 2)
     end
 
     # There will be issues here. Japanese files use NIED or local station

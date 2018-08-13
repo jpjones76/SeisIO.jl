@@ -5,7 +5,7 @@ function trid(i::Int16; fs=2000.0::Float64)
   return string(getbandcode(fs, fc=10.0), S[i])
 end
 
-function auto_coords(xy::Array{Int32,1}, c::Array{Int16,1})
+function auto_coords(xy::Array{Int32, 1}, c::Array{Int16, 1})
   xy == Int32[0,0] && return (0.0, 0.0)
   lon = xy[1]
   lat = xy[2]
@@ -31,20 +31,20 @@ function auto_coords(xy::Array{Int32,1}, c::Array{Int16,1})
   return lat, lon
 end
 
-function do_trace(f::IO; full=false::Bool, passcal=false::Bool, fh=zeros(Int16,3)::Array{Int16,1}, src=""::String)
-  ftypes = Array{DataType,1}([UInt32, Int32, Int16, Any, Float32, Any, Any, Int8]) # Note: type 1 is IBM Float32
+function do_trace(f::IO; full=false::Bool, passcal=false::Bool, fh=zeros(Int16, 3)::Array{Int16, 1}, src=""::String)
+  ftypes = Array{DataType, 1}([UInt32, Int32, Int16, Any, Float32, Any, Any, Int8]) # Note: type 1 is IBM Float32
   shorts = Array{Int16, 1}(undef, 53)
   ints   = Array{Int32, 1}(undef, 19)
 
   # First part of trace header is quite standard
   ints[1:7]   = read!(f, Array{Int32, 1}(undef, 7))
-  shorts[1:4] = read!(f, Array{Int16,1}(undef, 4))
-  ints[8:15]  = read!(f, Array{Int32,1}(undef, 8))
-  shorts[5:6] = read!(f, Array{Int16,1}(undef, 2))
-  ints[16:19] = read!(f, Array{Int32,1}(undef, 4))
-  shorts[7:52]= read!(f, Array{Int16,1}(undef, 46))
+  shorts[1:4] = read!(f, Array{Int16, 1}(undef, 4))
+  ints[8:15]  = read!(f, Array{Int32, 1}(undef, 8))
+  shorts[5:6] = read!(f, Array{Int16, 1}(undef, 2))
+  ints[16:19] = read!(f, Array{Int32, 1}(undef, 4))
+  shorts[7:52]= read!(f, Array{Int16, 1}(undef, 46))
   if passcal
-    chars       = read!(f, Array{UInt8,1}(undef, 20))
+    chars       = read!(f, Array{UInt8, 1}(undef, 20))
     dt          = read(f, Int32)
     fmt         = read(f, Int16)
     shorts[53]  = read(f, Int16)
@@ -79,9 +79,9 @@ function do_trace(f::IO; full=false::Bool, passcal=false::Bool, fh=zeros(Int16,3
     skip(f, 22)
     trace_unit  = bswap(read(f, Int16))
     trans_mant  = bswap(read(f, Int32))
-    shorts2     = [bswap(i) for i in read!(f, Array{Int16,1}(undef,5))]
+    shorts2     = [bswap(i) for i in read!(f, Array{Int16, 1}(undef, 5))]
     skip(f, 22)
-    x           = map(Float64, [bswap(i) for i in read!(f, Array{ftypes[fmt],1}(undef,n))])
+    x           = map(Float64, [bswap(i) for i in read!(f, Array{ftypes[fmt], 1}(undef, n))])
 
     # not sure about this; where did this formula come from...?
     gain  = Float64(trans_mant) * 10.0^(Float64(shorts2[1]+sum(shorts[23:24]))/10.0) # *2.0^shorts[47]
@@ -155,7 +155,7 @@ function readsegy(fname::String; passcal=false::Bool, full=false::Bool)
     # My sample files have the Int16s in little endian order...?
     fh = [bswap(i) for i in fh]
     skip(f, 240)
-    fh[25:27] = read!(f, Array{Int16,1}(undef,3))
+    fh[25:27] = read!(f, Array{Int16, 1}(undef, 3))
     skip(f, 94)
 
     # Process file header
@@ -168,7 +168,7 @@ function readsegy(fname::String; passcal=false::Bool, full=false::Bool)
       skip(f, 3200*nh)
     else
       fhd = Dict{String,Any}()
-      fhd["exthdr"] = [replace(join(read!(f, Array{Cchar,1 }(undef, 3200))), "\0" => " ") for i = 1:nh]
+      fhd["exthdr"] = [replace(join(read!(f, Array{Cchar, 1}(undef, 3200))), "\0" => " ") for i = 1:nh]
       merge!(fhd, Dict{String,Any}(zip(["jobid", "lineid", "reelid", "ntr", "naux", "filedt", "origdt", "filenx",
       "orignx", "fmt", "cdpfold", "trasort", "vsum", "swst", "swen0", "swlen", "swtyp", "tapnum", "swtapst", "swtapen",
       "taptyp", "corrtra", "bgainrec", "amprec", "msys", "zupdn", "vibpol", "segyver", "isfixed", "ntxthdr"],
