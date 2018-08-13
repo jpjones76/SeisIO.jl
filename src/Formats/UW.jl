@@ -1,15 +1,13 @@
 # ============================================================================
 # Utility functions not for export
 function nextline(pf::IO, c::Char)
-  tmpstring = chomp(readline(pf))
-  while tmpstring[1] != c
-    tmpstring = readline(pf)
-    if eof(pf)
-      tmpstring = -1
-      break
+    eof(pf) && return "-1"
+    s = "\0"
+    while s[1] != c
+        eof(pf) && return "-1"
+        s = chomp(readline(pf))
     end
-  end
-  return tmpstring
+    return s
 end
 
 function getpf(froot::String, lc::Array{UInt8,1})
@@ -39,7 +37,7 @@ function uwpf!(S::SeisEvent, pickfile::String; v=0::Int)
   m = 0
   pline = nextline(pf,'.')
   v>2 && println(stdout, pline)
-  while pline != -1
+  while pline != "-1"
     m += 1
     sta = pline[2:4]
     cmp = pline[6:8]
@@ -73,115 +71,153 @@ function uwpf!(S::SeisEvent, pickfile::String; v=0::Int)
 end
 
 """
-    H = uwpf(hf, v::Int)
+    H = uwpf(pf, v::Int)
 
-Read University of Washington-format seismic pick file `hf` into SeisHdr `H`. `v` controls verbosity, set `v>0` for verbose debug mode.
+Read University of Washington-format seismic pick file `pf` into SeisHdr struct `H`. `v` controls verbosity; set `v > 0` to dump verbose debug info. to STDOUT.
 
 """
 function uwpf(pickfile::String, v::Int)
   pf = open(pickfile, "r")
   seekstart(pf)
-  A = nextline(pf,'A')
-  v>0  && println(stdout, A)
+  D = Dict{String, Any}()
+
+  # Initialize variables that will fill SeisHdr structure
+  LOC = Array{Float64, 1}(undef, 3); LOC[1:3] .= NaN;
+  MAG = -5.0f0
+  ID = zero(Int64)
+  OT = zero(Float64)
+
+  # Read begins --------------------------------------------------------------
+  A = nextline(pf, 'A')
+  (v > 1)  && println(stdout, A)
   c = 0
   if length(A) == 75 || length(A) == 12
-    y = 0
+    y = zero(Int8)
     c = 1900
   else
-    y = 2
+    y = Int8(2)
   end
-  D = Dict{String,Any}()
   D["type"] = A[2]
 
   # Start time
-  ot = d2u(DateTime(string(Meta.parse(A[3:4+y]) + c)*A[5+y:12+y],"yyyymmddHHMM"))
+  OT = d2u(DateTime(string(Base.parse(Int64, A[3:4+y]) + c)*A[5+y:12+y], "yyyymmddHHMM"))
 
-  si = [13,19,27,36,42,43,47,51,54,58,61,66,71,74] .+ y
-  ei = [18,26,35,41,42,46,49,53,57,60,65,70,72,75] .+ y
+  si = Int8[13, 19, 27, 36, 42, 43, 47, 51, 54, 58, 61, 66, 71, 74] .+ y
+  ei = Int8[18, 26, 35, 41, 42, 46, 49, 53, 57, 60, 65, 70, 72, 75] .+ y
   L = length(si)
 
-  if length(A) > (14+y)
-    ah = [A[si[i]:ei[i]] for i=1:L]
-    # Parse numeric and string headers
-    nh = [Meta.parse(ah[i]) for i in [1,4,6,7,8,9,10,11,12]]
-    #    [sec, evdp, mag, numsta, numpha, gap, dmin, rms, err]
-    (evla,evlo,qual,vmod) = (ah[2],ah[3],ah[13],ah[14])
+  if length(A) > (14 + y)
+      # Parse reset of Acard line
+      ah = String[A[si[i]:ei[i]] for i = 1:L]
 
-    # Set start time of each channel
-    ot += nh[1]
-    dep = nh[2]
-    mag = Float32(nh[3])
+      # origin time, event depth, and magnitude
+      OT += Base.parse(Float64, ah[1])
+      LOC[3] = Base.parse(Float64, ah[4])
+      MAG = Base.parse(Float32, ah[6])
 
-    # Lat, Lon, Dep, Mag
-    lat = (Meta.parse(evla[1:3]) + Meta.parse(evla[5:6])/60 + Meta.parse(evla[7:8])/6000) * (evla[4] == 'S' ? -1.0 : 1.0)
-    lon = (Meta.parse(evlo[1:4]) + Meta.parse(evlo[6:7])/60 + Meta.parse(evlo[8:9])/6000) * (evlo[5] == 'W' ? -1.0 : 1.0)
-    mag_typ = "M_d (UW)"
+      # record whether depth is fixed
+      D["fixdepth"] = ah[5] == "F" ? true : false
 
-  elseif length(A) > 12+y
-    reg = A[14+y]
-    close(pf)
-    error(string("Teleseism, source region: ", reg, "; pickfile unusable! (use `uwdf` for datafile)"))
+      # Keep these as strings; we'll convert them below
+      evla = ah[2]
+      evlo = ah[3]
+
+      # Rest become dictionary entries
+      aline_keys = String["numsta", "numpha", "gap", "dmin", "rms", "err", "qual", "vmod"]
+      for (j, k) in enumerate(aline_keys)
+          if j < 3
+              D[k] = Base.parse(Int32, ah[j+6])
+          elseif j > 6
+              D[k] = ah[j+6]
+          else
+              D[k] = Base.parse(Float32, ah[j+6])
+          end
+      end
+
+      # Convert lat and lon to decimal degrees
+      LOC[1] = (Base.parse(Float64, evla[1:3]) + Base.parse(Float64, evla[5:6])/60.0 + Base.parse(Float64, evla[7:8])/6000.0) * (evla[4] == 'S' ? -1.0 : 1.0)
+      LOC[2] = (Base.parse(Float64, evlo[1:4]) + Base.parse(Float64, evlo[6:7])/60.0 + Base.parse(Float64, evlo[8:9])/6000.0) * (evlo[5] == 'W' ? -1.0 : 1.0)
+
+  elseif length(A) > 12 + y
+      reg = A[14 + y]
+      close(pf)
+      error(string("Teleseism, source region: ", reg, "; pickfile unusable! (use `uwdf` for datafile)"))
   end
 
-  # Error line...mostly pointless crap, left as a string w/limited parses for fast QC
+  # Error line
   seekstart(pf)
-  eline = nextline(pf,'E')
-  if eline != -1
-    (D["meanRMS"], D["sdAbout0"], D["sswres"], D["ndfr"], D["fixxyzt"],
-    D["sdx"], D["sdy"], D["sdz"], D["sdt"], D["sdmag"], D["meanUncert"]) =
-    (eline[12:17], eline[18:23], eline[24:29], eline[30:37], eline[38:41], eline[42:45],
-    eline[46:50], eline[51:55], eline[56:60], eline[61:65], eline[66:70], eline[76:79])
-    for i in ("meanRMS", "sdAbout0", "sswres", "ndfr", "sdx", "sdy", "sdz",
-      "sdt", "sdmag", "meanUncert")
-      D[i] = Meta.parse(D[i])
-    end
+  eline = nextline(pf, 'E')
+  if eline != "-1"
+      # Effectively: 10x MeanRMS SDabout0 SDaboutMean SSWRES NDFR FIXXYZT SDx  SDy  SDz  SDt  Mag  5x MeanUncert
+      #              10x f6.3    f6.3     f6.3        f8.2   i4   a4      f5.2 f5.2 f5.2 f5.2 f5.2 5x f4.2
+      eline_keys = String["MeanRMS", "SDabout0", "SDaboutMean", "SSWRES", "NDFR", "FIXXYZT", "SDx", "SDy", "SDz", "SDt", "Mag", "MeanUncert"]
+      si = Int8[11, 17, 23, 29, 37, 42, 46, 51, 56, 61, 66, 76]
+      ei = Int8[16, 22, 28, 36, 40, 45, 50, 55, 60, 65, 70, 79]
+      for (j, k) in enumerate(eline_keys)
+          s = strip(eline[si[j]:ei[j]])
+          if !isempty(s)
+              D[k] = Base.parse(j == 5 ? Int32 : Float32, eline[si[j]:ei[j]])
+          end
+      end
   end
 
-  # Alternate magnitude line
+  # Alternate magnitude line(s)
   seekstart(pf)
   sline = nextline(pf, 'S')
-  if sline != -1
-    @warn("Alternate magnitude found, M_d overwritten.")
-    (mag, mag_typ) = (Meta.parse(sline[1:5]), sline(6:8))
+  if sline != "-1"
+      if haskey(D, "smag")
+          push!(D["smag"], sline)
+      else
+          D["smag"] = sline
+      end
   end
 
   # Focal mechanism line(s)
   seekstart(pf)
   mline = nextline(pf,'M')
   m = 0
-  if mline != -1
-    D["mech_lines"] = Array{String,1}()
-    while mline != -1
-      m += 1
-      push!(D["mech_lines"], mline)
-      mline = nextline(pf,'M')
-    end
-    v>0 && println(stdout, "Processed ", m, " focal mechanism lines.")
+  if mline != "-1"
+      D["mech_lines"] = Array{String, 1}(undef, 0)
+      while mline != "-1"
+          m += 1
+          push!(D["mech_lines"], mline)
+          mline = nextline(pf,'M')
+      end
+      v>0 && println(stdout, "Processed ", m, " focal mechanism lines.")
   end
 
   # Comment lines
-  loc_name = ""
-  event_id = 0
   seekstart(pf)
   m = 0
   cline = nextline(pf,'C')
-  if cline != -1
-    D["comment"] = Array{String,1}()
-    while cline != -1
-      m += 1
-      if occursin("NEAR", cline)
-        loc_name = strip(cline[8:end])
-    elseif occursin("EVENT ID", cline)
-        event_id = Meta.parse(strip(cline[13:end]))
-      else
-        push!(D["comment"], cline[3:end])
+  if cline != "-1"
+      D["comment"] = Array{String, 1}(undef, 0)
+      while cline != "-1"
+          m += 1
+          if occursin("NEAR", cline)
+              D["loc_name"] = strip(cline[8:end])
+          elseif occursin("EVENT ID", cline)
+              ID = Base.parse(Int64, strip(cline[13:end]))
+          else
+              push!(D["comment"], cline[3:end])
+          end
+          cline = nextline(pf,'C')
       end
-      cline = nextline(pf,'C')
-    end
-    v>0 && println(stdout, "Processed ", m, " comment lines.")
+      v>0 && println(stdout, "Processed ", m, " comment lines.")
   end
+
+  # Done reading
   close(pf)
-  return SeisHdr(ot=u2d(ot), loc=[lat, lon, dep], mag=(mag, "Mc"), id=event_id, misc=D)
+
+  # Create SeisHdr struct
+  H = SeisHdr()
+  isnan(LOC[1]) || setfield!(H, :loc, LOC)
+  MAG == -5.0f0 || setfield!(H, :mag, (MAG, "M_c (UW)"))
+  ID == 0       || setfield!(H, :id, ID)
+  OT == 0.0     || setfield!(H, :ot, u2d(OT))
+  isempty(D)    || setfield!(H, :misc, D)
+  setfield!(H, :src, pickfile)
+  return H
 end
 
 """
@@ -207,9 +243,9 @@ function uwdf(datafile::String; v=0::Int)
   lmin = bswap(read(fid, Int32))
   lsec = bswap(read(fid, Int32))
   skip(fid, 8)
-  flags = [bswap(i) for i in read!(fid, Array{Int16,1}(undef, 10))]
-  extras = replace(String(read!(fid, Array{UInt8,1}(undef, 10))), "\0" =>" ")
-  comment = replace(String(read!(fid, Array{UInt8,1}(undef, 80))), "\0" => " ")
+  flags = [bswap(i) for i in read!(fid, Array{Int16, 1}(undef, 10))]
+  extras = replace(String(read!(fid, Array{UInt8, 1}(undef, 10))), "\0" => " ")
+  comment = replace(String(read!(fid, Array{UInt8, 1}(undef, 80))), "\0" => " ")
 
   # Set M time with lmin and lsec GREGORIAN MINUTES JESUS CHRIST WTF
   uw_ot = lmin*60 + lsec*1.0e-6 + dconst
@@ -227,13 +263,13 @@ function uwdf(datafile::String; v=0::Int)
   uwformat = extras[3] == '2' ? 2 : 1
 
   # Read in UW2 data structures
-  chno = Array{Int32,1}()
-  corr = Array{Int32,1}()
+  chno = Array{Int32, 1}(undef, 0)
+  corr = Array{Int32, 1}(undef, 0)
   if uwformat == 2
     seekend(fid)
     skip(fid, structs_os)
     for i1 = 1:nstructs
-      structtag     = replace(String(read!(fid, Array{UInt8,1}(undef,4))), "\0" => "")
+      structtag     = replace(String(read!(fid, Array{UInt8, 1}(undef, 4))), "\0" => "")
       nstructs      = bswap(read(fid, Int32))
       byteoffset    = bswap(read(fid, Int32))
       if structtag == "CH2"
@@ -242,8 +278,8 @@ function uwdf(datafile::String; v=0::Int)
         fpos = position(fid)
         seek(fid, byteoffset)
         for n = 1:nstructs
-          push!(chno,read(fid, Int32))
-          push!(corr,read(fid, Int32))
+          push!(chno, read(fid, Int32))
+          push!(corr, read(fid, Int32))
         end
         bswap && [chno[n] = bswap(chno[n]) for n in chno]
         bswap && [corr[n] = bswap(corr[n]) for n in chno]
@@ -268,9 +304,9 @@ function uwdf(datafile::String; v=0::Int)
   if uwformat == 2
     seekend(fid)
     skip(fid, Int(-56*N + structs_os + tc_os))
-    f = Array{DataType,1}(undef, N)
-    I32 = Array{Int32,2}(undef,6,N)  # chlen, offset, lmin, lsec, fs, expan1
-    U8 = Array{UInt8,2}(undef,32,N)  # (8 = 4*int16, unused) + name(8), tmp(4), compflg(4), chid(4)
+    f = Array{DataType, 1}(undef, N)
+    I32 = Array{Int32, 2}(undef, 6, N)  # chlen, offset, lmin, lsec, fs, expan1
+    U8 = Array{UInt8, 2}(undef, 32, N)  # (8 = 4*int16, unused) + name(8), tmp(4), compflg(4), chid(4)
     for i = 1:N
       I32[1:6,i] = read!(fid, Array{Int32,1}(undef, 6))
       U8[1:32,i] = read!(fid, Array{UInt8,1}(undef, 32))
@@ -308,26 +344,25 @@ function uwdf(datafile::String; v=0::Int)
     end
 
     s = cat(repeat([0x55 0x57 0x2e], N, 1), sta_u8, repeat([0x2e 0x2e], N, 1), cha_u8, dims=2)'
-    id = [replace(String(s[:,i]), "\0" => "") for i=1:N]
-    X = Array{Array{Float64,1},1}(undef,N)
-    T = Array{Array{Int64,2},1}(undef,N)
+    id = [replace(String(s[:,i]), "\0" => "") for i = 1:N]
+    X = Array{Array{Float64, 1}, 1}(undef, N)
+    T = Array{Array{Int64, 2}, 1}(undef, N)
     for i = 1:N
       seek(fid, ch_os[i])
-      X[i] = [bswap(j) for j in read!(fid, Array{f[i], 1}(undef, ch_len[i]))]
-      T[i] = [1 round(Int64, ch_time[i]*1000000); length(X[i]) 0]
+      X[i] = Float64[bswap(j) for j in read!(fid, Array{f[i], 1}(undef, ch_len[i]))]
+      T[i] = Int64[1 round(Int64, ch_time[i]*1000000); length(X[i]) 0]
     end
   end
   close(fid)
 
-  src = fname
   S = SeisData(N)
   setfield!(S, :name, id)
   setfield!(S, :id, id)
   setfield!(S, :fs, fs)
   setfield!(S, :x, X)
   setfield!(S, :t, T)
-  setfield!(S, :src, repeat([src],N))
-  setfield!(S, :units, repeat(["counts"],N))
+  setfield!(S, :src, repeat([fname], N))
+  setfield!(S, :units, repeat(["counts"], N))
   note!(S, string("+src: readuw ", fname))
   return S
 end
