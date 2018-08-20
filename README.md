@@ -1,6 +1,8 @@
 # SeisIO
 A minimalist, platform-agnostic package for working with univariate geophysical data.
 
+[![Build Status](https://travis-ci.org/jpjones76/SeisIO.jl.svg?branch=master)](https://travis-ci.org/jpjones76/SeisIO.jl) [![Build status](https://ci.appveyor.com/api/projects/status/ocilv0u1sy41m934/branch/master?svg=true)](https://ci.appveyor.com/project/jpjones76/seisio-jl/branch/master)
+
 ## Documentation
 http://seisio.readthedocs.org
 
@@ -15,49 +17,17 @@ Includes web clients, readers for several data formats, and writers for SAC and 
 || Win_32 |
 || UW |
 
-### Julia v0.7.0
-| **Build Status: Julia v0.7.0** |
-|:-------------------------------------------------------------------------------:|
-| [![](https://travis-ci.org/jpjones76/SeisIO.jl.svg?branch=master)](https://travis-ci.org/jpjones76/SeisIO.jl) [![Build status](https://ci.appveyor.com/api/projects/status/ocilv0u1sy41m934?svg=true)](https://ci.appveyor.com/project/jpjones76/seisio-jl) |
+### Installation
+From the command line, press `]` to enter the Package environment, then type (or copy) these commands:
 
-### Julia v1.0.0
-* SeisIO runs after minor manual fixes to some dependencies. See below.
+```
+add https://github.com/jpjones76/SeisIO.jl; build; precompile; test SeisIO
+```
 
-## Known Issues (2018-08-12)
+Dependencies should install automatically.
+
+## Known Issues
 * Rarely, `SeedLink!` may cause a Julia session to hang when a connection fails to initialize.
-* In Julia v0.7, LightXML and Blosc generate "deprecated syntax" warnings.
-* SeisIO has broken dependencies in Julia v1.0.
-
-### Building for Julia 1.0.0
-Four dependencies must be modified for SeisIO to work in Julia 1.0: DSP, Blosc, and CMake/CMakeWrapper. If you'd rather do this yourself than wait for the official fixes, it takes very little time:
-
-* Add CMake.jl and CMakeWrapper.jl directly from their GitHub sites:
-  ```
-  ]
-  (v1.0) pkg> add https://github.com/JuliaPackaging/CMake.jl
-  (v1.0) pkg> add https://github.com/JuliaPackaging/CMakeWrapper.jl
-  (v1.0) pkg> build CMake
-  (v1.0) pkg> build CMakeWrapper
-  ```
-* In (src)/packages/Blosc/src/Blosc.jl, replace both calls to 'isbits' with 'isbitstype'
-  + After modification, rebuild Blosc:
-  ```
-  ]
-  (v1.0) pkg> build Blosc
-  ```
-* In (src)/packages/DSP/src/periodograms.jl and util.jl, update the DSP iterator syntax:
-  + Refer to the pull request at  https://github.com/JuliaDSP/DSP.jl/pull/220/commits/de6157495772588b434bb24b2e7f6612bd0d6161
-  + In each of the above two .jl files, replace the text in *red* in the pull request with the text in *green*
-  + After saving your modifications, rebuild DSP:
-  ```
-  ]
-  (v1.0) pkg> build DSP
-  ```
-* Compile and test SeisIO:
-  ```
-  ]
-  add SeisIO; precompile; test SeisIO
-  ```
 
 ## Changelog
 ### 2018-08-10
