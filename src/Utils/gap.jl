@@ -16,7 +16,7 @@ function gapfill!(x::Array{Float64,1}, t::Array{Int64,2}, fs::Float64; m=true::B
   for i = size(t,1):-1:2
     # Gap fill
     g = round(Int64, fs*μs*t[i,2])
-    g < 0 && (@warn(@sprintf("Negative time gap (i = %i, t = %.3f); skipped.", i, Float64(g)/fs)); continue)
+    g < 0 && (@warn(string("Negative time gap (i = ", i, ", t = ", Float64(g)/fs, "; skipped.")); continue)
     g == 0 && continue
     j = t[i-1,1]
     k = t[i,1]
