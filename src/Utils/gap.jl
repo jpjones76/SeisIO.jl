@@ -10,13 +10,13 @@ function get_sync_t(s::Union{String,DateTime}, t::Array{Int64,1}, k::Array{Int64
 end
 
 function gapfill!(x::Array{Float64,1}, t::Array{Int64,2}, fs::Float64; m=true::Bool, w=true::Bool)
-  (fs == 0 || isempty(x)) && (return x)
+  (fs == 0.0 || isempty(x)) && (return x)
   mx = m ? mean(x[isnan.(x).==false]) : NaN
-  u = round(Int64, max(20,0.2*fs))
+  u = round(Int64, max(20, 0.2*fs))
   for i = size(t,1):-1:2
     # Gap fill
     g = round(Int64, fs*μs*t[i,2])
-    g < 0 && (@warn(@sprintf("Negative time gap (i = %i, t = %.3f); skipped.", i, g)); continue)
+    g < 0 && (@warn(string("Negative time gap (i = ", i, ", t = ", Float64(g)/fs, "; skipped.")); continue)
     g == 0 && continue
     j = t[i-1,1]
     k = t[i,1]
@@ -28,7 +28,7 @@ function gapfill!(x::Array{Float64,1}, t::Array{Int64,2}, fs::Float64; m=true::B
       if N >= u
         x[j+1:k] .*= tukey(N, u/N)
       else
-        @warn(@sprintf("segment %i too short; x[%i:%i] replaced with mean(x).", i, j+1, k))
+        @warn(string("segment ", i, " too short; x[", j+1, ":", k, "] replaced with mean(x)."))
         x[j+1:k] = mx
       end
     end
