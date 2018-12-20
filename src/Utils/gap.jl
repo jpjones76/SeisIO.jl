@@ -29,7 +29,7 @@ function gapfill!(x::Array{Float64,1}, t::Array{Int64,2}, fs::Float64; m=true::B
         x[j+1:k] .*= tukey(N, u/N)
       else
         @warn(string("segment ", i, " too short; x[", j+1, ":", k, "] replaced with mean(x)."))
-        x[j+1:k] = mx
+        x[j+1:k] .= mx
       end
     end
   end
