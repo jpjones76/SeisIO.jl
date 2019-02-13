@@ -28,15 +28,17 @@ Dependencies should install automatically.
 
 ## Known Issues
 * Rarely, `SeedLink!` may cause a Julia session to hang when a connection fails to initialize.
-* Arch/Manjaro Linux with Julia v1.0.3: Dependency `Arpack` sometimes fails to build with this error: `│ ERROR: LoadError: LibraryProduct(nothing, ["libarpack"], :libarpack, "Prefix(...)") is not satisfied, cannot generate deps.jl!`
-  + Breaks file i/o in native SeisIO format
-  + Issue does not exist in Julia v1.1.0
 
+### System-Dependent Issues
+* Package dependency Arpack (required by Blosc) sometimes fails to build with ERROR: LoadError: LibraryProduct(nothing, ["libarpack"], :libarpack, "Prefix([path])") is not satisfied, cannot generate deps.jl!
+  + Affects: Linux 4.19.16-1-MANJARO (x86_64) with Julia 1.0.3-2
+  + Impact: could break file i/o in native format
+  + Workaround: upgrade to Julia 1.1.0 Generic Linux Binaries for x86 (64-bit)
 
 ## Changelog
 ### 2019-02-13
-* Minor bugfix in SAC.jl
-* Testing for Julia 1.1.0
+* +Julia 1.1, -Julia 0.7.
+* Minor bug fix in SAC.jl.
 
 ### 2018-08-10
 * Updated for Julia 0.7. Testing for 1.0.
