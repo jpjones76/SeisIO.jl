@@ -1,18 +1,24 @@
 # Documentation: http://docs.travis-ci.com/user/languages/julia/
 language: julia
+
+notifications:
+  email:
+    on_success: change
+    on_failure: always
+
 os:
   - linux
   - osx
+
 julia:
   - 1.0
   - 1.1
   - nightly
-  matrix:
-    allow_failures:
-      - julia: nightly
-      fast_finish: true
-notifications:
-  email: true
+
+matrix:
+  allow_failures:
+    - julia: nightly
+#    fast_finish: true
 # uncomment the following lines to override the default test script
 #script:
 #  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
