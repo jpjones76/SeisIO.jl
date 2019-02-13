@@ -167,7 +167,7 @@ function readsac(fname::String; full=false::Bool)
   seis = read_sac_stream(f, full)
   close(f)
   seis.src = fname
-  note!(seis, string(["+src: readsac ", fname]))
+  note!(seis, string("+src: readsac ", fname))
   return seis
 end
 
