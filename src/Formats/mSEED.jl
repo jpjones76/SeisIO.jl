@@ -37,8 +37,12 @@ end
 function parserec!(S::SeisData, sid::IO, v::Int)
   # =========================================================================
   # Fixed section of data header (48 bytes)
+  pos = position(sid)
   @inbounds for i = 1:20
     SEED.hdr[i]   = read(sid, UInt8)
+  end
+  if v > 2
+      println(stdout, join(map(Char,SEED.hdr)))
   end
   SEED.u16[1]     = read(sid, UInt16)
   SEED.u16[2]     = read(sid, UInt16)
@@ -68,6 +72,7 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     end
   end
   if SEED.swap
+    v > 2 && println(stdout, "Performing byte swap")
     SEED.r[1] = bswap(SEED.r[1])
     SEED.r[2] = bswap(SEED.r[2])
     tc = bswap(tc)
@@ -78,6 +83,9 @@ function parserec!(S::SeisData, sid::IO, v::Int)
   end
 
   # Time
+  if v > 2
+      println(stdout, "SEED.u16 = ", map(Int, SEED.u16))
+  end
   SEED.t[1] = Int32(SEED.u16[1])
   (SEED.t[2], SEED.t[3]) = j2md(SEED.t[1], Int32(SEED.u16[2]))
   SEED.t[7] = Int32(SEED.u16[3])*Int32(100)
@@ -92,7 +100,7 @@ function parserec!(S::SeisData, sid::IO, v::Int)
   else
     SEED.dt = Float64(SEED.r[1]*SEED.r[2])
   end
-  TC::Int = SEED.u8[2] == 0x01 ? 0 : Int(tc)*100
+  SEED.tc = SEED.u8[2] == 0x01 ? 0 : Int64(tc)*100
 
   # =========================================================================
   # Channel handling for S
@@ -131,117 +139,137 @@ function parserec!(S::SeisData, sid::IO, v::Int)
 
   # =========================================================================
   # Parse blockettes
-  SEED.nsk = SEED.u16[4] - 0x0030
 
+  SEED.nsk = SEED.u16[4] - 0x0030
+  SEED.u16[6] = SEED.u16[5] - 0x0030
   @inbounds for i = 0x01:0x01:SEED.u8[4]
+
+    # DND DND DND
+    skip(sid, SEED.u16[6])
+    SEED.nsk -= SEED.u16[6]
+    SEED.u16[5] = UInt16(position(sid) - pos)
     bt = ntoh(read(sid, UInt16))    # always big-Endian? Undocumented
+    # DND DND DND
+
     if v > 2
+      println(stdout, "Skipped SEED.u16[6] = ", SEED.u16[6], " bytes")
+      println(stdout, "Relative position SEED.u16[5] = ", SEED.u16[5], " bytes from record begin")
+      println(stdout, "Will seek SEED.nsk = ", SEED.nsk, " bytes from last blockete's end to data begin")
       println(stdout, "Position = ", position(sid))
       println(stdout, "Blockette type to parse = ", bt)
     end
 
-    if bt == 0x0064
-      # [100] Sample Rate Blockette (12 bytes)
-      skip(sid, 2)
-      SEED.dt = Float64(ntoh(read(sid, Float32)))
-      skip(sid, 4)
-      SEED.nsk -= 0x000c
+    # DND DND DND
+    SEED.u16[6] = ntoh(read(sid, UInt16)) - SEED.u16[5]
+    # DND DND DND
 
-    elseif bt == 0x00c9
-      # [201] Murdock Event Detection Blockette (60 bytes)
-      skip(sid, 2)
-      for j = 1:3
-        SEED.B201.sig[j]    = read(sid, Float32)
-      end
-      for j = 1:2
-        SEED.B201.flags[j]  = read(sid, UInt8, 2)
-      end
-      blk_time!(SEED.B201.t, sid, SEED.bswap)
-      SEED.B201.det         = String(read(sid, UInt8, 24))
-      skip(sid, 32)
-      SEED.nsk -= 0x003c
-
-      t_evt = round(Int64, sμ*(d2u(DateTime(SEED.B201.t[1:6]..., 0)))) + SEED.B201.t[7] + TC
-      if haskey(S.misc[c], ["Events"])
-        push!(S.misc[c]["Events"], t_evt)
-      else
-        S.misc[c]["Events"] = Array{Int64, 1}([t_evt])
-      end
-
-    elseif bt == 0x01f4
-      #  [500] Timing Blockette (200 bytes)
-      skip(sid, 2)
-      SEED.B500.vco_correction    = ntoh(read(sid, Float32))
-      blk_time!(SEED.B500.t, sid, swap)
-      SEED.B500.μsec              = read(sid, Int8)
-      SEED.B500.reception_quality = read(sid, UInt8)
-      SEED.B500.exception_count   = ntoh(read(sid, UInt16))
-      SEED.B500.exception_type    = String(read(sid, UInt8, 16))
-      SEED.B500.clock_model       = String(read(sid, UInt8, 32))
-      SEED.B500.clock_status      = String(read(sid, UInt8, 128))
-      SEED.nsk -= 0x00c8
-      # TO DO: correct S.t[c] when a timing blockette is detected
-
-    elseif bt == 0x03e8
-      # [1000] Data Only SEED Blockette (8 bytes)
-      skip(sid, 2)
-      SEED.fmt = read(sid, UInt8)
-      SEED.wo  = read(sid, UInt8)
-      SEED.lx  = read(sid, UInt8)
-      skip(sid, 1)
-
-      SEED.nx   = UInt16(2^SEED.lx)
-      SEED.xs   = ((SEED.swap == true) && (SEED.wo == 0x01))
-      SEED.nsk -= 0x0008
-
-    elseif bt == 0x03e9
-      # [1001] Data Extension Blockette  (8 bytes)
-      skip(sid, 3)
-      TC += read(sid, Int8)
-      skip(sid, 2)
-      SEED.nsk -= 0x0008
-
-    elseif bt == 0x07d0
-      # [2000] Variable Length Opaque Data Blockette
-      name::String
-      blk_length::UInt16
-      odos::UInt16
-      record_number::UInt32
-      flags::Tuple{UInt8, UInt8, UInt8}
-      header_fields::Array{String, 1}
-      opaque_data::Vector{UInt8}
-
-      # Always big-Endian?
-      SEED.B2000.blk_length     = ntoh(read(sid, UInt16))
-      SEED.B2000.odos           = ntoh(read(sid, UInt16))
-      SEED.B2000.record_number  = ntoh(read(sid, UInt32))
-      for j = 1:3
-        SEED.B2000.flags[j]       = read(sid, UInt8)
-      end
-      SEED.B2000.header_fields  = String[String(j) for j in split(String(read(sid, UInt8, Int(SEED.B2000.odos)-15)), '~', keepempty=true, limit=SEED.B2000.flags[3])]
-      SEED.B2000.opaque_data    = read(sid, UInt8, SEED.B2000.blk_length - SEED.B2000.odos)
-
-      # Store to S.misc[i]
-      ri = string(SEED.B2000.record_number)
-      S.misc[c][ri * "_flags"] = bits(flags)
-      S.misc[c][ri * "_header"] = header_fields
-      S.misc[c][ri * "_data"] = opaque_data
-      SEED.nsk -= SEED.B2000.blk_length
+    # TO DO: move blockette parsing to individual functions
+    if bt in UInt16[0x0064,0x00c9,0x01f4,0x03e8,0x03e9,0x07d0]
+      blk_len = getfield(SeisIO, Symbol(string("blk_", bt)))(S, sid)
+      SEED.nsk -= blk_len
+      SEED.u16[6] -= blk_len
     else
-      # I have not found other blockette types in a mini-SEED stream/archive as of 2017-07-14
-      # Similar reports from C. Trabant @ IRIS
-      error(string("No support for Blockette Type ", bt))
+      warn(string("No support for Blockette Type ", bt, ", channel ", id, "; attempting to skip."))
+      skip(sid, SEED.u16[5]-0x0004)
     end
+
+    # if bt == 0x0064
+      # [100] Sample Rate Blockette (12 bytes)
+    #   SEED.dt = Float64(ntoh(read(sid, Float32)))
+    #   skip(sid, 4)
+    #   SEED.nsk -= 0x000c
+    #   SEED.u16[6] -= 0x000c
+
+    # elseif bt == 0x00c9
+    #   # [201] Murdock Event Detection Blockette (60 bytes)
+    #   for j = 1:3
+    #     SEED.B201.sig[j]    = read(sid, Float32)
+    #   end
+    #   for j = 1:2
+    #     SEED.B201.flags[j]  = read(sid, UInt8, 2)
+    #   end
+    #   blk_time!(SEED.B201.t, sid, SEED.bswap)
+    #   SEED.B201.det         = String(read(sid, UInt8, 24))
+    #   skip(sid, 32)
+    #   SEED.nsk -= 0x003c
+    #   SEED.u16[6] -= 0x000c
+    #
+    #   t_evt = round(Int64, sμ*(d2u(DateTime(SEED.B201.t[1:6]..., 0)))) + SEED.B201.t[7] + SEED.tc
+    #   if haskey(S.misc[c], ["Events"])
+    #     push!(S.misc[c]["Events"], t_evt)
+    #   else
+    #     S.misc[c]["Events"] = Array{Int64, 1}([t_evt])
+    #   end
+
+    # elseif bt == 0x01f4
+    #   #  [500] Timing Blockette (200 bytes)
+    #   SEED.B500.vco_correction    = ntoh(read(sid, Float32))
+    #   blk_time!(SEED.B500.t, sid, swap)
+    #   SEED.B500.μsec              = read(sid, Int8)
+    #   SEED.B500.reception_quality = read(sid, UInt8)
+    #   SEED.B500.exception_count   = ntoh(read(sid, UInt16))
+    #   SEED.B500.exception_type    = String(read(sid, UInt8, 16))
+    #   SEED.B500.clock_model       = String(read(sid, UInt8, 32))
+    #   SEED.B500.clock_status      = String(read(sid, UInt8, 128))
+    #   SEED.nsk -= 0x00c8
+    #   SEED.u16[6] -= 0x00c8
+    #   # TO DO: correct S.t[c] when a timing blockette is detected
+
+    # elseif bt == 0x03e8
+    #   # [1000] Data Only SEED Blockette (8 bytes)
+    #   SEED.fmt = read(sid, UInt8)
+    #   SEED.wo  = read(sid, UInt8)
+    #   SEED.lx  = read(sid, UInt8)
+    #   skip(sid, 1)
+    #
+    #   SEED.nx   = UInt16(2^SEED.lx)
+    #   SEED.xs   = ((SEED.swap == true) && (SEED.wo == 0x01))
+    #   SEED.nsk -= 0x0008
+    #   SEED.u16[6] -= 0x0008
+
+    # elseif bt == 0x03e9
+    #   # [1001] Data Extension Blockette  (8 bytes)
+    #   skip(sid, 1)
+    #   SEED.tc += read(sid, Int8)
+    #   skip(sid, 2)
+    #   SEED.nsk -= 0x0008
+    #   SEED.u16[6] -= 0x0008
+
+    # elseif bt == 0x07d0
+    #   # [2000] Variable Length Opaque Data Blockette
+    #   # Always big-Endian? Undocumented
+    #   SEED.B2000.blk_length     = ntoh(read(sid, UInt16))
+    #   SEED.B2000.odos           = ntoh(read(sid, UInt16))
+    #   SEED.B2000.record_number  = ntoh(read(sid, UInt32))
+    #   for j = 1:3
+    #     SEED.B2000.flags[j]       = read(sid, UInt8)
+    #   end
+    #   SEED.B2000.header_fields  = String[String(j) for j in split(String(read(sid, UInt8, Int(SEED.B2000.odos)-15)), '~', keepempty=true, limit=SEED.B2000.flags[3])]
+    #   SEED.B2000.opaque_data    = read(sid, UInt8, SEED.B2000.blk_length - SEED.B2000.odos)
+    #
+    #   # Store to S.misc[i]
+    #   ri = string(SEED.B2000.record_number)
+    #   S.misc[c][ri * "_flags"] = bits(flags)
+    #   S.misc[c][ri * "_header"] = header_fields
+    #   S.misc[c][ri * "_data"] = opaque_data
+    #   SEED.nsk -= SEED.B2000.blk_length
+    #   SEED.u16[6] -= SEED.B2000.blk_length
+    # else
+    #   # I have not found other blockette types in a mini-SEED stream/archive as of 2017-07-14
+    #   # Similar reports from C. Trabant @ IRIS
+    #   error(string("No support for Blockette Type ", bt))
+    # end
   end
   # =========================================================================
   if SEED.nsk > 0x0000
     skip(sid, Int(SEED.nsk))
+    SEED.nsk = 0x0000
   end
   # =========================================================================
   # Data: Adapted from rdmseed.m by Francois Beauducel <beauducel@ipgp.fr>, Institut de Physique du Globe de Paris
 
   if v > 2
-    println(stdout, "To parse = ", n, " data, fmt=", SEED.fmt)
+    println(stdout, "To parse = length ", n, " data blockette, ", SEED.nx-SEED.u16[4], " compressed points, fmt = ", SEED.fmt)
   end
 
   if xi+n > L
@@ -355,12 +383,15 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     end
 
     unsafe_copyto!(getfield(S,:x)[c], xi+1, SEED.x, 1, n)
+    if v > 2
+      println(stdout, "Added ", n, " data points")
+    end
   else
     error(@sprintf("Decoding for fmt = %i NYI!", SEED.fmt))
   end
 
   # Correct time matrix
-  dts = round(Int64, sμ*(d2u(DateTime(SEED.t[1:6]...)))) + SEED.t[7] + TC - te
+  dts = round(Int64, sμ*(d2u(DateTime(SEED.t[1:6]...)))) + SEED.t[7] + SEED.tc - te
   if te == 0
     S.t[c] = Array{Int64, 2}(undef, 2, 2)
     S.t[c][1] = one(Int64)

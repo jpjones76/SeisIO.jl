@@ -42,12 +42,13 @@ mutable struct SeedVol
   lx::UInt8     # 0x00
   nx::UInt16    # 0x1000
   wo::UInt8     # 0x01
-  nsk::UInt16
+  nsk::UInt16   # [Number of bytes to skip after end of data record]
+  tc::Int64     # Time correction
   swap::Bool
 
   # hdr:
   hdr::Vector{UInt8}
-  u16::Vector{UInt16}
+  u16::Vector{UInt16}   #  year, jdy, record start time, beginning of data, first blockette, position of next blockette from record begin
   id::Array{UInt8,1}
   r::Array{Int16,1}
 
@@ -79,11 +80,11 @@ mutable struct SeedVol
     id = Array{UInt8,1}(undef, 15)
     fill!(id, 0x20)
     id[[3,9,12]] .= 0x2e
-    new(0x0a, 0x00, 0x1000, 0x01, 0x0000, false,    # fmt, lx, nx, wo, nsk, swap
+    new(0x0a, 0x00, 0x1000, 0x01, 0x0000, 0, false,  # fmt, lx, nx, wo, nsk, tc, swap
 
         # header
         Array{UInt8,1}(undef,20),           # hdr::Vector{UInt8}
-        Array{UInt16,1}(undef,5),           # u16::Vector{UInt16}
+        Array{UInt16,1}(undef,6),           # u16::Vector{UInt16}
         id,                                 # id::Array{UInt8,1}
         Array{Int16,1}(undef, 2),           # r::Array{Int16,1}
 
