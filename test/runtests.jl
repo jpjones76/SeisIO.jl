@@ -18,6 +18,9 @@ include(path*"/test_misc_rw.jl")
 println("SAC (test_sac.jl)...")
 include(path*"/test_sac.jl")
 
+println("Mini-SEED file read (test_mseed.jl)...")
+include(path*"/test_mseed.jl")
+
 println("SeisData test 1 (test_seisdata_1.jl)...")
 include(path*"/test_seisdata_1.jl")
 

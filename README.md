@@ -36,6 +36,11 @@ Dependencies should install automatically.
   + Workaround: upgrade to Julia 1.1.0 Generic Linux Binaries for x86 (64-bit)
 
 ## Changelog
+### 2019-02-15
+* Backend improvements to mSEED reader
+  + `readmseed` now attempts to skip SEED blockettes of unknown type, rather than throwing an error
+  + Fixes bug #7
+
 ### 2019-02-13
 * +Julia 1.1, -Julia 0.7.
 * Minor bug fix in SAC.jl.
