@@ -169,7 +169,7 @@ deleteat!(S::SeisData, K::UnitRange)    = (J = collect(K); deleteat!(S, J))
 
 # With this convention, S+U-U = S
 function deleteat!(S::SeisData, U::SeisData)
-  id = flipdim(U.id,1)
+  id = reverse(U.id)
   J = Array{Int64,1}(undef,0)
   for i in id
     j = findlast(S.id.==i)
