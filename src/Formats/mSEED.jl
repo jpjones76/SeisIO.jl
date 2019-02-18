@@ -280,7 +280,7 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     end
 
     if SEED.wo != 0x01
-      SEED.x[1:n] = flipdim(SEED.x[1:n], 1)
+      SEED.x[1:n] = reverse(SEED.x[1:n])
     end
     SEED.x[1] = SEED.x0
 
