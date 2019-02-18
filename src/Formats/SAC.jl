@@ -131,16 +131,6 @@ function read_sac_stream(f::IO, full=false::Bool, swap=false::Bool)
     for (i, v) in enumerate(iv)
       iv[i] = bswap(v)
     end
-    # j = 0
-    # cr = Array{UInt8, 1}(undef, 8)
-    # for i = 1:23
-    #   cr = reverse(cv[j+1:j+8])
-    #   unsafe_copyto!(cv, j+1, cr, 1, 8)
-    #   j = j+8
-    #   if j == 2
-    #     j = j+8
-    #   end
-    # end
     setfield!(S, :x, Array{Float64,1}(Float32[bswap(i) for i in read!(f, Array{Float32, 1}(undef, iv[10]))]))
   else
     setfield!(S, :x, Array{Float64,1}(read!(f, Array{Float32, 1}(undef, iv[10]))))
