@@ -31,6 +31,26 @@ get_sac_keys() = ["delta", "depmin", "depmax", "scale", "odelta",
                 "kuser1", "kuser2", "kcmpnm", "knetwk", "kdatrd", "kinst"]
 
 
+# Bytes 305:308 as a littleendian Int32 should read 0x06 0x00 0x00 0x00; compare each end to 0x0a to allow older SAC versions (if version in same place?)
+function should_bswap(file::String)
+  q::Bool = open(file, "r") do io
+    seek(io, 304)
+    u = read(io, UInt8)
+    skip(io, 2)
+    v = read(io, UInt8)
+    # Least significant byte in u
+    if 0x00 < u < 0x0a && v == 0x00
+      return false
+    # Most significant byte in u
+    elseif u == 0x00 && 0x00 < v < 0x0a
+      return true
+    else
+      error("Invalid SAC file.")
+    end
+  end
+  return q
+end
+
 function write_sac_file(fname::String, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Array{UInt8,1}, x::Array{Float32,1}; t=[Float32(0)]::Array{Float32,1}, ts=true::Bool)
   f = open(fname, "w")
   write(f, fv)
@@ -99,11 +119,32 @@ function fill_sac(S::SeisChannel, ts::Bool, leven::Bool)
   return (fv, iv, cv, fname)
 end
 
-function read_sac_stream(f::IO, full=false::Bool)
+function read_sac_stream(f::IO, full=false::Bool, swap=false::Bool)
   S = SeisChannel()
   fv = read!(f, Array{Float32, 1}(undef, 70))
   iv = read!(f, Array{Int32, 1}(undef, 40))
   cv = read!(f, Array{UInt8, 1}(undef, 192))
+  if swap == true
+    for (i, v) in enumerate(fv)
+      fv[i] = bswap(v)
+    end
+    for (i, v) in enumerate(iv)
+      iv[i] = bswap(v)
+    end
+    # j = 0
+    # cr = Array{UInt8, 1}(undef, 8)
+    # for i = 1:23
+    #   cr = reverse(cv[j+1:j+8])
+    #   unsafe_copyto!(cv, j+1, cr, 1, 8)
+    #   j = j+8
+    #   if j == 2
+    #     j = j+8
+    #   end
+    # end
+    setfield!(S, :x, Array{Float64,1}(Float32[bswap(i) for i in read!(f, Array{Float32, 1}(undef, iv[10]))]))
+  else
+    setfield!(S, :x, Array{Float64,1}(read!(f, Array{Float32, 1}(undef, iv[10]))))
+  end
 
   # floats
   setfield!(S, :fs, Float64(1/fv[1]))
@@ -125,8 +166,7 @@ function read_sac_stream(f::IO, full=false::Bool)
   nn = join(split(strip(cs[169:176], bads),'.')); nn = nn[1:min(length(nn),2)]
   setfield!(S, :id, join([nn,sta,ll,cc],'.'))
 
-  # Read data
-  setfield!(S, :x, Array{Float64,1}(read!(f, Array{Float32, 1}(undef, iv[10])))) #(read(f, Float32, iv[10])))
+
 
   # Create dictionary if full headers are desired
   if full
@@ -164,7 +204,8 @@ Specify `full=true` to read all non-empty headers into S.misc. Header names will
 """
 function readsac(fname::String; full=false::Bool)
   f = open(realpath(fname), "r")
-  seis = read_sac_stream(f, full)
+  q = should_bswap(fname)
+  seis = read_sac_stream(f, full, q)
   close(f)
   seis.src = fname
   note!(seis, string("+src: readsac ", fname))
