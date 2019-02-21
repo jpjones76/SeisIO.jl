@@ -1,8 +1,8 @@
 function cfile_parse(C::String; delim=','::Char)
   if safe_isfile(C)
-    ccfg = [strip(j, ['\r','\n']) for j in filter(i -> !startswith(i, ['\#','\*']), open(readlines, C))]
+    ccfg = [strip(j, ['\r','\n']) for j in filter(i -> !startswith(i, ['#','*']), open(readlines, C))]
   else
-    ccfg = split(C, delim, keepempty=false)
+      ccfg = split(C, delim, keepempty=false)
   end
   return map(String, ccfg)
 end
@@ -19,7 +19,7 @@ Specify a character as the delimiter `d` between channel strings in `C`. Only va
 
   Q = SL_config(C, fdsn=true::Bool)
 
-Parse channel file or channel string `C` for use with FDSN \& IRIS web requests. `Q` is a string array optimized s.t. looping over each element of `Q` makes all channel requests in `C` in a minimum number of web requests.
+Parse channel file or channel string `C` for use with FDSN and IRIS web requests. `Q` is a string array optimized s.t. looping over each element of `Q` makes all channel requests in `C` in a minimum number of web requests.
 
 When `fdsn=true`, strings in `Q` are formatted "net=NN&sta=ST1,ST2,...&loc=LL&cha=CCC" for direct use with FDSN web requests.
 

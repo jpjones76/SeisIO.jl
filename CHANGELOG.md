@@ -1,10 +1,6 @@
-### 2019-02-16
-Web requests of time-series data now use a wrapper function `get_ts`.
-* Syntax is `get_ts(METHOD, SRC, START_TIME, END_TIME)`, where:
-  + `METHOD` is a protocol string, e.g., "FDSN", "IRIS".
-  + `SRC` is a data source, e.g., "IRIS", "ORFEUS".
-  + `START_TIME` and `END_TIME` are the former keyword arguments `-s` and `-t`.
-* Web functions `FDSNget`, `IRISget`, `irisws` are no longer exported.
+### 2019-02-20
+Please ignore the previous changelog item from 02-16. This change was never
+implemented and was never intended to appear here.
 
 ### 2019-02-15
 `readmseed` bug fixes and backend improvements

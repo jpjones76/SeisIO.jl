@@ -1,10 +1,24 @@
 const sμ = 1000000.0
 const μs = 1.0e-6
 
+function tstr(t::DateTime)
+  Y, M, D, h, m, s, μ = year(t), month(t), day(t), hour(t), minute(t), second(t), millisecond(t)
+  Y = lpad(Y, 4, "0")
+  M = lpad(M, 2, "0")
+  D = lpad(M, 2, "0")
+  h = lpad(M, 2, "0")
+  m = lpad(M, 2, "0")
+  s = lpad(M, 2, "0")
+  μ = lpad(μ, 3, "0")
+  c = ":"
+  return string(Y, c, M, c, D, "T", h, c, m, c, s, ".", μ)
+end
+
 u2d(k::Real) = Dates.unix2datetime(k)
 d2u(k::DateTime) = Dates.datetime2unix(k)
-timestamp() = String(Dates.format(u2d(time()), "yyyy-mm-ddTHH:MM:SS"))
-timestamp(t::Int64) = String(Dates.format(u2d(t/sμ), "yyyy-mm-ddTHH:MM:SS"))
+timestamp() = tstr(unix2datetime(time()))
+timestamp(t::Int64) = tstr(u2d(t/sμ))
+tnote(s::String) = string(timestamp(), ": ", s)
 
 # =========================================================
 # Not for export
