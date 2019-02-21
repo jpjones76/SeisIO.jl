@@ -25,10 +25,4 @@ writesac(SAC1)
 @assert(SeisIO.safe_isfile("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC"))
 rm("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")
 
-println("To test for faithful SAC write of SeisIO in SAC:")
-println("     (1) Type `wsac(SL)` at the Julia prompt.")
-println("     (2) Open a terminal, change to the current directory, and start SAC.")
-println("     (4) type `r *GPW*SAC *MBW*SAC; qdp off; plot1; lh default`.")
-println("     (5) Report any irregularities.")
-
 println("...done!")
