@@ -1,8 +1,8 @@
 .. _function_list:
 
-######################################
-Appendix A: Alphabetical Function List
-######################################
+**************************
+Alphabetical Function List
+**************************
 
 .. function:: H = FDSNevq(ot::Real)
 
@@ -12,17 +12,9 @@ Multi-server query for event with origin time(s) closest to ``ot``.
 
 Get event headers and trace data for the event with origin time nearest ``ot`` on channels ``C``.
 
-.. function:: S = FDSNget(C)
-
-Retrieve data from channels ``C``.
-
 .. function:: S = FDSNsta(C)
 
 Retrieve station/channel info for ``C`` in an empty SeisData structure.
-
-.. function:: S = IRISget(C)
-
-Get near-real-time data from channels in ``C``.
 
 .. function:: S = SeedLink(C)
 
@@ -125,11 +117,7 @@ Check that station identifiers ``C`` exist at SeedLink server ``url``. Returns a
 
 .. function:: s = ls(path)
 
-Wrapper to /bin/ls; returns output as a string array. In Windows, provides similar functionality to *nix ls. ``ls()`` with no arguments lists contents of cwd.
-
-.. function:: S = irisws(C)
-
-Get near-real-time data from a single channel ``C``.
+Wrapper to /bin/ls; returns output as a string array. In Windows, provides similar functionality to Unix ls. ``ls()`` with no arguments lists contents of cwd.
 
 .. function:: (m, d) = j2md(y, j)
 

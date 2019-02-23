@@ -1,7 +1,7 @@
-
 OK = [0x00, 0x01, 0x10, 0x11, 0x12, 0x13, 0x14, 0x20, 0x21, 0x22, 0x23, 0x24, 0x30, 0x31, 0x32, 0x50, 0x51, 0x52, 0x53, 0x54, 0x60, 0x61, 0x62, 0x63, 0x64, 0x70, 0x71, 0x72, 0x80, 0x81, 0x90, 0x91, 0x92, 0x93, 0x94, 0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xb0, 0xb1, 0xb2, 0xd0, 0xd1, 0xd2, 0xd3, 0xd4, 0xe0, 0xe1, 0xe2, 0xe3, 0xe4, 0xf0, 0xf1, 0xf2]
+ur2() = uppercase(Random.randstring(2))
 
-function pop_rand!(D::Dict{String,Any}, N::Int)
+function pop_rand_dict!(D::Dict{String,Any}, N::Int)
   for n = 1:N
     t = code2typ(rand(OK))
     k = Random.randstring(rand(2:12))
@@ -29,15 +29,16 @@ end
 
 
 #
-#    (i,c,u) = getyp2codes(b::Char)
+#    (i,c,u) = getyp2codes(b::Char, g=false::Bool)
 #
 # Using band code `b`, generate quasi-sane random instrument char code (`i`)
-# and channel char code (`c`), plus unit string `u`.
-function getyp2codes(b::Char)
-  if rand() > 0.2
+# and channel char code (`c`), plus unit string `u`. if s=true, use only seismic
+# data codes
+function getyp2codes(b::Char, s=false::Bool)
+  if s
     # Neglecting gravimeters ('G') and mass position sensors ('M')
     i = rand(['H','L','N'])
-    if rand() > 0.1
+    if rand() > 0.2
       c = rand(['Z','N','E'])
     else
       c = rand(['A','B','C','1','2','3','U','V','W'])
@@ -48,7 +49,7 @@ function getyp2codes(b::Char)
       u = "m/s^2"
     end
   else
-    i = rand(['A','B','D','F','I','J','K','O','P','Q','R','S','T','U','V','W',
+    i = rand(['A','B','D','F','G','I','J','K','M','O','P','Q','R','S','T','U','V','W',
       'Z'])
     if i == 'A' # tiltmeter
       c = rand(['N','E'])
@@ -64,6 +65,9 @@ function getyp2codes(b::Char)
     elseif i == 'F' # magnetometer
       c = rand(['Z','N','E'])
       u = "T"
+    elseif i == 'G' # tiltmeter
+        c = rand(['A','B','C','1','2','3','U','V','W'])
+        u = "m/s^2"
     elseif i == 'I' # humidity
       c = rand(['O','I','D'])
       u = "%"
@@ -73,6 +77,9 @@ function getyp2codes(b::Char)
     elseif i == 'K' # thermal (thermometer or radiometer)
       c = rand(['O', 'I', 'D'])
       u = rand(["C","K"])
+    elseif i == 'M' # mass position sensor
+        c = rand(['A','B','C','1','2','3','U','V','W'])
+        u = "m"
     elseif i == 'O' # current gauge
       c = '_'
       u = "m/s"
@@ -109,83 +116,121 @@ function getyp2codes(b::Char)
   return i,c,u
 end
 
+
+# Things that work for both regularly and irregularly sampled data
+function pop_chan_tail!(Ch::SeisChannel)
+  ((Ch.gain == 1) || isnan(Ch.gain)) && (Ch.gain = rand()*10^rand(0:10))    # gain
+  if isempty(Ch.loc) || Ch.loc == zeros(Float64,5)
+    Ch.loc = [90, 180, 500, 90, 45].*(rand(5).-0.5)
+  end                                                                       # loc
+  if isempty(Ch.misc)
+    pop_rand_dict!(Ch.misc, rand(4:24))                                     # misc
+  end
+  note!(Ch, "Created by function populate_chan!.")                          # note
+end
+
+# Populate a channel with irregularly sampled data
+function populate_irr!(Ch::SeisChannel)
+  irregular_units = ["%", "(% cloud cover)", "(direction vector)", "C", "K", "None", "Pa", "T", "V", "W", "m", "m/m", "m/s", "m/s^2", "m^3/m^3", "rad", "rad/s", "rad/s^2", "tonnes SO2"]
+
+  Ch.fs = 0
+  if isempty(Ch.id) || Ch.id == "...YYY"
+    chan = "OY"*Random.randstring('A':'Z',1)
+    net = ur2()
+    sta = uppercase(Random.randstring('A':'Z', rand(1:5)))
+    loc = ur2()
+
+    # id
+    Ch.id = join([net,sta,loc,chan],'.')
+
+  end
+
+  # units
+  if isempty(Ch.units) || units == lowercase("unknown")
+    Ch.units = rand(irregular_units)
+  end
+
+  if isempty(Ch.x) || isempty(Ch.t)
+    ts = time()-86400+randn()
+    Lx = 2^rand(1:12)
+    L = rand(2:8)
+    Ch.x = rand(L) .* 10 .^(rand(1:10, L))
+    Ch.t = [Int64(0) round(Int64, ts/μs); zeros(Int64, L-1) round.(Int, diff(sort(rand(2:Lx, L)))/μs)]
+  end
+  Ch.src = "randseischannel(c=true)"
+
+  pop_chan_tail!(Ch)
+  return nothing
+end
+
 #    populate_chan!(S::SeisChannel)
 #
 # Populate all empty fields of S with quasi-random values.
-function populate_chan!(S::SeisChannel; c=false::Bool)
+# s = 'Seismic'
+function populate_chan!(Ch::SeisChannel; s=false::Bool)
   fc_vals = Float64[1/120 1/60 1/30 0.2 1.0 1.0 1.0 2.0 4.5 15.0]
   fs_vals = Float64[0.1, 1.0, 2.0, 5.0, 10.0, 20.0, 25.0, 40.0, 50.0, 60.0, 62.5,
     80.0, 100.0, 120.0, 125.0, 250.0]
   bcodes = Char['V', 'L', 'M', 'M', 'B', 'S', 'S', 'S', 'S', 'S', 'S', 'H', 'S', 'E', 'E', 'C']
-  seiscodes = ['H','L','N']
-  irregular_units = ["K", "tonnes SO2", "rad", "W", "m"]
-  isempty(S.name) && (S.name = Random.randstring(12))                          # name
-  (isempty(S.fs) || S.fs == 0 || isnan(S.fs)) && (S.fs = rand(fs_vals))  # fs
-  fc = rand(fc_vals[fc_vals .< S.fs/2])
+
+  # Ch.name
+  isempty(Ch.name) && (Ch.name = Random.randstring(12))
+
+  # Ch.fs
+  (isempty(Ch.fs) || Ch.fs == 0 || isnan(Ch.fs)) && (Ch.fs = rand(fs_vals))
+
+  fc = rand(fc_vals[fc_vals .< Ch.fs/2])
 
   # An empty ID generates codes and units to match values real data might have
-  if isempty(S.id)
-    bcode = getbandcode(S.fs)
-    (icode,ccode,units) = getyp2codes(bcode)
+  if isempty(Ch.id) || Ch.id == "...YYY"
+    bcode = getbandcode(Ch.fs)
+    (icode,ccode,units) = getyp2codes(bcode, s)
     chan = join([bcode, icode, ccode])
-    net = uppercase(Random.randstring(2))
-    sta = uppercase(Random.randstring(4))
-    S.id = join([net,sta,"",chan],'.')                                  # id
+    net = ur2()
+    sta = uppercase(Random.randstring('A':'Z', rand(1:5)))
+    loc = rand() < 0.3 ? "" : ur2()
+    Ch.id = join([net,sta,"",chan],'.')                                     # id
+    if isempty(Ch.units)
+      Ch.units = units                                                      # units
+    end
   end
-  (isempty(S.units) || S.units == "unknown") && (S.units = rand(irregular_units))  # units
-  (isempty(S.gain) || isnan(S.gain)) && (S.gain = rand()*10^rand(5:10)) # gain
-  isempty(S.loc) && (S.loc = [90, 180, 500, 90, 45].*(rand(5)-0.5))     # loc
 
-  # Need this even if S had an ID value when populate_chan! was called
-  cha = split(S.id, '.')[4]
+  # Need this even if Ch had an ID value when populate_chan! was called
+  cha = split(Ch.id, '.')[4]
   if isempty(cha)
     ccode = 'Y'
   else
-    ccode = [2]
-  end
-  # Random miscellany
-  if isempty(S.misc)
-    pop_rand!(S.misc, rand(4:24))
+    ccode = cha[2]
   end
 
   # A random instrument response function
-  if isempty(S.resp)
-    if Base.in(ccode,seiscodes)
+  if isempty(Ch.resp)
+    if Base.in(ccode,['H','L','N'])
       i = rand(1:4)
-      zstub = zeros(2*i, 1)
-      pstub = 10 .*rand(i,1)
-      S.resp = [complex(zstub) complex([pstub; pstub],[pstub; -pstub])] # resp
+      zstub = zeros(2*i)
+      pstub = 10 .*rand(i)
+      Ch.resp = [complex(zstub) [pstub .+ pstub.*im; pstub .- pstub*im]]    # resp
     end
   end
 
   # random noise for data, with random short time gaps; gaussian noise for a
   # time series, uniform noise with a random exponent otherwise
-  irreg = false
-  if isempty(S.x)                                                       # data
-    if c
-      p = rand()
-      p < 0.1 && (irreg = true)
-    end
+  if isempty(Ch.x) || isempty(Ch.t)                                         # x
+    Lx = ceil(Int, Ch.fs)*(2^rand(8:12))
+    Ch.x = randn(Lx)
+
     L = rand(0:9)
-    ts = time()-86400+randn()                                           # time
-    Lx = ceil(Int, S.fs)*(2^rand(8:12))
-    if irreg
-      L+=2
-      S.x = rand(L) .* 10 .^(rand(1:10, L))
-      t = [Int64(0) round(Int64, ts/μs); zeros(Int64, L-1) round.(Int, diff(sort(rand(2:Lx, L)))/(μs*S.fs))]
-      S.fs = 0
-      S.units = rand(irregular_units)
-    else
-      S.x = randn(Lx)
-      t = zeros(2+L, 2)
-      t[1,:] = [1 round(Int64, ts/μs)]
-      t[2:L+1,:] = [rand(2:Lx, L, 1) round.(Int, rand(L,1)./μs)]
-      t[L+2,:] = [Lx 0]
-      S.t = sortslices(t, dims=1)
-    end
+    ts = time()-86400+randn()                                               # t
+    t = zeros(2+L, 2)
+    t[1,:] = [1 round(Int64, ts/μs)]
+    t[2:L+1,:] = [rand(2:Lx, L, 1) round.(Int, rand(L,1)./μs)]
+    t[L+2,:] = [Lx 0]
+    Ch.t = sortslices(t, dims=1)
   end
-  note!(S, "Created by function populate_chan!.")
-  return S
+
+  Ch.src = "randseischannel(c=false)"
+  pop_chan_tail!(Ch)
+  return nothing
 end
 
 """
@@ -194,39 +239,53 @@ end
 Generate a random channel of seismic data as a SeisChannel.
 
 """
-randseischannel(; c=false::Bool) = (S = populate_chan!(SeisChannel(), c=c); return S)
-
+function randseischannel(; c=false::Bool, s=false::Bool)
+  Ch = SeisChannel()
+  if c == true
+    populate_irr!(Ch)
+  else
+    populate_chan!(Ch, s=s)
+  end
+  return Ch
+end
 """
     populate_seis!(S::SeisData)
 
 Fill empty fields of S with random data.
 
-    populate_seis!(S::SeisData, n=N)
+    populate_seis!(S::SeisData, N)
 
 Add N channels of random data to S.
 
-    populate_seis!(S::SeisData, n=N, c=true)
+    populate_seis!(S::SeisData, N, c=C::Float64, s=F::Float64)
 
-Add "c=true" to either function call to allow random channels of non-timeseries
-data (i.e. `c`ampaign channels, with no definable Fs).
+Specify that (100*c)% of channels are campaign (irregularly sampled) data or
+(100*s)% of channels are guaranteed to be seismic data. Note that populate_seis!
+restricts channel types so that (n_seismic + n_campaign) < S.n, and n_seismic
+takes precedence.
+
+Defaults: c = 0.2, s = 0.6
 """
-function populate_seis!(S::SeisData; c=false::Bool)
-  for j = 1:S.n
-    eflag = false
-      for i in datafields(S)
-        if isempty(S.(i)[j])
-          eflag = true
-        end
-      end
-    if eflag
-      T = S[j]
-      populate_chan!(T, c=c)
-      S[j] = T
+function populate_seis!(S::SeisData; c=0.2::Float64, s=0.6::Float64)
+  n_seis = max(min(ceil(Int, s*S.n), S.n-1),0)
+  n_irr = max(min(floor(Int, c*S.n), S.n-n_seis-1),0)
+  data_spec = zeros(UInt8, S.n)
+  data_spec[1:n_seis] .= 0x01
+  data_spec[n_seis+1:n_seis+n_irr] .= 0x02
+  data_spec = Random.shuffle!(data_spec)
+  for i = 1:S.n
+    if data_spec[i] == 0x01
+      S[i] = randseischannel(s=true)
+    elseif data_spec[i] == 0x02
+      S[i] = randseischannel(c=true)
+    else
+      S[i] = randseischannel()
     end
   end
+  return nothing
 end
-populate_seis!(S::SeisData, N::Int; c=false::Bool) = ([push!(S,
-  randseischannel(c=c)) for n = 1:N])
+populate_seis!(S::SeisData, N::Int; c=0.2::Float64, s=0.6::Float64) =
+  (U = SeisData(N); populate_seis!(U, c=c, s=s); append!(S,U))
 
 """
     randseisdata()
@@ -237,10 +296,16 @@ Generate 8 to 24 channels of random seismic data as a SeisData object.
 
 Generate N channels of random seismic data as a SeisData object.
 """
-randseisdata(; c=false::Bool) = (S = SeisData();
-  populate_seis!(S, rand(8:24), c=c); return S)
-randseisdata(i::Int; c=false::Bool) = (S = SeisData();
-  populate_seis!(S, i, c=c); return S)
+function randseisdata(; c=0.2::Float64, s=0.6::Float64)
+  S = SeisData()
+  populate_seis!(S, rand(8:24), c = c, s = s)
+  return S
+end
+function randseisdata(i::Int; c = 0.2::Float64, s = 0.6::Float64)
+  S = SeisData()
+  populate_seis!(S, i, c = c, s = s)
+  return S
+end
 
 """
     randseishdr()
@@ -252,14 +317,16 @@ function randseishdr()
   setfield!(H, :id, rand(1:2^62))
   setfield!(H, :ot, now())
   setfield!(H, :loc, [(rand(0.0:1.0:89.0)+rand())*-1.0^(rand(1:2)), (rand(0.0:1.0:179.0)+rand())*-1.0^(rand(1:2)), 50.0*randexp(Float64)])
-  setfield!(H, :mag, (6.0f0*rand(Float32), Random.randstring(1)[1], Random.randstring(1)[1]))
+  setfield!(H, :mag, (6.0f0*rand(Float32), "M_"*Random.randstring(rand(2:4))))
   setfield!(H, :int, (UInt8(floor(Int, H.mag[1])), Random.randstring(rand(2:4))))
   setfield!(H, :mt, rand(Float64, 8))
   setfield!(H, :np, [(rand(), rand(), rand()), (rand(), rand(), rand())])
   setfield!(H, :pax, [(rand(), rand(), rand()), (rand(), rand(), rand()), (rand(), rand(), rand())])
-  setfield!(H, :src, Random.randstring(rand(16:256)))
+  setfield!(H, :src, "randseishdr")
   pop_rand!(H.misc, rand(4:24))
   [note!(H, Random.randstring(rand(16:256))) for i = 1:rand(3:18)]
+
+  # Adding a phase catalog
   return H
 end
 

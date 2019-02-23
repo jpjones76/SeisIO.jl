@@ -3,11 +3,11 @@
 ..    include:: <isoamsr.txt>
 ..    module:: sphinx.ext.mathbase
 
-.. _seisdata_fields:
+################################
+Structure and Field Descriptions
+################################
 
-############################################
-Appendix B: Structure and Field Descriptions
-############################################
+.. _sdf:
 
 ******************
 SeisChannel Fields

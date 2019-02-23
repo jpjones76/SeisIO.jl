@@ -1,0 +1,245 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Appendix A: Structure and Field Descriptions &mdash; SeisIO 0.1.0 beta documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> SeisIO
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../seisdata.html">SeisIO Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fileformats.html">File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Web/webclients.html">Web Clients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/function_list.html">Appendix A: Alphabetical Function List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisdata_fields.html">Appendix B: Structure and Field Descriptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisdata_fileformat.html">Appendix C: SeisIO File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/web_syntax.html">Appendix D: Web Keywords and Syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/examples.html">Appendix E: Web Client Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SeisIO</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+      <li><code class="docutils literal notranslate"><span class="pre">Appendix</span> <span class="pre">A:</span> <span class="pre">Structure</span> <span class="pre">and</span> <span class="pre">Field</span> <span class="pre">Descriptions</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/src/Formats/seisdata_fields.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <span class="target" id="module-sphinx.ext.mathbase"></span><div class="section" id="appendix-a-structure-and-field-descriptions">
+<span id="seisdata-fields"></span><h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">Appendix</span> <span class="pre">A:</span> <span class="pre">Structure</span> <span class="pre">and</span> <span class="pre">Field</span> <span class="pre">Descriptions</span></code><a class="headerlink" href="#appendix-a-structure-and-field-descriptions" title="Permalink to this headline">¶</a></h1>
+<p>Types introduced in SeisIO:</p>
+<ul class="simple">
+<li>SeisChannel: Container for one channel of univariate data</li>
+<li>SeisData: Container for multiple channels of univariate data</li>
+<li>SeisHdr: Seismic event header</li>
+<li>SeisEvent: Composite type for events with header and trace data</li>
+</ul>
+<p>All field names use lowercase letters.</p>
+<div class="section" id="seischannel-fields">
+<h2>SeisChannel Fields<a class="headerlink" href="#seischannel-fields" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="id1">
+<h2>SeisData Fields<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>As SeisChannel, plus</p>
+</div>
+<div class="section" id="seishdr-fields">
+<h2>SeisHdr Fields<a class="headerlink" href="#seishdr-fields" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="seisevent-fields">
+<h2>SeisEvent Fields<a class="headerlink" href="#seisevent-fields" title="Permalink to this headline">¶</a></h2>
+<p><sup>(a)</sup> Abbreviations: s = String, c = Char, f = Float, i = Signed Integer, u = Unsigned Integer.</p>
+<p><sup>(b)</sup> Subfields of <code class="docutils literal notranslate"><span class="pre">id</span></code> should contain only alphanumeric characters.</p>
+<p><sup>(c)</sup> Gain has an identical meaning to the “Stage 0 gain” of FDSN XML.</p>
+<p><sup>(d)</sup> azimuth is clockwise from North; incidence of 0 = vertical; both use degrees</p>
+<p><sup>(e)</sup> Always use typed arrays in <code class="docutils literal notranslate"><span class="pre">misc</span></code> (e.g. <code class="docutils literal notranslate"><span class="pre">Array{Float64,1}</span></code>, never <code class="docutils literal notranslate"><span class="pre">Array{Any,1}</span></code>). Only (subtypes of) Char, Complex, Real, and String can be saved in SeisIO native file format.</p>
+<div class="section" id="time-convention">
+<h3>Time Convention<a class="headerlink" href="#time-convention" title="Permalink to this headline">¶</a></h3>
+<p id="seisdata-t">The units of <code class="docutils literal notranslate"><span class="pre">t</span></code> are <em>integer microseconds</em>, measured from Unix epoch time (1970-01-01T00:00:00.000).</p>
+<p>For <em>regularly sampled</em> data (<code class="docutils literal notranslate"><span class="pre">fs</span> <span class="pre">&gt;</span> <span class="pre">0.0</span></code>), each <code class="docutils literal notranslate"><span class="pre">t</span></code> is a sparse delta-compressed representation of <em>time gaps</em> in the corresponding <code class="docutils literal notranslate"><span class="pre">x</span></code>. The first column stores indices of gaps; the second, gap lengths.</p>
+<p>Within each time field, <code class="docutils literal notranslate"><span class="pre">t[1,2]</span></code> stores the time of the first sample of the corresponding <code class="docutils literal notranslate"><span class="pre">x</span></code>. The last row of each <code class="docutils literal notranslate"><span class="pre">t</span></code> should always take the form <code class="docutils literal notranslate"><span class="pre">[length(x)</span> <span class="pre">0]</span></code>. Other rows take the form <code class="docutils literal notranslate"><span class="pre">[(starting</span> <span class="pre">index</span> <span class="pre">of</span> <span class="pre">gap)</span> <span class="pre">(length</span> <span class="pre">of</span> <span class="pre">gap)]</span></code>.</p>
+<p>For <em>irregularly sampled data</em> (<code class="docutils literal notranslate"><span class="pre">fs</span> <span class="pre">=</span> <span class="pre">0</span></code>), <code class="docutils literal notranslate"><span class="pre">t</span></code> is a dense delta-compressed representation of <em>time stamps corresponding to each sample</em>.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Joshua Jones
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

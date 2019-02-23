@@ -8,48 +8,45 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Appendix B: Structure and Field Descriptions &mdash; SeisIO 0.1.0 beta documentation</title>
+  <title>2. Structure and Field Descriptions &mdash; SeisIO 0.1.2 rc documentation</title>
   
 
   
   
+  
+  
 
   
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="SeisIO 0.1.0 beta documentation" href="../../index.html"/>
-        <link rel="next" title="Appendix C: SeisIO File Format" href="seisdata_fileformat.html"/>
-        <link rel="prev" title="Appendix A: Alphabetical Function List" href="function_list.html"/> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="3. SeisIO File Format" href="seisdata_fileformat.html" />
+    <link rel="prev" title="1. Alphabetical Function List" href="function_list.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -63,7 +60,7 @@
             
             
               <div class="version">
-                0.1.0
+                0.1.2
               </div>
             
           
@@ -84,26 +81,40 @@
           
             
             
-                <p class="caption"><span class="caption-text">Table of Contents</span></p>
-<ul class="current">
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../seisdata.html">SeisIO Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../seisdata.html">Data Types</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Data Readers</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">File Formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Web/webclients.html">Web Clients</a></li>
-<li class="toctree-l1"><a class="reference internal" href="function_list.html">Appendix A: Alphabetical Function List</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Appendix B: Structure and Field Descriptions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#seischannel-fields">SeisChannel Fields</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id11">SeisData Fields</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#time-convention">Time Convention</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Web Clients</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Web/webclients.html">Web Requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Web/seedlink.html">SeedLink</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendices</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="function_list.html">1. Alphabetical Function List</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Structure and Field Descriptions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#seischannel-fields">2.1. SeisChannel Fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#seisdata-fields">2.2. SeisData Fields</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#time-convention">2.2.1. Time Convention</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#seishdr-fields">SeisHdr Fields</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#seisevent-fields">SeisEvent Fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#seishdr-fields">2.3. SeisHdr Fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#seisevent-fields">2.4. SeisEvent Fields</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="seisdata_fileformat.html">Appendix C: SeisIO File Format</a></li>
-<li class="toctree-l1"><a class="reference internal" href="web_syntax.html">Appendix D: Web Keywords and Syntax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Appendix E: Web Client Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="seisdata_fileformat.html">3. SeisIO File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="web_syntax.html">4. Data Requests Syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="keywords.html">5. SeisIO Standard Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">6. Examples</a></li>
 </ul>
 
             
@@ -115,43 +126,63 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../index.html">SeisIO</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SeisIO</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../../index.html">Docs</a> &raquo;</li>
-      
-    <li>Appendix B: Structure and Field Descriptions</li>
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+      <li>2. Structure and Field Descriptions</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="../../_sources/src/Appendices/seisdata_fields.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <span class="target" id="module-sphinx.ext.mathbase"></span><div class="section" id="appendix-b-structure-and-field-descriptions">
-<span id="seisdata-fields"></span><h1>Appendix B: Structure and Field Descriptions<a class="headerlink" href="#appendix-b-structure-and-field-descriptions" title="Permalink to this headline">¶</a></h1>
+  <span class="target" id="module-sphinx.ext.mathbase"></span><div class="section" id="structure-and-field-descriptions">
+<h1>2. Structure and Field Descriptions<a class="headerlink" href="#structure-and-field-descriptions" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="seischannel-fields">
-<h2>SeisChannel Fields<a class="headerlink" href="#seischannel-fields" title="Permalink to this headline">¶</a></h2>
+<span id="sdf"></span><h2>2.1. SeisChannel Fields<a class="headerlink" href="#seischannel-fields" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <colgroup>
 <col width="10%" />
@@ -230,7 +261,7 @@ inc] <a class="footnote-reference" href="#id8" id="id3">[3]</a></td>
 <table class="docutils footnote" frame="void" id="id7" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Gain has an identical meaning to the &#8220;Stage 0 gain&#8221; of FDSN XML.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Gain has an identical meaning to the “Stage 0 gain” of FDSN XML.</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="id8" rules="none">
@@ -242,18 +273,18 @@ inc] <a class="footnote-reference" href="#id8" id="id3">[3]</a></td>
 <table class="docutils footnote" frame="void" id="id9" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id4">[4]</a></td><td>Zeros in <code class="docutils literal"><span class="pre">:resp[i][:,1]</span></code>, poles in <code class="docutils literal"><span class="pre">:resp[i][:,2]</span></code>.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id4">[4]</a></td><td>Zeros in <code class="docutils literal notranslate"><span class="pre">:resp[i][:,1]</span></code>, poles in <code class="docutils literal notranslate"><span class="pre">:resp[i][:,2]</span></code>.</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="id10" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id5">[5]</a></td><td>Arrays in <code class="docutils literal"><span class="pre">:misc</span></code> should contain a single variablle type (e.g. <code class="docutils literal"><span class="pre">Array{Float64,1}</span></code>, never <code class="docutils literal"><span class="pre">Array{Any,1}</span></code>). See the <a class="reference internal" href="seisdata_fileformat.html#seisdata-misc-types"><span class="std std-ref">SeisIO file format description</span></a> for a full list of allowed value types in <code class="docutils literal"><span class="pre">:misc</span></code>.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id5">[5]</a></td><td>Arrays in <code class="docutils literal notranslate"><span class="pre">:misc</span></code> should contain a single variablle type (e.g. <code class="docutils literal notranslate"><span class="pre">Array{Float64,1}</span></code>, never <code class="docutils literal notranslate"><span class="pre">Array{Any,1}</span></code>). See the <a class="reference internal" href="seisdata_fileformat.html#seisdata-misc-types"><span class="std std-ref">SeisIO file format description</span></a> for a full list of allowed value types in <code class="docutils literal notranslate"><span class="pre">:misc</span></code>.</td></tr>
 </tbody>
 </table>
 </div>
-<div class="section" id="id11">
-<h2>SeisData Fields<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="seisdata-fields">
+<h2>2.2. SeisData Fields<a class="headerlink" href="#seisdata-fields" title="Permalink to this headline">¶</a></h2>
 <p>As SeisChannel, plus</p>
 <table border="1" class="docutils">
 <colgroup>
@@ -279,15 +310,15 @@ inc] <a class="footnote-reference" href="#id8" id="id3">[3]</a></td>
 </tbody>
 </table>
 <div class="section" id="time-convention">
-<h3>Time Convention<a class="headerlink" href="#time-convention" title="Permalink to this headline">¶</a></h3>
-<p id="seisdata-t">The units of <code class="docutils literal"><span class="pre">t</span></code> are <em>integer microseconds</em>, measured from Unix epoch time (1970-01-01T00:00:00.000).</p>
-<p>For <em>regularly sampled</em> data (<code class="docutils literal"><span class="pre">fs</span> <span class="pre">&gt;</span> <span class="pre">0.0</span></code>), each <code class="docutils literal"><span class="pre">t</span></code> is a sparse delta-compressed representation of <em>time gaps</em> in the corresponding <code class="docutils literal"><span class="pre">x</span></code>. The first column stores indices of gaps; the second, gap lengths.</p>
-<p>Within each time field, <code class="docutils literal"><span class="pre">t[1,2]</span></code> stores the time of the first sample of the corresponding <code class="docutils literal"><span class="pre">x</span></code>. The last row of each <code class="docutils literal"><span class="pre">t</span></code> should always take the form <code class="docutils literal"><span class="pre">[length(x)</span> <span class="pre">0]</span></code>. Other rows take the form <code class="docutils literal"><span class="pre">[(starting</span> <span class="pre">index</span> <span class="pre">of</span> <span class="pre">gap)</span> <span class="pre">(length</span> <span class="pre">of</span> <span class="pre">gap)]</span></code>.</p>
-<p>For <em>irregularly sampled data</em> (<code class="docutils literal"><span class="pre">fs</span> <span class="pre">=</span> <span class="pre">0</span></code>), <code class="docutils literal"><span class="pre">t</span></code> is a dense delta-compressed representation of <em>time stamps for each sample</em>.</p>
+<h3>2.2.1. Time Convention<a class="headerlink" href="#time-convention" title="Permalink to this headline">¶</a></h3>
+<p id="seisdata-t">The units of <code class="docutils literal notranslate"><span class="pre">t</span></code> are <em>integer microseconds</em>, measured from Unix epoch time (1970-01-01T00:00:00.000).</p>
+<p>For <em>regularly sampled</em> data (<code class="docutils literal notranslate"><span class="pre">fs</span> <span class="pre">&gt;</span> <span class="pre">0.0</span></code>), each <code class="docutils literal notranslate"><span class="pre">t</span></code> is a sparse delta-compressed representation of <em>time gaps</em> in the corresponding <code class="docutils literal notranslate"><span class="pre">x</span></code>. The first column stores indices of gaps; the second, gap lengths.</p>
+<p>Within each time field, <code class="docutils literal notranslate"><span class="pre">t[1,2]</span></code> stores the time of the first sample of the corresponding <code class="docutils literal notranslate"><span class="pre">x</span></code>. The last row of each <code class="docutils literal notranslate"><span class="pre">t</span></code> should always take the form <code class="docutils literal notranslate"><span class="pre">[length(x)</span> <span class="pre">0]</span></code>. Other rows take the form <code class="docutils literal notranslate"><span class="pre">[(starting</span> <span class="pre">index</span> <span class="pre">of</span> <span class="pre">gap)</span> <span class="pre">(length</span> <span class="pre">of</span> <span class="pre">gap)]</span></code>.</p>
+<p>For <em>irregularly sampled data</em> (<code class="docutils literal notranslate"><span class="pre">fs</span> <span class="pre">=</span> <span class="pre">0</span></code>), <code class="docutils literal notranslate"><span class="pre">t</span></code> is a dense delta-compressed representation of <em>time stamps for each sample</em>.</p>
 </div>
 </div>
 <div class="section" id="seishdr-fields">
-<h2>SeisHdr Fields<a class="headerlink" href="#seishdr-fields" title="Permalink to this headline">¶</a></h2>
+<h2>2.3. SeisHdr Fields<a class="headerlink" href="#seishdr-fields" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <colgroup>
 <col width="10%" />
@@ -344,7 +375,7 @@ Float64, Float64},1}</td>
 </table>
 </div>
 <div class="section" id="seisevent-fields">
-<h2>SeisEvent Fields<a class="headerlink" href="#seisevent-fields" title="Permalink to this headline">¶</a></h2>
+<h2>2.4. SeisEvent Fields<a class="headerlink" href="#seisevent-fields" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="docutils">
 <colgroup>
 <col width="10%" />
@@ -373,15 +404,16 @@ Float64, Float64},1}</td>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="seisdata_fileformat.html" class="btn btn-neutral float-right" title="Appendix C: SeisIO File Format" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="seisdata_fileformat.html" class="btn btn-neutral float-right" title="3. SeisIO File Format" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="function_list.html" class="btn btn-neutral" title="Appendix A: Alphabetical Function List" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="function_list.html" class="btn btn-neutral float-left" title="1. Alphabetical Function List" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -390,11 +422,11 @@ Float64, Float64},1}</td>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Joshua Jones.
+        &copy; Copyright 2016-2019, Joshua Jones, Ph.D.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -407,35 +439,15 @@ Float64, Float64},1}</td>
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'0.1.0 beta',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

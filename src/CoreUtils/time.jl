@@ -16,7 +16,7 @@ end
 
 u2d(k::Real) = Dates.unix2datetime(k)
 d2u(k::DateTime) = Dates.datetime2unix(k)
-timestamp() = tstr(unix2datetime(time()))
+timestamp() = tstr(Dates.unix2datetime(time()))
 timestamp(t::Int64) = tstr(u2d(t/sμ))
 tnote(s::String) = string(timestamp(), ": ", s)
 

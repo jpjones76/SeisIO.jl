@@ -4,9 +4,10 @@
 
 .. _seisdata:
 
-#################
-SeisIO Data Types
-#################
+##########
+Data Types
+##########
+
 * SeisChannel: single-channel univariate data
 * SeisData: multi-channel univariate data
 * SeisHdr: seismic event header
@@ -19,15 +20,15 @@ Initialization
 **************
 .. function:: C = SeisChannel()
 
-Initiate an empty SeisChannel structure. Fields can be set at creation with keywords, e.g. ``SeisChannel(fs=100.0)`` creates a new SeisChannel structure with fs set to 100.0 Hz.
+Create an empty SeisChannel structure. Fields can be set at creation with keywords, e.g. ``SeisChannel(fs=100.0)`` creates a new SeisChannel structure with fs set to 100.0 Hz.
 
 .. function:: S = SeisData()
 
-Initiate an empty SeisData structure. Fields cannot be set at creation.
+Create an empty SeisData structure. Fields cannot be set at creation.
 
 .. function:: T = SeisEvent()
 
-Initiate an empty SeisEvent structure.
+Create an empty SeisEvent structure.
 
 .. function:: H = SeisHdr()
 
@@ -98,7 +99,7 @@ Remove all empty channels from ``S``. Empty channels are defined as the set of a
 
 
 Read, Write
-==========
+===========
 .. function:: rsac(fname::String)
 
 Read SAC data file ``fname`` into a SeisData structure. Specify keyword ``full=true`` to save all SAC header values in field ``:misc``.

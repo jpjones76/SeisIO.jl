@@ -115,6 +115,9 @@ function parserec!(S::SeisData, sid::IO, v::Int)
   c = findid(id, S)
 
   if c == 0
+    if v > 2
+      println(stdout, "New channel; ID = ", id, ", S.id = ", S.id)
+    end
     C = SeisChannel()
     C.name = id
     C.id = id
@@ -187,8 +190,8 @@ function parserec!(S::SeisData, sid::IO, v::Int)
   end
 
   if xi+n > L
+    v > 1 && println(stdout, "Resize S.x[", c, "] from length ", length(S.x[c]), " to length ", length(S.x[c]) + SEED.def.nx)
     resize!(S.x[c], length(S.x[c]) + SEED.def.nx)
-    v > 1 && println(stdout, "Resized S.x[", c, "] to length ", length(S.x[c]))
   end
 
   # ASCII
@@ -385,6 +388,28 @@ function readmseed(fname::String; swap=false::Bool, v=0::Int)
   end
   return S
 end
+
+"""
+    readmseed!(S, fname)
+
+Read file `fname` into `S` big-Endian mini-SEED format.
+"""
+function readmseed!(fname::String; swap=false::Bool, v=0::Int)
+  setfield!(SEED, :swap, swap)
+
+  if safe_isfile(fname)
+    fid = open(fname, "r")
+    skip(fid, 6)
+    (findfirst(isequal(read(fid, Char)), "DRMQ") > 0) || error("Scan failed due to invalid file type")
+    seek(fid, 0)
+    parsemseed!(S, fid, v)
+    close(fid)
+  else
+    error("Invalid file name!")
+  end
+  return nothing
+end
+
 
 """
     seeddef(s, v)
