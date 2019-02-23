@@ -17,11 +17,12 @@ readsac, rsac, sachdr, writesac, wsac,                        # Formats/SAC.jl
 readsegy, segyhdr,                                            # Formats/SEGY.jl
 readuw, uwdf, uwpf, uwpf!,                                    # Formats/UW.jl
 readwin32,                                                    # Formats/Win32.jl
-findid, pull,                                                 # Types/SeisData.jl
-FDSNevq, FDSNevt, FDSNget, FDSNsta,                           # Web/FDSN.jl
-IRISget, irisws,                                              # Web/IRIS.jl
+findid, pull, prune!, findchan,                               # Types/SeisData.jl
+get_data!, get_data,                                          # Web/get_data.jl
+FDSNevq, FDSNevt, FDSNsta,                                    # Web/FDSN.jl
+get_pha,                                                      # Web/IRIS.jl
 SeedLink, SeedLink!, SL_info, has_sta, has_live_stream,       # Web/SeedLink.jl
-chanspec, webhdr,                                             # Web/WebMisc.jl
+chanspec, webhdr, seis_www, track_on!, track_off!,            # Web/WebMisc.jl
 gcdist, getbandcode, lcfs,                                    # Utils/
 fctopz, translate_resp, equalize_resp!,                       # Utils/resp.jl
 d2u, j2md, md2j, parsetimewin, timestamp, u2d,                # CoreUtils/time.jl
@@ -37,7 +38,7 @@ randseischannel, randseisdata, randseisevent, randseishdr     # Misc/randseis.jl
 # Everything depends on these
 include("CoreUtils/ls.jl")
 include("CoreUtils/time.jl")
-include("CoreUtils/safe_isfile.jl") # Temporary workaround for safe_isfile bad behaior in Windows
+include("CoreUtils/safe_isfile.jl") # workaround for safe_isfile bad behaior in Windows
 
 # Utilities that don't require SeisIO types to work
 for i in readdir(path*"/Utils")
@@ -45,6 +46,7 @@ for i in readdir(path*"/Utils")
 end
 
 # Types and core type functionality: do not change order of operations
+include("Types/KWDefs.jl")
 include("Types/SEED.jl")
 include("Types/SeisData.jl")
 include("Types/SeisChannel.jl")
@@ -72,7 +74,7 @@ end
 # Web clients
 include("Web/parse_chstr.jl")
 include("Web/WebMisc.jl")         # Common functions for web data access
-
+include("Web/get_data.jl")          # Common method for retrieving data
 include("Web/FDSN.jl")
 include("Web/IRIS.jl")            # IRISws command line client
 include("Web/SeedLink.jl")

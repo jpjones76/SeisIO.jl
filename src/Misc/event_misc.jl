@@ -1,8 +1,8 @@
 # =============================================================
 # Utility functions
 sa_prune!(S::Union{Array{String,1},Array{SubString{String},1}}) = (deleteat!(S, findall(isempty, S)); return S)
-get_phase_start(pha::String, Pha::Array{String,2}) = Float64(findmin([Meta.parse(i) for i in Pha[:,4]]))
-get_phase_end(pha::String, Pha::Array{String,2}) = Float64(findmax([Meta.parse(i) for i in Pha[:,4]]))
+get_phase_start(Pha::Array{String,2}) = Float64(findmin([Meta.parse(i) for i in Pha[:,4]]))
+get_phase_end(Pha::Array{String,2}) = Float64(findmax([Meta.parse(i) for i in Pha[:,4]]))
 
 function get_phase_time(pha::String, Pha::Array{String,2})
     j = findall(Pha[:,3] .== pha)

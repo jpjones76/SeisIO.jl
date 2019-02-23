@@ -4,7 +4,7 @@ path = Base.source_dir()
 # It has a more complicated structure than the test.mseed file in more recent
 # versions of libmseed, which reads with no issues
 println("...file read...")
-S = readmseed(string(path, "/SampleFiles/test.mseed"))
+S = readmseed(string(path, "/SampleFiles/test.mseed"), v=3)
 
 println("...channel info accuracy...")
 @test isequal(S.id[1], "NL.HGN.00.BHZ")

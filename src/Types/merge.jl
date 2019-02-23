@@ -243,10 +243,6 @@ function merge!(S::SeisData)
     K = length(C)
     (K == 1) && continue
 
-    # Sanity check
-    if length(unique(getfield(S, :units)[C])) != 1
-      error(string(id, ": data type changes across inputs!"))
-    end
 
     # LOC ====================================================================
     LOC = getfield(S, :loc)[C]  # LOC
@@ -345,7 +341,23 @@ function merge!(S::SeisData)
     # Let c be the index in C to the member whose start time is earliest
     # Let ω be the corresponding index in S
     c = argmax(te)
+
+    # ====================================
+    # Index of final channel for merge
     ω = C[c]
+    # ====================================
+
+    # UNITS ==================================================================
+    units = getfield(S, :units)[C]
+    unique!(filter!(i->i≠"",units))
+    if length(units) > 1
+      error(string(id, ": attempt to merge channels with different units! Units found: ", units))
+      # w[1] += 1
+    elseif length(units) == 0
+      S.units[ω] = ""
+    else
+      S.units[ω] = units[1]
+    end
 
     # NAME ====================================================================
     (length(unique(S.name[C])) == 1) || println(stdout, id, ": name changes across inputs; using most recent.")

@@ -1,8 +1,8 @@
 .. _seisdata_file_format:
 
-##############################
-Appendix C: SeisIO File Format
-##############################
+##################
+SeisIO File Format
+##################
 Files are written in little-endian byte order.
 
 .. csv-table:: Abbreviations used in this section

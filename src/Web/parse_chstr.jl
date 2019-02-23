@@ -1,3 +1,4 @@
+# TO DO: Comment parse_chstr.jl, even I can't figure out what I've done here anymore
 function parse_charr(chan_in::Array{String,1}; d='.'::Char, fdsn=false::Bool)
     N = size(chan_in,1)
     chan_data = Array{String,2}(undef, 0, 5)
@@ -18,7 +19,7 @@ function parse_charr(chan_in::Array{String,1}; d='.'::Char, fdsn=false::Bool)
     return fdsn == true ? minreq!(chan_data) : map(String, chan_data)
 end
 
-function parse_chstr(chan_in::String; d=','::Char, fdsn=false::Bool)
+function parse_chstr(chan_in::String; d=','::Char, fdsn=false::Bool, SL=false::Bool)
   chan_out = Array{String, 2}(undef, 0, 5)
   if safe_isfile(chan_in)
     return parse_chstr(join([strip(j, ['\r','\n']) for j in filter(i -> !startswith(i, ['#','*']), open(readlines, chan_in))],','))
@@ -33,7 +34,11 @@ function parse_chstr(chan_in::String; d=','::Char, fdsn=false::Bool)
       chan_out = cat(chan_out, reshape(tmp_data, 1, 5), dims=1)
     end
   end
-  return fdsn == true ? minreq!(chan_out) : chan_out
+  if fdsn == true
+    minreq!(chan_out)
+  end
+  N = SL ? 4 : 5
+  return chan_out[:,1:N]
 end
 
 function parse_sl(CC::Array{String,2})
@@ -43,7 +48,12 @@ function parse_sl(CC::Array{String,2})
   return S,P
 end
 
-function build_stream_query(C::Array{String,1}, d0::String, d1::String, estr=""::String)
+# FDSNWS
+# http://service.iris.edu/fdsnws/dataselect/1/query?net=IU&sta=ANMO&loc=00&cha=BHZ&start=2010-02-27T06:30:00.000&end=2010-02-27T10:30:00.000
+# IRISWS
+# http://service.iris.edu/irisws/timeseries/1/query?net=IU&sta=ANMO&loc=00&cha=BHZ&starttime=2005-01-01T00:00:00&endtime=2005-01-02T00:00:00
+# IRISWS
+function build_stream_query(C::Array{String,1}, d0::String, d1::String; estr=""::String)
   net_str = isempty(C[1]) ? estr : "net="*C[1]
   sta_str = isempty(C[2]) ? estr : "&sta="*C[2]
   loc_str = isempty(C[3]) ? estr : "&loc="*C[3]
@@ -53,11 +63,12 @@ end
 
 # ============================================================================
 # Purpose: Create the most compact set of requests, one per row
-"""
-    minreq!(S::Array{String,2})
-
-Reduce `S` to the most compact possible set of SeedLink request query strings that completely cover its string requests.
-"""
+# """
+#     minreq!(S::Array{String,2})
+#
+# Reduce `S` to the most compact possible set of SeedLink request query strings
+# that completely cover its string requests.
+# """
 function minreq!(S::Array{String,2})
   d = ','
   (M,N) = size(S)
@@ -90,14 +101,20 @@ minreq(S::Array{String,2}) = (T = deepcopy(S); minreq!(T); return T)
 ## CHANNEL ID SPECIFICATION
 Channel ID data can be passed to SeisIO web functions in three ways:
 
-1. String: comma-delineated list of IDs, formatted `"NET.STA.LOC.CHA"` (e.g. `"PB.B004.01.BS1,PB.B004.01.BS2"`)
+1. String: a comma-delineated list of IDs formatted `"NET.STA.LOC.CHA"` (e.g. `"PB.B004.01.BS1,PB.B004.01.BS2"`)
 2. Array{String,1}: one ID per entry, formatted `"NET.STA.LOC.CHA"` (e.g. `["PB.B004.01.BS1","PB.B004.01.BS2"]`)
 3. Array{String,2}: one ID per row, formatted `["NET" "STA" "LOC" "CHA"]` (e.g. `["PB" "B004" "01" "BS?"; "PB" "B001" "01" "BS?"]`)
 
 The `LOC` field can be left blank (e.g. `"UW.ELK..EHZ", ["UW" "ELK" "" "EHZ"]`).
 
+The allowed subfield widths before channel IDs break is identical to the FDSN
+standard: NN.SSSSS.LL.CCC (network name length ≤ 2 chars, etc.)
+
 #### SEEDLINK ONLY
-For SeedLink functions (`SeedLink!`, `has_live_stream`, etc.), channel IDs can include a fifth field (i.e. NET.STA.LOC.CHA.T) to set the "type" flag (one of DECOTL, for Data, Event, Calibration, blOckette, Timing, or Logs). Note that calibration, timing, and logs are not yet supported by SeisIO.
+For SeedLink functions (`SeedLink!`, `has_live_stream`, etc.), channel IDs can
+include a fifth field (i.e. NET.STA.LOC.CHA.T) to set the "type" flag (one of
+DECOTL, for Data, Event, Calibration, blOckette, Timing, or Logs). Note that
+SeedLink calibration, timing, and logs are not supported by SeisIO.
 """
 function chanspec()
   return nothing

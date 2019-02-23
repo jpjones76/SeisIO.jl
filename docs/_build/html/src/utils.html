@@ -1,114 +1,251 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>Appendix C: Utility Programs &mdash; SeisIO 0.0.1 documentation</title>
-    
-    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../',
-        VERSION:     '0.0.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="SeisIO 0.0.1 documentation" href="../index.html" />
-    <link rel="prev" title="Appendix B: SeisIO File Format" href="seisdata_fileformat.html" /> 
-  </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="seisdata_fileformat.html" title="Appendix B: SeisIO File Format"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SeisIO 0.0.1 documentation</a> &raquo;</li> 
-      </ul>
-    </div>  
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Utility Programs &mdash; SeisIO 0.1.0 beta documentation</title>
+  
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> SeisIO
+          
+
+          
+          </a>
+
+          
             
-  <div class="section" id="appendix-c-utility-programs">
-<span id="utils"></span><h1><code class="xref py py-mod docutils literal"><span class="pre">Appendix</span> <span class="pre">C:</span> <span class="pre">Utility</span> <span class="pre">Programs</span></code><a class="headerlink" href="#appendix-c-utility-programs" title="Permalink to this headline">¶</a></h1>
-<p>A few utility programs are included with SeisIO.</p>
-<p><code class="docutils literal"><span class="pre">plotseis(S)</span></code>: Plot time-aligned trace data from SeisData structure <code class="docutils literal"><span class="pre">S</span></code>.</p>
-<p><code class="docutils literal"><span class="pre">randseis()</span></code>: Generate a SeisObj structure with pseudo-random headers and data. Specify <code class="docutils literal"><span class="pre">c=false</span></code> to allow campaign-style channels with <code class="docutils literal"><span class="pre">fs=0</span></code>. Specify an integer argument to set the number of channels; otherwise, <code class="docutils literal"><span class="pre">S.n</span></code> varies from 12 to 24.</p>
-<p><code class="docutils literal"><span class="pre">randseisobj()</span></code>: Generate a SeisData structure with pseudo-random headers and data.</p>
-<p><code class="docutils literal"><span class="pre">getbandcode(fs,</span> <span class="pre">fc=FC)</span></code>: Generate a valid FDSN-compliant one-character band code for data sampled at <code class="docutils literal"><span class="pre">fs</span></code>; corner frequency <code class="docutils literal"><span class="pre">FC</span></code> is optional.</p>
-<p><code class="docutils literal"><span class="pre">tx</span> <span class="pre">=</span> <span class="pre">t_expand(t)</span></code>: Expand sparse delta-encoded time representation <code class="docutils literal"><span class="pre">t</span></code> to generate time stamps for for each value in the corresponding data <code class="docutils literal"><span class="pre">x</span></code>.</p>
-<p><code class="docutils literal"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">t_collapse(tx)</span></code>: Collapse time stamp array <code class="docutils literal"><span class="pre">tx</span></code> to sparse delta-encoded time representation <code class="docutils literal"><span class="pre">t</span></code>.</p>
-<p><code class="docutils literal"><span class="pre">j</span> <span class="pre">=</span> <span class="pre">md2j(y,m,d)</span></code>: Convert month <code class="docutils literal"><span class="pre">m</span></code>, day <code class="docutils literal"><span class="pre">d</span></code> of year <code class="docutils literal"><span class="pre">y</span></code> to Julian day (day of year) <code class="docutils literal"><span class="pre">j</span></code>. Not included in the Julia DateTime library.</p>
-<p><code class="docutils literal"><span class="pre">m,d</span> <span class="pre">=</span> <span class="pre">j2md(y,j)</span></code>: Convert Julian day (day of year) <code class="docutils literal"><span class="pre">j</span></code> of year <code class="docutils literal"><span class="pre">y</span></code> to month <code class="docutils literal"><span class="pre">m</span></code>, day <code class="docutils literal"><span class="pre">d</span></code>. Not included in the Julia DateTime library.</p>
+            
+              <div class="version">
+                0.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="seisdata.html">SeisIO Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Formats/fileformats.html">File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Web/webclients.html">Web Clients</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Appendices/function_list.html">Appendix A: Alphabetical Function List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Appendices/seisdata_fields.html">Appendix B: Structure and Field Descriptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Appendices/seisdata_fileformat.html">Appendix C: SeisIO File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Appendices/web_syntax.html">Appendix D: Web Keywords and Syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Appendices/examples.html">Appendix E: Web Client Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SeisIO</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li><code class="docutils literal notranslate"><span class="pre">Utility</span> <span class="pre">Programs</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/src/utils.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="utility-programs">
+<span id="utils"></span><h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">Utility</span> <span class="pre">Programs</span></code><a class="headerlink" href="#utility-programs" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="event-utilities">
+<h2>Event Utilities<a class="headerlink" href="#event-utilities" title="Permalink to this headline">¶</a></h2>
+<p>The following utilities are for acquisition and storage of discrete event data.</p>
+<p>FDSNevq
+—
+Event query. A fast command-line utility to do a multi-server query for one or more events near an origin time <code class="docutils literal notranslate"><span class="pre">t</span></code>.  Incomplete string queries are read to the nearest fully specified time constraint, e.g., FDSNevq(“2001-02-08”) returns the nearest event to 2001-02-08T00:00:00 UTC. If no event is found on any server queried within one day of <code class="docutils literal notranslate"><span class="pre">t</span></code>, FDSNevq exits with an error.</p>
+<p>User-specified parameters (always passed as param=value) can include:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">dep</span></code>: Depth, specified <code class="docutils literal notranslate"><span class="pre">[min_depth</span> <span class="pre">max_depth]</span></code>, + = down. Default: <code class="docutils literal notranslate"><span class="pre">dep=[-30.0</span> <span class="pre">700.0]</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">lat</span></code>: Latitude, specified <code class="docutils literal notranslate"><span class="pre">[min_lat</span> <span class="pre">max_lat]</span></code>. + = North. Default: <code class="docutils literal notranslate"><span class="pre">lat=[-90.0</span> <span class="pre">90.0]</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">lon</span></code>: Longitude, specified <code class="docutils literal notranslate"><span class="pre">[min_lon</span> <span class="pre">max_lon]</span></code>. + = East. Default: <code class="docutils literal notranslate"><span class="pre">lon=[-180.0</span> <span class="pre">180.0]</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">mag</span></code>: Magnitude, specified <code class="docutils literal notranslate"><span class="pre">[min_mag</span> <span class="pre">max_mag]</span></code>. Default: <code class="docutils literal notranslate"><span class="pre">mag=[6.0</span> <span class="pre">9.9]</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">n</span></code>: Maximum number of events to return. Default: <code class="docutils literal notranslate"><span class="pre">n=1</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">w</span></code>: Maximum time length (in seconds) to search around <code class="docutils literal notranslate"><span class="pre">t</span></code>. Default: <code class="docutils literal notranslate"><span class="pre">w=86400</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">x</span></code>: Boolean. Treat <code class="docutils literal notranslate"><span class="pre">t</span></code> as exact (within one second). Overrides <code class="docutils literal notranslate"><span class="pre">w</span></code>. Default: <code class="docutils literal notranslate"><span class="pre">x=false</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">to</span></code>: Query timeout (in seconds) for each FDSN query. Default: <code class="docutils literal notranslate"><span class="pre">to=10</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">src</span></code>: Data sources. Specify a comma-delineated list of strings or <code class="docutils literal notranslate"><span class="pre">&quot;All&quot;</span></code> to query all (Default: <code class="docutils literal notranslate"><span class="pre">src=&quot;All&quot;</span></code>). Valid sources currently include IRIS (Incorporated Research Institutions for Seismology, WA, USA), RESIF (Réseau sismologique &amp; géodésique français, France), NCEDC (Northern California Earthquake Data Center, CA, USA), and GFZ (GeoForschungsZentrum, Potsdam, Germany).</li>
+</ul>
+<div class="section" id="gcdist">
+<h3>gcdist<a class="headerlink" href="#gcdist" title="Permalink to this headline">¶</a></h3>
+<p>Compute great-circle distance between source and receiver(s) by the Haversine formula.</p>
+</div>
+<div class="section" id="getpha">
+<h3>getpha<a class="headerlink" href="#getpha" title="Permalink to this headline">¶</a></h3>
+<p>Get phase onset times relative to the origin time of an event.</p>
+</div>
+<div class="section" id="distaz">
+<h3>distaz!<a class="headerlink" href="#distaz" title="Permalink to this headline">¶</a></h3>
+<p>Update SeisEvent object S with distances(in degrees), azimuth, and backazimuth for each channel. Values are saved in S.data.misc[“dist”], S.data.misc[“az”], and S.data.misc[“baz”], respectively.</p>
+</div>
+</div>
+<div class="section" id="miscellaneous">
+<h2>Miscellaneous<a class="headerlink" href="#miscellaneous" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">getbandcode(fs,</span> <span class="pre">fc=FC)</span></code>: Generate a valid FDSN-compliant one-character band code for data sampled at <code class="docutils literal notranslate"><span class="pre">fs</span></code>; corner frequency <code class="docutils literal notranslate"><span class="pre">FC</span></code> is optional.</p>
+<p><code class="docutils literal notranslate"><span class="pre">tx</span> <span class="pre">=</span> <span class="pre">t_expand(t)</span></code>: Expand sparse delta-encoded time representation <code class="docutils literal notranslate"><span class="pre">t</span></code> to generate time stamps for for each value in the corresponding data <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">t_collapse(tx)</span></code>: Collapse time stamp array <code class="docutils literal notranslate"><span class="pre">tx</span></code> to sparse delta-encoded time representation <code class="docutils literal notranslate"><span class="pre">t</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">j</span> <span class="pre">=</span> <span class="pre">md2j(y,m,d)</span></code>: Convert month <code class="docutils literal notranslate"><span class="pre">m</span></code>, day <code class="docutils literal notranslate"><span class="pre">d</span></code> of year <code class="docutils literal notranslate"><span class="pre">y</span></code> to Julian day (day of year) <code class="docutils literal notranslate"><span class="pre">j</span></code>. Not included in the Julia DateTime library.</p>
+<p><code class="docutils literal notranslate"><span class="pre">m,d</span> <span class="pre">=</span> <span class="pre">j2md(y,j)</span></code>: Convert Julian day (day of year) <code class="docutils literal notranslate"><span class="pre">j</span></code> of year <code class="docutils literal notranslate"><span class="pre">y</span></code> to month <code class="docutils literal notranslate"><span class="pre">m</span></code>, day <code class="docutils literal notranslate"><span class="pre">d</span></code>. Not included in the Julia DateTime library.</p>
+</div>
 </div>
 
 
+           </div>
+           
           </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Joshua Jones
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="seisdata_fileformat.html"
-                        title="previous chapter"><code class="docutils literal"><span class="pre">Appendix</span> <span class="pre">B:</span> <span class="pre">SeisIO</span> <span class="pre">File</span> <span class="pre">Format</span></code></a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="../_sources/src/utils.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="seisdata_fileformat.html" title="Appendix B: SeisIO File Format"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">SeisIO 0.0.1 documentation</a> &raquo;</li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &copy; Copyright 2016, Joshua Jones.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
 </html>

@@ -20,27 +20,3 @@ function sync_test!(S::SeisData)
     @assert(maximum(t) - minimum(t) ≤ maximum(2.0./S.fs))
     return nothing
 end
-
-function get_ts_data(method_in::Function, sstr::String, ts::Real, L::Real; v=v::Int64)
-    S = SeisData()
-    c = 1
-    S = method_in(sstr, s=ts, t=ts-L, v=v)
-    while isempty(S)
-        S = method_in(sstr, s=ts, t=ts-L, v=1)
-        remove_low_gain!(S)
-
-        # Check to see if S is empty
-        if isempty(S)
-            c += 1
-            if c < 10
-                @warn("Decrementing start time and retrying. If problem persists, check time zone settings.")
-                ts -= 3600
-            else
-                error("Too many retries, exit with error. Check that network is configured.")
-            end
-        end
-    end
-    sync!(S)
-    sync_test!(S)
-    return S
-end

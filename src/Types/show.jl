@@ -80,15 +80,16 @@ function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, b::Bool)
     if isempty(X[i])
       str[p+1:p+7,1] = codeunits("(empty)")
     else
-      for k = 1:min(6,L+2)
-        if k <= length(X[i])
+      for k = 1:6
+        if k <= L
           s = float_str(X[i][k])
-        end
-        if (L > 5 && k==5) || (L == length(X[i])+1 && length(X[i]) > 1)
-          s = "  ..."
-        end
-        if k == min(6, length(X[i])+2)
+          if (L > 5 && k==5)
+            s = "  ..."
+          end
+        elseif k == 6
           s = Lx
+        else
+          s = ""
         end
         str[p+1:p+length(codeunits(s)),k] = codeunits(s)
       end

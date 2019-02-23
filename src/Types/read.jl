@@ -152,7 +152,9 @@ function rdata(io::IOStream)
     # float arrays
     S.loc[i] = read!(io, Array{Float64, 1}(undef, 5))
     if i64[2] > 0
-      S.resp[i] = reshape(complex.(read!(io, Array{Float64, 1}(undef, i64[2])), read!(io, Array{Float64, 1}(undef, i64[2]))))
+      test_read_1 = read!(io, Array{Float64, 1}(undef, i64[2]))
+      test_read_2 = read!(io, Array{Float64, 1}(undef, i64[2]))
+      S.resp[i] = reshape(complex.(test_read_1, test_read_2), div(i64[2],2), 2)
     end
 
     # U8
