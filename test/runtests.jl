@@ -5,7 +5,7 @@ println(stdout, "Tests require up to 20 minutes to execute.")
 println(stdout, Dates.now(), ": tests begin, source_dir = ", path)
 
 include(path*"/../src/SeisIO.jl")
-include("get_ts_data.jl") # Handler for timeseries data functions
+include("test_helpers.jl")
 
 println("begin tests:")
 
@@ -35,6 +35,9 @@ include(path*"/test_note_proc.jl")
 
 println("other (non-SAC) file formats (test_file_formats.jl)...")
 include(path*"/test_file_formats.jl")
+
+println("Misc. web functions (test_WebMisc.jl)...")
+include(path*"/test_WebMisc.jl")
 
 println("FDSN XML parsing (test_xml.jl)...")
 include(path*"/test_xml.jl")

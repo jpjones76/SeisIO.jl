@@ -4,7 +4,7 @@
  *
  * sphinx.websupport utilities for all documentation.
  *
- * :copyright: Copyright 2007-2016 by the Sphinx team, see AUTHORS.
+ * :copyright: Copyright 2007-2019 by the Sphinx team, see AUTHORS.
  * :license: BSD, see LICENSE for details.
  *
  */
@@ -149,9 +149,9 @@
     $('#ah' + id).show();
     var context = $.extend({id: id}, opts);
     var popup = $(renderTemplate(popupTemplate, context)).hide();
-    popup.findall('textarea[name="proposal"]').hide();
-    popup.findall('a.by' + by).addClass('sel');
-    var form = popup.findall('#cf' + id);
+    popup.find('textarea[name="proposal"]').hide();
+    popup.find('a.by' + by).addClass('sel');
+    var form = popup.find('#cf' + id);
     form.submit(function(event) {
       event.preventDefault();
       addComment(form);
@@ -187,7 +187,7 @@
        var ul = $('#cl' + id);
        var speed = 100;
        $('#cf' + id)
-         .findall('textarea[name="proposal"]')
+         .find('textarea[name="proposal"]')
          .data('source', data.source);
 
        if (data.comments.length === 0) {
@@ -214,10 +214,10 @@
    * Add a comment via ajax and insert the comment into the comment tree.
    */
   function addComment(form) {
-    var node_id = form.findall('input[name="node"]').val();
-    var parent_id = form.findall('input[name="parent"]').val();
-    var text = form.findall('textarea[name="comment"]').val();
-    var proposal = form.findall('textarea[name="proposal"]').val();
+    var node_id = form.find('input[name="node"]').val();
+    var parent_id = form.find('input[name="parent"]').val();
+    var text = form.find('textarea[name="comment"]').val();
+    var proposal = form.find('textarea[name="proposal"]').val();
 
     if (text == '') {
       showError('Please enter a comment.');
@@ -225,7 +225,7 @@
     }
 
     // Disable the form that is being submitted.
-    form.findall('textarea,input').attr('disabled', 'disabled');
+    form.find('textarea,input').attr('disabled', 'disabled');
 
     // Send the comment to the server.
     $.ajax({
@@ -243,9 +243,9 @@
         if (node_id) {
           hideProposeChange(node_id);
         }
-        form.findall('textarea')
+        form.find('textarea')
           .val('')
-          .add(form.findall('input'))
+          .add(form.find('input'))
           .removeAttr('disabled');
 	var ul = $('#cl' + (node_id || parent_id));
         if (ul.data('empty')) {
@@ -254,7 +254,7 @@
         }
         insertComment(data.comment);
         var ao = $('#ao' + node_id);
-        ao.findall('img').attr({'src': opts.commentBrightImage});
+        ao.find('img').attr({'src': opts.commentBrightImage});
         if (node_id) {
           // if this was a "root" comment, remove the commenting box
           // (the user can get it back by reopening the comment popup)
@@ -262,7 +262,7 @@
         }
       },
       error: function(request, textStatus, error) {
-        form.findall('textarea,input').removeAttr('disabled');
+        form.find('textarea,input').removeAttr('disabled');
         showError('Oops, there was a problem adding the comment.');
       }
     });
@@ -276,7 +276,7 @@
     $.each(comments, function() {
       var div = createCommentDiv(this);
       ul.append($(document.createElement('li')).html(div));
-      appendComments(this.children, div.findall('ul.comment-children'));
+      appendComments(this.children, div.find('ul.comment-children'));
       // To avoid stagnating data, don't store the comments children in data.
       this.children = null;
       div.data('comment', this);
@@ -301,7 +301,7 @@
     li.hide();
 
     // Determine where in the parents children list to insert this comment.
-    for(i=0; i < siblings.length; i++) {
+    for(var i=0; i < siblings.length; i++) {
       if (comp(comment, siblings[i]) <= 0) {
         $('#cd' + siblings[i].id)
           .parent()
@@ -348,11 +348,11 @@
         }
         // User mode: only mark the comment as deleted
         div
-          .findall('span.user-id:first')
+          .find('span.user-id:first')
           .text('[deleted]').end()
-          .findall('div.comment-text:first')
+          .find('div.comment-text:first')
           .text('[deleted]').end()
-          .findall('#cm' + id + ', #dc' + id + ', #ac' + id + ', #rc' + id +
+          .find('#cm' + id + ', #dc' + id + ', #ac' + id + ', #rc' + id +
                 ', #sp' + id + ', #hp' + id + ', #cr' + id + ', #rl' + id)
           .remove();
         var comment = div.data('comment');
@@ -468,7 +468,7 @@
     div.data('comment', data);
 
     // Change the rating text.
-    div.findall('.rating:first')
+    div.find('.rating:first')
       .text(data.rating + ' point' + (data.rating == 1 ? '' : 's'));
 
     // Send the vote information to the server.
@@ -495,18 +495,18 @@
     $('#cl' + id)
       .prepend(div)
       // Setup the submit handler for the reply form.
-      .findall('#rf' + id)
+      .find('#rf' + id)
       .submit(function(event) {
         event.preventDefault();
         addComment($('#rf' + id));
         closeReply(id);
       })
-      .findall('input[type=button]')
+      .find('input[type=button]')
       .click(function() {
         closeReply(id);
       });
     div.slideDown('fast', function() {
-      $('#rf' + id).findall('textarea').focus();
+      $('#rf' + id).find('textarea').focus();
     });
   }
 
@@ -545,7 +545,7 @@
       .each(function() {
         var comment = $(this).data('comment');
         if (recursive)
-          comment.children = getChildren($(this).findall('#cl' + comment.id), true);
+          comment.children = getChildren($(this).find('#cl' + comment.id), true);
         children.push(comment);
       });
     return children;
@@ -569,18 +569,18 @@
     // If the user has voted on this comment, highlight the correct arrow.
     if (comment.vote) {
       var direction = (comment.vote == 1) ? 'u' : 'd';
-      div.findall('#' + direction + 'v' + comment.id).hide();
-      div.findall('#' + direction + 'u' + comment.id).show();
+      div.find('#' + direction + 'v' + comment.id).hide();
+      div.find('#' + direction + 'u' + comment.id).show();
     }
 
     if (opts.moderator || comment.text != '[deleted]') {
-      div.findall('a.reply').show();
+      div.find('a.reply').show();
       if (comment.proposal_diff)
-        div.findall('#sp' + comment.id).show();
+        div.find('#sp' + comment.id).show();
       if (opts.moderator && !comment.displayed)
-        div.findall('#cm' + comment.id).show();
+        div.find('#cm' + comment.id).show();
       if (opts.moderator || (opts.username == comment.username))
-        div.findall('#dc' + comment.id).show();
+        div.find('#dc' + comment.id).show();
     }
     return div;
   }

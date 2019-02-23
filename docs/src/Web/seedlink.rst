@@ -1,85 +1,66 @@
-***************
-:mod:`SeedLink`
-***************
+********
+SeedLink
+********
 
-`SeedLink <https://www.seiscomp3.org/wiki/doc/applications/seedlink>`_ is a TCP/IP-based data transmission protocol for near-real-time access.
+`SeedLink <https://www.seiscomp3.org/wiki/doc/applications/seedlink>`_ is a TCP/IP-based data transmission protocol that allows near-real-time access to data from thousands of geophysical monitoring instruments. See :ref:`data keywords list <dkw>` and :ref:`channel id syntax <cid>` for options.
 
-SeedLink client
-================
-``SeedLink!(S, ...)`` invokes a native Julia SeedLink client on SeisData object ``S``. A channel list (array of ASCII strings) or config filename (ASCII string) must be passed as the first argument. Other other arguments are passed as keywords.
+.. function:: SeedLink!(S, chans, KWs)
+.. function:: SeedLink!(S, chans, patts, KWs)
+.. function:: S = SeedLink(chans, KWs)
 
+Initiate a SeedLink session in DATA mode to feed data from channels ``chans`` with
+selection patterns ``patts`` to SeisData structure ``S``. A handle to a TCP
+connection is appended to ``S.c``.Data are periodically parsed until the
+connection is closed. One SeisData object can support multiple connections,
+provided that each connection's streams feed unique channels.
 
-Valid Channel Specification
----------------------------
-::
+Argument Syntax
+---------------
 
-  nn sssss llccc.d
-  nn sssss ccc.d
-  nn sssss ccc
-  nn sssss
+**chans**
 
-n = network, s = station, l = location, c = channel, d = data flag; field length corresponds to expected number of characters. Selectors should follow `SeedLink offical specifications <https://www.seiscomp3.org/wiki/doc/applications/seedlink>`_ with ? indicating a wildcard; see Examples.
+Channel specification can use any of the following options:
 
-If passing a list of channels, construct an array of ASCII strings, e.g. ``["UW TDH","CC VALT BHZ.D"]``
+1. A comma-separated String where each pattern follows the syntax NET.STA.LOC.CHA.DFLAG, e.g. UW.TDH..EHZ.D. Use "?" to match any single character.
+2. An Array{String,1} with one pattern per entry, following the above syntax.
+3. The name of a configuration text file, with one channel pattern per line; see :ref:`Channel Configuration File syntax<ccfg>`.
 
-If using a config file, the expected format is identical to `SLtool <http://ds.iris.edu/ds/nodes/dmc/software/downloads/slinktool/>`_ config files.
+| **patts**
+| Data selection patterns. See SeedLink documentation; syntax is identical.
+|
+| **KWs**
+| Standard keywords: fmt, opts, q, si, to, v, w, y
+| Standard SL keywords: gap, kai, mode, port, refresh, safety, x\_on\_err
+| Other keywords: ``u`` specifies the URL without "http://"
 
+Special Rules
+-------------
 
-Working with SeedLink
----------------------
-``SeedLink!(S, ...)`` operates on SeisData object ``S`` by appending a new TCP/IP connection handle to ``S.c``. Data are periodically parsed until the connection is closed. One SeisData object can support multiple connections provided each connection's streams feed different channels.
+1. SeedLink follows unusual rules for wild cards in ``sta`` and ``patts``:
+    a. ``*`` is not a valid SeedLink wild card.
+    b. The LOC and CHA fields can be left blank in ``sta`` to select all locations and channels.
+2. DO NOT feed one data channel with multiple SeedLink streams. This can have severe consequences:
+    a. A channel fed by multiple live streams will have many small time sequences out of order. ``merge!`` is not guaranteed to fix it.
+    b. SeedLink will almost certainly crash.
+    c. Your data may be corrupted.
+    d. The Julia interpreter can freeze, requiring ``kill -9`` on the process.
+    e. This is not an "issue". There will never be a workaround. It's what happens when one intentionally causes TCP congestion on one's own machine while writing to open data streams in memory. Hint: don't do this.
 
-``close(S.c[i])`` ends a SeedLink connection. After the next refresh interval, remaining data in ``S.c[i]`` are parsed.
-
-``!deleteat(S.c, i)`` removes a handle to a connection.
-
-``SeedLink!(... , w=true)`` directly writes packets from a SeedLink connection to file.
-
-``S = SeedLink(...)`` creates a new SeisData object fed by a new SeedLink connection.
-
-
-Checking for Dead Streams
--------------------------
-Not every data stream is always active.
-
-``has_stream`` checks the time gaps of specified streams. Streams with two hours or more since last packet received return ``false``. Keyword ``g=XX`` sets the maximum allowed gap in seconds.
-
-
-``has_sta`` checks whether a station exists on a given server.
-
-``SeedLink!(... f=0x01)`` calls ``has_sta`` automatically, before initiating the new session.
-
-``SeedLink!(... f=0x02)`` calls ``has_stream`` automatically, before initiating the new session.
-
-
-Examples
---------
-1. An unattended SeedLink download in TIME mode:
-
-::
-
-  sta = "UW.GPW,UW.MBW,UW.SHUK"
-  s0 = now()
-  S = SeedLink(sta, mode="TIME", s=s0, t=120, r=10)
-  sleep(180)
-  isopen(S.c[1]) && close(S.c[1])
-  sleep(20)
-  sync!(S)
-  fname = string("GPW_MBW_SHUK", s0, ".seis")
-  wseis(fname, S)
-
-Get the next two minutes of data from stations GPW, MBW, SHUK in the UW network. Put the Julia REPL to sleep while the request fills. If the connection is still open, close it (SeedLink's time bounds arent precise in TIME mode, so this may or may not be necessary). Pause briefly so that the last data packets are written. Synchronize results and write data in native SeisIO file format.
-
-2. An attended SeedLink session in DATA mode:
-
-::
-
-  S = SeisData()
-  SeedLink!(S, "SL.conf", mode="DATA", r=10, w=true)
-
-Initiate a SeedLink session in DATA mode using config file SL.conf and write all packets received directly to file (in addition to parsing to S itself). Set nominal refresh interval for checking for new data to 10 s. A mini-seed file will be generated automatically.
+Special Functions
+-----------------
+* ``close(S.c[i])`` ends SeedLink connection ``i``.
+* ``!deleteat(S.c, i)`` removes a handle to closed SeedLink connection ``i``.
 
 
-Associated Functions
-====================
-``has_sta, has_stream, parsetimewin, SeedLink!, SeedLink, SL_config, SL_info``
+.. function:: T = has_sta(C, src)
+
+Check that station identifiers ``C`` exist at ``src``. The syntax of ``C`` can be truncated to network and station ids (NN.SSSSS) or a standard id (NN.SSSSS.LL.CC), but only matches on station and network codes.
+
+``SeedLink!(... safety=0x01)`` calls ``has_sta`` before initiating a SeedLink connection.
+
+.. function:: T = has_live_stream(C, src, gap=G)
+
+
+Check that streams with channel identifiers ``C`` have data < ``G`` seconds old at ``src``. Returns a Boolean array with one entry per channel id.
+
+``SeedLink!(... safety=0x02)`` calls ``has_live_stream`` before initiating a SeedLink connection.

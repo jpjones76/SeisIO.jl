@@ -9,9 +9,9 @@ tf = has_live_stream(sta, "rtserve.iris.washington.edu")
 println("...SeedLink! DATA mode...")
 T = SeisData()
 println("...link 1: command-line station list...")
-SeedLink!(T, sta, mode="DATA", r=11.1)
+SeedLink!(T, sta, mode="DATA", refresh=11.1)
 println("...link 2: station file...")
-SeedLink!(T, config_file, mode="DATA", r=13.3)
+SeedLink!(T, config_file, mode="DATA", refresh=13.3)
 println("...sleep 60.0s while SeedLink session receives data...")
 sleep(60.0)
 for i = 1:length(T.c)
@@ -33,15 +33,15 @@ dt = en-st
 (d0,d1) = parsetimewin(st,en)
 
 S = SeisData()
-SeedLink!(S, sta, mode="TIME", r=10.0, s=d0, t=d1, v=0)
+SeedLink!(S, sta, mode="TIME", refresh=10.0, s=d0, t=d1, v=0)
 println("...first link initialized...")
 
 # Seedlink with a config file
-SeedLink!(S, config_file, r=10.0, mode="TIME", s=d0, t=d1)
+SeedLink!(S, config_file, refresh=10.0, mode="TIME", s=d0, t=d1)
 println("...second link initialized...")
 
 # Seedlink with a config string
-SeedLink!(S, "CC.VALT..???, UW.ELK..EHZ", mode="TIME", r=10.0, s=d0, t=d1)
+SeedLink!(S, "CC.VALT..???, UW.ELK..EHZ", mode="TIME", refresh=10.0, s=d0, t=d1)
 println("...third link initialized...")
 
 # This takes time

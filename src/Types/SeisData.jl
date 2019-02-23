@@ -29,7 +29,7 @@ mutable struct SeisData
         Array{Array{Complex{Float64},2},1}(undef,0),
         Array{String,1}(undef,0),
         Array{Dict{String,Any},1}(undef,0),
-        Array{String,1}(undef,0),
+        Array{Array{String,1},1}(undef,0),
         Array{String,1}(undef,0),
         Array{Array{Int64,2}}(undef,0),
         Array{Array{Float64,1}}(undef,0)
@@ -44,8 +44,8 @@ mutable struct SeisData
 
     n0 = tnote("channel initialized")
     for i = 1:n
-      name[i] = string("Channel ",i)
-      id[i] = string(".", i, "..YYY")
+      name[i] = ""
+      id[i] = ""
       misc[i] = Dict{String,Any}()
       notes[i] = Array{String,1}([identity(n0)])
     end
@@ -58,10 +58,10 @@ mutable struct SeisData
         collect(Main.Base.Iterators.repeated(0.0,n)),
         collect(Main.Base.Iterators.repeated(1.0,n)),
         collect(Main.Base.Iterators.repeated(Array{Complex{Float64}}(undef,0,2),n)),
-        collect(Main.Base.Iterators.repeated("Unknown",n)),
+        collect(Main.Base.Iterators.repeated("",n)),
         misc,
         notes,
-        collect(Main.Base.Iterators.repeated(string("SeisData(", n, ")"),n)),
+        collect(Main.Base.Iterators.repeated("",n)),
         collect(Main.Base.Iterators.repeated(Array{Int64,2}(undef,0,2),n)),
         collect(Main.Base.Iterators.repeated(Array{Float64,1}(undef,0),n))
         )
@@ -70,7 +70,9 @@ mutable struct SeisData
   function SeisData(U...)
     S = SeisData()
     for i = 1:length(U)
-      if typeof(U[i]) in [SeisChannel,SeisData]
+      if typeof(U[i]) == SeisChannel
+        push!(S, U[i])
+      elseif typeof(U[i]) == SeisData
         append!(S, U[i])
       else
         @warn(string("Tried to join incompatible type into SeisData at arg ", i, "; skipped."))
@@ -151,6 +153,16 @@ function sizeof(S::SeisData)
   [N[i] = sum([M[j] = sizeof(V) for (j,V) in enumerate(getfield(S,f))]) for (i,f) in enumerate(datafields)]
   return sum(N) + sum(M)
 end
+
+"""
+    findchan(id::String, S::SeisData)
+    findchan(S::SeisData, id::String)
+
+Get all channel indices `i` in S with id ∈ S.id[i]
+"""
+findchan(s::String, S::SeisData) = findall([occursin(s, i) for i in S.id])
+findchan(S::SeisData, s::String) = findall([occursin(s, i) for i in S.id])
+# findall([startswith("UW", i) for i in S.id]) is much faster
 # ============================================================================
 
 
@@ -163,9 +175,9 @@ append!(S::SeisData, U::SeisData)  = (
 +(S::SeisData, U::SeisData) = (T = deepcopy(S); return append!(T, U))
 
 # Delete methods are aliased to -
-deleteat!(S::SeisData, j::Int)          = ([deleteat!(getfield(S, i),j) for i in datafields]; S.n -= 1; return S)
-deleteat!(S::SeisData, J::Array{Int,1}) = (sort!(J); [deleteat!(getfield(S, f), J) for f in datafields]; S.n -= length(J))
-deleteat!(S::SeisData, K::UnitRange)    = (J = collect(K); deleteat!(S, J))
+deleteat!(S::SeisData, j::Int)          = ([deleteat!(getfield(S, i),j) for i in datafields]; S.n -= 1; return nothing)
+deleteat!(S::SeisData, J::Array{Int,1}) = (sort!(J); [deleteat!(getfield(S, f), J) for f in datafields]; S.n -= length(J); return nothing)
+deleteat!(S::SeisData, K::UnitRange)    = (J = collect(K); deleteat!(S, J); return nothing)
 
 # With this convention, S+U-U = S
 function deleteat!(S::SeisData, U::SeisData)
@@ -181,7 +193,15 @@ end
 
 # Delete by Regex match or exact ID match
 delete!(S::SeisData, r::Regex)          = deleteat!(S, findall([occursin(r, i) for i in S.id]))
-delete!(S::SeisData, s::String)         = (i = findlast(S.id.==s); (i > 0) && deleteat!(S, i))
+function delete!(S::SeisData, s::String; exact=true::Bool)
+  if exact
+    i = findid(S, s)
+    deleteat!(S, i)
+  else
+    deleteat!(S, findchan(s::String, S::SeisData))
+  end
+  return nothing
+end
 
 # Nothing more than aliasing, really
 delete!(S::SeisData, j::Int)            = deleteat!(S, j)
@@ -200,11 +220,11 @@ delete!(S::SeisData, J::Array{Int,1})   = deleteat!(S, J)
 """
     T = pull(S::SeisData, id::String)
 
-Extract the first channel with id=`id` from `S` and return it as a new SeisData structure. The corresponding channel in `S` is deleted.
+Extract the first channel with id=`id` from `S` and return it as a new SeisChannel structure. The corresponding channel in `S` is deleted.
 
     T = pull(S::SeisData, i::integer)
 
-Extract channel `i` from `S` as a new SeisData struct, deleting it from `S`.
+Extract channel `i` from `S` as a new SeisChannel struct, deleting it from `S`.
 """
 function pull(S::SeisData, s::String)
   i = findid(S, s)
@@ -235,3 +255,10 @@ function sort!(S::SeisData; rev=false::Bool)
   return S
 end
 sort(S::SeisData; rev=false::Bool) = (T = deepcopy(S); j = sortperm(T.id, rev=rev); [setfield!(T,i,getfield(T,i)[j]) for i in datafields]; return(T))
+
+"""
+    prune!(S::SeisData)
+
+Delete all channels from S that have no data (i.e. S.x is empty or non-existent).
+"""
+prune!(S::SeisData) = (deleteat!(S, findall([length(x) == 0 for x in S.x])); return nothing)

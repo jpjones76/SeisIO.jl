@@ -1,0 +1,437 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>5. SeisIO Standard Keywords &mdash; SeisIO 0.1.2 rc documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="6. Examples" href="examples.html" />
+    <link rel="prev" title="4. Data Requests Syntax" href="web_syntax.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> SeisIO
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../working_with_data.html">Working with Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../seisdata.html">Data Types</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Data Readers</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">File Formats</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Web Clients</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Web/webclients.html">Web Requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Web/seedlink.html">SeedLink</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendices</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="function_list.html">1. Alphabetical Function List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="seisdata_fields.html">2. Structure and Field Descriptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="seisdata_fileformat.html">3. SeisIO File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="web_syntax.html">4. Data Requests Syntax</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">5. SeisIO Standard Keywords</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#seedlink-keywords">5.1. SeedLink Keywords</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">6. Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SeisIO</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+      <li>5. SeisIO Standard Keywords</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/src/Appendices/keywords.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="seisio-standard-keywords">
+<span id="dkw"></span><h1>5. SeisIO Standard Keywords<a class="headerlink" href="#seisio-standard-keywords" title="Permalink to this headline">¶</a></h1>
+<p>SeisIO.KW is a memory-resident structure of default values for common keywords
+used by package functions. KW has one substructure, SL, with keywords specific
+to SeedLink. These defaults current cannot be modified, but this may change
+as the Julia language matures.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="11%" />
+<col width="22%" />
+<col width="11%" />
+<col width="57%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">KW</th>
+<th class="head">Default</th>
+<th class="head">T <a class="footnote-reference" href="#id8" id="id1">[1]</a></th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>evw</td>
+<td>[600.0, 600.0]</td>
+<td>A{F,1}</td>
+<td>time search window [o-evw[1], o+evw[2]]</td>
+</tr>
+<tr class="row-odd"><td>fmt</td>
+<td>“miniseed”</td>
+<td>S</td>
+<td>request data format</td>
+</tr>
+<tr class="row-even"><td>mag</td>
+<td>[6.0, 9.9]</td>
+<td>A{F,1}</td>
+<td>magnitude range for queries</td>
+</tr>
+<tr class="row-odd"><td>nev</td>
+<td>1</td>
+<td>I</td>
+<td>number of events returned per query</td>
+</tr>
+<tr class="row-even"><td>opts</td>
+<td>“”</td>
+<td>S</td>
+<td>user-specified options <a class="footnote-reference" href="#id9" id="id2">[2]</a></td>
+</tr>
+<tr class="row-odd"><td>q</td>
+<td>‘B’</td>
+<td>C</td>
+<td>data quality <a class="footnote-reference" href="#id10" id="id3">[3]</a></td>
+</tr>
+<tr class="row-even"><td>pha</td>
+<td>“P”</td>
+<td>S</td>
+<td>seismic phase arrival times to retrieve</td>
+</tr>
+<tr class="row-odd"><td>reg</td>
+<td>[-90.0, 90.0,</td>
+<td>A{F,1}</td>
+<td>geographic search region <a class="footnote-reference" href="#id11" id="id4">[4]</a></td>
+</tr>
+<tr class="row-even"><td>&#160;</td>
+<td>-180.0, 180.0,</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>&#160;</td>
+<td>-30.0, 660.0]</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>si</td>
+<td>True</td>
+<td>B</td>
+<td>autofill station info on data req? <a class="footnote-reference" href="#id12" id="id5">[5]</a></td>
+</tr>
+<tr class="row-odd"><td>to</td>
+<td>30</td>
+<td>I</td>
+<td>read timeout for web requests (s)</td>
+</tr>
+<tr class="row-even"><td>v</td>
+<td>0</td>
+<td>I</td>
+<td>verbosity</td>
+</tr>
+<tr class="row-odd"><td>w</td>
+<td>False</td>
+<td>B</td>
+<td>write requests to disc? <a class="footnote-reference" href="#id13" id="id6">[6]</a></td>
+</tr>
+<tr class="row-even"><td>y</td>
+<td>False</td>
+<td>B</td>
+<td>sync data after web request? <a class="footnote-reference" href="#id14" id="id7">[7]</a></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Table Footnotes</p>
+<table class="docutils footnote" frame="void" id="id8" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Types: A = Array, B = Boolean, C = Char, DT = DateTime, F = Float, I = Integer, R = Real, S = String, U8 = Unsigned 8-bit integer</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id9" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>String is passed as-is, e.g. “szsrecs=true&amp;repo=realtime” for FDSN. String should not begin with an ampersand.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id10" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>Queries to some FDSN servers will fail with <strong>-q=’R’</strong>.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id11" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[4]</a></td><td>Specify region <strong>[lat_min, lat_max, lon_min, lon_max, dep_min, dep_max]</strong>, with lat, lon in decimal degrees (°) and depth in km with + = down.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id12" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[5]</a></td><td>Not used with IRISWS.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id13" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id6">[6]</a></td><td><strong>-v=0</strong> = quiet; 1 = verbose, 2 = very verbose; 3 = debugging</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id14" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id7">[7]</a></td><td>If <strong>-w=true</strong>, a file name is automatically generated from the request parameters, in addition to parsing data to a SeisData structure. Files are created even if data processing fails.</td></tr>
+</tbody>
+</table>
+<div class="section" id="seedlink-keywords">
+<h2>5.1. SeedLink Keywords<a class="headerlink" href="#seedlink-keywords" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="17%" />
+<col width="17%" />
+<col width="17%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">kw</th>
+<th class="head">def</th>
+<th class="head">type</th>
+<th class="head">meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>gap</td>
+<td>3600</td>
+<td>R</td>
+<td>a stream with no data in &gt;gap seconds is considered offline</td>
+</tr>
+<tr class="row-odd"><td>kai</td>
+<td>600</td>
+<td>R</td>
+<td>keepalive interval (s)</td>
+</tr>
+<tr class="row-even"><td>mode</td>
+<td>“DATA”</td>
+<td>I</td>
+<td>“TIME”, “DATA”, or “FETCH”</td>
+</tr>
+<tr class="row-odd"><td>port</td>
+<td>18000</td>
+<td>I</td>
+<td>port number</td>
+</tr>
+<tr class="row-even"><td>refresh</td>
+<td>20</td>
+<td>R</td>
+<td>base refresh interval (s) <a class="footnote-reference" href="#id17" id="id15">[8]</a></td>
+</tr>
+<tr class="row-odd"><td>safety</td>
+<td>0x00</td>
+<td>U8</td>
+<td>safety check level <a class="footnote-reference" href="#id18" id="id16">[9]</a></td>
+</tr>
+<tr class="row-even"><td>x_on_err</td>
+<td>true</td>
+<td>Bool</td>
+<td>exit on error?</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Table Footnotes</p>
+<table class="docutils footnote" frame="void" id="id17" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id15">[8]</a></td><td>This value is modified slightly by each SeedLink session to minimize the risk of congestion</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id18" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id16">[9]</a></td><td>Before initiating a SeedLink connection, <strong>safety=0x01</strong> calls <strong>has_sta</strong>, <strong>safety=0x02</strong> calls <strong>has_live_stream</strong></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="examples.html" class="btn btn-neutral float-right" title="6. Examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="web_syntax.html" class="btn btn-neutral float-left" title="4. Data Requests Syntax" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016-2019, Joshua Jones, Ph.D.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
