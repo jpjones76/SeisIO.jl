@@ -28,7 +28,7 @@ the longstanding `FDSN_sta` method.
   + randseis now uses floats to set the fraction of campaign data (KW `c=0.`)
     and guaranteed seismic data (KW `s`).
   + `FDSN_evt` has been rewritten.
-  + changes to SeisData :id and :data fields can now be tracked with the
+  + changes to SeisData :id and :x fields can now be tracked with the
     functions track_on!(S) and u = track_off!(S).
 * Performance improvements:
   + note! is a factor of 4 faster due to rewriting the time stamper
