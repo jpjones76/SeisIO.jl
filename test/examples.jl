@@ -4,17 +4,17 @@ using SeisIO
 CHA = ["CC.PALM, UW.HOOD, UW.TIMB, CC.HIYU, UW.TDH"]
 TS = u2d(time())
 TT = -600
-seis = FDSNget(CHA, s=TS, t=TT)
+seis = get_data("FDSN", CHA, "IRIS", s=TS, t=TT)
 
 # Iris web service, single station, written to miniseed
-seis = irisws("CC.TIMB..EHZ", t=-300, fmt="miniseed")
+seis = get_data("IRIS", "CC.TIMB..EHZ", "", t=-300, fmt="miniseed")
 writesac(seis)
 
 # IRISget example: 6 channels, 10 minutes, synchronized, saved in SeisIO format"
 STA = ["UW.HOOD..BHZ", "UW.HOOD..BHN", "UW.HOOD..BHE", "CC.TIMB..EHZ", "CC.TIMB..EHN", "CC.TIMB..EHE"]
 S = Dates.DateTime(Dates.year(now()))
 T = 600
-seis = IRISget(STA, s=S, t=T, y=true)
+seis = get_data("IRIS", STA, "", s=S, t=T, y=true)
 wseis(seis, "20160516145000.data.seis")
 
 # The Tohoku-Oki great earthquake, from IRIS FDSN, recorded by boreholes in WA (USA)

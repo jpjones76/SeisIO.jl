@@ -1,3 +1,39 @@
+### 2019-02-23
+Significant update with many bug fixes and code improvements.
+* Documentation has been updated to include a tutorial.
+* FDSN methods now support the full list of standard FDSNWS servers.
+  + Type `?seis_www` for server list and correspondence.
+* Web requests of time-series data now use a wrapper function `get_data`.
+  + Syntax is `get_data(METHOD, START_TIME, END_TIME)`, where:
+  + `METHOD` is a protocol string, e.g., "FDSN", "IRIS".
+  + `START_TIME` and `END_TIME` are the former keyword arguments `-s` and `-t`.
+  + `FDSNget`, `IRISget`, `irisws` are no longer being exported.
+    web functions.
+* Web requests now merge! by default, rather than append!
+* `FDSN_sta!` added to autofill existing SeisData headers; complements
+the longstanding `FDSN_sta` method.
+* Bug fixes:
+  + delete!, deleteat! now correctly return nothing, preventing accidentally
+    returning a link to a SeisData structure
+  + show no longer has errors for channels that contain very few samples
+    (length(S.x[i]) < 5)
+  + Fixed a file read bug of :resp in native SeisIO format
+  + randseis now sets :src accurately rather than using a random string
+  + Fixed creation of new SeisData objects from multiple SeisChannels
+  + get_pha is now correctly exported
+* Behavior changes:
+  + New SeisChannel structures no longer have fields set except :notes
+  + New SeisData structures no longer have fields set except :notes
+  + SeedLink keywords have changed and are now much more intuitive
+  + randseis now uses floats to set the fraction of campaign data (KW `c=0.`)
+    and guaranteed seismic data (KW `s`).
+  + `FDSN_evt` has been rewritten.
+  + changes to SeisData :id and :data fields can now be tracked with the
+    functions track_on!(S) and u = track_off!(S).
+* Performance improvements:
+  + note! is a factor of 4 faster due to rewriting the time stamper
+  + readsac now reads bigendian files
+
 ### 2019-02-15
 `readmseed` bug fixes and backend improvements
   + Now skips blockettes of unrecognized types rather than throwing an error

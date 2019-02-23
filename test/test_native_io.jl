@@ -3,7 +3,7 @@ savfile1 = "test.seis"
 savfile2 = "test.hdr"
 savfile3 = "test.evt"
 
-S = randseisdata(c=false)
+S = randseisdata(c=0.0)
 println("...SeisData file write...")
 wseis(savfile1, S)
 

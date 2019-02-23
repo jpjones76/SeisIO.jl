@@ -8,48 +8,45 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Appendix D: Web Keywords and Syntax &mdash; SeisIO 0.1.0 beta documentation</title>
+  <title>4. Data Requests Syntax &mdash; SeisIO 0.1.2 rc documentation</title>
   
 
   
   
+  
+  
 
   
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="SeisIO 0.1.0 beta documentation" href="../../index.html"/>
-        <link rel="next" title="Appendix E: Web Client Examples" href="examples.html"/>
-        <link rel="prev" title="Appendix C: SeisIO File Format" href="seisdata_fileformat.html"/> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="5. SeisIO Standard Keywords" href="keywords.html" />
+    <link rel="prev" title="3. SeisIO File Format" href="seisdata_fileformat.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -63,7 +60,7 @@
             
             
               <div class="version">
-                0.1.0
+                0.1.2
               </div>
             
           
@@ -84,30 +81,40 @@
           
             
             
-                <p class="caption"><span class="caption-text">Table of Contents</span></p>
-<ul class="current">
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../seisdata.html">SeisIO Data Types</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Data Readers</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">File Formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Web/webclients.html">Web Clients</a></li>
-<li class="toctree-l1"><a class="reference internal" href="function_list.html">Appendix A: Alphabetical Function List</a></li>
-<li class="toctree-l1"><a class="reference internal" href="seisdata_fields.html">Appendix B: Structure and Field Descriptions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="seisdata_fileformat.html">Appendix C: SeisIO File Format</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Appendix D: Web Keywords and Syntax</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#channel-id-syntax">Channel ID Syntax</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#wildcards-and-blanks">Wildcards and Blanks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#channel-configuration-files">Channel Configuration Files</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Web Clients</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Web/webclients.html">Web Requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Web/seedlink.html">SeedLink</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendices</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="function_list.html">1. Alphabetical Function List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="seisdata_fields.html">2. Structure and Field Descriptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="seisdata_fileformat.html">3. SeisIO File Format</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">4. Data Requests Syntax</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#channel-id-syntax">4.1. Channel ID Syntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#wildcards-and-blanks">4.1.1. Wildcards and Blanks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#channel-configuration-files">4.1.2. Channel Configuration Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#server-list">4.1.3. Server List</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#time-syntax">Time Syntax</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#data-query-keywords">Data Query Keywords</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#src-options"><code class="docutils literal"><span class="pre">src</span></code> Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#time-syntax">4.2. Time Syntax</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#event-query-keywords">Event Query Keywords</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">Appendix E: Web Client Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="keywords.html">5. SeisIO Standard Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">6. Examples</a></li>
 </ul>
 
             
@@ -119,45 +126,65 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../index.html">SeisIO</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SeisIO</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../../index.html">Docs</a> &raquo;</li>
-      
-    <li>Appendix D: Web Keywords and Syntax</li>
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+      <li>4. Data Requests Syntax</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="../../_sources/src/Appendices/web_syntax.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="appendix-d-web-keywords-and-syntax">
-<h1>Appendix D: Web Keywords and Syntax<a class="headerlink" href="#appendix-d-web-keywords-and-syntax" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="data-requests-syntax">
+<h1>4. Data Requests Syntax<a class="headerlink" href="#data-requests-syntax" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="channel-id-syntax">
-<span id="cid"></span><h2>Channel ID Syntax<a class="headerlink" href="#channel-id-syntax" title="Permalink to this headline">¶</a></h2>
-<p><code class="docutils literal"><span class="pre">NN.SSSSS.LL.CC</span></code> (net.sta.loc.cha, separated by periods) is the expected syntax for all web functions. The maximum field width in characters corresponds to the length of each field (e.g. 2 for network). Fields can&#8217;t contain whitespace.</p>
-<p><code class="docutils literal"><span class="pre">NN.SSSSS.LL.CC.T</span></code> (net.sta.loc.cha.tflag) is allowed in SeedLink. <code class="docutils literal"><span class="pre">T</span></code> is a single-character data type flag and must be one of <code class="docutils literal"><span class="pre">DECOTL</span></code>: Data, Event, Calibration, blOckette, Timing, or Logs. Calibration, timing, and logs are not in the scope of SeisIO and may crash SeedLink sessions.</p>
+<span id="cid"></span><h2>4.1. Channel ID Syntax<a class="headerlink" href="#channel-id-syntax" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">NN.SSSSS.LL.CC</span></code> (net.sta.loc.cha, separated by periods) is the expected syntax for all web functions. The maximum field width in characters corresponds to the length of each field (e.g. 2 for network). Fields can’t contain whitespace.</p>
+<p><code class="docutils literal notranslate"><span class="pre">NN.SSSSS.LL.CC.T</span></code> (net.sta.loc.cha.tflag) is allowed in SeedLink. <code class="docutils literal notranslate"><span class="pre">T</span></code> is a single-character data type flag and must be one of <code class="docutils literal notranslate"><span class="pre">DECOTL</span></code>: Data, Event, Calibration, blOckette, Timing, or Logs. Calibration, timing, and logs are not in the scope of SeisIO and may crash SeedLink sessions.</p>
 <p>The table below specifies valid types and expected syntax for channel lists.</p>
 <table border="1" class="docutils">
 <colgroup>
@@ -173,41 +200,41 @@
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td>String</td>
-<td>Comma-delineated ID
-list</td>
-<td>&#8220;PB.B004.01.BS1,PB.B002.01.BS1&#8221;</td>
+<td>Comma-delineated
+list of IDs</td>
+<td>“PB.B004.01.BS1,PB.B002.01.BS1”</td>
 </tr>
 <tr class="row-odd"><td>Array{String,1}</td>
 <td>String array, one
 ID string per entry</td>
-<td>[&#8220;PB.B004.01.BS1&#8221;,&#8221;PB.B002.01.BS1&#8221;]</td>
+<td>[“PB.B004.01.BS1”,”PB.B002.01.BS1”]</td>
 </tr>
 <tr class="row-even"><td>Array{String,2}</td>
 <td>String array, one
 ID string per row</td>
 <td><dl class="first last docutils">
-<dt>[&#8220;PB&#8221; &#8220;B004&#8221; &#8220;01&#8221; &#8220;BS1&#8221;;</dt>
-<dd>&#8220;PB&#8221; &#8220;B002&#8221; &#8220;01&#8221; &#8220;BS1&#8221;]</dd>
+<dt>[“PB” “B004” “01” “BS1”;</dt>
+<dd>“PB” “B002” “01” “BS1”]</dd>
 </dl>
 </td>
 </tr>
 </tbody>
 </table>
-<p>The expected component order is always network, station, location, channel; thus, &#8220;UW.TDH..EHZ&#8221; is OK, but &#8220;UW.TDH.EHZ&#8221; fails.</p>
+<p>The expected component order is always network, station, location, channel; thus, “UW.TDH..EHZ” is OK, but “UW.TDH.EHZ” fails.</p>
 <div class="section" id="wildcards-and-blanks">
-<h3>Wildcards and Blanks<a class="headerlink" href="#wildcards-and-blanks" title="Permalink to this headline">¶</a></h3>
+<h3>4.1.1. Wildcards and Blanks<a class="headerlink" href="#wildcards-and-blanks" title="Permalink to this headline">¶</a></h3>
 <p>Allowed wildcards are client-specific.</p>
 <ul class="simple">
-<li>The LOC field can be left blank in any client because it was rarely used until the mid-2000s: <code class="docutils literal"><span class="pre">&quot;UW.ELK..EHZ&quot;</span></code> and <code class="docutils literal"><span class="pre">[&quot;UW&quot;</span> <span class="pre">&quot;ELK&quot;</span> <span class="pre">&quot;&quot;</span> <span class="pre">&quot;EHZ&quot;]</span></code> are all valid. Blank LOC fields are set to <code class="docutils literal"><span class="pre">--</span></code> in IRIS, <code class="docutils literal"><span class="pre">*</span></code> in FDSN, and <code class="docutils literal"><span class="pre">??</span></code> in SeedLink.</li>
-<li><code class="docutils literal"><span class="pre">?</span></code> acts as a single-character wildcard in FDSN &amp; SeedLink. Thus, <code class="docutils literal"><span class="pre">CC.VALT..???</span></code> is valid.</li>
-<li><code class="docutils literal"><span class="pre">*</span></code> acts as a multi-character wildcard in FDSN. Thus, <code class="docutils literal"><span class="pre">CC.VALT..*</span></code> and <code class="docutils literal"><span class="pre">CC.VALT..???</span></code> behave identically in FDSN.</li>
-<li>Partial specifiers are OK, but a network and station are always required: <code class="docutils literal"><span class="pre">&quot;UW.EL?&quot;</span></code> is OK, <code class="docutils literal"><span class="pre">&quot;.ELK..&quot;</span></code> fails.</li>
+<li>The LOC field can be left blank in any client: <code class="docutils literal notranslate"><span class="pre">&quot;UW.ELK..EHZ&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">[&quot;UW&quot;</span> <span class="pre">&quot;ELK&quot;</span> <span class="pre">&quot;&quot;</span> <span class="pre">&quot;EHZ&quot;]</span></code> are all valid. Blank LOC fields are set to <code class="docutils literal notranslate"><span class="pre">--</span></code> in IRIS, <code class="docutils literal notranslate"><span class="pre">*</span></code> in FDSN, and <code class="docutils literal notranslate"><span class="pre">??</span></code> in SeedLink.</li>
+<li><code class="docutils literal notranslate"><span class="pre">?</span></code> acts as a single-character wildcard in FDSN &amp; SeedLink. Thus, <code class="docutils literal notranslate"><span class="pre">CC.VALT..???</span></code> is valid.</li>
+<li><code class="docutils literal notranslate"><span class="pre">*</span></code> acts as a multi-character wildcard in FDSN. Thus, <code class="docutils literal notranslate"><span class="pre">CC.VALT..*</span></code> and <code class="docutils literal notranslate"><span class="pre">CC.VALT..???</span></code> behave identically in FDSN.</li>
+<li>Partial specifiers are OK, but a network and station are always required: <code class="docutils literal notranslate"><span class="pre">&quot;UW.EL?&quot;</span></code> is OK, <code class="docutils literal notranslate"><span class="pre">&quot;.ELK..&quot;</span></code> fails.</li>
 </ul>
 </div>
 <div class="section" id="channel-configuration-files">
-<h3>Channel Configuration Files<a class="headerlink" href="#channel-configuration-files" title="Permalink to this headline">¶</a></h3>
+<span id="ccfg"></span><h3>4.1.2. Channel Configuration Files<a class="headerlink" href="#channel-configuration-files" title="Permalink to this headline">¶</a></h3>
 <p>One entry per line, ASCII text, format NN.SSSSS.LL.CCC.D. Due to client-specific wildcard rules, the most versatile configuration files are those that specify each channel most completely:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span># This only works with SeedLink
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span># This only works with SeedLink
 GE.ISP..BH?.D
 NL.HGN
 MN.AQU..BH?
@@ -240,10 +267,91 @@ CC.VALT..BHE
 </pre></div>
 </div>
 </div>
+<div class="section" id="server-list">
+<span id="servers"></span><h3>4.1.3. Server List<a class="headerlink" href="#server-list" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="17%" />
+<col width="83%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">String</th>
+<th class="head">Source</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>BGR</td>
+<td><a class="reference external" href="http://eida.bgr.de">http://eida.bgr.de</a></td>
+</tr>
+<tr class="row-odd"><td>EMSC</td>
+<td><a class="reference external" href="http://www.seismicportal.eu">http://www.seismicportal.eu</a></td>
+</tr>
+<tr class="row-even"><td>ETH</td>
+<td><a class="reference external" href="http://eida.ethz.ch">http://eida.ethz.ch</a></td>
+</tr>
+<tr class="row-odd"><td>GEONET</td>
+<td><a class="reference external" href="http://service.geonet.org.nz">http://service.geonet.org.nz</a></td>
+</tr>
+<tr class="row-even"><td>GFZ</td>
+<td><a class="reference external" href="http://geofon.gfz-potsdam.de">http://geofon.gfz-potsdam.de</a></td>
+</tr>
+<tr class="row-odd"><td>ICGC</td>
+<td><a class="reference external" href="http://ws.icgc.cat">http://ws.icgc.cat</a></td>
+</tr>
+<tr class="row-even"><td>INGV</td>
+<td><a class="reference external" href="http://webservices.ingv.it">http://webservices.ingv.it</a></td>
+</tr>
+<tr class="row-odd"><td>IPGP</td>
+<td><a class="reference external" href="http://eida.ipgp.fr">http://eida.ipgp.fr</a></td>
+</tr>
+<tr class="row-even"><td>IRIS</td>
+<td><a class="reference external" href="http://service.iris.edu">http://service.iris.edu</a></td>
+</tr>
+<tr class="row-odd"><td>ISC</td>
+<td><a class="reference external" href="http://isc-mirror.iris.washington.edu">http://isc-mirror.iris.washington.edu</a></td>
+</tr>
+<tr class="row-even"><td>KOERI</td>
+<td><a class="reference external" href="http://eida.koeri.boun.edu.tr">http://eida.koeri.boun.edu.tr</a></td>
+</tr>
+<tr class="row-odd"><td>LMU</td>
+<td><a class="reference external" href="http://erde.geophysik.uni-muenchen.de">http://erde.geophysik.uni-muenchen.de</a></td>
+</tr>
+<tr class="row-even"><td>NCEDC</td>
+<td><a class="reference external" href="http://service.ncedc.org">http://service.ncedc.org</a></td>
+</tr>
+<tr class="row-odd"><td>NIEP</td>
+<td><a class="reference external" href="http://eida-sc3.infp.ro">http://eida-sc3.infp.ro</a></td>
+</tr>
+<tr class="row-even"><td>NOA</td>
+<td><a class="reference external" href="http://eida.gein.noa.gr">http://eida.gein.noa.gr</a></td>
+</tr>
+<tr class="row-odd"><td>ORFEUS</td>
+<td><a class="reference external" href="http://www.orfeus-eu.org">http://www.orfeus-eu.org</a></td>
+</tr>
+<tr class="row-even"><td>RESIF</td>
+<td><a class="reference external" href="http://ws.resif.fr">http://ws.resif.fr</a></td>
+</tr>
+<tr class="row-odd"><td>SCEDC</td>
+<td><a class="reference external" href="http://service.scedc.caltech.edu">http://service.scedc.caltech.edu</a></td>
+</tr>
+<tr class="row-even"><td>TEXNET</td>
+<td><a class="reference external" href="http://rtserve.beg.utexas.edu">http://rtserve.beg.utexas.edu</a></td>
+</tr>
+<tr class="row-odd"><td>USGS</td>
+<td><a class="reference external" href="http://earthquake.usgs.gov">http://earthquake.usgs.gov</a></td>
+</tr>
+<tr class="row-even"><td>USP</td>
+<td><a class="reference external" href="http://sismo.iag.usp.br">http://sismo.iag.usp.br</a></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</div>
 </div>
 <div class="section" id="time-syntax">
-<span id="id1"></span><h2>Time Syntax<a class="headerlink" href="#time-syntax" title="Permalink to this headline">¶</a></h2>
-<p>Specify time inputs for web queries as a DateTime, Real, or String. The latter must take the form YYYY-MM-DDThh:mm:ss.nnn, where <code class="docutils literal"><span class="pre">T</span></code> is the uppercase character <cite>T</cite> and <code class="docutils literal"><span class="pre">nnn</span></code> denotes milliseconds; incomplete time strings treat missing fields as 0.</p>
+<span id="id1"></span><h2>4.2. Time Syntax<a class="headerlink" href="#time-syntax" title="Permalink to this headline">¶</a></h2>
+<p>Specify time inputs for web queries as a DateTime, Real, or String. The latter must take the form YYYY-MM-DDThh:mm:ss.nnn, where <code class="docutils literal notranslate"><span class="pre">T</span></code> is the uppercase character <cite>T</cite> and <code class="docutils literal notranslate"><span class="pre">nnn</span></code> denotes milliseconds; incomplete time strings treat missing fields as 0.</p>
 <table border="1" class="colwidths-given docutils">
 <colgroup>
 <col width="20%" />
@@ -263,295 +371,42 @@ CC.VALT..BHE
 </tr>
 <tr class="row-odd"><td>R</td>
 <td>DT</td>
-<td>Add <code class="docutils literal"><span class="pre">s</span></code> seconds to <code class="docutils literal"><span class="pre">t</span></code></td>
+<td>Add <code class="docutils literal notranslate"><span class="pre">s</span></code> seconds to <code class="docutils literal notranslate"><span class="pre">t</span></code></td>
 </tr>
 <tr class="row-even"><td>DT</td>
 <td>R</td>
-<td>Add <code class="docutils literal"><span class="pre">t</span></code> seconds to <code class="docutils literal"><span class="pre">s</span></code></td>
+<td>Add <code class="docutils literal notranslate"><span class="pre">t</span></code> seconds to <code class="docutils literal notranslate"><span class="pre">s</span></code></td>
 </tr>
 <tr class="row-odd"><td>S</td>
 <td>R</td>
-<td>Convert <code class="docutils literal"><span class="pre">s</span></code> to DateTime, add <code class="docutils literal"><span class="pre">t</span></code></td>
+<td>Convert <code class="docutils literal notranslate"><span class="pre">s</span></code> to DateTime, add <code class="docutils literal notranslate"><span class="pre">t</span></code></td>
 </tr>
 <tr class="row-even"><td>R</td>
 <td>S</td>
-<td>Convert <code class="docutils literal"><span class="pre">t</span></code> to DateTime, add <code class="docutils literal"><span class="pre">s</span></code></td>
+<td>Convert <code class="docutils literal notranslate"><span class="pre">t</span></code> to DateTime, add <code class="docutils literal notranslate"><span class="pre">s</span></code></td>
 </tr>
 <tr class="row-odd"><td>R</td>
 <td>R</td>
-<td>Add <code class="docutils literal"><span class="pre">s,</span> <span class="pre">t</span></code> seconds to <code class="docutils literal"><span class="pre">now()</span></code></td>
+<td>Add <code class="docutils literal notranslate"><span class="pre">s,</span> <span class="pre">t</span></code> seconds to <code class="docutils literal notranslate"><span class="pre">now()</span></code></td>
 </tr>
 </tbody>
 </table>
 <p>(above, R = Real, DT = DateTime, S = String, I = Integer)</p>
 </div>
-<div class="section" id="data-query-keywords">
-<span id="dkw"></span><h2>Data Query Keywords<a class="headerlink" href="#data-query-keywords" title="Permalink to this headline">¶</a></h2>
-<table border="1" class="colwidths-given docutils">
-<colgroup>
-<col width="14%" />
-<col width="14%" />
-<col width="14%" />
-<col width="14%" />
-<col width="43%" />
-</colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">kw</th>
-<th class="head">def</th>
-<th class="head">type <a class="footnote-reference" href="#id7" id="id2">[1]</a></th>
-<th class="head">srvc <a class="footnote-reference" href="#id8" id="id3">[2]</a></th>
-<th class="head">meaning</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr class="row-even"><td>a</td>
-<td>240</td>
-<td>R</td>
-<td>SL</td>
-<td>keepalive interval (s)</td>
-</tr>
-<tr class="row-odd"><td>f</td>
-<td>0x00</td>
-<td>u8</td>
-<td>SL</td>
-<td>safety check level</td>
-</tr>
-<tr class="row-even"><td>g</td>
-<td>3600</td>
-<td>R</td>
-<td>SL</td>
-<td>maxmum gap since last packet received</td>
-</tr>
-<tr class="row-odd"><td>m</td>
-<td>DATA</td>
-<td>S</td>
-<td>SL</td>
-<td>mode (DATA/TIME/FETCH)</td>
-</tr>
-<tr class="row-even"><td>p</td>
-<td>18000</td>
-<td>I64</td>
-<td>SL</td>
-<td>port number</td>
-</tr>
-<tr class="row-odd"><td>q</td>
-<td>&#8216;R&#8217;</td>
-<td>c</td>
-<td>FD, IW</td>
-<td>quality (uses standard <a class="reference external" href="https://ds.iris.edu/ds/nodes/dmc/manuals/breq_fast/#quality-option">FDSN/IRIS codes</a> <a class="footnote-reference" href="#id9" id="id4">[3]</a> )</td>
-</tr>
-<tr class="row-even"><td>r</td>
-<td>20</td>
-<td>R</td>
-<td>SL</td>
-<td>refresh interval (s)</td>
-</tr>
-<tr class="row-odd"><td>s</td>
-<td>0</td>
-<td>U(R,DT,S)</td>
-<td>All</td>
-<td>start time</td>
-</tr>
-<tr class="row-even"><td>src</td>
-<td>IRIS</td>
-<td>S</td>
-<td>FD,IW</td>
-<td><a class="reference internal" href="#fdsn-src"><span class="std std-ref">source institution</span></a></td>
-</tr>
-<tr class="row-odd"><td>x</td>
-<td>false</td>
-<td>B</td>
-<td>SL</td>
-<td>strict mode (exit on errors)</td>
-</tr>
-<tr class="row-even"><td>t</td>
-<td>300 <a class="footnote-reference" href="#id10" id="id5">[4]</a></td>
-<td>U(R,D,S)</td>
-<td>All</td>
-<td>end time</td>
-</tr>
-<tr class="row-odd"><td>to</td>
-<td>10</td>
-<td>R</td>
-<td>FD,IW</td>
-<td>timeout (s)</td>
-</tr>
-<tr class="row-even"><td>u</td>
-<td>(iris)</td>
-<td>S</td>
-<td>SL</td>
-<td>url</td>
-</tr>
-<tr class="row-odd"><td>v</td>
-<td>0</td>
-<td>IW</td>
-<td>All</td>
-<td>verbosity level</td>
-</tr>
-<tr class="row-even"><td>w</td>
-<td>false</td>
-<td>B</td>
-<td>All</td>
-<td>write download directly to file? <a class="footnote-reference" href="#id11" id="id6">[5]</a></td>
-</tr>
-<tr class="row-odd"><td>y</td>
-<td>false</td>
-<td>B</td>
-<td>FD,IW</td>
-<td>synchronize channel times and fill gaps?</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Table Footnotes</p>
-<table class="docutils footnote" frame="void" id="id7" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[1]</a></td><td>A = Array, B = Boolean, c = Char, DT = DateTime, F = Float, I = Integer, R = Real, S = String, u = Unsigned, U = Union</td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="id8" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id3">[2]</a></td><td>SL = SeedLink, IW = IRISws, FD = FDSN</td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="id9" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id4">[3]</a></td><td><code class="docutils literal"><span class="pre">Q='R'</span></code> won&#8217;t work on some FDSN servers.</td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="id10" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id5">[4]</a></td><td>Default is <code class="docutils literal"><span class="pre">t=-300</span></code> for IRIS and FDSN, <code class="docutils literal"><span class="pre">t=300</span></code> for SeedLink; the sign difference arises because of differences in service scope.</td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="id11" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id6">[5]</a></td><td>If <code class="docutils literal"><span class="pre">w=true</span></code>, a file name is automatically generated from the request parameters.</td></tr>
-</tbody>
-</table>
-<div class="section" id="src-options">
-<span id="fdsn-src"></span><h3><code class="docutils literal"><span class="pre">src</span></code> Options<a class="headerlink" href="#src-options" title="Permalink to this headline">¶</a></h3>
-<table border="1" class="colwidths-given docutils">
-<colgroup>
-<col width="11%" />
-<col width="44%" />
-<col width="44%" />
-</colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head"><code class="docutils literal"><span class="pre">src=</span></code></th>
-<th class="head">URL Queried</th>
-<th class="head">Source Institution</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr class="row-even"><td>&#8220;IRIS&#8221;</td>
-<td><a class="reference external" href="http://service.iris.edu/fdsnws/">http://service.iris.edu/fdsnws/</a></td>
-<td>Incorporated Research Institutions for Seismology, US</td>
-</tr>
-<tr class="row-odd"><td>&#8220;RESIF&#8221;</td>
-<td><a class="reference external" href="http://ws.resif.fr/fdsnws/">http://ws.resif.fr/fdsnws/</a></td>
-<td>Réseau Sismologique et Géodesique Français, FR</td>
-</tr>
-<tr class="row-even"><td>&#8220;NCEDC&#8221;</td>
-<td><a class="reference external" href="http://service.ncedc.org/fdsnws/">http://service.ncedc.org/fdsnws/</a></td>
-<td>Northern California Earthquake Data Center, US</td>
-</tr>
-<tr class="row-odd"><td>&#8220;GFZ&#8221;</td>
-<td><a class="reference external" href="http://geofon.gfz-potsdam.de/fdsnws/">http://geofon.gfz-potsdam.de/fdsnws/</a></td>
-<td>GFZ Potsdam, DE</td>
-</tr>
-<tr class="row-even"><td>&#8220;All&#8221;</td>
-<td>All of the above</td>
-<td>All of the above <a class="footnote-reference" href="#id13" id="id12">[6]</a></td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Table Footnotes</p>
-<table class="docutils footnote" frame="void" id="id13" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id12">[6]</a></td><td>Presently only supported in event queries.</td></tr>
-</tbody>
-</table>
-</div>
-</div>
-<div class="section" id="event-query-keywords">
-<span id="ekw"></span><h2>Event Query Keywords<a class="headerlink" href="#event-query-keywords" title="Permalink to this headline">¶</a></h2>
-<table border="1" class="colwidths-given docutils">
-<colgroup>
-<col width="13%" />
-<col width="13%" />
-<col width="25%" />
-<col width="50%" />
-</colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">Keyword</th>
-<th class="head">Type</th>
-<th class="head">Default</th>
-<th class="head">Description</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr class="row-even"><td>dep</td>
-<td>A{F64,2}</td>
-<td>[-30.0 700.0]</td>
-<td>depth range in km</td>
-</tr>
-<tr class="row-odd"><td>lat</td>
-<td>A{F64,2}</td>
-<td>[-90.0 90.0]</td>
-<td>latitude range in degrees</td>
-</tr>
-<tr class="row-even"><td>lon</td>
-<td>A{F64,2}</td>
-<td>[-180.0 180.0]</td>
-<td>longitude range in degrees</td>
-</tr>
-<tr class="row-odd"><td>mag</td>
-<td>A{F64,2}</td>
-<td>[6.0 9.9]</td>
-<td>magnitude range</td>
-</tr>
-<tr class="row-even"><td>n</td>
-<td>Int</td>
-<td>1</td>
-<td>return N events with closest origin times</td>
-</tr>
-<tr class="row-odd"><td>src</td>
-<td>String</td>
-<td>&#8220;IRIS&#8221;</td>
-<td><a class="reference internal" href="#fdsn-src"><span class="std std-ref">source institution</span></a></td>
-</tr>
-<tr class="row-even"><td>w</td>
-<td>Int</td>
-<td>86400</td>
-<td>search W seconds around T for events</td>
-</tr>
-<tr class="row-odd"><td>x</td>
-<td>Bool</td>
-<td>false</td>
-<td>treat T as exact to one second; overrides w</td>
-</tr>
-</tbody>
-</table>
-</div>
 </div>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="examples.html" class="btn btn-neutral float-right" title="Appendix E: Web Client Examples" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="keywords.html" class="btn btn-neutral float-right" title="5. SeisIO Standard Keywords" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="seisdata_fileformat.html" class="btn btn-neutral" title="Appendix C: SeisIO File Format" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="seisdata_fileformat.html" class="btn btn-neutral float-left" title="3. SeisIO File Format" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -560,11 +415,11 @@ CC.VALT..BHE
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Joshua Jones.
+        &copy; Copyright 2016-2019, Joshua Jones, Ph.D.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -577,35 +432,15 @@ CC.VALT..BHE
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'0.1.0 beta',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

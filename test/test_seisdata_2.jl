@@ -22,6 +22,7 @@ function mktestseis()
   t2 = round(Int64, (L0+os)/μs) + t1
 
   S = SeisData(5)
+  S.name = ["Channel 1", "Channel 2", "Channel 3", "Channel 4", "Channel 5"]
   S.id = ["XX.TMP01.00.BHZ","XX.TMP01.00.BHN","XX.TMP01.00.BHE","CC.LON..BHZ","UW.SEP..EHZ"]
   S.fs = collect(Main.Base.Iterators.repeated(100.0, S.n))
   S.fs[4] = 20.0
@@ -159,3 +160,12 @@ n_targ = 7
 @test ≈(S.n, n_targ)
 @test ≈(maximum([length(getfield(S,i)) for i in datafields]), n_targ)
 @test ≈(minimum([length(getfield(S,i)) for i in datafields]), n_targ)
+
+# Some new functionality added 2019-02-23
+S = SeisData(randseisdata(5), SeisChannel(), SeisChannel(),
+      SeisChannel(id="UW.SEP..EHZ", name="Darth Exploded",
+      loc=[46.1967, -122.1875, 1440, 0.0, 0.0], x=rand(1024)))
+prune!(S)
+@test (S.n == 6)
+J = findchan("EHZ",S)
+@test (6 in J)
