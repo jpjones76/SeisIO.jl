@@ -66,6 +66,25 @@ function get_separator(s::String)
     return '\n'
 end
 
+# Create end times from t, fs, x
+function mk_end_times(t::Array{Array{T,2},1}, fs::Array{Float64,1}, x::Array{Array{Float64,1},1}) where T<: Integer
+  n = length(fs)
+  ts = [t[j][1,2] for j=1:n]
+  te = copy(ts)
+  @inbounds for j = 1:n
+    tt = view(t[j], :, 2)
+    if fs[j] == 0.0
+      te[j] = last(tt)
+    else
+      te[j] = sum(tt) + round(T, sμ*length(x[j])/fs[j])
+    end
+  end
+  return ts, te
+end
+
+# ============================================================================
+# Write functions
+
 function write_string_array(io, v::Array{String})
   nd = UInt8(ndims(v))
   d = Array{Int64, 1}(collect(size(v)))
@@ -281,8 +300,7 @@ function wseis(fname::String, S...)
         if typeof(seis) == SeisData
             C[i] = UInt8('D')
             id = sa2u8(seis.id)
-            ts = vcat([seis.t[j][1,2] for j=1:seis.n]...)
-            te = ts .+ vcat([sum(seis.t[j][2:end,2]) for j=1:seis.n]...) + map(Int64, round.(1.0e6.*[length(seis.x[j]) for j=1:seis.n]./seis.fs))
+            ts, te = mk_end_times(seis.t, seis.fs, seis.x)
         elseif typeof(seis) == SeisHdr
             C[i] = UInt8('H')
             id = Array{UInt8,1}()
@@ -291,8 +309,7 @@ function wseis(fname::String, S...)
         elseif typeof(seis) == SeisEvent
             C[i] = UInt8('E')
             id = sa2u8(seis.data.id)
-            ts = vcat([seis.data.t[j][1,2] for j=1:seis.data.n]...)
-            te = ts .+ vcat([sum(seis.data.t[j][2:end,2]) for j=1:seis.data.n]...) + map(Int64, round.(1.0e6.*[length(seis.data.x[j]) for j=1:seis.data.n]./seis.data.fs))
+            ts, te = mk_end_times(seis.data.t, seis.data.fs, seis.data.x)
         end
         append!(TS, ts)
         append!(TE, te)

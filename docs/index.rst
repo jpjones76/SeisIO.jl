@@ -19,18 +19,18 @@ Intro
    src/working_with_data.rst
    src/seisdata.rst
 
-************
-Data Readers
-************
+*****
+Files
+*****
 .. toctree::
    :caption: Data Readers
    :maxdepth: 2
 
    src/Formats/fileformats.rst
 
-***********
-Web Clients
-***********
+***
+Web
+***
 .. toctree::
    :caption: Web Clients
    :maxdepth: 2
