@@ -258,11 +258,11 @@ provided that each connection’s streams feed unique channels.</p>
 <p><code class="docutils literal notranslate"><span class="pre">SeedLink!(...</span> <span class="pre">safety=0x01)</span></code> calls <code class="docutils literal notranslate"><span class="pre">has_sta</span></code> before initiating a SeedLink connection.</p>
 <dl class="function">
 <dt>
-<code class="descname">T = has_live_stream(C, src, gap=G)</code></dt>
+<code class="descname">T = has_stream(C, src, gap=G)</code></dt>
 <dd></dd></dl>
 
 <p>Check that streams with channel identifiers <code class="docutils literal notranslate"><span class="pre">C</span></code> have data &lt; <code class="docutils literal notranslate"><span class="pre">G</span></code> seconds old at <code class="docutils literal notranslate"><span class="pre">src</span></code>. Returns a Boolean array with one entry per channel id.</p>
-<p><code class="docutils literal notranslate"><span class="pre">SeedLink!(...</span> <span class="pre">safety=0x02)</span></code> calls <code class="docutils literal notranslate"><span class="pre">has_live_stream</span></code> before initiating a SeedLink connection.</p>
+<p><code class="docutils literal notranslate"><span class="pre">SeedLink!(...</span> <span class="pre">safety=0x02)</span></code> calls <code class="docutils literal notranslate"><span class="pre">has_stream</span></code> before initiating a SeedLink connection.</p>
 </div>
 </div>
 

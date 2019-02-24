@@ -1,4 +1,6 @@
 using DelimitedFiles: readdlm
+export readwin32
+
 # =======================================================
 # Auxiliary functions not for export
 

@@ -1,3 +1,5 @@
+export ungap, ungap!, sync, sync!
+
 """
     ungap!(S)
 

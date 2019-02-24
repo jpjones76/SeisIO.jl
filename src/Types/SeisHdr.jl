@@ -1,4 +1,6 @@
 import Base:isequal, sizeof, ==
+export SeisHdr
+
 unset_3tup = tuple(0.0, 0.0, 0.0)
 
 """

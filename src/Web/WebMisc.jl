@@ -1,3 +1,5 @@
+export chanspec, webhdr, seis_www, track_on!, track_off!
+
 # ============================================================================
 # Utility functions not for export
 webhdr() = Dict("UserAgent" => "Julia-SeisIO-FSDN.jl/0.1.2")
@@ -75,7 +77,7 @@ function savereq(D::Array{UInt8,1}, ext::String, net::String, sta::String,
   if loc == "--"
     loc = ""
   end
-  fname = string(join([y, string(j), i, namestrip!(net), namestrip!(sta), namestrip!(loc), namestrip!(cha)],'.'), ".", q, ".", ext)
+  fname = string(join([y, string(j), i, namestrip(net), namestrip(sta), namestrip(loc), namestrip(cha)],'.'), ".", q, ".", ext)
   if safe_isfile(fname)
     @warn(string("File ", fname, " contains an identical request. Overwriting."))
   end
@@ -134,3 +136,26 @@ seis_www = Dict("BGR" => "http://eida.bgr.de",
                 "USP" => "http://sismo.iag.usp.br")
 
 fdsn_uhead(src::String) = haskey(seis_www, src) ? seis_www[src] * "/fdsnws/" : src
+
+"""
+## CHANNEL ID SPECIFICATION
+Channel ID data can be passed to SeisIO web functions in three ways:
+
+1. String: a comma-delineated list of IDs formatted `"NET.STA.LOC.CHA"` (e.g. `"PB.B004.01.BS1,PB.B004.01.BS2"`)
+2. Array{String,1}: one ID per entry, formatted `"NET.STA.LOC.CHA"` (e.g. `["PB.B004.01.BS1","PB.B004.01.BS2"]`)
+3. Array{String,2}: one ID per row, formatted `["NET" "STA" "LOC" "CHA"]` (e.g. `["PB" "B004" "01" "BS?"; "PB" "B001" "01" "BS?"]`)
+
+The `LOC` field can be left blank (e.g. `"UW.ELK..EHZ", ["UW" "ELK" "" "EHZ"]`).
+
+The allowed subfield widths before channel IDs break is identical to the FDSN
+standard: NN.SSSSS.LL.CCC (network name length ≤ 2 chars, etc.)
+
+#### SEEDLINK ONLY
+For SeedLink functions (`SeedLink!`, `has_stream`, etc.), channel IDs can
+include a fifth field (i.e. NET.STA.LOC.CHA.T) to set the "type" flag (one of
+DECOTL, for Data, Event, Calibration, blOckette, Timing, or Logs). Note that
+SeedLink calibration, timing, and logs are not supported by SeisIO.
+"""
+function chanspec()
+  return nothing
+end

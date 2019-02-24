@@ -1,3 +1,5 @@
+export wseis
+
 vSeisIO() = Float32(0.2) # SeisIO file format version
 vJulia() = Float32(Meta.parse(string(VERSION.major,".",VERSION.minor)))
 Blosc.set_compressor("blosclz")

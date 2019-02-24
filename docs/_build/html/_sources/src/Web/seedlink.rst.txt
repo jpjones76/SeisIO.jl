@@ -57,9 +57,9 @@ Check that station identifiers ``C`` exist at ``src``. The syntax of ``C`` can b
 
 ``SeedLink!(... safety=0x01)`` calls ``has_sta`` before initiating a SeedLink connection.
 
-.. function:: T = has_live_stream(C, src, gap=G)
+.. function:: T = has_stream(C, src, gap=G)
 
 
 Check that streams with channel identifiers ``C`` have data < ``G`` seconds old at ``src``. Returns a Boolean array with one entry per channel id.
 
-``SeedLink!(... safety=0x02)`` calls ``has_live_stream`` before initiating a SeedLink connection.
+``SeedLink!(... safety=0x02)`` calls ``has_stream`` before initiating a SeedLink connection.

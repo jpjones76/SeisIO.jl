@@ -1,4 +1,5 @@
 using DelimitedFiles: readdlm
+export rlennasc
 
 """
     rlennasc(fname)

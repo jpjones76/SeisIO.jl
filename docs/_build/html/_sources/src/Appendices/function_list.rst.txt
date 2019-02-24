@@ -107,7 +107,7 @@ Compute great circle distance, azimuth, and backazimuth from source coordinates 
 
 Get SEED-compliant one-character band code corresponding to instrument sample rate ``fs`` and corner frequency ``FC``. If unset, ``FC`` is assumed to be 1 Hz.
 
-.. function:: tf = has_live_stream(C, url, g=G)
+.. function:: tf = has_stream(C, url, g=G)
 
 Check that streams with channel identifiers ``C`` have data < ``G`` seconds old at SeedLink server ``url``. Returns a Boolean array.
 

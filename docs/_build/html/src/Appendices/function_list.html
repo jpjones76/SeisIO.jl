@@ -312,7 +312,7 @@ initializes a SeisHdr structure with magnitude = M<sub>l</sub> 1.1 and location 
 <p>Get SEED-compliant one-character band code corresponding to instrument sample rate <code class="docutils literal notranslate"><span class="pre">fs</span></code> and corner frequency <code class="docutils literal notranslate"><span class="pre">FC</span></code>. If unset, <code class="docutils literal notranslate"><span class="pre">FC</span></code> is assumed to be 1 Hz.</p>
 <dl class="function">
 <dt>
-<code class="descname">tf = has_live_stream(C, url, g=G)</code></dt>
+<code class="descname">tf = has_stream(C, url, g=G)</code></dt>
 <dd></dd></dl>
 
 <p>Check that streams with channel identifiers <code class="docutils literal notranslate"><span class="pre">C</span></code> have data &lt; <code class="docutils literal notranslate"><span class="pre">G</span></code> seconds old at SeedLink server <code class="docutils literal notranslate"><span class="pre">url</span></code>. Returns a Boolean array.</p>

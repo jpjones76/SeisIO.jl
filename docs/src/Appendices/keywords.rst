@@ -71,4 +71,4 @@ SeedLink Keywords
 .. rubric:: Table Footnotes
 
 .. [#] This value is modified slightly by each SeedLink session to minimize the risk of congestion
-.. [#] Before initiating a SeedLink connection, **safety=0x01** calls **has_sta**, **safety=0x02** calls **has_live_stream**
+.. [#] Before initiating a SeedLink connection, **safety=0x01** calls **has_sta**, **safety=0x02** calls **has_stream**

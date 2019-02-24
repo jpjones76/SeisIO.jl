@@ -1,3 +1,5 @@
+export SeedLink, SeedLink!, SL_info, has_sta, has_stream
+
 # ========================================================================
 # Utility functions not for export
 function sync_add(r::Task)
@@ -157,7 +159,7 @@ has_sta(sta::Array{String,2}, u::String; port=18000::Integer) = check_sta_exists
 
 
 """
-X = has_live_stream(cha::String, u::String)
+X = has_stream(cha::String, u::String)
 
 Check that streams with recent data exist at url `u` for channel spec
 `cha`, formatted NET.STA.LOC.CHA.DFLAG, e.g. "UW.TDH..EHZ.D,
@@ -166,27 +168,27 @@ for streams with recent data.
 
 `cha` can also be the name of a valid config file.
 
-    X = has_live_stream(cha::Array{String,1}, u::String)
+    X = has_stream(cha::Array{String,1}, u::String)
 
 Check that streams with recent data exist at url `u` for channel spec
 `cha`, formatted NET.STA.LOC.CHA.DFLAG, e.g. ["UW.TDH..EHZ.D",
 "CC.HOOD..BH?.E"]. Use "?" to match any single character. Returns
 `true` for streams with recent data.
 
-    X = has_live_stream(cha::Array{String,1}, u::String, port=N::Int, gap=G::Real)
+    X = has_stream(cha::Array{String,1}, u::String, port=N::Int, gap=G::Real)
 
 As above, with keywords to set port number `N` (default: 18000) and
 timeout `M` seconds (default: 7200). If t > G seconds since last
 packet received, a stream is considered dead.
 
-  X = has_live_stream(sta::Array{String,1}, sel::Array{String,1}, u::String, port=N::Int, gap=G::Real)
+  X = has_stream(sta::Array{String,1}, sel::Array{String,1}, u::String, port=N::Int, gap=G::Real)
 
-If two arrays are passed to has_live_stream, the first should be
+If two arrays are passed to has_stream, the first should be
 formatted as SeedLink STATION patterns (formated "SSSSS NN", e.g.
 ["TDH UW", "VALT CC"]); the second be an array of SeedLink selector
 patterns (formatted LLCCC.D, e.g. ["??EHZ.D", "??BH?.?"]).
 """
-function has_live_stream(sta::Array{String,1}, pat::Array{String,1}, u::String; port=18000::Int, gap=7200::Real)
+function has_stream(sta::Array{String,1}, pat::Array{String,1}, u::String; port=18000::Int, gap=7200::Real)
   for i = 1:length(sta)
     s = split(sta[i], " ")
     c = split(pat[i], '.')
@@ -194,12 +196,12 @@ function has_live_stream(sta::Array{String,1}, pat::Array{String,1}, u::String; 
   end
   return check_stream_exists(cha, SL_info("STREAMS", u, port=port), gap=gap)
 end
-function has_live_stream(sta::String, u::String; port=18000::Integer, gap=7200::Real)
+function has_stream(sta::String, u::String; port=18000::Integer, gap=7200::Real)
   sta,pat = SeisIO.parse_sl(SeisIO.parse_chstr(sta))
-  return has_live_stream(sta, pat, u, port=port,gap=gap)
+  return has_stream(sta, pat, u, port=port,gap=gap)
 end
-has_live_stream(sta::Array{String,1}, u::String; port=18000::Int, gap=7200::Real) = check_stream_exists(sta, SL_info("STREAMS", u, port=port), gap=gap)
-has_live_stream(sta::Array{String,2}, u::String; port=18000::Integer, gap=7200::Real) = check_stream_exists([join(sta[i,:],'.') for i=1:size(sta,1)], SL_info("STREAMS", u, port=port), gap=gap)
+has_stream(sta::Array{String,1}, u::String; port=18000::Int, gap=7200::Real) = check_stream_exists(sta, SL_info("STREAMS", u, port=port), gap=gap)
+has_stream(sta::Array{String,2}, u::String; port=18000::Integer, gap=7200::Real) = check_stream_exists([join(sta[i,:],'.') for i=1:size(sta,1)], SL_info("STREAMS", u, port=port), gap=gap)
 
 # ### KEYWORD ARGUMENTS
 # Specify as `kw=value`, e.g., `SeedLink!(S, sta, mode="TIME", refresh=120)`.
@@ -282,7 +284,7 @@ function SeedLink!(S::SeisData,
 
   if safety==0x02
     v>0 && println("Checking for recent matching streams (may take 60 s)...")
-    h = has_live_stream(sta, patts, u, port=port, gap=gap)
+    h = has_stream(sta, patts, u, port=port, gap=gap)
   elseif safety==0x01
     v>0 && println("Checking that request exists (may take 60 s)...")
     h = has_sta(sta, u, port=port)

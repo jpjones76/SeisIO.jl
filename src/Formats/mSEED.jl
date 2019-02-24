@@ -1,3 +1,4 @@
+export readmseed, seeddef
 const SEED = SeedVol()
 
 # TO DO: Account for channels where any of the relevant SeisData params

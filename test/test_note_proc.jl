@@ -51,7 +51,7 @@ end
 println("...demean!...")
 demean!(S)
 for i = 1:2
-  @assert abs(mean(S.x[i])) < 100eps() # was: 10eps ...why did this break? 
+  @test abs(mean(S.x[i])) < 1000.0*eps(Float64)
 end
 
 # for i = 1:2
