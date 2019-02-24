@@ -1,3 +1,5 @@
+export get_data!, get_data
+
 # | KW | Default    | Allowed Data Types     | Meaning                        |
 # |----|:-----------|:-----------------------|:-------------------------------|
 # | fmt| "miniseed" | String                 | Request data format            |

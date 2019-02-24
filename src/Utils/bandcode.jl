@@ -1,3 +1,5 @@
+export getbandcode
+
 """
     getbandcode(fs, fc=FC)
 

@@ -2,6 +2,8 @@ const nul_f = -12345.0f0
 const nul_i = Int32(-12345)
 const nul_s = "-12345  "
 
+export readsac, rsac, sachdr, writesac, wsac
+
 # ============================================================================
 # Utility functions not for export
 get_sac_keys() = ["delta", "depmin", "depmax", "scale", "odelta",

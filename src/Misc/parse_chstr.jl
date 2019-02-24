@@ -96,26 +96,3 @@ function minreq!(S::Array{String,2})
 end
 minreq!(S::Array{String,1}, T::Array{String,1}) = minreq!(hcat(S,T))
 minreq(S::Array{String,2}) = (T = deepcopy(S); minreq!(T); return T)
-
-"""
-## CHANNEL ID SPECIFICATION
-Channel ID data can be passed to SeisIO web functions in three ways:
-
-1. String: a comma-delineated list of IDs formatted `"NET.STA.LOC.CHA"` (e.g. `"PB.B004.01.BS1,PB.B004.01.BS2"`)
-2. Array{String,1}: one ID per entry, formatted `"NET.STA.LOC.CHA"` (e.g. `["PB.B004.01.BS1","PB.B004.01.BS2"]`)
-3. Array{String,2}: one ID per row, formatted `["NET" "STA" "LOC" "CHA"]` (e.g. `["PB" "B004" "01" "BS?"; "PB" "B001" "01" "BS?"]`)
-
-The `LOC` field can be left blank (e.g. `"UW.ELK..EHZ", ["UW" "ELK" "" "EHZ"]`).
-
-The allowed subfield widths before channel IDs break is identical to the FDSN
-standard: NN.SSSSS.LL.CCC (network name length ≤ 2 chars, etc.)
-
-#### SEEDLINK ONLY
-For SeedLink functions (`SeedLink!`, `has_live_stream`, etc.), channel IDs can
-include a fifth field (i.e. NET.STA.LOC.CHA.T) to set the "type" flag (one of
-DECOTL, for Data, Event, Calibration, blOckette, Timing, or Logs). Note that
-SeedLink calibration, timing, and logs are not supported by SeisIO.
-"""
-function chanspec()
-  return nothing
-end

@@ -1,4 +1,5 @@
 import Base:isequal, isempty, ==
+export SeisEvent
 
 """
     S = SeisEvent()

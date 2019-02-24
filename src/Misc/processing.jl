@@ -1,15 +1,4 @@
-"""
-    purge!(S)
-
-Remove all channels from S with empty data fields.
-"""
-function purge!(S::SeisData)
-  k = falses(S.n)
-  [isempty(S.x[i]) && (k[i] = true) for i in 1:S.n]
-  any(k) && (delete!(S, findall(k)))
-  return S
-end
-purge(S::SeisData) = (T = deepcopy(S); purge!(T); return(T))
+export autotap!, unscale!, demean!
 
 """
     demean!(S::SeisData)
@@ -60,16 +49,6 @@ function unscale!(S::SeisData; all::Bool=false)
   end
   return nothing
 end
-
-"""
-    namestrip!(s::String)
-
-Remove bad characters from S: ,, \\, !, @, #, \$, %, ^, &, *, (, ), +, /, ~, `, :, |, and whitespace.
-"""
-namestrip!(S::String) = (strip(S, [',', '\\', '!', '@', '#', '\$',
-  '%', '^', '&', '*', '(', ')', '+', '/', '~', '`', ':', '|', ' ']); return S)
-namestrip!(S::Array{String,1}) = [namestrip!(i) for i in S]
-namestrip!(S::SeisData) = [namestrip!(i) for i in S.name]
 
 """
     autotap!(S::SeisData)

@@ -1,3 +1,5 @@
+export fctopz, translate_resp, equalize_resp!
+
 # TO DO: accelerometer equation, unit-dependent conversion to pz format
 """
     resp = fctopz(fc)

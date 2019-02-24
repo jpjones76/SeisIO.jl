@@ -1,3 +1,5 @@
+export ls
+
 function listfiles(d::String, p::AbstractString)
   F = readdir(d)
   S = split(p, '*', keepempty=true)

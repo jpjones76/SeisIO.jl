@@ -1,3 +1,5 @@
+export readsegy, segyhdr
+
 # ============================================================================
 # Utility functions not for export
 function trid(i::Int16; fs=2000.0::Float64)

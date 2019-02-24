@@ -1,3 +1,5 @@
+export readuw, uwdf, uwpf, uwpf!
+
 # ============================================================================
 # Utility functions not for export
 function nextline(pf::IO, c::Char)

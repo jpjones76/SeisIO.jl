@@ -1,6 +1,8 @@
 import Base:in, getindex, setindex!, append!, deleteat!, delete!, +, -, *, isequal,
 length, size, sizeof, ==, isempty, sort!, sort, lastindex
 
+export SeisData, findid, pull, prune!, findchan
+
 # This is type-stable for S = SeisData() but not for keyword args
 mutable struct SeisData
   n::Int64

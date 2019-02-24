@@ -1,3 +1,5 @@
+export distaz!
+
 # =============================================================
 # Utility functions
 sa_prune!(S::Union{Array{String,1},Array{SubString{String},1}}) = (deleteat!(S, findall(isempty, S)); return S)

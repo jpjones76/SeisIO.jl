@@ -1,3 +1,5 @@
+export gcdist
+
 gc_ctr(lat::Array{Float64,1}, lon::Array{Float64,1}) = (atan.(tan.(lat*π/180.0)*0.9933056), lon*π/180.0)
 gc_unwrap!(t::Array{Float64,1}) = (t[t .< 0] .+= 2.0*π; return t)
 

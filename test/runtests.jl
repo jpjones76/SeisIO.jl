@@ -10,7 +10,10 @@ include("test_helpers.jl")
 println("begin tests:")
 
 println("time (test_time.jl)...")
+
 include(path*"/test_time.jl")
+println("namestrip!...")
+include(path*"/test_namestrip.jl")
 
 println("read/write \"misc\" dictionary (test_misc_rw.jl)...")
 include(path*"/test_misc_rw.jl")

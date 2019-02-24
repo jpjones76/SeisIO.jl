@@ -1,3 +1,5 @@
+export lcfs
+
 """
     f = lcfs(fs::Array{Float64,1})
 

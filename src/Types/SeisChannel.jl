@@ -1,4 +1,5 @@
 import Base:in, +, -, *, convert, isequal, length, push!, sizeof
+export SeisChannel
 
 mutable struct SeisChannel
   name  ::String
