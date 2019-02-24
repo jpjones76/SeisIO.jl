@@ -3,7 +3,8 @@ savfile1 = "test.seis"
 savfile2 = "test.hdr"
 savfile3 = "test.evt"
 
-S = randseisdata(c=0.0)
+# Changing this test to guarantee at least one campaign-style measurement
+S = randseisdata() + randseisdata(2, c=1.0, s=0.0)[2]
 println("...SeisData file write...")
 wseis(savfile1, S)
 

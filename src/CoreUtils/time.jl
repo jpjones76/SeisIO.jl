@@ -63,6 +63,7 @@ Convert matrix T from sparse delta-encoded time gaps to time windows (w[:,1]:w[:
 Convert S.t to time windows s.t. W[i] = t_win(S.t[i], S.fs[i]).
 """
 function t_win(T::Array{Int64,2}, fs::Float64)
+  fs == 0.0 && return T
   n = size(T,1)-1
   w0 = Int64(0)
   W = Array{Int64,2}(undef,n,2)

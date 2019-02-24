@@ -4,10 +4,10 @@
 
 Convert critical frequency fc to a matrix of complex poles and zeros. zeros are in resp[:,1], poles in resp[:,2].
 """
-function fctopz(fc::T; hc=1.0/sqrt(2)::T, units="m/s"::String) where T
+function fctopz(fc::T; hc=1.0/sqrt(2.0)::T, units="m/s"::String) where T
   pp = 2.0*pi
   if units == "m/s"
-    cr = sqrt(complex(hc^2-1))
+    cr = sqrt(complex(hc^2-1.0))
     cp = complex(zeros(T,2))
     cz = [-hc+cr, -hc-cr].*pp*fc
     return [cp cz]
@@ -30,8 +30,8 @@ function translate_resp!(X::Array{T,1}, fs::T,
   Nx = length(X)
   N2 = nextpow2(Nx)
   f = [collect(0.0:1.0:N2/2.0); collect(-N2/2.0+1.0:1.0:-1.0)]*fs/N2  # Freqs
-  F0 = SeisIO.resp_f(resp_old, hc_old, f, fs)                         # Old resp
-  F1 = SeisIO.resp_f(resp_new, hc_new, f, fs)                         # New resp
+  F0 = resp_f(resp_old, hc_old, f, fs)                                # Old resp
+  F1 =  resp_f(resp_new, hc_new, f, fs)                               # New resp
   xf = fft([X; zeros(T, N2-Nx)])                                      # FFT
   rf = F1.*conj(F0)./(F0.*conj(F0).+eps())
   X[:] = real(ifft(xf.*rf))[1:Nx]

@@ -155,7 +155,7 @@ function populate_irr!(Ch::SeisChannel)
     Lx = 2^rand(1:12)
     L = rand(2:8)
     Ch.x = rand(L) .* 10 .^(rand(1:10, L))
-    Ch.t = [Int64(0) round(Int64, ts/μs); zeros(Int64, L-1) round.(Int, diff(sort(rand(2:Lx, L)))/μs)]
+    Ch.t = cumsum([Int64(0) round(Int64, ts/μs); zeros(Int64, L-1) round.(Int, diff(sort(rand(2:Lx, L)))/μs)], dims=1)
   end
   Ch.src = "randseischannel(c=true)"
 
