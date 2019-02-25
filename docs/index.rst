@@ -39,12 +39,20 @@ Web
    src/Web/seedlink.rst
 
 **********
+Processing
+**********
+.. toctree::
+  :caption: Data Processing
+  :maxdepth: 2
+
+  src/Processing/processing.rst
+
+**********
 Appendices
 **********
 .. toctree::
    :caption: Appendices
    :maxdepth: 2
-   :numbered:
 
    src/Appendices/function_list.rst
    src/Appendices/seisdata_fields.rst

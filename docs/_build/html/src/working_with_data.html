@@ -97,6 +97,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#keeping-track">Keeping Track</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#taking-notes">Taking Notes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Keeping Track</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#source-logging">Source Logging</a></li>
 </ul>
 </li>
@@ -115,10 +116,10 @@
 </ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Appendices/function_list.html">1. Alphabetical Function List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Appendices/function_list.html">Utility Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Appendices/seisdata_fields.html">2. Structure and Field Descriptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Appendices/seisdata_fileformat.html">3. SeisIO File Format</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Appendices/web_syntax.html">4. Data Requests Syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Appendices/web_syntax.html">Data Requests Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Appendices/keywords.html">5. SeisIO Standard Keywords</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Appendices/examples.html">6. Examples</a></li>
 </ul>
@@ -322,30 +323,123 @@ much more complicated than addition.</p>
 <div class="section" id="keeping-track">
 <h2>Keeping Track<a class="headerlink" href="#keeping-track" title="Permalink to this headline">¶</a></h2>
 <p>Because tracking arbitrary operations can be difficult, several functions have
-been written to keep track of data operations in a semi-automated way.</p>
+been written to keep track of data and operations in a semi-automated way.</p>
 <div class="section" id="taking-notes">
 <h3>Taking Notes<a class="headerlink" href="#taking-notes" title="Permalink to this headline">¶</a></h3>
 <p>Most functions that add or process data note this in the appropriate channel’s :notes field.
 However, you can also make your own notes with the note! command:</p>
 <dl class="function">
 <dt>
-<code class="descname">note!(S, str)</code></dt>
+<code class="descname">note!(S, i, str)</code></dt>
 <dd></dd></dl>
 
-<p>Append a string to field :notes of every channel of S. Alternately, you can also do:</p>
+<p>Append <strong>str</strong> with a timestamp to the :notes field of channel number <strong>i</strong> of <strong>S</strong>.</p>
 <dl class="function">
 <dt>
 <code class="descname">note!(S, id, str)</code></dt>
 <dd></dd></dl>
 
-<p>As above for the first channel in S whose id is an exact match to id.</p>
+<p>As above for the first channel in <strong>S</strong> whose id is an exact match to <strong>id</strong>.</p>
 <dl class="function">
 <dt>
-<code class="descname">note!(S, i, str)</code></dt>
+<code class="descname">note!(S, str)</code></dt>
 <dd></dd></dl>
 
-<p>Record a note in channel number i.</p>
-<p>All notes recorded with the note! function are time-stamped.</p>
+<p>if <strong>str* mentions a channel name or ID, only the corresponding channel(s) in **S</strong> is annotated; otherwise, all channels are annotated.</p>
+<p>Clear all notes from channel <code class="docutils literal notranslate"><span class="pre">i</span></code> of <code class="docutils literal notranslate"><span class="pre">S</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">clear_notes!(S,</span> <span class="pre">id)</span></code></p>
+<p>Clear all notes from the first channel in <code class="docutils literal notranslate"><span class="pre">S</span></code> whose id field exactly matches <code class="docutils literal notranslate"><span class="pre">id</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">clear_notes!(S)</span></code></p>
+<p>Clear all notes from every channel in <code class="docutils literal notranslate"><span class="pre">S</span></code>.</p>
+</div>
+<div class="section" id="id1">
+<h3>Keeping Track<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>A number of auxiliary functions exist to keep track of channels:</p>
+<dl class="function">
+<dt id="findchan">
+<code class="descname">findchan</code><span class="sig-paren">(</span><em>id::String</em>, <em>S::SeisData</em><span class="sig-paren">)</span><a class="headerlink" href="#findchan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt>
+<code class="descname">findchan</code><span class="sig-paren">(</span><em>S::SeisData</em>, <em>id::String</em><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<p>Get all channel indices i in S with id ∈ S.id[i]. Can do partial id matches, e.g. findchan(S, “UW.”) returns indices to all channels whose IDs begin with “UW.”.</p>
+<dl class="function">
+<dt id="findid">
+<code class="descname">findid</code><span class="sig-paren">(</span><em>S::SeisData</em>, <em>id</em><span class="sig-paren">)</span><a class="headerlink" href="#findid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Return the index of the first channel in <strong>S</strong> where id = <strong>id</strong>.</p>
+<dl class="function">
+<dt>
+<code class="descname">findid</code><span class="sig-paren">(</span><em>S::SeisData</em>, <em>Ch::SeisChannel</em><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<p>Equivalent to findfirst(S.id.==Ch.id).</p>
+<dl class="function">
+<dt>
+<code class="descname">namestrip!(S[, convention])</code></dt>
+<dd></dd></dl>
+
+<p>Remove bad characters from the :name fields of <strong>S</strong>. Specify convention as a string (default is “File”):</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="24%" />
+<col width="76%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Convention</th>
+<th class="head">Characters Removed:sup:<cite>(a)</cite></th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>“File”</td>
+<td><code class="docutils literal notranslate"><span class="pre">&quot;$*/:&lt;&gt;?&#64;\^|~DEL</span></code></td>
+</tr>
+<tr class="row-odd"><td>“HTML”</td>
+<td><code class="docutils literal notranslate"><span class="pre">&quot;&amp;';&lt;&gt;©DEL</span></code></td>
+</tr>
+<tr class="row-even"><td>“Julia”</td>
+<td><code class="docutils literal notranslate"><span class="pre">$\DEL</span></code></td>
+</tr>
+<tr class="row-odd"><td>“Markdown”</td>
+<td><code class="docutils literal notranslate"><span class="pre">!#()*+-.[\]_`{}</span></code></td>
+</tr>
+<tr class="row-even"><td>“SEED”</td>
+<td><code class="docutils literal notranslate"><span class="pre">.DEL</span></code></td>
+</tr>
+<tr class="row-odd"><td>“Strict”</td>
+<td><code class="docutils literal notranslate"><span class="pre">!&quot;#$%&amp;'()*+,-./:;&lt;=&gt;?&#64;[\]^`{|}~DEL</span></code></td>
+</tr>
+</tbody>
+</table>
+<p><sup>(a)</sup> <code class="docutils literal notranslate"><span class="pre">DEL</span></code> is \x7f (ASCII/Unicode U+007f).</p>
+<dl class="function">
+<dt id="timestamp">
+<code class="descname">timestamp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#timestamp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Return current UTC time formatted yyyy-mm-ddTHH:MM:SS.μμμ.</p>
+<dl class="function">
+<dt>
+<code class="descname">track_off!(S)</code></dt>
+<dd></dd></dl>
+
+<p>Turn off tracking in S and return a boolean vector of which channels were added
+or altered significantly.</p>
+<dl class="function">
+<dt>
+<code class="descname">track_on!(S)</code></dt>
+<dd></dd></dl>
+
+<p>Begin tracking changes in S. Tracks changes to :id, channel additions, and
+changes to data vector sizes in S.x.</p>
+<p>Does not track data processing operations on any channel i unless
+length(S.x[i]) changes for channel i (e.g. filtering is not tracked).</p>
+<p><strong>Warning</strong>: If you have or suspect gapped data in any channel, calling
+ungap! while tracking is active will flag a channel as changed.</p>
 </div>
 <div class="section" id="source-logging">
 <h3>Source Logging<a class="headerlink" href="#source-logging" title="Permalink to this headline">¶</a></h3>

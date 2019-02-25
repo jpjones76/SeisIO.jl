@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>1. Alphabetical Function List &mdash; SeisIO 0.1.2 rc documentation</title>
+  <title>Utility Functions &mdash; SeisIO 0.1.2 rc documentation</title>
   
 
   
@@ -87,7 +87,8 @@
               <p class="caption"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../seisdata.html">SeisIO Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../working_with_data.html">Working with Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../seisdata.html">Data Types</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Data Readers</span></p>
 <ul>
@@ -100,11 +101,15 @@
 </ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">1. Alphabetical Function List</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Utility Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#randseis">RandSeis</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="seisdata_fields.html">2. Structure and Field Descriptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="seisdata_fileformat.html">3. SeisIO File Format</a></li>
-<li class="toctree-l1"><a class="reference internal" href="web_syntax.html">4. Data Requests Syntax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">5. Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="web_syntax.html">Data Requests Syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="keywords.html">5. SeisIO Standard Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">6. Examples</a></li>
 </ul>
 
             
@@ -150,7 +155,7 @@
     
       <li><a href="../../index.html">Docs</a> &raquo;</li>
         
-      <li>1. Alphabetical Function List</li>
+      <li>Utility Functions</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -169,135 +174,28 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="alphabetical-function-list">
-<span id="function-list"></span><h1>1. Alphabetical Function List<a class="headerlink" href="#alphabetical-function-list" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="utility-functions">
+<span id="function-list"></span><h1>Utility Functions<a class="headerlink" href="#utility-functions" title="Permalink to this headline">¶</a></h1>
+<p>This appendix covers utility functions that belong in no other category.</p>
 <dl class="function">
 <dt>
-<code class="descname">H = FDSNevq(ot::Real)</code></dt>
+<code class="descname">distaz!(Ev::SeisEvent)</code></dt>
 <dd></dd></dl>
 
-<p>Multi-server query for event with origin time(s) closest to <code class="docutils literal notranslate"><span class="pre">ot</span></code>.</p>
+<p>Fill Ev with great-circle distance, azimuth, and back-azimuth for each channel. Writes to evt.data.misc.</p>
 <dl class="function">
-<dt>
-<code class="descname">T = FDSNevt(ot::Real, C::Union{String,Array{String,1},Array{String,2}})</code></dt>
+<dt id="d2u">
+<code class="descname">d2u</code><span class="sig-paren">(</span><em>DT::DateTime</em><span class="sig-paren">)</span><a class="headerlink" href="#d2u" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<p>Get event headers and trace data for the event with origin time nearest <code class="docutils literal notranslate"><span class="pre">ot</span></code> on channels <code class="docutils literal notranslate"><span class="pre">C</span></code>.</p>
-<dl class="function">
-<dt>
-<code class="descname">S = FDSNsta(C)</code></dt>
-<dd></dd></dl>
-
-<p>Retrieve station/channel info for <code class="docutils literal notranslate"><span class="pre">C</span></code> in an empty SeisData structure.</p>
-<dl class="function">
-<dt>
-<code class="descname">S = SeedLink(C)</code></dt>
-<dd></dd></dl>
-
-<p>Initiate a SeedLink session to feed data from streams <code class="docutils literal notranslate"><span class="pre">C</span></code> to a new SeisData structure with a handle to the SeedLink connection in <code class="docutils literal notranslate"><span class="pre">S.c[1]</span></code>.</p>
-<dl class="function">
-<dt>
-<code class="descname">SeedLink!(S, C)</code></dt>
-<dd></dd></dl>
-
-<p>Initiate a SeedLink session to feed data from streams <code class="docutils literal notranslate"><span class="pre">C</span></code> to SeisData structure <code class="docutils literal notranslate"><span class="pre">S</span></code>. A handle to the TCP connection is appended to <code class="docutils literal notranslate"><span class="pre">S.c</span></code>.</p>
-<dl class="function">
-<dt>
-<code class="descname">C = SeisChannel()</code></dt>
-<dd></dd></dl>
-
-<p>Initiate an empty SeisChannel structure. Fields can be set at creation with keywords, e.g. <code class="docutils literal notranslate"><span class="pre">SeisChannel(fs=100.0)</span></code> creates a new SeisChannel structure with fs set to 100.0 Hz.</p>
-<dl class="function">
-<dt>
-<code class="descname">S = SeisData()</code></dt>
-<dd></dd></dl>
-
-<p>Initiate an empty SeisData structure. Fields cannot be set at creation.</p>
-<dl class="function">
-<dt>
-<code class="descname">evt = SeisEvent()</code></dt>
-<dd></dd></dl>
-
-<p>Initiate an empty SeisEvent structure.</p>
-<dl class="function">
-<dt>
-<code class="descname">H = SeisHdr()</code></dt>
-<dd></dd></dl>
-
-<p>Create an empty SeisHdr structure. Fields can be set at creation with keywords, e.g. <code class="docutils literal notranslate"><span class="pre">SeisHdr(mag=(1.1f0,'l','</span> <span class="pre">'),</span> <span class="pre">loc=[45.37,</span> <span class="pre">-121.69,</span> <span class="pre">6.8])</span></code>
-initializes a SeisHdr structure with magnitude = M<sub>l</sub> 1.1 and location = 45.37°N, 121.69°W, z=6.8 km. Fields not specified at creation are initialized to SeisIO defaults.</p>
-<dl class="function">
-<dt>
-<code class="descname">xstr = SL_info(v, url)</code></dt>
-<dd></dd></dl>
-
-<p>Retrieve SeedLink information at level <code class="docutils literal notranslate"><span class="pre">v</span></code> from <code class="docutils literal notranslate"><span class="pre">url</span></code>. Returns XML as a string. Valid strings for <code class="docutils literal notranslate"><span class="pre">L</span></code> are ID, CAPABILITIES, STATIONS, STREAMS, GAPS, CONNECTIONS, ALL.</p>
-<dl class="function">
-<dt>
-<code class="descname">autotap!(S)</code></dt>
-<dd></dd></dl>
-
-<p>Cosine taper each channel in S around time gaps, then fill time gaps with the mean of non-NaN data points.</p>
-<dl class="function">
-<dt id="chanspec">
-<code class="descname">chanspec</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chanspec" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<p>Type <code class="docutils literal notranslate"><span class="pre">?chanspec</span></code> to print detailed channel specification syntax to stdout.</p>
-<p>Clear all notes from channel <code class="docutils literal notranslate"><span class="pre">i</span></code> of <code class="docutils literal notranslate"><span class="pre">S</span></code>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">clear_notes!(S,</span> <span class="pre">id)</span></code></p>
-<p>Clear all notes from the first channel in <code class="docutils literal notranslate"><span class="pre">S</span></code> whose id field exactly matches <code class="docutils literal notranslate"><span class="pre">id</span></code>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">clear_notes!(S)</span></code></p>
-<p>Clear all notes from every channel in <code class="docutils literal notranslate"><span class="pre">S</span></code>.</p>
-<dl class="function">
-<dt>
-<code class="descname">t = d2u(DT::DateTime)</code></dt>
-<dd></dd></dl>
-
-<p>Alias to <code class="docutils literal notranslate"><span class="pre">Dates.datetime2unix</span></code>.</p>
-<dl class="function">
-<dt>
-<code class="descname">del_sta!(S::SeisData, ssss::String)</code></dt>
-<dd></dd></dl>
-
-<p>Delete channels with station names (second substring of ID) that match <code class="docutils literal notranslate"><span class="pre">ssss</span></code>. Specify station names as they appears within IDs, e.g. for ID=”UW.HOOD..BHZ” use station name “HOOD”. Works on exact matches only.</p>
-<dl class="function">
-<dt>
-<code class="descname">distaz!(T::SeisEvent)</code></dt>
-<dd></dd></dl>
-
-<p>Fill <code class="docutils literal notranslate"><span class="pre">T</span></code> with great-circle distance, azimuth, and back-azimuth for each channel. Writes to <code class="docutils literal notranslate"><span class="pre">evt.data.misc</span></code>.</p>
-<dl class="function">
-<dt>
-<code class="descname">env!(S)</code></dt>
-<dd></dd></dl>
-
-<p>Convert time-seris data in S.x to smoothed envelopes. Overwrites existing S.x.</p>
-<dl class="function">
-<dt>
-<code class="descname">U = env(S)</code></dt>
-<dd></dd></dl>
-
-<p>Convert time-series data in S.x[i] to envelopes. T.x[i] contains the envelope of S.x[i].</p>
-<dl class="function">
-<dt>
-<code class="descname">equalize_resp!(S, resp_new::Array, hc_new=HC, C=CH)</code></dt>
-<dd></dd></dl>
-
-<p>Translate all data in SeisData structure <code class="docutils literal notranslate"><span class="pre">S</span></code> to instrument response <code class="docutils literal notranslate"><span class="pre">resp_new</span></code>. Expected structure of <code class="docutils literal notranslate"><span class="pre">resp_new</span></code> is a complex Float64 2d array with zeros in <code class="docutils literal notranslate"><span class="pre">resp[:,1]</span></code>, poles in <code class="docutils literal notranslate"><span class="pre">resp[:,2]</span></code>. If channel <code class="docutils literal notranslate"><span class="pre">i</span></code> has key <code class="docutils literal notranslate"><span class="pre">S.misc[i][&quot;hc&quot;]</span></code>, the corresponding value is used as the critical damping constant; otherwise a value of 1.0 is assumed.</p>
+<p>Aliased to <code class="docutils literal notranslate"><span class="pre">Dates.datetime2unix</span></code>.</p>
 <p>Keyword <code class="docutils literal notranslate"><span class="pre">hc_new</span></code> specifies the new critical damping constant. Keyword <code class="docutils literal notranslate"><span class="pre">C</span></code> specifies an array of channel numbers on which to operate; by default, every channel with fs &gt; 0.0 is affected.</p>
 <dl class="function">
-<dt>
-<code class="descname">resp = fctopz(fc)</code></dt>
+<dt id="fctopz">
+<code class="descname">fctopz</code><span class="sig-paren">(</span><em>fc</em><span class="sig-paren">)</span><a class="headerlink" href="#fctopz" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p>Convert critical frequency <code class="docutils literal notranslate"><span class="pre">fc</span></code> to a matrix of complex poles and zeros; zeros in <code class="docutils literal notranslate"><span class="pre">resp[:,1]</span></code>, poles in <code class="docutils literal notranslate"><span class="pre">resp[:,2]</span></code>.</p>
-<dl class="function">
-<dt>
-<code class="descname">i = findid(S, C)</code></dt>
-<dd></dd></dl>
-
-<p>Return the index of the first channel in <code class="docutils literal notranslate"><span class="pre">S</span></code> with id matching <code class="docutils literal notranslate"><span class="pre">C</span></code>. If <code class="docutils literal notranslate"><span class="pre">C</span></code> is a string, <code class="docutils literal notranslate"><span class="pre">findid</span></code> is equivalent to <code class="docutils literal notranslate"><span class="pre">findfirst(S.id.==C)</span></code>; if <code class="docutils literal notranslate"><span class="pre">C</span></code> is a SeisChannel, <code class="docutils literal notranslate"><span class="pre">findid</span></code> is equivalent to <code class="docutils literal notranslate"><span class="pre">findfirst(S.id.==C.id)</span></code>.</p>
 <dl class="function">
 <dt>
 <code class="descname">(dist, az, baz) = gcdist([lat_src, lon_src], rec)</code></dt>
@@ -305,278 +203,104 @@ initializes a SeisHdr structure with magnitude = M<sub>l</sub> 1.1 and location 
 
 <p>Compute great circle distance, azimuth, and backazimuth from source coordinates <code class="docutils literal notranslate"><span class="pre">[lat_src,</span> <span class="pre">lon_src]</span></code> to receiver coordinates in <code class="docutils literal notranslate"><span class="pre">rec</span></code> using the Haversine formula. <code class="docutils literal notranslate"><span class="pre">rec</span></code> must be a two-column matix arranged [lat lon]. Returns a tuple of arrays.</p>
 <dl class="function">
-<dt>
-<code class="descname">c = getbandcode(fs, fc=FC)</code></dt>
+<dt id="getbandcode">
+<code class="descname">getbandcode</code><span class="sig-paren">(</span><em>fs</em>, <em>fc=FC</em><span class="sig-paren">)</span><a class="headerlink" href="#getbandcode" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p>Get SEED-compliant one-character band code corresponding to instrument sample rate <code class="docutils literal notranslate"><span class="pre">fs</span></code> and corner frequency <code class="docutils literal notranslate"><span class="pre">FC</span></code>. If unset, <code class="docutils literal notranslate"><span class="pre">FC</span></code> is assumed to be 1 Hz.</p>
 <dl class="function">
-<dt>
-<code class="descname">tf = has_stream(C, url, g=G)</code></dt>
+<dt id="ls">
+<code class="descname">ls</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#ls" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<p>Check that streams with channel identifiers <code class="docutils literal notranslate"><span class="pre">C</span></code> have data &lt; <code class="docutils literal notranslate"><span class="pre">G</span></code> seconds old at SeedLink server <code class="docutils literal notranslate"><span class="pre">url</span></code>. Returns a Boolean array.</p>
+<p>Wrapper to <cite>sh /bin/ls -1</cite>; returns output as a string array. In Windows, provides similar functionality to Unix ls. <code class="docutils literal notranslate"><span class="pre">ls()</span></code> with no arguments lists contents of cwd.</p>
 <dl class="function">
-<dt>
-<code class="descname">tf = has_sta(C, url)</code></dt>
+<dt id="j2md">
+<code class="descname">j2md</code><span class="sig-paren">(</span><em>y</em>, <em>j</em><span class="sig-paren">)</span><a class="headerlink" href="#j2md" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<p>Check that station identifiers <code class="docutils literal notranslate"><span class="pre">C</span></code> exist at SeedLink server <code class="docutils literal notranslate"><span class="pre">url</span></code>. Returns a Boolean array.</p>
+<p>Convert Julian day <strong>j</strong> of year <strong>y</strong> to month, day.</p>
 <dl class="function">
-<dt>
-<code class="descname">s = ls(path)</code></dt>
+<dt id="md2j">
+<code class="descname">md2j</code><span class="sig-paren">(</span><em>y</em>, <em>m</em>, <em>d</em><span class="sig-paren">)</span><a class="headerlink" href="#md2j" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<p>Wrapper to /bin/ls; returns output as a string array. In Windows, provides similar functionality to Unix ls. <code class="docutils literal notranslate"><span class="pre">ls()</span></code> with no arguments lists contents of cwd.</p>
+<p>Convert month <strong>m</strong>, day <strong>d</strong> of year <strong>y</strong> to Julian day <strong>j</strong>.</p>
+<p>Remove unwanted characters from S.</p>
 <dl class="function">
-<dt>
-<code class="descname">(m, d) = j2md(y, j)</code></dt>
+<dt id="parsetimewin">
+<code class="descname">parsetimewin</code><span class="sig-paren">(</span><em>s</em>, <em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#parsetimewin" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<p>Convert Julian day <code class="docutils literal notranslate"><span class="pre">j</span></code> of year <code class="docutils literal notranslate"><span class="pre">y</span></code> to month, day. Returns a tuple.</p>
-<dl class="function">
-<dt>
-<code class="descname">f = lcfs(fs::Array{Float64,1})</code></dt>
-<dd></dd></dl>
-
-<p>Find <em>L*owest *C*ommon *fs</em>, the lowest fs at which data sampled at each frequency in <cite>fs</cite> can be upsampled by repeating an integer number of copies of each sample value.</p>
-<p>For ridiculous or arbitrary combinations of sampling rates, e.g. <cite>lcfs([62.5, 48.3, 3.0])</cite>, you should really just use <cite>DSP.resample</cite> to approximate.</p>
-<dl class="function">
-<dt>
-<code class="descname">j = md2j(y, m, d)</code></dt>
-<dd></dd></dl>
-
-<p>Convert month <code class="docutils literal notranslate"><span class="pre">m</span></code>, day <code class="docutils literal notranslate"><span class="pre">d</span></code> of year <code class="docutils literal notranslate"><span class="pre">y</span></code> to Julian day <code class="docutils literal notranslate"><span class="pre">j</span></code>.</p>
-<dl class="function">
-<dt>
-<code class="descname">namestrip!(S)</code></dt>
-<dd></dd></dl>
-
-<p>Remove bad characters from <code class="docutils literal notranslate"><span class="pre">S</span></code>. Applied to a SeisData structure <code class="docutils literal notranslate"><span class="pre">S</span></code>, <code class="docutils literal notranslate"><span class="pre">namestrip!</span></code> removes bad characters from <code class="docutils literal notranslate"><span class="pre">S.name</span></code>.</p>
-<dl class="function">
-<dt>
-<code class="descname">note!(S, n, txt)</code></dt>
-<dd></dd></dl>
-
-<p>Append a timestamped note to channel <code class="docutils literal notranslate"><span class="pre">n</span></code> of <code class="docutils literal notranslate"><span class="pre">S</span></code>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">note!(S,</span> <span class="pre">id,</span> <span class="pre">txt)</span></code></p>
-<p>Append a timestamped note to the first channel in <code class="docutils literal notranslate"><span class="pre">S</span></code> whose id field exactly matches <code class="docutils literal notranslate"><span class="pre">id</span></code>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">note!(S,</span> <span class="pre">txt)</span></code></p>
-<p>Fuzzy note: if <code class="docutils literal notranslate"><span class="pre">txt</span></code> mentions a channel name or ID, only the corresponding channel in <code class="docutils literal notranslate"><span class="pre">S</span></code> is annotated; otherwise, all channels are annotated with <code class="docutils literal notranslate"><span class="pre">txt</span></code>.</p>
-<dl class="function">
-<dt>
-<code class="descname">(d0, d1) = parsetimewin(s, t)</code></dt>
-<dd></dd></dl>
-
-<p>Convert times <code class="docutils literal notranslate"><span class="pre">s</span></code> and <code class="docutils literal notranslate"><span class="pre">t</span></code> to strings <code class="docutils literal notranslate"><span class="pre">d0,</span> <span class="pre">d1</span></code> sorted s.t. <code class="docutils literal notranslate"><span class="pre">d0</span> <span class="pre">&lt;</span> <span class="pre">d1</span></code>. <code class="docutils literal notranslate"><span class="pre">s</span></code> and <code class="docutils literal notranslate"><span class="pre">t</span></code> can be real numbers, DateTime objects, or ASCII strings. Strings must follow the format “yyyy-mm-ddTHH:MM:SS.nnn”, e.g. <code class="docutils literal notranslate"><span class="pre">s=&quot;2016-03-23T11:17:00.333&quot;</span></code>.</p>
-<dl class="function">
-<dt>
-<code class="descname">U = pol_sort(S)</code></dt>
-<dd></dd></dl>
-
-<p>Sort channels of SeisData structure <code class="docutils literal notranslate"><span class="pre">S</span></code> to a new structure, retaining seismic data sorted in channel order Z, N, E (or Z, 1, 2).</p>
-<dl class="function">
-<dt>
-<code class="descname">T = pull(S, i)</code></dt>
-<dd></dd></dl>
-
-<p>If <code class="docutils literal notranslate"><span class="pre">i</span></code> is a string, extract the first channel from <code class="docutils literal notranslate"><span class="pre">S</span></code> with <code class="docutils literal notranslate"><span class="pre">id=i</span></code> and return it as a new SeisData structure <code class="docutils literal notranslate"><span class="pre">T</span></code>. The corresponding channel in <code class="docutils literal notranslate"><span class="pre">S</span></code> is deleted. If <code class="docutils literal notranslate"><span class="pre">i</span></code> is an integer, <code class="docutils literal notranslate"><span class="pre">pull</span></code> operates on the corresponding channel number.</p>
-<dl class="function">
-<dt>
-<code class="descname">purge!(S)</code></dt>
-<dd></dd></dl>
-
-<p>Remove all channels <code class="docutils literal notranslate"><span class="pre">i</span></code> from <code class="docutils literal notranslate"><span class="pre">S</span></code> s.t. <code class="docutils literal notranslate"><span class="pre">isempty(S.x[i])</span> <span class="pre">=</span> <span class="pre">true</span></code>.</p>
-<dl class="function">
-<dt>
-<code class="descname">C = randseischannel()</code></dt>
-<dd></dd></dl>
-
-<p>Generate a SeisChannel of random data. Specify <code class="docutils literal notranslate"><span class="pre">c=true</span></code> to allow the possibility of campaign (non-timeseries) data.</p>
-<dl class="function">
-<dt>
-<code class="descname">S = randseisdata(N)</code></dt>
-<dd></dd></dl>
-
-<p>Generate <code class="docutils literal notranslate"><span class="pre">N</span></code> channels of random seismic data in a SeisData structure. Calling with no arguments (<code class="docutils literal notranslate"><span class="pre">randseisdata()</span></code>) generates 8 to 24 channels. Specify keyword <code class="docutils literal notranslate"><span class="pre">c=true</span></code> to allow the possibility of campaign (non-timeseries) data in some channels.</p>
-<dl class="function">
-<dt>
-<code class="descname">evt = randseisevent()</code></dt>
-<dd></dd></dl>
-
-<p>Generate a SeisEvent structure filled with random values. Specify keyword <code class="docutils literal notranslate"><span class="pre">c=true</span></code> to allow the possibility of campaign (non-timeseries) data in some channels.</p>
-<dl class="function">
-<dt>
-<code class="descname">H = randseishdr()</code></dt>
-<dd></dd></dl>
-
-<p>Generate a SeisHdr structure filled with random values.</p>
-<dl class="function">
-<dt>
-<code class="descname">S = readmseed(fname)</code></dt>
-<dd></dd></dl>
-
-<p>Read miniSEED data file <code class="docutils literal notranslate"><span class="pre">fname</span></code> into a SeisData structure.</p>
-<dl class="function">
-<dt>
-<code class="descname">S = readsac(fname)</code></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt>
-<code class="descname">S = rsac(fname)</code></dt>
-<dd></dd></dl>
-
-<p>Read SAC data file <code class="docutils literal notranslate"><span class="pre">fname</span></code> into a SeisData structure. Specify keyword <code class="docutils literal notranslate"><span class="pre">full=true</span></code> to save all SAC header values in field <code class="docutils literal notranslate"><span class="pre">:misc</span></code>.</p>
-<dl class="function">
-<dt>
-<code class="descname">S = readsegy(fname)</code></dt>
-<dd></dd></dl>
-
-<p>Read SEG Y data file <code class="docutils literal notranslate"><span class="pre">fname</span></code> into a SeisData structure. Specify keyword <code class="docutils literal notranslate"><span class="pre">passcal=true</span></code> for PASSCAL-modified SEG Y.</p>
-<dl class="function">
-<dt>
-<code class="descname">S = readuw(fname)</code></dt>
-<dd></dd></dl>
-
-<p>Read UW data file <code class="docutils literal notranslate"><span class="pre">fname</span></code> into a SeisData structure. <code class="docutils literal notranslate"><span class="pre">fname</span></code> can be a pick file (ending in [a-z]), a data file (ending in W), or a file root (numeric UW event ID).</p>
-<dl class="function">
-<dt>
-<code class="descname">S = readwin32(fstr, cf)</code></dt>
-<dd></dd></dl>
-
-<p>Read win32 data from files matching <code class="docutils literal notranslate"><span class="pre">fstr</span></code> into a SeisData structure using channel information file <code class="docutils literal notranslate"><span class="pre">cf</span></code>. <code class="docutils literal notranslate"><span class="pre">fstr</span></code> can contain wildcard filenames, but no wildcards are allowed in directory names if <code class="docutils literal notranslate"><span class="pre">fstr</span></code> specifies a full path.</p>
-<p>..function:: S = rlennasc(fname)</p>
-<p>Read Lennartz-formatted ASCII file <code class="docutils literal notranslate"><span class="pre">fname</span></code> into a SeisData structure.</p>
-<dl class="function">
-<dt>
-<code class="descname">A = rseis(fname)</code></dt>
-<dd></dd></dl>
-
-<p>Read SeisIO data from <code class="docutils literal notranslate"><span class="pre">fname</span></code> into an array of SeisIO-compatible structures.</p>
-<dl class="function">
-<dt id="sachdr">
-<code class="descname">sachdr</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#sachdr" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<p>Print headers from SAC file <code class="docutils literal notranslate"><span class="pre">fname</span></code> to stdout.</p>
-<dl class="function">
-<dt id="segyhdr">
-<code class="descname">segyhdr</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#segyhdr" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<p>Print headers from SEG Y file <code class="docutils literal notranslate"><span class="pre">fname</span></code> to stdout. Specify <code class="docutils literal notranslate"><span class="pre">passcal=true</span></code> for PASSCAL SEG Y.</p>
-<dl class="function">
-<dt id="seeddef">
-<code class="descname">seeddef</code><span class="sig-paren">(</span><em>f</em>, <em>v</em><span class="sig-paren">)</span><a class="headerlink" href="#seeddef" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<p>Set default SEED value for field <code class="docutils literal notranslate"><span class="pre">f</span></code> to <code class="docutils literal notranslate"><span class="pre">v</span></code>. Type <code class="docutils literal notranslate"><span class="pre">?seeddef</span></code> at the Julia prompt for a list of SEED defaults.</p>
-<dl class="function">
-<dt>
-<code class="descname">T = sort(S, rev=false)</code></dt>
-<dd></dd></dl>
-
-<p>“Safe” sort of channels in SeisData struct <code class="docutils literal notranslate"><span class="pre">S</span></code> by S.id to a new SeisData structure. Specify <code class="docutils literal notranslate"><span class="pre">rev=true</span></code> to reverse the sort order.</p>
-<dl class="function">
-<dt>
-<code class="descname">sort!(S, [rev=false])</code></dt>
-<dd></dd></dl>
-
-<p>In-place sort of channels in SeisData struct <code class="docutils literal notranslate"><span class="pre">S</span></code> by S.id. Specify <code class="docutils literal notranslate"><span class="pre">rev=true</span></code> to reverse the sort order.</p>
-<dl class="function">
-<dt>
-<code class="descname">sync!(S)</code></dt>
-<dd></dd></dl>
-
-<p>Synchronize the start and end times of all trace data in SeisData structure <code class="docutils literal notranslate"><span class="pre">S</span></code></p>
-<dl class="function">
-<dt>
-<code class="descname">U = sync(S)</code></dt>
-<dd></dd></dl>
-
-<p>“Safe” synchronize of start and end times of all trace data in SeisData structure <code class="docutils literal notranslate"><span class="pre">S</span></code> to a new structure <code class="docutils literal notranslate"><span class="pre">U</span></code>.</p>
-<dl class="function">
-<dt>
-<code class="descname">w = t_win(T, fs)</code></dt>
-<dd></dd></dl>
-
-<p>Convert matrix T from sparse delta-encoded time gaps to time windows (w[:,1]:w[:,2]) in integer μs from the Unix epoch (1970-01-01T00:00:00). Specify fs in Hz.</p>
-<p><code class="docutils literal notranslate"><span class="pre">W</span> <span class="pre">=</span> <span class="pre">t_win(S::SeisData)</span></code></p>
-<p>Convert S.t to time windows, as above, s.t. W[i] = t_win(S.t[i], S.fs[i])</p>
-<dl class="function">
-<dt id="timestamp">
-<code class="descname">timestamp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#timestamp" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<p>Return the current UTC time formatted yyyy-mm-ddTHH:MM:SS.</p>
-<dl class="function">
-<dt>
-<code class="descname">resp_new = translate_resp(X, fs, resp_old, resp_new; gain=G, hc_old=h0, hc_new=h1)</code></dt>
-<dd></dd></dl>
-
-<p>Translate frequency response of time-series data <code class="docutils literal notranslate"><span class="pre">X</span></code> sampled at <code class="docutils literal notranslate"><span class="pre">fs</span></code> Hz from <code class="docutils literal notranslate"><span class="pre">resp_old</span></code> to <code class="docutils literal notranslate"><span class="pre">resp_new</span></code>. zeros are in <code class="docutils literal notranslate"><span class="pre">resp[:,1]</span></code>, poles in <code class="docutils literal notranslate"><span class="pre">resp[:,2]</span></code>. Keywords <code class="docutils literal notranslate"><span class="pre">gain,</span> <span class="pre">hc_old,</span> <span class="pre">hc_new</span></code> set the scalar gain, old critical damping constant h<sub>0</sub>, and new critcal damping constant h<sub>1</sub>.</p>
-<dl class="function">
-<dt id="u2d">
-<code class="descname">u2d</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#u2d" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<p>Alias to <code class="docutils literal notranslate"><span class="pre">Dates.unix2datetime</span></code>.</p>
-<dl class="function">
-<dt>
-<code class="descname">ungap!(S)</code></dt>
-<dd></dd></dl>
-
-<p>Fill time gaps in SeisData structure <code class="docutils literal notranslate"><span class="pre">S</span></code>, cosine tapers regularly sampled subsequences of time series data, and fills time gaps with the mean of non-NaN data points. Setting <code class="docutils literal notranslate"><span class="pre">m=false</span></code> leaves time gaps set to NaNs; setting <code class="docutils literal notranslate"><span class="pre">w=false</span></code> prevents cosine tapering.</p>
-<dl class="function">
-<dt>
-<code class="descname">T = ungap(S)</code></dt>
-<dd></dd></dl>
-
-<p>“Safe” ungap of SeisData structure <code class="docutils literal notranslate"><span class="pre">S</span></code> to a new structure <code class="docutils literal notranslate"><span class="pre">T</span></code>.</p>
-<dl class="function">
-<dt>
-<code class="descname">S = uwdf(dfname)</code></dt>
-<dd></dd></dl>
-
-<p>Parse UW event data file <code class="docutils literal notranslate"><span class="pre">dfname</span></code> into a new SeisEvent structure <code class="docutils literal notranslate"><span class="pre">S</span></code>.</p>
-<dl class="function">
-<dt>
-<code class="descname">uwpf!(evt, pfname)</code></dt>
-<dd></dd></dl>
-
-<p>Parse UW event pick file <code class="docutils literal notranslate"><span class="pre">pfname</span></code> into SeisEvent structure <code class="docutils literal notranslate"><span class="pre">evt</span></code>.</p>
-<dl class="function">
-<dt>
-<code class="descname">S = uwpf(pfname)</code></dt>
-<dd></dd></dl>
-
-<p>Parse UW event pick file <code class="docutils literal notranslate"><span class="pre">pfname</span></code> into a new SeisEvent structure.</p>
-<p>fuinction:: w = w_time(W::Array{Int64,2}, fs::Float64)</p>
-<p>Convert matrix W from time windows (w[:,1]:w[:,2]) in integer μs from the Unix epoch (1970-01-01T00:00:00) to sparse delta-encoded time representation. Specify fs in Hz.</p>
+<p>Convert times <strong>s</strong> and <strong>t</strong> to strings α, ω sorted α &lt; ω.
+<strong>s</strong> and <strong>t</strong> can be real numbers, DateTime objects, or ASCII strings.
+Expected string format is “yyyy-mm-ddTHH:MM:SS.nnn”, e.g. 2016-03-23T11:17:00.333.</p>
 <dl class="function">
 <dt id="webhdr">
 <code class="descname">webhdr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#webhdr" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p>Generate a Dict{String,String} to set UserAgent in web requests.</p>
+<p>“Safe” synchronize of start and end times of all trace data in SeisData structure <code class="docutils literal notranslate"><span class="pre">S</span></code> to a new structure <code class="docutils literal notranslate"><span class="pre">U</span></code>.</p>
 <dl class="function">
-<dt id="writesac">
-<code class="descname">writesac</code><span class="sig-paren">(</span><em>S</em><span class="sig-paren">)</span><a class="headerlink" href="#writesac" title="Permalink to this definition">¶</a></dt>
+<dt id="t_win">
+<code class="descname">t_win</code><span class="sig-paren">(</span><em>T</em>, <em>fs</em><span class="sig-paren">)</span><a class="headerlink" href="#t_win" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>Convert matrix T from sparse delta-encoded time gaps to time windows (w[:,1]:w[:,2]) in integer μs from the Unix epoch (1970-01-01T00:00:00). Specify fs in Hz.</p>
 <dl class="function">
-<dt id="wsac">
-<code class="descname">wsac</code><span class="sig-paren">(</span><em>S</em><span class="sig-paren">)</span><a class="headerlink" href="#wsac" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">w = t_win(S::SeisData</code></dt>
 <dd></dd></dl>
 
-<p>Write SAC data from SeisData structure <code class="docutils literal notranslate"><span class="pre">S</span></code> to SAC files with auto-generated names. Specify <code class="docutils literal notranslate"><span class="pre">ts=true</span></code> to write time stamps; note that this will flag the file as “generic x-y data” in SAC.</p>
+<p>Convert S.t to time windows, as above, s.t. W[i] = t_win(S.t[i], S.fs[i])</p>
 <dl class="function">
-<dt id="wseis">
-<code class="descname">wseis</code><span class="sig-paren">(</span><em>fname</em>, <em>S</em><span class="sig-paren">)</span><a class="headerlink" href="#wseis" title="Permalink to this definition">¶</a></dt>
+<dt id="u2d">
+<code class="descname">u2d</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#u2d" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<p>Write SeisIO data from S to <code class="docutils literal notranslate"><span class="pre">fname</span></code>. Supports splat expansion for writing multiple objects, e.g. <code class="docutils literal notranslate"><span class="pre">wseis(fname,</span> <span class="pre">S,</span> <span class="pre">T,</span> <span class="pre">U)</span></code> writes <code class="docutils literal notranslate"><span class="pre">S</span></code>, <code class="docutils literal notranslate"><span class="pre">T</span></code>, and <code class="docutils literal notranslate"><span class="pre">U</span></code> to <code class="docutils literal notranslate"><span class="pre">fname</span></code>.</p>
+<p>Alias to <code class="docutils literal notranslate"><span class="pre">Dates.unix2datetime</span></code>.</p>
+<p>function:: w_time(W::Array{Int64,2}, fs::Float64)</p>
+<p>Convert matrix W from time windows (w[:,1]:w[:,2]) in integer μs from the Unix epoch (1970-01-01T00:00:00) to sparse delta-encoded time representation. Specify fs in Hz.</p>
+<div class="section" id="randseis">
+<h2>RandSeis<a class="headerlink" href="#randseis" title="Permalink to this headline">¶</a></h2>
+<p>These auxiliary function are used to quickly generate SeisIO structures with quasi-random field contents:</p>
+<ul class="simple">
+<li>Channels have SEED-compliant IDs, sampling frequencies, and data types.</li>
+<li>Channel data are randomly generated.</li>
+<li>Some time gaps are automatically inserted into regularly-sampled data.</li>
+<li>Instrument location parameters are randomly set.</li>
+</ul>
+<dl class="function">
+<dt>
+<code class="descname">C = randseischannel([,c=False, s=False])</code></dt>
+<dd></dd></dl>
+
+<p>Generate a SeisChannel of random data. Specify c=True for campaign-style (irregularly-sampled) data (fs = 0.0); specify s=True to guarantee seismic data. s=True overrides c=True.</p>
+<p>Generate 8 to 24 channels of random seismic data as a SeisData object.</p>
+<ul>
+<li><p class="first">100*c% of channels <em>after the first</em> will have irregularly-sampled data (fs = 0.0)</p>
+</li>
+<li><p class="first">100*s% of channels <em>after the first</em> are guaranteed to have seismic data.</p>
+<p>randseisdata(N[, c=0.2, s=0.6])</p>
+</li>
+</ul>
+<p>Generate N channels of random seismic data as a SeisData object.</p>
+<dl class="function">
+<dt id="randseisevent">
+<code class="descname">randseisevent</code><span class="sig-paren">(</span><span class="optional">[</span><em>c=0.2</em>, <em>s=0.6</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#randseisevent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Generate a SeisEvent structure filled with random values.
+* 100*c% of channels <em>after the first</em> will have irregularly-sampled data (fs = 0.0)
+* 100*s% of channels <em>after the first</em> are guaranteed to have seismic data.</p>
+<dl class="function">
+<dt>
+<code class="descname">H = randseishdr()</code></dt>
+<dd></dd></dl>
+
+<p>Generate a SeisHdr structure filled with random values.</p>
+</div>
 </div>
 
 

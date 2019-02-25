@@ -18,22 +18,44 @@ Data types in SeisIO can be manipulated using standard Julia commands.
 **************
 Initialization
 **************
-.. function:: C = SeisChannel()
 
-Create an empty SeisChannel structure. Fields can be set at creation with keywords, e.g. ``SeisChannel(fs=100.0)`` creates a new SeisChannel structure with fs set to 100.0 Hz.
+SeisChannel
+===========
+.. function:: SeisChannel()
 
-.. function:: S = SeisData()
+Initialize an empty SeisChannel structure.
 
-Create an empty SeisData structure. Fields cannot be set at creation.
+.. function:: SeisChannel(; [KWs])
 
-.. function:: T = SeisEvent()
+Set fields at creation by specifying fieldnames as keywords, e.g. ``SeisChannel(fs=100.0)`` creates a new SeisChannel structure with fs = 100.0 Hz.
 
-Create an empty SeisEvent structure.
+SeisData
+========
+.. function:: SeisData()
 
-.. function:: H = SeisHdr()
+Initialize an empty SeisData structure. Fields cannot be set at creation.
 
-Create an empty SeisHdr structure. Fields can be set at creation with keywords, e.g. ``SeisHdr(mag=(1.1f0,'l',' '), loc=[45.37, -121.69, 6.8])``
-initializes a SeisHdr structure with magnitude = M\ :sub:`l` 1.1 and location = 45.37°N, 121.69°W, z=6.8 km. Fields not specified at creation are initialized to SeisIO defaults.
+.. function:: SeisData(n)
+
+Initialize an empty SeisData structure with S.n channel containers.
+
+.. function:: SeisData(S::SeisData, Ev::SeisEvent, C1::SeisChannel, C2::SeisChannel)
+
+Create a SeisData structure by copying S and appending Ev.data, C1, and C2. This syntax can be used to form a new SeisData structure from arbitrary combinations of SeisData and SeisChannel objects.
+
+SeisHdr, SeisEvent
+==================
+.. function:: SeisHdr()
+
+Create an empty SeisHdr structure.
+
+.. function:: SeisHdr(; KWs)
+
+Set fields at creation by specifying fieldnames as keywords.
+
+.. function:: SeisEvent()
+
+Initialize an empty SeisEvent structure with an empty SeisHdr in .hdr and an empty SeisData in .data.
 
 
 Example
@@ -101,10 +123,12 @@ Remove all empty channels from ``S``. Empty channels are defined as the set of a
 Read, Write
 ===========
 .. function:: rsac(fname::String)
+   :noindex:
 
 Read SAC data file ``fname`` into a SeisData structure. Specify keyword ``full=true`` to save all SAC header values in field ``:misc``.
 
 .. function:: A = rseis(fname::String)
+   :noindex:
 
 Read SeisIO data from ``fname`` into an array of SeisIO structures.
 

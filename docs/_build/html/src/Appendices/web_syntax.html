@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>4. Data Requests Syntax &mdash; SeisIO 0.1.2 rc documentation</title>
+  <title>Data Requests Syntax &mdash; SeisIO 0.1.2 rc documentation</title>
   
 
   
@@ -87,7 +87,8 @@
               <p class="caption"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../seisdata.html">SeisIO Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../working_with_data.html">Working with Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../seisdata.html">Data Types</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Data Readers</span></p>
 <ul>
@@ -100,17 +101,17 @@
 </ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="function_list.html">1. Alphabetical Function List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="function_list.html">Functions by Category</a></li>
 <li class="toctree-l1"><a class="reference internal" href="seisdata_fields.html">2. Structure and Field Descriptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="seisdata_fileformat.html">3. SeisIO File Format</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">4. Data Requests Syntax</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#channel-id-syntax">4.1. Channel ID Syntax</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#wildcards-and-blanks">4.1.1. Wildcards and Blanks</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#channel-configuration-files">4.1.2. Channel Configuration Files</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#server-list">4.1.3. Server List</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Requests Syntax</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#channel-id-syntax">Channel ID Syntax</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#wildcards-and-blanks">Wildcards and Blanks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#channel-configuration-files">Channel Configuration Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#server-list">Server List</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#time-syntax">4.2. Time Syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#time-syntax">Time Syntax</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="keywords.html">5. SeisIO Standard Keywords</a></li>
@@ -160,7 +161,7 @@
     
       <li><a href="../../index.html">Docs</a> &raquo;</li>
         
-      <li>4. Data Requests Syntax</li>
+      <li>Data Requests Syntax</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -180,9 +181,9 @@
            <div itemprop="articleBody">
             
   <div class="section" id="data-requests-syntax">
-<h1>4. Data Requests Syntax<a class="headerlink" href="#data-requests-syntax" title="Permalink to this headline">¶</a></h1>
+<h1>Data Requests Syntax<a class="headerlink" href="#data-requests-syntax" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="channel-id-syntax">
-<span id="cid"></span><h2>4.1. Channel ID Syntax<a class="headerlink" href="#channel-id-syntax" title="Permalink to this headline">¶</a></h2>
+<span id="cid"></span><h2>Channel ID Syntax<a class="headerlink" href="#channel-id-syntax" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">NN.SSSSS.LL.CC</span></code> (net.sta.loc.cha, separated by periods) is the expected syntax for all web functions. The maximum field width in characters corresponds to the length of each field (e.g. 2 for network). Fields can’t contain whitespace.</p>
 <p><code class="docutils literal notranslate"><span class="pre">NN.SSSSS.LL.CC.T</span></code> (net.sta.loc.cha.tflag) is allowed in SeedLink. <code class="docutils literal notranslate"><span class="pre">T</span></code> is a single-character data type flag and must be one of <code class="docutils literal notranslate"><span class="pre">DECOTL</span></code>: Data, Event, Calibration, blOckette, Timing, or Logs. Calibration, timing, and logs are not in the scope of SeisIO and may crash SeedLink sessions.</p>
 <p>The table below specifies valid types and expected syntax for channel lists.</p>
@@ -221,8 +222,14 @@ ID string per row</td>
 </tbody>
 </table>
 <p>The expected component order is always network, station, location, channel; thus, “UW.TDH..EHZ” is OK, but “UW.TDH.EHZ” fails.</p>
+<dl class="function">
+<dt id="chanspec">
+<code class="descname">chanspec</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chanspec" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Type <code class="docutils literal notranslate"><span class="pre">?chanspec</span></code> in Julia to print the above info. to stdout.</p>
 <div class="section" id="wildcards-and-blanks">
-<h3>4.1.1. Wildcards and Blanks<a class="headerlink" href="#wildcards-and-blanks" title="Permalink to this headline">¶</a></h3>
+<h3>Wildcards and Blanks<a class="headerlink" href="#wildcards-and-blanks" title="Permalink to this headline">¶</a></h3>
 <p>Allowed wildcards are client-specific.</p>
 <ul class="simple">
 <li>The LOC field can be left blank in any client: <code class="docutils literal notranslate"><span class="pre">&quot;UW.ELK..EHZ&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">[&quot;UW&quot;</span> <span class="pre">&quot;ELK&quot;</span> <span class="pre">&quot;&quot;</span> <span class="pre">&quot;EHZ&quot;]</span></code> are all valid. Blank LOC fields are set to <code class="docutils literal notranslate"><span class="pre">--</span></code> in IRIS, <code class="docutils literal notranslate"><span class="pre">*</span></code> in FDSN, and <code class="docutils literal notranslate"><span class="pre">??</span></code> in SeedLink.</li>
@@ -232,7 +239,7 @@ ID string per row</td>
 </ul>
 </div>
 <div class="section" id="channel-configuration-files">
-<span id="ccfg"></span><h3>4.1.2. Channel Configuration Files<a class="headerlink" href="#channel-configuration-files" title="Permalink to this headline">¶</a></h3>
+<span id="ccfg"></span><h3>Channel Configuration Files<a class="headerlink" href="#channel-configuration-files" title="Permalink to this headline">¶</a></h3>
 <p>One entry per line, ASCII text, format NN.SSSSS.LL.CCC.D. Due to client-specific wildcard rules, the most versatile configuration files are those that specify each channel most completely:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span># This only works with SeedLink
 GE.ISP..BH?.D
@@ -268,7 +275,7 @@ CC.VALT..BHE
 </div>
 </div>
 <div class="section" id="server-list">
-<span id="servers"></span><h3>4.1.3. Server List<a class="headerlink" href="#server-list" title="Permalink to this headline">¶</a></h3>
+<span id="servers"></span><h3>Server List<a class="headerlink" href="#server-list" title="Permalink to this headline">¶</a></h3>
 <blockquote>
 <div><table border="1" class="docutils">
 <colgroup>
@@ -346,11 +353,17 @@ CC.VALT..BHE
 </tr>
 </tbody>
 </table>
+<dl class="function">
+<dt id="seis_www">
+<code class="descname">seis_www</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#seis_www" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Type <code class="docutils literal notranslate"><span class="pre">?seis_www</span></code> in Julia to print the above info. to stdout.</p>
 </div></blockquote>
 </div>
 </div>
 <div class="section" id="time-syntax">
-<span id="id1"></span><h2>4.2. Time Syntax<a class="headerlink" href="#time-syntax" title="Permalink to this headline">¶</a></h2>
+<span id="id1"></span><h2>Time Syntax<a class="headerlink" href="#time-syntax" title="Permalink to this headline">¶</a></h2>
 <p>Specify time inputs for web queries as a DateTime, Real, or String. The latter must take the form YYYY-MM-DDThh:mm:ss.nnn, where <code class="docutils literal notranslate"><span class="pre">T</span></code> is the uppercase character <cite>T</cite> and <code class="docutils literal notranslate"><span class="pre">nnn</span></code> denotes milliseconds; incomplete time strings treat missing fields as 0.</p>
 <table border="1" class="colwidths-given docutils">
 <colgroup>
