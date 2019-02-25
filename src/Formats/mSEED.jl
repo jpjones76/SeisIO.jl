@@ -1,4 +1,4 @@
-export readmseed, seeddef
+export readmseed
 const SEED = SeedVol()
 
 # TO DO: Account for channels where any of the relevant SeisData params
@@ -412,14 +412,14 @@ function readmseed!(fname::String; swap=false::Bool, v=0::Int)
 end
 
 
-"""
-    seeddef(s, v)
-
-Set SEED default for field `s` to value `v`. Field types, system defaults, and meanings are below.
-
-| Name   | Default | Type            | Description                      |
-|:-------|:--------|:----------------|:---------------------------------|
-| nx     | 360200  | Int             | length(C.x) for new channels     |
-"""
-seeddef(f::Symbol, v::Any) = setfield!(SEED.def, f, v)
-seeddef(s::String, v::Any) = setfield!(SEED.def, Symbol(s), v)
+# """
+#     seeddef(s, v)
+#
+# Set SEED default for field `s` to value `v`. Field types, system defaults, and meanings are below.
+#
+# | Name   | Default | Type            | Description                      |
+# |:-------|:--------|:----------------|:---------------------------------|
+# | nx     | 360200  | Int             | length(C.x) for new channels     |
+# """
+# seeddef(f::Symbol, v::Any) = setfield!(SEED.def, f, v)
+# seeddef(s::String, v::Any) = setfield!(SEED.def, Symbol(s), v)
