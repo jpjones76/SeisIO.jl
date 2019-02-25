@@ -20,16 +20,13 @@ const bad_chars = Dict{String,Array{UInt8,1}}(
   "HTML" => [0x22, 0x26, 0x27, 0x3b, 0x3c, 0x3e, 0xa9, 0x7f],
   "Julia" => [0x24, 0x5c, 0x7f],
   "Markdown" => [0x21, 0x23, 0x28, 0x29, 0x2a, 0x2b, 0x2d, 0x2e, 0x5b, 0x5c, 0x5d, 0x5f, 0x60, 0x7b, 0x7d],
-  "Safe" => [0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x2a, 0x2e, 0x2f, 0x3a,
-             0x3b, 0x3c, 0x3d, 0x3e, 0x3f, 0x40, 0x5c, 0x5e, 0x7b, 0x7c, 0x7d,
-             0x7e, 0x7f],
   "SEED" => [0x2e, 0x7f],
   "Strict" => [0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a,
                0x2b, 0x2c, 0x2d, 0x2e, 0x2f, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
                0x40, 0x5b, 0x5c, 0x5d, 0x5e, 0x60, 0x7b, 0x7c, 0x7d, 0x7e, 0x7f]
 )
 """
-    namestrip(s::String; convention::String="Safe")
+    namestrip(s::String; convention::String="File")
 
 Remove bad characters from S. Specify one of the following conventions:
 
@@ -37,12 +34,11 @@ Remove bad characters from S. Specify one of the following conventions:
 * "HTML" => ['"', '', '&', ';', '<', '>' , '©', '\x7f']
 * "Julia" => ['\$', '\\', '\x7f']
 * "Markdown" => ['!', '#', '(', ')', '*', '+', '-', '.', '[', '\\', ']', '_', '`', '{', '}']
-* "Safe" => ['!', '"', '#', '\$', '%', '&', '\'', '*', '.', '/', ':', ';', '<', '>', '?', '@', '\\', '^', '{', '|', '}', '~', '©', '\x7f']
 * "SEED" => ['.', '\x7f']
 * "Strict" => [' ', '!', '"', '#', '\$', '%', '&', '\'', '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '\\', '^', '{', '|', '}', '~', '\x7f']
 
 """
-function namestrip(str::String, convention::String="Safe")
+function namestrip(str::String, convention::String="File")
   chars = UInt8.(codeunits(str))
   deleteat!(chars, chars.<0x20)   # strip non-printing ASCII
   if haskey(bad_chars, convention)
