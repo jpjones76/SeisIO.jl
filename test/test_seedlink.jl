@@ -3,7 +3,7 @@ sta = ["CC.SEP", "UW.HDW"]
 config_file = path*"/SampleFiles/seedlink.conf"
 
 # Checking
-tf = has_stream(sta, "rtserve.iris.washington.edu")
+tf = has_stream(sta, u="rtserve.iris.washington.edu")
 
 # SeedLink DATA mode (easier)
 println("...SeedLink! DATA mode...")

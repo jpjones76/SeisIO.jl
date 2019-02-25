@@ -97,15 +97,15 @@ end
 
 
 """
-    info_xml = SL_info(level=LEVEL::String, u=URL::String, port=PORT::Integer)
+    info_xml = SL_info(level=LEVEL::String; u=URL::String, port=PORT::Integer)
 
 Retrieve XML output of SeedLink command "INFO `LEVEL`" from server `URL:PORT`.
 Returns formatted XML. `LEVEL` must be one of "ID", "CAPABILITIES",
 "STATIONS", "STREAMS", "GAPS", "CONNECTIONS", "ALL".
 
 """
-function SL_info(level::String,                    # level
-                 u::String;                        # url
+function SL_info(level::String;                    # level
+                 u::String="rtserve.iris.washington.edu",
                  port=18000::Integer                  # port
                  )
   conn = connect(TCPSocket(),u,port)
@@ -132,34 +132,39 @@ function SL_info(level::String,                    # level
 end
 
 """
-  has_sta(sta::String, u::String; port=18000::Integer)
+    has_sta(sta[, u=url, port=n])
 
-Check that streams exist at url `u` for stations `sta`, formatted
+Check that streams exist at `url` for stations `sta`, formatted
 NET.STA. Use "?" to match any single character. Returns `true` for
 stations that exist. `sta` can also be the name of a valid config
-file.
+file or a 1d string array.
 
-    X = has_sta(sta::Array{String,1}, u)
+Returns a BitArray with one value per entry in `sta.`
 
-Check that stations in `sta` (formatted NET.STA) are available via
-SeedLink from `u`. Returns a BitArray with one value per entry in
-`sta.`
-
+SeedLink keywords: gap, port
 """
-function has_sta(C::String, u::String; port=18000::Integer)
+function has_sta(C::String;
+  u::String="rtserve.iris.washington.edu",
+  port::Integer=18000)
+
   sta,pat = SeisIO.parse_sl(SeisIO.parse_chstr(C))
   for i = 1:length(sta)
     s = split(sta[i], " ")
     sta[i] = join([s[2],s[1]],'.')
   end
-  return check_sta_exists(sta, SL_info("STATIONS", u, port=port))
+  return check_sta_exists(sta, SL_info("STATIONS", u=u, port=port))
 end
-has_sta(sta::Array{String,1}, u::String; port=18000::Integer) = check_sta_exists([replace(i, " " => ".") for i in sta], SL_info("STATIONS", u, port=port))
-has_sta(sta::Array{String,2}, u::String; port=18000::Integer) = check_sta_exists([join(sta[i,:],'.') for i=1:size(sta,1)], SL_info("STATIONS", u, port=port))
-
+has_sta(sta::Array{String,1};
+  u::String="rtserve.iris.washington.edu",
+  port=18000::Integer) = check_sta_exists([replace(i, " " => ".") for i in sta],
+                                          SL_info("STATIONS", u=u, port=port))
+has_sta(sta::Array{String,2};
+        u::String="rtserve.iris.washington.edu",
+        port=18000::Integer) = check_sta_exists([join(sta[i,:],'.') for i=1:size(sta,1)],
+                                                SL_info("STATIONS", u=u, port=port))
 
 """
-X = has_stream(cha::String, u::String)
+    has_stream(cha[, u=url, port=N, gap=G)
 
 Check that streams with recent data exist at url `u` for channel spec
 `cha`, formatted NET.STA.LOC.CHA.DFLAG, e.g. "UW.TDH..EHZ.D,
@@ -168,40 +173,48 @@ for streams with recent data.
 
 `cha` can also be the name of a valid config file.
 
-    X = has_stream(cha::Array{String,1}, u::String)
-
-Check that streams with recent data exist at url `u` for channel spec
-`cha`, formatted NET.STA.LOC.CHA.DFLAG, e.g. ["UW.TDH..EHZ.D",
-"CC.HOOD..BH?.E"]. Use "?" to match any single character. Returns
-`true` for streams with recent data.
-
-    X = has_stream(cha::Array{String,1}, u::String, port=N::Int, gap=G::Real)
-
-As above, with keywords to set port number `N` (default: 18000) and
-timeout `M` seconds (default: 7200). If t > G seconds since last
-packet received, a stream is considered dead.
-
-  X = has_stream(sta::Array{String,1}, sel::Array{String,1}, u::String, port=N::Int, gap=G::Real)
+    has_stream(sta::Array{String,1}, sel::Array{String,1}, u::String, port=N::Int, gap=G::Real)
 
 If two arrays are passed to has_stream, the first should be
 formatted as SeedLink STATION patterns (formated "SSSSS NN", e.g.
 ["TDH UW", "VALT CC"]); the second be an array of SeedLink selector
 patterns (formatted LLCCC.D, e.g. ["??EHZ.D", "??BH?.?"]).
+
+SeedLink keywords: gap, port
 """
-function has_stream(sta::Array{String,1}, pat::Array{String,1}, u::String; port=18000::Int, gap=7200::Real)
+function has_stream(sta::Array{String,1}, pat::Array{String,1};
+    u="rtserve.iris.washington.edu"::String,            # url
+    port=18000::Int,
+    gap=7200::Real)
   for i = 1:length(sta)
     s = split(sta[i], " ")
     c = split(pat[i], '.')
     cha[i] = join([s[2],s[1],c[1][1:2],c[1][3:5],c[2]],'.')
   end
-  return check_stream_exists(cha, SL_info("STREAMS", u, port=port), gap=gap)
+  return check_stream_exists(cha, SL_info("STREAMS", u=u, port=port), gap=gap)
 end
-function has_stream(sta::String, u::String; port=18000::Integer, gap=7200::Real)
-  sta,pat = SeisIO.parse_sl(SeisIO.parse_chstr(sta))
-  return has_stream(sta, pat, u, port=port,gap=gap)
+function has_stream(sta::String;
+    u="rtserve.iris.washington.edu"::String,            # url
+    port=18000::Integer, gap=7200::Real)
+  sta, pat = SeisIO.parse_sl(SeisIO.parse_chstr(sta))
+  return has_stream(sta, pat, u=u, port=port, gap=gap)
 end
-has_stream(sta::Array{String,1}, u::String; port=18000::Int, gap=7200::Real) = check_stream_exists(sta, SL_info("STREAMS", u, port=port), gap=gap)
-has_stream(sta::Array{String,2}, u::String; port=18000::Integer, gap=7200::Real) = check_stream_exists([join(sta[i,:],'.') for i=1:size(sta,1)], SL_info("STREAMS", u, port=port), gap=gap)
+has_stream(sta::Array{String,1};
+  u="rtserve.iris.washington.edu"::String,
+  port=18000::Int,
+  gap=7200::Real) = check_stream_exists(sta,
+                                        SL_info("STREAMS",
+                                                u=u,
+                                                port=port),
+                                        gap=gap)
+has_stream(sta::Array{String,2};
+  u="rtserve.iris.washington.edu"::String,
+  port=18000::Integer,
+  gap=7200::Real) = check_stream_exists([join(sta[i,:],'.') for i=1:size(sta,1)],
+                                         SL_info("STREAMS",
+                                                 u=u,
+                                                 port=port),
+                                         gap=gap)
 
 # ### KEYWORD ARGUMENTS
 # Specify as `kw=value`, e.g., `SeedLink!(S, sta, mode="TIME", refresh=120)`.
@@ -249,6 +262,8 @@ use "*" for wildcards, it isn't valid.
 where n is connection #. If `w=true`, the next attempted packet dump
 after closing `C` will close the output file automatically.
 
+Standard keywords: fmt, opts, q, si, to, v, w, y
+SL keywords: gap, kai, mode, port, refresh, safety, x_on_err
 """
 function SeedLink!(S::SeisData,
   sta::Array{String,1},
@@ -287,7 +302,7 @@ function SeedLink!(S::SeisData,
     h = has_stream(sta, patts, u, port=port, gap=gap)
   elseif safety==0x01
     v>0 && println("Checking that request exists (may take 60 s)...")
-    h = has_sta(sta, u, port=port)
+    h = has_sta(sta, u=u, port=port)
   else
     h = trues(Ns)
   end
