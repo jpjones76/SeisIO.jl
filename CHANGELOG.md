@@ -1,3 +1,11 @@
+### 2019-02-24
+Several minor consistency improvements:
+* Exported functions are now all documented by topic
+* `randseisevent` now uses the same keywords as `randseisdata`
+* In SeedLink functions, `u` (url base) is now a keyword; FDSNWS keys aren't yet used
+* A `SeisData` object can now be created from a `SeisEvent`
+* Fixed exported functions to be more consistent and complete
+
 ### 2019-02-23
 Significant update with many bug fixes and code improvements.
 * Documentation has been updated to include a tutorial.
