@@ -76,6 +76,8 @@ mutable struct SeisData
         push!(S, U[i])
       elseif typeof(U[i]) == SeisData
         append!(S, U[i])
+      elseif typeof(U[i]) == SeisEvent
+        append!(S, U[i].data)
       else
         @warn(string("Tried to join incompatible type into SeisData at arg ", i, "; skipped."))
       end
