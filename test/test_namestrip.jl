@@ -7,4 +7,4 @@ for key in keys(SeisIO.bad_chars)
   @test length(test_str) == 256 - (32 + length(SeisIO.bad_chars[key]))
 end
 namestrip!(S)
-@test length(S.name[2]) == 200
+@test length(S.name[2]) == 210
