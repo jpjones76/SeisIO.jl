@@ -250,24 +250,24 @@ function randseischannel(; c=false::Bool, s=false::Bool)
   end
   return Ch
 end
-"""
-    populate_seis!(S::SeisData)
-
-Fill empty fields of S with random data.
-
-    populate_seis!(S::SeisData, N)
-
-Add N channels of random data to S.
-
-    populate_seis!(S::SeisData, N, c=C::Float64, s=F::Float64)
-
-Specify that (100*c)% of channels are campaign (irregularly sampled) data or
-(100*s)% of channels are guaranteed to be seismic data. Note that populate_seis!
-restricts channel types so that (n_seismic + n_campaign) < S.n, and n_seismic
-takes precedence.
-
-Defaults: c = 0.2, s = 0.6
-"""
+# """
+#     populate_seis!(S::SeisData)
+#
+# Fill empty fields of S with random data.
+#
+#     populate_seis!(S::SeisData, N)
+#
+# Add N channels of random data to S.
+#
+#     populate_seis!(S::SeisData, N, c=C::Float64, s=F::Float64)
+#
+# Specify that (100*c)% of channels are campaign (irregularly sampled) data or
+# (100*s)% of channels are guaranteed to be seismic data. Note that populate_seis!
+# restricts channel types so that (n_seismic + n_campaign) < S.n, and n_seismic
+# takes precedence.
+#
+# Defaults: c = 0.2, s = 0.6
+# """
 function populate_seis!(S::SeisData; c=0.2::Float64, s=0.6::Float64)
   n_seis = max(min(ceil(Int, s*S.n), S.n-1),0)
   n_irr = max(min(floor(Int, c*S.n), S.n-n_seis-1),0)
@@ -290,9 +290,11 @@ populate_seis!(S::SeisData, N::Int; c=0.2::Float64, s=0.6::Float64) =
   (U = SeisData(N); populate_seis!(U, c=c, s=s); append!(S,U))
 
 """
-    randseisdata()
+    randseisdata([, c=0.2, s=0.6])
 
 Generate 8 to 24 channels of random seismic data as a SeisData object.
+* 100*c is the percentage of channels _after the first_ with irregularly-sampled data (fs = 0.0)
+* 100*s is the percentage of channels _after the first_ with guaranteed seismic data.
 
     randseisdata(N)
 
@@ -332,20 +334,15 @@ function randseishdr()
   return H
 end
 
-function randseisevent(; c=false::Bool)
-  D = SeisData()
-  populate_seis!(D, rand(8:24), c=c)
-  return SeisEvent(hdr=randseishdr(), data=D)
-end
+"""
+    randseisevent([, c=0.2, s=0.6])
 
-function add_fake_net_code!(S::SeisData, str::String)
-  if length(str) > 2
-    str = str[1:2]
-  end
-  str = uppercase(str)
-  for i = 1:S.n
-    if startswith(S.id[i],'.')
-      S.id[i] = join(str, S.id[i][2:end])
-    end
-  end
+Generate a SeisEvent structure filled with random header and channel data.
+* 100*c is the percentage of :data channels _after the first_ with irregularly-sampled data (fs = 0.0)
+* 100*s is the percentage of :data channels _after the first_ with guaranteed seismic data.
+"""
+function randseisevent(; c=0.2::Float64, s=0.6::Float64)
+  D = SeisData()
+  populate_seis!(D, rand(8:24), c=c, s=s)
+  return SeisEvent(hdr=randseishdr(), data=D)
 end
