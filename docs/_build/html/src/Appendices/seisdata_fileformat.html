@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>3. SeisIO File Format &mdash; SeisIO 0.1.2 rc documentation</title>
+  <title>SeisIO File Format &mdash; SeisIO 0.1.2 rc documentation</title>
   
 
   
@@ -35,8 +35,8 @@
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="4. Data Requests Syntax" href="web_syntax.html" />
-    <link rel="prev" title="2. Structure and Field Descriptions" href="seisdata_fields.html" /> 
+    <link rel="next" title="Data Requests Syntax" href="web_syntax.html" />
+    <link rel="prev" title="Structure and Field Descriptions" href="seisdata_fields.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -99,28 +99,32 @@
 <li class="toctree-l1"><a class="reference internal" href="../Web/webclients.html">Web Requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Web/seedlink.html">SeedLink</a></li>
 </ul>
+<p class="caption"><span class="caption-text">Data Processing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Processing/processing.html">Data Processing</a></li>
+</ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="function_list.html">1. Functions by Category</a></li>
-<li class="toctree-l1"><a class="reference internal" href="seisdata_fields.html">2. Structure and Field Descriptions</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">3. SeisIO File Format</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#file-header">3.1. File header</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#seishdr">3.2. SeisHdr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#seisdata">3.3. SeisData</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#channel-data">3.3.1. Channel data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#storing-misc">3.3.2. Storing misc</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#standard-types-in-misc">3.3.2.1. Standard Types in <code class="docutils literal notranslate"><span class="pre">:misc</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#unusual-types-in-misc">3.3.2.2. Unusual Types in <code class="docutils literal notranslate"><span class="pre">:misc</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="function_list.html">Utility Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="seisdata_fields.html">Structure and Field Descriptions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">SeisIO File Format</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#file-header">File header</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#seishdr">SeisHdr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#seisdata">SeisData</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#channel-data">Channel data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#storing-misc">Storing misc</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#standard-types-in-misc">Standard Types in <code class="docutils literal notranslate"><span class="pre">:misc</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#unusual-types-in-misc">Unusual Types in <code class="docutils literal notranslate"><span class="pre">:misc</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#seisevent">3.4. SeisEvent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#seisevent">SeisEvent</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="web_syntax.html">4. Data Requests Syntax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="keywords.html">5. SeisIO Standard Keywords</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples.html">6. Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="web_syntax.html">Data Requests Syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="keywords.html">SeisIO Standard Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
 </ul>
 
             
@@ -166,7 +170,7 @@
     
       <li><a href="../../index.html">Docs</a> &raquo;</li>
         
-      <li>3. SeisIO File Format</li>
+      <li>SeisIO File Format</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -186,7 +190,7 @@
            <div itemprop="articleBody">
             
   <div class="section" id="seisio-file-format">
-<span id="seisdata-file-format"></span><h1>3. SeisIO File Format<a class="headerlink" href="#seisio-file-format" title="Permalink to this headline">¶</a></h1>
+<span id="seisdata-file-format"></span><h1>SeisIO File Format<a class="headerlink" href="#seisio-file-format" title="Permalink to this headline">¶</a></h1>
 <p>Files are written in little-endian byte order.</p>
 <table border="1" class="colwidths-given docutils" id="id1">
 <caption><span class="caption-text">Abbreviations used in this section</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
@@ -257,7 +261,7 @@
 </tbody>
 </table>
 <div class="section" id="file-header">
-<h2>3.1. File header<a class="headerlink" href="#file-header" title="Permalink to this headline">¶</a></h2>
+<h2>File header<a class="headerlink" href="#file-header" title="Permalink to this headline">¶</a></h2>
 <table border="1" class="colwidths-given docutils" id="id2">
 <caption><span class="caption-text">File header (14 bytes + TOC)</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
 <colgroup>
@@ -332,7 +336,7 @@
 </table>
 </div>
 <div class="section" id="seishdr">
-<h2>3.2. SeisHdr<a class="headerlink" href="#seishdr" title="Permalink to this headline">¶</a></h2>
+<h2>SeisHdr<a class="headerlink" href="#seishdr" title="Permalink to this headline">¶</a></h2>
 <p>Structural overview:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Int64_vals</span>
 <span class="p">:</span><span class="n">mag</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>       <span class="c1"># Float32</span>
@@ -446,7 +450,7 @@
 <p>Entries in Misc are stored after UInt8 values. See below for details.</p>
 </div>
 <div class="section" id="seisdata">
-<h2>3.3. SeisData<a class="headerlink" href="#seisdata" title="Permalink to this headline">¶</a></h2>
+<h2>SeisData<a class="headerlink" href="#seisdata" title="Permalink to this headline">¶</a></h2>
 <p>Structural overview:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">S</span><span class="o">.</span><span class="n">n</span>           <span class="c1"># UInt32</span>
 <span class="c1"># Repeated for each channel</span>
@@ -458,7 +462,7 @@
 </div>
 <p>S.x is compressed with BloscLZ before writing to disk.</p>
 <div class="section" id="channel-data">
-<h3>3.3.1. Channel data<a class="headerlink" href="#channel-data" title="Permalink to this headline">¶</a></h3>
+<h3>Channel data<a class="headerlink" href="#channel-data" title="Permalink to this headline">¶</a></h3>
 <table border="1" class="colwidths-given docutils" id="id7">
 <caption><span class="caption-text">Int64 values</span><a class="headerlink" href="#id7" title="Permalink to this table">¶</a></caption>
 <colgroup>
@@ -595,7 +599,7 @@
 <p>S.misc is written last, after the compressed S.x</p>
 </div>
 <div class="section" id="storing-misc">
-<h3>3.3.2. Storing misc<a class="headerlink" href="#storing-misc" title="Permalink to this headline">¶</a></h3>
+<h3>Storing misc<a class="headerlink" href="#storing-misc" title="Permalink to this headline">¶</a></h3>
 <p><code class="docutils literal notranslate"><span class="pre">:misc</span></code> is a Dict{String,Any} for both SeisData and SeisHdr, with limited support for key value types. Structural overview:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">L_keys</span>
 <span class="n">char_separator</span>  <span class="c1"># for keys</span>
@@ -638,7 +642,7 @@
 </tr>
 </tbody>
 </table>
-<span id="seisdata-misc-types"></span><table border="1" class="colwidths-given docutils" id="id11">
+<span id="smt"></span><table border="1" class="colwidths-given docutils" id="id11">
 <caption><span class="caption-text">Supported <code class="docutils literal notranslate"><span class="pre">:misc</span></code> value Types</span><a class="headerlink" href="#id11" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col width="7%" />
@@ -844,11 +848,11 @@
 </div>
 <p>Type “Any” is provided as a default; it is not supported.</p>
 <div class="section" id="standard-types-in-misc">
-<h4>3.3.2.1. Standard Types in <code class="docutils literal notranslate"><span class="pre">:misc</span></code><a class="headerlink" href="#standard-types-in-misc" title="Permalink to this headline">¶</a></h4>
-<p>Most values in <code class="docutils literal notranslate"><span class="pre">:misc</span></code> are saved as a <a class="reference internal" href="#seisdata-misc-types"><span class="std std-ref">UInt8 code</span></a> followed by the value itself.</p>
+<h4>Standard Types in <code class="docutils literal notranslate"><span class="pre">:misc</span></code><a class="headerlink" href="#standard-types-in-misc" title="Permalink to this headline">¶</a></h4>
+<p>Most values in <code class="docutils literal notranslate"><span class="pre">:misc</span></code> are saved as a <a class="reference internal" href="#smt"><span class="std std-ref">UInt8 code</span></a> followed by the value itself.</p>
 </div>
 <div class="section" id="unusual-types-in-misc">
-<h4>3.3.2.2. Unusual Types in <code class="docutils literal notranslate"><span class="pre">:misc</span></code><a class="headerlink" href="#unusual-types-in-misc" title="Permalink to this headline">¶</a></h4>
+<h4>Unusual Types in <code class="docutils literal notranslate"><span class="pre">:misc</span></code><a class="headerlink" href="#unusual-types-in-misc" title="Permalink to this headline">¶</a></h4>
 <p>The tables below describe how to read non-bitstype data into <code class="docutils literal notranslate"><span class="pre">:misc</span></code>.</p>
 <table border="1" class="colwidths-given docutils" id="id12">
 <caption><span class="caption-text">Array{String}</span><a class="headerlink" href="#id12" title="Permalink to this table">¶</a></caption>
@@ -1004,7 +1008,7 @@
 </div>
 </div>
 <div class="section" id="seisevent">
-<h2>3.4. SeisEvent<a class="headerlink" href="#seisevent" title="Permalink to this headline">¶</a></h2>
+<h2>SeisEvent<a class="headerlink" href="#seisevent" title="Permalink to this headline">¶</a></h2>
 <p>A SeisEvent structure is stored as a SeisHdr object followed by a SeisData object. However, the combination of SeisHdr and SeisData objects that comprises a SeisEvent object counts as one object, not two, in the file TOC.</p>
 </div>
 </div>
@@ -1017,10 +1021,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="web_syntax.html" class="btn btn-neutral float-right" title="4. Data Requests Syntax" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="web_syntax.html" class="btn btn-neutral float-right" title="Data Requests Syntax" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="seisdata_fields.html" class="btn btn-neutral float-left" title="2. Structure and Field Descriptions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="seisdata_fields.html" class="btn btn-neutral float-left" title="Structure and Field Descriptions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

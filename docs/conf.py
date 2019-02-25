@@ -28,9 +28,9 @@ import os
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = [
-'sphinx.ext.mathbase'
-]
+# extensions = [
+# 'sphinx.ext.mathbase'
+# ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -41,7 +41,8 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 
 # The encoding of source files.
-#source_encoding = 'utf-8-sig'
+source_encoding = 'utf-8-sig'
+# source_encoding = 'utf_16'
 
 # The master toctree document.
 master_doc = 'index'
@@ -124,7 +125,7 @@ html_theme = 'sphinx_rtd_theme'
 
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
-#html_title = u'SeisIO v0.0.0'
+# html_title = u'SeisIO v0.1.2'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None
@@ -211,18 +212,17 @@ htmlhelp_basename = 'SeisIOdoc'
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
-# The paper size ('letterpaper' or 'a4paper').
-#'papersize': 'letterpaper',
-
-# The font size ('10pt', '11pt' or '12pt').
-#'pointsize': '10pt',
+'papersize': 'letterpaper', # The paper size ('letterpaper' or 'a4paper').
+'pointsize': '11pt'#,
+#'hyperref': r'\usepackage[hidelinks]{hyperref}'
+}
 
 # Additional stuff for the LaTeX preamble.
-#'preamble': '',
+# 'preamble': '\usepackage[utf8x]{inputenc}',
 
 # Latex figure (float) alignment
 #'figure_align': 'htbp',
-}
+
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,

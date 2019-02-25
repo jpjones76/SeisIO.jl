@@ -188,7 +188,7 @@ A number of auxiliary functions exist to keep track of channels:
 .. function:: findchan(id::String, S::SeisData)
 .. function:: findchan(S::SeisData, id::String)
 
-Get all channel indices i in S with id ∈ S.id[i]. Can do partial id matches, e.g. findchan(S, "UW.") returns indices to all channels whose IDs begin with "UW.".
+Get all channel indices i in S with id :math:`\in` S.id[i]. Can do partial id matches, e.g. findchan(S, "UW.") returns indices to all channels whose IDs begin with "UW.".
 
 .. function:: findid(S::SeisData, id)
 
