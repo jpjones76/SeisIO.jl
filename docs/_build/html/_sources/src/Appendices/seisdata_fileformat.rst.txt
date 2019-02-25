@@ -171,7 +171,7 @@ Storing misc
     ``K``,string of keys,u8,p
 
 
-.. _seisdata_misc_types:
+.. _smt:
 
 .. csv-table:: Supported ``:misc`` value Types
     :header: code, value Type, code, value Type
@@ -260,7 +260,7 @@ Type "Any" is provided as a default; it is not supported.
 
 Standard Types in ``:misc``
 ---------------------------
-Most values in ``:misc`` are saved as a :ref:`UInt8 code <seisdata_misc_types>` followed by the value itself.
+Most values in ``:misc`` are saved as a :ref:`UInt8 code <smt>` followed by the value itself.
 
 
 Unusual Types in ``:misc``

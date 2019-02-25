@@ -17,7 +17,7 @@ Current format support: (e = endianness; B = big, l = little, * = either)
 +----------+---+---------------+---------------------------+
 |          | l | writesac      | sac files on disk         |
 +----------+---+---------------+---------------------------+
-| SEG Y    | B | readsegy [a]_ | new SeisData              |
+| SEG Y    | B | readsegy (a)  | new SeisData              |
 +----------+---+---------------+---------------------------+
 |          | B | segyhdr       | dumps header to stdout    |
 +----------+---+---------------+---------------------------+
@@ -32,8 +32,7 @@ Current format support: (e = endianness; B = big, l = little, * = either)
 | win32    | B | readwin32     | new SeisData              |
 +----------+---+---------------+---------------------------+
 
-.. rubric:: Footnotes
-.. [a] Use keyword PASSCAL=true for PASSCAL SEG Y.
+(a) Use keyword PASSCAL=true for PASSCAL SEG Y.
 
 *******************
 Format Descriptions
@@ -51,7 +50,10 @@ Format Descriptions
 
 Usage Warnings
 --------------
-:sup:`(a)`  **SEG Y** ≤ rev 1 is supported. Trace header field definitions in SEG Y are not ridigly controlled by any central authority, so some industry SEG Y files may be unreadable. Please address questions about unreadable SEG Y files to their creators.
+:sup:`(a)`  **SEG Y** v :math:`\le` rev 1 is supported. Trace header field
+definitions in SEG Y are not ridigly controlled by any central authority, so
+some industry SEG Y files may be unreadable. Please address questions about
+unreadable SEG Y files to their creators.
 
 :sup:`(b)`  **UW** data format has no online documentation. Please contact the SeisIO creators or the Pacific Northwest Seismic Network (University of Washington, United States) if additional help is needed to read these files.
 
