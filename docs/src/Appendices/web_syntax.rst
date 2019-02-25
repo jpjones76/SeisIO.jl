@@ -28,6 +28,9 @@ The table below specifies valid types and expected syntax for channel lists.
 
 The expected component order is always network, station, location, channel; thus, "UW.TDH..EHZ" is OK, but "UW.TDH.EHZ" fails.
 
+.. function:: chanspec()
+
+Type ``?chanspec`` in Julia to print the above info. to stdout.
 
 Wildcards and Blanks
 ====================
@@ -126,6 +129,10 @@ Server List
   +--------+---------------------------------------+
   | USP    | http://sismo.iag.usp.br               |
   +--------+---------------------------------------+
+
+  .. function:: seis_www()
+
+  Type ``?seis_www`` in Julia to print the above info. to stdout.
 
 .. _time_syntax:
 

@@ -45,7 +45,9 @@ FDSN queries in SeisIO are highly customizable; see :ref:`data keywords list <dk
 Data Query
 **********
 .. function:: get_data!(S, "FDSN", channels; KWs)
+   :noindex:
 .. function:: S = get_data("FDSN", channels; KWs)
+   :noindex:
 
 FDSN data query with get_data! wrapper.
 
@@ -57,7 +59,9 @@ FDSN data query with get_data! wrapper.
 Station Query
 *************
 .. function:: FDSNsta!(S, chans, KW)
+   :noindex:
 .. function:: S = FDSNsta(chans, KW)
+   :noindex:
 
 Fill channels `chans` of SeisData structure `S` with information retrieved from
 remote station XML files by web query.
@@ -70,6 +74,9 @@ remote station XML files by web query.
 Event Header Query
 ******************
 .. function:: H = FDSNevq(ot)
+   :noindex:
+
+:ref:`Shared keywords<dkw>`: evw, reg, mag, nev, src, to, w
 
 Multi-server query for the event(s) with origin time(s) closest to `ot`. Returns
 a SeisHdr.
@@ -101,20 +108,15 @@ IRIS Queries
 
 Incorporated Research Institutions for Seismology `(IRIS) <http://www.iris.edu/>`_ is a consortium of universities dedicated to the operation of science facilities for the acquisition, management, and distribution of seismological data.
 
-Data Query
-**********
-.. function:: get_data!(S, "IRIS", channels; KWs)
-.. function:: S = get_data("IRIS", channels; KWs)
-
-Features
---------
+Data Query Features
+*******************
 * Stage zero gains are removed from trace data; all IRIS data will appear to have a gain of 1.0.
 * IRISWS disallows wildcards in channel IDs.
 * Channel spec *must* include the net, sta, cha fields; thus, CHA = "CC.VALT..BHZ" is OK; CHA = "CC.VALT" is not.
 
 Phase Onset Query
 *****************
-.. function: T = get_pha(Δ::Float64, z::Float64)
+.. function: get_pha(Δ::Float64, z::Float64)
 
 Command-line interface to IRIS online travel time calculator, which calls TauP [1-2]. Returns a matrix of strings.
 

@@ -87,7 +87,8 @@
               <p class="caption"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../seisdata.html">SeisIO Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../working_with_data.html">Working with Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../seisdata.html">Data Types</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Data Readers</span></p>
 <ul>
@@ -105,10 +106,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#iris-queries">IRIS Queries</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Data Query</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#features">Features</a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="#data-query-features">Data Query Features</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#phase-onset-query">Phase Onset Query</a></li>
 </ul>
 </li>
@@ -118,11 +116,12 @@
 </ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Appendices/function_list.html">1. Alphabetical Function List</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/function_list.html">Functions by Category</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/seisdata_fields.html">2. Structure and Field Descriptions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/seisdata_fileformat.html">3. SeisIO File Format</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Appendices/web_syntax.html">4. Web Keywords and Syntax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Appendices/examples.html">5. Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/web_syntax.html">Data Requests Syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/keywords.html">5. SeisIO Standard Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/examples.html">6. Examples</a></li>
 </ul>
 
             
@@ -211,7 +210,7 @@
 <div class="line">Channels to retrieve; can be passed as a <a class="reference internal" href="../Appendices/web_syntax.html#cid"><span class="std std-ref">string, string array, or parameter file</span></a>. Type <code class="docutils literal notranslate"><span class="pre">?chanspec</span></code> at the Julia prompt for more info.</div>
 <div class="line"><br /></div>
 <div class="line"><strong>KWs</strong></div>
-<div class="line">Keyword arguments; see also <a class="reference internal" href="../Appendices/web_syntax.html#dkw"><span class="std std-ref">SeisIO standard KWs</span></a> or type <code class="docutils literal notranslate"><span class="pre">?SeisIO.KW</span></code>.</div>
+<div class="line">Keyword arguments; see also <a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">SeisIO standard KWs</span></a> or type <code class="docutils literal notranslate"><span class="pre">?SeisIO.KW</span></code>.</div>
 <div class="line">Standard keywords: fmt, opts, q, si, to, v, w, y</div>
 <div class="line">Other keywords:</div>
 <div class="line"><code class="docutils literal notranslate"><span class="pre">--s</span></code>: Start time</div>
@@ -229,7 +228,7 @@
 <div class="section" id="fdsn-queries">
 <h2>FDSN Queries<a class="headerlink" href="#fdsn-queries" title="Permalink to this headline">¶</a></h2>
 <p id="fdsnws"><a class="reference external" href="http://www.fdsn.org/">The International Federation of Digital Seismograph Networks (FDSN)</a> is a global organization that supports seismology research. The FDSN web protocol offers near-real-time access to data from thousands of instruments across the world.</p>
-<p>FDSN queries in SeisIO are highly customizable; see <a class="reference internal" href="../Appendices/web_syntax.html#dkw"><span class="std std-ref">data keywords list</span></a> and <a class="reference internal" href="../Appendices/web_syntax.html#cid"><span class="std std-ref">channel id syntax</span></a>.</p>
+<p>FDSN queries in SeisIO are highly customizable; see <a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">data keywords list</span></a> and <a class="reference internal" href="../Appendices/web_syntax.html#cid"><span class="std std-ref">channel id syntax</span></a>.</p>
 <div class="section" id="data-query">
 <h3>Data Query<a class="headerlink" href="#data-query" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
@@ -244,7 +243,7 @@
 
 <p>FDSN data query with get_data! wrapper.</p>
 <div class="line-block">
-<div class="line"><a class="reference internal" href="../Appendices/web_syntax.html#dkw"><span class="std std-ref">Shared keywords</span></a>: fmt, opts, q, s, si, t, to, v, w, y</div>
+<div class="line"><a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">Shared keywords</span></a>: fmt, opts, q, s, si, t, to, v, w, y</div>
 <div class="line">Other keywords:</div>
 <div class="line"><code class="docutils literal notranslate"><span class="pre">--s</span></code>: Start time</div>
 <div class="line"><code class="docutils literal notranslate"><span class="pre">--t</span></code>: Termination (end) time</div>
@@ -265,7 +264,7 @@
 <p>Fill channels <cite>chans</cite> of SeisData structure <cite>S</cite> with information retrieved from
 remote station XML files by web query.</p>
 <div class="line-block">
-<div class="line"><a class="reference internal" href="../Appendices/web_syntax.html#dkw"><span class="std std-ref">Shared keywords</span></a>: src, to, v</div>
+<div class="line"><a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">Shared keywords</span></a>: src, to, v</div>
 <div class="line">Other keywords:</div>
 <div class="line"><code class="docutils literal notranslate"><span class="pre">--s</span></code>: Start time</div>
 <div class="line"><code class="docutils literal notranslate"><span class="pre">--t</span></code>: Termination (end) time</div>
@@ -278,6 +277,7 @@ remote station XML files by web query.</p>
 <code class="descname">H = FDSNevq(ot)</code></dt>
 <dd></dd></dl>
 
+<p><a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">Shared keywords</span></a>: evw, reg, mag, nev, src, to, w</p>
 <p>Multi-server query for the event(s) with origin time(s) closest to <cite>ot</cite>. Returns
 a SeisHdr.</p>
 <p>Notes:</p>
@@ -287,7 +287,7 @@ a SeisHdr.</p>
 <li>If no event is found in the specified search window, FDSNevq exits with an error.</li>
 </ol>
 <div class="line-block">
-<div class="line"><a class="reference internal" href="../Appendices/web_syntax.html#dkw"><span class="std std-ref">Shared keywords</span></a>: evw, reg, mag, nev, src, to, w</div>
+<div class="line"><a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">Shared keywords</span></a>: evw, reg, mag, nev, src, to, w</div>
 </div>
 </div>
 <div class="section" id="event-header-and-data-query">
@@ -300,7 +300,7 @@ a SeisHdr.</p>
 <p>Get trace data for the event closest to origin time <cite>ot</cite> on channels <cite>chans</cite>.
 Returns a SeisEvent.</p>
 <div class="line-block">
-<div class="line"><a class="reference internal" href="../Appendices/web_syntax.html#dkw"><span class="std std-ref">Shared keywords</span></a>: fmt, mag, opts, pha, q, src, to, v, w</div>
+<div class="line"><a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">Shared keywords</span></a>: fmt, mag, opts, pha, q, src, to, v, w</div>
 <div class="line">Other keywords:</div>
 <div class="line"><code class="docutils literal notranslate"><span class="pre">--len</span></code>: desired record length <em>in minutes</em>.</div>
 </div>
@@ -309,26 +309,13 @@ Returns a SeisEvent.</p>
 <div class="section" id="iris-queries">
 <h2>IRIS Queries<a class="headerlink" href="#iris-queries" title="Permalink to this headline">¶</a></h2>
 <p id="irisws">Incorporated Research Institutions for Seismology <a class="reference external" href="http://www.iris.edu/">(IRIS)</a> is a consortium of universities dedicated to the operation of science facilities for the acquisition, management, and distribution of seismological data.</p>
-<div class="section" id="id1">
-<h3>Data Query<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
-<dl class="function">
-<dt>
-<code class="descname">get_data!(S, &quot;IRIS&quot;, channels; KWs)</code></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt>
-<code class="descname">S = get_data(&quot;IRIS&quot;, channels; KWs)</code></dt>
-<dd></dd></dl>
-
-<div class="section" id="features">
-<h4>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="data-query-features">
+<h3>Data Query Features<a class="headerlink" href="#data-query-features" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Stage zero gains are removed from trace data; all IRIS data will appear to have a gain of 1.0.</li>
 <li>IRISWS disallows wildcards in channel IDs.</li>
 <li>Channel spec <em>must</em> include the net, sta, cha fields; thus, CHA = “CC.VALT..BHZ” is OK; CHA = “CC.VALT” is not.</li>
 </ul>
-</div>
 </div>
 <div class="section" id="phase-onset-query">
 <h3>Phase Onset Query<a class="headerlink" href="#phase-onset-query" title="Permalink to this headline">¶</a></h3>

@@ -12,6 +12,7 @@ First Steps
 Create a new, empty **SeisChannel** object with
 
 .. function:: Ch = SeisChannel()
+    :noindex:
 
 The meanings of the field names are explained `here<dkw>`. You can edit
 field values manually, e.g.,
@@ -31,6 +32,7 @@ the SeisData() command, which can optionally create any number of empty channels
 at a time, e.g.,
 
 .. function:: S = SeisData(1)
+    :noindex:
 
 They can be explored similarly:
 ::
@@ -41,11 +43,13 @@ They can be explored similarly:
 A collection of channels becomes a SeisData structure:
 
 .. function:: S = SeisData(SeisChannel(), SeisChannel())
+    :noindex:
 
 You can push channels onto existing SeisData structures, like adding one key
 to a dictionary:
 
 .. function:: push!(S, Ch)
+    :noindex:
 
 Note that this copies Ch to a new channel in S -- S[3] is not a view into C.
 This is deliberate, as otherwise the workspace quickly becomes a mess of
@@ -129,6 +133,7 @@ SeisData structures can be merged using the function **merge!**, but this is
 much more complicated than addition.
 
 .. function:: merge!(S)
+    :noindex:
 
 * Does nothing to channels with unique IDs.
 * For sets of channels in S that share an ID...
@@ -142,26 +147,100 @@ much more complicated than addition.
 Keeping Track
 *************
 Because tracking arbitrary operations can be difficult, several functions have
-been written to keep track of data operations in a semi-automated way.
+been written to keep track of data and operations in a semi-automated way.
 
 Taking Notes
 ============
 Most functions that add or process data note this in the appropriate channel's :notes field.
 However, you can also make your own notes with the note! command:
 
-.. function:: note!(S, str)
+.. function:: note!(S, i, str)
+    :noindex:
 
-Append a string to field :notes of every channel of S. Alternately, you can also do:
+Append **str** with a timestamp to the :notes field of channel number **i** of **S**.
 
 .. function:: note!(S, id, str)
+    :noindex:
 
-As above for the first channel in S whose id is an exact match to id.
+As above for the first channel in **S** whose id is an exact match to **id**.
 
-.. function:: note!(S, i, str)
+.. function:: note!(S, str)
+    :noindex:
 
-Record a note in channel number i.
+if **str* mentions a channel name or ID, only the corresponding channel(s) in **S** is annotated; otherwise, all channels are annotated.
 
-All notes recorded with the note! function are time-stamped.
+.. clear_notes!(S::SeisData, i::Int64, s::String)
+
+Clear all notes from channel ``i`` of ``S``.
+
+``clear_notes!(S, id)``
+
+Clear all notes from the first channel in ``S`` whose id field exactly matches ``id``.
+
+``clear_notes!(S)``
+
+Clear all notes from every channel in ``S``.
+
+Keeping Track
+=============
+A number of auxiliary functions exist to keep track of channels:
+
+.. function:: findchan(id::String, S::SeisData)
+.. function:: findchan(S::SeisData, id::String)
+
+Get all channel indices i in S with id ∈ S.id[i]. Can do partial id matches, e.g. findchan(S, "UW.") returns indices to all channels whose IDs begin with "UW.".
+
+.. function:: findid(S::SeisData, id)
+
+Return the index of the first channel in **S** where id = **id**.
+
+.. function:: findid(S::SeisData, Ch::SeisChannel)
+
+Equivalent to findfirst(S.id.==Ch.id).
+
+.. function:: namestrip!(S[, convention])
+
+Remove bad characters from the :name fields of **S**. Specify convention as a string (default is "File"):
+
++------------+---------------------------------------+
+| Convention | Characters Removed:sup:`(a)`          |
++============+=======================================+
+| "File"     | ``"$*/:<>?@\^|~DEL``                  |
++------------+---------------------------------------+
+| "HTML"     | ``"&';<>©DEL``                        |
++------------+---------------------------------------+
+| "Julia"    | ``$\DEL``                             |
++------------+---------------------------------------+
+| "Markdown" | ``!#()*+-.[\]_`{}``                   |
++------------+---------------------------------------+
+| "SEED"     | ``.DEL``                              |
++------------+---------------------------------------+
+| "Strict"   | ``!"#$%&'()*+,-./:;<=>?@[\]^`{|}~DEL``|
++------------+---------------------------------------+
+
+:sup:`(a)` ``DEL`` is \\x7f (ASCII/Unicode U+007f).
+
+
+.. function:: timestamp()
+
+Return current UTC time formatted yyyy-mm-ddTHH:MM:SS.μμμ.
+
+.. function:: track_off!(S)
+
+Turn off tracking in S and return a boolean vector of which channels were added
+or altered significantly.
+
+.. function:: track_on!(S)
+
+Begin tracking changes in S. Tracks changes to :id, channel additions, and
+changes to data vector sizes in S.x.
+
+Does not track data processing operations on any channel i unless
+length(S.x[i]) changes for channel i (e.g. filtering is not tracked).
+
+**Warning**: If you have or suspect gapped data in any channel, calling
+ungap! while tracking is active will flag a channel as changed.
+
 
 Source Logging
 ==============
