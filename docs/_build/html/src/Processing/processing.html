@@ -184,7 +184,7 @@
 <dd></dd></dl>
 
 <p>Cosine taper each channel in S around time gaps, then fill time gaps with the mean of non-NaN data points.</p>
-<p>Remove the mean from all channels i with S.fs[i] &gt; 0.0. Specify all=True to also remove the mean from irregularly sampled channels. Ignores NaNs.</p>
+<p>Remove the mean from all channels i with S.fs[i] &gt; 0.0. Specify all=true to also remove the mean from irregularly sampled channels. Ignores NaNs.</p>
 <dl class="function">
 <dt>
 <code class="descname">equalize_resp!(S, resp_new::Array[, hc_new=HC, C=CH])</code></dt>
@@ -224,7 +224,7 @@
 <p>Synchronize S to a common range of times and pad data gaps.</p>
 <p>Keywords and behaviors:</p>
 <ul class="simple">
-<li>resample=True resamples regularly-data in S to the lowest non-null value of S.fs. Resample requests are ignored if S has only one data channel.</li>
+<li>resample=true resamples regularly-data in S to the lowest non-null value of S.fs. Resample requests are ignored if S has only one data channel.</li>
 <li>fs=FS resamples regularly-sampled data in S to FS. Note that a poor choice of FS can lead to upsampling and other bad behaviors.</li>
 <li>s=ST, t=EN specifies start and end times. Accepted values include:<ul>
 <li>s=”max”: Sync to earliest start time in S. (default)</li>
@@ -239,19 +239,24 @@
 </ul>
 <dl class="function">
 <dt>
-<code class="descname">ungap!(S, [m=True, w=True])</code></dt>
+<code class="descname">ungap!(S, [m=true, w=true])</code></dt>
 <dd></dd></dl>
 
 <p>Cosine taper all subsequences of regularly-sampled data and fill gaps with the
-mean of non-NaN data points. <strong>m=False</strong> leaves time gaps set to NaNs;
-<strong>w=False</strong> prevents cosine tapering.</p>
+mean of non-NaN data points. <strong>m=false</strong> leaves time gaps set to NaNs;
+<strong>w=false</strong> prevents cosine tapering.</p>
 <dl class="function">
 <dt>
 <code class="descname">T = ungap(S)</code></dt>
 <dd></dd></dl>
 
 <p>“Safe” ungap of SeisData object S to a new SeisData object T.</p>
-<p>Divide the gains from all channels i with S.fs[i] &gt; 0.0. Specify all=True to
+<dl class="function">
+<dt>
+<code class="descname">unscale!(S[, all=false])</code></dt>
+<dd></dd></dl>
+
+<p>Divide the gains from all channels i with S.fs[i] &gt; 0.0. Specify all=true to
 also remove gains of irregularly-sampled channels.</p>
 </div>
 

@@ -74,7 +74,7 @@ Retrieve SeedLink information at verbosity level **v** from **url**. Returns XML
 | Other keywords: ``u`` specifies the URL without "http://"
 
 Check that streams exist at `url` for stations `sta`, formatted
-NET.STA. Use "?" to match any single character. Returns True for
+NET.STA. Use "?" to match any single character. Returns true for
 stations that exist. `sta` can also be the name of a valid config
 file or a 1d string array.
 
