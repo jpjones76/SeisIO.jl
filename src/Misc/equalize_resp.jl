@@ -1,3 +1,5 @@
+export equalize_resp!
+
 """
     equalize_resp!(S::SeisData, resp_new::Array{Complex{Float64},2})
 
