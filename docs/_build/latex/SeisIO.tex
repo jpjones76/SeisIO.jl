@@ -506,7 +506,7 @@ Initialize an empty SeisChannel structure.
 \end{fulllineitems}
 
 
-Set fields at creation by specifying fieldnames as keywords, e.g. \sphinxcode{\sphinxupquote{SeisChannel(fs=100.0)}} creates a new SeisChannel structure with fs = 100.0 Hz.
+Set fields at creation by specifying fieldnames as keywords, e.g. \sphinxstylestrong{SeisChannel(fs=100.0)} creates a new SeisChannel structure with fs = 100.0 Hz.
 
 
 \subsubsection{SeisData}
@@ -576,17 +576,19 @@ Create a new SeisData structure with three channels
 
 \subsubsection{SeisData Indexing}
 \label{\detokenize{src/seisdata:seisdata-indexing}}
-Individual channels in a SeisData structure can be accessed by channel index. Indexing a single channel, e.g. \sphinxcode{\sphinxupquote{C=S{[}3{]}}}, outputs a SeisChannel; indexing several outputs a new SeisData structure.
+Individual channels in a SeisData structure can be accessed by channel index. Indexing a single channel, e.g. \sphinxstylestrong{C=S{[}3{]}}, outputs a SeisChannel; indexing several outputs a new SeisData structure.
 
-The same syntax can be used to ovewrwrite data by channel (or channel range). For example, \sphinxcode{\sphinxupquote{S{[}2{]} = T}}, where T is a SeisChannel instance, replaces the second channel of S with T.
+The same syntax can be used to ovewrwrite data by channel (or channel range). For example, \sphinxstylestrong{S{[}2{]} = T}, where T is a SeisChannel instance, replaces the second channel of S with T.
 
-Multiple channels in a SeisData structure S can be overwritten with another SeisData structure T using \sphinxcode{\sphinxupquote{setindex!(S, T, I)}}; the last input is the range of indices in S to overwrite (which must satisfy \sphinxcode{\sphinxupquote{length(I) == T.n}}).
+Multiple channels in a SeisData structure S can be overwritten with another SeisData structure T using \sphinxstylestrong{setindex!(S, T, I)}; the last input is the range of indices in S to overwrite (which must satisfy \sphinxstylestrong{length(I) == T.n}).
 
-\sphinxstyleemphasis{Julia is a “pass by reference” language}. The precaution here is best illustrated by example: if we assign \sphinxcode{\sphinxupquote{T = S{[}2{]}}}, subsequent changes to \sphinxcode{\sphinxupquote{T}} modify \sphinxcode{\sphinxupquote{S{[}2{]}}} in place.
+\sphinxstyleemphasis{Julia is a “pass by reference” language}. The precaution here is best illustrated by example: if we assign \sphinxstylestrong{T = S{[}2{]}}, subsequent changes to \sphinxstylestrong{T} modify \sphinxstylestrong{S{[}2{]}} in place.
 
 
 \subsection{Commands by Category}
 \label{\detokenize{src/seisdata:commands-by-category}}
+SeisIO extends a number of built-in Julia methods to work with its custom data types. In addition, many custom functions exist to simplify processing.
+
 
 \subsubsection{Append, Merge}
 \label{\detokenize{src/seisdata:append-merge}}
@@ -596,7 +598,7 @@ Multiple channels in a SeisData structure S can be overwritten with another Seis
 \end{fulllineitems}
 
 
-Append all channels in \sphinxcode{\sphinxupquote{U}} to \sphinxcode{\sphinxupquote{S}}. No checks against redundancy are performed; can result in duplicate channels (fix with \sphinxcode{\sphinxupquote{merge!(S)}}).
+Append all channels in \sphinxstylestrong{U} to \sphinxstylestrong{S}. No checks against redundancy are performed; can result in duplicate channels (fix with \sphinxstylestrong{merge!(S)}).
 
 
 \begin{fulllineitems}
@@ -610,9 +612,9 @@ Append all channels in \sphinxcode{\sphinxupquote{U}} to \sphinxcode{\sphinxupqu
 \end{fulllineitems}
 
 
-Merge \sphinxcode{\sphinxupquote{U}} into \sphinxcode{\sphinxupquote{S}}. Also works if \sphinxcode{\sphinxupquote{U}} is a SeisChannel structure. Merges are based on matching channel IDs; channels in \sphinxcode{\sphinxupquote{U}} without IDs in \sphinxcode{\sphinxupquote{S}} are simply assigned to new channels. \sphinxcode{\sphinxupquote{merge!}} and \sphinxcode{\sphinxupquote{+=}} work identically for SeisData and SeisChannel instances.
+Merge \sphinxstylestrong{U} into \sphinxstylestrong{S}. Also works if \sphinxstylestrong{U} is a SeisChannel structure. Merges are based on matching channel IDs; channels in \sphinxstylestrong{U} without IDs in \sphinxstylestrong{S} are simply assigned to new channels. \sphinxstylestrong{merge!} and \sphinxstylestrong{+=} work identically for SeisData and SeisChannel instances.
 
-Data can be merged directly from the output of any SeisIO command that outputs a compatible structure; for example, \sphinxcode{\sphinxupquote{S += readsac(sacfile.sac)}} merges data from \sphinxcode{\sphinxupquote{sacfile.sac}} into S.
+Data can be merged directly from the output of any SeisIO command that outputs a compatible structure; for example, \sphinxstylestrong{S += readsac(sacfile.sac)} merges data from \sphinxstylestrong{sacfile.sac} into S.
 
 For two channels \sphinxtitleref{i}, \sphinxtitleref{j} with identical ids, pairs of non-NaN data \sphinxtitleref{x}$_{\text{i}}$, \sphinxtitleref{x}$_{\text{j}}$ with overlapping time stamps (i.e. \textbar{} \sphinxtitleref{t}$_{\text{i}}$ - \sphinxtitleref{t}$_{\text{j}}$ \textbar{} \textless{} 0.5/fs) are \sphinxstyleemphasis{averaged}.
 
@@ -622,7 +624,7 @@ For two channels \sphinxtitleref{i}, \sphinxtitleref{j} with identical ids, pair
 \end{fulllineitems}
 
 
-Applying \sphinxcode{\sphinxupquote{merge!}} to a single SeisData structure merges pairs of channels with identical IDs.
+Applying \sphinxstylestrong{merge!} to a single SeisData structure merges pairs of channels with identical IDs.
 
 
 \subsubsection{Delete, Extract}
@@ -645,7 +647,7 @@ Applying \sphinxcode{\sphinxupquote{merge!}} to a single SeisData structure merg
 \end{fulllineitems}
 
 
-Delete channel number(s) \sphinxcode{\sphinxupquote{j}} from \sphinxcode{\sphinxupquote{S}}. \sphinxcode{\sphinxupquote{j}} can be an Int, UnitRange, Array\{Int,1\}, a String, or a Regex. In the last two cases, any channel with an id that matches \sphinxcode{\sphinxupquote{j}} will be deleted; for example, \sphinxcode{\sphinxupquote{S-="CC.VALT"}} deletes all channels whose IDs match \sphinxcode{\sphinxupquote{"CC.VALT"}}.
+Delete channel number(s) \sphinxstylestrong{j} from \sphinxstylestrong{S}. \sphinxstylestrong{j} can be an Int, UnitRange, Array\{Int,1\}, a String, or a Regex. In the last two cases, any channel with an id that matches \sphinxstylestrong{j} will be deleted; for example, \sphinxstylestrong{S-=”CC.VALT”} deletes all channels whose IDs match \sphinxstylestrong{“CC.VALT”}.
 
 
 \begin{fulllineitems}
@@ -653,7 +655,7 @@ Delete channel number(s) \sphinxcode{\sphinxupquote{j}} from \sphinxcode{\sphinx
 \end{fulllineitems}
 
 
-If \sphinxcode{\sphinxupquote{i}} is a string, extract the first channel from \sphinxcode{\sphinxupquote{S}} with \sphinxcode{\sphinxupquote{id=i}} and return it as a new SeisData structure \sphinxcode{\sphinxupquote{T}}. The corresponding channel in \sphinxcode{\sphinxupquote{S}} is deleted. If \sphinxcode{\sphinxupquote{i}} is an integer, \sphinxcode{\sphinxupquote{pull}} operates on the corresponding channel number.
+If \sphinxstylestrong{i} is a string, extract the first channel from \sphinxstylestrong{S} with \sphinxstylestrong{id=i} and return it as a new SeisData structure \sphinxstylestrong{T}. The corresponding channel in \sphinxstylestrong{S} is deleted. If \sphinxstylestrong{i} is an integer, \sphinxstylestrong{pull} operates on the corresponding channel number.
 
 
 \begin{fulllineitems}
@@ -661,26 +663,18 @@ If \sphinxcode{\sphinxupquote{i}} is a string, extract the first channel from \s
 \end{fulllineitems}
 
 
-Remove all empty channels from \sphinxcode{\sphinxupquote{S}}. Empty channels are defined as the set of all channel indices \sphinxcode{\sphinxupquote{i}} s.t. \sphinxcode{\sphinxupquote{isempty(S.x{[}i{]}) = true}}.
+Remove all empty channels from \sphinxstylestrong{S}. Empty channels are defined as the set of all channel indices \sphinxstylestrong{i} s.t. \sphinxstylestrong{isempty(S.x{[}i{]}) = true}.
 
 
 \subsubsection{Read, Write}
 \label{\detokenize{src/seisdata:read-write}}
 
 \begin{fulllineitems}
-\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{rsac}}}{\emph{fname::String}}{}
-\end{fulllineitems}
-
-
-Read SAC data file \sphinxcode{\sphinxupquote{fname}} into a SeisData structure. Specify keyword \sphinxcode{\sphinxupquote{full=true}} to save all SAC header values in field \sphinxcode{\sphinxupquote{:misc}}.
-
-
-\begin{fulllineitems}
 \pysigline{\sphinxbfcode{\sphinxupquote{A~=~rseis(fname::String)}}}
 \end{fulllineitems}
 
 
-Read SeisIO data from \sphinxcode{\sphinxupquote{fname}} into an array of SeisIO structures.
+Read SeisIO data from \sphinxstylestrong{fname} into an array of SeisIO structures.
 
 
 \begin{fulllineitems}
@@ -688,9 +682,9 @@ Read SeisIO data from \sphinxcode{\sphinxupquote{fname}} into an array of SeisIO
 \end{fulllineitems}
 
 
-Write SAC data from SeisData structure \sphinxcode{\sphinxupquote{S}} to SAC files with auto-generated names. SAC data can only be saved to single precision.
+Write SAC data from SeisData structure \sphinxstylestrong{S} to SAC files with auto-generated names. SAC data can only be saved to single precision.
 
-Specify \sphinxcode{\sphinxupquote{ts=true}} to write time stamps. Time stamped SAC files created by SeisIO are treated by the SAC program itself as unevenly spaced, generic \sphinxcode{\sphinxupquote{x-y}} data (\sphinxcode{\sphinxupquote{LEVEN=0, IFTYPE=4}}). Third-party readers might interpret timestamped files less predictably: depending on the reader, timestamped data might be loaded as the real part of a complex time series, with time stamps as the imaginary part … or the other way around … or they might not load at all.
+Specify \sphinxstylestrong{ts=true} to write time stamps. Time stamped SAC files created by SeisIO are treated by the SAC program itself as unevenly spaced, generic \sphinxstylestrong{x-y} data (\sphinxstylestrong{LEVEN=0, IFTYPE=4}). Third-party readers might interpret timestamped files less predictably: depending on the reader, timestamped data might be loaded as the real part of a complex time series, with time stamps as the imaginary part … or the other way around … or they might not load at all.
 
 
 \begin{fulllineitems}
@@ -698,20 +692,20 @@ Specify \sphinxcode{\sphinxupquote{ts=true}} to write time stamps. Time stamped 
 \end{fulllineitems}
 
 
-Write SeisIO data from S to \sphinxcode{\sphinxupquote{fname}}. Supports splat expansion for writing multiple objects, e.g. \sphinxcode{\sphinxupquote{wseis(fname, S, T, U)}} writes \sphinxcode{\sphinxupquote{S}}, \sphinxcode{\sphinxupquote{T}}, and \sphinxcode{\sphinxupquote{U}} to \sphinxcode{\sphinxupquote{fname}}.
+Write SeisIO data from S to \sphinxstylestrong{fname}. Supports splat expansion for writing multiple objects, e.g. \sphinxstylestrong{wseis(fname, S, T, U)} writes \sphinxstylestrong{S}, \sphinxstylestrong{T}, and \sphinxstylestrong{U} to \sphinxstylestrong{fname}.
 
-To write arrays of SeisIO objects to file, use “splat” notation: for example, for an array \sphinxcode{\sphinxupquote{A}} of type \sphinxcode{\sphinxupquote{Array\{SeisEvent,1\}}}, use syntax \sphinxcode{\sphinxupquote{wseis(fname, A...)}}.
+To write arrays of SeisIO objects to file, use “splat” notation: for example, for an array \sphinxstylestrong{A} of type \sphinxstylestrong{Array\{SeisEvent,1\}}, use syntax \sphinxstylestrong{wseis(fname, A…)}.
 
 
 \subsubsection{Search, Sort}
 \label{\detokenize{src/seisdata:search-sort}}
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{sort!(S,~rev=false)}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{sort!(S::SeisData,~rev=false)}}}
 \end{fulllineitems}
 
 
-In-place sort of channels in SeisData struct \sphinxcode{\sphinxupquote{S}} by S.id. Specify \sphinxcode{\sphinxupquote{rev=true}} to reverse the sort order.
+In-place sort by \sphinxstylestrong{S.id}. Specify \sphinxstylestrong{rev=true} to reverse the sort order.
 
 
 \begin{fulllineitems}
@@ -719,57 +713,7 @@ In-place sort of channels in SeisData struct \sphinxcode{\sphinxupquote{S}} by S
 \end{fulllineitems}
 
 
-Return the index of the first channel in \sphinxcode{\sphinxupquote{S}} with id matching \sphinxcode{\sphinxupquote{C}}. If \sphinxcode{\sphinxupquote{C}} is a string, \sphinxcode{\sphinxupquote{findid}} is equivalent to \sphinxcode{\sphinxupquote{findfirst(S.id.==C)}}; if \sphinxcode{\sphinxupquote{C}} is a SeisChannel, \sphinxcode{\sphinxupquote{findid}} is equivalent to \sphinxcode{\sphinxupquote{findfirst(S.id.==C.id)}}.
-
-
-\subsubsection{Miscellaneous}
-\label{\detokenize{src/seisdata:miscellaneous}}
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{note!(S,~txt::String)}}}
-\end{fulllineitems}
-
-
-Append a timestamped note to \sphinxcode{\sphinxupquote{S.notes}}. If \sphinxcode{\sphinxupquote{txt}} mentions a channel name or ID, only the corresponding channel is annotated; otherwise, all channels are annotated. SeisChannel, SeisData, and SeisHdr can all be annotated.
-
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{ungap!(S;~w=true,~m=true)}}}
-\end{fulllineitems}
-
-
-Fill time gaps in SeisData structure \sphinxcode{\sphinxupquote{S}}, cosine tapers regularly sampled subsequences of time series data, and fills time gaps with the mean of non-NaN data points. Setting \sphinxcode{\sphinxupquote{m=false}} leaves time gaps set to NaNs; setting \sphinxcode{\sphinxupquote{w=false}} prevents cosine tapering.
-
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{sync!(S)}}}
-\end{fulllineitems}
-
-
-Synchronize the start and end times of all trace data in SeisData structure \sphinxcode{\sphinxupquote{S}}.
-
-\sphinxcode{\sphinxupquote{sync!(S, resample=true)}}
-
-Synchronize S and resample data in S to the lowest non-null interval in S.fs.
-
-\sphinxcode{\sphinxupquote{sync!(S, resample=true, fs=FS)}}
-
-Synchronize S and resample data in S to FS. Note that a poor choice of FS can lead to
-upsampling and other bad behaviors. Resample requests are ignored if S has only one data
-channel.
-
-\sphinxcode{\sphinxupquote{sync!(S, s=ST, t=EN)}}
-
-Synchronize all data in S to start at ST and terminate at EN. Start time can be any of:
-* “max”: sync to earliest start time of any channel in S. (default)
-* “min”: use latest start time of any channel in S.
-* a numeric value: treated as an epoch time.
-* a DateTime or DateTime-compatible string.
-
-End time can be any of:
-* “max”: sync to latest end time in S. (default)
-* “min”: Synchronize to earliest end time in S.
-* numeric, DateTime, and DateTime-compatible strings behave as for start time.
+Return the index of the first channel in S with id matching \sphinxstylestrong{C}. If \sphinxstylestrong{C} is a string, \sphinxstylestrong{findid} is equivalent to \sphinxstylestrong{findfirst(S.id.==C)}; if \sphinxstylestrong{C} is a SeisChannel, \sphinxstylestrong{findid} is equivalent to \sphinxstylestrong{findfirst(S.id.==C.id)}.
 
 
 \chapter{Files}
@@ -1447,7 +1391,7 @@ Retrieve SeedLink information at verbosity level \sphinxstylestrong{v} from \sph
 \end{DUlineblock}
 
 Check that streams exist at \sphinxtitleref{url} for stations \sphinxtitleref{sta}, formatted
-NET.STA. Use “?” to match any single character. Returns True for
+NET.STA. Use “?” to match any single character. Returns true for
 stations that exist. \sphinxtitleref{sta} can also be the name of a valid config
 file or a 1d string array.
 
@@ -1503,7 +1447,7 @@ Basic data processing operations are described below.
 
 Cosine taper each channel in S around time gaps, then fill time gaps with the mean of non-NaN data points.
 
-Remove the mean from all channels i with S.fs{[}i{]} \textgreater{} 0.0. Specify all=True to also remove the mean from irregularly sampled channels. Ignores NaNs.
+Remove the mean from all channels i with S.fs{[}i{]} \textgreater{} 0.0. Specify all=true to also remove the mean from irregularly sampled channels. Ignores NaNs.
 
 
 \begin{fulllineitems}
@@ -1558,7 +1502,7 @@ Synchronize S to a common range of times and pad data gaps.
 Keywords and behaviors:
 \begin{itemize}
 \item {} 
-resample=True resamples regularly-data in S to the lowest non-null value of S.fs. Resample requests are ignored if S has only one data channel.
+resample=true resamples regularly-data in S to the lowest non-null value of S.fs. Resample requests are ignored if S has only one data channel.
 
 \item {} 
 fs=FS resamples regularly-sampled data in S to FS. Note that a poor choice of FS can lead to upsampling and other bad behaviors.
@@ -1593,13 +1537,13 @@ Numeric values of s,e treated as seconds from 01-01-1970T00:00:00.
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{ungap!(S,~{[}m=True,~w=True{]})}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{ungap!(S,~{[}m=true,~w=true{]})}}}
 \end{fulllineitems}
 
 
 Cosine taper all subsequences of regularly-sampled data and fill gaps with the
-mean of non-NaN data points. \sphinxstylestrong{m=False} leaves time gaps set to NaNs;
-\sphinxstylestrong{w=False} prevents cosine tapering.
+mean of non-NaN data points. \sphinxstylestrong{m=false} leaves time gaps set to NaNs;
+\sphinxstylestrong{w=false} prevents cosine tapering.
 
 
 \begin{fulllineitems}
@@ -1609,7 +1553,13 @@ mean of non-NaN data points. \sphinxstylestrong{m=False} leaves time gaps set to
 
 “Safe” ungap of SeisData object S to a new SeisData object T.
 
-Divide the gains from all channels i with S.fs{[}i{]} \textgreater{} 0.0. Specify all=True to
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{unscale!(S{[},~all=false{]})}}}
+\end{fulllineitems}
+
+
+Divide the gains from all channels i with S.fs{[}i{]} \textgreater{} 0.0. Specify all=true to
 also remove gains of irregularly-sampled channels.
 
 
@@ -1757,11 +1707,11 @@ Instrument location parameters are randomly set.
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{C~=~randseischannel({[},c=False,~s=False{]})}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{C~=~randseischannel({[},c=false,~s=false{]})}}}
 \end{fulllineitems}
 
 
-Generate a SeisChannel of random data. Specify c=True for campaign-style (irregularly-sampled) data (fs = 0.0); specify s=True to guarantee seismic data. s=True overrides c=True.
+Generate a SeisChannel of random data. Specify c=true for campaign-style (irregularly-sampled) data (fs = 0.0); specify s=true to guarantee seismic data. s=true overrides c=true.
 
 Generate 8 to 24 channels of random seismic data as a SeisData object.
 \begin{itemize}
@@ -2188,29 +2138,29 @@ UInt64
 uint64\_t
 \\
 \hline
-u(\sphinxcode{\sphinxupquote{8v}})
+u(8)
 &
-unsigned \sphinxcode{\sphinxupquote{8v}}-bit integer
+unsigned 8-bit integer
 &
-UInt\sphinxcode{\sphinxupquote{8v}}
+UInt8
 &
-uint\sphinxcode{\sphinxupquote{8v}}\_t
+uint8\_t
 \\
 \hline
-i(\sphinxcode{\sphinxupquote{8v}})
+i(8)
 &
-signed \sphinxcode{\sphinxupquote{8v}}-bit integer
+signed 8-bit integer
 &
-Int\sphinxcode{\sphinxupquote{8v}}
+Int8
 &
-int\sphinxcode{\sphinxupquote{8v}}\_t
+int8\_t
 \\
 \hline
-f(\sphinxcode{\sphinxupquote{8v}})
+f(8)
 &
-\sphinxcode{\sphinxupquote{8v}}-bit float
+8-bit float
 &
-Float\sphinxcode{\sphinxupquote{8v}}
+Float8
 &
 float or double
 \\
@@ -3795,7 +3745,7 @@ Specify region \sphinxstylestrong{{[}lat\_min, lat\_max, lon\_min, lon\_max, dep
 \hline
 si
 &
-True
+true
 &
 B
 &
@@ -3826,7 +3776,7 @@ verbosity
 \hline
 w
 &
-False
+false
 &
 B
 &
@@ -3839,7 +3789,7 @@ write requests to disc? %
 \hline
 y
 &
-False
+false
 &
 B
 &

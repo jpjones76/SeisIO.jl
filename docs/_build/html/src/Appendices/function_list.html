@@ -277,10 +277,10 @@ Expected string format is “yyyy-mm-ddTHH:MM:SS.nnn”, e.g. 2016-03-23T11:17:0
 </ul>
 <dl class="function">
 <dt>
-<code class="descname">C = randseischannel([,c=False, s=False])</code></dt>
+<code class="descname">C = randseischannel([,c=false, s=false])</code></dt>
 <dd></dd></dl>
 
-<p>Generate a SeisChannel of random data. Specify c=True for campaign-style (irregularly-sampled) data (fs = 0.0); specify s=True to guarantee seismic data. s=True overrides c=True.</p>
+<p>Generate a SeisChannel of random data. Specify c=true for campaign-style (irregularly-sampled) data (fs = 0.0); specify s=true to guarantee seismic data. s=true overrides c=true.</p>
 <p>Generate 8 to 24 channels of random seismic data as a SeisData object.</p>
 <ul>
 <li><p class="first">100*c% of channels <em>after the first</em> will have irregularly-sampled data (fs = 0.0)</p>

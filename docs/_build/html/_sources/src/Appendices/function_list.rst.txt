@@ -81,9 +81,9 @@ These auxiliary function are used to quickly generate SeisIO structures with qua
 * Some time gaps are automatically inserted into regularly-sampled data.
 * Instrument location parameters are randomly set.
 
-.. function:: C = randseischannel([,c=False, s=False])
+.. function:: C = randseischannel([,c=false, s=false])
 
-Generate a SeisChannel of random data. Specify c=True for campaign-style (irregularly-sampled) data (fs = 0.0); specify s=True to guarantee seismic data. s=True overrides c=True.
+Generate a SeisChannel of random data. Specify c=true for campaign-style (irregularly-sampled) data (fs = 0.0); specify s=true to guarantee seismic data. s=true overrides c=true.
 
 .. function randseisdata([, c=0.2, s=0.6])
 

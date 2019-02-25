@@ -16,9 +16,9 @@ Files are written in little-endian byte order.
   u8, unsigned 8-bit int, UInt8, uint8_t
   u32, unsigned 32-bit int, UInt32, int32_t
   u64, unsigned 64-bit int, UInt64, uint64_t
-  u(``8v``), unsigned ``8v``-bit integer, UInt\ ``8v``\ , uint\ ``8v``\_t
-  i(``8v``), signed ``8v``-bit integer, Int\ ``8v``\ , int\ ``8v``\_t
-  f(``8v``), ``8v``-bit float, Float\ ``8v``\ , float or double
+  u(8), unsigned 8-bit integer, UInt\ 8\ , uint\ 8\_t
+  i(8), signed 8-bit integer, Int\ 8\ , int\ 8\_t
+  f(8), 8-bit float, Float\ 8\ , float or double
 
 ***********
 File header

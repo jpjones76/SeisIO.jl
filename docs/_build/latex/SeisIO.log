@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018/Arch Linux) (preloaded format=pdflatex 2019.2.19)  25 FEB 2019 12:41
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018/Arch Linux) (preloaded format=pdflatex 2019.2.19)  25 FEB 2019 13:07
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -868,58 +868,58 @@ LaTeX Font Info:    Try loading font information for TS1+pcr on input line 1.
 (/usr/share/texmf-dist/tex/latex/psnfss/ts1pcr.fd
 File: ts1pcr.fd 2001/06/04 font definitions for TS1/pcr.
 ) [7] [8] [9] [10] [11]
-[12]
-Chapter 2.
-[13
+[12
 
-] [14] [15] [16
+]
+Chapter 2.
+[13] [14] [15] [16
 
 ]
 Chapter 3.
 
 LaTeX Warning: Hyper reference `src/Web/webclients:irisws' on page 17 undefined
- on input line 1120.
+ on input line 1064.
 
 
 LaTeX Warning: Hyper reference `src/Web/webclients:fdsnws' on page 17 undefined
- on input line 1121.
+ on input line 1065.
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1141--1142
+Underfull \hbox (badness 10000) in paragraph at lines 1085--1086
 []\T1/pcr/m/n/10.95 get_data!(S, "FDSN", "UW.SEP..EHZ,UW.SHW..EHZ,UW.HSR..EHZ",
  "IRIS",
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1144--1145
+Underfull \hbox (badness 10000) in paragraph at lines 1088--1089
 []\T1/pcr/m/n/10.95 get_data!(S, "IRIS", "CC.PALM..EHN", "IRIS", t=(-120), f="s
 acbl")\T1/ptm/m/n/10.95 :
  []
 
 [17]
-Overfull \hbox (10.9495pt too wide) in paragraph at lines 1150--1151
+Overfull \hbox (10.9495pt too wide) in paragraph at lines 1094--1095
 []\T1/pcr/m/n/10.95 S = get_data("FDSN", "HV.MOKD..HHZ", "IRIS", s="2012-01-01T
 00:00:00",
  []
 
 [18]
-Underfull \hbox (badness 5388) in paragraph at lines 1233--1234
+Underfull \hbox (badness 5388) in paragraph at lines 1177--1178
 []\T1/ptm/m/n/10.95 Incomplete string queries are read to the near-est fully-sp
 ecified time con-straint; thus,
  []
 
 [19] [20]
-Overfull \hbox (31.58516pt too wide) in paragraph at lines 1391--1391
+Overfull \hbox (31.58516pt too wide) in paragraph at lines 1335--1335
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1391--1391
+Underfull \hbox (badness 10000) in paragraph at lines 1335--1335
 
  []
 
 [21]
-Underfull \hbox (badness 10000) in paragraph at lines 1467--1471
+Underfull \hbox (badness 10000) in paragraph at lines 1411--1415
 []\T1/ptm/m/n/10.95 Check that streams with re-cent data ex-ist at url \T1/ptm/
 m/it/10.95 u \T1/ptm/m/n/10.95 for chan-nel spec \T1/ptm/m/it/10.95 cha\T1/ptm/
 m/n/10.95 , for-mat-ted
@@ -936,78 +936,78 @@ Chapter 5.
 ] [26]
 
 LaTeX Warning: Hyper reference `src/Appendices/seisdata_fields:seisdata-t' on p
-age 27 undefined on input line 1926.
+age 27 undefined on input line 1876.
 
 
 LaTeX Warning: Hyper reference `src/Appendices/seisdata_fields:seisdata-t' on p
-age 27 undefined on input line 1926.
+age 27 undefined on input line 1876.
 
 [27]
-Overfull \hbox (1.9331pt too wide) in paragraph at lines 2066--2066
+Overfull \hbox (1.9331pt too wide) in paragraph at lines 2016--2016
 []\T1/phv/m/n/10.95 Name| 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2066--2066
+Underfull \hbox (badness 10000) in paragraph at lines 2016--2016
 []\T1/ptm/m/n/10.95 Ar-ray{Tuple{Float64, Float64,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2066--2066
+Underfull \hbox (badness 10000) in paragraph at lines 2016--2016
 []\T1/ptm/m/n/10.95 Ar-ray{Tuple{Float64, Float64,
  []
 
 [28] [29]
-Overfull \hbox (9.75858pt too wide) in paragraph at lines 2555--2556
+Overfull \hbox (9.75858pt too wide) in paragraph at lines 2505--2506
 []|\T1/ptm/m/n/10.95 L_units| 
  []
 
 
-Overfull \hbox (1.22864pt too wide) in paragraph at lines 2560--2561
+Overfull \hbox (1.22864pt too wide) in paragraph at lines 2510--2511
 []|\T1/ptm/m/n/10.95 L_src| 
  []
 
 
-Overfull \hbox (12.1786pt too wide) in paragraph at lines 2565--2566
+Overfull \hbox (12.1786pt too wide) in paragraph at lines 2515--2516
 []|\T1/ptm/m/n/10.95 L_name| 
  []
 
 
-Overfull \hbox (11.57631pt too wide) in paragraph at lines 2570--2571
+Overfull \hbox (11.57631pt too wide) in paragraph at lines 2520--2521
 []|\T1/ptm/m/n/10.95 L_notes| 
  []
 
 [30] [31]
-Overfull \hbox (2.61398pt too wide) in paragraph at lines 2800--2801
+Overfull \hbox (2.61398pt too wide) in paragraph at lines 2750--2751
 []|\T1/phv/m/n/10.95 code| 
  []
 
 
-Overfull \hbox (2.61398pt too wide) in paragraph at lines 2804--2805
+Overfull \hbox (2.61398pt too wide) in paragraph at lines 2754--2755
 []|\T1/phv/m/n/10.95 code| 
  []
 
 [32]
 LaTeX Font Info:    Font shape `T1/pcr/bx/n' in size <10> not available
-(Font)              Font shape `T1/pcr/b/n' tried instead on input line 3068.
+(Font)              Font shape `T1/pcr/b/n' tried instead on input line 3018.
  [33] [34]
-Overfull \hbox (18.7079pt too wide) in paragraph at lines 3387--3389
+Overfull \hbox (18.7079pt too wide) in paragraph at lines 3337--3339
 []|\T1/ptm/m/n/10.95 ^^PPB.B004.01.BS1,PB.B002.01.BS1^^Q| 
  []
 
 
-Overfull \hbox (34.9575pt too wide) in paragraph at lines 3395--3397
+Overfull \hbox (34.9575pt too wide) in paragraph at lines 3345--3347
 []|\T1/ptm/m/n/10.95 [^^PPB.B004.01.BS1^^Q,^^QPB.B002.01.BS1^^Q]| 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3403--3405
+Underfull \hbox (badness 10000) in paragraph at lines 3353--3355
 []
  []
 
 [35] [36] [37]
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <9> not available
-(Font)              Font shape `T1/ptm/b/n' tried instead on input line 3853.
+(Font)              Font shape `T1/ptm/b/n' tried instead on input line 3803.
 
 Overfull \vbox (0.60336pt too high) has occurred while \output is active []
 
@@ -1017,25 +1017,25 @@ Overfull \vbox (0.60336pt too high) has occurred while \output is active []
 ] [43
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 4109.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 4109.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 4059.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 4059.
  (./SeisIO.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 4109.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 4109.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 4059.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 4059.
 
 Package rerunfilecheck Info: File `SeisIO.out' has not changed.
-(rerunfilecheck)             Checksum: 1A0F26CA752982FB495684ECD65B3B4C;2235.
+(rerunfilecheck)             Checksum: 1778F0253DACC8DC16B8749FFD58321D;2235.
 
 
 LaTeX Warning: There were undefined references.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 4109.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 4059.
  ) 
 Here is how much of TeX's memory you used:
- 13853 strings out of 492616
- 194568 string characters out of 6135177
- 334301 words of memory out of 5000000
- 17195 multiletter control sequences out of 15000+600000
+ 13851 strings out of 492616
+ 194523 string characters out of 6135177
+ 334252 words of memory out of 5000000
+ 17194 multiletter control sequences out of 15000+600000
  77058 words of font info for 113 fonts, out of 8000000 for 9000
  1142 hyphenation exceptions out of 8191
  37i,16n,45p,586b,479s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1052,10 +1052,10 @@ vetic/uhvr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb></
 usr/share/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-dist/fo
 nts/type1/urw/times/utmr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utm
 ri8a.pfb>
-Output written on SeisIO.pdf (47 pages, 272284 bytes).
+Output written on SeisIO.pdf (47 pages, 271546 bytes).
 PDF statistics:
- 736 PDF objects out of 1000 (max. 8388607)
- 625 compressed objects within 7 object streams
- 229 named destinations out of 1000 (max. 500000)
+ 734 PDF objects out of 1000 (max. 8388607)
+ 623 compressed objects within 7 object streams
+ 228 named destinations out of 1000 (max. 500000)
  173 words of extra memory for PDF output out of 10000 (max. 10000000)
 
