@@ -1,4 +1,4 @@
-export fctopz, translate_resp, equalize_resp!
+export fctopz
 
 # TO DO: accelerometer equation, unit-dependent conversion to pz format
 """
@@ -19,7 +19,7 @@ function fctopz(fc::T; hc=1.0/sqrt(2.0)::T, units="m/s"::String) where T
 end
 
 """
-    Y = translate_resp(X, fs, resp_old, resp_new)
+    Y = translate_resp!(X, fs, resp_old, resp_new)
 
 Translate frequency response of `X`, sampled at `fs`, from `resp_old` to `resp_new`. zeros are in resp[:,1], poles in resp[:,2].
 """
