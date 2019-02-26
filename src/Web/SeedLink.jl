@@ -487,7 +487,7 @@ w=false::Bool)
   return S
 end
 
-function SeedLink(S::SeisData, sta::Array{String,1}, pat::Array{String,1};
+function SeedLink(sta::Array{String,1}, pat::Array{String,1};
   safety=0x00::UInt8,                                      # safety check level
   gap=7200::Real,                                       # maximum gap
   kai=240::Real,                                       # keepalive interval (s)
