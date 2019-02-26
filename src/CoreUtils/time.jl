@@ -5,6 +5,7 @@ export d2u, j2md, md2j, parsetimewin, timestamp, u2d, t_win, w_time
 
 function tstr(t::DateTime)
   Y, M, D, h, m, s, μ = year(t), month(t), day(t), hour(t), minute(t), second(t), millisecond(t)
+  c = ":"
   Y = lpad(Y, 4, "0")
   M = lpad(M, 2, "0")
   D = lpad(M, 2, "0")
@@ -12,21 +13,22 @@ function tstr(t::DateTime)
   m = lpad(M, 2, "0")
   s = lpad(M, 2, "0")
   μ = lpad(μ, 3, "0")
-  c = ":"
   return string(Y, c, M, c, D, "T", h, c, m, c, s, ".", μ)
 end
 
 u2d(k::Real) = Dates.unix2datetime(k)
 d2u(k::DateTime) = Dates.datetime2unix(k)
 timestamp() = tstr(Dates.unix2datetime(time()))
-timestamp(t::Int64) = tstr(u2d(t/sμ))
+timestamp(t::DateTime) = tstr(t)
+timestamp(t::Real) = tstr(u2d(t))
+timestamp(t::String) = tstr(Dates.DateTime(t))
 tnote(s::String) = string(timestamp(), ": ", s)
 
 # =========================================================
 # Not for export
 
 function t_expand(t::Array{Int64,2}, fs::Float64)
-  fs == 0.0 && return cumsum(t[:,2])
+  fs == 0.0 && return t[:,2]
   t[end,1] == 1 && return [t[1,2]]
   dt = round(Int64, 1.0/(fs*SeisIO.μs))
   tt = dt.*ones(Int64, t[end,1])
@@ -39,16 +41,16 @@ end
 
 function t_collapse(tt::Array{Int64,1}, fs::Float64)
   if fs == 0.0
-    t = Array{Int64,2}([Int64(0) tt[1]; zeros(Int64, length(tt)) diff(tt)::Array{Int64,1}])
+    t = hcat(collect(1:1:length(tt)), tt)
   else
     dt = round(Int64, 1.0/(fs*μs))
     ts = Array{Int64,1}([dt; diff(tt)::Array{Int64,1}])
     L = length(tt)
     i = findall(ts .!= dt)
     t = Array{Int64,2}([[1 tt[1]];[i ts[i].-dt]])
-  end
-  if isempty(i) || i[end] != L
-    t = vcat(t, hcat(L,0))
+    if isempty(i) || i[end] != L
+      t = vcat(t, hcat(L,0))
+    end
   end
   return t
 end
@@ -56,68 +58,28 @@ end
 # =========================================================
 
 """
-    w = t_win(T::Array{Int64,2}, fs::Float64)
-
-Convert matrix T from sparse delta-encoded time gaps to time windows (w[:,1]:w[:,2]) in integer μs from the Unix epoch (1970-01-01T00:00:00). Specify fs in Hz.
-
-    W = t_win(S::SeisData)
-
-Convert S.t to time windows s.t. W[i] = t_win(S.t[i], S.fs[i]).
-"""
-function t_win(T::Array{Int64,2}, fs::Float64)
-  fs == 0.0 && return T
-  n = size(T,1)-1
-  w0 = Int64(0)
-  W = Array{Int64,2}(undef,n,2)
-  @inbounds for i = 1:n
-    W[i,1] = T[i,2] + w0
-    W[i,2] = W[i,1] + round(Int64, SeisIO.sμ*Float64(T[i+1,1]-T[i,1])/fs)
-    w0 = W[i,2]
-  end
-  return W
-end
-
-"""
-    w = w_time(W::Array{Int64,2}, fs::Float64)
-
-Convert matrix W from time windows (w[:,1]:w[:,2]) in integer μs from the Unix epoch (1970-01-01T00:00:00) to sparse delta-encoded time representation. Specify fs in Hz.
-"""
-function w_time(W::Array{Int64,2}, fs::Float64)
-  w2 = Int64(0)
-  n = size(W,1)
-  T = Array{Int64,2}(undef,n+1,2)
-  T[1,1] = Int64(1)
-  @inbounds for i = 1:n
-    T[i,2] = W[i,1] - w2
-    T[i+1,1] = T[i,1] - round(Int64, (W[i,1]-W[i,2])*SeisIO.μs*fs)
-    w2 = W[i,2]
-  end
-  T[n+1,2] = Int64(0)
-  return T
-end
-
-"""
   m,d = j2md(y,j)
 
 Convert Julian day j of year y to month m, day d
 """
 function j2md(y::T, j::T) where T
-   if j > T(31)
-      D = Array{T,1}([31,28,31,30,31,30,31,31,30,31,30,31])
-      ((y%T(400) == T(0)) || (y%T(4) == T(0) && y%T(100) != T(0))) && (D[2]+=T(1))
-      m = T(0)
-      while j > T(0)
-         d = j
-         m += T(1)
-         j -= D[m]
-      end
-   else
-      m = T(1)
-      d = T(j)
-   end
-   return m, d
+  m = zero(T)
+  d = one(T)
+  if j > T(31)
+    D = Array{T,1}([31,28,31,30,31,30,31,31,30,31,30,31])
+    ((y%T(400) == T(0)) || (y%T(4) == T(0) && y%T(100) != T(0))) && (D[2]+=T(1))
+    z = zero(T)
+    while j > z
+      d = j
+      m += one(T)
+      j -= D[m]
+    end
+  else
+    m = one(T)
+    d = T(j)
+  end
+  return m, d
 end
-# j2md(y::Int64, j::Int64) = j2md(Int32(y), Int32(j))
 
 """
   j = md2j(y,m,d)
