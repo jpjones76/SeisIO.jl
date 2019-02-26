@@ -77,7 +77,8 @@ function SeisData(C::SeisChannel)
   return S
 end
 convert(::Type{SeisData}, C::SeisChannel) = SeisData(C)
-+(S::SeisData, C::SeisChannel) = (T = deepcopy(S); return T + SeisData(C))
++(S::SeisData, C::SeisChannel) = (deepcopy(S) + SeisData(C))
++(C::SeisChannel, S::SeisData) = (deepcopy(S) + SeisData(C))
 +(C::SeisChannel, D::SeisChannel) = SeisData(C,D)
 
 # push!(S::SeisData, C::SeisChannel)  = (
