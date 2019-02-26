@@ -71,7 +71,7 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
 
   # Resample
   if resample && S.n > 1
-    f0 = fs == 0 ? minimum(S.fs[S.fs .> 0]) : fs
+    f0 = fs == 0.0 ? minimum(S.fs[S.fs .> 0.0]) : fs
     N = floor(Int64, f0*(t_end-t_start)*SeisIO.μs)-1
     for i = 1:S.n
       S.fs[i] == 0 && continue
@@ -115,16 +115,14 @@ function sync!(S::SeisData; resample=false::Bool, fs=0::Real,
 
   # Loop over non-timeseries data
   for i in c
-    t = cumsum(S.t[i][:,2])
+    t = view(S.t[i][:,2])
     j = findall(t_start .≤ t .< t_end)
     S.x[i] = S.x[i][j]
+    S.t[i] = S.t[i][j,:]
     if isempty(j)
       S.t[i] = Array{Int64,2}()
       note!(S, i, @sprintf("sync! emptied channel; no data in range %s--%s", sstr, tstr))
     else
-      t = t[j]
-      t = [t[1]; diff(t)]
-      S.t[i] = reshape(t,length(t),1)
       note!(S, i, @sprintf("sync! pulled samples outside range %s--%s", sstr, tstr))
     end
   end
