@@ -4,6 +4,21 @@ Blosc.set_num_threads(Sys.CPU_THREADS)
 
 # ===========================================================================
 # Auxiliary file read functions
+chk_seisio(io::IOStream, f_ok::Array{UInt8,1} =
+  UInt8[0x53, 0x45, 0x49, 0x53, 0x49, 0x4f]) =
+  (read(io, 6) == f_ok ? true : false)
+
+# function read_preamble(io::IOStream)
+#   r = read(io, Float32)
+#   j = read(io, Float32)
+#   L = read(io, Int64)
+#   C = Array{UInt8,1}(undef, L)
+#   B = copy(C)
+#   read!(io, C)
+#   read!(io, B)
+#   return (r, j, L, C, B)
+# end
+
 function readstr_varlen(io::IOStream)
   L = read(io, Int64)
   if L > 0
@@ -194,78 +209,137 @@ revent(io::IOStream) = (
   )
 
 
-"""
-    rseis(fstr::String)
+# """
+#     rseis(fstr::String)
+#
+# Read SeisIO files matching file string ``fstr`` into memory.
+#
+# """
+# function rseis(files::Array{String,1}; v=0::Int)
+#   A = Array{Any,1}(undef, 0)
+#
+#   fcheck = Array{UInt8, 1}(undef,6)
+#   f_ok = UInt8[0x53, 0x45, 0x49, 0x53, 0x49, 0x4f]
+#   for f in files
+#     io = open(f, "r")
+#     fcheck = read(io, 6)
+#     if fcheck != f_ok
+#       close(io)
+#       @warn(string(f, " is not a SeisIO file; skipped."))
+#       continue
+#     end
+#     r = read(io, Float32)
+#     j = read(io, Float32)
+#     L = read(io, Int64)
+#     C = read!(io, Array{UInt8, 1}(undef, L))
+#     B = read!(io, Array{UInt64, 1}(undef, L))
+#     (v > 0) && @printf(stdout, "Reading %i total objects from file %s.\n", L, f)
+#     for i = 1:L
+#       if C[i] == 0x48
+#         push!(A, rhdr(io))
+#       elseif C[i] == 0x45
+#         push!(A, revent(io))
+#       else
+#         push!(A, rdata(io))
+#       end
+#       (v > 0) && @printf(stdout, "Read %s object from %s, bytes %i:%i.\n", typeof(A[end]), f, B[i], ((i == L) ? position(io) : B[i+1]))
+#     end
+#     close(io)
+#   end
+#   return A
+# end
+# rseis(fstr::String; v=0::Int) = rseis(ls(fstr), v=v)
+#
+# function read_rec(io::IOStream, u::UInt8; v=0::Int)
+#   (v > 0) && @printf(stdout, "Read %s object from %s, bytes %i:%i.\n", typeof(A[end]), f, B[i], ((i == L) ? position(io) : B[i+1]))
+#   if u == 0x48
+#     return rhdr(io)
+#   elseif u == 0x45
+#     return revent(io)
+#   else
+#     return rdata(io)
+#   end
+# end
 
-Read SeisIO files matching file string ``fstr`` into memory.
-
-"""
-function rseis(files::Array{String,1}; v=0::Int)
-  A = Array{Any,1}(undef, 0)
-
-  for f in files
-    io = open(f, "r")
-    (String(read!(io, Array{UInt8, 1}(undef, 6))) == "SEISIO") || (close(io); error("Not a SeisIO file!"))
-    r = read(io, Float32)
-    j = read(io, Float32)
-    L = read(io, Int64)
-    C = read!(io, Array{UInt8, 1}(undef, L))
-    B = read!(io, Array{UInt64, 1}(undef, L))
-    (v > 0) && @printf(stdout, "Reading %i total objects from file %s.\n", L, f)
-    for i = 1:L
-      if C[i] == 0x48
-        push!(A, rhdr(io))
-      elseif C[i] == 0x45
-        push!(A, revent(io))
-      else
-        push!(A, rdata(io))
-      end
-      (v > 0) && @printf(stdout, "Read %s object from %s, bytes %i:%i.\n", typeof(A[end]), f, B[i], ((i == L) ? position(io) : B[i+1]))
-    end
-    close(io)
+function build_file_list(patts::Union{String,Array{String,1}})
+  if isa(patts, String)
+    patts = [patts]
   end
-  return A
+  file_list = String[]
+  for pat in patts
+    files = ls(pat)
+    for f in files
+      if safe_isfile(f)
+        push!(file_list, f)
+      end
+    end
+  end
+  return file_list
 end
-rseis(fstr::String; v=0::Int) = rseis(ls(fstr), v=v)
-
+function read_rec(io::IOStream, u::UInt8; v=0::Int)
+  if u == 0x48
+    return rhdr(io)
+  elseif u == 0x45
+    return revent(io)
+  else
+    return rdata(io)
+  end
+end
 """
-    rseis(fstr::String, K::Array{Int,1}; v=0::Int)
+    rseis(fstr::String[, c=C::Array{Int64,1}, v=0::Int])
 
-Read SeisIO files matching file string ``fstr`` into memory. Pass an array K to read only record indices in K from file.
+Read SeisIO files matching file pattern ``fstr`` into memory.
 
+If an array of record indices is passed to keyword c, only those record indices
+are read from each file.
+
+Set v>0 to control verbosity.
 """
-function rseis(files::Array{String,1}, c::Array{Int,1}; v=0::Int)
+function rseis(patts::Union{String,Array{String,1}};
+  c::Union{Int64,Array{Int64,1}}  = Int64[],
+  v::Int64                        = KW.v)
+
   A = Array{Any,1}(undef, 0)
-
+  files = build_file_list(patts)
+  if isa(c, Int64)
+    c = [c]
+  end
   for f in files
     io = open(f, "r")
-    (String(read!(io, Array{UInt8,1}(undef, 6))) == "SEISIO") || (close(io); error("Not a SeisIO file!"))
+    if chk_seisio(io) == false
+      (v > 0) && @warn string("Skipped ", f, ": invalid SeisIO file!")
+      close(io)
+      continue
+    end
     r = read(io, Float32)
     j = read(io, Float32)
     L = read(io, Int64)
     C = read!(io, Array{UInt8, 1}(undef, L))
     B = read!(io, Array{UInt64, 1}(undef, L))
-    (v > 0) && @printf(stdout, "Reading %i total objects from file %s.\n", L, f)
-    for k = 1:length(c)
-      if c[k] > length(L)
-        @warn(string("Skipped file=", f, ", k=", c[k], " (no such record #)"))
+    if isempty(c)
+      (v > 1) && @printf(stdout, "Reading %i total objects from file %s.\n", L, f)
+      for n = 1:L
+        push!(A, read_rec(io, C[n], v=v))
+      end
+    else
+      if minimum(c) > L
+        (v > 0) && @info string("Skipped ", f, ": file contains none of the record numbers given.")
+        close(io)
         continue
-      else
-        i = c[k]
-        seek(io, B[i])
-        if C[i] == 0x48
-          push!(A, rhdr(io))
-        elseif C[i] == 0x45
-          push!(A, revent(io))
+      end
+      RNs = collect(1:1:L)
+      for k = 1:length(c)
+        n = c[k]
+        if n in RNs
+          seek(io, B[n])
+          push!(A, read_rec(io, C[n], v=v))
+          (v > 1) && @printf(stdout, "Read %s object from %s, bytes %i:%i.\n", typeof(A[end]), f, B[n], ((n == L) ? position(io) : B[n+1]))
         else
-          push!(A, rdata(io))
+          (v > 0) && @info(string((n > L ? "No" : "Skipped"), " record ", c[k], " in ", f))
         end
-        (v > 0) && @printf(stdout, "Read %s object from %s, bytes %i:%i.\n", typeof(A[end]), f, B[i], ((i == L) ? position(io) : B[i+1]))
       end
     end
     close(io)
   end
   return A
 end
-rseis(fstr::Array{String,1}, c::Int; v=0::Int) = rseis(fstr, Int[c], v=v)
-rseis(fstr::String, c::Int; v=0::Int) = rseis(ls(fstr), Int[c], v=v)
