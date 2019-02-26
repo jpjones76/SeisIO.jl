@@ -219,12 +219,12 @@ function sachdr(fname::String)
 end
 
 """
-    writesac(S::Union{SeisData,SeisEvent}; ts=false, v=true)
+    writesac(S::Union{SeisData,SeisEvent}; ts=false, v=false)
 
 Write all data in SeisData structure `S` to auto-generated SAC files. If S is a
 SeisEvent, event header information is also written.
 """
-function writesac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=true::Bool)
+function writesac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=false::Bool)
   if ts
     ift = Int32(4); leven = false
   else
@@ -262,14 +262,14 @@ function writesac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=true::Bool)
     v && @printf(stdout, "%s: Wrote file %s from SeisData channel %i\n", string(now()), fname, i)
   end
 end
-writesac(S::SeisChannel; ts=false::Bool, v=true::Bool) = writesac(SeisData(S), ts=ts, v=v)
+writesac(S::SeisChannel; ts=false::Bool, v=false::Bool) = writesac(SeisData(S), ts=ts, v=v)
 
 rsac(fname::String; full=false::Bool) = readsac(fname, full=full)
 
 """
-    wsac(S::SeisData; ts=false, v=true)
+    wsac(S::SeisData; ts=false, v=false)
 
 Write all data in SeisData structure `S` to auto-generated SAC files.
 """
-wsac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=true::Bool) = writesac(S, ts=ts, v=v)
-wsac(S::SeisChannel; ts=false::Bool, v=true::Bool) = writesac(SeisData(S), ts=ts, v=v)
+wsac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=false::Bool) = writesac(S, ts=ts, v=v)
+wsac(S::SeisChannel; ts=false::Bool, v=false::Bool) = writesac(SeisData(S), ts=ts, v=v)
