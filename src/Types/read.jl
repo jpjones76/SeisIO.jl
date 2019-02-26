@@ -122,7 +122,7 @@ function rhdr(io::IOStream)
   if i64[6] > 0
       j = k + 1
       k = k + i64[6]
-      setfield!(H, :notes, Array{String,1}(split(u8[j:k], Char(c))))# Notes
+      setfield!(H, :notes, String.(split(String(u8[j:k]), Char(c))))# Notes
   end
   setfield!(H, :loc, f64[1:3])                                      # Event location
   setfield!(H, :mt, f64[4:11])                                      # Moment tensor

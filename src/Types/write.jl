@@ -212,7 +212,7 @@ function w_struct(io::IOStream, H::SeisHdr)
   n = Array{UInt8,1}(undef,0)
   if !isempty(a)
       c = get_separator(join(a))                    # this should always be true
-      n = map(UInt8, collect(join(a)))              # notes as UInt8 array
+      n = map(UInt8, collect(join(a,c)))            # notes as UInt8 array
   end
   j = codeunits(i[2])                               # magnitude scale as char array
   k = codeunits(m[2])                               # intensity scale as char array
