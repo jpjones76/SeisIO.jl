@@ -327,7 +327,7 @@ function randseishdr()
   setfield!(H, :np, [(rand(), rand(), rand()), (rand(), rand(), rand())])
   setfield!(H, :pax, [(rand(), rand(), rand()), (rand(), rand(), rand()), (rand(), rand(), rand())])
   setfield!(H, :src, "randseishdr")
-  pop_rand!(H.misc, rand(4:24))
+  pop_rand_dict!(H.misc, rand(4:24))
   [note!(H, Random.randstring(rand(16:256))) for i = 1:rand(3:18)]
 
   # Adding a phase catalog
