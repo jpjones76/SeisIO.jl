@@ -2,6 +2,16 @@
 (S,T) = mktestseis()
 
 printstyled(stdout,"    Extended methods and custom functions...\n", color=:light_green)
+printstyled(stdout,"      show...\n", color=:light_green)
+open("show.log", "w") do out
+  redirect_stdout(out) do
+    show(S)
+    show(randseishdr())
+    show(randseisevent())
+  end
+end
+rm("show.log")
+
 printstyled(stdout,"      getindex...\n", color=:light_green)
 i_targ = 3
 C = S[i_targ]
@@ -118,3 +128,8 @@ prune!(S)
 @test (S.n == 6)
 J = findchan("EHZ",S)
 @test (6 in J)
+
+printstyled(stdout,"      show...\n", color=:light_green)
+@test show(randseischannel()) == nothing
+S = randseisdata(2,c=1.0)[2] + randseisdata()
+S[1].x = rand(Float64, 3)
