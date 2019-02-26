@@ -37,7 +37,7 @@ struct KWDefs
   si::Bool
   src::String
   to::Int
-  v::UInt8
+  v::Int
   w::Bool
   y::Bool
 end
