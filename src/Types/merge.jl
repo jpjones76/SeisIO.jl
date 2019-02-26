@@ -361,7 +361,7 @@ function merge!(S::SeisData)
     end
 
     # NAME ====================================================================
-    (length(unique(S.name[C])) == 1) || println(stdout, id, ": name changes across inputs; using most recent.")
+    (length(unique(S.name[C])) == 1) || @info(string(id, ": name changes across inputs; using most recent."))
 
     # NOTES =================================================================
     D = C[C.!=ω]

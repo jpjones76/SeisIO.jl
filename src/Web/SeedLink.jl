@@ -417,7 +417,7 @@ function SeedLink!(S::SeisData,
     j = 0
     while true
       if !isopen(S.c[q])
-        println(stdout, timestamp(), ": SeedLink connection closed.")
+        @info(string(timestamp(), ": SeedLink connection closed."))
         w && close(fid)
         break
       else

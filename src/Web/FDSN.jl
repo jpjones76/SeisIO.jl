@@ -237,9 +237,6 @@ function FDSNget!(seis::SeisIO.SeisData, C::Array{String,2}, d0::String, d1::Str
       if fmt == "mseed" || fmt == "miniseed"
         parsemseed!(S, IOBuffer(R.body), v)
         parsed = true
-      else
-        @warn(string("No parser for fmt=", fmt, ": returning a new channel with ID= ", new_id,
-        " and request in [channel].misc[\"data\"]"))
       end
     else
       @warn(string("FDSNWS request failed: returning as a channel with ID= ", new_id,
@@ -252,9 +249,10 @@ function FDSNget!(seis::SeisIO.SeisData, C::Array{String,2}, d0::String, d1::Str
       u = track_off!(S)
       S.src[u] .= data_url
     else
+      @info(string("Not parsed: ID = ", new_id,
+            ". Returned as a new channel with request body in [channel].misc[\"data\"]"))
       Ch = SeisChannel()
-      println(stdout, "ID = ", join(C[j,1:4], '.'))
-      setfield!(Ch, :id, join(C[j,1:4], '.'))
+      setfield!(Ch, :id, new_id)
       Ch.misc["data"] = R.body
       push!(S, Ch)
     end

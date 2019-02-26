@@ -1,12 +1,11 @@
-path = Base.source_dir()
 segy_file = path*"/SampleFiles/02.050.02.01.34.0572.6"
 uw_root = path*"/SampleFiles/99062109485W"
 const μs = 1.0e-6
+fs1 = 50.0
 
 t1 = round(Int64,time()/μs)
 ts = t1+round(Int64,0.25/μs)
 te = t1+round(Int64,0.75/μs)
-fs1 = 50.0
 
 # s1 and s2 represent data from a fictitious channel
 # s2 begins 1 second later, but has a gap of 1s after sample 25
@@ -27,8 +26,6 @@ s4 = SeisChannel(fs = 100.0, gain = 50.0, name = "UNNAMED", id = "DEAD.STA..EHE"
 # (3) after sync of a seisobj formed from [s1+s3, s2], s2 will be padded with 0.5s
 # at start and 3s at end
 
-
-println("...init...")
 S = SeisData()
 for i in fieldnames(typeof(S))
   if i != :n
@@ -36,11 +33,11 @@ for i in fieldnames(typeof(S))
   end
 end
 
-println("...dealing with gaps...")
+printstyled("  ...fixing data gaps...\n", color=:light_green)
 s2u = ungap(s2)
 @test length(s2.x) / s2.fs + μs * sum(s2.t[2:end - 1, 2]) ≈ length(s2u.x) / s2u.fs
 
-println("...channel add + simple merge...")
+printstyled("  ...channel add and simple merges...\n", color=:light_green)
 S += (s1 * s2)
 
 # Do in-place operations only change leftmost variable?
@@ -64,7 +61,7 @@ S += (s1 * s2)
 @test ≈(length(S.name), 1)
 @test ≈(length(S.t),1)
 @test ≈(length(S.x),1)
-@assert(S.id[1]=="DEAD.STA..EHZ")
+@test S.id[1]=="DEAD.STA..EHZ"
 ungap!(S::SeisData; m=false, w=false) # why do I have to force type here
 @test ≈(length(S.x[1]), 260)
 @test ≈(S.x[1][1:50], s1.x[1:50])
@@ -80,20 +77,20 @@ T = deepcopy(S)
 ii = findall(isnan.(S.x[1]))
 # T.x[1] -= mean(T.x[1][!isnan(T.x[1])])
 autotap!(S)
-@assert(length(findall(isnan.(S.x[1])))==0)           # No more NaNs?
-@assert(sum(diff(S.x[1][ii]))==0)                 # All NaNs filled w/same val?
+@test length(findall(isnan.(S.x[1])))==0           # No more NaNs?
+@test sum(diff(S.x[1][ii]))==0                 # All NaNs filled w/same val?
 @test ≈(T.x[1][12:90], S.x[1][12:90])     # Un-windowed vals untouched?
 
-println("...channel delete...")
+printstyled("  ...channel delete...\n", color=:light_green)
 S -= 1
 for i in fieldnames(typeof(S))
   if i != :n
     @test ≈(isempty([]), isempty(getfield(S,i)))
   end
 end
-@assert(isempty(S))
+@test isempty(S)
 
-println("...a more difficult merge...")
+printstyled("  ...a more difficult merge...\n", color=:light_green)
 S *= (s1 * s3)
 S *= (s2 * s4)
 @test ≈(S.n, 2)
@@ -107,44 +104,15 @@ S *= (s2 * s4)
 @test ≈(true, S.id[2]=="DEAD.STA..EHZ")
 ungap!(S, m=false, w=false)
 @test ≈(length(S.x[2]), 260)
-println("...auto-resample on merge...")
 @test ≈(length(S.x[1]), 350)
-println("...gain correction on merge...")
 @test ≈(S.x[1][101]/S.gain[1], s4.x[1]/s4.gain)
 
-println("...direct reading of supported file formats...")
-println("......SAC...")
-S += readsac(sac_file)                                   # SAC
-@test ≈(S.t[S.n][1,1], 1.0)
-@test ≈(S.t[S.n][end,1], length(S.x[S.n]))
-@test ≈(S.t[S.n][end,2], 0.0)
-
-println("......SEGY...")
-S += readsegy(segy_file, passcal=true)                       # PASSCAL SEGY r0
-println("......UW...")
-@test ≈(S.t[S.n][1,1], 1.0)
-@test ≈(S.t[S.n][end,1], length(S.x[S.n]))
-@test ≈(S.t[S.n][end,2], 0.0)
-
-Ev = readuw(uw_root)                                     # UW
-S += Ev.data
-@test ≈(S.t[S.n][1,1], 1.0)
-@test ≈(S.t[S.n][end,1], length(S.x[S.n]))
-@test ≈(S.t[S.n][end,2], 0.0)
-
-println("......win32 skipped (data redistribution prohibited; tested internally)...")
-
-println("...randseisdata...")
-R = randseisdata(c=true)
-S += R
-
 # Ensure merge works correctly with traces separated in time
+printstyled("  ...channel merge with * operator...\n", color=:light_green)
 s5 = SeisChannel(fs = 100.0, gain = 32.0, name = "DEAD.STA.EHE", id = "DEAD.STA..EHE",
   t = [1 t1; 100 0], x=randn(100))
 s6 = SeisChannel(fs = 100.0, gain = 32.0, name = "UNNAMED", id = "DEAD.STA..EHE",
   t = [1 t1+30000000; 200 0], x=randn(200))
-println("...channel add...")
 T = (s5 * s6)
 ungap!(T)
 @test ≈(length(T.x[1]),3200)
-println("...done!")

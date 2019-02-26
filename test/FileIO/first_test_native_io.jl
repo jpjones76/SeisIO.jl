@@ -1,6 +1,41 @@
-#using Base.Test, Compat
+# save to disk/read from disk
+savfile1 = "test.seis"
+savfile2 = "test.hdr"
+savfile3 = "test.evt"
 
-# script to test each compatible type
+# Changing this test to guarantee at least one campaign-style measurement
+S = randseisdata() + randseisdata(2, c=1.0, s=0.0)[2]
+printstyled("    SeisData...\n", color=:light_green)
+wseis(savfile1, S)
+R = rseis(savfile1)
+@test(R[1]==S)
+
+printstyled("    SeisHdr...\n", color=:light_green)
+H = randseishdr()
+wseis(savfile2, H)
+H2 = rseis(savfile2)[1]
+@test(H==H2)
+
+printstyled("    SeisEvent...\n", color=:light_green)
+EV = SeisEvent(hdr=H, data=S)
+wseis(savfile3, EV)
+
+printstyled("    ...a more complicated write involving each type...\n", color=:light_green)
+Ch = randseischannel()
+wseis(savfile3, EV, S, H, Ch)
+
+E2 = rseis(savfile3)
+@test(E2[1]==EV)
+@test(E2[2]==S)
+@test(E2[3]==H)
+@test(E2[4][1]==Ch)
+
+rm(savfile1)
+rm(savfile2)
+rm(savfile3)
+
+# test each allowed value type in :misc dictionaries
+printstyled("    ...accurate r/w of Types allowed as :misc vals...\n", color=:light_green)
 D = Dict{String,Any}()
 D["0"] = 'c'
 D["1"] = randstring(rand(51:100))
@@ -67,6 +102,8 @@ io = open("crapfile.bin","r")
 DD = SeisIO.read_misc(io)
 close(io)
 
-[@assert(D[k]==DD[k]) for k in sort(collect(keys(D)))]
+[@test(D[k]==DD[k]) for k in sort(collect(keys(D)))]
 
 rm("crapfile.bin")
+
+printstyled("Supported file format IO\n", color=:light_green, bold=true)
