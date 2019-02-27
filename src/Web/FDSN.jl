@@ -3,7 +3,7 @@ export FDSNevq, FDSNevt, FDSNsta
 # =============================================================================
 # No export
 
-function FDSN_chp(chans::Union{String,Array{String,1},Array{String,2}}; v::Int = KW.v)
+function FDSN_chp(chans::Union{String,Array{String,1},Array{String,2}}; v::Int64 = KW.v)
   # Parse channel config
   if isa(chans, String)
     C = parse_chstr(chans, fdsn = true)
@@ -168,7 +168,7 @@ function FDSNsta!(S::SeisIO.SeisData, chans::Union{String,Array{String,1},Array{
   t = (-600)::Union{Real,DateTime,String},  # End or Length (s)
   src::String = KW.src,
   to::Int = KW.to,
-  v::Int = KW.v)
+  v::Int64 = KW.v)
 
   d0, d1 = parsetimewin(s, t)
   C = FDSN_chp(chans, v=v)
@@ -205,7 +205,7 @@ function FDSNget!(seis::SeisIO.SeisData, C::Array{String,2}, d0::String, d1::Str
   si::Bool = KW.si,
   src::String = KW.src,
   to::Int = KW.to,
-  v::Int = KW.v,
+  v::Int64 = KW.v,
   w::Bool = KW.w)
 
   uhead = fdsn_uhead(src)
@@ -281,11 +281,11 @@ See also: SeisIO.KW
 function FDSNevq(ot::String;
   reg::Array{Float64,1} = KW.reg,
   mag::Array{Float64,1} = KW.mag,
-  nev::Int = KW.nev,
+  nev::Int64 = KW.nev,
   src::String = KW.src,
   to::Int = KW.to,
   evw::Array{Float64,1} =  KW.evw,
-  v::Int = KW.v)
+  v::Int64 = KW.v)
 
   # Determine time window
   if length(ot) <= 14
@@ -360,7 +360,7 @@ function FDSNsta( chans::Union{String,Array{String,1},Array{String,2}};
                   s::Union{Real,DateTime,String} = 0,
                   t::Union{Real,DateTime,String} = (-600),
                   to::Int = KW.to,
-                  v::Int = KW.v)
+                  v::Int64 = KW.v)
 
   d0, d1 = parsetimewin(s, t)
   CC = FDSN_chp(chans, v=v)
@@ -438,7 +438,7 @@ function FDSNevt(ot::String, chans::Union{String,Array{String,1},Array{String,2}
   q::Char = KW.q,
   src::String = KW.src,
   to::Int64 = KW.to,
-  v::Int = KW.v,
+  v::Int64 = KW.v,
   w::Bool = KW.w)
 
   C = FDSN_chp(chans, v=v)

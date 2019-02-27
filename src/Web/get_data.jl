@@ -40,18 +40,18 @@ Other keywords:
 See also: chanspec, parsetimewin, seis_www
 """
 function get_data!(S::SeisIO.SeisData, method_in::String, C::Union{String,Array{String,1},Array{String,2}};
-  src = KW.src::String,
-  fmt = "miniseed"::String,                 # File format
-  opts = ""::String,                           # User-specified options string
-  q = 'B'::Char,                            # Quality
-  s = 0::Union{Real,DateTime,String},       # Start
-  si = true::Bool,                          # Get station info. from FDSN?
-  t = (-600)::Union{Real,DateTime,String},  # End or Length (s)
-  to = 30::Int,                             # Timeout (s)
-  v = 0::Int,                               # Verbosity
-  w = false::Bool,                          # Write directly to disc
-  y = false::Bool                           # Sync
-  )
+      src::String = KW.src                              ,  # Data source
+      fmt::String = KW.fmt                              ,  # File format
+     opts::String = KW.opts                             ,  # Options string
+          q::Char = KW.q                                ,  # Quality
+         si::Bool = KW.si                               ,  # Fill station info?
+        to::Int64 = KW.to                               ,  # Timeout (s)
+         v::Int64 = KW.v                                ,  # Verbosity
+          w::Bool = KW.w                                ,  # Write to disc?
+          y::Bool = KW.y                                ,  # Sync
+                s = 0::Union{Real,DateTime,String}      ,  # Start
+                t = (-600)::Union{Real,DateTime,String}    # End or Length (s)
+     )
 
   # Parse time window
   α, ω = parsetimewin(s, t)
@@ -102,18 +102,18 @@ end
 See ?get_data!
 """
 function get_data(method_in::String, C::Union{String,Array{String,1},Array{String,2}};
-    src = KW.src::String,
-    fmt = "miniseed"::String,                 # File format
-    opts = ""::String,                           # User-specified options string
-    q = 'B'::Char,                            # Quality
-    s = 0::Union{Real,DateTime,String},       # Start
-    si = true::Bool,                          # Get station info. from FDSN?
-    t = (-600)::Union{Real,DateTime,String},  # End or Length (s)
-    to = 30::Int,                             # Timeout (s)
-    v = 0::Int,                               # Verbosity
-    w = false::Bool,                          # Write directly to disc
-    y = false::Bool                           # Sync
-    )
+      src::String = KW.src                              ,  # Data source
+      fmt::String = KW.fmt                              ,  # File format
+     opts::String = KW.opts                             ,  # Options string
+          q::Char = KW.q                                ,  # Quality
+         si::Bool = KW.si                               ,  # Fill station info?
+        to::Int64 = KW.to                               ,  # Timeout (s)
+         v::Int64 = KW.v                                ,  # Verbosity
+          w::Bool = KW.w                                ,  # Write to disc?
+          y::Bool = KW.y                                ,  # Sync
+                s = 0::Union{Real,DateTime,String}      ,  # Start
+                t = (-600)::Union{Real,DateTime,String}    # End or Length (s)
+     )
 
   S = SeisIO.SeisData()
   get_data!(S, method_in, C,
