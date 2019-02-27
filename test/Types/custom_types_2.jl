@@ -1,4 +1,41 @@
 printstyled(stdout,"    Extended methods and custom functions...\n", color=:light_green)
+
+# untested methods in SeisData
+(S,T) = mktestseis()
+@test in("UW.SEP..EHZ",S)
+@test sizeof(S) > 0
+U = S[3:S.n]
+V = deepcopy(S)
+deleteat!(S, 1:2)
+deleteat!(V, [1,2])
+@test S == U == V
+delete!(S, "CC.", exact=false)
+delete!(U,V)
+
+(S,T) = mktestseis()
+X = deepcopy(T)
+U = pull(S, 5)
+@test U.id == "UW.SEP..EHZ"
+sizetest(S, 4)
+@test findid("UW.SEP..EHZ", S.id) == 0
+
+U = pull(S, 3:4)
+sizetest(S, 2)
+@test findid(U.id[1], S.id) == 0
+@test findid(U.id[2], S.id) == 0
+
+V = pull(T, [2,3,4])
+sizetest(T, 1)
+@test findid(V.id[1], T.id) == 0
+@test findid(V.id[2], T.id) == 0
+@test findid(V.id[3], T.id) == 0
+sort!(V)
+
+deleteat!(X,1)
+@test findid(V,X) == [2,3,1]
+sort!(X)
+@test V == X
+
 printstyled(stdout,"      show...\n", color=:light_green)
 S = randSeisData(2,c=1.0)[2] + randSeisData()
 S[1].x = rand(Float64, 3)
@@ -10,6 +47,10 @@ open("show.log", "w") do out
     show(S)
     show(randSeisHdr())
     show(randSeisEvent())
+    summary(randSeisEvent())
+    summary(randSeisChannel())
+    summary(randSeisData())
+    summary(randSeisHdr())
   end
 end
 rm("show.log")
@@ -58,7 +99,7 @@ sizetest(S, 8)
 @test ≈(length(findall(S.name.==C.name)),0)
 
 C = deepcopy(S[3:4])
-delete!(S,3:4)
+deleteat!(S,3:4)
 nt = 6
 @test ≈(S.n, nt)
 @test ≈(maximum([length(getfield(S,i)) for i in datafields]), nt)
@@ -72,7 +113,8 @@ delete!(S, s)
 sizetest(S, 5)
 
 s = r"EH"
-S -= s
+@test_throws BoundsError S - s
+delete!(S, s, exact=false)
 sizetest(S, 2)
 
 printstyled(stdout,"      merge!, no common channels...\n", color=:light_green)

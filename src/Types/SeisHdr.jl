@@ -1,4 +1,4 @@
-import Base:isequal, sizeof, ==
+import Base:isequal, isempty, sizeof, ==
 export SeisHdr
 
 unset_3tup = tuple(0.0, 0.0, 0.0)

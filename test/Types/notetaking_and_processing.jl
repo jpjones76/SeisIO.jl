@@ -15,6 +15,9 @@ note!(S, "poor SNR")
 note!(S, string(id_str, " SNR OK"))
 @test occursin(" SNR OK", S.notes[1][end])
 
+note!(S, id_str, "why is it clipping again")
+@test occursin("clipping", S.notes[1][end])
+
 printstyled("    clear_notes!...\n", color=:light_green)
 clear_notes!(S, 1)
 @test length(S.notes[1]) == 1

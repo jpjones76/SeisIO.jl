@@ -4,7 +4,7 @@ const os=8
 si(w::Int, i::Int) = os + w*(i-1)
 showtail(io::IO, b::Bool) = b ? "…" : ""
 float_str(x::Float64) = @sprintf("%.3e", x)
-maxgap(t::Array{Int64,2}) = @sprintf("%g", μs*maximum(t[2:end,2]))
+# maxgap(t::Array{Int64,2}) = @sprintf("%g", μs*maximum(t[2:end,2]))
 ngaps(t::Array{Int64,2}) = max(0, size(t,1)-2)
 
 function str_trunc(str::String, w::Integer)
@@ -38,17 +38,17 @@ function show_str(io::IO, S::Array{String,1}, w::Int, W::Int, s::String, b::Bool
   return
 end
 
-function show_int(io::IO, D::Array{Int,1}, W::Int, w::Int, s::String, b::Bool)
-  N = length(D)
-  sd = str_head(s, W)
-  for i = 1:N
-    st = si(w,i)
-    d = str_trunc(string(D[i]), w)
-    sd[st+1:st+length(d)] = d
-  end
-  println(io, string(replace(String(sd),'\0' => ' '), showtail(io, b)))
-  return
-end
+# function show_int(io::IO, D::Array{Int,1}, W::Int, w::Int, s::String, b::Bool)
+#   N = length(D)
+#   sd = str_head(s, W)
+#   for i = 1:N
+#     st = si(w,i)
+#     d = str_trunc(string(D[i]), w)
+#     sd[st+1:st+length(d)] = d
+#   end
+#   println(io, string(replace(String(sd),'\0' => ' '), showtail(io, b)))
+#   return
+# end
 
 function show_t(io::IO, T::Array{Array{Int64,2},1}, w::Int, W::Int, b::Bool)
   sd1 = str_head("T", W::Int)
@@ -223,7 +223,8 @@ end
 show(S::SeisChannel) = show(stdout, S)
 
 magsum(mag::Tuple{Float32, String}) = string(mag[2], " ", mag[1])
-locsum(loc::Array{Float64,1}) = string(loc[1], "°N, ", loc[2], "°E, ", loc[3], "km")
+locsum(loc::Array{Float64,1}) = @sprintf("%.5f°N, %.5f°E, %.3f km", loc[1], loc[2], loc[3])
+
 function show(io::IO, S::SeisHdr)
   W = max(80,displaysize(io)[2]-2)-os
   println(io, "    ID: ", S.id)

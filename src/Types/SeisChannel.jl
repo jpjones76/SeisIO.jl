@@ -102,16 +102,7 @@ isequal(S::SeisChannel, U::SeisChannel) = minimum([hash(getfield(S,i))==hash(get
 
 Get the index to the first channel `c` in S where `S.id[c]==C.id`.
 """
-function findid(C::SeisChannel, S::SeisData)
-  c = 0
-  for i = 1:S.n
-    if S.id[i] == C.id
-      c = i
-      break
-    end
-  end
-  return c
-end
+findid(C::SeisChannel, S::SeisData) = findid(C.id, S)
 findid(S::SeisData, C::SeisChannel) = findid(C, S)
 
 function sizeof(Ch::SeisChannel)

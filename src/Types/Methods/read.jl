@@ -19,16 +19,16 @@ chk_seisio(io::IOStream, f_ok::Array{UInt8,1} =
 #   read!(io, B)
 #   return (r, j, L, C, B)
 # end
-
-function readstr_varlen(io::IOStream)
-  L = read(io, Int64)
-  if L > 0
-    str = String(read!(io, Array{UInt8, 1},(undef, L)))
-  else
-    str = ""
-  end
-  return str
-end
+#
+# function readstr_varlen(io::IOStream)
+#   L = read(io, Int64)
+#   if L > 0
+#     str = String(read!(io, Array{UInt8, 1},(undef, L)))
+#   else
+#     str = ""
+#   end
+#   return str
+# end
 
 function read_string_array(io::IOStream)
   nd = Int64(read(io, UInt8))
@@ -124,8 +124,7 @@ function rhdr(io::IOStream)
   i0 = u8[2]
 
   # parse i64 array
-  j = 3
-  k = 2 + i64[3]
+  j = 3; k = 2 + i64[3]
   setfield!(H, :id, i64[1])                                         # Event id
   setfield!(H, :ot, u2d(i64[2]*μs))                                 # Origin time
   setfield!(H, :mag, (m, String(u8[j:k])))                          # Magnitude
@@ -210,12 +209,12 @@ function rdata(io::IOStream, ver::Float32)
   return S
 end
 
-revent(io::IOStream, ver::Float32) = (
-  S = SeisEvent();
-  setfield!(S, :hdr, rhdr(io));
-  setfield!(S, :data, rdata(io, ver));
-  return S
-  )
+revent(io::IOStream, ver::Float32) = SeisEvent(hdr = rhdr(io), data = rdata(io, ver))
+  # S = SeisEvent()
+  # setfield!(S, :hdr, rhdr(io))
+  # setfield!(S, :data, rdata(io, ver))
+  # return S
+  # )
 
 function build_file_list(patts::Union{String,Array{String,1}})
   if isa(patts, String)
