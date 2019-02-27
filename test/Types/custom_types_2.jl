@@ -3,7 +3,6 @@ printstyled(stdout,"    Extended methods and custom functions...\n", color=:ligh
 # untested methods in SeisData
 (S,T) = mktestseis()
 @test in("UW.SEP..EHZ",S)
-@test sizeof(S) > 0
 U = S[3:S.n]
 V = deepcopy(S)
 deleteat!(S, 1:2)
@@ -33,12 +32,13 @@ sort!(V)
 
 deleteat!(X,1)
 @test findid(V,X) == [2,3,1]
-sort!(X)
-@test V == X
+Y = sort(X)
+@test V == Y
 
 printstyled(stdout,"      show...\n", color=:light_green)
-S = randSeisData(2,c=1.0)[2] + randSeisData()
+S = (randSeisData(2,c=1.0)[2], randSeisEvent().data, randSeisData())
 S[1].x = rand(Float64, 3)
+@test sizeof(S) > 0
 T = randSeisData(1)
 
 open("show.log", "w") do out

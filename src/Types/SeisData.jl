@@ -185,7 +185,6 @@ deleteat!(S::SeisData, K::UnitRange)    = (J = collect(K); deleteat!(S, J); retu
 # Subtraction
 -(S::SeisData, i::Int)          = (U = deepcopy(S); deleteat!(U,i); return U)  # By channel #
 -(S::SeisData, J::Array{Int,1}) = (U = deepcopy(S); deleteat!(U,J); return U)  # By array of channel #s
--(S::SeisData, J::AbstractRange)= (U = deepcopy(S); deleteat!(U,J); return U)  # By range of channel #s
 # ============================================================================
 # delete!
 function delete!(S::SeisData, s::Union{Regex,String}; exact=true::Bool)
@@ -204,7 +203,7 @@ function delete!(S::SeisData, U::SeisData)
   J = Array{Int64,1}(undef,0)
   for i in id
     j = findlast(S.id.==i)
-    (j > 0) && push!(J,j)
+    (j == nothing) || push!(J,j)
   end
   deleteat!(S, J)
   return nothing
@@ -251,7 +250,7 @@ function sort!(S::SeisData; rev=false::Bool)
   [setfield!(S,i,getfield(S,i)[j]) for i in datafields]
   return S
 end
-sort(S::SeisData; rev=false::Bool) = (T = deepcopy(S); j = sortperm(T.id, rev=rev); [setfield!(T,i,getfield(T,i)[j]) for i in datafields]; return(T))
+sort(S::SeisData; rev=false::Bool) = (T = deepcopy(S); sort!(T, rev=rev))
 
 """
     prune!(S::SeisData)
