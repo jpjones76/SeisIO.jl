@@ -29,8 +29,7 @@ mutable struct SeisChannel
       t     ::Array{Int64,2},
       x     ::Array{Float64,1})
 
-      C = new(name, id, loc, fs, gain, resp, units, src, misc, notes, t, x)
-      return C
+      return new(name, id, loc, fs, gain, resp, units, src, misc, notes, t, x)
     end
 end
 
@@ -61,7 +60,7 @@ setindex!(S::SeisData, C::SeisChannel, j::Int) = (
   [(getfield(S, f))[j] = getfield(C, f) for f in datafields];
   return S)
 
-isempty(C::SeisChannel) = minimum([isempty(S.x[i]) for i=1:S.n]::Array{Bool,1})
+isempty(Ch::SeisChannel) = minimum([isempty(getfield(Ch,f)) for f in datafields])
 
 function pull(S::SeisData, i::Integer)
   T = deepcopy(getindex(S, i))
@@ -115,4 +114,13 @@ function findid(C::SeisChannel, S::SeisData)
 end
 findid(S::SeisData, C::SeisChannel) = findid(C, S)
 
-sizeof(S::SeisChannel) = sum([sizeof(getfield(S,f)) for f in enumerate(datafields)]) + sizeof(getfield(S, :notes))
+function sizeof(Ch::SeisChannel)
+  s = sum([sizeof(getfield(Ch,f)) for f in datafields])
+  if !isempty(Ch.notes)
+    s += sum([sizeof(i) for i in Ch.notes])
+  end
+  if !isempty(Ch.misc)
+    s += sum([sizeof(i) for i in values(Ch.misc)])
+  end
+  return s
+end

@@ -100,8 +100,6 @@ lastindex(S::SeisData) = S.n
 
 function getindex(S::SeisData, J::Array{Int,1})
   U = SeisData()
-  # [setfield!(U, f, getfield(S,f)[J]) for f in datafields]
-  # I guess this bug was fixed in 0.6
   for f in datafields
     setfield!(U, f, getfield(S,f)[J])
   end
@@ -112,11 +110,50 @@ getindex(S::SeisData, J::UnitRange) = getindex(S, collect(J))
 
 in(s::String, S::SeisData) = in(s, S.id)
 
+function setindex!(S::SeisData, U::SeisData, J::Array{Int,1})
+  length(J) == U.n || throw(BoundsError)
+  ([(getfield(S, f))[J] = getfield(U, f) for f in datafields])
+  return nothing
+end
+setindex!(S::SeisData, U::SeisData, J::UnitRange) = setindex!(S, U, collect(J))
+
+isempty(S::SeisData) = (S.n == 0) ? true : minimum([isempty(getfield(S,f)) for f in datafields])
+
+isequal(S::SeisData, U::SeisData) = minimum([hash(getfield(S,i))==hash(getfield(U,i)) for i in datafields]::Array{Bool,1})
+==(S::SeisData, U::SeisData) = isequal(S,U)::Bool
+
+function sizeof(S::SeisData)
+  s = sizeof(S.c) + 8
+  for f in datafields
+    v = getfield(S,:f)
+    s += sizeof(v)
+    for i = 1:n
+      s += sizeof(v[i])
+      if f == :notes
+        if !isempty(S.notes[i])
+          s += sum([sizeof(j) for j in S.notes[i]])
+        end
+      elseif f == :misc
+        if !isempty(S.misc[i])
+          s += sum([sizeof(j) for j in values(S.misc[i])])
+        end
+      end
+    end
+  end
+  return s
+end
+
 """
     findid(id::String, S::SeisData)
     findid(S::SeisData, id::String)
 
-Get the index to the first channel `c` in  S where `S.id[c]==id`.
+Get the index of the first channel in S where `id.==S.id` is true. Returns 0
+for failure.
+
+    findid(S::SeisData, T::SeisData)
+
+Get indices corresponding to the first channel in T that matches each ID in S;
+equivalent to [findid(id,T) for id in S.id].
 """
 function findid(id::String, S::SeisData)
   c = 0
@@ -129,46 +166,15 @@ function findid(id::String, S::SeisData)
   return c
 end
 findid(S::SeisData, id::String) = findid(id, S)
-function findid(S::SeisData, T::SeisData)
-  tc = Array{Int,1}(T.n)
-  for i = 1:T.n
-    tc[i] = findid(T.id[n], S)
-  end
-  return tc
-end
-
-setindex!(S::SeisData, U::SeisData, J::Array{Int,1}) = (
-  [(getfield(S, f))[J] = getfield(U, f) for f in datafields];
-  return S)
-setindex!(S::SeisData, U::SeisData, J::UnitRange) = setindex!(S, U, collect(J))
-setindex!(S::SeisData, U::SeisData, j::Int) = setindex!(S, U, [j])
-
-isempty(S::SeisData) = (S.n == 0) ? true : minimum([isempty(getfield(S,f)) for f in datafields])
-
-isequal(S::SeisData, U::SeisData) = minimum([hash(getfield(S,i))==hash(getfield(U,i)) for i in datafields]::Array{Bool,1})
-==(S::SeisData, U::SeisData) = isequal(S,U)::Bool
-
-function sizeof(S::SeisData)
-  N = Array{Int,1}(length(datafields))
-  M = Array{Int,1}(length(datafields))
-  [M[i] = sizeof(getfield(S,f)) for (i,f) in enumerate(datafields)]
-  [N[i] = sum([M[j] = sizeof(V) for (j,V) in enumerate(getfield(S,f))]) for (i,f) in enumerate(datafields)]
-  return sum(N) + sum(M)
-end
+findid(S::SeisData, T::SeisData) = [findid(id, T) for id in S.id]
 
 """
     findchan(id::String, S::SeisData)
-    findchan(S::SeisData, id::String)
 
 Get all channel indices `i` in S with id ∈ S.id[i]
 """
 findchan(s::String, S::SeisData) = findall([occursin(s, i) for i in S.id])
-findchan(S::SeisData, s::String) = findall([occursin(s, i) for i in S.id])
-# findall([startswith("UW", i) for i in S.id]) is much faster
-# ============================================================================
 
-
-# ============================================================================
 # Append, add, delete, sort
 append!(S::SeisData, U::SeisData)  = (
   [setfield!(S, i, append!(getfield(S,i), getfield(U,i))) for i in datafields];
@@ -182,7 +188,7 @@ deleteat!(S::SeisData, J::Array{Int,1}) = (sort!(J); [deleteat!(getfield(S, f), 
 deleteat!(S::SeisData, K::UnitRange)    = (J = collect(K); deleteat!(S, J); return nothing)
 
 # With this convention, S+U-U = S
-function deleteat!(S::SeisData, U::SeisData)
+function delete!(S::SeisData, U::SeisData)
   id = reverse(U.id)
   J = Array{Int64,1}(undef,0)
   for i in id
