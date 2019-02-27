@@ -1,10 +1,13 @@
 export wseis
 
-vSeisIO() = Float32(0.2) # SeisIO file format version
+vSeisIO() = Float32(0.3)                          # SeisIO file format version
 vJulia() = Float32(Meta.parse(string(VERSION.major,".",VERSION.minor)))
 Blosc.set_compressor("blosclz")
 Blosc.set_num_threads(Sys.CPU_THREADS)
 
+# SeisIO file format version changes
+# 0.3 SeisData.loc[i] no longer is assumed to be length 5
+# 0.2 First stable
 
 # ===========================================================================
 # Auxiliary file write functions
@@ -166,6 +169,7 @@ function w_struct(io::IOStream, S::SeisData)
     write(io, length(notes))
     write(io, l)
     write(io, length(S.x[i]))
+    write(io, length(S.loc[i]))
 
     # Int array
     write(io, S.t[i][:])
@@ -175,11 +179,7 @@ function w_struct(io::IOStream, S::SeisData)
     write(io, S.gain[i])
 
     # Float arrays
-    if isempty(S.loc[i]) == true
-      write(io, zeros(Float64, 5))
-    else
-      write(io, S.loc[i])
-    end
+    write(io, S.loc[i])
     if r > 0
       write(io, real(S.resp[i][:]))
       write(io, imag(S.resp[i][:]))

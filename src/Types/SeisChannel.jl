@@ -1,4 +1,4 @@
-import Base:in, +, -, *, convert, isequal, length, push!, sizeof
+import Base:in, +, -, *, convert, isempty, isequal, length, push!, sizeof
 export SeisChannel
 
 mutable struct SeisChannel
@@ -30,7 +30,6 @@ mutable struct SeisChannel
       x     ::Array{Float64,1})
 
       C = new(name, id, loc, fs, gain, resp, units, src, misc, notes, t, x)
-      note!(C, "Channel initialized")
       return C
     end
 end
@@ -39,7 +38,7 @@ end
 SeisChannel(;
             name  ::String                    = "",
             id    ::String                    = "",
-            loc   ::Array{Float64,1}          = zeros(Float64, 5),
+            loc   ::Array{Float64,1}          = Array{Float64,1}(undef, 0),
             fs    ::Float64                   = zero(Float64),
             gain  ::Float64                   = one(Float64),
             resp  ::Array{Complex{Float64},2} = Array{Complex{Float64},2}(undef, 0, 2),
@@ -61,6 +60,8 @@ end
 setindex!(S::SeisData, C::SeisChannel, j::Int) = (
   [(getfield(S, f))[j] = getfield(C, f) for f in datafields];
   return S)
+
+isempty(C::SeisChannel) = minimum([isempty(S.x[i]) for i=1:S.n]::Array{Bool,1})
 
 function pull(S::SeisData, i::Integer)
   T = deepcopy(getindex(S, i))

@@ -75,7 +75,7 @@ printstyled("  safe_isfile...\n", color=:light_green)
 
 printstyled("  namestrip...\n", color=:light_green)
 str = String(0x00:0xff)
-S = randseisdata(3)
+S = randSeisData(3)
 S.name[2] = str
 
 for key in keys(SeisIO.bad_chars)

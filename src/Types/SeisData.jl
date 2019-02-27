@@ -22,70 +22,74 @@ mutable struct SeisData
 
   function SeisData()
     return new(0,
-        Array{TCPSocket,1}(undef,0),
-        Array{String,1}(undef,0),
-        Array{String,1}(undef,0),
-        Array{Array{Float64,1}}(undef,0),
-        Array{Float64,1}(undef,0),
-        Array{Float64,1}(undef,0),
-        Array{Array{Complex{Float64},2},1}(undef,0),
-        Array{String,1}(undef,0),
-        Array{Dict{String,Any},1}(undef,0),
-        Array{Array{String,1},1}(undef,0),
-        Array{String,1}(undef,0),
-        Array{Array{Int64,2}}(undef,0),
-        Array{Array{Float64,1}}(undef,0)
-        )
+                Array{TCPSocket,1}(undef,0),
+                Array{String,1}(undef,0),
+                Array{String,1}(undef,0),
+                Array{Array{Float64,1}}(undef,0),
+                Array{Float64,1}(undef,0),
+                Array{Float64,1}(undef,0),
+                Array{Array{Complex{Float64},2},1}(undef,0),
+                Array{String,1}(undef,0),
+                Array{Dict{String,Any},1}(undef,0),
+                Array{Array{String,1},1}(undef,0),
+                Array{String,1}(undef,0),
+                Array{Array{Int64,2}}(undef,0),
+                Array{Array{Float64,1}}(undef,0)
+              )
   end
 
   function SeisData(n::UInt)
-    id = Array{String,1}(undef, n)
-    name = Array{String,1}(undef, n)
-    notes = Array{Array{String,1},1}(undef, n)
-    misc = Array{Dict{String,Any},1}(undef, n)
+    S = new(n,
+              Array{TCPSocket,1}(undef,0),
+              Array{String,1}(undef,n),
+              Array{String,1}(undef,n),
+              Array{Array{Float64,1}}(undef,n),
+              Array{Float64,1}(undef,n),
+              Array{Float64,1}(undef,n),
+              Array{Array{Complex{Float64},2},1}(undef,n),
+              Array{String,1}(undef,n),
+              Array{Dict{String,Any},1}(undef,n),
+              Array{Array{String,1},1}(undef,n),
+              Array{String,1}(undef,n),
+              Array{Array{Int64,2}}(undef,n),
+              Array{Array{Float64,1}}(undef,n)
+            )
 
-    n0 = tnote("channel initialized")
+    # Fill these fields with something to prevent undefined reference errors
+    fill!(S.id, "")                                         #  id
+    fill!(S.name, "")                                       # name
+    fill!(S.src, "")                                        # src
+    fill!(S.units, "")                                      # units
+    fill!(S.fs, 0.0)                                        # fs
+    fill!(S.gain, 1.0)                                      # gain
     for i = 1:n
-      name[i] = ""
-      id[i] = ""
-      misc[i] = Dict{String,Any}()
-      notes[i] = Array{String,1}([identity(n0)])
-    end
-
-    return new(n,
-        Array{TCPSocket,1}(undef,0),
-        name,
-        id,
-        collect(Main.Base.Iterators.repeated(zeros(Float64,5),n)),
-        collect(Main.Base.Iterators.repeated(0.0,n)),
-        collect(Main.Base.Iterators.repeated(1.0,n)),
-        collect(Main.Base.Iterators.repeated(Array{Complex{Float64}}(undef,0,2),n)),
-        collect(Main.Base.Iterators.repeated("",n)),
-        misc,
-        notes,
-        collect(Main.Base.Iterators.repeated("",n)),
-        collect(Main.Base.Iterators.repeated(Array{Int64,2}(undef,0,2),n)),
-        collect(Main.Base.Iterators.repeated(Array{Float64,1}(undef,0),n))
-        )
-  end
-
-  function SeisData(U...)
-    S = SeisData()
-    for i = 1:length(U)
-      if typeof(U[i]) == SeisChannel
-        push!(S, U[i])
-      elseif typeof(U[i]) == SeisData
-        append!(S, U[i])
-      elseif typeof(U[i]) == SeisEvent
-        append!(S, U[i].data)
-      else
-        @warn(string("Tried to join incompatible type into SeisData at arg ", i, "; skipped."))
-      end
+      S.notes[i]  = Array{String,1}(undef,0)                # notes
+      S.misc[i]   = Dict{String,Any}()                      # misc
+      S.t[i]      = Array{Int64,2}(undef,0,2)               # t
+      S.x[i]      = Array{Float64,1}(undef,0)               #  x
+      S.loc[i]    = Array{Float64,1}(undef,0)               # loc
+      S.resp[i]   = Array{Complex{Float64},2}(undef,0,2)    # resp
     end
     return S
   end
+  SeisData(n::Int) = n > 0 ? SeisData(UInt(n)) : SeisData()
 end
-SeisData(n::Int) = n > 0 ? SeisData(UInt(n)) : SeisData()
+
+function SeisData(U...)
+  S = SeisData()
+  for i = 1:length(U)
+    if typeof(U[i]) == SeisChannel
+      push!(S, U[i])
+    elseif typeof(U[i]) == SeisData
+      append!(S, U[i])
+    elseif typeof(U[i]) == SeisEvent
+      append!(S, U[i].data)
+    else
+      @warn(string("Tried to join incompatible type into SeisData at arg ", i, "; skipped."))
+    end
+  end
+  return S
+end
 
 # ============================================================================
 # Indexing, searching, iteration, size
@@ -139,13 +143,7 @@ setindex!(S::SeisData, U::SeisData, J::Array{Int,1}) = (
 setindex!(S::SeisData, U::SeisData, J::UnitRange) = setindex!(S, U, collect(J))
 setindex!(S::SeisData, U::SeisData, j::Int) = setindex!(S, U, [j])
 
-function isempty(S::SeisData)
-  if S.n == 0
-    return true
-  else
-    return minimum([isempty(S.x[i]) for i=1:S.n]::Array{Bool,1})
-  end
-end
+isempty(S::SeisData) = (S.n == 0) ? true : minimum([isempty(getfield(S,f)) for f in datafields])
 
 isequal(S::SeisData, U::SeisData) = minimum([hash(getfield(S,i))==hash(getfield(U,i)) for i in datafields]::Array{Bool,1})
 ==(S::SeisData, U::SeisData) = isequal(S,U)::Bool

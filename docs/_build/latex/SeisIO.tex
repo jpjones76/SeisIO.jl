@@ -59,7 +59,7 @@
 
 
 \title{SeisIO Documentation}
-\date{Feb 25, 2019}
+\date{Feb 26, 2019}
 \release{0.1.2 rc}
 \author{Joshua Jones}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -1657,22 +1657,6 @@ Expected string format is “yyyy-mm-ddTHH:MM:SS.nnn”, e.g. 2016-03-23T11:17:0
 Generate a Dict\{String,String\} to set UserAgent in web requests.
 
 “Safe” synchronize of start and end times of all trace data in SeisData structure \sphinxcode{\sphinxupquote{S}} to a new structure \sphinxcode{\sphinxupquote{U}}.
-\index{t\_win() (built-in function)@\spxentry{t\_win()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Appendices/function_list:t_win}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{t\_win}}}{\emph{T}, \emph{fs}}{}
-\end{fulllineitems}
-
-
-Convert matrix T from sparse delta-encoded time gaps to time windows (w{[}:,1{]}:w{[}:,2{]}) in integer \(\mu\)s from the Unix epoch (1970-01-01T00:00:00). Specify fs in Hz.
-
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{w~=~t\_win(S::SeisData}}}
-\end{fulllineitems}
-
-
-Convert S.t to time windows, as above, s.t. W{[}i{]} = t\_win(S.t{[}i{]}, S.fs{[}i{]})
 \index{u2d() (built-in function)@\spxentry{u2d()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
@@ -1689,7 +1673,8 @@ Convert matrix W from time windows (w{[}:,1{]}:w{[}:,2{]}) in integer \(\mu\)s f
 
 \subsection{RandSeis}
 \label{\detokenize{src/Appendices/function_list:randseis}}
-These auxiliary function are used to quickly generate SeisIO structures with quasi-random field contents:
+This submodule is used to quickly generate SeisIO structures with quasi-random
+field contents. Access it by typing “using SeisIO.RandSeis”
 \begin{itemize}
 \item {} 
 Channels have SEED-compliant IDs, sampling frequencies, and data types.
@@ -1707,7 +1692,7 @@ Instrument location parameters are randomly set.
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{C~=~randseischannel({[},c=false,~s=false{]})}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{C~=~randSeisChannel({[},c=false,~s=false{]})}}}
 \end{fulllineitems}
 
 
@@ -1721,15 +1706,15 @@ Generate 8 to 24 channels of random seismic data as a SeisData object.
 \item {} 
 100*s\% of channels \sphinxstyleemphasis{after the first} are guaranteed to have seismic data.
 
-randseisdata(N{[}, c=0.2, s=0.6{]})
+randSeisData(N{[}, c=0.2, s=0.6{]})
 
 \end{itemize}
 
 Generate N channels of random seismic data as a SeisData object.
-\index{randseisevent() (built-in function)@\spxentry{randseisevent()}\spxextra{built-in function}}
+\index{randSeisEvent() (built-in function)@\spxentry{randSeisEvent()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Appendices/function_list:randseisevent}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{randseisevent}}}{\sphinxoptional{\emph{c=0.2}, \emph{s=0.6}}}{}
+\phantomsection\label{\detokenize{src/Appendices/function_list:randSeisEvent}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{randSeisEvent}}}{\sphinxoptional{\emph{c=0.2}, \emph{s=0.6}}}{}
 \end{fulllineitems}
 
 
@@ -1739,7 +1724,7 @@ Generate a SeisEvent structure filled with random values.
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{H~=~randseishdr()}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{H~=~randSeisHdr()}}}
 \end{fulllineitems}
 
 

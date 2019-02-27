@@ -1,7 +1,7 @@
 using Statistics
 
 printstyled("  Annotation and logging...\n", color=:light_green)
-S = randseisdata(2)
+S = randSeisData(2)
 id_str = "XX.STA.00.EHZ"
 S.id[1] = id_str
 

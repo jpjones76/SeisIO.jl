@@ -1,3 +1,26 @@
+### 2019-02-26
+Bugfixes and consistency improvments:
+* `rseis`, `wseis` no longer assume `:loc` has length-5 vectors. The intent was
+always for location values and `:loc` vector lengths to be freeform.
+* Improved read methods for `rseis`.
+* More bug fixes for irregularly-sampled data.
+* `get_data` now sets default keyword values from SeisIO.KW.
+* `SeisData(n)` should now always allocate memory correctly.
+* Addition of SeisChannel and SeisData objects is once again commutative.
+* `SeisData(1)` and `SeisData(SeisChannel())` are now identical.
+* `isempty(SeisChannel)` and `isempty(SeisData)` have been redefined in a self-consistent way.
+Backend improvements:
+* Reorganized directory trees
+* Reorganized and improved tests
+* Removed Distributions from dependencies
+RandSeis:
+* The "randseis" functions are now a submodule, `SeisIO.RandSeis`. Functions
+have been renamed:
+    + `randseischannel` --> `RandSeis.randSeisChannel`
+    + `randseisdata` --> `RandSeis.randSeisData`
+    + `randseishdr` --> `RandSeis.randSeisHdr`
+    + `randseisevent` --> `RandSeis.randSeisEvent`
+
 ### 2019-02-24
 Several minor consistency improvements:
 * Exported functions are now all documented by topic

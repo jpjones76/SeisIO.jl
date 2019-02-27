@@ -73,7 +73,7 @@ D["242"] = collect(rand(Complex{Float64}, rand(4:24)))
 # rm("crapfile.bin")
 
 # Changing this test to guarantee at least one campaign-style measurement
-S = randseisdata() + randseisdata(2, c=1.0, s=0.0)[2]
+S = randSeisData() + randSeisData(2, c=1.0, s=0.0)[2]
 printstyled("    SeisData...\n", color=:light_green)
 S.misc[1] = D
 wseis(savfile1, S)
@@ -81,7 +81,7 @@ R = rseis(savfile1)
 @test(R[1]==S)
 
 printstyled("    SeisHdr...\n", color=:light_green)
-H = randseishdr()
+H = randSeisHdr()
 wseis(savfile2, H)
 H2 = rseis(savfile2)[1]
 @test(H==H2)
@@ -92,7 +92,7 @@ EV.data.misc[1] = D
 wseis(savfile3, EV)
 
 printstyled("    ...read/write of each type to same file...\n", color=:light_green)
-Ch = randseischannel()
+Ch = randSeisChannel()
 wseis(savfile3, EV, S, H, Ch)
 
 R = rseis(savfile3)

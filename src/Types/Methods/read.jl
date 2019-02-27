@@ -8,6 +8,7 @@ chk_seisio(io::IOStream, f_ok::Array{UInt8,1} =
   UInt8[0x53, 0x45, 0x49, 0x53, 0x49, 0x4f]) =
   (read(io, 6) == f_ok ? true : false)
 
+# Don't do this! It breaks the scoping of A for reasons unknown (bug in Julia)
 # function read_preamble(io::IOStream)
 #   r = read(io, Float32)
 #   j = read(io, Float32)
@@ -150,14 +151,18 @@ function rhdr(io::IOStream)
 end
 
 # SeisData, SeisChannel
-function rdata(io::IOStream)
+function rdata(io::IOStream, ver::Float32)
   Base.GC.enable(false)
   N = convert(Int64, read(io, UInt32))
   S = SeisData(N)
   for i = 1:N
 
     # int
-    i64 = read!(io, Array{Int64, 1}(undef, 8))
+    if ver < 0.3
+      i64 = read!(io, Array{Int64, 1}(undef, 8))
+    else
+      i64 = read!(io, Array{Int64, 1}(undef, 9))
+    end
     if i64[1] > 0
       S.t[i] = reshape(read!(io, Array{Int64, 1}(undef, i64[1])), div(i64[1],2), 2)
     end
@@ -167,7 +172,11 @@ function rdata(io::IOStream)
     S.gain[i] = read(io, Float64)
 
     # float arrays
-    S.loc[i] = read!(io, Array{Float64, 1}(undef, 5))
+    if ver < 0.3
+      S.loc[i] = read!(io, Array{Float64, 1}(undef, 5))
+    else
+      S.loc[i] = read!(io, Array{Float64, 1}(undef, i64[9]))
+    end
     if i64[2] > 0
       test_read_1 = read!(io, Array{Float64, 1}(undef, i64[2]))
       test_read_2 = read!(io, Array{Float64, 1}(undef, i64[2]))
@@ -201,65 +210,12 @@ function rdata(io::IOStream)
   return S
 end
 
-revent(io::IOStream) = (
+revent(io::IOStream, ver::Float32) = (
   S = SeisEvent();
   setfield!(S, :hdr, rhdr(io));
-  setfield!(S, :data, rdata(io));
+  setfield!(S, :data, rdata(io, ver));
   return S
   )
-
-
-# """
-#     rseis(fstr::String)
-#
-# Read SeisIO files matching file string ``fstr`` into memory.
-#
-# """
-# function rseis(files::Array{String,1}; v=0::Int)
-#   A = Array{Any,1}(undef, 0)
-#
-#   fcheck = Array{UInt8, 1}(undef,6)
-#   f_ok = UInt8[0x53, 0x45, 0x49, 0x53, 0x49, 0x4f]
-#   for f in files
-#     io = open(f, "r")
-#     fcheck = read(io, 6)
-#     if fcheck != f_ok
-#       close(io)
-#       @warn(string(f, " is not a SeisIO file; skipped."))
-#       continue
-#     end
-#     r = read(io, Float32)
-#     j = read(io, Float32)
-#     L = read(io, Int64)
-#     C = read!(io, Array{UInt8, 1}(undef, L))
-#     B = read!(io, Array{UInt64, 1}(undef, L))
-#     (v > 0) && @printf(stdout, "Reading %i total objects from file %s.\n", L, f)
-#     for i = 1:L
-#       if C[i] == 0x48
-#         push!(A, rhdr(io))
-#       elseif C[i] == 0x45
-#         push!(A, revent(io))
-#       else
-#         push!(A, rdata(io))
-#       end
-#       (v > 0) && @printf(stdout, "Read %s object from %s, bytes %i:%i.\n", typeof(A[end]), f, B[i], ((i == L) ? position(io) : B[i+1]))
-#     end
-#     close(io)
-#   end
-#   return A
-# end
-# rseis(fstr::String; v=0::Int) = rseis(ls(fstr), v=v)
-#
-# function read_rec(io::IOStream, u::UInt8; v=0::Int)
-#   (v > 0) && @printf(stdout, "Read %s object from %s, bytes %i:%i.\n", typeof(A[end]), f, B[i], ((i == L) ? position(io) : B[i+1]))
-#   if u == 0x48
-#     return rhdr(io)
-#   elseif u == 0x45
-#     return revent(io)
-#   else
-#     return rdata(io)
-#   end
-# end
 
 function build_file_list(patts::Union{String,Array{String,1}})
   if isa(patts, String)
@@ -276,13 +232,14 @@ function build_file_list(patts::Union{String,Array{String,1}})
   end
   return file_list
 end
-function read_rec(io::IOStream, u::UInt8; v=0::Int)
+
+function read_rec(io::IOStream, r::Float32, u::UInt8; v=0::Int)
   if u == 0x48
     return rhdr(io)
   elseif u == 0x45
-    return revent(io)
+    return revent(io, r)
   else
-    return rdata(io)
+    return rdata(io, r)
   end
 end
 """
@@ -319,7 +276,7 @@ function rseis(patts::Union{String,Array{String,1}};
     if isempty(c)
       (v > 1) && @printf(stdout, "Reading %i total objects from file %s.\n", L, f)
       for n = 1:L
-        push!(A, read_rec(io, C[n], v=v))
+        push!(A, read_rec(io, r, C[n], v=v))
       end
     else
       if minimum(c) > L
@@ -332,7 +289,7 @@ function rseis(patts::Union{String,Array{String,1}};
         n = c[k]
         if n in RNs
           seek(io, B[n])
-          push!(A, read_rec(io, C[n], v=v))
+          push!(A, read_rec(io, r, C[n], v=v))
           (v > 1) && @printf(stdout, "Read %s object from %s, bytes %i:%i.\n", typeof(A[end]), f, B[n], ((n == L) ? position(io) : B[n+1]))
         else
           (v > 0) && @info(string((n > L ? "No" : "Skipped"), " record ", c[k], " in ", f))
