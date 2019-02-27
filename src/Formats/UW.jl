@@ -250,7 +250,7 @@ function uwdf(datafile::String; v=0::Int)
   comment = replace(String(read!(fid, Array{UInt8, 1}(undef, 80))), "\0" => " ")
 
   # Set M time with lmin and lsec GREGORIAN MINUTES JESUS CHRIST WTF
-  uw_ot = lmin*60 + lsec*1.0e-6 + dconst
+  # uw_ot = lmin*60 + lsec*1.0e-6 + dconst
 
   # Seek EOF to get number of structures
   seekend(fid)
@@ -387,7 +387,7 @@ Read data file 99062109485W and pick file 99062109485o in the current working di
 function readuw(filename::String; v=0::Int)
 
   # Identify pickfile and datafile
-  filename = realpath(filename)
+  filename = Sys.iswindows() ? realpath(filename) : relpath(filename)
   pf = String("")
   df = String("")
   ec = UInt8(filename[end])
@@ -397,12 +397,11 @@ function readuw(filename::String; v=0::Int)
     df = filename[1:end-1]*"W"
   elseif ec == 0x57
     df = filename
-    froot = filename[1:end-1]
-    pf = getpf(froot, lc)
+    pf = getpf(filename[1:end-1], lc)
   else
     df = filename*"W"
     safe_isfile(df) || error("Invalid filename stub (no corresponding data file)!")
-    pf = getpf(froot, lc)
+    pf = getpf(filename, lc)
   end
 
   # File read wrappers
