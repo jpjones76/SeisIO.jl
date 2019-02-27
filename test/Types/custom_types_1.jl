@@ -53,29 +53,28 @@ S += (s1 * s2)
 # (5) S.x[1][126:250] = s2.x[126:250]
 
 # Basic merge ops
-@test S.n ≈ 1
-@test length(S.fs) ≈ 1
-@test ≈(S.fs[1], s1.fs)
-@test ≈(length(S.gain), 1)
-@test ≈(S.gain[1], s1.gain)
-@test ≈(length(S.name), 1)
-@test ≈(length(S.t),1)
-@test ≈(length(S.x),1)
+@test S.n == 1
+@test length(S.fs) == 1
+@test ==(S.fs[1], s1.fs)
+@test ==(length(S.gain), 1)
+@test ==(S.gain[1], s1.gain)
+@test ==(length(S.name), 1)
+@test ==(length(S.t),1)
+@test ==(length(S.x),1)
 @test S.id[1]=="DEAD.STA..EHZ"
 ungap!(S::SeisData; m=false, w=false) # why do I have to force type here
-@test ≈(length(S.x[1]), 260)
-@test ≈(S.x[1][1:50], s1.x[1:50])
-@test ≈(S.x[1][51:75], 0.5.*(s1.x[51:75] .+ s2.x[1:25]))
-@test ≈(S.x[1][76:100], s1.x[76:100])
-@test ≈(true, minimum(isnan.(S.x[1][101:125])))
-@test ≈(S.x[1][126:225], s2.x[26:125])
-@test ≈(true, minimum(isnan.(S.x[1][226:235])))
-@test ≈(S.x[1][236:260], s2.x[126:150])
+@test ==(length(S.x[1]), 260)
+@test ==(S.x[1][1:50], s1.x[1:50])
+@test ==(S.x[1][51:75], 0.5.*(s1.x[51:75] .+ s2.x[1:25]))
+@test ==(S.x[1][76:100], s1.x[76:100])
+@test minimum(isnan.(S.x[1][101:125]))
+@test ==(S.x[1][126:225], s2.x[26:125])
+@test minimum(isnan.(S.x[1][226:235]))
+@test ==(S.x[1][236:260], s2.x[126:150])
 
 # Auto-tapering after a merge
 T = deepcopy(S)
 ii = findall(isnan.(S.x[1]))
-# T.x[1] -= mean(T.x[1][!isnan(T.x[1])])
 autotap!(S)
 @test length(findall(isnan.(S.x[1])))==0           # No more NaNs?
 @test sum(diff(S.x[1][ii]))==0                 # All NaNs filled w/same val?
@@ -91,6 +90,7 @@ end
 @test isempty(S)
 
 printstyled("  ...a more difficult merge...\n", color=:light_green)
+S = SeisData()
 S *= (s1 * s3)
 S *= (s2 * s4)
 @test ≈(S.n, 2)

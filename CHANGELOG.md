@@ -1,5 +1,7 @@
 ### 2019-02-26
 Bugfixes and consistency improvments:
+* Consolidated methods for channel delete in `SeisData`, standardized syntax
+* `isempty` no longer defined for `SeisEvent`; old definition wasn't achievable
 * `rseis`, `wseis` no longer assume `:loc` has length-5 vectors. The intent was
 always for location values and `:loc` vector lengths to be freeform.
 * Improved read methods for `rseis`.

@@ -125,9 +125,9 @@ isequal(S::SeisData, U::SeisData) = minimum([hash(getfield(S,i))==hash(getfield(
 function sizeof(S::SeisData)
   s = sizeof(S.c) + 8
   for f in datafields
-    v = getfield(S,:f)
+    v = getfield(S,f)
     s += sizeof(v)
-    for i = 1:n
+    for i = 1:S.n
       s += sizeof(v[i])
       if f == :notes
         if !isempty(S.notes[i])
@@ -152,20 +152,14 @@ for failure.
 
     findid(S::SeisData, T::SeisData)
 
-Get indices corresponding to the first channel in T that matches each ID in S;
+Get index corresponding to the first channel in T that matches each ID in S;
 equivalent to [findid(id,T) for id in S.id].
 """
-function findid(id::String, S::SeisData)
-  c = 0
-  for i = 1:S.n
-    if S.id[i] == id
-      c = i
-      break
-    end
-  end
-  return c
+function findid(id::Union{Regex,String}, S::SeisData)
+  j = findfirst(S.id.==id)
+  return j == nothing ? 0 : j
 end
-findid(S::SeisData, id::String) = findid(id, S)
+findid(S::SeisData, id::Union{String,Regex}) = findid(id, S)
 findid(S::SeisData, T::SeisData) = [findid(id, T) for id in S.id]
 
 """
@@ -173,7 +167,7 @@ findid(S::SeisData, T::SeisData) = [findid(id, T) for id in S.id]
 
 Get all channel indices `i` in S with id ∈ S.id[i]
 """
-findchan(s::String, S::SeisData) = findall([occursin(s, i) for i in S.id])
+findchan(r::Union{Regex,String}, S::SeisData) = findall([occursin(r, i) for i in S.id])
 
 # Append, add, delete, sort
 append!(S::SeisData, U::SeisData)  = (
@@ -182,10 +176,27 @@ append!(S::SeisData, U::SeisData)  = (
   return S)
 +(S::SeisData, U::SeisData) = (T = deepcopy(S); return append!(T, U))
 
-# Delete methods are aliased to -
+# ============================================================================
+# deleteat!
 deleteat!(S::SeisData, j::Int)          = ([deleteat!(getfield(S, i),j) for i in datafields]; S.n -= 1; return nothing)
 deleteat!(S::SeisData, J::Array{Int,1}) = (sort!(J); [deleteat!(getfield(S, f), J) for f in datafields]; S.n -= length(J); return nothing)
 deleteat!(S::SeisData, K::UnitRange)    = (J = collect(K); deleteat!(S, J); return nothing)
+
+# Subtraction
+-(S::SeisData, i::Int)          = (U = deepcopy(S); deleteat!(U,i); return U)  # By channel #
+-(S::SeisData, J::Array{Int,1}) = (U = deepcopy(S); deleteat!(U,J); return U)  # By array of channel #s
+-(S::SeisData, J::AbstractRange)= (U = deepcopy(S); deleteat!(U,J); return U)  # By range of channel #s
+# ============================================================================
+# delete!
+function delete!(S::SeisData, s::Union{Regex,String}; exact=true::Bool)
+  if exact
+    i = findid(S, s)
+    deleteat!(S, i)
+  else
+    deleteat!(S, findchan(s,S))
+  end
+  return nothing
+end
 
 # With this convention, S+U-U = S
 function delete!(S::SeisData, U::SeisData)
@@ -199,30 +210,8 @@ function delete!(S::SeisData, U::SeisData)
   return nothing
 end
 
-# Delete by Regex match or exact ID match
-delete!(S::SeisData, r::Regex)          = deleteat!(S, findall([occursin(r, i) for i in S.id]))
-function delete!(S::SeisData, s::String; exact=true::Bool)
-  if exact
-    i = findid(S, s)
-    deleteat!(S, i)
-  else
-    deleteat!(S, findchan(s::String, S::SeisData))
-  end
-  return nothing
-end
-
-# Nothing more than aliasing, really
-delete!(S::SeisData, j::Int)            = deleteat!(S, j)
-delete!(S::SeisData, J::UnitRange)      = deleteat!(S, J)
-delete!(S::SeisData, J::Array{Int,1})   = deleteat!(S, J)
-
-# Subtraction
--(S::SeisData, i::Int)          = (U = deepcopy(S); deleteat!(U,i); return U)  # By channel #
--(S::SeisData, J::Array{Int,1}) = (U = deepcopy(S); deleteat!(U,J); return U)  # By array of channel #s
--(S::SeisData, J::AbstractRange)= (U = deepcopy(S); deleteat!(U,J); return U)  # By range of channel #s
--(S::SeisData, s::String)       = (U = deepcopy(S); delete!(U,s); return U)    # By channel id string
--(S::SeisData, r::Regex)        = (U = deepcopy(S); delete!(U,r); return U)    # By channel id regex
--(S::SeisData, T::SeisData)     = (U = deepcopy(S); delete!(U,T); return U)    # Remove all channels in one SeisData from another
+-(S::SeisData, r::Union{Regex,String}) = (U = deepcopy(S); delete!(U,r); return U)  # By channel id regex or string
+-(S::SeisData, T::SeisData) = (U = deepcopy(S); delete!(U,T); return U)             # Remove all channels with IDs in one SeisData from another
 
 # Extract
 """
@@ -245,7 +234,7 @@ function pull(S::SeisData, J::UnitRange)
   deleteat!(S,J)
   return T
 end
-function pull(S::SeisData, J::Array{Integer,1})
+function pull(S::SeisData, J::Array{Int64,1})
   T = deepcopy(getindex(S, J))
   deleteat!(S,J)
   return T
