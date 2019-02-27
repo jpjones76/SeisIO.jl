@@ -2,8 +2,10 @@ import Base:length, show, size, summary
 const os=8
 
 si(w::Int, i::Int) = os + w*(i-1)
-showtail(io::IO, b::Bool) = b ? "..." : ""
+showtail(io::IO, b::Bool) = b ? "…" : ""
 float_str(x::Float64) = @sprintf("%.3e", x)
+maxgap(t::Array{Int64,2}) = @sprintf("%g", μs*maximum(t[2:end,2]))
+ngaps(t::Array{Int64,2}) = max(0, size(t,1)-2)
 
 function str_trunc(str::String, w::Integer)
   d = map(UInt8, collect(str))
@@ -32,7 +34,7 @@ function show_str(io::IO, S::Array{String,1}, w::Int, W::Int, s::String, b::Bool
     d = str_trunc(S[i], w)
     sd[st+1:st+length(d)] = d
   end
-  println(io, replace(String(sd),'\0' => ' ') => showtail(io, b))
+  println(io, replace(String(sd),'\0' => ' '), showtail(io, b))
   return
 end
 
@@ -44,12 +46,10 @@ function show_int(io::IO, D::Array{Int,1}, W::Int, w::Int, s::String, b::Bool)
     d = str_trunc(string(D[i]), w)
     sd[st+1:st+length(d)] = d
   end
-  println(io, string(replace(String(sd),'\0' => ' ') => showtail(io, b)))
+  println(io, string(replace(String(sd),'\0' => ' '), showtail(io, b)))
   return
 end
 
-maxgap(t::Array{Int64,2}) = @sprintf("%g", μs*maximum(t[2:end,2]))
-ngaps(t::Array{Int64,2}) = max(0, size(t,1)-2)
 function show_t(io::IO, T::Array{Array{Int64,2},1}, w::Int, W::Int, b::Bool)
   sd1 = str_head("T", W::Int)
   p = os
@@ -64,14 +64,14 @@ function show_t(io::IO, T::Array{Array{Int64,2},1}, w::Int, W::Int, b::Bool)
     sd1[p+2+length(s):p+1+length(s)+length(ng)] = ng
     p += w
   end
-  println(io, replace(String(sd1),'\0' => ' ') => showtail(io, b))
+  println(io, replace(String(sd1),'\0' => ' '), showtail(io, b))
   return
 end
 
-function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, b::Bool)
+function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, tip::String, b::Bool)
   N = length(X)
   str = zeros(UInt8, W, 6)
-  str[os-2:os,1] = codeunits("X: ")
+  str[os-length(tip)-1:os,1] = UInt8.(codeunits(tip * ": "))
   p = os
   i = 1
   while p < W && i <= N
@@ -99,7 +99,7 @@ function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, b::Bool)
   end
   for i = 1:6
     if i == 1
-      println(io, replace(String(str[:,i]),'\0' => ' ') => showtail(io, b))
+      println(io, replace(String(str[:,i]),'\0' => ' '), showtail(io, b))
     else
       println(io, replace(String(str[:,i]),'\0' => ' '))
     end
@@ -181,7 +181,8 @@ function show(io::IO, S::SeisData)
   println(io, "SeisData with ", nc, " channels (", N, " shown)")
   show_str(io, S.id[1:N], w, W, "id", N<nc)
   show_str(io, S.name[1:N], w, W, "name", N<nc)
-  show_str(io, [@sprintf("%0.03f, %0.03f, %0.03f", S.loc[i][1], S.loc[i][2], S.loc[i][3]) for i = 1:N], w, W, "loc", N<nc)
+  # show_str(io, [@sprintf("%0.03f, %0.03f, %0.03f", S.loc[i][1], S.loc[i][2], S.loc[i][3]) for i = 1:N], w, W, "loc", N<nc)
+  show_x(io, S.loc[1:N], w, W, "LOC", N<nc)
   show_str(io, [@sprintf("%.04g", S.fs[i]) for i = 1:N], w, W, "fs", N<nc)
   show_str(io, [@sprintf("%.03e", S.gain[i]) for i = 1:N], w, W, "gain", N<nc)
   resp_str(io, S.resp[1:N], w, W, N<nc)
@@ -190,7 +191,7 @@ function show(io::IO, S::SeisData)
   show_str(io, [string(length(S.notes[i]), " entries") for i = 1:N],w,W,"NOTES",N<nc)
   show_str(io, [string(length(S.misc[i]), " items") for i = 1:N],w,W,"MISC",N<nc)
   show_t(io, S.t[1:N], w, W, N<nc)
-  show_x(io, S.x[1:N], w, W, N<nc)
+  show_x(io, S.x[1:N], w, W, "DATA", N<nc)
   show_conn(io, S.c)
   return nothing
 end
@@ -205,7 +206,9 @@ function show(io::IO, S::SeisChannel)
   println(io, "SeisChannel with ", nx, " samples")
   show_str(io, [S.id], w, W, "id", false)
   show_str(io, [S.name], w, W, "name", false)
-  [show_str(io, [string(S.loc[j])], w, W, loc_str[j], false) for j=1:5]
+  show_x(io, [S.x], w, W, "LOC", false)
+  # [show_str(io, [string(S.loc[j])], w, W, loc_str[j], false) for j=1:5]
+  # show_x(io, [S.loc], w, W, N<nc)
   show_str(io, [string(S.fs)], w, W, "fs", false)
   show_str(io, [float_str(S.gain)], w, W, "gain", false)
   resp_str(io, [S.resp], w, W, false)
@@ -214,7 +217,7 @@ function show(io::IO, S::SeisChannel)
   show_str(io, [string(length(S.notes), " entries")], w, W, "NOTES", false)
   show_str(io, [string(length(S.misc), " items")], w, W, "MISC", false)
   show_t(io, [S.t], w, W, false)
-  show_x(io, [S.x], w, W, false)
+  show_x(io, [S.x], w, W, "DATA", false)
   return nothing
 end
 show(S::SeisChannel) = show(stdout, S)

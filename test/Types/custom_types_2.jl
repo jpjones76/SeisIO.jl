@@ -1,17 +1,18 @@
-# Tests
-(S,T) = mktestseis()
-
 printstyled(stdout,"    Extended methods and custom functions...\n", color=:light_green)
 printstyled(stdout,"      show...\n", color=:light_green)
+S = randSeisData(2,c=1.0)[2] + randSeisData()
+S[1].x = rand(Float64, 3)
 open("show.log", "w") do out
   redirect_stdout(out) do
+    show(randSeisChannel())
     show(S)
-    show(randseishdr())
-    show(randseisevent())
+    show(randSeisHdr())
+    show(randSeisEvent())
   end
 end
 rm("show.log")
 
+(S,T) = mktestseis()
 printstyled(stdout,"      getindex...\n", color=:light_green)
 i_targ = 3
 C = S[i_targ]
@@ -121,15 +122,10 @@ n_targ = 7
 @test ≈(minimum([length(getfield(S,i)) for i in datafields]), n_targ)
 
 # Some new functionality added 2019-02-23
-S = SeisData(randseisdata(5), SeisChannel(), SeisChannel(),
+S = SeisData(randSeisData(5), SeisChannel(), SeisChannel(),
     SeisChannel(id="UW.SEP..EHZ", name="Darth Exploded",
     loc=[46.1967, -122.1875, 1440, 0.0, 0.0], x=rand(1024)))
 prune!(S)
 @test (S.n == 6)
 J = findchan("EHZ",S)
 @test (6 in J)
-
-printstyled(stdout,"      show...\n", color=:light_green)
-@test show(randseischannel()) == nothing
-S = randseisdata(2,c=1.0)[2] + randseisdata()
-S[1].x = rand(Float64, 3)

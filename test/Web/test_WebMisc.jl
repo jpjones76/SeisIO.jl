@@ -10,8 +10,8 @@ S = SeisData(3)
 @test track_off!(S) == [true,true,true]
 # @test_throws ErrorException("Tracking not enabled!") track_off!(S)
 
-# Now replace S with randseisdata
-S = randseisdata(3)
+# Now replace S with randSeisData
+S = randSeisData(3)
 track_on!(S)
 @test haskey(S.misc[1], "track")
 u = track_off!(S)

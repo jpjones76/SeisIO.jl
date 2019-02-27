@@ -46,7 +46,7 @@
 
   \indexspace
   \bigletter R
-  \item \spxentry{randseisevent()}\spxextra{built-in function}, \hyperpage{26}
+  \item \spxentry{randSeisEvent()}\spxextra{built-in function}, \hyperpage{26}
   \item \spxentry{readmseed()}\spxextra{built-in function}, \hyperpage{14}
   \item \spxentry{readsac()}\spxextra{built-in function}, \hyperpage{14}
   \item \spxentry{readsegy()}\spxextra{built-in function}, \hyperpage{14}
@@ -68,7 +68,6 @@
 
   \indexspace
   \bigletter T
-  \item \spxentry{t\_win()}\spxextra{built-in function}, \hyperpage{26}
   \item \spxentry{timestamp()}\spxextra{built-in function}, \hyperpage{7}
 
   \indexspace

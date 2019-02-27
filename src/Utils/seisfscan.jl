@@ -1,3 +1,5 @@
+import Dates:DateTime
+
 """
   `seisfscan(fstr::String, id::String, s=t0, t=t1)`
 
@@ -14,10 +16,10 @@ function seisfscan(fstr::String, ids::Array{String,1}; s=(-62167219200)::Real, t
   F = length(files)
 
   (d0,d1) = parsetimewin(s,t)
-  s = d2u(Dates.DateTime(d0))
-  t = d2u(Dates.DateTime(d1))
-  ts = round(Int64, min(s,t)*1000000)
-  te = round(Int64, max(s,t)*1000000)
+  s = d2u(DateTime(d0))
+  t = d2u(DateTime(d1))
+  ts = round(Int64, min(s,t)*1000000.0)
+  te = round(Int64, max(s,t)*1000000.0)
 
   # Each ID gets a key, whose value is an array of files that match the key
   for id in ids
