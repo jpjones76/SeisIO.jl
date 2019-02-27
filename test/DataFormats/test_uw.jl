@@ -19,3 +19,10 @@ i = findfirst(W.data.id.=="UW.VFP..EHZ")
 @test ≈(W.data.misc[i]["t_d"][1], 19.0)
 
 S += W.data
+
+# Can we read from pickfile only?
+uw_root = uw_root[1:end-1]
+W = readuw(uw_root*"o")
+
+# Can we read from filename stub?
+W = readuw(uw_root)
