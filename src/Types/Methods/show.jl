@@ -57,7 +57,7 @@ function show_t(io::IO, T::Array{Array{Int64,2},1}, w::Int, W::Int, b::Bool)
     if isempty(T[i])
       s = ""
     else
-      s = timestamp(T[i][1,2])
+      s = timestamp(T[i][1,2]*μs)
     end
     sd1[p+1:p+length(s)] = codeunits(s)
     ng = map(UInt8, collect(string("(", ngaps(T[i]), " gaps)")))
