@@ -55,14 +55,6 @@ Generate a Dict{String,String} to set UserAgent in web requests.
 
 "Safe" synchronize of start and end times of all trace data in SeisData structure ``S`` to a new structure ``U``.
 
-.. function:: t_win(T, fs)
-
-Convert matrix T from sparse delta-encoded time gaps to time windows (w[:,1]:w[:,2]) in integer μs from the Unix epoch (1970-01-01T00:00:00). Specify fs in Hz.
-
-.. function:: w = t_win(S::SeisData
-
-Convert S.t to time windows, as above, s.t. W[i] = t_win(S.t[i], S.fs[i])
-
 .. function:: u2d(x)
 
 Alias to ``Dates.unix2datetime``.
@@ -74,34 +66,35 @@ Convert matrix W from time windows (w[:,1]:w[:,2]) in integer μs from the Unix 
 ********
 RandSeis
 ********
-These auxiliary function are used to quickly generate SeisIO structures with quasi-random field contents:
+This submodule is used to quickly generate SeisIO structures with quasi-random
+field contents. Access it by typing "using SeisIO.RandSeis"
 
 * Channels have SEED-compliant IDs, sampling frequencies, and data types.
 * Channel data are randomly generated.
 * Some time gaps are automatically inserted into regularly-sampled data.
 * Instrument location parameters are randomly set.
 
-.. function:: C = randseischannel([,c=false, s=false])
+.. function:: C = randSeisChannel([,c=false, s=false])
 
 Generate a SeisChannel of random data. Specify c=true for campaign-style (irregularly-sampled) data (fs = 0.0); specify s=true to guarantee seismic data. s=true overrides c=true.
 
-.. function randseisdata([, c=0.2, s=0.6])
+.. function randSeisData([, c=0.2, s=0.6])
 
 Generate 8 to 24 channels of random seismic data as a SeisData object.
 
 * 100*c% of channels *after the first* will have irregularly-sampled data (fs = 0.0)
 * 100*s% of channels *after the first* are guaranteed to have seismic data.
 
-  randseisdata(N[, c=0.2, s=0.6])
+  randSeisData(N[, c=0.2, s=0.6])
 
 Generate N channels of random seismic data as a SeisData object.
 
-.. function:: randseisevent([, c=0.2, s=0.6])
+.. function:: randSeisEvent([, c=0.2, s=0.6])
 
 Generate a SeisEvent structure filled with random values.
 * 100*c% of channels *after the first* will have irregularly-sampled data (fs = 0.0)
 * 100*s% of channels *after the first* are guaranteed to have seismic data.
 
-.. function:: H = randseishdr()
+.. function:: H = randSeisHdr()
 
 Generate a SeisHdr structure filled with random values.
