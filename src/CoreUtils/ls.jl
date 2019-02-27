@@ -49,7 +49,7 @@ function ls(s::String)
     # The syntax below takes advantage of the fact that realpath in Windows
     # doesn't test for existence and hence won't break on wildcards.
     c = Char['/', '\\']
-    K = Sys.iswindows() ? split(relpath(s), c) : split(realpath(s), c)
+    K = Sys.iswindows() ? split(realpath(s), c) : split(relpath(s), c)
 
     if length(K) == 1
       return listfiles(pwd(), K[1])
