@@ -23,7 +23,7 @@ function ls(s::String)
     # works in v >= 0.5.2
     return filter(x -> !isempty(x), map(String, split(read(`sh -c "ls -1 $s"`, String), "\n")))
   else
-    isdir(s) && return readdir(s)
+    safe_isdir(s) && return readdir(s)
     safe_isfile(s) && return(Array{String,1}([s]))
 
     # The syntax below takes advantage of the fact that realpath in Windows
