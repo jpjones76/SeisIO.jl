@@ -1,5 +1,29 @@
 export ls
 
+# safe_isfile, safe_isdir adapted from https://github.com/JuliaPackaging/BinaryProvider.jl/commit/08a314a225206a68665c6f730d7c3feeda1ba615
+# Temporary hack around https://github.com/JuliaLang/julia/issues/26685
+function safe_isfile(path)
+    try
+        return isfile(path)
+    catch err
+        if typeof(err) <: Base.IOError && err.code == Base.UV_EINVAL
+            return false
+        end
+        rethrow(err)
+    end
+end
+
+function safe_isdir(path)
+    try
+        return isdir(path)
+    catch err
+        if typeof(err) <: Base.IOError && err.code == Base.UV_EINVAL
+            return false
+        end
+        rethrow(err)
+    end
+end
+
 function listfiles(d::String, p::AbstractString)
   F = readdir(d)
   S = split(p, '*', keepempty=true)
@@ -19,17 +43,13 @@ function listfiles(d::String, p::AbstractString)
 end
 
 function ls(s::String)
-  if Sys.iswindows() == false
-    # works in v >= 0.5.2
-    return filter(x -> !isempty(x), map(String, split(read(`sh -c "ls -1 $s"`, String), "\n")))
-  else
     safe_isdir(s) && return readdir(s)
     safe_isfile(s) && return(Array{String,1}([s]))
 
     # The syntax below takes advantage of the fact that realpath in Windows
     # doesn't test for existence and hence won't break on wildcards.
     c = Char['/', '\\']
-    K = split(realpath(s), c)
+    K = Sys.iswindows() ? split(relpath(s), c) : split(realpath(s), c)
 
     if length(K) == 1
       return listfiles(pwd(), K[1])
@@ -49,24 +69,5 @@ function ls(s::String)
     # which is to say, not robustly. Nonetheless, it can work.
     # s = replace(s, "/" => "\\")
     # return map(String, filter(x -> !isempty(x), split(read(`cmd /c dir /b $s`, String), "\r\n")))
-  end
 end
 ls() = readdir(pwd())
-
-
-# Tests
-# Windows
-# ls("F:\\Research")
-# ls("F:/Research/Yellowstone/*.txt")
-# cd("F:/Research/DLP"); ls("*seis")
-# cd("F:/Research/DLP"); ls("poo.seis")
-# cd("F:/Research/DLP"); ls("dlp.seis")
-# ls("C:\\Users\\Josh\\*hist")
-
-# WORKING IN LINUX AS OF 2017-07-03
-# ls("/data2/Research")
-# ls("/data2/Research/Yellowstone/*.txt")
-# cd("/data2/Research/DLP"); ls("*seis")
-# cd("/data2/Research/DLP"); ls("poo.seis")
-# cd("/data2/Research/DLP"); ls("dlp.seis")
-# ls("/win/Users/Josh/*hist")
