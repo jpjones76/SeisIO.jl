@@ -9,9 +9,9 @@ const datafields = [:id, :name, :loc, :fs, :gain, :resp, :units, :src, :notes, :
 const hdrfields = [:id, :ot, :loc, :mag, :int, :mt, :np, :pax, :src, :notes, :misc]
 
 # DO NOT CHANGE IMPORT ORDER
+include("CoreUtils/safe_isfile.jl") # workaround for safe_isfile bad behaior in Windows
 include("CoreUtils/ls.jl")
 include("CoreUtils/time.jl")
-include("CoreUtils/safe_isfile.jl") # workaround for safe_isfile bad behaior in Windows
 
 # Utilities that don't require SeisIO types to work but may depend on CoreUtils
 for i in readdir(path*"/Utils")

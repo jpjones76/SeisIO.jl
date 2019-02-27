@@ -11,3 +11,14 @@ function safe_isfile(path)
         rethrow(err)
     end
 end
+
+function safe_isdir(path)
+    try
+        return isdir(path)
+    catch err
+        if typeof(err) <: Base.IOError && err.code == Base.UV_EINVAL
+            return false
+        end
+        rethrow(err)
+    end
+end
