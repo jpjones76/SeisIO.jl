@@ -1,0 +1,14 @@
+id = "UW.SEP..EHZ"
+name = "Darth Exploded"
+
+Ch = randSeisChannel()
+Ch.id = id
+Ch.name = name
+S = SeisData(Ch)
+
+@test in(id, Ch) == true
+@test isempty(Ch) == false
+@test convert(SeisData, Ch) == SeisData(Ch)
+@test findid(Ch, S) == 1
+@test sizeof(Ch) > 0
+@test lastindex(S) == 1

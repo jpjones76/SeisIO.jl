@@ -2,6 +2,8 @@ printstyled(stdout,"    Extended methods and custom functions...\n", color=:ligh
 printstyled(stdout,"      show...\n", color=:light_green)
 S = randSeisData(2,c=1.0)[2] + randSeisData()
 S[1].x = rand(Float64, 3)
+T = randSeisData(1)
+
 open("show.log", "w") do out
   redirect_stdout(out) do
     show(randSeisChannel())
@@ -13,6 +15,8 @@ end
 rm("show.log")
 
 (S,T) = mktestseis()
+@test findid(T, S) == [0, 0, 4, 5]
+
 printstyled(stdout,"      getindex...\n", color=:light_green)
 i_targ = 3
 C = S[i_targ]
@@ -25,9 +29,9 @@ printstyled(stdout,"      in...\n", color=:light_green)
 @test ("XX.TMP01.00.BHZ" in S.id)
 
 printstyled(stdout,"      findid...\n", color=:light_green)
-@test ≈(findid("CC.LON..BHZ",S),findid(S,"CC.LON..BHZ"))
-@test ≈(findid(S,"CC.LON..BHZ"),4)
-@test ≈(findid(S,C),3)
+@test ≈(findid("CC.LON..BHZ",S), findid(S,"CC.LON..BHZ"))
+@test ≈(findid(S,"CC.LON..BHZ"), 4)
+@test ≈(findid(S,C), 3)
 
 printstyled(stdout,"      setindex!...\n", color=:light_green)
 A = SeisData(3)
