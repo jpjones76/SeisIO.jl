@@ -60,7 +60,7 @@ function clear_notes!(S::SeisData)
   end
   return nothing
 end
-clear_notes!(C::SeisChannel) = (C.notes = Array{String,1}(1); C.notes[i][1] = tnote("notes cleared."); return nothing)
+clear_notes!(C::SeisChannel) = (C.notes = Array{String,1}[1]; C.notes[i][1] = tnote("notes cleared."); return nothing)
 
 """
     clear_notes!(S::SeisData, i::Int64, s::String)

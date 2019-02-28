@@ -1,5 +1,9 @@
 using Statistics
 
+Ch = randSeisChannel()
+clear_notes!(Ch)
+@test isempty(Ch.notes)
+
 printstyled("  Annotation and logging...\n", color=:light_green)
 S = randSeisData(2)
 id_str = "XX.STA.00.EHZ"

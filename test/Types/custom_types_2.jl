@@ -51,6 +51,8 @@ open("show.log", "w") do out
     summary(randSeisChannel())
     summary(randSeisData())
     summary(randSeisHdr())
+    length(randSeisHdr())
+    length(randSeisChannel())
   end
 end
 rm("show.log")
