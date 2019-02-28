@@ -1,7 +1,7 @@
 export wseis
 
-vSeisIO() = Float32(0.3)                          # SeisIO file format version
-vJulia() = Float32(Meta.parse(string(VERSION.major,".",VERSION.minor)))
+const vSeisIO() = Float32(0.3)                          # SeisIO file format version
+const vJulia() = Float32(Meta.parse(string(VERSION.major,".",VERSION.minor)))
 Blosc.set_compressor("blosclz")
 Blosc.set_num_threads(Sys.CPU_THREADS)
 
@@ -13,29 +13,12 @@ Blosc.set_num_threads(Sys.CPU_THREADS)
 # Auxiliary file write functions
 sa2u8(s::Array{String,1}) = map(UInt8, collect(join(s,'\0')))
 
-function autoname(ot::DateTime)
-  s = replace(string(ot), ['-',':','T'] => '.')
-  (length(s) == 19) && (s*=".000")
-  (length(s) < 23) && (s*="0"^(23-length(s)))
-  return s
-end
-autoname(t::Array{Array{Int64,2}}) = autoname(isempty(t) ? u2d(0) : u2d(minimum([t[i][1,2] for i=1:length(t)])/1000000))
-
 function writestr_fixlen(io::IOStream, s::String, L::Integer)
       o = map(UInt8, collect(" "^L))
       L = min(L, length(s))
       o[1:L] = codeunits(s)
       write(io, o)
       return
-end
-
-function writestr_varlen(io::IOStream, s::String)
-  L = Int64(length(s))
-  write(io, L)
-  if L > 0
-    write(io, map(UInt8, collect(s)))
-  end
-  return
 end
 
 # allowed values in misc: char, string, numbers, and arrays of same.
@@ -101,7 +84,6 @@ function write_string_array(io, v::Array{String})
     write(io, UInt8(sep), Int64(length(s)), s)
   end
 end
-write_string_array(io, v::String) = write_string_array(io, String[v])
 
 write_misc_val(io::IOStream, K::Union{Char,AbstractFloat,Integer}) = write(io, K)
 write_misc_val(io::IOStream, K::Complex) = write(io, real(K), imag(K))
@@ -249,9 +231,6 @@ function w_struct(io::IOStream, H::SeisHdr)
   # Misc
   write_misc(io, H.misc)
 end
-
-# SeisChannel
-w_struct(io::IOStream, S::SeisChannel) = w_struct(io, SeisData(S))
 
 # SeisEvent
 w_struct(io::IOStream, S::SeisEvent) = (w_struct(io, S.hdr); w_struct(io, S.data))
