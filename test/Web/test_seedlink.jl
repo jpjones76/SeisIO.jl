@@ -56,6 +56,7 @@ sleep(dt)
 for i = 1:length(S.c)
   close(S.c[i])
 end
+show(S)
 @test isempty(S)==false
 
 # Synchronize (the reason we used d0,d1 above)
