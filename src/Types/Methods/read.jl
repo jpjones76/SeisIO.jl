@@ -196,13 +196,13 @@ function rdata(io::IOStream, ver::Float32)
     else
       S.notes[i] = Array{String,1}([""])
     end
-    if y == 0x32
+    # if y == 0x32
       S.x[i]  = Blosc.decompress(Float64, read!(io, Array{UInt8, 1}(undef, i64[7])))
-    elseif y == 0x31
-      S.x[i]  = Blosc.decompress(Float32, read!(io, Array{UInt8, 1}(undef, i64[7])))
-    else
-      S.x[i]  = Blosc.decompress(code2typ(y), read!(io, Array{UInt8, 1}(undef, i64[7])))
-    end
+    # elseif y == 0x31
+    #   S.x[i]  = Blosc.decompress(Float32, read!(io, Array{UInt8, 1}(undef, i64[7])))
+    # else
+    #   S.x[i]  = Blosc.decompress(code2typ(y), read!(io, Array{UInt8, 1}(undef, i64[7])))
+    # end
     S.misc[i] = read_misc(io)
   end
   Base.GC.enable(true)
