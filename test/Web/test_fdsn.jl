@@ -1,3 +1,4 @@
+# using LightXML
 printstyled("  FDSN web requests\n", color=:light_green)
 
 # US Test
@@ -38,8 +39,6 @@ S = FDSNevt("201103110547", "PB.B004..EH?,PB.B004..BS?,PB.B001..BS?,PB.B001..EH?
 printstyled("    data from GFZ...\n", color=:light_green)
 R = get_data("FDSN", "GE.BKB..BH?", src="GFZ", s="2011-03-11T06:00:00", t="2011-03-11T06:05:00", v=0, y=false)
 @test (isempty(R)==false)
-
-using LightXML
 
 printstyled("  FDSN XML\n", color=:light_green)
 xml_evfile = path*"/SampleFiles/fdsnws-event_2017-01-12T03-18-55Z.xml"

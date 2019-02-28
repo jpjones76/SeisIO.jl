@@ -1,6 +1,21 @@
 printstyled(stdout,"    Extended methods and custom functions...\n", color=:light_green)
 
 # untested methods in SeisData
+for i = 1:5
+    S = randSeisData()
+    @test sizeof(S) > 0
+
+    r = S.id[1]
+    U = S - r
+    @test sizeof(U) < sizeof(S)
+    @test S.n == U.n + 1
+
+    T = pull(S,r)
+    @test isa(T, SeisChannel)
+    @test(U == S)
+end
+
+
 (S,T) = mktestseis()
 @test in("UW.SEP..EHZ",S)
 U = S[3:S.n]
@@ -36,7 +51,7 @@ Y = sort(X)
 @test V == Y
 
 printstyled(stdout,"      show...\n", color=:light_green)
-S = (randSeisData(2,c=1.0)[2], randSeisEvent().data, randSeisData())
+S = (randSeisData(2,c=1.0)[2], randSeisEvent(), randSeisData())
 S[1].x = rand(Float64, 3)
 @test sizeof(S) > 0
 T = randSeisData(1)

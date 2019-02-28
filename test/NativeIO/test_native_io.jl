@@ -72,10 +72,11 @@ D["242"] = collect(rand(Complex{Float64}, rand(4:24)))
 # [@test(D[k]==DD[k]) for k in sort(collect(keys(D)))]
 # rm("crapfile.bin")
 
-# Changing this test to guarantee at least one campaign-style measurement ... and test splat notation
+# Changing this test to guarantee at least one campaign-style measurement ... and test splat notation ... and something with no notes
 S = SeisData(randSeisData(), randSeisEvent().data, randSeisData(2, c=1.0, s=0.0)[2])
 printstyled("    SeisData...\n", color=:light_green)
 S.misc[1] = D
+S.notes[2] = []
 wseis(savfile1, S)
 R = rseis(savfile1)
 @test(R[1]==S)

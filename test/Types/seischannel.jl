@@ -12,3 +12,8 @@ S = SeisData(Ch)
 @test findid(Ch, S) == 1
 @test sizeof(Ch) > 0
 @test lastindex(S) == 1
+
+S = randSeisData()
+C = randSeisChannel()
+U = C + S
+@test findid(C,U) == 1

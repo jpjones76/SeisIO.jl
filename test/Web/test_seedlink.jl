@@ -54,9 +54,10 @@ printstyled("    ...third link initialized...\n", color=:light_green)
 printstyled(string("    ...sleep ", dt, " s while SeedLink session receives data...\n"), color=:green)
 sleep(dt)
 for i = 1:length(S.c)
-  close(S.c[i])
+    i == 3 && show(S)
+    close(S.c[i])
 end
-show(S)
+
 @test isempty(S)==false
 
 # Synchronize (the reason we used d0,d1 above)
