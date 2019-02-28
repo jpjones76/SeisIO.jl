@@ -1,6 +1,6 @@
 __precompile__()
 module SeisIO
-using Blosc, Dates, DSP, LightXML, LinearAlgebra, Printf, Random, SharedArrays, Sockets
+using Blosc, Dates, DSP, LightXML, LinearAlgebra, Printf, Sockets
 using HTTP: request
 using Statistics: mean
 
@@ -29,13 +29,6 @@ for i in readdir(path*"/Types/Methods")
   include(joinpath("Types/Methods",i))
 end
 
-# Miscellaneous SeisIO-dependent functions
-# for i in readdir(path*"/Misc")
-#   if endswith(i, ".jl")
-#     include(joinpath("Misc",i))
-#   end
-# end
-
 # Processing
 for i in readdir(path*"/Processing")
   include(joinpath("Processing",i))
@@ -47,7 +40,6 @@ for i in readdir(path*"/Formats")
     include(joinpath("Formats",i))
   end
 end
-
 
 # Web clients
 include("Web/WebMisc.jl")         # Common functions for web data access

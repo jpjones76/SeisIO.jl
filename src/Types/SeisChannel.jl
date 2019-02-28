@@ -78,13 +78,9 @@ function SeisData(C::SeisChannel)
 end
 convert(::Type{SeisData}, C::SeisChannel) = SeisData(C)
 +(S::SeisData, C::SeisChannel) = (deepcopy(S) + SeisData(C))
-+(C::SeisChannel, S::SeisData) = (deepcopy(S) + SeisData(C))
++(C::SeisChannel, S::SeisData) = (SeisData(C) + deepcopy(S))
 +(C::SeisChannel, D::SeisChannel) = SeisData(C,D)
 
-# push!(S::SeisData, C::SeisChannel)  = (
-#   [setfield!(S, i, push!(getfield(S,i), getfield(C,i))) for i in datafields];
-#   S.n += 1;
-#   return S)
 function push!(S::SeisData, C::SeisChannel)
   for i in datafields
     setfield!(S, i, push!(getfield(S,i), getfield(C,i)))
