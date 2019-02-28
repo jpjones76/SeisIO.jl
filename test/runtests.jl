@@ -14,4 +14,4 @@ for d in ["CoreUtils", "Types", "NativeIO", "DataFormats", "Web"]
 end
 
 printstyled("Done!\n", color=:light_green, bold=true)
-printstyled("To run canonical examples, execute this command: include(\"", path, "/examples.jl\")", color=:cyan, bold=true)
+printstyled("To run canonical examples, execute this command: include(\"", path, "/examples.jl\").\n", color=:cyan, bold=true)
