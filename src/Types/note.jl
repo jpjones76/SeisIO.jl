@@ -47,10 +47,19 @@ end
 note!(H::SeisHdr, s::String) = push!(H.notes, tnote(s))
 note!(S::SeisChannel, s::String) = push!(S.notes, tnote(s))
 
+# DND, these methods prevent memory reuse
 """
-    clear_notes!(S::Union{SeisData,SeisChannel})
+    clear_notes!(U::Union{SeisData,SeisChannel,SeisHdr})
 
-Clear all notes from all channels of `S`.
+Clear all notes from `U` and leaves a note about this.
+
+    clear_notes!(S::SeisData, i::Int64, s::String)
+
+Clear all notes from channel `i` of `S` and leaves a note about this.
+
+    clear_notes!(S::SeisData, id::String, s::String)
+
+As above for the first channel in `S` whose id is an exact match to `id`.
 """
 function clear_notes!(S::SeisData)
   cstr = tnote("notes cleared.")
@@ -60,17 +69,7 @@ function clear_notes!(S::SeisData)
   end
   return nothing
 end
-clear_notes!(C::SeisChannel) = (C.notes = Array{String,1}[1]; C.notes[i][1] = tnote("notes cleared."); return nothing)
 
-"""
-    clear_notes!(S::SeisData, i::Int64, s::String)
-
-Clear all notes from channel `i` of `S`.
-
-    clear_notes!(S::SeisData, id::String, s::String)
-
-As above for the first channel in `S` whose id is an exact match to `id`.
-"""
 function clear_notes!(S::SeisData, i::Int64)
   empty!(S.notes[i])
   push!(S.notes[i], tnote("notes cleared."))
@@ -85,4 +84,5 @@ function clear_notes!(S::SeisData, id::String)
   return nothing
 end
 
-clear_notes!(H::SeisHdr) = empty!(H.notes)
+clear_notes!(U::Union{SeisChannel,SeisHdr}) = (U.notes = Array{String,1}(undef,1); U.notes[1] = tnote("notes cleared."); return nothing)
+clear_notes!(Ev::SeisEvent) = (clear_notes!(Ev.hdr); clear_notes!(Ev.data))

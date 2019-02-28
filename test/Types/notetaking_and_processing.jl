@@ -2,7 +2,7 @@ using Statistics
 
 Ch = randSeisChannel()
 clear_notes!(Ch)
-@test isempty(Ch.notes)
+@test length(Ch.notes) == 1
 
 printstyled("  Annotation and logging...\n", color=:light_green)
 S = randSeisData(2)
@@ -39,6 +39,15 @@ clear_notes!(S, id_str)
 
 @test_throws ErrorException clear_notes!(S, "YY.STA.11.BHE")
 clear_notes!(S)
+
+Ev = randSeisEvent()
+clear_notes!(Ev)
+for i = 1:Ev.data.n
+    @test length(Ev.data.notes[i]) == 1
+    @test occursin("notes cleared.", Ev.data.notes[i][1])
+end
+@test length(Ev.hdr.notes) == 1
+@test occursin("notes cleared.", Ev.hdr.notes[1])
 
 Ngaps = [size(S.t[i],1)-2 for i =1:2]
 ungap!(S)
