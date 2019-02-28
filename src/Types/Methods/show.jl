@@ -251,4 +251,4 @@ function show(io::IO, S::SeisEvent)
 end
 show(S::SeisEvent) = show(stdout, S)
 
-length(t::Union{SeisChannel,SeisEvent}) = summary(t)
+length(t::Union{SeisChannel,SeisEvent,SeisHdr}) = summary(t)
