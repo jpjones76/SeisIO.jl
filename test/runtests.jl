@@ -1,8 +1,8 @@
 using Test, Compat, Dates, Random, SeisIO, SeisIO.RandSeis
 path = Base.source_dir()
-@warn("Tests require up to 20 minutes to execute. Begin in 5 seconds...")
+@warn("Tests require up to 20 minutes to execute. Begin in 3 seconds...")
 include("test_helpers.jl")
-sleep(5)
+sleep(3)
 printstyled(stdout, string(Dates.now(), ": tests begin, source_dir = ", path, "/\n"), color=:light_green, bold=true)
 
 # huehuehue grep "include(joinpath" runtests.jl | awk -F "(" '{print $3}' | awk -F "," {'print $1'}

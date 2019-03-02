@@ -50,28 +50,6 @@ deleteat!(X,1)
 Y = sort(X)
 @test V == Y
 
-printstyled(stdout,"      show...\n", color=:light_green)
-S = (randSeisData(2,c=1.0)[2], randSeisEvent(), randSeisData())
-S[1].x = rand(Float64, 3)
-@test sizeof(S) > 0
-T = randSeisData(1)
-
-open("show.log", "w") do out
-  redirect_stdout(out) do
-    show(randSeisChannel())
-    show(S)
-    show(randSeisHdr())
-    show(randSeisEvent())
-    summary(randSeisEvent())
-    summary(randSeisChannel())
-    summary(randSeisData())
-    summary(randSeisHdr())
-    length(randSeisHdr())
-    length(randSeisChannel())
-  end
-end
-rm("show.log")
-
 (S,T) = mktestseis()
 @test findid(T, S) == [0, 0, 4, 5]
 
