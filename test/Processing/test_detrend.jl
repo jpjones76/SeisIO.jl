@@ -21,7 +21,11 @@ T = demean(S)
 @test maximum(S.x[1] .- T.x[1]) ≤ 6.01
 @test minimum(S.x[1] .- T.x[1]) ≥ 5.99
 @test maximum(abs.(T.x[1]-S₀.x[1])) < 0.01
+<<<<<<< HEAD
 @test abs(mean(T.x[1])) < 0.01
+=======
+@test abs(mean(T[1])) < 0.01
+>>>>>>> 1a137d91ca2114a1b964dcaf99c1cc003f8ef851
 
 # Test 2: de-trend
 m = 0.01
