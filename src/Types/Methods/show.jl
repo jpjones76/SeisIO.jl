@@ -108,20 +108,18 @@ function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, tip::Strin
 end
 
 function resp_str(io::IO, X::Array{Array{Complex{Float64},2},1}, w::Int, W::Int, b::Bool)
-  N = length(X)
+  N = length(X); p = os; i = 1
   sd = zeros(UInt8, W, 2)
   sd[os-5:os-1,1] = codeunits("RESP:")
-  p = os
-  i = 1
   while p < W && i <= N
+    zstr = ""
+    pstr = ""
     R = X[i]
     if isempty(R)
-      zstr = " "
-      pstr = " "
+      zstr *= " "
+      pstr *= " "
     else
       L = size(R,1)
-      zstr = ""
-      pstr = ""
       for j = 1:L
         zstr *= string(float_str(real(R[j,1])), " + ", float_str(imag(R[j,1])), "i")
         pstr *= string(float_str(real(R[j,2])), " + ", float_str(imag(R[j,2])), "i")
