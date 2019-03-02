@@ -245,7 +245,6 @@ ss = string(ds₆)
 Y = sync(S, s=ds₆, t="last"); basic_checks(Y)
 
 # Expect: X != Y due to notes, but all other fields equal
-@test X != Y
 for f in SeisIO.datafields
   if f != :notes
     @test isequal(getfield(X,f), getfield(Y,f))
