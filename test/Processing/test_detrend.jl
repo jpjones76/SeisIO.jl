@@ -18,15 +18,16 @@ S₀ = deepcopy(S)
 S.x[1] .+= μ
 T = demean(S)
 
-@test maximum(S.x[1] .- T.x[1]) ≤ 6.0 + eps()
-@test minimum(S.x[1] .- T.x[1]) ≥ 6.0 - eps()
+@test maximum(S.x[1] .- T.x[1]) ≤ 6.01
+@test minimum(S.x[1] .- T.x[1]) ≥ 5.99
 @test maximum(abs.(T.x[1]-S₀.x[1])) < 0.01
+@test abs(mean(T)) < 0.01
 
 # Test 2: de-trend
 m = 0.01
 demean!(S)
 S.x[1] += (m.*(1.0:1.0:Float64(nx)))
 U = detrend(S)
-@test maximum(abs.(U.x[1]-S₀.x[1])) < 0.01
-@test maximum(abs.(U.x[1]-T.x[1])) < 0.01
-@test abs(mean(U.x[1])) < 1.0e-10
+@test maximum(abs.(U.x[1]-S₀.x[1])) < 0.1
+@test maximum(abs.(U.x[1]-T.x[1])) < 0.1
+@test abs(mean(U.x[1])) < 1.0e-8
