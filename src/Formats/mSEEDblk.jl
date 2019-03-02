@@ -1,4 +1,22 @@
 # All blockette functions return a UInt16 value equal to blockette length in bytes
+function blk_time!(t::Array{Int32,1}, sid::IOStream, b::Bool)
+  yy    = read(sid, UInt16)
+  jj    = read(sid, UInt16)
+  t[4]  = Int32(read(sid, UInt8))
+  t[5]  = Int32(read(sid, UInt8))
+  t[6]  = Int32(read(sid, UInt8))
+  skip(sid, 1)
+  ms    = read(sid, UInt16, 1)
+  if b
+    yy = bswap(yy)
+    jj = bswap(jj)
+    ms = bswap(ms)
+  end
+  t[1] = Int32(yy)
+  (t[2], t[3]) = j2md(t[1], Int32(jj))
+  t[7] = Int32(ms)*Int32(100)
+  return nothing
+end
 
 # [100] Sample Rate Blockette (12 bytes)
 function blk_100(S::SeisIO.SeisData, sid::IO)
