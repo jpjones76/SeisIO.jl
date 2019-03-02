@@ -1,4 +1,6 @@
 using Dates
+printstyled("  sync!...\n", color=:light_green)
+
 fs = 100.0
 ns = 10
 t = floor(Int64, time()-60.0)*SeisIO.sμ
@@ -69,7 +71,6 @@ ts₁ = maximum(ts)
 
 # TEST 1 =====================================================================
 # Sync to last start; don't sync ends
-
 T = sync(S)
 basic_checks(T)
 ts_new, te_new = get_edge_times(T)
