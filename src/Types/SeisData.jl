@@ -180,7 +180,7 @@ append!(S::SeisData, U::SeisData)  = (
 # deleteat!
 deleteat!(S::SeisData, j::Int)          = ([deleteat!(getfield(S, i),j) for i in datafields]; S.n -= 1; return nothing)
 deleteat!(S::SeisData, J::Array{Int,1}) = (sort!(J); [deleteat!(getfield(S, f), J) for f in datafields]; S.n -= length(J); return nothing)
-deleteat!(S::SeisData, K::UnitRange)    = (J = collect(K); deleteat!(S, J); return nothing)
+deleteat!(S::SeisData, K::UnitRange)    = deleteat!(S, collect(K))
 
 # Subtraction
 -(S::SeisData, i::Int)          = (U = deepcopy(S); deleteat!(U,i); return U)  # By channel #
