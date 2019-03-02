@@ -1,7 +1,6 @@
 export wseis
-
-const vSeisIO() = Float32(0.3)                          # SeisIO file format version
-const vJulia() = Float32(Meta.parse(string(VERSION.major,".",VERSION.minor)))
+const vSeisIO = Float32(0.3)                          # SeisIO file format version
+const vJulia = Float32(Meta.parse(string(VERSION.major,".",VERSION.minor)))
 Blosc.set_compressor("blosclz")
 Blosc.set_num_threads(Sys.CPU_THREADS)
 
@@ -14,11 +13,17 @@ Blosc.set_num_threads(Sys.CPU_THREADS)
 sa2u8(s::Array{String,1}) = map(UInt8, collect(join(s,'\0')))
 
 function writestr_fixlen(io::IOStream, s::String, L::Integer)
-      o = map(UInt8, collect(" "^L))
-      L = min(L, length(s))
-      o[1:L] = codeunits(s)
-      write(io, o)
-      return
+  o = UInt8.(codeunits(s))
+  c = length(o)
+  if c > L
+    deleteat!(o, L+1:c)
+  else
+    write(io, o)
+    for i = c+1:L
+      write(io, 0x20)
+    end
+  end
+  return nothing
 end
 
 # allowed values in misc: char, string, numbers, and arrays of same.
@@ -47,11 +52,9 @@ end
 function get_separator(s::String)
     for i = 0x00:0x01:0xff
         c = Char(i)
-        if occursin(c, s) == false
-            return c
-        end
+        occursin(c, s) == false && return(c)
     end
-    return '\n'
+    error("No valid separators!")
 end
 
 # Create end times from t, fs, x
@@ -80,14 +83,14 @@ function write_string_array(io, v::Array{String})
   if d != [0]
     sep = get_separator(join(v))
     vstr = join(v, sep)
-    s = codeunits(vstr)
-    write(io, UInt8(sep), Int64(length(s)), s)
+    u = UInt8.(codeunits(vstr))
+    write(io, UInt8(sep), Int64(length(u)), u)
   end
 end
 
 write_misc_val(io::IOStream, K::Union{Char,AbstractFloat,Integer}) = write(io, K)
 write_misc_val(io::IOStream, K::Complex) = write(io, real(K), imag(K))
-write_misc_val(io::IOStream, K::String) = (write(io, Int64(length(K))); write(io, K))
+write_misc_val(io::IOStream, K::String) = (u = UInt8.(codeunits(K)); write(io, Int64(length(u))); write(io, u))
 function write_misc_val(io::IOStream, V::Union{Array{Integer},Array{AbstractFloat},Array{Char}})
   write(io, UInt8(ndims(V)))
   write(io, map(Int64, collect(size(V))))
@@ -111,12 +114,16 @@ function write_misc(io::IOStream, D::Dict{String,Any})
   write(io, L)
   if !isempty(D)
     keysep = get_separator(join(K))
-    kstr = join(K, keysep)
-    l = Int64(length(kstr))
+    karr = UInt8.(codeunits(join(K, keysep)))
+    l = Int64(length(karr))
     write(io, l)
     write(io, keysep)
-    write(io, kstr)
-    [(write(io, typ2code(typeof(D[i]))); write_misc_val(io, D[i])) for i in K]
+    write(io, karr)
+    for i in K
+      c = typ2code(typeof(D[i]))
+      write(io, c)
+      write_misc_val(io, D[i])
+    end
   end
   return
 end
@@ -137,7 +144,7 @@ function w_struct(io::IOStream, S::SeisData)
       x = Blosc.compress(S.x[i], level=9)
     end
 
-    notes = join(S.notes[i], c)
+    notes = codeunits(join(S.notes[i], c))
     units = codeunits(S.units[i])
     src   = codeunits(S.src[i])
     name  = codeunits(S.name[i])
@@ -190,7 +197,7 @@ function w_struct(io::IOStream, H::SeisHdr)
   s = map(UInt8, collect(getfield(H, :src)))        # source string as char array
   a = getfield(H, :notes)
 
-  c = '\0'
+  c = Char('\0')
   n = Array{UInt8,1}(undef,0)
   if !isempty(a)
       c = get_separator(join(a))                    # this should always be true
@@ -267,8 +274,8 @@ function wseis(fname::String, S...)
     # fname → IO stream
     io = open(fname, "w")
     write(io, map(UInt8, collect("SEISIO")))
-    write(io, vSeisIO())
-    write(io, vJulia())
+    write(io, vSeisIO)
+    write(io, vJulia)
     write(io, L)
     p = position(io)
     skip(io, sizeof(C)+sizeof(B))

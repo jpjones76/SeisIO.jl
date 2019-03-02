@@ -19,16 +19,6 @@ chk_seisio(io::IOStream, f_ok::Array{UInt8,1} =
 #   read!(io, B)
 #   return (r, j, L, C, B)
 # end
-#
-# function readstr_varlen(io::IOStream)
-#   L = read(io, Int64)
-#   if L > 0
-#     str = String(read!(io, Array{UInt8, 1},(undef, L)))
-#   else
-#     str = ""
-#   end
-#   return str
-# end
 
 function read_string_array(io::IOStream)
   nd = Int64(read(io, UInt8))
@@ -67,7 +57,7 @@ function code2typ(c::UInt8)
   elseif c == 0x00
     t = Char
   else
-    t = Any
+    throw(TypeError)
   end
   return t
 end
@@ -78,7 +68,7 @@ function read_misc(io::IOStream)
   if L > 0
     l = read(io, Int64)
     ksep = Char(read(io, UInt8))
-    kstr = String(read!(io, Array{UInt8}(undef, l))) #kstr = String(read(io, UInt8, l))
+    kstr = String(read!(io, Array{UInt8,1}(undef, l))) #kstr = String(read(io, UInt8, l))
     K = collect(split(kstr, ksep))
     for i in K
       t = read(io, UInt8)
@@ -157,7 +147,7 @@ function rdata(io::IOStream, ver::Float32)
   for i = 1:N
 
     # int
-    if ver < 0.3
+    if ver < 0.3f0
       i64 = read!(io, Array{Int64, 1}(undef, 8))
     else
       i64 = read!(io, Array{Int64, 1}(undef, 9))
@@ -171,7 +161,7 @@ function rdata(io::IOStream, ver::Float32)
     S.gain[i] = read(io, Float64)
 
     # float arrays
-    if ver < 0.3
+    if ver < 0.3f0
       S.loc[i] = read!(io, Array{Float64, 1}(undef, 5))
     else
       S.loc[i] = read!(io, Array{Float64, 1}(undef, i64[9]))
@@ -194,15 +184,9 @@ function rdata(io::IOStream, ver::Float32)
     if i64[6] > 0
       S.notes[i] = map(String, split(String(read!(io, Array{UInt8, 1}(undef, i64[6]))), Char(c)))
     else
-      S.notes[i] = Array{String,1}([""])
+      S.notes[i] = Array{String,1}(undef, 0)
     end
-    # if y == 0x32
-      S.x[i]  = Blosc.decompress(Float64, read!(io, Array{UInt8, 1}(undef, i64[7])))
-    # elseif y == 0x31
-    #   S.x[i]  = Blosc.decompress(Float32, read!(io, Array{UInt8, 1}(undef, i64[7])))
-    # else
-    #   S.x[i]  = Blosc.decompress(code2typ(y), read!(io, Array{UInt8, 1}(undef, i64[7])))
-    # end
+    S.x[i]  = Blosc.decompress(Float64, read!(io, Array{UInt8, 1}(undef, i64[7])))
     S.misc[i] = read_misc(io)
   end
   Base.GC.enable(true)
@@ -210,11 +194,6 @@ function rdata(io::IOStream, ver::Float32)
 end
 
 revent(io::IOStream, ver::Float32) = SeisEvent(hdr = rhdr(io), data = rdata(io, ver))
-  # S = SeisEvent()
-  # setfield!(S, :hdr, rhdr(io))
-  # setfield!(S, :data, rdata(io, ver))
-  # return S
-  # )
 
 function build_file_list(patts::Union{String,Array{String,1}})
   if isa(patts, String)
@@ -267,8 +246,8 @@ function rseis(patts::Union{String,Array{String,1}};
       close(io)
       continue
     end
-    r = read(io, Float32)
-    j = read(io, Float32)
+    r = read(io, Float32)   # SeisIO file format version
+    j = read(io, Float32)   # Julia version
     L = read(io, Int64)
     C = read!(io, Array{UInt8, 1}(undef, L))
     B = read!(io, Array{UInt64, 1}(undef, L))
