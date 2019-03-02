@@ -1,4 +1,4 @@
-import Base:length, show, size, summary
+import Base:show, size, summary
 const os=8
 
 si(w::Int, i::Int) = os + w*(i-1)
@@ -206,7 +206,7 @@ function show(io::IO, S::SeisChannel)
   println(io, "SeisChannel with ", nx, " samples")
   show_str(io, [S.id], w, W, "id", false)
   show_str(io, [S.name], w, W, "name", false)
-  show_x(io, [S.x], w, W, "LOC", false)
+  show_x(io, [S.loc], w, W, "LOC", false)
   # [show_str(io, [string(S.loc[j])], w, W, loc_str[j], false) for j=1:5]
   # show_x(io, [S.loc], w, W, N<nc)
   show_str(io, [string(S.fs)], w, W, "fs", false)
@@ -250,5 +250,3 @@ function show(io::IO, S::SeisEvent)
   return nothing
 end
 show(S::SeisEvent) = show(stdout, S)
-
-length(t::Union{SeisChannel,SeisEvent,SeisHdr}) = summary(t)
