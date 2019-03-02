@@ -7,9 +7,23 @@ Basic data processing operations are described below.
 
 Cosine taper each channel in S around time gaps, then fill time gaps with the mean of non-NaN data points.
 
-.. function: demean!(S::SeisData)
+.. function: demean!(S::SeisData[, irr=false])
 
-Remove the mean from all channels i with S.fs[i] > 0.0. Specify all=true to also remove the mean from irregularly sampled channels. Ignores NaNs.
+Remove the mean from all channels i with S.fs[i] > 0.0. Specify irr=true to also remove the mean from irregularly sampled channels. Ignores NaNs.
+
+.. function: demean(S::SeisData)
+
+"Safe" demean with results output to a new structure.
+
+.. function: detrend!(S::SeisData[, n=1])
+
+Remove the polynomial trend of degree n from every regularly-sampled channel i in S using a least-squares polynomial fit. Ignores NaNs. Channels of irregularly-sampled data are not (and cannot be) detrended.
+
+**Warning**: detrend! does *not* check for data gaps; if this is problematic, call ungap!(S, m=true) first!
+
+.. function: detrend(S::SeisData)
+
+"Safe" detrend with results output to a new structure.
 
 .. function:: equalize_resp!(S, resp_new::Array[, hc_new=HC, C=CH])
 
