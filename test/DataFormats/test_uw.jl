@@ -18,7 +18,10 @@ i = findfirst(W.data.id.=="UW.TDH..EHZ")
 i = findfirst(W.data.id.=="UW.VFP..EHZ")
 @test ≈(W.data.misc[i]["t_d"][1], 19.0)
 
+S = breaking_seis()
+n = S.n
 S += W.data
+@test S.n == n + W.data.n
 
 # Can we read from pickfile only?
 uw_root = uw_root[1:end-1]
