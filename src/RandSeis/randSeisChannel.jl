@@ -34,11 +34,11 @@ function populate_irr!(Ch::SeisChannel)
   end
 
   if isempty(Ch.x) || isempty(Ch.t)
-    ts = time()-86400+randn()
-    Lx = 2^rand(1:12)
-    L = rand(2:8)
-    Ch.x = rand(L) .* 10 .^(rand(1:10, L))
-    Ch.t = cumsum([Int64(0) round(Int64, ts/μs); zeros(Int64, L-1) round.(Int, diff(sort(rand(2:Lx, L)))/μs)], dims=1)
+    ts = round(Int, sμ*(time()-86400+randn()))
+    L = 2^rand(6:12)
+    Ls = rand(1200:7200)
+    Ch.x = (rand(L) .- (rand(Bool) == true ? 0.5 :  0.0)).*(10 .^ (rand(1:10, L)))
+    Ch.t = hcat(zeros(Int64, L), ts.+sort(rand(UnitRange{Int64}(1:Ls), L)))
   end
   Ch.src = "randSeisChannel(c=true)"
 
@@ -96,7 +96,9 @@ function populate_chan!(Ch::SeisChannel; s=false::Bool)
   # random noise for data, with random short time gaps; gaussian noise for a
   # time series, uniform noise with a random exponent otherwise
   if isempty(Ch.x) || isempty(Ch.t)                                         # x
-    Lx = ceil(Int, Ch.fs)*(2^rand(8:12))
+    # Change: length is always 20-120 minutes
+    Ls = rand(1200:7200)
+    Lx = ceil(Int, Ls*Ch.fs)
     Ch.x = randn(Lx)
 
     L = rand(0:9)
