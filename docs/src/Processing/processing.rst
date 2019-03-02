@@ -36,23 +36,32 @@ Extract the first channel with id=id from S and return it as a new SeisChannel s
 
 Extract channel i from S as a new SeisChannel struct, deleting it from S.
 
-.. function sync!(S::SeisData[, resample=false, fs=FS, s=ST, t=EN])
+.. function sync!(S::SeisData)
 
-Synchronize S to a common range of times and pad data gaps.
+Synchronize the start times of all data in S to begin at or after the last
+start time in S.
 
-Keywords and behaviors:
+.. function sync!(S::SeisData[, s=ST, t=EN, v=VV])
 
-* resample=true resamples regularly-data in S to the lowest non-null value of S.fs. Resample requests are ignored if S has only one data channel.
-* fs=FS resamples regularly-sampled data in S to FS. Note that a poor choice of FS can lead to upsampling and other bad behaviors.
-* s=ST, t=EN specifies start and end times. Accepted values include:
+Synchronize all data in S to start at `ST` and terminate at `EN` with verbosity level VV.
 
-  + s="max": Sync to earliest start time in S. (default)
-  + s="min": Sync to latest start time in S.
-  + t="max": Use latest end time in S. (default)
-  + t="min": Use earliest end time in S.
-  + DateTime values of s, e are accepted.
-  + String values of s,e converted to DateTime.
-  + Numeric values of s,e treated as seconds from 01-01-1970T00:00:00.
+For regularly-sampled channels, gaps between the specified and true times
+are filled with the mean; this isn't possible with irregularly-sampled data.
+
+#### Specifying start time
+* s="last": (Default) sync to the last start time of any channel in `S`.
+* s="first": sync to the first start time of any channel in `S`.
+* A numeric value is treated as an epoch time (`?time` for details).
+* A DateTime is treated as a DateTime. (see Dates.DateTime for details.)
+* Any string other than "last" or "first" is parsed as a DateTime.
+
+#### Specifying end time (t)
+* t="none": (Default) end times are not synchronized.
+* t="last": synchronize all channels to end at the last end time in `S`.
+* t="first" synchronize to the first end time in `S`.
+* numeric, datetime, and non-reserved strings are treated as for `-s`.
+
+Related functions: time, Dates.DateTime, parsetimewin
 
 .. function:: ungap!(S, [m=true, w=true])
 
