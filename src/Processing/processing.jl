@@ -1,35 +1,4 @@
-export autotap!, unscale!, demean!
-
-"""
-    demean!(S::SeisData)
-
-Remove the mean from all channels `i` with `S.fs[i] > 0.0`. Specify `irr=true`
-to also remove the mean from irregularly sampled channels (with S.fs[i] == 0.0)
-
-Ignores NaNs.
-"""
-function demean!(S::SeisData; irr::Bool=false)
-  @inbounds for i = 1:S.n
-    (irr==false && S.fs[i]<=0.0) && continue
-    K = findall(isnan.(S.x[i]))
-    if isempty(K)
-      L = length(S.x[i])
-      μ = sum(S.x[i])/Float64(L)
-      for j = 1:L
-        S.x[i][j] -= μ
-      end
-    else
-      J = findall(isnan.(S.x[i]) .== false)
-      L = length(J)
-      μ = sum(S.x[i][J])/Float64(L)
-      for j in J
-        S.x[i][j] -= μ
-      end
-    end
-    note!(S, i, "demean! removed mean of S.x.")
-  end
-  return nothing
-end
+export autotap!, unscale!
 
 """
     unscale!(S::SeisData)

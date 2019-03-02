@@ -5,7 +5,7 @@
 * Fixed a bug in `show` for a SeisChannel
 * SeisIO native file format now supports all Unicode characters supported by
 the Juila language *except* for a minor issue in in SeisData.id.
-
+* Added `detrend!`
 
 ### 2019-02-26
 Bugfixes and consistency improvments:
