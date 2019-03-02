@@ -137,6 +137,9 @@ function breaking_seis()
   # Test a channel with no notes
   S.notes[1] = []
 
+  # Need a channel with a very long name to test in show.jl
+  S.name[1] = "The quick brown fox jumped over the lazy dog"
+
   #= Here we test true, full Unicode support;
     only 0xff can be a separator in S.notes[2] =#
   S.notes[2] = Array{String,1}(undef,6)

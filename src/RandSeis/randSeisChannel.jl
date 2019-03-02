@@ -77,11 +77,7 @@ function populate_chan!(Ch::SeisChannel; s=false::Bool)
 
   # Need this even if Ch had an ID value when populate_chan! was called
   cha = split(Ch.id, '.')[4]
-  if isempty(cha)
-    ccode = 'Y'
-  else
-    ccode = cha[2]
-  end
+  ccode = cha[2]
 
   # A random instrument response function
   if isempty(Ch.resp)
