@@ -1,3 +1,12 @@
+### 2019-03-02
+* `sync!` has been rewritten
+  + `sync!` no longer calls `ungap!` or requires ungapped data
+  + `sync!` no longer has an option to resample data
+* Fixed a bug in `show` for a SeisChannel
+* SeisIO native file format now supports all Unicode characters supported by
+the Juila language *except* for a minor issue in in SeisData.id.
+
+
 ### 2019-02-26
 Bugfixes and consistency improvments:
 * Consolidated methods for channel delete in `SeisData`, standardized syntax

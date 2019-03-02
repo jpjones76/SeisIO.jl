@@ -1,11 +1,15 @@
-# History: Known Issues
+# Known and Historic Issues
 
-## 2019-02-15
-#### Dependency Issue (System- and Version-specific)
-* (**Unresolved**) Implicit package dependency `Arpack` (required by `Blosc`) sometimes fails to build with `ERROR: LoadError: LibraryProduct(nothing, ["libarpack"], :libarpack, "Prefix([path])") is not satisfied, cannot generate deps.jl!`
-  + **Workaround**: upgrade to Julia 1.1.0 Generic Linux Binaries for x86 (64-bit)
+## Outstanding
+* SeisData ID fields with Unicode characters are truncated when written to
+the native SeisIO data format.
+
+#### System- and Version-specific
+* (**Unresolved**) Implicit package dependency `Arpack` (required by `Blosc`)
+sometimes fails to build.
   + Affects: Linux 4.19.16-1-MANJARO (x86_64) with Julia 1.0.3-2
   + Impact: breaks native format file i/o
+  + **Workaround**: upgrade to Julia 1.1.0 Generic Linux Binaries for x86 (64-bit)
 
 ## 2017-07-24
 * (_Resolved_) `batch_read` is no longer useful. Julia 0.6.0 slowed `batch_read` execution time by roughly a factor of 4; it currently offers only ~10-20% speedup over standard file read times.
