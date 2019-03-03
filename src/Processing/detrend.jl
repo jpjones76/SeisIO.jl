@@ -1,4 +1,3 @@
-import Polynomials:polyfit, polyval
 export demean!, demean, detrend!, detrend
 
 """
