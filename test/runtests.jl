@@ -1,5 +1,3 @@
-using Test, Compat, Dates, Random, SeisIO, SeisIO.RandSeis
-path = Base.source_dir()
 @warn("Tests require up to 20 minutes to execute. Begin in 3 seconds...")
 include("test_helpers.jl")
 sleep(3)

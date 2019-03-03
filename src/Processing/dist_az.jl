@@ -9,10 +9,10 @@ function distaz!(S::SeisEvent)
   for i = 1:S.data.n
     rec[i,:] = S.data.loc[i][1:2]
   end
-  (dist, az, baz) = gcdist(S.hdr.loc[1:2], rec)
+  D = gcdist(S.hdr.loc[1:2], rec)
   for i = 1:S.data.n
-    S.data.misc[i]["dist"] = dist[i]
-    S.data.misc[i]["az"] = az[i]
-    S.data.misc[i]["baz"] = baz[i]
+    S.data.misc[i]["dist"] = D[i,1]
+    S.data.misc[i]["az"] = D[i,2]
+    S.data.misc[i]["baz"] = D[i,3]
   end
 end

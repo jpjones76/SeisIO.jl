@@ -1,3 +1,6 @@
+using Test, Compat, Dates, Random, SeisIO, SeisIO.RandSeis
+path = Base.source_dir()
+
 import Random: rand, randstring
 import DelimitedFiles: readdlm
 const μs = 1.0e-6
