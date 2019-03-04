@@ -46,7 +46,6 @@ include("Web/WebMisc.jl")         # Common functions for web data access
 include("Web/get_data.jl")          # Common method for retrieving data
 include("Web/FDSN.jl")
 include("Web/IRIS.jl")            # IRISws command line client
-include("Web/SLConfig.jl")
 include("Web/SeedLink.jl")
 
 # The RandSeis submodule
