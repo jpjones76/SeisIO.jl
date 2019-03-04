@@ -112,7 +112,7 @@ const KW = KWDefs(
                    3600,    # gap::Int
                     600,    # kai::Int
                  "DATA",    # mode::String
-                     20,    # refresh::Real
+                   20.0,    # refresh::Real
                    true ),  # x_on_err::Bool
     Float64[600.0, 600.0],  # evw::Real
                "miniseed",  # fmt::String

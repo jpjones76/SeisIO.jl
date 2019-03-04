@@ -55,7 +55,6 @@ function get_data!(S::SeisIO.SeisData, method_in::String, C::Union{String,Array{
 
   # Parse time window
   α, ω = parsetimewin(s, t)
-  got = false
 
   # Condense requests as much as possible
   if method_in == "FDSN"
@@ -91,7 +90,7 @@ function get_data!(S::SeisIO.SeisData, method_in::String, C::Union{String,Array{
 
   # Sync
   if y == true
-    sync!(S, α, ω)
+    sync!(S)
   end
   return nothing
 end

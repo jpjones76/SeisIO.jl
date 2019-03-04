@@ -22,8 +22,13 @@ distaz!(Ev)
 ot = d2u(Ev.hdr.ot)
 
 for i = 1:Ev.data.n
-  pdat = get_pha(Ev.data.misc[i]["dist"], Ev.hdr.loc[3], pha="ttall", to=to)
-
+  if i == 1
+    pdat = get_pha(Ev.data.misc[i]["dist"], Ev.hdr.loc[3], pha="", to=to)
+  elseif i == 2
+    pdat = get_pha(Ev.data.misc[i]["dist"], Ev.hdr.loc[3], pha="all", to=to)
+  else
+    pdat = get_pha(Ev.data.misc[i]["dist"], Ev.hdr.loc[3], pha="ttall", to=to)
+  end
   # Check that there's a P phase and an S phase
   for p in String["P","S"]
     j = findfirst(pdat[:,3].==p)
