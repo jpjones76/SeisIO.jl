@@ -65,10 +65,8 @@ SeedLink Keywords
   mode; \"DATA\"; I; \"TIME\", \"DATA\", or \"FETCH\"
   port; 18000; I; port number
   refresh; 20; R; base refresh interval (s) [#]_
-  safety; 0x00; U8; safety check level [#]_
   x\_on\_err; true; Bool; exit on error?
 
 .. rubric:: Table Footnotes
 
 .. [#] This value is modified slightly by each SeedLink session to minimize the risk of congestion
-.. [#] Before initiating a SeedLink connection, **safety=0x01** calls **has_sta**, **safety=0x02** calls **has_stream**

@@ -359,14 +359,9 @@ as the Julia language matures.</p>
 <tr class="row-even"><td>refresh</td>
 <td>20</td>
 <td>R</td>
-<td>base refresh interval (s) <a class="footnote-reference" href="#id17" id="id15">[8]</a></td>
+<td>base refresh interval (s) <a class="footnote-reference" href="#id16" id="id15">[8]</a></td>
 </tr>
-<tr class="row-odd"><td>safety</td>
-<td>0x00</td>
-<td>U8</td>
-<td>safety check level <a class="footnote-reference" href="#id18" id="id16">[9]</a></td>
-</tr>
-<tr class="row-even"><td>x_on_err</td>
+<tr class="row-odd"><td>x_on_err</td>
 <td>true</td>
 <td>Bool</td>
 <td>exit on error?</td>
@@ -374,16 +369,10 @@ as the Julia language matures.</p>
 </tbody>
 </table>
 <p class="rubric">Table Footnotes</p>
-<table class="docutils footnote" frame="void" id="id17" rules="none">
+<table class="docutils footnote" frame="void" id="id16" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label"><a class="fn-backref" href="#id15">[8]</a></td><td>This value is modified slightly by each SeedLink session to minimize the risk of congestion</td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="id18" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id16">[9]</a></td><td>Before initiating a SeedLink connection, <strong>safety=0x01</strong> calls <strong>has_sta</strong>, <strong>safety=0x02</strong> calls <strong>has_stream</strong></td></tr>
 </tbody>
 </table>
 </div>

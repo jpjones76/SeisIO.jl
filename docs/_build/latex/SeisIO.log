@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018/Arch Linux) (preloaded format=pdflatex 2019.2.19)  2 MAR 2019 04:01
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018/Arch Linux) (preloaded format=pdflatex 2019.2.19)  4 MAR 2019 04:53
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1008,20 +1008,16 @@ Underfull \hbox (badness 10000) in paragraph at lines 3331--3333
 [35] [36] [37]
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <9> not available
 (Font)              Font shape `T1/ptm/b/n' tried instead on input line 3781.
-
-Overfull \vbox (0.60336pt too high) has occurred while \output is active []
-
-
-[38] [39] [40] (./SeisIO.ind [41] [42
+ [38] [39] [40] (./SeisIO.ind [41] [42
 
 ] [43
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 4037.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 4037.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 4024.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 4024.
  (./SeisIO.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 4037.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 4037.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 4024.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 4024.
 
 Package rerunfilecheck Info: File `SeisIO.out' has not changed.
 (rerunfilecheck)             Checksum: B9B40422EDA5FB9F0EB537695E090BFB;2235.
@@ -1029,16 +1025,16 @@ Package rerunfilecheck Info: File `SeisIO.out' has not changed.
 
 LaTeX Warning: There were undefined references.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 4037.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 4024.
  ) 
 Here is how much of TeX's memory you used:
- 13849 strings out of 492616
- 194476 string characters out of 6135177
+ 13848 strings out of 492616
+ 194464 string characters out of 6135177
  334207 words of memory out of 5000000
  17193 multiletter control sequences out of 15000+600000
  77058 words of font info for 113 fonts, out of 8000000 for 9000
  1142 hyphenation exceptions out of 8191
- 37i,16n,45p,586b,479s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 37i,16n,45p,586b,490s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-dist/fon
 ts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-dist/fonts/type1/publi
 c/amsfonts/cm/cmmi6.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/c
@@ -1052,10 +1048,10 @@ vetic/uhvr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb></
 usr/share/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-dist/fo
 nts/type1/urw/times/utmr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utm
 ri8a.pfb>
-Output written on SeisIO.pdf (47 pages, 272044 bytes).
+Output written on SeisIO.pdf (47 pages, 271905 bytes).
 PDF statistics:
- 732 PDF objects out of 1000 (max. 8388607)
- 621 compressed objects within 7 object streams
- 227 named destinations out of 1000 (max. 500000)
+ 730 PDF objects out of 1000 (max. 8388607)
+ 619 compressed objects within 7 object streams
+ 226 named destinations out of 1000 (max. 500000)
  173 words of extra memory for PDF output out of 10000 (max. 10000000)
 
