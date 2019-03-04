@@ -64,12 +64,7 @@ function get_data!(S::SeisIO.SeisData, method_in::String, C::Union{String,Array{
       C = parse_charr(C, fdsn = true)
     end
     minreq!(C)
-      if v > 1
-      println(stdout, "Most compact request form = ", C)
-    end
-    # Wrapper to "get" function
     FDSNget!(S, C, α, ω, fmt = fmt, opts = opts, q = q, si = si, src = src, to = to, v = v, w = w)
-
   elseif method_in == "IRIS"
     if isa(C, String)
       C = String[strip(String(j)) for j in split(C, ',')]

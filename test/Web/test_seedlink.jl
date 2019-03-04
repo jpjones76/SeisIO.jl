@@ -91,8 +91,7 @@ sync!(S, s="first", t="last")
 printstyled("  SeedLink FETCH mode...\n", color=:light_green)
 
 # To ensure precise timing, we'll pass d0 and d1 as strings
-S = SeisData()
-SeedLink!(S, config_file, refresh=10.0, mode="FETCH", s=d0, t=d1)
+S = SeedLink(config_file, refresh=10.0, mode="FETCH", s=d0, t=d1)
 printstyled("    ...link initialized...\n", color=:light_green)
 printstyled(string("      (sleep ", dt + 20.0, " s)\n"), color=:green)
 sleep(dt)
@@ -104,6 +103,10 @@ printstyled("  Checking that errors and warnings are written correctly...\n", co
 S = SeisData()
 pat = ["*****.X"]
 @test_throws ErrorException SeedLink!(S, [sta[1]], pat)
+T = SeedLink([sta[1]], pat, x_on_err=false)
+close(T.c[1])
 
 pat = ["?????.D"]
 @test_throws ErrorException SeedLink!(S, [replace(sta[1], "SEP" => "XOX")], pat)
+T = SeedLink([replace(sta[1], "SEP" => "XOX")], pat, x_on_err=false)
+close(T.c[1])
