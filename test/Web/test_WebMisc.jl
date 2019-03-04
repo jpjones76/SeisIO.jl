@@ -14,8 +14,9 @@ S = SeisData(3)
 S = randSeisData(3)
 track_on!(S)
 @test haskey(S.misc[1], "track")
+S += randSeisChannel()
 u = track_off!(S)
-@test (u == [false, false, false])
+@test (u == [false, false, false, true])
 @test haskey(S.misc[1], "track") == false
 
 # Now turn tracking on again and move things around
@@ -31,5 +32,5 @@ S[1] = deepcopy(Ch3)
 append!(S.x[1], rand(Float64, 1024))        # Should flag channel 1 as updated
 S.id[2] = reverse(S.id[2])                  # Should flag channel 2 as updated
 u = track_off!(S)
-@test (u == [true, true, false])
+@test (u == [true, true, false, false])
 @test haskey(S.misc[3], "track") == false
