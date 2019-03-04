@@ -149,8 +149,10 @@ function rdata(io::IOStream, ver::Float32)
     # int
     if ver < 0.3f0
       i64 = read!(io, Array{Int64, 1}(undef, 8))
-    else
+    elseif ver < 0.4f0
       i64 = read!(io, Array{Int64, 1}(undef, 9))
+    else
+      i64 = read!(io, Array{Int64, 1}(undef, 10))
     end
     if i64[1] > 0
       S.t[i] = reshape(read!(io, Array{Int64, 1}(undef, i64[1])), div(i64[1],2), 2)
@@ -177,7 +179,11 @@ function rdata(io::IOStream, ver::Float32)
     y = read(io, UInt8)
 
     # U8 array
-    S.id[i]   = strip(String(read!(io, Array{UInt8, 1}(undef, 15))))
+    if ver > 0.3f0
+      S.id[i] = String(read!(io, Array{UInt8, 1}(undef, i64[10])))
+    else
+      S.id[i] = strip(String(read!(io, Array{UInt8, 1}(undef, 15))))
+    end
     S.units[i]= String(read!(io, Array{UInt8, 1}(undef, i64[3])))
     S.src[i]  = String(read!(io, Array{UInt8, 1}(undef, i64[4])))
     S.name[i] = String(read!(io, Array{UInt8, 1}(undef, i64[5])))
@@ -251,6 +257,9 @@ function rseis(patts::Union{String,Array{String,1}};
     L = read(io, Int64)
     C = read!(io, Array{UInt8, 1}(undef, L))
     B = read!(io, Array{UInt64, 1}(undef, L))
+    if r > 0.3
+      Nc = read!(io, Array{Int64, 1}(undef, L))
+    end
     if isempty(c)
       (v > 1) && @printf(stdout, "Reading %i total objects from file %s.\n", L, f)
       for n = 1:L

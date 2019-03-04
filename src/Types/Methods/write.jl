@@ -1,30 +1,16 @@
 export wseis
-const vSeisIO = Float32(0.3)                          # SeisIO file format version
-const vJulia = Float32(Meta.parse(string(VERSION.major,".",VERSION.minor)))
 Blosc.set_compressor("blosclz")
 Blosc.set_num_threads(Sys.CPU_THREADS)
 
 # SeisIO file format version changes
+# 0.4 SeisData.id[i] no longer needs to be a length ≤ 15 ASCII string
+#     seis files have a new file TOC field: number of channels in each record
 # 0.3 SeisData.loc[i] no longer is assumed to be length 5
 # 0.2 First stable
 
 # ===========================================================================
 # Auxiliary file write functions
 sa2u8(s::Array{String,1}) = map(UInt8, collect(join(s,'\0')))
-
-function writestr_fixlen(io::IOStream, s::String, L::Integer)
-  o = UInt8.(codeunits(s))
-  c = length(o)
-  if c > L
-    deleteat!(o, L+1:c)
-  else
-    write(io, o)
-    for i = c+1:L
-      write(io, 0x20)
-    end
-  end
-  return nothing
-end
 
 # allowed values in misc: char, string, numbers, and arrays of same.
 tos(t::Type) = round(Int64, log2(sizeof(t)))
@@ -144,6 +130,7 @@ function w_struct(io::IOStream, S::SeisData)
       x = Blosc.compress(S.x[i], level=9)
     end
 
+    id = codeunits(S.id[i])
     notes = codeunits(join(S.notes[i], c))
     units = codeunits(S.units[i])
     src   = codeunits(S.src[i])
@@ -159,6 +146,7 @@ function w_struct(io::IOStream, S::SeisData)
     write(io, l)
     write(io, length(S.x[i]))
     write(io, length(S.loc[i]))
+    write(io, length(S.id[i]))
 
     # Int array
     write(io, S.t[i][:])
@@ -179,7 +167,8 @@ function w_struct(io::IOStream, S::SeisData)
     write(io, typ2code(eltype(S.x[i])))
 
     # U8 array
-    writestr_fixlen(io, S.id[i], 15)
+    # writestr_fixlen(io, S.id[i], 15)
+    write(io, id)
     write(io, units)
     write(io, src)
     write(io, name)
@@ -267,6 +256,7 @@ function wseis(fname::String, S...)
     # open file for writing
     C = Array{UInt8,1}(undef,L)                                   # Codes
     B = zeros(UInt64, L)                                          # Byte indices
+    Nc = zeros(Int64, L)                                          # Number of channels
     ID = Array{UInt8,1}()                                         # IDs
     TS = Array{Int64,1}()                                         # Start times
     TE = Array{Int64,1}()                                         # End times
@@ -278,7 +268,7 @@ function wseis(fname::String, S...)
     write(io, vJulia)
     write(io, L)
     p = position(io)
-    skip(io, sizeof(C)+sizeof(B))
+    skip(io, sizeof(C) + sizeof(B) + sizeof(Nc))
 
     # Write all objects
     for i = 1:L
@@ -289,6 +279,7 @@ function wseis(fname::String, S...)
             C[i] = UInt8('D')
             id = sa2u8(seis.id)
             ts, te = mk_end_times(seis.t, seis.fs, seis.x)
+            Nc[i] = seis.n
         elseif typeof(seis) == SeisHdr
             C[i] = UInt8('H')
             id = Array{UInt8,1}()
@@ -298,6 +289,7 @@ function wseis(fname::String, S...)
             C[i] = UInt8('E')
             id = sa2u8(seis.data.id)
             ts, te = mk_end_times(seis.data.t, seis.data.fs, seis.data.x)
+            Nc[i] = seis.data.n
         end
         append!(TS, ts)
         append!(TE, te)
@@ -309,10 +301,11 @@ function wseis(fname::String, S...)
     end
 
     # Write TOC.
-    # format: array of object types, array of byte indices
+    # format: array of object types, array of byte indices, array of number of channels in each record
     seek(io, p)
     write(io, C)
     write(io, B)
+    write(io, Nc)
 
     # File appendix added 2017-02-23
     # appendix format: ID, TS, TE, position(ID), position(TS), position(TE)
