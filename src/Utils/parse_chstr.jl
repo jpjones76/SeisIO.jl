@@ -1,8 +1,7 @@
 # TO DO: Comment parse_chstr.jl, even I can't figure out what I've done here anymore
 function parse_charr(chan_in::Array{String,1}; d='.'::Char, fdsn=false::Bool)
-    N = size(chan_in,1)
+    N = length(chan_in)
     chan_data = Array{String,2}(undef, 0, 5)
-    default = ""
 
     # Initial pass to parse to string array
     for i = 1:N
@@ -11,7 +10,8 @@ function parse_charr(chan_in::Array{String,1}; d='.'::Char, fdsn=false::Bool)
       if L < 2
         continue
       elseif L < 5
-        append!(chan_line, collect(Main.Base.Iterators.repeated(default, 5-L)))
+        resize!(chan_line, 5)
+        chan_line[L+1:5] .= ""
       end
       chan_data = vcat(chan_data, reshape(chan_line, 1, 5))
     end
@@ -30,7 +30,10 @@ function parse_chstr(chan_in::String; d=','::Char, fdsn=false::Bool, SL=false::B
       # Build array
       tmp_data = map(String, split(chan_data[j], '.'))
       L = length(tmp_data)
-      L < 5 && append!(tmp_data, collect(Main.Base.Iterators.repeated("",5-L)))
+      if L < 5
+        append!(tmp_data, Array{String,1}(undef, 5-L))
+        tmp_data[L+1:5] .= ""
+      end
       chan_out = cat(chan_out, reshape(tmp_data, 1, 5), dims=1)
     end
   end
@@ -43,8 +46,9 @@ end
 
 function parse_sl(CC::Array{String,2})
   L = size(CC,1)
-  S = CC[:,2].*collect(Main.Base.Iterators.repeated(" ", L)).*CC[:,1]
-  P = [(i = isempty(i) ? "??" : i) for i in CC[:,3]] .* [(i = isempty(i) ? "???" : i) for i in CC[:,4]] .* collect(Main.Base.Iterators.repeated(".", L)) .* [(i = isempty(i) ? "D" : i) for i in CC[:,5]]
+  S = CC[:,2].*(" "^L).*CC[:,1]
+  # P = [(i = isempty(i) ? "??" : i) for i in CC[:,3]] .* [(i = isempty(i) ? "???" : i) for i in CC[:,4]] .* collect(Main.Base.Iterators.repeated(".", L)) .* [(i = isempty(i) ? "D" : i) for i in CC[:,5]]
+    P = [(i = isempty(i) ? "??" : i) for i in CC[:,3]] .* [(i = isempty(i) ? "???" : i) for i in CC[:,4]] .* fill(".", L) .* [(i = isempty(i) ? "D" : i) for i in CC[:,5]]
   return S,P
 end
 
