@@ -84,7 +84,7 @@ function FDSN_sta_xml(string_data::String)
     ID    = Array{String,1}(undef, N)
     NAME  = Array{String,1}(undef, N)
     LOC   = Array{Array{Float64,1}}(undef, N)
-    UNITS = collect(Main.Base.Iterators.repeated("unknown",N))
+    UNITS = Array{String,1}(undef, N)
     GAIN  = Array{Float64,1}(undef, N)
     RESP  = Array{Array{Complex{Float64},2}}(undef, N)
     MISC  = Array{Dict{String,Any}}(undef, N)
@@ -239,6 +239,7 @@ function FDSNget!(seis::SeisIO.SeisData, C::Array{String,2}, d0::String, d1::Str
         parsed = true
       end
     else
+      # This should be impossible to see
       @warn(string("FDSNWS request failed: returning as a channel with ID= ", new_id,
       " and request data in [channel].misc[\"data\"]"))
     end

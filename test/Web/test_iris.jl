@@ -23,9 +23,8 @@ chans = ["UW.TDH..EHZ", "UW.VLL..EHZ"] # HOOD is either offline or not on IRISws
 st = -86400.0
 en = -86100.0
 (d0,d1) = parsetimewin(st,en)
-U = get_data("IRIS", chans, s=d0, t=d1)
+U = get_data("IRIS", chans, s=d0, t=d1, y=true)
 @test(isempty(U)==false)
-sync!(U)
 L = [length(U.x[i])/U.fs[i] for i = 1:U.n]
 t = [U.t[i][1,2] for i = 1:U.n]
 L_min = minimum(L)
@@ -34,6 +33,9 @@ t_min = minimum(t)
 t_max = maximum(t)
 @test(L_max - L_min <= maximum(2 ./ U.fs))
 @test(t_max - t_min <= round(Int64, 1.0e6 * 2.0/maximum(U.fs)))
+
+# This should produce a warning and fail
+get_data!(S, "FDSN", "UW.LON.."; src="IRIS", s=-600, t=0, v=0, fmt="geocsv");
 
 # printstyled("  To test for faithful SAC write in SeisIO:")
 # printstyled("     (1) At the Julia prompt, repeat this test: `U = get_data(\"IRIS\", [\"UW.TDH..EHZ\", \"UW.VLL..EHZ\"], \"IRIS\", s=-86400.0, t=-86100.0)`")

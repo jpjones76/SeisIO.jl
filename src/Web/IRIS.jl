@@ -21,9 +21,7 @@ function irisws(cha::String, d0, d1;
   end
 
   # Build query URL
-  URLbase = "http://service.iris.edu/irisws/timeseries/1/query?"
-  URLtail = build_stream_query(c,d0,d1)*"&scale=AUTO&output="*fmt
-  url = string(URLbase,URLtail)
+  url = "http://service.iris.edu/irisws/timeseries/1/query?" * build_stream_query(c,d0,d1)* "&scale=AUTO&output=" * fmt
   v > 0 && println(url)
 
   # Do request
@@ -36,9 +34,6 @@ function irisws(cha::String, d0, d1;
       Ch = read_sac_stream(IOBuffer(R.body))
       note!(Ch, "+src: irisws "*url)
       Ch.src = url
-      if v > 2
-        println(stdout, Ch)
-      end
       parsed = true
     elseif fmt == "miniseed"
       Ch = parsemseed(IOBuffer(R.body), false, v)[1]
@@ -47,18 +42,11 @@ function irisws(cha::String, d0, d1;
       parsed = true
     else
       # other parsers not yet written
-      if v > 0
-        @warn("Unusual format spec; returning empty channel with
-               unparsed data in [channel].misc[\"data\"]")
-      end
+      v > 0 && @warn("Unusual format spec; returning empty channel with unparsed data in [channel].misc[\"data\"]")
     end
   else
-    @warn("IRISWS request failed; returning empty channel with
-           unparsed data in [channel].misc[\"data\"]")
-    if v > 2
-      println(stdout, "Raw text dump of request status follows:")
-      println(stdout, String(R.body))
-    end
+    # This should be impossible to see
+    @warn("IRISWS request failed; returning empty channel with unparsed data in [channel].misc[\"data\"]")
   end
   if parsed == false
     c[3] = strip(c[3],'-')

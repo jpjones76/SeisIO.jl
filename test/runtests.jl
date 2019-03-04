@@ -1,4 +1,4 @@
-@warn("Tests require up to 20 minutes to execute. Begin in 3 seconds...")
+@warn("Tests require 10-12 minutes to execute. Begin in 3 seconds...")
 include("test_helpers.jl")
 sleep(3)
 printstyled(stdout, string(Dates.now(), ": tests begin, source_dir = ", path, "/\n"), color=:light_green, bold=true)
