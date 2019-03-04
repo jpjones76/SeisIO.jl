@@ -1,4 +1,6 @@
 ### 2019-03-03
+* added `equalize_resp!` to translate instrument frequency responses to a given
+complex response matrix (in pole/zero form).
 * `gcdist` now returns an array, rather than a tuple of vectors.
 * Deprecated SeedLink keyword argument `safety`.
 

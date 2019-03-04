@@ -60,7 +60,7 @@ function autotap!(U::SeisChannel)
   # Fill time gaps with NaNs
   ungap!(U, m=false, w=false)
 
-  j = findall(!isnan(U.x))
+  j = findall(isnan.(U.x).==false)
   μ = mean(U.x[j])
   u = max(20, round(Int64, 0.2*U.fs))
 
@@ -68,7 +68,7 @@ function autotap!(U::SeisChannel)
   autotuk!(U.x, j, u)
 
   # Then replace NaNs with the mean
-  U.x[isnan(U.x)] = μ
+  U.x[isnan.(U.x)] .= μ
   note!(U, "autotap! tapered and ungapped data; replaced NaNs with mean of non-NaNs.")
   return nothing
 end
