@@ -1,52 +1,43 @@
-export distaz!
-
 # =============================================================
 # Utility functions
 sa_prune!(S::Union{Array{String,1},Array{SubString{String},1}}) = (deleteat!(S, findall(isempty, S)); return S)
-get_phase_start(Pha::Array{String,2}) = Float64(findmin([Meta.parse(i) for i in Pha[:,4]]))
-get_phase_end(Pha::Array{String,2}) = Float64(findmax([Meta.parse(i) for i in Pha[:,4]]))
+parse_pcat(pcat::Array{String,2}) = (pcat[:,3], map(Float64, [Meta.parse(i) for i in pcat[:,4]]))
+pcat_start(pcat::Array{String,2}) = findmin([Meta.parse(i) for i in pcat[:,4]])[1]
+pcat_end(pcat::Array{String,2}) = findmax([Meta.parse(i) for i in pcat[:,4]])[1]
 
-function get_phase_time(pha::String, Pha::Array{String,2})
-    j = findall(Pha[:,3] .== pha)
-    if length(j) == 0
+function phase_time(pha::String, pcat::Array{String,2})
+    j = findall(pcat[:,3] .== pha)
+    if isempty(j)
         error(string("Phase ", pha, " not found in phase list!"))
     else
         i = j[1]
         if length(j) > 1
             warn(string("Phase ", pha, " appears multiple times in phase list! Only using first occurrence in phase list."))
         end
-        return Float64(Meta.parse(Pha[j[1], 4]))
+        return Float64(Meta.parse(pcat[j[1], 4]))
     end
 end
 
-function next_phase(pha::String, Pha::Array{String,2})
-  s = Pha[:,3]
-  t = map(Float64, [Meta.parse(i) for i in Pha[:,4]])
-  j = findall(s.==pha)[1]
-  i = t .- t[j] .> 0
-  tt = t[i]
-  ss = s[i]
-  k = sortperm(tt .- t[j])[1]
-  return(ss[k], tt[k])
+function next_phase(pha::String, pcat::Array{String,2})
+  if isempty(pha) || pha == "ttall"
+    pha = "P"
+  end
+  (phases, τ) = parse_pcat(pcat)
+  j = findfirst(phases.==pha)
+  if isempty(j)
+    j = findfirst(phases.==(pha*"diff"))
+    isempty(j) && error("No such phase!")
+  end
+  i = τ .- τ[j] .> 0
+  tt = τ[i]
+  ss = phases[i]
+  k = sortperm(tt .- τ[j])[1]
+  isnothing(i) && error(string("No next phase! Phase ", pha, " had the last arrival time in pcat!"))
+  return ss[k], tt[k]
 end
 
-function next_converted(pha::String, Pha::Array{String,2})
-  s = Pha[:,3]
-  t = map(Float64, [Meta.parse(i) for i in Pha[:,4]])
-  j = findall(s.==pha)[1]
-
-  p = replace(lowercase(s[j]),"diff" => "")[end]
-  if p == 'p'
-    c = 's'
-  else
-    c = 'p'
-  end
-  p_bool = [replace(lowercase(a),"diff" => "")[end]==c for a in s]
-  t_bool = t.-t[j].>0
-  i = t_bool.*p_bool
-
-  tt = t[i]
-  ss = s[i]
-  k = sortperm(tt.-t[j])[1]
-  return(ss[k],tt[k])
+function first_phase(pcat::Array{String,2})
+  (phases, τ) = parse_pcat(pcat)
+  i = sortperm(τ)[1]
+  return phases[i], τ[i]
 end

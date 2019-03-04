@@ -1,7 +1,11 @@
-"""
-    distaz!(S::SeisEvent)
+export distaz!
 
-Compute Δ, Θ by the Haversine formula. Updates `S` with distance, azimuth, and backazimuth for each channel. Values are stored as `S.data.misc["dist"], S.data.misc["az"], S.data.misc["baz"]`.
+"""
+    distaz!(Ev::SeisEvent)
+
+Compute Δ, Θ by the Haversine formula. Updates `Ev` with distance, azimuth, and
+backazimuth for each channel. Values are stored in
+`S.data.misc["dist"], S.data.misc["az"], S.data.misc["baz"]`.
 
 """
 function distaz!(S::SeisEvent)

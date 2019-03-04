@@ -1,9 +1,7 @@
 export gcdist
-const Fπ = Float64(pi)
-const rad2deg = 180.0/Fπ
 
-gc_ctr(lat::Array{Float64,1}, lon::Array{Float64,1}) = (atan.(tan.(lat*Fπ/180.0)*0.9933056), lon*π/180.0)
-gc_unwrap!(t::Array{Float64,1}) = (t[t .< 0] .+= 2.0*Fπ; return t)
+gc_ctr(lat::Array{Float64,1}, lon::Array{Float64,1}) =  (atan.(tan.(deg2rad.(lat)).*0.9933056), deg2rad.(lon))
+gc_unwrap!(t::Array{Float64,1}) = (t[t .< 0] .+= (2.0*Float64(π)); return t)
 
 """
     G = gcdist(src, rec)
@@ -37,7 +35,7 @@ function gcdist(src::Array{Float64,1}, rec::Array{Float64,2})
   B = atan.(-1.0.*sin.(Δλ).*cos.(ϕ1), cos.(ϕ2).*sin.(ϕ1) - sin.(ϕ2).*cos.(ϕ1).*cos.(Δλ))
 
   # convert to degrees
-  return hcat(Δ, gc_unwrap!(A), gc_unwrap!(B)).*rad2deg
+  return rad2deg.(hcat(Δ, gc_unwrap!(A), gc_unwrap!(B)))
 end
 gcdist(lat0::Float64, lon0::Float64, rec::Array{Float64,2}) = gcdist([lat0, lon0], rec)
 gcdist(lat0::Float64, lon0::Float64, lat1::Float64, lon1::Float64) = gcdist([lat0, lon0], [lat1 lon1])
