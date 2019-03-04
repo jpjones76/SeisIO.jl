@@ -1,22 +1,21 @@
 ts = "2016-03-23T23:10:00"
 te = "2016-03-23T23:17:00"
+sta = "CC.JRO..BHZ"
 
 printstyled("  IRIS Web Services\n", color=:light_green)
 printstyled("    Equivalence of SAC and MSEED requests...\n", color=:light_green)
-S = get_data("IRIS", "CC.JRO..BHZ", src="IRIS", s=ts, t=te, fmt="sacbl", v=0, w=true)
+S = get_data("IRIS", sta, src="IRIS", s=ts, t=te, fmt="sacbl", v=0, w=true)
 @test(isempty(S)==false)
-T = get_data("IRIS", "CC.JRO..BHZ", src="IRIS", s=ts, t=te, fmt="miniseed", v=0)
+T = get_data("IRIS", [sta], src="IRIS", s=ts, t=te, fmt="mseed", v=0)
 @test(isempty(T)==false)
 sync!(S, s=ts, t=te)
 sync!(T, s=ts, t=te)
 
-files = ls("*.SAC")
-for f in files
-  rm(f)
-end
-
 @test ≈(length(S.x[1]), length(T.x[1]))
 @test ≈(S.x[1], T.x[1])
+
+# Test a bum data format
+get_data!(S, "IRIS", "UW.LON..BHZ", s=-600, t=0, v=0, fmt="audio")
 
 printstyled("    A more complex IRISWS request...\n", color=:light_green)
 chans = ["UW.TDH..EHZ", "UW.VLL..EHZ"] # HOOD is either offline or not on IRISws right now
@@ -33,9 +32,6 @@ t_min = minimum(t)
 t_max = maximum(t)
 @test(L_max - L_min <= maximum(2 ./ U.fs))
 @test(t_max - t_min <= round(Int64, 1.0e6 * 2.0/maximum(U.fs)))
-
-# This should produce a warning and fail
-get_data!(S, "FDSN", "UW.LON.."; src="IRIS", s=-600, t=0, v=0, fmt="geocsv");
 
 # printstyled("  To test for faithful SAC write in SeisIO:")
 # printstyled("     (1) At the Julia prompt, repeat this test: `U = get_data(\"IRIS\", [\"UW.TDH..EHZ\", \"UW.VLL..EHZ\"], \"IRIS\", s=-86400.0, t=-86100.0)`")

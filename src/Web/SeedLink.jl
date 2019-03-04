@@ -203,16 +203,12 @@ function has_stream(sta::Array{String,1}, pat::Array{String,1};
   return check_stream_exists(cha, SL_info("STREAMS", u=u, port=port), gap=gap)
 end
 
-function has_stream(sta::String;
+has_stream(sta::String;
   u::String   = "rtserve.iris.washington.edu",
   port::Int64 = KW.SL.port,
   gap::Real   = KW.SL.gap,
-  d::Char     = ' '
-  )
-
-  sta, pat = parse_sl(parse_chstr(sta))
-  return has_stream(sta, pat, u=u, port=port, gap=gap, d=d)
-end
+  d::Char     = ','
+  ) = check_stream_exists(String.(split(sta, d)), SL_info("STREAMS", u=u, port=port), gap=gap)
 
 has_stream(sta::Array{String,1};
   u::String   = "rtserve.iris.washington.edu",
