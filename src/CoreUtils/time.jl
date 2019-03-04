@@ -1,6 +1,3 @@
-const sμ = 1000000.0
-const μs = 1.0e-6
-
 export d2u, j2md, md2j, parsetimewin, timestamp, u2d, t_win, w_time
 
 function tstr(t::DateTime)

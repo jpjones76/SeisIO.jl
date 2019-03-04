@@ -6,10 +6,9 @@ using Statistics: mean
 using Polynomials: polyfit, polyval
 
 path = Base.source_dir()
-const datafields = [:id, :name, :loc, :fs, :gain, :resp, :units, :src, :notes, :misc, :t, :x]
-const hdrfields = [:id, :ot, :loc, :mag, :int, :mt, :np, :pax, :src, :notes, :misc]
 
 # DO NOT CHANGE IMPORT ORDER
+include("constants.jl")
 include("CoreUtils/ls.jl")
 include("CoreUtils/time.jl")
 

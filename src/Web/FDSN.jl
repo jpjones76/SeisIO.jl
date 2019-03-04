@@ -274,7 +274,7 @@ end
 
 Multi-server query for the events with the closest origin time to `ot`.
 
-Standard keywords: evw, reg, mag, nev, src, to, w
+Standard keywords: evw, reg, mag, nev, src, to
 
 See also: SeisIO.KW
 """
@@ -401,7 +401,7 @@ function FDSNsta( chans::Union{String,Array{String,1},Array{String,2}};
                           src = sta_url,
                           units = String(C[14])
                           )
-          note!(Ch, string("+src: FDSN ", src))
+          note!(Ch, string("Channel info from FDSNsta: ", src))
           seis += Ch
         catch err
           ID = @sprintf("%s.%s.%s.%s",C[1],C[2],C[3],C[4])
