@@ -5,11 +5,11 @@ printstyled("  FDSN web requests\n", color=:light_green)
 printstyled("    data from IRIS...\n", color=:light_green)
 fname = path*"/SampleFiles/fdsn.conf"
 S = SeisData()
-get_data!(S, "FDSN", fname; src="IRIS", s=-600, t=0, v=0);
-# files = ls("*.mseed")
-# for f in files
-#   rm(f)
-# end
+get_data!(S, "FDSN", fname; src="IRIS", s=-600, t=0, v=0, w=true);
+files = ls("*.mseed")
+for f in files
+  rm(f)
+end
 
 # Ensure station headers are set
 j = findid(S, "UW.HOOD..ENE")

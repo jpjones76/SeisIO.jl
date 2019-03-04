@@ -230,7 +230,7 @@ function FDSNget!(seis::SeisIO.SeisData, C::Array{String,2}, d0::String, d1::Str
     R = request("GET", data_url, webhdr(), readtimeout=to)
     if R.status == 200
       if w == true
-        savereq(R.body, f, C[j,1], C[j,2], C[j,3], C[j,4], d0, d1, string(q))
+        savereq(R.body, fmt, C[j,1], C[j,2], C[j,3], C[j,4], d0, d1, string(q))
       end
 
       # Parse data
