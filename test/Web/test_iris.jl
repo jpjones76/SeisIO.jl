@@ -15,7 +15,8 @@ sync!(T, s=ts, t=te)
 @test ≈(S.x[1], T.x[1])
 
 # Test a bum data format
-get_data!(S, "IRIS", "UW.LON..BHZ", s=-600, t=0, v=0, fmt="audio")
+sta_matrix = vcat(["CC" "JRO" "" "BHZ"], ["UW" "LON" "" "BHZ"])
+T = get_data("IRIS", sta_matrix, s=-600, t=0, v=0, fmt="audio")
 
 printstyled("    A more complex IRISWS request...\n", color=:light_green)
 chans = ["UW.TDH..EHZ", "UW.VLL..EHZ"] # HOOD is either offline or not on IRISws right now
