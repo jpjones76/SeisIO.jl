@@ -27,7 +27,7 @@ for i = 1:Ev.data.n
   # Check that there's a P phase and an S phase
   for p in String["P","S"]
     j = findfirst(pdat[:,3].==p)
-    @test isnothing(j) == false
+    @test (typeof(j) == Nothing) == false
   end
 
   # get the start and end of the phase catalog and S arrival time, apply sanity check

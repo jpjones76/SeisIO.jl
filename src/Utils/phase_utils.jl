@@ -32,7 +32,6 @@ function next_phase(pha::String, pcat::Array{String,2})
   tt = τ[i]
   ss = phases[i]
   k = sortperm(tt .- τ[j])[1]
-  isnothing(i) && error(string("No next phase! Phase ", pha, " had the last arrival time in pcat!"))
   return ss[k], tt[k]
 end
 
