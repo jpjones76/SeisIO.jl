@@ -3,12 +3,17 @@ te = "2016-03-23T23:17:00"
 
 printstyled("  IRIS Web Services\n", color=:light_green)
 printstyled("    Equivalence of SAC and MSEED requests...\n", color=:light_green)
-S = get_data("IRIS", "CC.JRO..BHZ", src="IRIS", s=ts, t=te, fmt="sacbl", v=0)
+S = get_data("IRIS", "CC.JRO..BHZ", src="IRIS", s=ts, t=te, fmt="sacbl", v=0, w=true)
 @test(isempty(S)==false)
 T = get_data("IRIS", "CC.JRO..BHZ", src="IRIS", s=ts, t=te, fmt="miniseed", v=0)
 @test(isempty(T)==false)
 sync!(S, s=ts, t=te)
 sync!(T, s=ts, t=te)
+
+files = ls("*.SAC")
+for f in files
+  rm(f)
+end
 
 @test ≈(length(S.x[1]), length(T.x[1]))
 @test ≈(S.x[1], T.x[1])

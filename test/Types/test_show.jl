@@ -21,6 +21,7 @@ open("show.log", "w") do out
     summary(randSeisEvent())
     summary(randSeisHdr())
 
+    chanspec()
   end
 end
 rm("show.log")
