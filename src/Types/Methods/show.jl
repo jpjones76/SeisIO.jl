@@ -1,7 +1,6 @@
 import Base:show, size, summary
-const os=8
 
-si(w::Int, i::Int) = os + w*(i-1)
+si(w::Int, i::Int) = show_os + w*(i-1)
 showtail(io::IO, b::Bool) = b ? "…" : ""
 float_str(x::Float64) = @sprintf("%.3e", x)
 # maxgap(t::Array{Int64,2}) = @sprintf("%g", μs*maximum(t[2:end,2]))
@@ -21,8 +20,8 @@ end
 
 function str_head(s::String, W::Int)
   sd = ones(UInt8, W)*0x20
-  sd[os-1-length(s):os-2] = map(UInt8, collect(uppercase(s)))
-  sd[os-1:os] = codeunits(": ")
+  sd[show_os-1-length(s):show_os-2] = map(UInt8, collect(uppercase(s)))
+  sd[show_os-1:show_os] = codeunits(": ")
   return sd
 end
 
@@ -52,7 +51,7 @@ end
 
 function show_t(io::IO, T::Array{Array{Int64,2},1}, w::Int, W::Int, b::Bool)
   sd1 = str_head("T", W::Int)
-  p = os
+  p = show_os
   for i = 1:length(T)
     if isempty(T[i])
       s = ""
@@ -71,8 +70,8 @@ end
 function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, tip::String, b::Bool)
   N = length(X)
   str = zeros(UInt8, W, 6)
-  str[os-length(tip)-1:os,1] = UInt8.(codeunits(tip * ": "))
-  p = os
+  str[show_os-length(tip)-1:show_os,1] = UInt8.(codeunits(tip * ": "))
+  p = show_os
   i = 1
   while p < W && i <= N
     L = length(X[i])
@@ -108,9 +107,9 @@ function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, tip::Strin
 end
 
 function resp_str(io::IO, X::Array{Array{Complex{Float64},2},1}, w::Int, W::Int, b::Bool)
-  N = length(X); p = os; i = 1
+  N = length(X); p = show_os; i = 1
   sd = zeros(UInt8, W, 2)
-  sd[os-5:os-1,1] = codeunits("RESP:")
+  sd[show_os-5:show_os-1,1] = codeunits("RESP:")
   while p < W && i <= N
     zstr = ""
     pstr = ""
@@ -145,16 +144,16 @@ function resp_str(io::IO, X::Array{Array{Complex{Float64},2},1}, w::Int, W::Int,
 end
 
 function show_conn(io::IO, C::Array{TCPSocket,1})
-  d = str_head("C", os)
+  d = str_head("C", show_os)
   println(io, replace(String(d),'\0' => ' '), sum([isopen(i) for i in C]), " open, ", length(C), " total")
   if !isempty(C)
     m = 1
     for c in C
       if isopen(c)
         (url,port) = getsockname(c)
-        println(io, " "^os, "(", m, ") ", url, ":", Int(port))
+        println(io, " "^show_os, "(", m, ") ", url, ":", Int(port))
       else
-        println(io, " "^os, "(", m, ") (closed)")
+        println(io, " "^show_os, "(", m, ") (closed)")
       end
       m+=1
     end
@@ -171,10 +170,10 @@ summary(S::SeisChannel) = string(typeof(S), " with ", length(S.x), " sample",
 
 function show(io::IO, S::SeisData)
   # loc_str = ["lat", "lon", "ele", "az", "inc"]
-  W = max(80,displaysize(io)[2]-2)-os
+  W = max(80,displaysize(io)[2]-2)-show_os
   w = min(W, 36)
   nc = getfield(S, :n)
-  N = min(nc, floor(Int, (W-os-3)/(w+1)))
+  N = min(nc, floor(Int, (W-show_os-3)/(w+1)))
   D = Array{String,1}(undef, 25)
   println(io, "SeisData with ", nc, " channels (", N, " shown)")
   show_str(io, S.id[1:N], w, W, "id", N<nc)
@@ -197,7 +196,7 @@ show(S::SeisData) = show(stdout, S)
 
 function show(io::IO, S::SeisChannel)
   loc_str = ["lat", "lon", "ele", "az", "inc"]
-  W = max(80,displaysize(io)[2]-2)-os
+  W = max(80,displaysize(io)[2]-2)-show_os
   w = min(W, 36)
   D = Array{String,1}(undef,25)
   nx = length(S.x)
@@ -224,7 +223,7 @@ magsum(mag::Tuple{Float32, String}) = string(mag[2], " ", mag[1])
 locsum(loc::Array{Float64,1}) = @sprintf("%.5f°N, %.5f°E, %.3f km", loc[1], loc[2], loc[3])
 
 function show(io::IO, S::SeisHdr)
-  W = max(80,displaysize(io)[2]-2)-os
+  W = max(80,displaysize(io)[2]-2)-show_os
   println(io, "    ID: ", S.id)
   println(io, "    OT: ", S.ot)
   println(io, "   LOC: ", locsum(S.loc))

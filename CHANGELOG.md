@@ -1,10 +1,13 @@
+### 2019-03-03
+* `gcdist` now returns an array, rather than a tuple of vectors.
+
 ### 2019-03-02
 * `sync!` has been rewritten
   + `sync!` no longer calls `ungap!` or requires ungapped data
   + `sync!` no longer has an option to resample data
 * Fixed a bug in `show` for a SeisChannel
 * SeisIO native file format now supports all Unicode characters supported by
-the Juila language *except* for a minor issue in in SeisData.id.
+the Juila language.
 * Added `detrend!`
 
 ### 2019-02-26
@@ -62,7 +65,7 @@ the longstanding `FDSN_sta` method.
   + Fixed a file read bug of :resp in native SeisIO format
   + randseis now sets :src accurately rather than using a random string
   + Fixed creation of new SeisData objects from multiple SeisChannels
-  + get_pha is now correctly exported
+  + `get_pha` is now correctly exported
 * Behavior changes:
   + New SeisChannel structures no longer have fields set except :notes
   + New SeisData structures no longer have fields set except :notes

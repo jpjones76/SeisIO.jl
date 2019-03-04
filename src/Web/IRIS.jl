@@ -124,7 +124,7 @@ function get_pha(Δ::Float64, z::Float64;
   pha::String = KW.pha,
   model="iasp91"::String,
   to::Int64 = KW.to,
-  v::Int64 = v)
+  v::Int64 = KW.v)
 
   # Generate URL and do web query
   if isempty(pha) || pha == "all"

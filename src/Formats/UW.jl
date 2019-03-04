@@ -233,7 +233,6 @@ Specify verbose mode (for debugging).
 """
 function uwdf(datafile::String; v=0::Int)
   fname = realpath(datafile)
-  dconst = -11676096000
   D = Dict{String,Any}()
 
   # Open data file
@@ -250,7 +249,7 @@ function uwdf(datafile::String; v=0::Int)
   comment = replace(String(read!(fid, Array{UInt8, 1}(undef, 80))), "\0" => " ")
 
   # Set M time with lmin and lsec GREGORIAN MINUTES JESUS CHRIST WTF
-  # uw_ot = lmin*60 + lsec*1.0e-6 + dconst
+  # uw_ot = lmin*60 + lsec*1.0e-6 + uw_dconv
 
   # Seek EOF to get number of structures
   seekend(fid)
@@ -319,7 +318,7 @@ function uwdf(datafile::String; v=0::Int)
     # Parse I32
     ch_len = I32[:,1]
     ch_os = I32[:,2]
-    ch_time = I32[:,3].*60.0 .+ I32[:,4]*1.0e-6 .+ timecorr .+ dconst
+    ch_time = I32[:,3].*60.0 .+ I32[:,4]*1.0e-6 .+ timecorr .+ uw_dconv
     fs = map(Float64, I32[:,5])./1000.0
 
     # Divide up U8

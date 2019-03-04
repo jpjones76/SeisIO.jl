@@ -1,7 +1,3 @@
-const nul_f = -12345.0f0
-const nul_i = Int32(-12345)
-const nul_s = "-12345  "
-
 export readsac, rsac, sachdr, writesac, wsac
 
 # ============================================================================
@@ -67,9 +63,9 @@ function write_sac_file(fname::String, fv::Array{Float32,1}, iv::Array{Int32,1},
 end
 
 function fill_sac(S::SeisChannel, ts::Bool, leven::Bool)
-  fv = nul_f.*ones(Float32, 70)
-  iv = nul_i.*ones(Int32, 40)
-  cv = repeat(codeunits(nul_s), 24)
+  fv = sac_nul_f.*ones(Float32, 70)
+  iv = sac_nul_i.*ones(Int32, 40)
+  cv = repeat(codeunits(sac_nul_s), 24)
   cv[17:24] = codeunits(" "^8)
 
   # Ints
@@ -140,13 +136,13 @@ function read_sac_stream(f::IO, full=false::Bool, swap=false::Bool)
 
   # floats
   setfield!(S, :fs, Float64(1/fv[1]))
-  setfield!(S, :gain, Float64(fv[4] == nul_f ? 1.0f0 : fv[4]))
-  loc = [(fv[i] == nul_f ? 0.0 : Float64(fv[i])) for i in [32, 33, 34, 58, 59]]
+  setfield!(S, :gain, Float64(fv[4] == sac_nul_f ? 1.0f0 : fv[4]))
+  loc = [(fv[i] == sac_nul_f ? 0.0 : Float64(fv[i])) for i in [32, 33, 34, 58, 59]]
   setfield!(S, :loc, loc)
 
   # ints
   (m,d) = j2md(iv[1],iv[2])
-  ts = round(Int64, d2u(DateTime(iv[1],m,d,iv[3],iv[4],iv[5]))*sμ + Float64(Float32(iv[6]) + fv[6] == nul_f ? 0.0f0 : fv[6])*1.0e3)
+  ts = round(Int64, d2u(DateTime(iv[1],m,d,iv[3],iv[4],iv[5]))*sμ + Float64(Float32(iv[6]) + fv[6] == sac_nul_f ? 0.0f0 : fv[6])*1.0e3)
   setfield!(S, :t, Array{Int64,2}([1 ts; iv[10] 0]))
 
   # chars
@@ -163,8 +159,8 @@ function read_sac_stream(f::IO, full=false::Bool, swap=false::Bool)
   # Create dictionary if full headers are desired
   if full
     (fk, ik, ck) = get_sac_keys()
-    ii = findall(fv .!= nul_f)
-    jj = findall(iv .!= nul_i)
+    ii = findall(fv .!= sac_nul_f)
+    jj = findall(iv .!= sac_nul_i)
     S.misc = Dict{String,Any}(zip(fk[ii], fv[ii]))
     merge!(S.misc, Dict{String,Any}(zip(ik[jj], iv[jj])))
     m = Int32(0)
@@ -232,9 +228,9 @@ function writesac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=false::Bool)
   end
   tdata = Array{Float32}(undef, 0)
   if isa(S, SeisEvent)
-    evt_info = map(Float32, vcat(S.hdr.loc, nul_f, S.hdr.mag[1]))
+    evt_info = map(Float32, vcat(S.hdr.loc, sac_nul_f, S.hdr.mag[1]))
     t_evt = d2u(S.hdr.ot)
-    evid  = S.hdr.id == 0 ? nul_s : String(S.hdr.id)
+    evid  = S.hdr.id == 0 ? sac_nul_s : String(S.hdr.id)
     EvL   = length(evid)
     N     = S.data.n
   else
