@@ -11,5 +11,16 @@ for d in ["CoreUtils", "Types", "RandSeis", "NativeIO", "DataFormats", "Processi
   end
 end
 
+# Done. Clean up.
+rm("show.log")
+files = ls("*.mseed")
+for f in files
+  rm(f)
+end
+files = ls("*.SAC")
+for f in files
+  rm(f)
+end
+
 printstyled("Done!\n", color=:light_green, bold=true)
 printstyled("To run canonical examples, execute this command: include(\"", path, "/examples.jl\").\n", color=:cyan, bold=true)

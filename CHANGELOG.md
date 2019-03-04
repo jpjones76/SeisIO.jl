@@ -1,5 +1,6 @@
 ### 2019-03-03
 * `gcdist` now returns an array, rather than a tuple of vectors.
+* Deprecated SeedLink keyword argument `safety`.
 
 ### 2019-03-02
 * `sync!` has been rewritten

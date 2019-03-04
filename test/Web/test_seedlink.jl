@@ -5,15 +5,18 @@ config_file = path*"/SampleFiles/seedlink.conf"
 sta = ["CC.SEP", "UW.HDW"]
 pat = ["?????.D"; "?????.D"]
 trl = ".??.???.D"
+sta_matrix = String.(reshape(split(sta[2],'.'), 1,2))
 
 printstyled("SeedLink\n", color=:light_green, bold=true)
 printstyled("  (test requires 5 minutes)\n", color=:green)
 
 # has_stream
 printstyled("  has_stream...\n", color=:light_green)
-tf1 = has_stream(sta, u="rtserve.iris.washington.edu")
-tf2 = has_stream(sta, pat, u="rtserve.iris.washington.edu", d='.')
-@test tf1 == tf2
+tf1 = has_stream(sta, u="rtserve.iris.washington.edu")[2]
+tf2 = has_stream(sta, pat, u="rtserve.iris.washington.edu", d='.')[2]
+tf3 = has_stream(join(sta, ','), u="rtserve.iris.washington.edu")[2]
+tf4 = has_stream(sta_matrix, u="rtserve.iris.washington.edu")[1]
+@test tf1 == tf2 == tf3 == tf4
 
 # has_stream
 printstyled("  has_sta...\n", color=:light_green)
@@ -104,10 +107,3 @@ pat = ["*****.X"]
 
 pat = ["?????.D"]
 @test_throws ErrorException SeedLink!(S, [replace(sta[1], "SEP" => "XOX")], pat)
-
-# Done. Clean up.
-rm("show.log")
-files = ls("*.mseed")
-for f in files
-  rm(f)
-end

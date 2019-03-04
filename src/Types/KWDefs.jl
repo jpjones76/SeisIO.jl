@@ -15,7 +15,6 @@
 # x     ::Array{Float64,1}          = Array{Float64,1}(undef, 0)
 
 struct SLDefs
-  safety::UInt8
   port::Int
   gap::Int
   kai::Int
@@ -101,14 +100,12 @@ general keywords.
 | mode        | "DATA"  | String          | TIME, DATA, or FETCH              |
 | port        | 18000   | Integer         | port number                       |
 | refresh     | 20      | Real            | base refresh interval [s]         |
-| safety      | 0x00    | UInt8           | safety check level                |
 | xonerr      | true    | Bool            | exit on error?                    |
 
 
 """
 const KW = KWDefs(
-           SLDefs( 0x00,    # safety::UInt8
-                  18000,    # port::Int
+           SLDefs(18000,    # port::Int
                    3600,    # gap::Int
                     600,    # kai::Int
                  "DATA",    # mode::String
