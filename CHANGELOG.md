@@ -1,3 +1,9 @@
+### 2019-03-04
+* Fixed a rare bug where `wseis` occasionally failed to write channels with
+very few data points.
+* Fixed several breaking `readwin32` issues.
+  + Added timezone kw "tz" for `readwin32`; most files are UTC +9 (tz="true")
+
 ### 2019-03-03
 * added `equalize_resp!` to translate instrument frequency responses to a given
 complex response matrix (in pole/zero form).
