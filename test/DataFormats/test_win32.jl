@@ -17,14 +17,14 @@ if Sys.islinux()
 
   # Check against SAC files
   printstyled("    ...checking read integrity against HiNet SAC files...\n", color=:light_green)
-  testfiles = "/home/josh/SAC/" .* ["20140927000000.V.ONTA.E.SAC",
-                                    "20140927000000.V.ONTA.H.SAC",
-                                    "20140927000000.V.ONTA.N.SAC",
-                                    "20140927000000.V.ONTA.U.SAC",
-                                    "20140927000000.V.ONTN.E.SAC",
-                                    "20140927000000.V.ONTN.H.SAC",
-                                    "20140927000000.V.ONTN.N.SAC",
-                                    "20140927000000.V.ONTN.U.SAC"]
+  testfiles = path*"/SampleFiles/Win32/" .* ["20140927000000.V.ONTA.E.SAC",
+                                            "20140927000000.V.ONTA.H.SAC",
+                                            "20140927000000.V.ONTA.N.SAC",
+                                            "20140927000000.V.ONTA.U.SAC",
+                                            "20140927000000.V.ONTN.E.SAC",
+                                            "20140927000000.V.ONTN.H.SAC",
+                                            "20140927000000.V.ONTN.N.SAC",
+                                            "20140927000000.V.ONTN.U.SAC"]
 
   # SAC files prepared in SAC with these commands from day-long Ontake files
   # beginning at midnight Japan time converted to SAC with win32 precompiled
