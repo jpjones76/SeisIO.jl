@@ -37,18 +37,6 @@ function show_str(io::IO, S::Array{String,1}, w::Int, W::Int, s::String, b::Bool
   return
 end
 
-# function show_int(io::IO, D::Array{Int,1}, W::Int, w::Int, s::String, b::Bool)
-#   N = length(D)
-#   sd = str_head(s, W)
-#   for i = 1:N
-#     st = si(w,i)
-#     d = str_trunc(string(D[i]), w)
-#     sd[st+1:st+length(d)] = d
-#   end
-#   println(io, string(replace(String(sd),'\0' => ' '), showtail(io, b)))
-#   return
-# end
-
 function show_t(io::IO, T::Array{Array{Int64,2},1}, w::Int, W::Int, b::Bool)
   sd1 = str_head("T", W::Int)
   p = show_os
@@ -79,24 +67,27 @@ function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, tip::Strin
     if isempty(X[i])
       str[p+1:p+7,1] = codeunits("(empty)")
     else
-      for k = 1:6
+      for k = 1:5
         if k <= L
           s = float_str(X[i][k])
-          if (L > 5 && k==5)
+          if (L > 5 && k==3)
             s = "  ..."
+          elseif (L > 5 && k==4)
+            s = float_str(last(X[i]))
+          elseif (L > 5 && k==5)
+            s = Lx
           end
-        elseif k == 6
-          s = Lx
         else
           s = ""
         end
-        str[p+1:p+length(codeunits(s)),k] = codeunits(s)
+        cstr = codeunits(s)
+        str[p+1:p+length(cstr),k] = cstr
       end
     end
     p += w
     i += 1
   end
-  for i = 1:6
+  for i = 1:5
     if i == 1
       println(io, replace(String(str[:,i]),'\0' => ' '), showtail(io, b))
     else
