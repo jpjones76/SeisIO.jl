@@ -128,6 +128,7 @@ function w_struct(io::IOStream, S::SeisData)
     if l == 0
       @warn(string("Compression ratio > 1.0 for channel ", i, "; are data OK?"))
       x = Blosc.compress(S.x[i], level=9)
+      l = length(x)
     end
 
     id = codeunits(S.id[i])

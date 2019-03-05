@@ -25,7 +25,9 @@ EV.data.misc[1] = breaking_dict
 wseis(savfile3, EV)
 
 printstyled("    ...read/write of each type to same file...\n", color=:light_green)
-Ch = randSeisChannel()
+Ch = randSeisChannel(s=true)
+Ch.x = rand(24)
+Ch.t = vcat(Ch.t[1], [24 0])
 wseis(savfile3, EV, S, H, Ch)
 
 R = rseis(savfile3)
