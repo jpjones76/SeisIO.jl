@@ -3,3 +3,5 @@
 *.jl.mem
 internal_tests/
 dev/
+test/SampleFiles/win32.tar.gz
+test/SampleFiles/Win32/

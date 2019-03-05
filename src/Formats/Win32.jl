@@ -29,7 +29,7 @@ function win32dict(Nh::UInt16, cinfo::String, hexID::String, StartTime::Float64,
   Meta.parse(D["locID"]) > 99 && (@warn(string("For hexID = ", hexID, ", locID > 99; location ID unset.")); D["locID"] = "")
 
   # Get local (Japanese) network and subnet
-  nets = readdlm(string(Pkg.dir(),"/SeisIO/src/Formats/jpcodes.csv"), ';')
+  nets = readdlm(string(@__DIR__,"/jpcodes.csv"), ';')
   i = findall((nets[:,1].==orgID).*(nets[:,2].==netID))
   D["netName"] = isempty(i) ? "Unknown" : nets[i[1],:]
 
@@ -63,10 +63,10 @@ end
 
 Read all win32 files matching pattern `filestr` into SeisData object `S`, with channel info stored in `chanfile`.
 """
-function readwin32(filestr::String, cf::String; v=0::Int)
+function readwin32(filestr::String, cf::String; v=0::Int, jst::Bool=true)
   Chans = readlines(cf)
   seis = Dict{String,Any}()
-  files = SeisIO.ls(filestr)
+  files = ls(filestr)
   nf = 0
   for fname in files
     v>0 && println("Processing ", fname)
@@ -74,19 +74,19 @@ function readwin32(filestr::String, cf::String; v=0::Int)
     skip(fid, 4)
     while !eof(fid)
       # Start time: matches file info despite migraine-inducing nesting
-      stime = DateTime(bytes2hex(read(fid, UInt8, 8)), "yyyymmddHHMMSSsss")
+      stime = DateTime(bytes2hex(read!(fid, Array{UInt8,1}(undef, 8))), "yyyymmddHHMMSSsss")
       NewTime = Dates.datetime2unix(stime)
       skip(fid, 4)
       lsecb = bswap(read(fid, UInt32))
       y = 0
 
       while y < lsecb
-        orgID = bytes2hex(read(fid, UInt8, 1))
-        netID = bytes2hex(read(fid, UInt8, 1))
-        hexID = bytes2hex(read(fid, UInt8, 2))
-        c = string(bits(read(fid, UInt8)),bits(read(fid, UInt8)))
-        C = parse(UInt8, c[1:4], 2)
-        N = parse(UInt16, c[5:end], 2)
+        orgID = bytes2hex([read(fid, UInt8)])
+        netID = bytes2hex([read(fid, UInt8)])
+        hexID = bytes2hex(read!(fid, Array{UInt8,1}(undef, 2)))
+        c = string(bitstring(read(fid, UInt8)), bitstring(read(fid, UInt8)))
+        C = parse(UInt8, c[1:4], base=2)
+        N = parse(UInt16, c[5:end], base=2)
         x = Array{Int32, 1}(undef, N)
         Nh = copy(N)
 
@@ -104,9 +104,9 @@ function readwin32(filestr::String, cf::String; v=0::Int)
         x[1] = bswap(read(fid, Int32))
 
         if C == 0
-          V = read(fid, UInt8, Int(N/2))
+          V = read!(fid, Array{UInt8,1}(undef, div(N, 2)))
           for i = 1:length(V)
-            x1,x2 = int4_2c(map(Int32, Vector{UInt8}(bits(V[i])) - 0x30)) # was: x1,x2 = int4_2c(map(Int32, bits(V[i]).data - 0x30))
+            x1,x2 = int4_2c(map(Int32, Vector{UInt8}(bitstring(V[i])) .- 0x30)) # was: x1,x2 = int4_2c(map(Int32, bits(V[i]).data - 0x30))
             if i < N/2
               x[2*i:2*i+1] = [x1 x2]
             else
@@ -115,16 +115,16 @@ function readwin32(filestr::String, cf::String; v=0::Int)
           end
           N+=1
         elseif C == 1
-          x[2:end] = read(fid, Int8, N)
+          x[2:end] = read!(fid, Array{Int8,1}(undef, N))
         elseif C == 3
-          V = read(fid, UInt8, 3*N)
+          V = read!(fid, Array{UInt8,1}(undef, 3*N))
           for i = 1:N
-            xi = join([bits(V[3*i]),bits(V[3*i-1]),bits(V[3*i-2])])
+            xi = join([bitstring(V[3*i]), bitstring(V[3*i-1]), bitstring(V[3*i-2])])
             x[i+1] = Meta.parse(Int32, xi, 2)
           end
         else
           fmt = (C == 2 ? Int16 : Int32)
-          V = read(fid, fmt, N)
+          V = read!(fid, Array{fmt,1}(undef, N))
           x[2:end] = [bswap(i) for i in V]
         end
 
@@ -162,7 +162,7 @@ function readwin32(filestr::String, cf::String; v=0::Int)
       for j = 1:J
         si = seis[i]["gapStart"][j]
         ei = seis[i]["gapEnd"][j]
-        seis[i]["data"][si:ei] = av
+        seis[i]["data"][si:ei] .= av
       end
     end
   end
@@ -177,7 +177,12 @@ function readwin32(filestr::String, cf::String; v=0::Int)
     fs    = Float64(seis[k]["fs"])
     units = seis[k]["unit"]
     x     = map(Float64, seis[k]["data"])
-    t     = [1 round(Int64,seis[k]["startTime"]/μs); length(seis[k]["data"]) 0]
+    nx    = length(x)
+    ts    = round(Int64,seis[k]["startTime"]/μs)
+    if jst
+      ts -= 32400000000
+    end
+    t     = [1 ts; nx 0]
     src   = filestr
     misc  = Dict{String,Any}(i => seis[k][i] for i in ("hexID", "orgID", "netID", "fc", "hc", "pCorr", "sCorr", "lineDelay", "comment"))
 
@@ -202,7 +207,7 @@ function readwin32(filestr::String, cf::String; v=0::Int)
     id    = join(["JP", sta, seis[k]["locID"], string(b,g,c)], '.')
 
     C = SeisChannel(id=id, name=k, x=x, t=t, gain=seis[k]["scale"], fs=fs, units=units, loc=[seis[k]["loc"]; 0.0; 0.0], misc=misc, src=src, resp=resp)
-    note!(C, string("+src: readwin32 ", fname))
+    note!(C, string("+src: readwin32 ", filestr))
     note!(C, string("channel file: ", cf))
     note!(C, string("location comment: ", seis[k]["comment"]))
     S += C
