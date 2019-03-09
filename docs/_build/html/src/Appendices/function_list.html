@@ -201,6 +201,12 @@
 
 <p>Convert critical frequency <code class="docutils literal notranslate"><span class="pre">fc</span></code> to a matrix of complex poles and zeros; zeros in <code class="docutils literal notranslate"><span class="pre">resp[:,1]</span></code>, poles in <code class="docutils literal notranslate"><span class="pre">resp[:,2]</span></code>.</p>
 <dl class="function">
+<dt id="find_regex">
+<code class="descname">find_regex</code><span class="sig-paren">(</span><em>path::String</em>, <em>r::Regex</em><span class="sig-paren">)</span><a class="headerlink" href="#find_regex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>OS-agnostic equivalent to Linux <cite>find</cite>. First argument is a path string, second is a Regex. File strings are postprocessed using Julia’s native PCRE Regex engine. By design, <cite>find_regex</cite> only returns file names.</p>
+<dl class="function">
 <dt>
 <code class="descname">(dist, az, baz) = gcdist([lat_src, lon_src], rec)</code></dt>
 <dd></dd></dl>
@@ -214,10 +220,20 @@
 <p>Get SEED-compliant one-character band code corresponding to instrument sample rate <code class="docutils literal notranslate"><span class="pre">fs</span></code> and corner frequency <code class="docutils literal notranslate"><span class="pre">FC</span></code>. If unset, <code class="docutils literal notranslate"><span class="pre">FC</span></code> is assumed to be 1 Hz.</p>
 <dl class="function">
 <dt id="ls">
-<code class="descname">ls</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#ls" title="Permalink to this definition">¶</a></dt>
+<code class="descname">ls</code><span class="sig-paren">(</span><em>s::String</em><span class="sig-paren">)</span><a class="headerlink" href="#ls" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<p>Wrapper to <cite>sh /bin/ls -1</cite>; returns output as a string array. In Windows, provides similar functionality to Unix ls. <code class="docutils literal notranslate"><span class="pre">ls()</span></code> with no arguments lists contents of cwd.</p>
+<p>Similar functionality to Bash ls with OS-agnostic output. Accepts wildcards in paths and file names.
+* Always returns the full path and file name.
+* Partial file name wildcards (e.g. “<cite>ls(data/2006*.sac)</cite>) invoke <cite>glob</cite>.
+* Path wildcards (e.g. <cite>ls(/data/*/*.sac)</cite>) invoke <cite>find_regex</cite> to circumvent glob limitations.
+* Passing ony “*” as a filename (e.g. “<cite>ls(/home/*)</cite>) invokes <cite>find_regex</cite> to recursively search subdirectories, as in the Bash shell.</p>
+<dl class="function">
+<dt>
+<code class="descname">ls</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<p>Return full path and file name of files in current working directory.</p>
 <dl class="function">
 <dt id="j2md">
 <code class="descname">j2md</code><span class="sig-paren">(</span><em>y</em>, <em>j</em><span class="sig-paren">)</span><a class="headerlink" href="#j2md" title="Permalink to this definition">¶</a></dt>

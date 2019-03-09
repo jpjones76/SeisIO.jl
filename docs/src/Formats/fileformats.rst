@@ -29,7 +29,9 @@ Current format support: (e = endianness; B = big, l = little, * = either)
 +----------+---+---------------+---------------------------+
 |          | B | uwdf          | new SeisData              |
 +----------+---+---------------+---------------------------+
-| win32    | B | readwin32     | new SeisData              |
+| win32    | B | readwin32!    | existing SeisData         |
++----------+---+---------------+---------------------------+
+|          | B | readwin32     | new SeisData              |
 +----------+---+---------------+---------------------------+
 
 (a) Use keyword PASSCAL=true for PASSCAL SEG Y.
@@ -46,7 +48,7 @@ Format Descriptions
 
 **UW**: the University of Washington data format was designed for event archival. A UW event is described by a pickfile and a corresponding data file, whose names are identical except for the last character, e.g. 99062109485o, 99062109485W.\ :sup:`(b)`
 
-**Win32** : data format developed by the NIED (National Research Institute for Earth Science and Disaster Prevention), Japan. Data are typically divided into files that contain a minute of continuous data from channels on a single network or subnet; data within each file are stored by channel as variable-precision integers in 1s segments. Channel information for each stream is retrieved from a channel information file.\ :sup:`(c)` [#]_ [#]_
+**Win32** : data format developed by the NIED (National Research Institute for Earth Science and Disaster Prevention), Japan. Data are typically divided into files that contain a minute of continuous data from channels on a single network or subnet. Data within each file are stored by channel in 1s segments as variable-precision integers. Channel information for each stream is retrieved from an external channel information file.\ :sup:`(c)` [#]_ [#]_
 
 Usage Warnings
 --------------
@@ -57,7 +59,7 @@ unreadable SEG Y files to their creators.
 
 :sup:`(b)`  **UW** data format has no online documentation. Please contact the SeisIO creators or the Pacific Northwest Seismic Network (University of Washington, United States) if additional help is needed to read these files.
 
-:sup:`(c)`  **Win32** channel information files are not ridigly controlled by any central authority; thus, inconsistencies in channel parameters (e.g. gains) are known to exist. Please remember that redistribution of Win32 files is strictly prohibited by the NIED.
+:sup:`(c)`  **Win32** channel information files are not strictly controlled by a central authority; inconsistencies in channel parameters (e.g. gains) are known to exist. Please remember that redistribution of Win32 files is strictly prohibited by the NIED (our travis-ci tests use an encrypted tarball).
 
 
 .. rubric:: External References

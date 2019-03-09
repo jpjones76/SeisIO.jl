@@ -59,7 +59,7 @@
 
 
 \title{SeisIO Documentation}
-\date{Mar 04, 2019}
+\date{Mar 08, 2019}
 \release{0.1.2 rc}
 \author{Joshua Jones}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -1588,6 +1588,14 @@ Keyword \sphinxcode{\sphinxupquote{hc\_new}} specifies the new critical damping 
 
 
 Convert critical frequency \sphinxcode{\sphinxupquote{fc}} to a matrix of complex poles and zeros; zeros in \sphinxcode{\sphinxupquote{resp{[}:,1{]}}}, poles in \sphinxcode{\sphinxupquote{resp{[}:,2{]}}}.
+\index{find\_regex() (built-in function)@\spxentry{find\_regex()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Appendices/function_list:find_regex}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{find\_regex}}}{\emph{path::String}, \emph{r::Regex}}{}
+\end{fulllineitems}
+
+
+OS-agnostic equivalent to Linux \sphinxtitleref{find}. First argument is a path string, second is a Regex. File strings are postprocessed using Julia’s native PCRE Regex engine. By design, \sphinxtitleref{find\_regex} only returns file names.
 
 
 \begin{fulllineitems}
@@ -1607,11 +1615,23 @@ Get SEED-compliant one-character band code corresponding to instrument sample ra
 \index{ls() (built-in function)@\spxentry{ls()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Appendices/function_list:ls}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{ls}}}{\emph{path}}{}
+\phantomsection\label{\detokenize{src/Appendices/function_list:ls}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{ls}}}{\emph{s::String}}{}
 \end{fulllineitems}
 
 
-Wrapper to \sphinxtitleref{sh /bin/ls -1}; returns output as a string array. In Windows, provides similar functionality to Unix ls. \sphinxcode{\sphinxupquote{ls()}} with no arguments lists contents of cwd.
+Similar functionality to Bash ls with OS-agnostic output. Accepts wildcards in paths and file names.
+* Always returns the full path and file name.
+* Partial file name wildcards (e.g. “\sphinxtitleref{ls(data/2006*.sac)}) invoke \sphinxtitleref{glob}.
+* Path wildcards (e.g. \sphinxtitleref{ls(/data/*/*.sac)}) invoke \sphinxtitleref{find\_regex} to circumvent glob limitations.
+* Passing ony “*” as a filename (e.g. “\sphinxtitleref{ls(/home/*)}) invokes \sphinxtitleref{find\_regex} to recursively search subdirectories, as in the Bash shell.
+\index{ls() (built-in function)@\spxentry{ls()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{ls}}}{}{}
+\end{fulllineitems}
+
+
+Return full path and file name of files in current working directory.
 \index{j2md() (built-in function)@\spxentry{j2md()}\spxextra{built-in function}}
 
 \begin{fulllineitems}

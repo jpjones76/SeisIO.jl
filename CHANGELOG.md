@@ -1,3 +1,16 @@
+### 2019-03-08
+* `readwin32` is now an order of magnitude faster and uses an order of magnitude
+less memory.
+  + use kw `jst=false` to NOT apply a 9h correction to win32 data times.
+* Added a `find_regex` command for OS-agonstic `find` functionality.
+* The built-in `ls` now behaves like Bash ls but outputs full paths in returned file names.
+  + Most invocations of `ls` still invoke `readdir` or `isile`.
+  + Partial file name wildcards (e.g. "`ls(data/*.sac)`) now invoke `glob`.
+  + Path wildcards (e.g. `ls(/data/*/*.sac)`) invoke `find_regex` to circumvent
+    glob limitations.
+  + Passing ony "\*" as a filename (e.g. "`ls(/home/*)`) invokes `find_regex` to
+  recursively search subdirectories, as in the Bash shell.
+
 ### 2019-03-04
 * Fixed a rare bug where `wseis` occasionally failed to write channels with
 very few data points.

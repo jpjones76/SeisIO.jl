@@ -19,6 +19,10 @@ Keyword ``hc_new`` specifies the new critical damping constant. Keyword ``C`` sp
 
 Convert critical frequency ``fc`` to a matrix of complex poles and zeros; zeros in ``resp[:,1]``, poles in ``resp[:,2]``.
 
+.. function:: find_regex(path::String, r::Regex)
+
+OS-agnostic equivalent to Linux `find`. First argument is a path string, second is a Regex. File strings are postprocessed using Julia's native PCRE Regex engine. By design, `find_regex` only returns file names.
+
 .. function:: (dist, az, baz) = gcdist([lat_src, lon_src], rec)
 
 Compute great circle distance, azimuth, and backazimuth from source coordinates ``[lat_src, lon_src]`` to receiver coordinates in ``rec`` using the Haversine formula. ``rec`` must be a two-column matix arranged [lat lon]. Returns a tuple of arrays.
@@ -27,9 +31,17 @@ Compute great circle distance, azimuth, and backazimuth from source coordinates 
 
 Get SEED-compliant one-character band code corresponding to instrument sample rate ``fs`` and corner frequency ``FC``. If unset, ``FC`` is assumed to be 1 Hz.
 
-.. function:: ls(path)
+.. function:: ls(s::String)
 
-Wrapper to `sh /bin/ls -1`; returns output as a string array. In Windows, provides similar functionality to Unix ls. ``ls()`` with no arguments lists contents of cwd.
+Similar functionality to Bash ls with OS-agnostic output. Accepts wildcards in paths and file names.
+* Always returns the full path and file name.
+* Partial file name wildcards (e.g. "`ls(data/2006*.sac)`) invoke `glob`.
+* Path wildcards (e.g. `ls(/data/*/*.sac)`) invoke `find_regex` to circumvent glob limitations.
+* Passing ony "*" as a filename (e.g. "`ls(/home/*)`) invokes `find_regex` to recursively search subdirectories, as in the Bash shell.
+
+.. function:: ls()
+
+Return full path and file name of files in current working directory.
 
 .. function:: j2md(y, j)
 

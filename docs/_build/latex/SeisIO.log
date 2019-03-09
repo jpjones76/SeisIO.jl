@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018/Arch Linux) (preloaded format=pdflatex 2019.2.19)  4 MAR 2019 04:53
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018/Arch Linux) (preloaded format=pdflatex 2019.2.27)  8 MAR 2019 22:25
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -936,102 +936,102 @@ Chapter 5.
 ] [26]
 
 LaTeX Warning: Hyper reference `src/Appendices/seisdata_fields:seisdata-t' on p
-age 27 undefined on input line 1854.
+age 27 undefined on input line 1874.
 
 
 LaTeX Warning: Hyper reference `src/Appendices/seisdata_fields:seisdata-t' on p
-age 27 undefined on input line 1854.
+age 27 undefined on input line 1874.
 
 [27]
-Overfull \hbox (1.9331pt too wide) in paragraph at lines 1994--1994
+Overfull \hbox (1.9331pt too wide) in paragraph at lines 2014--2014
 []\T1/phv/m/n/10.95 Name| 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1994--1994
+Underfull \hbox (badness 10000) in paragraph at lines 2014--2014
 []\T1/ptm/m/n/10.95 Ar-ray{Tuple{Float64, Float64,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1994--1994
+Underfull \hbox (badness 10000) in paragraph at lines 2014--2014
 []\T1/ptm/m/n/10.95 Ar-ray{Tuple{Float64, Float64,
  []
 
 [28] [29]
-Overfull \hbox (9.75858pt too wide) in paragraph at lines 2483--2484
+Overfull \hbox (9.75858pt too wide) in paragraph at lines 2503--2504
 []|\T1/ptm/m/n/10.95 L_units| 
  []
 
 
-Overfull \hbox (1.22864pt too wide) in paragraph at lines 2488--2489
+Overfull \hbox (1.22864pt too wide) in paragraph at lines 2508--2509
 []|\T1/ptm/m/n/10.95 L_src| 
  []
 
 
-Overfull \hbox (12.1786pt too wide) in paragraph at lines 2493--2494
+Overfull \hbox (12.1786pt too wide) in paragraph at lines 2513--2514
 []|\T1/ptm/m/n/10.95 L_name| 
  []
 
 
-Overfull \hbox (11.57631pt too wide) in paragraph at lines 2498--2499
+Overfull \hbox (11.57631pt too wide) in paragraph at lines 2518--2519
 []|\T1/ptm/m/n/10.95 L_notes| 
  []
 
 [30] [31]
-Overfull \hbox (2.61398pt too wide) in paragraph at lines 2728--2729
+Overfull \hbox (2.61398pt too wide) in paragraph at lines 2748--2749
 []|\T1/phv/m/n/10.95 code| 
  []
 
 
-Overfull \hbox (2.61398pt too wide) in paragraph at lines 2732--2733
+Overfull \hbox (2.61398pt too wide) in paragraph at lines 2752--2753
 []|\T1/phv/m/n/10.95 code| 
  []
 
 [32]
 LaTeX Font Info:    Font shape `T1/pcr/bx/n' in size <10> not available
-(Font)              Font shape `T1/pcr/b/n' tried instead on input line 2996.
+(Font)              Font shape `T1/pcr/b/n' tried instead on input line 3016.
  [33] [34]
-Overfull \hbox (18.7079pt too wide) in paragraph at lines 3315--3317
+Overfull \hbox (18.7079pt too wide) in paragraph at lines 3335--3337
 []|\T1/ptm/m/n/10.95 ^^PPB.B004.01.BS1,PB.B002.01.BS1^^Q| 
  []
 
 
-Overfull \hbox (34.9575pt too wide) in paragraph at lines 3323--3325
+Overfull \hbox (34.9575pt too wide) in paragraph at lines 3343--3345
 []|\T1/ptm/m/n/10.95 [^^PPB.B004.01.BS1^^Q,^^QPB.B002.01.BS1^^Q]| 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3331--3333
+Underfull \hbox (badness 10000) in paragraph at lines 3351--3353
 []
  []
 
 [35] [36] [37]
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <9> not available
-(Font)              Font shape `T1/ptm/b/n' tried instead on input line 3781.
+(Font)              Font shape `T1/ptm/b/n' tried instead on input line 3801.
  [38] [39] [40] (./SeisIO.ind [41] [42
 
 ] [43
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 4024.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 4024.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 4044.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 4044.
  (./SeisIO.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 4024.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 4024.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 4044.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 4044.
 
 Package rerunfilecheck Info: File `SeisIO.out' has not changed.
-(rerunfilecheck)             Checksum: B9B40422EDA5FB9F0EB537695E090BFB;2235.
+(rerunfilecheck)             Checksum: 1778F0253DACC8DC16B8749FFD58321D;2235.
 
 
 LaTeX Warning: There were undefined references.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 4024.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 4044.
  ) 
 Here is how much of TeX's memory you used:
- 13848 strings out of 492616
- 194464 string characters out of 6135177
- 334207 words of memory out of 5000000
- 17193 multiletter control sequences out of 15000+600000
+ 13850 strings out of 492616
+ 194516 string characters out of 6135177
+ 334252 words of memory out of 5000000
+ 17194 multiletter control sequences out of 15000+600000
  77058 words of font info for 113 fonts, out of 8000000 for 9000
  1142 hyphenation exceptions out of 8191
  37i,16n,45p,586b,490s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1048,10 +1048,10 @@ vetic/uhvr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/helvetic/uhvro8a.pfb></
 usr/share/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-dist/fo
 nts/type1/urw/times/utmr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utm
 ri8a.pfb>
-Output written on SeisIO.pdf (47 pages, 271905 bytes).
+Output written on SeisIO.pdf (47 pages, 272926 bytes).
 PDF statistics:
- 730 PDF objects out of 1000 (max. 8388607)
- 619 compressed objects within 7 object streams
- 226 named destinations out of 1000 (max. 500000)
+ 733 PDF objects out of 1000 (max. 8388607)
+ 622 compressed objects within 7 object streams
+ 227 named destinations out of 1000 (max. 500000)
  173 words of extra memory for PDF output out of 10000 (max. 10000000)
 
