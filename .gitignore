@@ -1,6 +1,8 @@
 *.jl.cov
 *.jl.*.cov
 *.jl.mem
+*.mem
+*.cov
 internal_tests/
 dev/
 test/SampleFiles/win32.tar.gz

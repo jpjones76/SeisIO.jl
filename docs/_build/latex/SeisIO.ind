@@ -14,6 +14,7 @@
   \indexspace
   \bigletter F
   \item \spxentry{fctopz()}\spxextra{built-in function}, \hyperpage{25}
+  \item \spxentry{find\_regex()}\spxextra{built-in function}, \hyperpage{25}
   \item \spxentry{findchan()}\spxextra{built-in function}, \hyperpage{7}
   \item \spxentry{findid()}\spxextra{built-in function}, \hyperpage{7}
 
@@ -28,16 +29,16 @@
 
   \indexspace
   \bigletter J
-  \item \spxentry{j2md()}\spxextra{built-in function}, \hyperpage{25}
+  \item \spxentry{j2md()}\spxextra{built-in function}, \hyperpage{26}
 
   \indexspace
   \bigletter L
   \item \spxentry{lcfs()}\spxextra{built-in function}, \hyperpage{23}
-  \item \spxentry{ls()}\spxextra{built-in function}, \hyperpage{25}
+  \item \spxentry{ls()}\spxextra{built-in function}, \hyperpage{25, 26}
 
   \indexspace
   \bigletter M
-  \item \spxentry{md2j()}\spxextra{built-in function}, \hyperpage{25}
+  \item \spxentry{md2j()}\spxextra{built-in function}, \hyperpage{26}
 
   \indexspace
   \bigletter P
@@ -46,7 +47,7 @@
 
   \indexspace
   \bigletter R
-  \item \spxentry{randSeisEvent()}\spxextra{built-in function}, \hyperpage{26}
+  \item \spxentry{randSeisEvent()}\spxextra{built-in function}, \hyperpage{27}
   \item \spxentry{readmseed()}\spxextra{built-in function}, \hyperpage{14}
   \item \spxentry{readsac()}\spxextra{built-in function}, \hyperpage{14}
   \item \spxentry{readsegy()}\spxextra{built-in function}, \hyperpage{14}
