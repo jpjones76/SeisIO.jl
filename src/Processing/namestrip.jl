@@ -15,7 +15,7 @@ export namestrip, namestrip!
 =#
 
 """
-    namestrip(s::String; convention::String="File")
+    namestrip(s::String, convention::String="File")
 
 Remove bad characters from S. Specify one of the following conventions:
 
@@ -33,7 +33,8 @@ function namestrip(str::String, convention::String="File")
   if haskey(bad_chars, convention)
     deleteat!(chars, [c in bad_chars[convention] for c in chars])
   else
-    warn("Invalid bad character list; only removed 0x00-0x20.")
+    @warn(string("Invalid bad character list \"", convention, "\"; using convention=\"File\"."))
+    deleteat!(chars, [c in bad_chars["File"] for c in chars])
   end
   return String(chars)
 end
