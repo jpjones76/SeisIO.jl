@@ -1,6 +1,6 @@
 import SeisIO: safe_isfile
 segy_file = string(path, "/SampleFiles/02.050.02.01.34.0572.6")
-segy_file_2 = string(path, "SampleFiles/test2.001.segy")
+segy_file_2 = string(path, "/SampleFiles/test2.001.segy")
 
 printstyled("  SEG Y...\n", color=:light_green)
 printstyled("    PASSCAL/NMT SEG Y...\n", color=:light_green)
@@ -27,6 +27,11 @@ end
 if safe_isfile(segy_file_2)
   printstyled("    SEG Y rev 1...\n", color=:light_green)
   SEG = readsegy(segy_file_2)
+  open("show.log", "w") do out
+    redirect_stdout(out) do
+      segyhdr(segy_file_2)
+    end
+  end
 else
   printstyled("    Skipped SEG Y rev 1...\n", color=:light_green)
 end
