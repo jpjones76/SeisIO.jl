@@ -3,7 +3,7 @@ te = "2016-03-23T23:17:00"
 sta = "CC.JRO..BHZ"
 
 printstyled("  IRIS Web Services\n", color=:light_green)
-printstyled("    Equivalence of SAC and MSEED requests...\n", color=:light_green)
+printstyled("    Equivalence of SAC and MSEED requests\n", color=:light_green)
 S = get_data("IRIS", sta, src="IRIS", s=ts, t=te, fmt="sacbl", v=0, w=true)
 @test(isempty(S)==false)
 T = get_data("IRIS", [sta], src="IRIS", s=ts, t=te, fmt="mseed", v=0)
@@ -18,7 +18,7 @@ sync!(T, s=ts, t=te)
 sta_matrix = vcat(["UW" "LON" "" "BHZ"],["UW" "LON" "" "BHE"])
 T = get_data("IRIS", sta_matrix, s=-600, t=0, v=0, fmt="audio")
 
-printstyled("    A more complex IRISWS request...\n", color=:light_green)
+printstyled("    A more complex IRISWS request\n", color=:light_green)
 chans = ["UW.TDH..EHZ", "UW.VLL..EHZ"] # HOOD is either offline or not on IRISws right now
 st = -86400.0
 en = -86100.0

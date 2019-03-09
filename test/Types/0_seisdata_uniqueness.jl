@@ -1,4 +1,4 @@
-printstyled("  Unique memory allocation of SeisData objects...\n", color=:light_green)
+printstyled("  Unique memory allocation of SeisData objects\n", color=:light_green)
 nx = 1024
 
 S = SeisData(2)

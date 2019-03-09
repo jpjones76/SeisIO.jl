@@ -3,6 +3,11 @@ include("test_helpers.jl")
 sleep(3)
 printstyled(stdout, string(Dates.now(), ": tests begin, source_dir = ", path, "/\n"), color=:light_green, bold=true)
 
+open("show.log", "w") do io
+  write(io, "stdout redirect:")
+end
+
+
 # huehuehue grep "include(joinpath" runtests.jl | awk -F "(" '{print $3}' | awk -F "," {'print $1'}
 for d in ["CoreUtils", "Types", "RandSeis", "NativeIO", "DataFormats", "Processing", "Web"]
   printstyled(string("Testing ", d, "/\n"), color=:light_green, bold=true)

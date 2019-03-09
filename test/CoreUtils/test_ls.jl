@@ -3,16 +3,16 @@ import SeisIO:sep, safe_isfile, safe_isdir
 change_sep(S::Array{String,1}) = [replace(i, "/" => sep) for i in S]
 cfile = path*"/SampleFiles/Win32/03_02_27_20140927.euc.ch"
 
-printstyled("  safe_isfile...\n", color=:light_green)
+printstyled("  safe_isfile\n", color=:light_green)
 @test SeisIO.safe_isfile("runtests.jl") == true
 @test SeisIO.safe_isfile("foo.jl") == false
 
-printstyled("  safe_isdir...\n", color=:light_green)
+printstyled("  safe_isdir\n", color=:light_green)
 @test SeisIO.safe_isdir("SampleFiles") == true
 @test SeisIO.safe_isdir("Roms") == false
 
 
-printstyled("  ls...\n", color=:light_green)
+printstyled("  ls\n", color=:light_green)
 @test any([occursin("test", i) for i in ls()])
 
 S = [
@@ -62,5 +62,5 @@ if safe_isfile(cfile)
   @test change_sep(ls(T[2])) == change_sep(regex_find("SampleFiles", r".*$"))
   @test change_sep(ls(T[3])) == change_sep(regex_find("SampleFiles", r"Win.*/2014092709.*cnt$"))
 else
-  printstyled("  ...extended ls tests skipped. (files not found; is this Appveyor?)\n", color=:green)
+  printstyled("  extended ls tests skipped. (files not found; is this Appveyor?)\n", color=:green)
 end

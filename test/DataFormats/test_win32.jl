@@ -3,7 +3,7 @@ import SeisIO:safe_isfile
 # win32 with gaps
 cfile = path*"/SampleFiles/Win32/03_02_27_20140927.euc.ch"
 if safe_isfile(cfile)
-  printstyled("  win32...\n", color=:light_green)
+  printstyled("  win32\n", color=:light_green)
   @info(string(timestamp(), ": win32 tests use an SSL-encrypted tarball."))
   fname = path*"/SampleFiles/Win32/2014092709*.cnt"
   cfile = path*"/SampleFiles/Win32/03_02_27_20140927.euc.ch"
@@ -18,7 +18,7 @@ if safe_isfile(cfile)
   @test maximum(nx)==360000
 
   # Check against SAC files
-  printstyled("    ...checking read integrity against HiNet SAC files...\n", color=:light_green)
+  printstyled("    checking read integrity against HiNet SAC files\n", color=:light_green)
   testfiles = path*"/SampleFiles/Win32/" .* ["20140927000000.V.ONTA.E.SAC",
                                             "20140927000000.V.ONTA.H.SAC",
                                             "20140927000000.V.ONTA.N.SAC",
@@ -96,7 +96,7 @@ if safe_isfile(cfile)
   # This can be verified using the script "ontake_test.jl" in ../../internal_tests/
 
   # Now test the other two bits types, 4-bit Int ...
-  printstyled("    ...testing Int4 and Int24 handling...\n", color=:light_green)
+  printstyled("    testing Int4 and Int24 handling\n", color=:light_green)
   fname = path*"/SampleFiles/Win32/2014092700000302.cnt"
   S = SeisData()
   readwin32!(S, fname, cfile);

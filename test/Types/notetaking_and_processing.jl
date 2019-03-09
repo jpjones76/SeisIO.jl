@@ -4,12 +4,12 @@ Ch = randSeisChannel()
 clear_notes!(Ch)
 @test length(Ch.notes) == 1
 
-printstyled("  Annotation and logging...\n", color=:light_green)
+printstyled("  Annotation and logging\n", color=:light_green)
 S = randSeisData(2)
 id_str = "XX.STA.00.EHZ"
 S.id[1] = id_str
 
-printstyled("    note!...\n", color=:light_green)
+printstyled("    note!\n", color=:light_green)
 note!(S, 1, "hi")
 @test occursin("hi", S.notes[1][end])
 
@@ -22,7 +22,7 @@ note!(S, string(id_str, " SNR OK"))
 note!(S, id_str, "why is it clipping again")
 @test occursin("clipping", S.notes[1][end])
 
-printstyled("    clear_notes!...\n", color=:light_green)
+printstyled("    clear_notes!\n", color=:light_green)
 clear_notes!(S, 1)
 @test length(S.notes[1]) == 1
 @test occursin("notes cleared.", S.notes[1][1])
@@ -66,7 +66,7 @@ for i = 1:2
   @test abs(mean(S.x[i])) < 1000.0*eps(Float64)
 end
 
-printstyled("    ...accuracy of automatic logging...\n", color=:light_green)
+printstyled("    accuracy of automatic logging\n", color=:light_green)
 for i = 1:2
   c = (Ngaps[i]>0) ? 1 : 0
   @test length(S.notes[i]) == (3+c)

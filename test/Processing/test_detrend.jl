@@ -1,5 +1,5 @@
 import Statistics:mean
-printstyled("  demean, detrend...\n", color=:light_green)
+printstyled("  demean, detrend\n", color=:light_green)
 
 S = randSeisData(2, s=1.0)[2:2]
 fs = 100.0

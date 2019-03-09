@@ -1,5 +1,5 @@
 import Dates:DateTime, Hour, now
-printstyled("  ...time functions...\n", color=:light_green)
+printstyled("  time functions\n", color=:light_green)
 
 t0 = time()
 ts1 = timestamp(t0)
