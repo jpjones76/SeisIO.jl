@@ -1,9 +1,9 @@
 import SeisIO: parse_charr, parse_chstr, parse_sl
 
-function wait_on_data!(S::SeisData; tmax::Real=20.0)
-  printstyled(string("      (sleep up to ", tmax, " s)\n"), color=:green)
+function wait_on_data!(S::SeisData; tmax::Real=100.0)
   τ = 0.0
   t = 20.0
+  printstyled(string("      (sleep up to ", tmax + t, " s)\n"), color=:green)
   open("show.log", "w") do out
     redirect_stdout(out) do
 
@@ -27,6 +27,7 @@ function wait_on_data!(S::SeisData; tmax::Real=20.0)
           show(S)
         end
       end
+      sleep(t)
     end
   end
 
@@ -34,7 +35,7 @@ function wait_on_data!(S::SeisData; tmax::Real=20.0)
   if !isempty(S)
     sync!(S, s="first")
   else
-    @warn(stdout, string("No data after ", tmax, " s. Is the server down?"))
+    @warn(string("No data after ", tmax, " s. Is the server down?"))
   end
   return nothing
 end

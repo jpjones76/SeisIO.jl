@@ -31,3 +31,19 @@ U = detrend(S)
 @test maximum(abs.(U.x[1]-S₀.x[1])) < 0.1
 @test maximum(abs.(U.x[1]-T.x[1])) < 0.1
 @test abs(mean(U.x[1])) < 1.0e-8
+
+# de-mean and de-trend with NaNs
+nx = length(S.x[1])
+for i = 1:3
+  j = randperm(nx)[1:rand(1:div(nx,2))]
+  V = deepcopy(S)
+  V.x[1][j] .= NaN
+  demean!(V)
+  @test length(j) == length(findall(isnan.(V.x[1])))
+
+  k = randperm(nx)[1:rand(1:div(nx,2))]
+  W = deepcopy(S)
+  W.x[1][k] .= NaN
+  detrend!(W)
+  @test length(k) == length(findall(isnan.(W.x[1])))
+end

@@ -4,8 +4,9 @@ printstyled("  ...time functions...\n", color=:light_green)
 t0 = time()
 ts1 = timestamp(t0)
 ts2 = timestamp(u2d(t0))
-ts3 = timestamp(DateTime(string(u2d(t0))))
-@test ts1 == ts2 == ts3
+ts3 = timestamp(string(u2d(t0)))
+ts4 = timestamp(DateTime(string(u2d(t0))))
+@test ts1 == ts2 == ts3 == ts4
 
 m,d = j2md(2000,1); @test m == 1 && d == 1
 m,d = j2md(2000,60); @test m == 2 && d == 29
@@ -68,17 +69,3 @@ fs = 100.0
 T = hcat(cumsum(ones(Int64,size(T,1))), cumsum(T[:,2]))
 fs = 0.0
 @test ≈(T, SeisIO.t_collapse(SeisIO.t_expand(T, fs), fs))
-
-
-
-printstyled("  namestrip...\n", color=:light_green)
-str = String(0x00:0xff)
-S = randSeisData(3)
-S.name[2] = str
-
-for key in keys(SeisIO.bad_chars)
-  test_str = namestrip(str, key)
-  @test length(test_str) == 256 - (32 + length(SeisIO.bad_chars[key]))
-end
-namestrip!(S)
-@test length(S.name[2]) == 210
