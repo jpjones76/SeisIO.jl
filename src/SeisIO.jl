@@ -2,6 +2,7 @@ __precompile__()
 module SeisIO
 using Blosc, Dates, DSP, LightXML, LinearAlgebra, Printf, Sockets
 using FFTW: fft, ifft
+using Glob: glob
 using HTTP: request
 using Statistics: mean
 using Polynomials: polyfit, polyval
