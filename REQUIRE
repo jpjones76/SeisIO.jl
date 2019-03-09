@@ -3,6 +3,7 @@ Blosc
 Compat
 DSP
 FFTW
+Glob
 HTTP
 LightXML
 Polynomials
