@@ -280,7 +280,6 @@ function readwin32!(S::SeisData, filestr::String, cf::String; v::Int=KW.v, jst::
     # http://data.sokki.jmbsc.or.jp/cdrom/seismological/catalog/appendix/apendixe.htm
     (net, sta, chan_stub) = split(S.id[ii], '.')
     bb = getbandcode(S.fs[ii], fc = fc)    # Band code
-    gg = 'H'                              # Gain code
     if chan_stub[1] == 'U'
       cc = 'Z'                            # Nope
     else
@@ -288,7 +287,7 @@ function readwin32!(S::SeisData, filestr::String, cf::String; v::Int=KW.v, jst::
     end
 
     locID = get(S.misc[ii], "locID", "")
-    id = net * "." * sta * "." * locID * "." * string(bb,gg,cc)
+    id = net * "." * sta * "." * locID * "." * string(bb,"H",cc)
 
     S.id[ii] = id
     S.src[ii] = string("readwin32(", filestr, ",", cf, ")")
