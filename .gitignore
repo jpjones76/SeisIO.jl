@@ -7,3 +7,4 @@ internal_tests/
 dev/
 test/SampleFiles/win32.tar.gz
 test/SampleFiles/Win32/
+test/SampleFiles/test2.001.segy

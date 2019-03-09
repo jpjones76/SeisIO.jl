@@ -1,3 +1,5 @@
+import SeisIO: get_separator
+
 # save to disk/read from disk
 savfile1 = "test.seis"
 savfile2 = "test.hdr"
@@ -73,3 +75,6 @@ rm(savfile3)
 printstyled("    ...done native file IO test.\n", color=:light_green)
 
 # printstyled("Supported file format IO\n", color=:light_green, bold=true)
+
+# Checking for write errors
+@test_throws ErrorException get_separator(String(Char.(Array{UInt8,1}(0x00:0x01:0xff))))

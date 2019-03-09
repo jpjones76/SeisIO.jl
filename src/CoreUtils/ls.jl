@@ -3,25 +3,19 @@ export ls, regex_find
 # safe_isfile, safe_isdir adapted from https://github.com/JuliaPackaging/BinaryProvider.jl/commit/08a314a225206a68665c6f730d7c3feeda1ba615
 # Temporary hack around https://github.com/JuliaLang/julia/issues/26685
 function safe_isfile(path)
-    try
-        return isfile(path)
-    catch err
-        if typeof(err) <: Base.IOError && err.code == Base.UV_EINVAL
-            return false
-        end
-        rethrow(err)
-    end
+  try
+    return isfile(path)
+  catch err
+    return false
+  end
 end
 
 function safe_isdir(path)
-    try
-        return isdir(path)
-    catch err
-        if typeof(err) <: Base.IOError && err.code == Base.UV_EINVAL
-            return false
-        end
-        rethrow(err)
-    end
+  try
+    return isdir(path)
+  catch err
+    return false
+  end
 end
 
 """

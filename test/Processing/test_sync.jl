@@ -242,7 +242,7 @@ X = sync(S, s=ds₆, t="first"); basic_checks(X)
 X = sync(S, s=ds₆, t="last"); basic_checks(X)
 
 ss = string(ds₆)
-Y = sync(S, s=ds₆, t="last"); basic_checks(Y)
+Y = sync(S, s=ds₆, t="last", v=3); basic_checks(Y)
 
 # Expect: X != Y due to notes, but all other fields equal
 for f in SeisIO.datafields
@@ -250,3 +250,19 @@ for f in SeisIO.datafields
     @test isequal(getfield(X,f), getfield(Y,f))
   end
 end
+
+# TEST 9 =====================================================================
+# Do we actually prune campaign data when all times are out of range?
+
+ss = string(ds₆)
+Z = deepcopy(S)
+t = deepcopy(Z.t[5])
+t = hcat(t[:,1:1], vcat(0, diff(t[:,2:2], dims=1)))
+Z.t[5] = deepcopy(t)
+sync!(Z, v=3); basic_checks(Z)
+
+# Expect: Z[5] is gone
+for i in [1,2,3,4,6]
+  @test any(Z.id.==S.id[i])
+end
+@test (any(Z.id.==S.id[5]) == false)

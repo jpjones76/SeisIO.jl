@@ -24,7 +24,11 @@ get_data!(S, "FDSN", ["UW.HOOD..E??", "CC.VALT..???"], src="IRIS", s=-600, t=0)
 S = get_data("FDSN", "CC.JRO..BHZ", src="IRIS", s=-600, t=0)
 
 # Test a bum data format
-get_data!(S, "FDSN", "UW.LON.."; src="IRIS", s=-600, t=0, v=0, fmt="sac.zip")
+open("show.log", "w") do out
+  redirect_stdout(out) do
+    get_data!(S, "FDSN", "UW.LON.."; src="IRIS", s=-600, t=0, v=3, fmt="sac.zip")
+  end
+end
 
 # FDSNevq
 printstyled("    event header from IRIS...\n", color=:light_green)
