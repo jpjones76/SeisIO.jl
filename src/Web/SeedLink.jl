@@ -357,6 +357,7 @@ function SeedLink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
     (v > 1) && println("Response: ", sel_resp)
     if occursin("ERROR", sel_resp)
       if x_on_err
+        write(S.c[q], "BYE\r")
         close(S.c[q])
         deleteat!(S.c, q)
         error(string("Error in select string ", patts[i], "; connection closed and deleted, exit with error."))
@@ -373,6 +374,7 @@ function SeedLink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
     (v > 1) && println("Response: ", sta_resp)
     if occursin("ERROR", sta_resp)
       if x_on_err
+        write(S.c[q], "BYE\r")
         close(S.c[q])
         deleteat!(S.c, q)
         error(string("Error in station string ", sta[i], "; connection closed and deleted, exit with error."))
