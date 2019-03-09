@@ -33,8 +33,8 @@ mutable struct SeisData
                 Array{Dict{String,Any},1}(undef,0),
                 Array{Array{String,1},1}(undef,0),
                 Array{String,1}(undef,0),
-                Array{Array{Int64,2}}(undef,0),
-                Array{Array{Float64,1}}(undef,0)
+                Array{Array{Int64,2},1}(undef,0),
+                Array{Array{Float64,1},1}(undef,0)
               )
   end
 
@@ -51,8 +51,8 @@ mutable struct SeisData
               Array{Dict{String,Any},1}(undef,n),
               Array{Array{String,1},1}(undef,n),
               Array{String,1}(undef,n),
-              Array{Array{Int64,2}}(undef,n),
-              Array{Array{Float64,1}}(undef,n)
+              Array{Array{Int64,2},1}(undef,n),
+              Array{Array{Float64,1},1}(undef,n)
             )
 
     # Fill these fields with something to prevent undefined reference errors
@@ -156,11 +156,18 @@ Get index corresponding to the first channel in T that matches each ID in S;
 equivalent to [findid(id,T) for id in S.id].
 """
 function findid(id::Union{Regex,String}, S::SeisData)
-  j = findfirst(S.id.==id)
-  return j == nothing ? 0 : j
+  j=0
+  for i=1:length(S.id)
+    if S.id[i] == id
+      j=i
+      break
+    end
+  end
+  return j
 end
 findid(S::SeisData, id::Union{String,Regex}) = findid(id, S)
 findid(S::SeisData, T::SeisData) = [findid(id, T) for id in S.id]
+# DND ...why the fuck is findfirst so fucking slow?!
 
 """
     findchan(id::String, S::SeisData)
