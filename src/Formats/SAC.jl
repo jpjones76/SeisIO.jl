@@ -207,7 +207,7 @@ end
 Print formatted SAC headers from file `f` to stdout.
 """
 function sachdr(fname::String)
-  seis = readsac(fname, true)
+  seis = readsac(fname, full=true)
   for k in sort(collect(keys(seis.misc)))
     println(stdout, uppercase(k), ": ", string(seis.misc[k]))
   end
