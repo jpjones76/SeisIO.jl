@@ -1,4 +1,4 @@
-printstyled(stdout,"    Extended methods and custom functions...\n", color=:light_green)
+printstyled(stdout,"    Extended methods and custom functions\n", color=:light_green)
 
 # untested methods in SeisData
 for i = 1:5
@@ -53,7 +53,7 @@ Y = sort(X)
 (S,T) = mktestseis()
 @test findid(T, S) == [0, 0, 4, 5]
 
-printstyled(stdout,"      getindex...\n", color=:light_green)
+printstyled(stdout,"      getindex\n", color=:light_green)
 i_targ = 3
 C = S[i_targ]
 test_fields_preserved(C,S,i_targ)
@@ -61,33 +61,33 @@ test_fields_preserved(C,S,i_targ)
 D = S[i_targ:i_targ+1]
 test_fields_preserved(D,S,2,i_targ+1)
 
-printstyled(stdout,"      in...\n", color=:light_green)
+printstyled(stdout,"      in\n", color=:light_green)
 @test ("XX.TMP01.00.BHZ" in S.id)
 
-printstyled(stdout,"      findid...\n", color=:light_green)
+printstyled(stdout,"      findid\n", color=:light_green)
 @test ≈(findid("CC.LON..BHZ",S), findid(S,"CC.LON..BHZ"))
 @test ≈(findid(S,"CC.LON..BHZ"), 4)
 @test ≈(findid(S,C), 3)
 
-printstyled(stdout,"      setindex!...\n", color=:light_green)
+printstyled(stdout,"      setindex!\n", color=:light_green)
 A = SeisData(3)
 setindex!(A, C, 3)
 A[1:2]=D
 test_fields_preserved(A, S, 2, i_targ+1)
 test_fields_preserved(C, S, 3)
 
-printstyled(stdout,"      isempty...\n", color=:light_green)
+printstyled(stdout,"      isempty\n", color=:light_green)
 D = SeisData()
 @test isempty(D)
 
-printstyled(stdout,"      equality (reflexive)...\n", color=:light_green)
+printstyled(stdout,"      equality (reflexive)\n", color=:light_green)
 @test S==S
 
-printstyled(stdout,"      append!...\n", color=:light_green)
+printstyled(stdout,"      append!\n", color=:light_green)
 append!(S, T)
 sizetest(S, 9)
 
-printstyled(stdout,"      deleteat!, delete! (by channel index)...\n", color=:light_green)
+printstyled(stdout,"      deleteat!, delete! (by channel index)\n", color=:light_green)
 C = deepcopy(S[4])
 deleteat!(S, 4)
 sizetest(S, 8)
@@ -102,7 +102,7 @@ nt = 6
 @test ≈(length(findall(S.name.==C.name[1])).*length(findall(S.id.==C.id[1])),0)
 @test ≈(length(findall(S.name.==C.name[2])).*length(findall(S.id.==C.id[2])),0)
 
-printstyled(stdout,"      deleteat!, delete! (by id match)...\n", color=:light_green)
+printstyled(stdout,"      deleteat!, delete! (by id match)\n", color=:light_green)
 s = "CC.LON..BHZ"
 delete!(S, s)
 sizetest(S, 5)
@@ -112,37 +112,37 @@ s = r"EH"
 delete!(S, s, exact=false)
 sizetest(S, 2)
 
-printstyled(stdout,"      merge!, no common channels...\n", color=:light_green)
+printstyled(stdout,"      merge!, no common channels\n", color=:light_green)
 (S,T) = mktestseis()
 A = deepcopy(S[5])
 B = deepcopy(T[4])
 T*=S[1]
 sizetest(T, 5)
 
-printstyled(stdout,"      merge!, one common channel...\n", color=:light_green)
+printstyled(stdout,"      merge!, one common channel\n", color=:light_green)
 S*=T[2]
 sizetest(S, 5)
 @test ≈(S.t[2][2,1], 1+length(A.x))
 @test ≈(S.t[2][2,2], (5-1/S.fs[2])*1.0e6)
 
-printstyled(stdout,"      merge!, common channels and seisdata splat notation...\n", color=:light_green)
+printstyled(stdout,"      merge!, common channels and seisdata splat notation\n", color=:light_green)
 (S,T) = mktestseis()
 U = SeisData(S,T)
 merge!(U)
 sizetest(U, 7)
 
-printstyled(stdout,"      merge! (two independent channels)...\n", color=:light_green)
+printstyled(stdout,"      merge! (two independent channels)\n", color=:light_green)
 U = S[1] * T[2]
 sizetest(U, 2)
 @test U == S[1]+T[2]
 
-printstyled(stdout,"      merge! (two identical channel ids)...\n", color=:light_green)
+printstyled(stdout,"      merge! (two identical channel ids)\n", color=:light_green)
 U = S[4] * T[3]
 @test typeof(U)==SeisData
 @test U.id[1]==S.id[4]
 @test U.id[1]==T.id[3]
 
-printstyled(stdout,"      pull...\n", color=:light_green)
+printstyled(stdout,"      pull\n", color=:light_green)
 C = pull(S,4)
 @test C.name=="Channel 4"
 @test S.n==4

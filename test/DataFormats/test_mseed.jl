@@ -1,7 +1,7 @@
 # The file test.mseed comes from an older IRIS libmseed, found by anowacki
 # It has a more complicated structure than the test.mseed file in more recent
 # versions of libmseed, which reads with no issues
-printstyled("  mini-SEED file read...\n", color=:light_green)
+printstyled("  mini-SEED file read\n", color=:light_green)
 S = readmseed(string(path, "/SampleFiles/test.mseed"), v=0)
 @test isequal(S.id[1], "NL.HGN.00.BHZ")
 @test ≈(S.fs[1], 40.0)

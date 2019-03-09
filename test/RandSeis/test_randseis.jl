@@ -1,4 +1,4 @@
-printstyled("  RandSeis utils...\n", color=:light_green)
+printstyled("  RandSeis utils\n", color=:light_green)
 
 # This should do it
 D = Dict{String,Any}()
@@ -21,7 +21,7 @@ for i = 1:10000
   @test isa(u, String)
 end
 
-printstyled("  RandSeis functions...\n", color=:light_green)
+printstyled("  RandSeis functions\n", color=:light_green)
 for i = 1:10
   randSeisChannel()
   randSeisData()
@@ -29,7 +29,7 @@ for i = 1:10
   randSeisEvent()
 end
 
-printstyled("    namestrip, namestrip!...\n", color=:light_green)
+printstyled("    namestrip, namestrip!\n", color=:light_green)
 str = String(0x00:0xff)
 S = randSeisData(3)
 S.name[2] = str
@@ -38,6 +38,10 @@ for key in keys(SeisIO.bad_chars)
   test_str = namestrip(str, key)
   @test length(test_str) == 256 - (32 + length(SeisIO.bad_chars[key]))
 end
-test_str = namestrip(str, "Nonexistent List")
+open("show.log", "w") do out
+  redirect_stdout(out) do
+    test_str = namestrip(str, "Nonexistent List")
+  end
+end
 namestrip!(S)
 @test length(S.name[2]) == 210

@@ -1,6 +1,6 @@
 # Test tracking of changes in SeisData structure S ==========================
 # Does S change? Let's see.
-printstyled("  Tracking with track_on!, track_off!...\n", color=:light_green)
+printstyled("  Tracking with track_on!, track_off!\n", color=:light_green)
 
 S = SeisData()
 track_on!(S)  # should do nothing but no error

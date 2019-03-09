@@ -1,5 +1,5 @@
 using Dates
-printstyled("  sync!...\n", color=:light_green)
+printstyled("  sync!\n", color=:light_green)
 
 fs = 100.0
 ns = 10
@@ -259,7 +259,11 @@ Z = deepcopy(S)
 t = deepcopy(Z.t[5])
 t = hcat(t[:,1:1], vcat(0, diff(t[:,2:2], dims=1)))
 Z.t[5] = deepcopy(t)
-sync!(Z, v=3); basic_checks(Z)
+open("show.log", "a") do out
+  redirect_stdout(out) do
+    sync!(Z, v=3); basic_checks(Z)
+  end
+end
 
 # Expect: Z[5] is gone
 for i in [1,2,3,4,6]

@@ -33,11 +33,11 @@ for i in fieldnames(typeof(S))
   end
 end
 
-printstyled("  ...fixing data gaps...\n", color=:light_green)
+printstyled("  fixing data gaps\n", color=:light_green)
 s2u = ungap(s2)
 @test length(s2.x) / s2.fs + μs * sum(s2.t[2:end - 1, 2]) ≈ length(s2u.x) / s2u.fs
 
-printstyled("  ...channel add and simple merges...\n", color=:light_green)
+printstyled("  channel add and simple merges\n", color=:light_green)
 S += (s1 * s2)
 
 # Do in-place operations only change leftmost variable?
@@ -80,7 +80,7 @@ autotap!(S)
 @test sum(diff(S.x[1][ii]))==0                 # All NaNs filled w/same val?
 @test ≈(T.x[1][12:90], S.x[1][12:90])     # Un-windowed vals untouched?
 
-printstyled("  ...channel delete...\n", color=:light_green)
+printstyled("  channel delete\n", color=:light_green)
 S -= 1
 for i in fieldnames(typeof(S))
   if i != :n
@@ -89,7 +89,7 @@ for i in fieldnames(typeof(S))
 end
 @test isempty(S)
 
-printstyled("  ...a more difficult merge...\n", color=:light_green)
+printstyled("  a more difficult merge\n", color=:light_green)
 S = SeisData()
 S *= (s1 * s3)
 S *= (s2 * s4)
@@ -108,7 +108,7 @@ ungap!(S, m=false, w=false)
 @test ≈(S.x[1][101]/S.gain[1], s4.x[1]/s4.gain)
 
 # Ensure merge works correctly with traces separated in time
-printstyled("  ...channel merge with * operator...\n", color=:light_green)
+printstyled("  channel merge with * operator\n", color=:light_green)
 s5 = SeisChannel(fs = 100.0, gain = 32.0, name = "DEAD.STA.EHE", id = "DEAD.STA..EHE",
   t = [1 t1; 100 0], x=randn(100))
 s6 = SeisChannel(fs = 100.0, gain = 32.0, name = "UNNAMED", id = "DEAD.STA..EHE",
