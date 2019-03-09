@@ -1,8 +1,10 @@
+import SeisIO:safe_isfile
+
 # win32 with gaps
-# When merging and ungapping many same-channel files, are they mapped to one SeisData channel?
-if Sys.islinux()
-  printstyled("  win_32...\n", color=:light_green)
-  @info(string(timestamp(), ": win_32 tests use an SSL-encrypted tarball."))
+cfile = path*"/SampleFiles/Win32/03_02_27_20140927.euc.ch"
+if safe_isfile(cfile)
+  printstyled("  win32...\n", color=:light_green)
+  @info(string(timestamp(), ": win32 tests use an SSL-encrypted tarball."))
   fname = path*"/SampleFiles/Win32/2014092709*.cnt"
   cfile = path*"/SampleFiles/Win32/03_02_27_20140927.euc.ch"
   S = readwin32(fname, cfile)
@@ -49,13 +51,13 @@ if Sys.islinux()
     id = split(i, '.')
     id[3] = ""
     id[2] = "V"*id[2]
+    id[1] = "JP"
     c = id[4][3:3]
     if c == "Z"
       id[4] = "U"
     else
       id[4] = c
     end
-
     id = join(id, '.')
     j[n] = findid(id, U)
   end
@@ -75,14 +77,40 @@ if Sys.islinux()
   # ┌ Warning: Time gap detected! (15.0 s at V.ONTA.E, beginning 2014-09-27T09:58:00)
   # └ @ SeisIO ~/.julia/dev/SeisIO/src/Formats/Win32.jl:137
 
-  for i = 1:4
-    @test length(inds[i]) == 1500
-    @test div(first(inds[i]), 6000) == 58
-    @test div(last(inds[i]), 6000) == 58
-    r₀ = rem(first(inds[i]), 6000)
-    r₁ = rem(last(inds[i]), 6000)
-    @test round((r₁ - r₀)/100, digits=1) == 15.0
+  for k = 1:S.n
+    i = j[k]
+    if !isempty(inds[i])
+      @test length(inds[i]) == 1500
+      @test div(first(inds[i]), 6000) == 58
+      @test div(last(inds[i]), 6000) == 58
+      r₀ = rem(first(inds[i]), 6000)
+      r₁ = rem(last(inds[i]), 6000)
+      @test round((r₁ - r₀)/100, digits=1) == 15.0
+    end
   end
+
+  # Converting the mean to single-point precision gives exactly the same
+  # result as SAC conversion from win32; however, the average computed
+  # over an hour will be slightly different.
+  #
+  # This can be verified using the script "ontake_test.jl" in ../../internal_tests/
+
+  # Now test the other two bits types, 4-bit Int ...
+  printstyled("    ...testing Int4 and Int24 handling...\n", color=:light_green)
+  fname = path*"/SampleFiles/Win32/2014092700000302.cnt"
+  S = SeisData()
+  readwin32!(S, fname, cfile);
+  @test length(S.x[1]) == 60*S.fs[1]
+  @test maximum(S.x[1]) == 11075.0
+  @test minimum(S.x[1]) == -5026.0
+
+  # ...and 24-bit bigendian Int...
+  fname = path*"/SampleFiles/Win32/2014092712000302.cnt"
+  S = SeisData()
+  readwin32!(S, fname, cfile);
+  @test length(S.x[1]) == 60*S.fs[1]
+  @test maximum(S.x[1]) == 14896.0
+  @test minimum(S.x[1]) == -12651.0
 else
-  printstyled("  skipping win_32 test (Windows)...\n", color=:light_green)
+  printstyled("  win32 data format skipped. (files not found; is this Appveyor?)\n", color=:light_green)
 end
