@@ -69,9 +69,7 @@ T = hcat(cumsum(ones(Int64,size(T,1))), cumsum(T[:,2]))
 fs = 0.0
 @test ≈(T, SeisIO.t_collapse(SeisIO.t_expand(T, fs), fs))
 
-printstyled("  safe_isfile...\n", color=:light_green)
-@test SeisIO.safe_isfile("runtests.jl") == true
-@test SeisIO.safe_isfile("foo.jl") == false
+
 
 printstyled("  namestrip...\n", color=:light_green)
 str = String(0x00:0xff)
