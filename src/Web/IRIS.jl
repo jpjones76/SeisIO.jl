@@ -69,9 +69,6 @@ function IRISget(C::Array{String,1}, d0::String, d1::String;
   for k = 1:K
     S += irisws(C[k], d0, d1, fmt = fmt, opts = opts, to = to, v = v, w = w)
   end
-  if v > 2
-    println(stdout, S)
-  end
   return S
 end
 
@@ -124,21 +121,19 @@ function get_pha(Δ::Float64, z::Float64;
   url = string("http://service.iris.edu/irisws/traveltime/1/query?", "distdeg=", Δ, "&evdepth=", z, pq, "&model=", model, "&mintimeonly=true&noheader=true")
   v > 0 && println(stdout, "url = ", url)
   R = request("GET", url, webhdr(), readtimeout=to)
-  if R.status == 200
-    req = String(take!(copy(IOBuffer(R.body))))
-    v > 0 && println(stdout, "Request result:\n", req)
 
-    # Parse results
-    phase_data = split(req, '\n')
-    sa_prune!(phase_data)
-    Nf = length(split(phase_data[1]))
-    Np = length(phase_data)
-    Pha = Array{String, 2}(undef, Np, Nf)
-    for p = 1:Np
-      Pha[p,1:Nf] = split(phase_data[p])
-    end
-  else
-    Pha = Array{String,2}(undef, 0, 0)
+  # This assumes the request succeeds
+  req = String(take!(copy(IOBuffer(R.body))))
+  v > 0 && println(stdout, "Request result:\n", req)
+
+  # Parse results
+  phase_data = split(req, '\n')
+  sa_prune!(phase_data)
+  Nf = length(split(phase_data[1]))
+  Np = length(phase_data)
+  Pha = Array{String, 2}(undef, Np, Nf)
+  for p = 1:Np
+    Pha[p,1:Nf] = split(phase_data[p])
   end
   return Pha
 end

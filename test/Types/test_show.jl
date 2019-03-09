@@ -24,4 +24,3 @@ open("show.log", "w") do out
     chanspec()
   end
 end
-rm("show.log")

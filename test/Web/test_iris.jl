@@ -15,7 +15,7 @@ sync!(T, s=ts, t=te)
 @test ≈(S.x[1], T.x[1])
 
 # Test a bum data format
-sta_matrix = vcat(["CC" "JRO" "" "BHZ"], ["UW" "LON" "" "BHZ"])
+sta_matrix = vcat(["UW" "LON" "" "BHZ"],["UW" "LON" "" "BHE"])
 T = get_data("IRIS", sta_matrix, s=-600, t=0, v=0, fmt="audio")
 
 printstyled("    A more complex IRISWS request...\n", color=:light_green)

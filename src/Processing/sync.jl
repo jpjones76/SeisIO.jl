@@ -90,13 +90,13 @@ function sync!(S::SeisData;
     t_end > t_start || error("No time overlap with given start & end times!")
     tstr = string(u2d(t_end*SeisIO.μs))
     if v > 0
-      @info(@sprintf("Synching %.2f seconds of data\n", (t_end - t_start)*SeisIO.μs))
+      @info(@sprintf("Synchronizing %.2f seconds of data\n", (t_end - t_start)*SeisIO.μs))
       if v > 1
         @info(string("t_start = ", u2d(t_start*μs)))
         @info(string("t_end = ", tstr))
     end
     elseif v > 0
-      @info(string("Synching to start at ", u2d(t_start*μs)))
+      @info(string("Synchronizing to start at ", u2d(t_start*μs)))
     end
   else
     t_end = z

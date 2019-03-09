@@ -2,7 +2,9 @@ printstyled("  RandSeis utils...\n", color=:light_green)
 
 # This should do it
 D = Dict{String,Any}()
-SeisIO.RandSeis.pop_rand_dict!(D, 1000)
+for i = 1:10
+  SeisIO.RandSeis.pop_rand_dict!(D, 1000)
+end
 
 # Similarly for the yp2 codes
 for i = 1:100
@@ -26,7 +28,6 @@ for i = 1:10
   randSeisHdr()
   randSeisEvent()
 end
-
 
 printstyled("    namestrip, namestrip!...\n", color=:light_green)
 str = String(0x00:0xff)

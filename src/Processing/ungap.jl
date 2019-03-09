@@ -27,10 +27,6 @@ function gapfill!(x::Array{Float64,1}, t::Array{Int64,2}, fs::Float64; m=true::B
   return x
 end
 
-gapfill(x::Array{Float64,1}, t::Array{Int64,2}, f::Float64) =
-  (y = deepcopy(x); gapfill!(y,t,f); return y)
-
-
 """
     ungap!(S[, m=true, w=true])
 

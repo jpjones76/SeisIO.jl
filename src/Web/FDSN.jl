@@ -308,6 +308,7 @@ function FDSNevq(ot::String;
   else
     sources = split(src,",")
   end
+  sources = [strip(i) for i in sources]
   catalog = Array{SeisHdr,1}()
   ot = Array{Int64,1}()
   for k in sources

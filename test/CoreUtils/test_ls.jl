@@ -48,7 +48,7 @@ if safe_isfile(cfile)
                 "/SampleFiles/*",
                 "/SampleFiles/Win*/2014092709*cnt"
               ]
-  T_expect =  [62, 91, 60]
+  T_expect =  [62, 93, 60]
 
   # Test that ls finds the same number of files as `ls -1`
   for (n,v) in enumerate(T)
