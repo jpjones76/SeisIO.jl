@@ -4,6 +4,8 @@ sac_be_file = path*"/SampleFiles/060123130000.CON.1.sac"
 
 printstyled("  SAC...\n", color=:light_green)
 printstyled("    read...\n", color=:light_green)
+@test_throws ErrorException readsac(path*"/SampleFiles/99062109485W")
+
 SAC1 = readsac(sac_file)
 @test ≈(SAC1.fs, 100.0)
 @test ≈(length(SAC1.x), 1000)
@@ -31,5 +33,12 @@ rm("1981.088.10.38.14.009..CDV...R.SAC")
 SAC1.id = "VU.CDV..NUL"
 SAC1.name = "VU.CDV..NUL"
 writesac(SAC1)
+@test SeisIO.safe_isfile("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")
+
+open("show.log", "w") do out
+  redirect_stdout(out) do
+    writesac(SAC1, ts=true, v=1)
+  end
+end
 @test SeisIO.safe_isfile("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")
 rm("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")
