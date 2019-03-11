@@ -23,6 +23,3 @@ before_install:
 - cd test/SampleFiles
 - tar zxvf samples.tar.gz
 - cd ../..
-- ls -l test/SampleFiles/
-- ls -l test/
-- ls -l /
