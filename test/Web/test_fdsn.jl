@@ -83,7 +83,7 @@ xsta = read(io, String)
 close(io)
 
 printstyled("    event XML\n", color=:light_green)
-(id, ot, loc, mag, msc) = SeisIO.FDSN_event_xml(xevt)
+(id, ot, loc, mag, msc) = FDSN_event_xml(xevt)
 
 @test ≈(id, true_id)
 @assert(ot[2]==true_ot, "OT parse error")
@@ -92,7 +92,7 @@ printstyled("    event XML\n", color=:light_green)
 @assert(msc==true_msc, "Magnitude scale parse error")
 
 printstyled("    station XML\n", color=:light_green)
-(ID, LOC, UNITS, GAIN, RESP, NAME, MISC) = SeisIO.FDSN_sta_xml(xsta)
+(ID, LOC, UNITS, GAIN, RESP, NAME, MISC) = FDSN_sta_xml(xsta)
 
 @assert(ID[1]=="AK.ATKA..BNE", id_err)
 @assert(ID[2]=="AK.ATKA..BNN", id_err)

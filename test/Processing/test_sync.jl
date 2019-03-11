@@ -3,7 +3,7 @@ printstyled("  sync!\n", color=:light_green)
 
 fs = 100.0
 ns = 10
-t = floor(Int64, time()-60.0)*SeisIO.sμ
+t = floor(Int64, time()-60.0)*sμ
 δ3 = 1.0
 dtμ = round(Int, 1.0e6/fs)
 
@@ -245,7 +245,7 @@ ss = string(ds₆)
 Y = sync(S, s=ds₆, t="last", v=3); basic_checks(Y)
 
 # Expect: X != Y due to notes, but all other fields equal
-for f in SeisIO.datafields
+for f in datafields
   if f != :notes
     @test isequal(getfield(X,f), getfield(Y,f))
   end

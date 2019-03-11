@@ -14,7 +14,7 @@ equalize_resp!(S, r) # doesnt work
 Ev = randSeisEvent()
 Ev.data.fs[1] = 100.0
 Ev.data.x[1] = rand(1024)
-Ev.data.t[1] = vcat(Ev.data.t[1][1:1,:], [5 2*ceil(S.fs[1])*SeisIO.sμ], [8 2*ceil(S.fs[1])*SeisIO.sμ], [1024 0])
+Ev.data.t[1] = vcat(Ev.data.t[1][1:1,:], [5 2*ceil(S.fs[1])*sμ], [8 2*ceil(S.fs[1])*sμ], [1024 0])
 open("runtests.log", "a") do out
   redirect_stdout(out) do
     ungap!(Ev)

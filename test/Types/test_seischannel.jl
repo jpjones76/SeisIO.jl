@@ -1,3 +1,5 @@
+printstyled("  SeisChannel methods\n", color=:light_green)
+
 id = "UW.SEP..EHZ"
 name = "Darth Exploded"
 

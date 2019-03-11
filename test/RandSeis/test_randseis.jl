@@ -1,21 +1,22 @@
 printstyled("  RandSeis utils\n", color=:light_green)
 
+
 # This should do it
 D = Dict{String,Any}()
 for i = 1:10
-  SeisIO.RandSeis.pop_rand_dict!(D, 1000)
+  RandSeis.pop_rand_dict!(D, 1000)
 end
 
 # Similarly for the yp2 codes
 for i = 1:100
-  i,c,u = SeisIO.RandSeis.getyp2codes('s', true)
+  i,c,u = RandSeis.getyp2codes('s', true)
   @test isa(i, Char)
   @test isa(c, Char)
   @test isa(u, String)
 end
 
 for i = 1:10000
-  i,c,u = SeisIO.RandSeis.getyp2codes('s', false)
+  i,c,u = RandSeis.getyp2codes('s', false)
   @test isa(i, Char)
   @test isa(c, Char)
   @test isa(u, String)
@@ -34,9 +35,9 @@ str = String(0x00:0xff)
 S = randSeisData(3)
 S.name[2] = str
 
-for key in keys(SeisIO.bad_chars)
+for key in keys(bad_chars)
   test_str = namestrip(str, key)
-  @test length(test_str) == 256 - (32 + length(SeisIO.bad_chars[key]))
+  @test length(test_str) == 256 - (32 + length(bad_chars[key]))
 end
 open("runtests.log", "a") do out
   redirect_stdout(out) do

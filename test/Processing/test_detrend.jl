@@ -4,7 +4,7 @@ printstyled("  demean, detrend\n", color=:light_green)
 S = randSeisData(2, s=1.0)[2:2]
 fs = 100.0
 nx = 14400
-t = floor(Int64, time()-60.0)*SeisIO.sμ
+t = floor(Int64, time()-60.0)*sμ
 
 S.fs[1] = 100.0
 S.t[1] = [1 t; nx 0]

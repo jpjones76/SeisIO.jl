@@ -1,11 +1,11 @@
-using Test, Compat, Dates, Random, SeisIO, SeisIO.RandSeis
-path = Base.source_dir()
+using Compat, Dates, SeisIO, SeisIO.RandSeis, Test
 
-import Random: rand, randstring
 import DelimitedFiles: readdlm
-const μs = 1.0e-6
-const datafields = [:name, :id, :fs, :gain, :loc, :misc, :notes, :resp, :src, :units, :t, :x]
-const hdrfields = [:id, :ot, :loc, :mag, :int, :mt, :np, :pax, :src, :notes, :misc]
+import Random: rand, randperm, randstring
+import SeisIO: FDSN_event_xml, FDSN_sta_xml, bad_chars, datafields, hdrfields, μs, safe_isfile, safe_isdir, sμ
+import SeisIO.RandSeis: getyp2codes, pop_rand_dict!
+
+const path = Base.source_dir()
 const unicode_chars = String.(readdlm("SampleFiles/julia-unicode.csv", '\n')[:,1])
 const n_unicode = length(unicode_chars)
 const breaking_dict = Dict{String,Any}(
@@ -46,7 +46,7 @@ function mktestseis()
   t2 = round(Int64, (L0+os)/μs) + t1
 
   S = SeisData(5)
-  S.name = ["Channel 1", "Channel 2", "Channel 3", "Channel 4", "Channel 5"]
+  S.name = ["Channel 1", "Channel 2", "Channel 3", "Longmire", "September Lobe"]
   S.id = ["XX.TMP01.00.BHZ","XX.TMP01.00.BHN","XX.TMP01.00.BHE","CC.LON..BHZ","UW.SEP..EHZ"]
   S.fs = collect(Main.Base.Iterators.repeated(100.0, S.n))
   S.fs[4] = 20.0
@@ -57,7 +57,7 @@ function mktestseis()
   end
 
   T = SeisData(4)
-  T.name = ["Channel 6", "Channel 7", "Channel 8", "Channel 9"]
+  T.name = ["Channel 6", "Channel 7", "Longmire", "September Lobe"]
   T.id = ["XX.TMP02.00.EHZ","XX.TMP03.00.EHN","CC.LON..BHZ","UW.SEP..EHZ"]
   T.fs = collect(Main.Base.Iterators.repeated(100.0, T.n))
   T.fs[3] = 20.0

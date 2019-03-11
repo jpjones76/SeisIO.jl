@@ -31,7 +31,7 @@ S.misc[1]["P"] = 2.0
 S.t[1] = [S.t[1]; [1 round(Int, time()*1.0e6); nx 0]]
 append!(S.x[1], rand(nx))
 
-for f in SeisIO.datafields
+for f in datafields
   v = getfield(S, f)
   @test v[1] != v[2]
 end
