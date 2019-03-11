@@ -1,3 +1,13 @@
+### 2019-03-10
+* Several improvements to `readsegy`
+  + Fixed a bug where elevations were set incorrectly with `-passcal=true`.
+  + Dictionary keys with `-full=true` are now much more comprehensible.
+  + `readsegy` now always returns a SeisData object.
+* Consistency fix: `readwin32!` now appends channels to existing SeisData
+structures; it doesn't merge.
+* Deprecated `wsac` as an alias to `writesac`.
+* Moved CHANGELOG.md, ISSUES.md to docs/
+
 ### 2019-03-08
 * `readwin32` is now an order of magnitude faster and uses an order of magnitude
 less memory.

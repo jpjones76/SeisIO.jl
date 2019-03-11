@@ -12,12 +12,11 @@ From the Julia command prompt:
 3. Press backspace to exit `pkg`.
 4. Type or copy: `using SeisIO`
 
-#### ...but what about...?
 ...that's it. Everything should work. If not, and the problem isn't documented, please [open a new issue](https://github.com/jpjones76/SeisIO.jl/issues/). If possible, please include a text dump with the error message.
 
-#### [Known and Historic Issues](ISSUES.md)
+#### [Changelog](docs/CHANGELOG.md)
 
-#### [Changelog](CHANGELOG.md)
+#### [Known and Historic Issues](docs/ISSUES.md)
 
 ## Functionality
 Designed for speed, efficiency, and ease of use. Includes web clients, readers for many seismic data formats, and writers for SAC and native (SeisIO) format. Utility functions allow time synchronization, data merging, padding time gaps, and basic data processing.
