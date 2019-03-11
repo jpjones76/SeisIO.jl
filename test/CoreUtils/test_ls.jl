@@ -1,7 +1,7 @@
 import SeisIO:sep, safe_isfile, safe_isdir
 
 change_sep(S::Array{String,1}) = [replace(i, "/" => sep) for i in S]
-cfile = path*"/SampleFiles/Win32/03_02_27_20140927.euc.ch"
+cfile = path*"/SampleFiles/Restricted/03_02_27_20140927.euc.ch"
 
 printstyled("  safe_isfile\n", color=:light_green)
 @test SeisIO.safe_isfile("runtests.jl") == true
@@ -44,11 +44,11 @@ end
 
 if safe_isfile(cfile)
   T = path .* [
-                "/SampleFiles/Win32/*.cnt",
+                "/SampleFiles/Restricted/*.cnt",
                 "/SampleFiles/*",
-                "/SampleFiles/Win*/2014092709*cnt"
+                "/SampleFiles/Restricted/2014092709*cnt"
               ]
-  T_expect =  [62, 94, 60]
+  T_expect =  [63, 91, 60]
 
   # Test that ls finds the same number of files as `ls -1`
   for (n,v) in enumerate(T)
@@ -60,7 +60,7 @@ if safe_isfile(cfile)
 
   # Test that ls invokes find_regex under the right circumstances
   @test change_sep(ls(T[2])) == change_sep(regex_find("SampleFiles", r".*$"))
-  @test change_sep(ls(T[3])) == change_sep(regex_find("SampleFiles", r"Win.*/2014092709.*cnt$"))
+  @test change_sep(ls(T[3])) == change_sep(regex_find("SampleFiles", r"Restricted/2014092709.*cnt$"))
 else
   printstyled("  extended ls tests skipped. (files not found; is this Appveyor?)\n", color=:green)
 end

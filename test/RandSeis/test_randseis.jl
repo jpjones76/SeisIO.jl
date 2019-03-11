@@ -38,7 +38,7 @@ for key in keys(SeisIO.bad_chars)
   test_str = namestrip(str, key)
   @test length(test_str) == 256 - (32 + length(SeisIO.bad_chars[key]))
 end
-open("show.log", "w") do out
+open("runtests.log", "a") do out
   redirect_stdout(out) do
     test_str = namestrip(str, "Nonexistent List")
   end
