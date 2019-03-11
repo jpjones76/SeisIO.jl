@@ -2,7 +2,7 @@ printstyled(stdout,"      show\n", color=:light_green)
 S = breaking_seis()
 T = randSeisData(1)
 
-open("show.log", "a") do out
+open("runtests.log", "a") do out
   redirect_stdout(out) do
     show(SeisChannel())
     show(SeisData())

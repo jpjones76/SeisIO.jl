@@ -259,7 +259,7 @@ Z = deepcopy(S)
 t = deepcopy(Z.t[5])
 t = hcat(t[:,1:1], vcat(0, diff(t[:,2:2], dims=1)))
 Z.t[5] = deepcopy(t)
-open("show.log", "a") do out
+open("runtests.log", "a") do out
   redirect_stdout(out) do
     sync!(Z, v=3); basic_checks(Z)
   end

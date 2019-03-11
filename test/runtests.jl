@@ -3,7 +3,7 @@ include("test_helpers.jl")
 sleep(3)
 printstyled(stdout, string(Dates.now(), ": tests begin, source_dir = ", path, "/\n"), color=:light_green, bold=true)
 
-open("show.log", "w") do io
+open("runtests.log", "w") do io
   write(io, "stdout redirect:")
 end
 
@@ -17,7 +17,7 @@ for d in ["CoreUtils", "Types", "RandSeis", "NativeIO", "DataFormats", "Processi
 end
 
 # Done. Clean up.
-rm("show.log")
+rm("runtests.log")
 files = ls("*.mseed")
 for f in files
   rm(f)

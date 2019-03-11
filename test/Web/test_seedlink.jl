@@ -4,7 +4,7 @@ function wait_on_data!(S::SeisData; tmax::Real=100.0)
   τ = 0.0
   t = 20.0
   printstyled(string("      (sleep up to ", tmax + t, " s)\n"), color=:green)
-  open("show.log", "a") do out
+  open("runtests.log", "a") do out
     redirect_stdout(out) do
 
       # Here we actually wait for data to arrive
@@ -69,7 +69,7 @@ tf4 = has_sta(parse_charr(sta), u="rtserve.iris.washington.edu")[1]
 # Attempting to produce errors
 printstyled("  Checking that errors and warnings are written correctly\n", color=:light_green)
 S1 = SeisData()
-open("show.log", "a") do out
+open("runtests.log", "a") do out
   redirect_stdout(out) do
     @test_throws ErrorException SeedLink!(S1, [sta[1]], ["*****.X"])
 
@@ -89,13 +89,13 @@ printstyled("  SeedLink DATA mode\n", color=:light_green)
 printstyled("    link 1: command-line station list\n", color=:light_green)
 printstyled("    link 2: station file\n", color=:light_green)
 T = SeisData()
-open("show.log", "a") do out
+open("runtests.log", "a") do out
   redirect_stdout(out) do
     SeedLink!(T, sta, mode="DATA", refresh=9.9, kai=90.0)
   end
 end
 
-open("show.log", "a") do out
+open("runtests.log", "a") do out
   redirect_stdout(out) do
     SeedLink!(T, config_file, mode="DATA", refresh=13.3, v=3)
   end
