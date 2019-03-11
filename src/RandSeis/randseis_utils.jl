@@ -22,15 +22,17 @@ function pop_rand_dict!(D::Dict{String,Any}, N::Int)
       D[k] = rand(Complex{real(t)})
     elseif Bool(t <: Array) == true
       y = eltype(t)
-        if isa(y,Char)
-          D[k] = Array{Char,1}([rand(Char) for i = 1:rand(Int, 1:256)])
-        elseif isa(y,String)
-          D[k] = Array{String,1}([randstring(rand(1:256))
-                                  for i = 1:rand(Int, 1:64)])
-        elseif Bool(y <: Number) == true
-          D[k] = rand(y, rand(1:1000))
-        end
+      if isa(y,Char)
+        D[k] = Array{Char,1}([rand(Char) for i = 1:rand(Int, 1:256)])
+      elseif isa(y,String)
+        D[k] = Array{String,1}([randstring(rand(1:256)) for i = 1:rand(Int, 1:64)])
+      elseif Bool(y <: Number) == true
+        D[k] = rand(y, rand(1:1000))
       end
+    end
+  end
+  if haskey(D, "hc")
+    delete!(D, "hc")
   end
   return D
 end
