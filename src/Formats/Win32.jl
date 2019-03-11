@@ -275,14 +275,8 @@ function readwin32(filestr::String, cf::String; v::Int=KW.v, jst::Bool=true)
 
     S.id[ii] = id
     S.src[ii] = string("readwin32(", filestr, ",", cf, ")")
-    if isempty(S.x[ii])
-      S.x[ii] = Array{Float64,1}(undef, xi[k])
-      map!(Float64, S.x[ii], data[k])
-    else
-      nx = length(S.x[ii])
-      resize!(S.x[ii], nx + xi[k])
-      copyto!(S.x[ii], nx+1, data[k], 1, xi[k])
-    end
+    S.x[ii] = Array{Float64,1}(undef, xi[k])
+    map!(Float64, S.x[ii], data[k])
 
     # Fill gaps with mean of data
     J = length(gapStart[k])
