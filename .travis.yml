@@ -18,8 +18,6 @@ after_success:
   || cd(Pkg.dir("SeisIO")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder());
   Codecov.submit(Coveralls.process_folder()); '
 before_install:
-- openssl aes-256-cbc -K $encrypted_faec3b24069b_key -iv $encrypted_faec3b24069b_iv
-  -in test/SampleFiles/win32.tar.gz.enc -out test/SampleFiles/win32.tar.gz -d
 - openssl aes-256-cbc -K $encrypted_d21b36055eee_key -iv $encrypted_d21b36055eee_iv
-  -in test/SampleFiles/test2.001.segy.enc -out test/SampleFiles/test2.001.segy -d
-- tar zxvf test/SampleFiles/win32.tar.gz
+  -in test/SampleFiles/samples.enc -out test/SampleFiles/samples.tar.gz -d
+- tar zxvf test/SampleFiles/samples.tar.gz
