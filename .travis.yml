@@ -20,6 +20,9 @@ after_success:
 before_install:
 - openssl aes-256-cbc -K $encrypted_d21b36055eee_key -iv $encrypted_d21b36055eee_iv
   -in test/SampleFiles/samples.enc -out test/SampleFiles/samples.tar.gz -d
-- tar zxvf test/SampleFiles/samples.tar.gz
+- cd test/SampleFiles
+- tar zxvf samples.tar.gz
+- cd ../..
 - ls -l test/SampleFiles/
 - ls -l test/
+- ls -l /
