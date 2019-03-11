@@ -312,11 +312,11 @@ function SeedLink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
   ver = getSLver(vline)
 
   # version-based compatibility checks (unlikely that such a server exists)
-  if ver < 2.5 && length(sta) > 1
-    error(@sprintf("Multi-station mode unsupported in SeedLink v%.1f\n", ver))
-  elseif ver < 2.92 && mode == "TIME"
-    error(@sprintf("Mode \"TIME\" not available in SeedLink v%.1f\n", ver))
-  end
+  # if ver < 2.5 && length(sta) > 1
+  #   error(@sprintf("Multi-station mode unsupported in SeedLink v%.1f\n", ver))
+  # elseif ver < 2.92 && mode == "TIME"
+  #   error(@sprintf("Mode \"TIME\" not available in SeedLink v%.1f\n", ver))
+  # end
   (v > 1) && println("Version = ", ver)
   (v > 1) && println("Server = ", strip(sline,['\r','\n']))
   # ==========================================================================
@@ -330,9 +330,6 @@ function SeedLink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
   t = join(split(d1,r"[\-T\:\.]")[1:6],',')
   if mode in ["TIME", "FETCH"]
     if mode == "TIME"
-      if (DateTime(d1)-u2d(time())).value < 0
-        @warn("End time < time() in TIME mode; SeedLink may receive no data!")
-      end
       m_str = string("TIME ", s, " ", t, "\r")
     else
       m_str = string("FETCH ", s, "\r")

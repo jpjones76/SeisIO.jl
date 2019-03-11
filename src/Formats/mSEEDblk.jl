@@ -78,23 +78,3 @@ function blk_1001(S::SeisIO.SeisData, sid::IO)
   skip(sid, 2)
   return 0x0008
 end
-
-# [2000] Variable Length Opaque Data Blockette
-function blk_2000(S::SeisIO.SeisData, sid::IO)
-  # Always big-Endian? Undocumented
-  SEED.B2000.blk_length     = ntoh(read(sid, UInt16))
-  SEED.B2000.odos           = ntoh(read(sid, UInt16))
-  SEED.B2000.record_number  = ntoh(read(sid, UInt32))
-  for j = 1:3
-    SEED.B2000.flags[j]       = read(sid, UInt8)
-  end
-  SEED.B2000.header_fields  = String[String(j) for j in split(String(read(sid, UInt8, Int(SEED.B2000.odos)-15)), '~', keepempty=true, limit=SEED.B2000.flags[3])]
-  SEED.B2000.opaque_data    = read(sid, UInt8, SEED.B2000.blk_length - SEED.B2000.odos)
-
-  # Store to S.misc[i]
-  ri = string(SEED.B2000.record_number)
-  S.misc[c][ri * "_flags"] = bits(flags)
-  S.misc[c][ri * "_header"] = header_fields
-  S.misc[c][ri * "_data"] = opaque_data
-  return SEED.B2000.blk_length
-end

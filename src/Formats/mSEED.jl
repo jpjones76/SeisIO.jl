@@ -1,4 +1,4 @@
-export readmseed
+export readmseed, readmseed!
 const SEED = SeedVol()
 
 # TO DO: Account for channels where any of the relevant SeisData params
@@ -329,13 +329,6 @@ function parsemseed!(S::SeisData, sid::IO, v::Int)
   return S
 end
 
-# This overloading is degenerate, but I don't care.
-function parsemseed(sid::IO, v::Int)
-  S = SeisData(0)
-  parsemseed!(S, sid, v)
-  return S
-end
-
 function parsemseed(sid::IO, swap::Bool, v::Int)
   S = SeisData(0)
   setfield!(SEED, :swap, swap)
@@ -354,7 +347,7 @@ Keywords:
 * swap=false::Bool
 * v=0::Int
 """
-function readmseed(fname::String; swap=false::Bool, v=0::Int)
+function readmseed(fname::String; swap=false::Bool, v::Int=KW.v)
   S = SeisData(0)
   setfield!(SEED, :swap, swap)
 
@@ -376,7 +369,7 @@ end
 
 Read file `fname` into `S` big-Endian mini-SEED format.
 """
-function readmseed!(fname::String; swap=false::Bool, v=0::Int)
+function readmseed!(S::SeisData, fname::String; swap=false::Bool, v::Int=KW.v)
   setfield!(SEED, :swap, swap)
 
   if safe_isfile(fname)
