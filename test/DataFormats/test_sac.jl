@@ -4,7 +4,7 @@ sac_be_file = path*"/SampleFiles/test_be.sac"
 
 printstyled("  SAC\n", color=:light_green)
 printstyled("    read\n", color=:light_green)
-@test_throws ErrorException readsac(path*"/SampleFiles/99062109485W")
+@test_throws ErrorException readsac(path*"/SampleFiles/99011116541W")
 
 SAC1 = readsac(sac_file)
 @test ≈(SAC1.fs, 100.0)

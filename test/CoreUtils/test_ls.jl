@@ -20,15 +20,15 @@ S = [
       "CoreUtils/test_ls.jl",
       "CoreUtils/poo",
       "SampleFiles/99*",
-      "SampleFiles/990[5-6]*",
+      "SampleFiles/990[1-2]*",
       "CoreUtils/test_*"
     ]
 S_expect =  [
               ["test_ls.jl", "test_time.jl"],
               ["test_ls.jl"],
               String[],
-              ["99062109485W", "99062109485o"],
-              ["99062109485W", "99062109485o"],
+              ["99011116541W", "99011116541o"],
+              ["99011116541W", "99011116541o"],
               ["test_ls.jl", "test_time.jl"]
             ]
 
@@ -40,7 +40,7 @@ for (n,v) in enumerate(S)
   [@test isfile(i) for i in ls(v)]
 end
 # Test that ls invokes find_regex under the right circumstances
-@test change_sep(ls(S[5])) == change_sep(regex_find("SampleFiles/", r"990[5-6].*$"))
+@test change_sep(ls(S[5])) == change_sep(regex_find("SampleFiles/", r"990[1-2].*$"))
 
 if safe_isfile(cfile)
   T = path .* [
@@ -48,7 +48,7 @@ if safe_isfile(cfile)
                 "/SampleFiles/*",
                 "/SampleFiles/Restricted/2014092709*cnt"
               ]
-  T_expect =  [63, 91, 60]
+  T_expect =  [63, 92, 60]
 
   # Test that ls finds the same number of files as `ls -1`
   for (n,v) in enumerate(T)
