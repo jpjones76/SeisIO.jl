@@ -42,7 +42,7 @@ end
 
 Read all win32 files matching pattern `filestr` into SeisData object `S`, with channel info stored in `chanfile`.
 """
-function readwin32!(S::SeisData, filestr::String, cf::String; v::Int=KW.v, jst::Bool=true)
+function readwin32(filestr::String, cf::String; v::Int=KW.v, jst::Bool=true)
 
   # Parse chans file
   Chans = readlines(cf)
@@ -64,14 +64,7 @@ function readwin32!(S::SeisData, filestr::String, cf::String; v::Int=KW.v, jst::
   files = ls(filestr)
   nf = length(files)
 
-  # Move locIDs to Misc
-  for ii = 1:S.n
-    sid = split(S.id[ii], '.')
-    if length(sid) > 3
-      S.misc[ii]["locID"] = String(sid[2])
-      S.id[ii] = join([sid[1], sid[2], sid[3]], '.')
-    end
-  end
+  S = SeisData()
 
   # Some constants
   B::UInt16 = 0x0000
@@ -146,22 +139,16 @@ function readwin32!(S::SeisData, filestr::String, cf::String; v::Int=KW.v, jst::
 
             c = findhex(hexID, hexIDs)
             id = chanIDs[c]
-            j = findid(id, S)
-            if j == 0
-              push!(S, SeisChannel())
-              add_win32!(S, Chans[c])
-              j = S.n
-              S.id[j] = id
-              S.fs[j] = Float64(Nh)
-              S.t[j] = [1 ts; nx 0]
-              S.misc[j]["orgID"] = orgID
-              S.misc[j]["netID"] = netID
-              S.misc[j]["hexID"] = hexID
-              S.misc[j]["locID"] = bytes2hex([orgID & 0xff | (netID << 4) & 0xf0])
-            else
-              nx_old = S.t[j][end,1]
-              S.t[j] = vcat(S.t[j], [nx_old+nx 0])
-            end
+            push!(S, SeisChannel())
+            add_win32!(S, Chans[c])
+            j = S.n
+            S.id[j] = id
+            S.fs[j] = Float64(Nh)
+            S.t[j] = [1 ts; nx 0]
+            S.misc[j] = Dict{String,Any}("orgID" => orgID, "netID" => netID,
+              "hexID" => hexID,
+              "locID" => bytes2hex([orgID & 0xff | (netID << 4) & 0xf0])
+              )
             push!(sums, 0)
             push!(gapStart, Array{Int64,1}(undef, 0))
             push!(gapEnd, Array{Int64,1}(undef, 0))
@@ -200,7 +187,6 @@ function readwin32!(S::SeisData, filestr::String, cf::String; v::Int=KW.v, jst::
           elseif C == 0x03
             readbytes!(fid, buf, 3*N)
             for i = 1:N
-              y::UInt32 = 0
               y  = UInt32(buf[3*i-2]) << 24
               y |= UInt32(buf[3*i-1]) << 16
               y |= UInt32(buf[3*i]) << 8
@@ -213,7 +199,6 @@ function readwin32!(S::SeisData, filestr::String, cf::String; v::Int=KW.v, jst::
             readbytes!(fid, buf, sz*N)
             if C == 0x04
               for i = 1:N
-                y::UInt32 = 0
                 y  = UInt32(buf[4*i-3]) << 24
                 y |= UInt32(buf[4*i-2]) << 16
                 y |= UInt32(buf[4*i-1]) << 8
@@ -222,7 +207,6 @@ function readwin32!(S::SeisData, filestr::String, cf::String; v::Int=KW.v, jst::
               end
             else
               for i = 1:N
-                y::UInt16 = 0
                 y  = UInt16(buf[2*i-1]) << 8
                 y |= UInt16(buf[2*i])
                 x[i+1] = signed(y)
@@ -297,7 +281,7 @@ function readwin32!(S::SeisData, filestr::String, cf::String; v::Int=KW.v, jst::
     else
       nx = length(S.x[ii])
       resize!(S.x[ii], nx + xi[k])
-      unsafe_copyto!(S.x[ii], nx+1, data[k], 1, xi[k])
+      copyto!(S.x[ii], nx+1, data[k], 1, xi[k])
     end
 
     # Fill gaps with mean of data
@@ -315,9 +299,4 @@ function readwin32!(S::SeisData, filestr::String, cf::String; v::Int=KW.v, jst::
   note!(S, string("channel file: ", cf))
   return S
 end
-readwin32(filestr::String, cf::String; v::Int=KW.v, jst::Bool=true) = (S = SeisData(); readwin32!(S, filestr, cf, v=v, jst=jst); S)
-
-# To parallelize:
-# (1) use shared arrays for x, xi, etc.
-# (2) timestamp each point on read
-# (3) send out each process as an async
+readwin32!(S::SeisData, filestr::String, cf::String; v::Int=KW.v, jst::Bool=true) = (U = readwin32(filestr, cf, v=v, jst=jst); append!(S,U))

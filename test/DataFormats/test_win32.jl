@@ -1,12 +1,12 @@
 import SeisIO:safe_isfile
 
 # win32 with gaps
-cfile = path*"/SampleFiles/Win32/03_02_27_20140927.euc.ch"
+cfile = path*"/SampleFiles/Restricted/03_02_27_20140927.euc.ch"
 if safe_isfile(cfile)
   printstyled("  win32\n", color=:light_green)
   @info(string(timestamp(), ": win32 tests use an SSL-encrypted tarball."))
-  fname = path*"/SampleFiles/Win32/2014092709*.cnt"
-  cfile = path*"/SampleFiles/Win32/03_02_27_20140927.euc.ch"
+  fname = path*"/SampleFiles/Restricted/2014092709*.cnt"
+  cfile = path*"/SampleFiles/Restricted/03_02_27_20140927.euc.ch"
   S = readwin32(fname, cfile)
 
   # There should be 8 channels
@@ -19,7 +19,7 @@ if safe_isfile(cfile)
 
   # Check against SAC files
   printstyled("    checking read integrity against HiNet SAC files\n", color=:light_green)
-  testfiles = path*"/SampleFiles/Win32/" .* ["20140927000000.V.ONTA.E.SAC",
+  testfiles = path*"/SampleFiles/Restricted/" .* ["20140927000000.V.ONTA.E.SAC",
                                             "20140927000000.V.ONTA.H.SAC",
                                             "20140927000000.V.ONTA.N.SAC",
                                             "20140927000000.V.ONTA.U.SAC",
@@ -97,20 +97,33 @@ if safe_isfile(cfile)
 
   # Now test the other two bits types, 4-bit Int ...
   printstyled("    testing Int4 and Int24 handling\n", color=:light_green)
-  fname = path*"/SampleFiles/Win32/2014092700000302.cnt"
+  fname = path*"/SampleFiles/Restricted/2014092700000302.cnt"
   S = SeisData()
-  readwin32!(S, fname, cfile);
+  open("runtests.log", "a") do out
+    redirect_stdout(out) do
+      readwin32!(S, fname, cfile, v=1)
+    end
+  end
   @test length(S.x[1]) == 60*S.fs[1]
   @test maximum(S.x[1]) == 11075.0
   @test minimum(S.x[1]) == -5026.0
 
   # ...and 24-bit bigendian Int...
-  fname = path*"/SampleFiles/Win32/2014092712000302.cnt"
-  S = SeisData()
-  readwin32!(S, fname, cfile);
-  @test length(S.x[1]) == 60*S.fs[1]
-  @test maximum(S.x[1]) == 14896.0
-  @test minimum(S.x[1]) == -12651.0
+  fname = path*"/SampleFiles/Restricted/2014092712000302.cnt"
+  readwin32!(S, fname, cfile)
+  @test length(S.x[1]) == round(Int64, 60*S.fs[1]) == S.t[1][end,1]
+  ii = findlast(S.id.=="V.ONTA.23.EHH")
+  @test maximum(S.x[ii]) == 14896.0
+  @test minimum(S.x[ii]) == -12651.0
+  for id in unique(S.id)
+    @test length(findall(S.id.==id))==2
+  end
+
+  # ...and 32-bit bigendian Int ...
+  cfile = path*"/SampleFiles/Restricted/chandata_20140927.txt"
+  fname = path*"/SampleFiles/Restricted/2014092712370207VM.cnt"
+  readwin32!(S, fname, cfile)
+
 else
   printstyled("  win32 data format skipped. (files not found; is this Appveyor?)\n", color=:light_green)
 end
