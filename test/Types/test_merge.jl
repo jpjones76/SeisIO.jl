@@ -105,6 +105,47 @@ ungap!(S, m=false, w=false)
 @test ≈(length(S.x[1]), 350)
 @test ≈(S.x[1][101]/S.gain[1], s4.x[1]/s4.gain)
 
+printstyled("    fastmerge!\n", color=:light_green)
+s1 = SeisChannel(fs = fs1, gain = 10.0, name = "DEAD.STA.EHZ", id = "DEAD.STA..EHZ",
+  t = [1 t1; 100 0], x=randn(100))
+
+# Repeating data
+s2 = SeisChannel(fs = fs1, gain = 10.0, name = "DEAD.STA.EHZ", id = "DEAD.STA..EHZ",
+  t = [1 t1+1000000; 150 0], x=vcat(s1.x[51:100], randn(100)))
+C = (s1 * s2)[1]
+@test length(C.x) == 200
+@test C.x[1:100] == s1.x
+@test C.x[101:200] == s2.x[51:150]
+
+# Simple overlapping times
+# s2 = SeisChannel(fs = fs1, gain = 10.0, name = "DEAD.STA.EHZ", id = "DEAD.STA..EHZ",
+#   t = [1 t1+1000000; 150 0], x=randn(150))
+os = 50
+nx = length(s1.x)
+lx = length(s1.x)/s1.fs
+τ = round(Int, 1.0e6*(2.0-os/fs1))
+s2 = SeisChannel(fs = fs1, gain = 10.0, name = "DEAD.STA.EHZ", id = "DEAD.STA..EHZ",
+  t = [1 t1+τ; 150 0], x=randn(150))
+C = (s1 * s2)[1]
+@test length(C.x) == 250-os
+@test C.x[1:nx-os] == s1.x[1:os]
+@test C.x[nx-os+1:nx] == 0.5.*(s1.x[nx-os+1:nx]+s2.x[1:os])
+@test C.x[nx+1:200] == s2.x[os+1:150]
+
+# two-sample offset
+os = 2
+nx = length(s1.x)
+lx = length(s1.x)/s1.fs
+τ = round(Int, 1.0e6*(2.0-(os-1)/fs1))
+s2 = SeisChannel(fs = fs1, gain = 10.0, name = "DEAD.STA.EHZ", id = "DEAD.STA..EHZ",
+  t = [1 t1+τ; 150 0], x=vcat(copy(s1.x[nx-os+1:nx]), randn(150-os)))
+@test s1.x[nx] == s2.x[os]
+C = (s1 * s2)[1]
+@test length(C.x) == 250-os+1
+@test C.x[1:99] == s1.x[1:99]
+@test C.x[100] == 0.5*(s2.x[1] + s1.x[100])
+@test C.x[101:249] == s2.x[2:150]
+
 # Ensure merge works correctly with traces separated in time
 printstyled("    operator \"*\"\n", color=:light_green)
 s5 = SeisChannel(fs = 100.0, gain = 32.0, name = "DEAD.STA.EHE", id = "DEAD.STA..EHE",
@@ -120,11 +161,13 @@ printstyled(stdout,"    SeisData * SeisChannel ==> SeisData\n", color=:light_gre
 (S,T) = mktestseis()
 merge!(S,T)
 C = randSeisChannel()
+D = randSeisChannel()
 U = merge(S,C)
 sort!(U)
 V = merge(C,S)
 sort!(V)
 @test U == V
+U = merge(C,D)
 
 (S,T) = mktestseis()
 A = deepcopy(S[5])
@@ -135,8 +178,9 @@ sizetest(T, 5)
 printstyled(stdout,"    SeisData merge tests\n", color=:light_green)
 printstyled(stdout,"      one common channel (fast, no gaps)\n", color=:light_green)
 (S,T) = mktestseis()
-T.t[4][1,2] -= 4900000
-merge!(T, S[1])
+t = t_expand(S.t[4], S.fs[4])
+T.t[3][1,2] = t[end] + t[end]-t[end-1]
+merge!(T, S[4])
 
 printstyled(stdout,"      one common channel (slow, has gaps)\n", color=:light_green)
 (S,T) = mktestseis()
@@ -159,7 +203,11 @@ V = SeisData(S,T)
 merge!(V)
 @test U == V
 
+mseis!(S,T)
+@test S == V
+
 printstyled(stdout,"      two independent channels ==> same as \"+\"\n", color=:light_green)
+(S,T) = mktestseis()
 U = S[1] * T[2]
 sizetest(U, 2)
 @test U == S[1]+T[2]
@@ -194,7 +242,7 @@ n_targ = 7
 @test ≈(S.n, n_targ)
 @test ≈(maximum([length(getfield(S,i)) for i in datafields]), n_targ)
 @test ≈(minimum([length(getfield(S,i)) for i in datafields]), n_targ)
-@test any(maximum([C.x.==i for i in S.x[1]])) == false 
+@test any(maximum([C.x.==i for i in S.x[1]])) == false
 
 # Some new functionality added 2019-02-23
 S = SeisData(randSeisData(5), SeisChannel(), SeisChannel(),
