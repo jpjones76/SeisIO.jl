@@ -106,10 +106,14 @@ ungap!(S, m=false, w=false)
 @test ≈(S.x[1][101]/S.gain[1], s4.x[1]/s4.gain)
 
 printstyled("    fastmerge!\n", color=:light_green)
-s1 = SeisChannel(fs = fs1, gain = 10.0, name = "DEAD.STA.EHZ", id = "DEAD.STA..EHZ",
-  t = [1 t1; 100 0], x=randn(100))
 
 # Repeating data
+loc1 = [45.28967, -121.79152, 1541, 0.0, 0.0]
+loc2 = [48.78384, -121.90093, 1.676, 0.0, 0.0]
+
+
+s1 = SeisChannel(fs = fs1, gain = 10.0, name = "DEAD.STA.EHZ", id = "DEAD.STA..EHZ",
+t = [1 t1; 100 0], x=randn(100))
 s2 = SeisChannel(fs = fs1, gain = 10.0, name = "DEAD.STA.EHZ", id = "DEAD.STA..EHZ",
   t = [1 t1+1000000; 150 0], x=vcat(s1.x[51:100], randn(100)))
 C = (s1 * s2)[1]
@@ -148,9 +152,9 @@ C = (s1 * s2)[1]
 
 # Ensure merge works correctly with traces separated in time
 printstyled("    operator \"*\"\n", color=:light_green)
-s5 = SeisChannel(fs = 100.0, gain = 32.0, name = "DEAD.STA.EHE", id = "DEAD.STA..EHE",
+s5 = SeisChannel(fs = 100.0, loc=loc1, gain = 32.0, name = "DEAD.STA.EHE", id = "DEAD.STA..EHE",
   t = [1 t1; 100 0], x=randn(100))
-s6 = SeisChannel(fs = 100.0, gain = 32.0, name = "UNNAMED", id = "DEAD.STA..EHE",
+s6 = SeisChannel(fs = 100.0, loc=loc2, gain = 16.0, name = "UNNAMED", id = "DEAD.STA..EHE",
   t = [1 t1+30000000; 200 0], x=randn(200))
 T = (s5 * s6)
 ungap!(T)
