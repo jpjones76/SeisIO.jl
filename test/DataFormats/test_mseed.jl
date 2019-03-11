@@ -8,3 +8,14 @@ S = readmseed(string(path, "/SampleFiles/test.mseed"), v=0)
 @test ≈(S.gain[1], 1.0)
 @test isequal(string(u2d(S.t[1][1,2]*1.0e-6)), "2003-05-29T02:13:22.043")
 @test ≈(S.x[1][1:5], [ 2787, 2776, 2774, 2780, 2783 ])
+
+if safe_isdir(path*"/SampleFiles/Restricted")
+  printstyled("    file read with many time gaps\n", color=:light_green)
+  S = readmseed(string(path, "/SampleFiles/Restricted/SHW.UW.mseed"), v=0)
+  @test size(S.t[1]) == (434, 2)
+  @test size(S.t[2]) == (10, 2)
+  @test string(u2d(S.t[1][1,2]*1.0e-6)) == "1980-03-22T20:45:18.349"
+  @test isequal(S.id, String[ "UW.SHW..EHZ", "UW.SHW..SHZ" ])
+  @test ≈(S.fs, Float64[104.085000, 52.038997])
+  @test ≈(S.x[1][1:5], Float64[-68.0, -57.0, -71.0, -61.0, -52.0])
+end
