@@ -64,18 +64,18 @@ function fastmerge!(X::Array{Array{Float64,1}}, T::Array{Array{Int64,2},1},
       # If not flagged, no match was found; average and warn
       if !ff
         X[ω][ω0:Lω] = 0.5*(xω + xκ)
-        @warn(stdout, string(id, " (serious): data discrepancy! Two or more ",
+        @warn(string(id, " (serious): data discrepancy! Two or more ",
               "traces with different data at the same sample time(s)."))
         w[1] += 1
       else
-        @warn(stdout, string(id, ": mismatched start times! Trace ", κ,
+        @warn(string(id, ": mismatched start times! Trace ", κ,
               " of id ", id, " adjusted ", (δt < 0 ? "+" : "") , -δt*sμs,
               " μs (", (δt < 0 ? "+" : ""), -δt, " sample", (abs(δt) > 1 ? "s" : ""),
               ")"))
         w[1] += 1
       end
     elseif xω != xκ
-      @warn(stdout, string(id, " (serious): data discrepancy with X too short to align! Averaging!"))
+      @warn(string(id, " (serious): data discrepancy with X too short to align! Averaging!"))
       X[ω][ω0:Lω] = 0.5*(xω + xκ)
       w[1] += 1
     end
@@ -499,8 +499,6 @@ function merge!(S::SeisData)
 end
 merge!(S::SeisData, U::SeisData) = ([append!(getfield(S, f), getfield(U, f)) for f in SeisIO.datafields]; S.n += U.n; merge!(S))
 merge!(S::SeisData, C::SeisChannel) = merge!(S, SeisData(C))
-merge!(C::SeisChannel, D::SeisChannel) = (S = SeisData(C); merge!(S, SeisData(D)); return S[1])
-# merge!(C::SeisChannel, S::SeisData) = merge!(SeisData(C), S)
 
 """
     S = merge(A::Array{SeisData,1})
@@ -519,7 +517,10 @@ function merge(A::Array{SeisIO.SeisData,1})
 end
 merge(S::SeisData, U::SeisData) = merge(Array{SeisData,1}([S,U]))
 merge(S::SeisData, C::SeisChannel) = merge(S, SeisData(C))
-merge(C::SeisChannel, S::SeisData) = merge(SeisData(C),S)
+merge(C::SeisChannel, S::SeisData) = merge(SeisData(C), S)
+merge(C::SeisChannel, D::SeisChannel) = (S = SeisData(C,D); merge!(S))
+
+# The "*" operator for SeisData
 *(S::SeisData, U::SeisData) = merge(Array{SeisData,1}([S,U]))
 *(S::SeisData, C::SeisChannel) = merge(S,SeisData(C))
 *(C::SeisChannel, D::SeisChannel) = (s1 = deepcopy(C); s2 = deepcopy(D); S = merge(SeisData(s1),SeisData(s2)); return S)
@@ -535,7 +536,7 @@ function mseis!(S...)
   U = Union{SeisData,SeisChannel,SeisEvent}
   L = Int64(length(S))
   (L < 2) && return
-  (typeof(S[i]) == SeisData) || error("Target must be type SeisData!")
+  (typeof(S[1]) == SeisData) || error("Target must be type SeisData!")
   for i = 2:L
     if !(typeof(S[i]) <: U)
       @warn(string("Object of incompatible type passed to wseis at ",i+1,"; skipped!"))
