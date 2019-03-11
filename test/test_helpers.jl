@@ -2,7 +2,7 @@ using Compat, Dates, SeisIO, SeisIO.RandSeis, Test
 
 import DelimitedFiles: readdlm
 import Random: rand, randperm, randstring
-import SeisIO: FDSN_event_xml, FDSN_sta_xml, bad_chars, datafields, hdrfields, μs, safe_isfile, safe_isdir, sμ
+import SeisIO: FDSN_event_xml, FDSN_sta_xml, bad_chars, datafields, hdrfields, μs, safe_isfile, safe_isdir, sμ, t_expand
 import SeisIO.RandSeis: getyp2codes, pop_rand_dict!
 
 const path = Base.source_dir()
