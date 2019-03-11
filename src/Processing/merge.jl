@@ -94,7 +94,7 @@ function ufar!(X::Array{Array{Float64,1}}, T::Array{Array{Int64,2},1},
   RE::Array{Array{Complex{Float64},2},1}, p::Array{Int64,1}, c::Int64,
   ts::Array{Int64,1}, te::Array{Int64,1})
 
-  sμs = round(Int64, SeisIO.sμ/FS[c])
+  sμs = round(Int64, sμ/FS[c])
   for k = 1:length(p)
     κ = p[k]
 
@@ -307,7 +307,7 @@ function merge!(S::SeisData)
       continue
     end
 
-    sμs = round(Int64, SeisIO.sμ/fs)
+    sμs = round(Int64, sμ/fs)
 
     # Get start, end times of all traces in C
     HC = ones(Float64, K).*1.0/sqrt(2.0)
@@ -326,7 +326,7 @@ function merge!(S::SeisData)
       end
       ts[k] = S.t[κ][1,2]
       if fs > 0.0
-        te[k] = sum(S.t[κ][:,2]) + S.t[κ][end,1]*round(Int64, SeisIO.sμ/S.fs[κ])
+        te[k] = sum(S.t[κ][:,2]) + S.t[κ][end,1]*round(Int64, sμ/S.fs[κ])
         ng[k] = max(0, size(S.t[κ],1)-2)
         for j = 1:k-1
           if min(ts[j]<te[k], te[j]>ts[k]) == true
@@ -378,8 +378,7 @@ function merge!(S::SeisData)
         X[k] .*= m
       end
       if S.src[C[k]] != S.src[ω]
-        resize!(S.notes[ω], length(S.notes[ω])+1)
-        S.notes[ω][end] = string(note_head, "+src:", S.src[C[k]])
+        push!(S.notes[ω], string(note_head, "+src:", S.src[C[k]]))
       end
     end
 

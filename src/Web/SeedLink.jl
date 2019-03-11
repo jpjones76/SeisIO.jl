@@ -398,7 +398,7 @@ function SeedLink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
     j = 0
     while true
       if !isopen(S.c[q])
-        @info(string(timestamp(), ": SeedLink connection closed."))
+          (v > 0) && @info(string(timestamp(), ": SeedLink connection closed."))
         w && close(fid)
         break
       else
