@@ -108,59 +108,54 @@ function uwpf(pickfile::String, v::Int)
   ei = Int8[18, 26, 35, 41, 42, 46, 49, 53, 57, 60, 65, 70, 72, 75] .+ y
   L = length(si)
 
-  if length(A) > (14 + y)
-      # Parse reset of Acard line
-      ah = String[A[si[i]:ei[i]] for i = 1:L]
+  # Parse reset of Acard line
+  ah = String[A[si[i]:ei[i]] for i = 1:L]
 
-      # origin time, event depth, and magnitude
-      OT += Base.parse(Float64, ah[1])
-      LOC[3] = Base.parse(Float64, ah[4])
-      MAG = Base.parse(Float32, ah[6])
+  # origin time, event depth, and magnitude
+  OT += Base.parse(Float64, ah[1])
+  LOC[3] = Base.parse(Float64, ah[4])
+  MAG = Base.parse(Float32, ah[6])
 
-      # record whether depth is fixed
-      D["fixdepth"] = ah[5] == "F" ? true : false
+  # record whether depth is fixed
+  D["fixdepth"] = ah[5] == "F" ? true : false
 
-      # Keep these as strings; we'll convert them below
-      evla = ah[2]
-      evlo = ah[3]
+  # Keep these as strings; we'll convert them below
+  evla = ah[2]
+  evlo = ah[3]
 
-      # Rest become dictionary entries
-      aline_keys = String["numsta", "numpha", "gap", "dmin", "rms", "err", "qual", "vmod"]
-      for (j, k) in enumerate(aline_keys)
-          if j < 3
-              D[k] = Base.parse(Int32, ah[j+6])
-          elseif j > 6
-              D[k] = ah[j+6]
-          else
-              D[k] = Base.parse(Float32, ah[j+6])
-          end
+  # Rest become dictionary entries
+  aline_keys = String["numsta", "numpha", "gap", "dmin", "rms", "err", "qual", "vmod"]
+  for (j, k) in enumerate(aline_keys)
+      if j < 3
+          D[k] = Base.parse(Int32, ah[j+6])
+      elseif j > 6
+          D[k] = ah[j+6]
+      else
+          D[k] = Base.parse(Float32, ah[j+6])
       end
-
-      # Convert lat and lon to decimal degrees
-      LOC[1] = (Base.parse(Float64, evla[1:3]) + Base.parse(Float64, evla[5:6])/60.0 + Base.parse(Float64, evla[7:8])/6000.0) * (evla[4] == 'S' ? -1.0 : 1.0)
-      LOC[2] = (Base.parse(Float64, evlo[1:4]) + Base.parse(Float64, evlo[6:7])/60.0 + Base.parse(Float64, evlo[8:9])/6000.0) * (evlo[5] == 'W' ? -1.0 : 1.0)
-
-  elseif length(A) > 12 + y
-      reg = A[14 + y]
-      close(pf)
-      error(string("Teleseism, source region: ", reg, "; pickfile unusable! (use `uwdf` for datafile)"))
   end
+
+  # Convert lat and lon to decimal degrees
+  LOC[1] = (Base.parse(Float64, evla[1:3]) + Base.parse(Float64, evla[5:6])/60.0 + Base.parse(Float64, evla[7:8])/6000.0) * (evla[4] == 'S' ? -1.0 : 1.0)
+  LOC[2] = (Base.parse(Float64, evlo[1:4]) + Base.parse(Float64, evlo[6:7])/60.0 + Base.parse(Float64, evlo[8:9])/6000.0) * (evlo[5] == 'W' ? -1.0 : 1.0)
 
   # Error line
   seekstart(pf)
   eline = nextline(pf, 'E')
   if eline != "-1"
-      # Effectively: 10x MeanRMS SDabout0 SDaboutMean SSWRES NDFR FIXXYZT SDx  SDy  SDz  SDt  Mag  5x MeanUncert
-      #              10x f6.3    f6.3     f6.3        f8.2   i4   a4      f5.2 f5.2 f5.2 f5.2 f5.2 5x f4.2
-      eline_keys = String["MeanRMS", "SDabout0", "SDaboutMean", "SSWRES", "NDFR", "FIXXYZT", "SDx", "SDy", "SDz", "SDt", "Mag", "MeanUncert"]
-      si = Int8[11, 17, 23, 29, 37, 42, 46, 51, 56, 61, 66, 76]
-      ei = Int8[16, 22, 28, 36, 40, 45, 50, 55, 60, 65, 70, 79]
-      for (j, k) in enumerate(eline_keys)
-          s = strip(eline[si[j]:ei[j]])
-          if !isempty(s)
-              D[k] = Base.parse(j == 5 ? Int32 : Float32, eline[si[j]:ei[j]])
-          end
+    # Effectively: 10x MeanRMS SDabout0 SDaboutMean SSWRES NDFR FIXXYZT SDx  SDy  SDz  SDt  Mag  5x MeanUncert
+    #              10x f6.3    f6.3     f6.3        f8.2   i4   a4      f5.2 f5.2 f5.2 f5.2 f5.2 5x f4.2
+    eline_keys = String["MeanRMS", "SDabout0", "SDaboutMean", "SSWRES", "NDFR", "FIXXYZT", "SDx", "SDy", "SDz", "SDt", "Mag", "MeanUncert"]
+    si =           Int8[       11,         17,            23,       29,     37,        42,    46,     51,    56,   61,    66,           76]
+    ei =           Int8[       16,         22,            28,       36,     40,        45,    50,     55,    60,   65,    70,           79]
+    for (j, k) in enumerate(eline_keys)
+      s = strip(eline[si[j]:ei[j]])
+      if k == "FIXXYZT"
+        D[k] = s
+      elseif !isempty(s)
+          D[k] = Base.parse(j == 5 ? Int32 : Float32, s)
       end
+    end
   end
 
   # Alternate magnitude line(s)
