@@ -4,12 +4,12 @@ change_sep(S::Array{String,1}) = [replace(i, "/" => sep) for i in S]
 cfile = path*"/SampleFiles/Restricted/03_02_27_20140927.euc.ch"
 
 printstyled("  safe_isfile\n", color=:light_green)
-@test SeisIO.safe_isfile("runtests.jl") == true
-@test SeisIO.safe_isfile("foo.jl") == false
+@test safe_isfile("runtests.jl") == true
+@test safe_isfile("foo.jl") == false
 
 printstyled("  safe_isdir\n", color=:light_green)
-@test SeisIO.safe_isdir("SampleFiles") == true
-@test SeisIO.safe_isdir("Roms") == false
+@test safe_isdir("SampleFiles") == true
+@test safe_isdir("Roms") == false
 
 
 printstyled("  ls\n", color=:light_green)
@@ -48,7 +48,7 @@ if safe_isfile(cfile)
                 "/SampleFiles/*",
                 "/SampleFiles/Restricted/2014092709*cnt"
               ]
-  T_expect =  [63, 92, 60]
+  T_expect =  [63, 93, 60]
 
   # Test that ls finds the same number of files as `ls -1`
   for (n,v) in enumerate(T)

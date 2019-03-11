@@ -1,4 +1,5 @@
 import Dates:DateTime, Hour, now
+import SeisIO:t_collapse, t_expand
 printstyled("  time functions\n", color=:light_green)
 
 t0 = time()
@@ -64,8 +65,8 @@ d0, d1 = parsetimewin(s, t)
 # t_collapse, t_expand
 T = Int64[1 1451606400000000; 100001 30000000; 250001 12330000; 352303 99000000; 360001 0]
 fs = 100.0
-@test ≈(T, SeisIO.t_collapse(SeisIO.t_expand(T, fs), fs))
+@test ≈(T, t_collapse(t_expand(T, fs), fs))
 
 T = hcat(cumsum(ones(Int64,size(T,1))), cumsum(T[:,2]))
 fs = 0.0
-@test ≈(T, SeisIO.t_collapse(SeisIO.t_expand(T, fs), fs))
+@test ≈(T, t_collapse(t_expand(T, fs), fs))

@@ -1,11 +1,14 @@
-uwf1 = joinpath(path, "SampleFiles/99011116541o")
+uwf1 = joinpath(path, "SampleFiles/99011116541")
 uwf2 = joinpath(path, "SampleFiles/94100613522o")
+uwf3 = joinpath(path, "SampleFiles/02062915175o")
 
 printstyled("  UW\n", color=:light_green)
 
 printstyled("    data files\n", color=:light_green)
 
-W = readuw(uwf1)
+# Can we read from pickfile only? datafile only?
+W = readuw(uwf1*"o")
+W = readuw(uwf1*"W")
 for i in ["UW.WWVB..TIM","UW.TCG..TIM","UW.TDH..EHZ","UW.VLM..EHZ"]
   @test !isempty(findall(W.data.id.==i))
   @test !isempty(findall(W.data.name.==i))
@@ -24,10 +27,6 @@ n = S.n
 S += W.data
 @test S.n == n + W.data.n
 
-# Can we read from pickfile only?
-uwf1 = uwf1[1:end-1]
-W = readuw(uwf1*"o")
-
 i = findfirst(W.data.id.=="UW.TDH..EHZ")
 @test ≈(W.data.misc[i]["t_p"][1], 14.506)
 i = findfirst(W.data.id.=="UW.VFP..EHZ")
@@ -42,3 +41,6 @@ W = readuw(uwf2)
 @test W.hdr.mag[1] == 0.9f0
 @test occursin("94100613522o", W.hdr.src)
 @test W.hdr.ot == DateTime("1994-10-06T13:52:39.02")
+
+W = readuw(uwf3)
+@test W.hdr.id == 41568
