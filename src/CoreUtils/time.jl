@@ -27,7 +27,7 @@ tnote(s::String) = string(timestamp(), ": ", s)
 function t_expand(t::Array{Int64,2}, fs::Float64)
   fs == 0.0 && return t[:,2]
   t[end,1] == 1 && return [t[1,2]]
-  dt = round(Int64, 1.0/(fs*SeisIO.μs))
+  dt = round(Int64, 1.0/(fs*μs))
   tt = dt.*ones(Int64, t[end,1])
   tt[1] -= dt
   for i = 1:size(t,1)

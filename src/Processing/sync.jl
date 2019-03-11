@@ -74,7 +74,7 @@ function sync!(S::SeisData;
     start_times[i] = S.t[i][1,2]
     if do_end
       end_times[i] = S.t[i][end,2] + (irr[i] ? z : start_times[i] + sum(S.t[i][2:end,2]) +
-        round(Int64, (length(S.x[i])-1)/(SeisIO.μs*S.fs[i])))
+        round(Int64, (length(S.x[i])-1)/(μs*S.fs[i])))
         # ts data: start time in μs from epoch + sum of time gaps in μs + length of trace in μs
         # non-ts data: time of last sample
     end
@@ -83,14 +83,14 @@ function sync!(S::SeisData;
 
   # Start and end times
   t_start = get_sync_t(s, start_times)
-  sstr = string(u2d(t_start*SeisIO.μs))
+  sstr = string(u2d(t_start*μs))
 
   if do_end
     t_end = get_sync_t(t, end_times)
     t_end > t_start || error("No time overlap with given start & end times!")
-    tstr = string(u2d(t_end*SeisIO.μs))
+    tstr = string(u2d(t_end*μs))
     if v > 0
-      @info(@sprintf("Synchronizing %.2f seconds of data\n", (t_end - t_start)*SeisIO.μs))
+      @info(@sprintf("Synchronizing %.2f seconds of data\n", (t_end - t_start)*μs))
       if v > 1
         @info(string("t_start = ", u2d(t_start*μs)))
         @info(string("t_end = ", tstr))
