@@ -11,7 +11,8 @@ S = readmseed(string(path, "/SampleFiles/test.mseed"), v=0)
 
 if safe_isdir(path*"/SampleFiles/Restricted")
   printstyled("    file read with many time gaps\n", color=:light_green)
-  S = readmseed(string(path, "/SampleFiles/Restricted/SHW.UW.mseed"), v=0)
+  S = SeisData()
+  readmseed!(S, string(path, "/SampleFiles/Restricted/SHW.UW.mseed"), v=0)
   @test size(S.t[1]) == (434, 2)
   @test size(S.t[2]) == (10, 2)
   @test string(u2d(S.t[1][1,2]*1.0e-6)) == "1980-03-22T20:45:18.349"

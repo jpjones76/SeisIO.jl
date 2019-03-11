@@ -158,17 +158,6 @@ function uwpf(pickfile::String, v::Int)
     end
   end
 
-  # Alternate magnitude line(s)
-  seekstart(pf)
-  sline = nextline(pf, 'S')
-  if sline != "-1"
-      if haskey(D, "smag")
-          push!(D["smag"], sline)
-      else
-          D["smag"] = sline
-      end
-  end
-
   # Focal mechanism line(s)
   seekstart(pf)
   mline = nextline(pf,'M')
