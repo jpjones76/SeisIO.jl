@@ -16,7 +16,7 @@ end
 # Can we read from filename stub?
 W = readuw(uwf1)
 @test W.hdr.mag[1] == 3.0f0
-@test W.hdr.src == "SampleFiles/99011116541o"
+@test occursin("99011116541o", W.hdr.src)
 @test W.hdr.ot == DateTime("1999-01-11T16:54:11.96")
 
 S = breaking_seis()
@@ -40,5 +40,5 @@ printstyled("    pick files\n", color=:light_green)
 # What about when there is no data file?
 W = readuw(uwf2)
 @test W.hdr.mag[1] == 0.9f0
-@test W.hdr.src == "SampleFiles/94100613522o"
+@test occursin("94100613522o", W.hdr.src)
 @test W.hdr.ot == DateTime("1994-10-06T13:52:39.02")
