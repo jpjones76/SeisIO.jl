@@ -1,10 +1,4 @@
-export readmseed, readmseed!
 const SEED = SeedVol()
-
-# TO DO: Account for channels where any of the relevant SeisData params
-# (fs, gain, loc, resp) change within a SEED volume...these are all
-# buried in currently-unsupported packet types. SEED is terrible; who
-# wrote this shit format
 
 cleanSEED() = (setfield!(SEED, :k, 0); setfield!(SEED, :dt, 0.0))
 
@@ -53,7 +47,8 @@ function parserec!(S::SeisData, sid::IO, v::Int)
   # This is the standard check for correct byte order...?
   yy = SEED.u16[1]
   jj = SEED.u16[2]
-  if (jj > 0x0200 || ((jj == 0x0000 || jj == 0x0100) && (yy > 0x0907 || yy < 0x707)) || yy>0x0bb8)
+  if (jj > 0x0200 || ((jj == 0x0000 || jj == 0x0100) &&
+      (yy > 0x0907 || yy < 0x707)) || yy>0x0bb8)
 	  setfield!(SEED, :swap, !SEED.swap)
     if ((SEED.swap == true) && (SEED.wo == 0x01))
       SEED.xs = true
@@ -111,8 +106,14 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     # assumes fs doesn't change within a SeisData structure
     L = length(S.x[c])
     nt = size(S.t[c], 1)
-    xi = S.t[c][nt, 1]
+    xi = nt > 0 ? S.t[c][nt, 1] : 0
     te = getindex(sum(S.t[c], dims=1),2) + round(Int64, L*SEED.dt*sμ)
+  end
+  if xi + SEED.n > L
+    v > 1 && println(stdout, "Resize S.x[", c, "] from length ",
+                    length(S.x[c]), " to length ",
+                    length(S.x[c]) + SEED.def.nx)
+    resize!(S.x[c], length(S.x[c]) + SEED.def.nx)
   end
 
   # =========================================================================
@@ -129,84 +130,62 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     SEED.u16[5] = UInt16(position(sid) - pos)
     # DND DND DND
 
-     # always big-Endian? Undocumented
     bt = SEED.swap ? ntoh(read(sid, UInt16)) : read(sid, UInt16)
 
     if v > 2
       println(stdout, "Skipped SEED.u16[6] = ", SEED.u16[6], " bytes")
-      println(stdout, "Relative position SEED.u16[5] = ", SEED.u16[5], " bytes from record begin")
-      println(stdout, "Will seek SEED.nsk = ", SEED.nsk, " bytes from last blockete's end to data begin")
+      println(stdout, "Relative position SEED.u16[5] = ", SEED.u16[5],
+                      " bytes from record begin")
+      println(stdout, "Will seek SEED.nsk = ", SEED.nsk,
+                      " bytes from last blockete's end to data begin")
       println(stdout, "Position = ", position(sid))
       println(stdout, string("Blockette type to read: ", bt))
     end
 
-    # DND DND DND
-    SEED.u16[6] = (SEED.swap ? ntoh(read(sid, UInt16)) : read(sid, UInt16)) - SEED.u16[5]
-    # DND DND DND
+    SEED.u16[6] = (SEED.swap ? ntoh(read(sid, UInt16)) : read(sid, UInt16)) -
+                    SEED.u16[5]
 
     # Blockette parsing moved to individual functions named blk_####, e.g., blk_200
-    if bt in UInt16[0x0064,0x00c9,0x01f4,0x03e8,0x03e9,0x07d0]
-      blk_len = getfield(SeisIO, Symbol(string("blk_", bt)))(S, sid)
+    if bt in UInt16[0x0064, 0x00c9, 0x01f4, 0x03e8, 0x03e9, 0x07d0]
+      blk_len = getfield(SeisIO, Symbol(string("blk_", bt)))(S, sid, c)
       SEED.nsk -= blk_len
       SEED.u16[6] -= blk_len
-
-      # Store event detections in S.misc
-      if bt == 0x00c9
-        sig = SEED.B201.sig
-        flag = SEED.B201.flags == 0x80 ? "dilatation" : "compression"
-        if SEED.swap
-          sig = ntoh.(sig)
-          flag = SEED.B201.flags == 0x01 ? "dilatation" : "compression"
-        end
-        if !haskey(S.misc[c], "mseed_events")
-          S.misc[c]["mseed_events"] = Array{String, 1}(undef,0)
-        end
-        push!(S.misc[c]["mseed_events"], join(SEED.B201.t, ',') * "," *
-                                            join(sig, ',') * "," *
-                                            flag * "," *
-                                            join(SEED.B201.snr, ',') * "," *
-                                            strip(SEED.B201.det) )
-
-        v > 2  && (string("Done reading blockette type ", bt, "."))
-      end
-
+      v > 2 && println(stdout, "Done reading blockette type ", bt, ".")
     else
       # This is only for mini-SEED.
-      @warn(string("No support for Blockette Type ", bt, ", channel ", id, "; attempting to skip."))
-      skip(sid, SEED.u16[5]-0x0004)
+      v > 1 && println(stdout, id, ": no support for Blockette Type ", bt, "; skipped.")
+      skip(sid, SEED.u16[5] - 0x0004)
     end
-  end
-  # =========================================================================
-  if SEED.nsk > 0x0000
-    skip(sid, Int(SEED.nsk))
-    SEED.nsk = 0x0000
-  end
-  # =========================================================================
-
-  if v > 2
-    println(stdout, "To parse: nx = ", SEED.n, " sample blockette, compressed size = ", SEED.nx-SEED.u16[4], " bytes, fmt = ", SEED.fmt)
-  end
-
-  if xi+SEED.n > L
-    v > 1 && println(stdout, "Resize S.x[", c, "] from length ", length(S.x[c]), " to length ", length(S.x[c]) + SEED.def.nx)
-    resize!(S.x[c], length(S.x[c]) + SEED.def.nx)
-  end
-  if length(SEED.x) < SEED.n
-    resize!(SEED.x, SEED.n)
   end
 
   # =========================================================================
   # Data parsing: Adapted from rdmseed.m by Francois Beauducel
+  if SEED.nsk > 0x0000
+    skip(sid, Int(SEED.nsk))
+    SEED.nsk = 0x0000
+  end
+
+  if v > 2
+    println(stdout, "To parse: nx = ", SEED.n, " sample blockette, ",
+    "compressed size = ", SEED.nx-SEED.u16[4], " bytes, fmt = ", SEED.fmt)
+  end
+  if length(SEED.x) < SEED.n
+    resize!(SEED.x, SEED.n)
+  end
   dec = get(SEED.dec, SEED.fmt, "DecErr")
   val = getfield(SeisIO, Symbol(string("SEED_", dec)))(sid)
+
   if dec == "Char"
-    # Parse ASCII data
+    # ASCII is a special case as it's typically not data
     if !haskey(S.misc[c], "seed_ascii")
       S.misc[c]["seed_ascii"] = Array{String,1}(undef,0)
     end
     push!(S.misc[c]["seed_ascii"], val)
+
   else
+    # Update S.x[c]
     unsafe_copyto!(getfield(S,:x)[c], xi+1, SEED.x, 1, SEED.k)
+
     # Correct time matrix
     tc = SEED.u8[2] == 0x01 ? 0 : Int64(SEED.tc)*100
     dts = round(Int64, sμ*(d2u(DateTime(SEED.t[1:6]...)))) + SEED.t[7] + tc - te
@@ -222,7 +201,7 @@ function parserec!(S::SeisData, sid::IO, v::Int)
       end
       δt = S.t[c][nt,2]
 
-      # If the gap is greater than or equal to one sample, we note it
+      # If the gap is greater than or equal to one sample, we record it
       if dts + δt >= round(Int64, SEED.dt*sμ)
         S.t[c][nt,1] += 1
         S.t[c][nt,2] += dts
@@ -235,84 +214,3 @@ function parserec!(S::SeisData, sid::IO, v::Int)
   end
   return nothing
 end
-
-function parsemseed!(S::SeisData, sid::IO, v::Int)
-  while !eof(sid)
-    parserec!(S, sid, v)
-  end
-  for i = 1:S.n
-    L = size(S.t[i], 1)
-    if L == 0
-      S.x[i] = Array{Float64,1}(undef, 0)
-      S.fs[i] = 0.0
-    else
-      nx = S.t[i][L,1]
-      if length(S.x[i]) > nx
-        resize!(S.x[i], nx)
-      end
-    end
-  end
-  return S
-end
-
-"""
-    S = readmseed(fname)
-
-Read file fname in big-Endian mini-SEED format. Returns a SeisData structure.
-Note: Limited functionality; cannot currently handle full SEED files or most
-non-data blockettes.
-
-Keywords:
-* swap=false::Bool
-* v=0::Int
-"""
-function readmseed(fname::String; swap=false::Bool, v::Int=KW.v)
-  S = SeisData(0)
-  setfield!(SEED, :swap, swap)
-
-  if safe_isfile(fname)
-    fid = open(fname, "r")
-    skip(fid, 6)
-    (findfirst(isequal(read(fid, Char)), "DRMQ") > 0) || error("Scan failed due to invalid file type")
-    seek(fid, 0)
-    parsemseed!(S, fid, v)
-    close(fid)
-  else
-    error("Invalid file name!")
-  end
-  return S
-end
-
-"""
-    readmseed!(S, fname)
-
-Read file `fname` into `S` big-Endian mini-SEED format.
-"""
-function readmseed!(S::SeisData, fname::String; swap=false::Bool, v::Int=KW.v)
-  setfield!(SEED, :swap, swap)
-
-  if safe_isfile(fname)
-    fid = open(fname, "r")
-    skip(fid, 6)
-    (findfirst(isequal(read(fid, Char)), "DRMQ") > 0) || error("Scan failed due to invalid file type")
-    seek(fid, 0)
-    parsemseed!(S, fid, v)
-    close(fid)
-  else
-    error("Invalid file name!")
-  end
-  return nothing
-end
-
-
-# """
-#     seeddef(s, v)
-#
-# Set SEED default for field `s` to value `v`. Field types, system defaults, and meanings are below.
-#
-# | Name   | Default | Type            | Description                      |
-# |:-------|:--------|:----------------|:---------------------------------|
-# | nx     | 360200  | Int             | length(C.x) for new channels     |
-# """
-# seeddef(f::Symbol, v::Any) = setfield!(SEED.def, f, v)
-# seeddef(s::String, v::Any) = setfield!(SEED.def, Symbol(s), v)

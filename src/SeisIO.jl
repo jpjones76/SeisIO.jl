@@ -21,7 +21,6 @@ end
 
 # Types and methods: do not change order of operations
 include("Types/KWDefs.jl")
-include("Types/SEED.jl")
 include("Types/SeisData.jl")
 include("Types/SeisChannel.jl")
 include("Types/SeisHdr.jl")
@@ -37,7 +36,7 @@ for i in readdir(path*"/Processing")
 end
 
 # Data formats
-for i in readdir(path*"/Formats")
+for i in ls(path*"/Formats/*")
   if endswith(i, ".jl")
     include(joinpath("Formats",i))
   end

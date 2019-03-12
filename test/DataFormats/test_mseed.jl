@@ -12,28 +12,42 @@ S = readmseed(string(path, "/SampleFiles/test.mseed"), v=0)
 if safe_isdir(path*"/SampleFiles/Restricted")
   printstyled("    file reads with many time gaps\n", color=:light_green)
 
-  files = ls("/data2/Code/SeisIO/test/SampleFiles/Restricted/*mseed")
-  for i = 1:5
-    for f in files
-      S = SeisData()
-      readmseed!(S, f, v=0)
-      @test isempty(S) == false
+  open("runtests.log", "a") do out
+    redirect_stdout(out) do
+      files = ls("/data2/Code/SeisIO/test/SampleFiles/Restricted/*mseed")
+      for i = 1:5
+        for f in files
+          println(stdout, "attempting to read ", f)
+          S = SeisData()
+          @test_nowarn readmseed!(S, f, v=3)
+          readmseed!(S, f, v=0)
+          @test isempty(S) == false
 
-      if occursin(f, "text-encoded")
-        @test haskey(S.misc[1], "seed_ascii") == true
-        str = split(S.misc[1]["seed_ascii"][1], "\n", keepempty=false)
-        @test occursin(str[1], "Quanterra Packet Baler Model 14 Restart.")
+          if occursin("text-encoded", f)
+            @test haskey(S.misc[1], "seed_ascii") == true
+            str = split(S.misc[1]["seed_ascii"][1], "\n", keepempty=false)
+            @test occursin("Quanterra Packet Baler Model 14 Restart.", str[1])
 
-      end
+          elseif occursin("detection.record",f )
+            ev_rec = get(S.misc[1], "mseed_events", "no record")[1]
+            @test ev_rec == "2004,7,28,20,28,6,185,80.0,0.39999998,18.0,dilatation,1,3,2,1,4,0,2,0,Z_SPWWSS"
 
-      if occursin("SHW.UW", f)
-        @test size(S.t[1]) == (434, 2)
-        @test size(S.t[2]) == (10, 2)
-        @test string(u2d(S.t[1][1,2]*1.0e-6)) == "1980-03-22T20:45:18.349"
-        @test isequal(S.id, String[ "UW.SHW..EHZ", "UW.SHW..SHZ" ])
-        @test ≈(S.fs, Float64[104.085000, 52.038997])
-        @test ≈(S.x[1][1:5], Float64[-68.0, -57.0, -71.0, -61.0, -52.0])
+          elseif occursin("SHW.UW", f)
+            @test size(S.t[1]) == (434, 2)
+            @test size(S.t[2]) == (10, 2)
+            @test string(u2d(S.t[1][1,2]*1.0e-6)) == "1980-03-22T20:45:18.349"
+            @test isequal(S.id, String[ "UW.SHW..EHZ", "UW.SHW..SHZ" ])
+            @test ≈(S.fs, Float64[104.085000, 52.038997])
+            @test ≈(S.x[1][1:5], Float64[-68.0, -57.0, -71.0, -61.0, -52.0])
+
+
+          else
+            @test isempty(S.x[1]) == false
+          end
+        end
       end
     end
   end
+else
+  printstyled("  extended readmseed tests skipped. (files not found; is this Appveyor?)\n", color=:green)
 end
