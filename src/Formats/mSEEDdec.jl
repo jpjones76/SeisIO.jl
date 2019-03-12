@@ -8,6 +8,8 @@ function unpack!(S::SeedVol)
   return nothing
 end
 
+SEED_Char(io::IO) = replace(String(read(io, SEED.nx-SEED.u16[4], all=false)), ['\r', '\0'] =>"")
+
 function SEED_Unenc(io::IO)
   T::Type = if SEED.fmt == 0x01
       Int16
@@ -26,19 +28,19 @@ function SEED_Unenc(io::IO)
   return nothing
 end
 
-function SEED_Int24(io::IO)
-  nv = div(SEED.nx - SEED.u16[4], 3)
-  buf = Array{UInt8,1}(undef, 3*nv)
-  readbytes!(io, buf, 3*nv)
-  for i = 1:nv
-    y  = UInt32(buf[3*i-2]) << 24
-    y |= UInt32(buf[3*i-1]) << 16
-    y |= UInt32(buf[3*i]) << 8
-    SEED.x[i+1] = signed(y) >> 8
-  end
-  SEED.k = nv
-  return nothing
-end
+# function SEED_Int24(io::IO)
+#   nv = div(SEED.nx - SEED.u16[4], 3)
+#   buf = Array{UInt8,1}(undef, 3*nv)
+#   readbytes!(io, buf, 3*nv)
+#   for i = 1:nv
+#     y  = UInt32(buf[3*i-2]) << 24
+#     y |= UInt32(buf[3*i-1]) << 16
+#     y |= UInt32(buf[3*i]) << 8
+#     SEED.x[i+1] = signed(y) >> 8
+#   end
+#   SEED.k = nv
+#   return nothing
+# end
 
 function SEED_Geoscope(io::IO)
   mm = 0x0fff
