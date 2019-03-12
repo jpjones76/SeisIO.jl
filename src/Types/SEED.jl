@@ -7,10 +7,11 @@ end
 # [201] Murdock Event Detection Blockette (60 bytes)
 mutable struct Blk201
   sig::Array{Float32,1}
-  flags::Array{UInt8, 1}
+  flags::UInt8
   t::Array{Int32,1}
   det::String
-  Blk201() = new(zeros(Float32, 3), zeros(UInt8, 2), Array{Int32,1}(undef,7), "None")
+  snr::Array{UInt8,1} # includes spots for lookback and pick algorithm
+  Blk201() = new(zeros(Float32, 3), 0x00, Array{Int32,1}(undef,7), "None", zeros(UInt8,8))
 end
 
 #  [500] Timing Blockette (200 bytes)
@@ -43,7 +44,7 @@ mutable struct SeedVol
   nx::UInt16    # 0x1000
   wo::UInt8     # 0x01
   nsk::UInt16   # [Number of bytes to skip after end of data record]
-  tc::Int64     # Time correction
+  tc::Int32     # Time correction
   swap::Bool
 
   # hdr:
@@ -52,11 +53,12 @@ mutable struct SeedVol
   id::Array{UInt8,1}
   r::Array{Int16,1}
 
-  # Computed quantities
+  # Values read from file/stream
   dt::Float64
   t::Array{Int32,1}
   xs::Bool
   k::Int
+  n::UInt16
 
   # Data-related
   x::Array{Float64,1}
@@ -76,11 +78,20 @@ mutable struct SeedVol
   # Steim
   steimvals::Array{UInt32,1}
 
+  # Dictionary for decoders
+  dec::Dict{UInt8,String}
+
   function SeedVol()
     id = Array{UInt8,1}(undef, 15)
     fill!(id, 0x20)
     id[[3,9,12]] .= 0x2e
-    new(0x0a, 0x00, 0x1000, 0x01, 0x0000, 0, false,  # fmt, lx, nx, wo, nsk, tc, swap
+    new(0x0a,                               # fmt
+        0x00,                               # lx
+        0x1000,                             # nx
+        0x01,                               # wo
+        0x0000,                             # nsk
+        zero(Int32),                        # tc
+        false,                              # swap
 
         # header
         Array{UInt8,1}(undef,20),           # hdr::Vector{UInt8}
@@ -93,6 +104,7 @@ mutable struct SeedVol
         zeros(Int32,7),                     # t::Array{Int32,1}
         false,                              # xs::Bool
         0,                                  # k::Int
+        0x0000,                             # n::UInt16
 
         # data-related
         Array{Float64, 1}(undef, 65535),    # x::Array{Float64,1}
@@ -109,7 +121,22 @@ mutable struct SeedVol
         Blk500(),                           # B500:: Blk500
         Blk2000(),                          # B2000:: Blk2000
 
-        reverse(collect(0x00000000:0x00000002:0x0000001e), dims=1)    # steimvals::Array{UInt32,1}
+        # steimvals::Array{UInt32,1}
+        reverse(collect(0x00000000:0x00000002:0x0000001e), dims=1),
+
+        Dict{UInt8,String}( 0x00 => "Char",
+                            0x01 => "Unenc",
+                            0x02 => "Int24",
+                            0x03 => "Unenc",
+                            0x04 => "Unenc",
+                            0x05 => "Unenc",
+                            0x0a => "Steim",
+                            0x0b => "Steim",
+                            0x0d => "Geoscope",
+                            0x0e => "Geoscope",
+                            0x10 => "CDSN",
+                            0x1e => "SRO",
+                            0x20 => "DWWSSN" )
         )
   end
 end

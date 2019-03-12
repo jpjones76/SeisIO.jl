@@ -36,7 +36,9 @@ function irisws(cha::String, d0, d1;
       Ch.src = url
       parsed = true
     elseif fmt == "miniseed"
-      Ch = parsemseed(IOBuffer(R.body), false, v)[1]
+      S = SeisData()
+      parsemseed!(S, IOBuffer(R.body), v)
+      Ch = S[1]
       note!(Ch, "+src: irisws "*url)
       Ch.src = url
       parsed = true
