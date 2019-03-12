@@ -198,16 +198,14 @@ function parserec!(S::SeisData, sid::IO, v::Int)
   # =========================================================================
   # Data parsing: Adapted from rdmseed.m by Francois Beauducel
   dec = get(SEED.dec, SEED.fmt, "DecErr")
+  val = getfield(SeisIO, Symbol(string("SEED_", dec)))(sid)
   if dec == "Char"
     # Parse ASCII data
-    str = replace(String(read(sid, SEED.nx-SEED.u16[4], all=false)), ['\r', '\0'] =>"")
     if !haskey(S.misc[c], "seed_ascii")
       S.misc[c]["seed_ascii"] = Array{String,1}(undef,0)
     end
-    push!(S.misc[c]["seed_ascii"], str)
-
+    push!(S.misc[c]["seed_ascii"], val)
   else
-    getfield(SeisIO, Symbol(string("SEED_", dec)))(sid)
     unsafe_copyto!(getfield(S,:x)[c], xi+1, SEED.x, 1, SEED.k)
     # Correct time matrix
     tc = SEED.u8[2] == 0x01 ? 0 : Int64(SEED.tc)*100
