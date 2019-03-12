@@ -1,3 +1,16 @@
+### 2019-03-12
+* `readmseed` improvements:
+  + tested data decoders added for remaining SEED data formats. three exceptions:
+    - No Steim3. No one, even IRIS staff, has seen it used.
+    - No USNSN Data Compression.
+    - Int24 has a decoder that should work, but cannot be tested unless someone
+    sends me a SEED volume with Int24 data.
+  + corrected handling of event detection and timing blockettes.
+  + temporarily deprecated handling of blockette type 2000; to return in a
+    later release, when examples are found in the wild!
+  + bugfix to handle an unusual situation where record endianness changes
+    within a file
+
 ### 2019-03-10
 * Several improvements to `readsegy`
   + Fixed a bug where elevations were set incorrectly with `-passcal=true`.

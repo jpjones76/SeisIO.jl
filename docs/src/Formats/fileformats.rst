@@ -128,11 +128,10 @@ Parse UW event pick file into SeisEvent structure.
 Parse UW event pick file ``pfname`` into a new SeisEvent structure.
 
 .. function:: writesac(S[, ts=true])
-.. function:: wsac(S[, ts=true])
 
 Write SAC data to SAC files with auto-generated names. Specify ts=true to write time stamps; this will flag the file as generic x-y data in the SAC interpreter.
 
 .. function:: wseis(fname, S)
-.. function:: wseis(fname, S, T, U)
+.. function:: wseis(fname, S, T, U...)
 
 Write SeisIO data to fname. Multiple objects can be written at once.
