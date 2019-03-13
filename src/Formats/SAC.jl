@@ -142,7 +142,7 @@ function read_sac_stream(f::IO, full=false::Bool, swap=false::Bool)
 
   # ints
   (m,d) = j2md(iv[1],iv[2])
-  ts = round(Int64, d2u(DateTime(iv[1],m,d,iv[3],iv[4],iv[5]))*sμ + Float64(Float32(iv[6]) + fv[6] == sac_nul_f ? 0.0f0 : fv[6])*1.0e3)
+  ts = round(Int64, d2u(DateTime(iv[1], m, d, iv[3], iv[4], iv[5], iv[6]))*sμ + Float64((fv[6] == sac_nul_f ? 0.0f0 : fv[6])*1.0f3))
   setfield!(S, :t, Array{Int64,2}([1 ts; iv[10] 0]))
 
   # chars
@@ -261,11 +261,3 @@ end
 writesac(S::SeisChannel; ts=false::Bool, v::Int64=KW.v) = writesac(SeisData(S), ts=ts, v=v)
 
 rsac(fname::String; full=false::Bool) = readsac(fname, full=full)
-
-# """
-#     wsac(S::SeisData; ts=false, v=false)
-#
-# Write all data in SeisData structure `S` to auto-generated SAC files.
-# """
-# wsac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v::Int64=KW.v) = writesac(S, ts=ts, v=v)
-# wsac(S::SeisChannel; ts=false::Bool, , v::Int64=KW.v) = writesac(SeisData(S), ts=ts, v=v)

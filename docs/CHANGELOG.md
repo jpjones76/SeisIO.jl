@@ -10,6 +10,16 @@
     later release, when examples are found in the wild!
   + bugfix to handle an unusual situation where record endianness changes
     within a file
+  + Improved time gap handling: for data sampled at fs, with δ = 1.0/fs,
+    a time gap is now recorded when the time gap between the end of one
+    packet and the start of the next exceeds 1.5x the sample rate δ (i.e.
+    when drift > 0.5δ).
+* Consistency fix: `get_data("IRIS" ... )` now always handles unset fields as follows:
+  + An unset :loc is always set to `[0.0, 0.0, 0.0, 0.0, 0.0]`.
+  + An unset :name is always set to match :id.
+* SeedLink: fixed a bug where :x was not being truncated after a packet parse
+  in which :x was resized.
+* Updated examples.jl
 
 ### 2019-03-10
 * Several improvements to `readsegy`

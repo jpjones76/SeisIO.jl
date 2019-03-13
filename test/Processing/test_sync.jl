@@ -7,33 +7,6 @@ t = floor(Int64, time()-60.0)*sμ
 δ3 = 1.0
 dtμ = round(Int, 1.0e6/fs)
 
-Lx(T::SeisData) = [length(T.x[i]) for i=1:T.n]
-
-function basic_checks(T::SeisData)
-  # Basic checks
-  for i = 1:T.n
-    if T.fs[i] == 0.0
-      @test size(T.t[i],1) == length(T.x[i])
-    else
-      @test T.t[i][end,1] == length(T.x[i])
-    end
-  end
-  return nothing
-end
-
-function get_edge_times(S::SeisData)
-  ts = [S.t[i][1,2] for i=1:S.n]
-  te = copy(ts)
-  for i=1:S.n
-    if S.fs[i] == 0.0
-      te[i] = S.t[i][end,2]
-    else
-      te[i] += (sum(S.t[i][2:end,2]) + dtμ*length(S.x[i]))
-    end
-  end
-  return ts, te
-end
-
 # for k = 1:10
 # Test three seismic and three irregularly sampled channels
 S = randSeisData(4, s=1.0)[2:4] + randSeisData(4, c=1.0)[2:4]

@@ -1,11 +1,12 @@
 using Compat, Dates, SeisIO, SeisIO.RandSeis, Test
-
 import DelimitedFiles: readdlm
 import Random: rand, randperm, randstring
 import SeisIO: FDSN_event_xml, FDSN_sta_xml, bad_chars, datafields, hdrfields, μs, safe_isfile, safe_isdir, sμ, t_expand
 import SeisIO.RandSeis: getyp2codes, pop_rand_dict!
 
+# All constants needed by tests are here
 const path = Base.source_dir()
+println(stdout, "SeisIO path = ", path)
 const unicode_chars = String.(readdlm("SampleFiles/julia-unicode.csv", '\n')[:,1])
 const n_unicode = length(unicode_chars)
 const breaking_dict = Dict{String,Any}(
@@ -25,6 +26,9 @@ const breaking_dict = Dict{String,Any}(
   "240" => collect(rand(Complex{Float16}, rand(4:24))), "241" => collect(rand(Complex{Float32}, rand(4:24))), "242" => collect(rand(Complex{Float64}, rand(4:24)))
   )
 
+# All functions used by tests are here
+Lx(T::SeisData) = [length(T.x[i]) for i=1:T.n]
+change_sep(S::Array{String,1}) = [replace(i, "/" => sep) for i in S]
 test_fields_preserved(S1::SeisData, S2::SeisData, x::Int, y::Int) =
   @test(minimum([getfield(S1,f)[x]==getfield(S2,f)[y] for f in datafields]))
 test_fields_preserved(S1::SeisChannel, S2::SeisData, y::Int) =
@@ -120,4 +124,98 @@ function breaking_seis()
   S.id[2] = "UW.VLM..EHZ"
   S.id[3] = "UW.TDH..EHZ"
   return S
+end
+
+function basic_checks(T::SeisData)
+  # Basic checks
+  for i = 1:T.n
+    if T.fs[i] == 0.0
+      @test size(T.t[i],1) == length(T.x[i])
+    else
+      @test T.t[i][end,1] == length(T.x[i])
+    end
+  end
+  return nothing
+end
+
+function get_edge_times(S::SeisData)
+  ts = [S.t[i][1,2] for i=1:S.n]
+  te = copy(ts)
+  for i=1:S.n
+    if S.fs[i] == 0.0
+      te[i] = S.t[i][end,2]
+    else
+      te[i] += (sum(S.t[i][2:end,2]) + dtμ*length(S.x[i]))
+    end
+  end
+  return ts, te
+end
+
+
+function wait_on_data!(S::SeisData; tmax::Real=60.0)
+  τ = 0.0
+  t = 10.0
+  printstyled(string("      (sleep up to ", tmax + t, " s)\n"), color=:green)
+  open("runtests.log", "a") do out
+    redirect_stdout(out) do
+
+      # Here we actually wait for data to arrive
+      sleep(t)
+      τ += t
+      while isempty(S)
+        sleep(t)
+        τ += t
+        if τ > tmax
+          break
+        end
+      end
+
+      # Close the connection cleanly (write & close are redundant, but
+      # write should close it instantly)
+      for q = 1:length(S.c)
+        if isopen(S.c[q])
+          close(S.c[q])
+          if q == 3
+            show(S)
+          end
+        end
+      end
+      sleep(t)
+    end
+  end
+
+  # Synchronize (the reason we used d0,d1 above)
+  if !isempty(S)
+    sync!(S, s="first")
+  else
+    @warn(string("No data after ", tmax, " s. Is the server down?"))
+  end
+  return nothing
+end
+
+
+function t_win(T::Array{Int64,2}, fs::Float64)
+  n = size(T,1)-1
+  w0 = Int64(0)
+  W = Array{Int64,2}(undef,n,2)
+  @inbounds for i = 1:n
+    W[i,1] = T[i,2] + w0
+    W[i,2] = W[i,1] + round(Int64, SeisIO.sμ*Float64(T[i+1,1]-T[i,1])/fs)
+    w0 = W[i,2]
+  end
+  return W
+end
+
+function w_time(W::Array{Int64,2}, fs::Float64)
+  w2 = Int64(0)
+  n = size(W,1)
+  T = Array{Int64,2}(undef,n+1,2)
+  T[1,1] = Int64(1)
+  @inbounds for i = 1:n
+    T[i,2] = W[i,1] - w2
+    T[i+1,1] = T[i,1] - round(Int64, (W[i,1]-W[i,2])*SeisIO.μs*fs)
+    w2 = W[i,2]
+  end
+  T[n+1,2] = Int64(0)
+  return T
 end

@@ -32,15 +32,21 @@ function irisws(cha::String, d0, d1;
     end
     if fmt == "sacbl"
       Ch = read_sac_stream(IOBuffer(R.body))
-      note!(Ch, "+src: irisws "*url)
       Ch.src = url
+      if isempty(Ch.name)
+        Ch.name = deepcopy(Ch.id)
+      end
+
       parsed = true
     elseif fmt == "miniseed"
       S = SeisData()
       parsemseed!(S, IOBuffer(R.body), v)
       Ch = S[1]
-      note!(Ch, "+src: irisws "*url)
       Ch.src = url
+      if isempty(Ch.loc)
+        Ch.loc = zeros(Float64,5)
+      end
+
       parsed = true
     else
       # other parsers not yet written

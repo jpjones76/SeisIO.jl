@@ -2,15 +2,14 @@ export d2u, j2md, md2j, parsetimewin, timestamp, u2d, t_win, w_time
 
 function tstr(t::DateTime)
   Y, M, D, h, m, s, μ = year(t), month(t), day(t), hour(t), minute(t), second(t), millisecond(t)
-  c = ":"
   Y = lpad(Y, 4, "0")
   M = lpad(M, 2, "0")
-  D = lpad(M, 2, "0")
-  h = lpad(M, 2, "0")
-  m = lpad(M, 2, "0")
-  s = lpad(M, 2, "0")
+  D = lpad(D, 2, "0")
+  h = lpad(h, 2, "0")
+  m = lpad(m, 2, "0")
+  s = lpad(s, 2, "0")
   μ = lpad(μ, 3, "0")
-  return string(Y, c, M, c, D, "T", h, c, m, c, s, ".", μ)
+  return string(Y, "-", M, "-", D, "T", h, ":", m, ":", s, ".", μ)
 end
 
 u2d(k::Real) = Dates.unix2datetime(k)
@@ -50,6 +49,11 @@ function t_collapse(tt::Array{Int64,1}, fs::Float64)
     end
   end
   return t
+end
+
+function endtime(t::Array{Int64,2}, fs::Float64)
+  L = size(t,1)
+  return L == 0 ? 0 : getindex(sum(t, dims=1),2) + (t[L,1]-1)*round(Int64, 1.0/(fs*μs))
 end
 
 # =========================================================

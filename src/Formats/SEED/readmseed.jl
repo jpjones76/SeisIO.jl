@@ -4,18 +4,7 @@ function parsemseed!(S::SeisData, sid::IO, v::Int)
   while !eof(sid)
     parserec!(S, sid, v)
   end
-  for i = 1:S.n
-    L = size(S.t[i], 1)
-    if L == 0
-      S.x[i] = Array{Float64,1}(undef, 0)
-      S.fs[i] = 0.0
-    else
-      nx = S.t[i][L,1]
-      if length(S.x[i]) > nx
-        resize!(S.x[i], nx)
-      end
-    end
-  end
+  trunc_x!(S)
   return S
 end
 

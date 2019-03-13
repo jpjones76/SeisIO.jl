@@ -265,3 +265,19 @@ sort(S::SeisData; rev=false::Bool) = (T = deepcopy(S); sort!(T, rev=rev))
 Delete all channels from S that have no data (i.e. S.x is empty or non-existent).
 """
 prune!(S::SeisData) = (deleteat!(S, findall([length(x) == 0 for x in S.x])); return nothing)
+
+# Purpose: deal with intentional overly-generous "resize!" when parsing SEED
+function trunc_x!(S::SeisData)
+  for i = 1:S.n
+    L = size(S.t[i], 1)
+    if L == 0
+      S.x[i] = Array{Float64,1}(undef, 0)
+    else
+      nx = S.t[i][L,1]
+      if length(S.x[i]) > nx
+        resize!(S.x[i], nx)
+      end
+    end
+  end
+  return nothing
+end

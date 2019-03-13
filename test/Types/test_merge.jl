@@ -248,7 +248,7 @@ n_targ = 7
 @test ≈(minimum([length(getfield(S,i)) for i in datafields]), n_targ)
 @test any(maximum([C.x.==i for i in S.x[1]])) == false
 
-# Some new functionality added 2019-02-23
+# added 2019-02-23
 S = SeisData(randSeisData(5), SeisChannel(), SeisChannel(),
     SeisChannel(id="UW.SEP..EHZ", name="Darth Exploded",
     loc=[46.1967, -122.1875, 1440, 0.0, 0.0], x=rand(1024)))

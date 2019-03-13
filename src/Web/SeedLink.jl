@@ -332,7 +332,7 @@ function SeedLink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
     if mode == "TIME"
       m_str = string("TIME ", s, " ", t, "\r")
     else
-      m_str = string("FETCH ", s, "\r")
+      m_str = string("FETCH\r")
     end
   else
     m_str = string("DATA\r")
@@ -402,7 +402,7 @@ function SeedLink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
 
         #= use of rand() makes it almost impossible for multiple SeedLink
         connections to result in one sleeping indefinitely. =#
-        τ = ceil(Int, refresh*(1.0+rand()))
+        τ = ceil(Int, refresh*(0.8 + 0.2*rand()))
         sleep(τ)
         eof(S.c[q])
         N = floor(Int, bytesavailable(S.c[q])/520)
@@ -418,9 +418,10 @@ function SeedLink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
             (v > 1) && @printf(stdout, "%s, ", pkt_id)
           end
           (v > 1) && @printf(stdout, "\b\b...done current packet dump.\n")
+          trunc_x!(S)
         end
 
-        # SeedLink (non-standard) keep-alive gets sent every a seconds
+        # SeedLink (non-standard) keep-alive gets sent every kai seconds
         j += τ
         if j ≥ kai
           # Secondary "isopen" loop avoids possible error from race condition

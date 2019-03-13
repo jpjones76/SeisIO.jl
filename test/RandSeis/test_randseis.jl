@@ -22,7 +22,7 @@ for i = 1:10000
   @test isa(u, String)
 end
 
-printstyled("  RandSeis functions\n", color=:light_green)
+printstyled("  randSeis*\n", color=:light_green)
 for i = 1:10
   randSeisChannel()
   randSeisData()
