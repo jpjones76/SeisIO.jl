@@ -1,45 +1,5 @@
 import SeisIO: parse_charr, parse_chstr, parse_sl
 
-function wait_on_data!(S::SeisData; tmax::Real=100.0)
-  τ = 0.0
-  t = 20.0
-  printstyled(string("      (sleep up to ", tmax + t, " s)\n"), color=:green)
-  open("runtests.log", "a") do out
-    redirect_stdout(out) do
-
-      # Here we actually wait for data to arrive
-      sleep(t)
-      τ += t
-      while isempty(S)
-        sleep(t)
-        τ += t
-        if τ > tmax
-          break
-        end
-      end
-
-      # Close the connection cleanly (write & close are redundant, but
-      # write should close it instantly)
-      for q = 1:length(S.c)
-        write(S.c[q], "BYE\r")
-        close(S.c[q])
-        if q == 3
-          show(S)
-        end
-      end
-      sleep(t)
-    end
-  end
-
-  # Synchronize (the reason we used d0,d1 above)
-  if !isempty(S)
-    sync!(S, s="first")
-  else
-    @warn(string("No data after ", tmax, " s. Is the server down?"))
-  end
-  return nothing
-end
-
 # Seedlink with command-line stations
 config_file = path*"/SampleFiles/seedlink.conf"
 sta = ["CC.SEP", "UW.HDW"]
@@ -102,6 +62,12 @@ open("runtests.log", "a") do out
 end
 wait_on_data!(T)
 
+# FETCH mode (indistinguishable from DATA mode for most users)
+printstyled("  SeedLink FETCH mode\n", color=:light_green)
+v = SeedLink(config_file, refresh=10.0, mode="FETCH")
+printstyled("    link initialized\n", color=:light_green)
+wait_on_data!(v, tmax=30.0)
+
 # SeedLink time mode (more complicated)
 printstyled("  SeedLink TIME mode\n", color=:light_green)
 
@@ -123,9 +89,3 @@ printstyled("    second link initialized\n", color=:light_green)
 SeedLink!(U, "CC.VALT..???, UW.ELK..EHZ", mode="TIME", refresh=10.0, s=d0, t=d1)
 printstyled("    third link initialized\n", color=:light_green)
 wait_on_data!(U)
-
-# To ensure precise timing, we'll pass d0 and d1 as strings
-printstyled("  SeedLink FETCH mode\n", color=:light_green)
-v = SeedLink(config_file, refresh=10.0, mode="FETCH", s=d0, t=d1)
-printstyled("    link initialized\n", color=:light_green)
-wait_on_data!(v)

@@ -1,7 +1,7 @@
 # SeedDef: default SEED values
 mutable struct SeedDef
   nx::Int
-  SeedDef() = new(360200)
+  SeedDef() = new(360000)
 end
 
 # [201] Murdock Event Detection Blockette (60 bytes)

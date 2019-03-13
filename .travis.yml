@@ -3,6 +3,8 @@ notifications:
   email:
     on_success: change
     on_failure: always
+codecov: true
+coveralls: true
 os:
 - linux
 - osx

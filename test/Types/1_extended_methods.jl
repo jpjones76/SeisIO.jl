@@ -4,12 +4,12 @@ printstyled(stdout,"    getindex\n", color=:light_green)
 (S,T) = mktestseis()
 @test findid(T, S) == [0, 0, 4, 5]
 
-printstyled(stdout,"    getindex on SeisData ==> SeisChannel\n", color=:light_green)
+printstyled(stdout,"    getindex + Int on SeisData ==> SeisChannel\n", color=:light_green)
 i_targ = 3
 C = S[i_targ]
 test_fields_preserved(C,S,i_targ)
 
-printstyled(stdout,"    getindex on SeisData ==> SeisData\n", color=:light_green)
+printstyled(stdout,"    getindex + Range on SeisData ==> SeisData\n", color=:light_green)
 D = S[i_targ:i_targ+1]
 test_fields_preserved(D,S,2,i_targ+1)
 

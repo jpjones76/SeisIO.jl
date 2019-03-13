@@ -107,13 +107,13 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     L = length(S.x[c])
     nt = size(S.t[c], 1)
     xi = nt > 0 ? S.t[c][nt, 1] : 0
-    te = getindex(sum(S.t[c], dims=1),2) + round(Int64, L*SEED.dt*sμ)
-  end
-  if xi + SEED.n > L
-    v > 1 && println(stdout, "Resize S.x[", c, "] from length ",
-                    length(S.x[c]), " to length ",
-                    length(S.x[c]) + SEED.def.nx)
-    resize!(S.x[c], length(S.x[c]) + SEED.def.nx)
+    te = endtime(S.t[c], S.fs[c])
+    if xi + SEED.n > L
+      nx_new = xi + SEED.def.nx
+      resize!(S.x[c], nx_new)
+      v > 1 && println( stdout, S.id[c], ": resized from length ", L,
+                        " to length ", nx_new )
+    end
   end
 
   # =========================================================================
@@ -169,9 +169,6 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     println(stdout, "To parse: nx = ", SEED.n, " sample blockette, ",
     "compressed size = ", SEED.nx-SEED.u16[4], " bytes, fmt = ", SEED.fmt)
   end
-  if length(SEED.x) < SEED.n
-    resize!(SEED.x, SEED.n)
-  end
   dec = get(SEED.dec, SEED.fmt, "DecErr")
   val = getfield(SeisIO, Symbol(string("SEED_", dec)))(sid)
 
@@ -187,24 +184,22 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     unsafe_copyto!(getfield(S,:x)[c], xi+1, SEED.x, 1, SEED.k)
 
     # Correct time matrix
+    nt = size(S.t[c], 1)
     tc = SEED.u8[2] == 0x01 ? 0 : Int64(SEED.tc)*100
-    dts = round(Int64, sμ*(d2u(DateTime(SEED.t[1:6]...)))) + SEED.t[7] + tc - te
+    Δ = round(Int64, sμ/S.fs[c])
+    τ = round(Int64, sμ*(d2u(DateTime(SEED.t[1:6]...)))) + SEED.t[7] + tc - te - Δ
     if te == 0
       S.t[c] = Array{Int64, 2}(undef, 2, 2)
-      S.t[c][1] = one(Int64)
-      S.t[c][2] = SEED.n
-      S.t[c][3] = dts
-      S.t[c][4] = zero(Int64)
+      setindex!(S.t[c], one(Int64), 1)
+      setindex!(S.t[c], SEED.n, 2)
+      setindex!(S.t[c], τ+Δ, 3)
+      setindex!(S.t[c], zero(Int64), 4)
     else
-      if v > 1 && dts > 0
-        println(stdout, "Old end = ", te, ", New start = ", dts + te, ", diff = ", dts, " μs")
-      end
-      δt = S.t[c][nt,2]
-
-      # If the gap is greater than or equal to one sample, we record it
-      if dts + δt >= round(Int64, SEED.dt*sμ)
+      if τ > div(Δ,2)
+        v > 1 && println(stdout, S.id[c], ": gap = ", τ, " μs (old end = ",
+                                          te, ", New start = ", τ + te + Δ)
         S.t[c][nt,1] += 1
-        S.t[c][nt,2] += dts
+        S.t[c][nt,2] += τ
         S.t[c] = vcat(S.t[c], [xi+SEED.n 0])
         nt += 1
       else

@@ -1,13 +1,14 @@
 import Dates:DateTime, Hour, now
-import SeisIO:t_collapse, t_expand
-printstyled("  time functions\n", color=:light_green)
+import SeisIO:t_collapse, t_expand, endtime
+printstyled("  time\n", color=:light_green)
 
 t0 = time()
-ts1 = timestamp(t0)
-ts2 = timestamp(u2d(t0))
-ts3 = timestamp(string(u2d(t0)))
-ts4 = timestamp(DateTime(string(u2d(t0))))
-@test ts1 == ts2 == ts3 == ts4
+ts0 = String(split(string(u2d(t0)), '.')[1])
+ts1 = String(split(timestamp(t0), '.')[1])
+ts2 = String(split(timestamp(u2d(t0)), '.')[1])
+ts3 = String(split(timestamp(string(u2d(t0))), '.')[1])
+ts4 = String(split(timestamp(DateTime(string(u2d(t0)))), '.')[1])
+@test ts1 == ts2 == ts3 == ts4 == ts0
 
 m,d = j2md(2000,1); @test m == 1 && d == 1
 m,d = j2md(2000,60); @test m == 2 && d == 29
@@ -65,8 +66,12 @@ d0, d1 = parsetimewin(s, t)
 # t_collapse, t_expand
 T = Int64[1 1451606400000000; 100001 30000000; 250001 12330000; 352303 99000000; 360001 0]
 fs = 100.0
-@test ≈(T, t_collapse(t_expand(T, fs), fs))
+t_long = t_expand(T, fs)
+@test ≈(T, t_collapse(t_long, fs))
 
-T = hcat(cumsum(ones(Int64,size(T,1))), cumsum(T[:,2]))
-fs = 0.0
-@test ≈(T, t_collapse(t_expand(T, fs), fs))
+T1 = hcat(cumsum(ones(Int64,size(T,1))), cumsum(T[:,2]))
+fs1 = 0.0
+@test ≈(T1, t_collapse(t_expand(T1, fs1), fs1))
+
+# endtime
+@test endtime(T, fs) == last(t_long)
