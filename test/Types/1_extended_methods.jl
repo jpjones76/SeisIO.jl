@@ -136,3 +136,12 @@ deleteat!(X,1)
 @test findid(V,X) == [2,3,1]
 Y = sort(X)
 @test V == Y
+
+# added 2019-02-23
+S = SeisData(randSeisData(5), SeisChannel(), SeisChannel(),
+    SeisChannel(id="UW.SEP..EHZ", name="Darth Exploded",
+    loc=[46.1967, -122.1875, 1440, 0.0, 0.0], x=rand(1024)))
+prune!(S)
+@test (S.n == 6)
+J = findchan("EHZ",S)
+@test (6 in J)

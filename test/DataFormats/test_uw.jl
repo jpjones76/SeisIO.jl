@@ -1,6 +1,11 @@
+import SeisIO: getpf
+
 uwf1 = joinpath(path, "SampleFiles/99011116541")
 uwf2 = joinpath(path, "SampleFiles/94100613522o")
 uwf3 = joinpath(path, "SampleFiles/02062915175o")
+
+froot = splitdir(uwf1)[2]
+@test getpf(froot*"xxx", collect(UInt8, 0x61:0x7a)) == froot*"xxx\0"
 
 printstyled("  UW\n", color=:light_green)
 

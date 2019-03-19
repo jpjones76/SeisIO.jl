@@ -75,3 +75,56 @@ fs1 = 0.0
 
 # endtime
 @test endtime(T, fs) == last(t_long)
+
+printstyled(stdout, "    t_win, w_time\n", color=:light_green)
+printstyled(stdout, "      Faithful representation of gaps\n", color=:light_green)
+fs = 100.0
+Δ = round(Int, 1.0e6/fs)
+t = [1 0; 6 980000; 8 100000; 10 0]
+# t1 = t_expand(t, fs)
+ #       0
+ #   10000
+ #   20000
+ #   30000
+ #   40000
+ # 1030000
+ # 1040000
+ # 1150000
+ # 1160000
+ # 1170000
+
+t2 = t_win(t, Δ)
+ #       0    40000
+ # 1030000  1040000
+ # 1150000  1170000
+ #
+@test t2[1,2] == 40000
+@test t2[2,:] == [1030000, 1040000]
+@test t2[3,:] == [1150000, 1170000]
+
+printstyled(stdout, "      Arbitrary windows containing gaps\n", color=:light_green)
+t = [1 999999998990000; 101 10000; 297 0]
+@test w_time(t_win(t, Δ), Δ) == t
+
+t = [1 999999998990000; 101 10000; 297 1000000; 303 40000; 500 1000000; 10000 0]
+@test w_time(t_win(t, Δ), Δ) == t
+
+printstyled(stdout, "      Length-0 gaps\n", color=:light_green)
+t = [1 0; 6 0; 8 0; 10 0]
+@test w_time(t_win(t, Δ), Δ) == t
+
+printstyled(stdout, "      Negative gaps\n", color=:light_green)
+t = [1 0; 6 -2Δ; 8 -10Δ; 10 0]
+@test w_time(t_win(t, Δ), Δ) == t
+
+printstyled(stdout, "      Single-point gap\n", color=:light_green)
+t = [1 0; 6 2Δ; 7 4Δ; 8 Δ; 10 0]
+@test w_time(t_win(t, Δ), Δ) == t
+
+printstyled(stdout, "      Non-null gap at end\n", color=:light_green)
+t = [1 0; 6 2Δ; 7 4Δ; 8 Δ; 10 Δ]
+@test w_time(t_win(t, Δ), Δ) == t
+
+printstyled(stdout, "      Negative gap at end\n", color=:light_green)
+t = [1 0; 6 2Δ; 7 4Δ; 8 Δ; 10 -5Δ]
+@test w_time(t_win(t, Δ), Δ) == t

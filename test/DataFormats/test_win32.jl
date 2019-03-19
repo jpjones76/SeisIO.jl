@@ -1,4 +1,10 @@
-import SeisIO:safe_isfile
+import SeisIO:safe_isfile, findhex
+
+hexIDs = UInt16[0x0001, 0x0002, 0x0003]
+@test findhex(0x0000, hexIDs) == -1
+@test findhex(0x0001, hexIDs) == 1
+@test findhex(0x0002, hexIDs) == 2
+@test findhex(0x0003, hexIDs) == 3
 
 # win32 with gaps
 cfile = path*"/SampleFiles/Restricted/03_02_27_20140927.euc.ch"
