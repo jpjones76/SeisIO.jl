@@ -281,3 +281,5 @@ function trunc_x!(S::SeisData)
   end
   return nothing
 end
+
+namestrip!(S::SeisData) = (for (i,name) in enumerate(S.name); s = namestrip(name); S.name[i]=s; end)
