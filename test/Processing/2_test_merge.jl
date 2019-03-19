@@ -1,6 +1,6 @@
 printstyled(stdout,"  merge! and new methods\n", color=:light_green)
 fs1 = 50.0
-Δ = round(Int64, 1.0e6/fs1)
+Δ = round(Int64, sμ/fs1)
 
 # t1 = round(Int64,time()/μs)
 t1 = 0

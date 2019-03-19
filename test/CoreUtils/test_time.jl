@@ -79,7 +79,7 @@ fs1 = 0.0
 printstyled(stdout, "    t_win, w_time\n", color=:light_green)
 printstyled(stdout, "      Faithful representation of gaps\n", color=:light_green)
 fs = 100.0
-Δ = round(Int, 1.0e6/fs)
+Δ = round(Int64, sμ/fs)
 t = [1 0; 6 980000; 8 100000; 10 0]
 # t1 = t_expand(t, fs)
  #       0
