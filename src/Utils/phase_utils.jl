@@ -12,7 +12,7 @@ function phase_time(pha::String, pcat::Array{String,2})
     else
         i = j[1]
         if length(j) > 1
-            warn(string("Phase ", pha, " appears multiple times in phase list! Only using first occurrence in phase list."))
+            @warn(string("Phase ", pha, " appears multiple times in phase list! Only using first occurrence in phase list."))
         end
         return Float64(Meta.parse(pcat[j[1], 4]))
     end
