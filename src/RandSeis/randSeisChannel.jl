@@ -81,12 +81,10 @@ function populate_chan!(Ch::SeisChannel; s=false::Bool)
 
   # A random instrument response function
   if isempty(Ch.resp)
-    if Base.in(ccode,['H','L','N'])
-      i = rand(1:4)
-      zstub = zeros(2*i)
-      pstub = 10 .*rand(i)
-      Ch.resp = [complex(zstub) [pstub .+ pstub.*im; pstub .- pstub*im]]    # resp
-    end
+    i = rand(1:4)
+    zstub = zeros(2*i)
+    pstub = 10 .*rand(i)
+    Ch.resp = [complex(zstub) [pstub .+ pstub.*im; pstub .- pstub*im]]    # resp
   end
 
   # random noise for data, with random short time gaps; gaussian noise for a
