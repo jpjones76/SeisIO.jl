@@ -166,6 +166,7 @@ function wait_on_data!(S::SeisData; tmax::Real=60.0)
         sleep(t)
         τ += t
         if τ > tmax
+          show(S)
           break
         end
       end
