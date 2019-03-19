@@ -150,7 +150,7 @@ function t_win(T::Array{Int64,2}, Δ::Int64)
   end
   w0 = -(Δ)
   W = Array{Int64,2}(undef,n,2)
-  @inbounds for i = 1:n
+  for i = 1:n
     W[i,1] = T[i,2] + w0 + Δ
     W[i,2] = W[i,1] + Δ*(T[i+1,1]-T[i,1]-1)
     w0 = W[i,2]
@@ -165,11 +165,11 @@ function w_time(W::Array{Int64,2}, Δ::Int64)
   T = Array{Int64,2}(undef,n,2)
   T[1,1] = Int64(1)
   T[1,2] = W[1,1]
-  @inbounds for i = 2:n
+  for i = 2:n-1
     T[i,1] = T[i-1,1] + div(W[i-1,2]-W[i-1,1], Δ) + 1
     T[i,2] = W[i,1] - W[i-1,2] - Δ
   end
-  T[n,1] -= 1
+  T[n,1] = T[n-1,1] + div(W[n-1,2]-W[n-1,1], Δ)
   T[n,2] = 0
   if T[n,1] == T[n-1,1]
     T = T[1:n-1,:]
