@@ -1,13 +1,3 @@
-function del_flagged!(S::SeisData, dflag::BitArray{1}, reason::String)
-  d = findall(dflag)
-  L = length(d)
-  if L > 0
-    @warn(string("Deleting (", reason, ")"), S.id[d])
-    deleteat!(S, d)
-  end
-  return nothing
-end
-
 function autotuk!(x::Array{Float64,1}, v::Array{Int64,1}, u::Int)
   g = findall(diff(v) .> 1)
   L = length(g)
