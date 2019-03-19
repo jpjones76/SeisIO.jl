@@ -104,7 +104,7 @@ t2 = t_win(t, Δ)
 
 printstyled(stdout, "      Arbitrary windows containing gaps\n", color=:light_green)
 t = [1 999999998990000; 101 10000; 297 0]
-println(t_win(t, Δ)
+println(t_win(t, Δ))
 println(w_time(t_win(t, Δ), Δ))
 @test w_time(t_win(t, Δ), Δ) == t
 
