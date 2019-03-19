@@ -1,9 +1,9 @@
 printstyled(stdout,"  merge! and new methods\n", color=:light_green)
 fs1 = 50.0
+Δ = round(Int64, 1.0e6/fs1)
 
-t1 = round(Int64,time()/μs)
-ts = t1+round(Int64,0.25/μs)
-te = t1+round(Int64,0.75/μs)
+# t1 = round(Int64,time()/μs)
+t1 = 0
 
 # s1 and s2 represent data from a fictitious channel
 # s2 begins 1 second later, but has a gap of 1s after sample 25
@@ -97,13 +97,14 @@ S *= (s2 * s4)
 @test ≈(length(S.name), 2)
 @test ≈(length(S.t),2)
 @test ≈(length(S.x),2)
-@test ≈(S.fs[1], 100.0)
-@test ≈(S.gain[2], 10.0)
-@test S.id[2]=="DEAD.STA..EHZ"
+i = findid("DEAD.STA..EHE", S)
+j = findid("DEAD.STA..EHZ", S)
+@test ≈(S.fs[i], 100.0)
+@test ≈(S.gain[j], 10.0)
 ungap!(S, m=false, w=false)
-@test ≈(length(S.x[2]), 260)
-@test ≈(length(S.x[1]), 350)
-@test ≈(S.x[1][101]/S.gain[1], s4.x[1]/s4.gain)
+@test ≈(length(S.x[j]), 260)
+@test ≈(length(S.x[i]), 350)
+@test ≈(S.x[i][101]/S.gain[i], s4.x[1]/s4.gain)
 
 printstyled("    fastmerge!\n", color=:light_green)
 
@@ -154,7 +155,7 @@ C = (s1 * s2)[1]
 printstyled("    operator \"*\"\n", color=:light_green)
 s5 = SeisChannel(fs = 100.0, loc=loc1, gain = 32.0, name = "DEAD.STA.EHE", id = "DEAD.STA..EHE",
   t = [1 t1; 100 0], x=randn(100))
-s6 = SeisChannel(fs = 100.0, loc=loc2, gain = 16.0, name = "UNNAMED", id = "DEAD.STA..EHE",
+s6 = SeisChannel(fs = 100.0, loc=loc1, gain = 16.0, name = "UNNAMED", id = "DEAD.STA..EHE",
   t = [1 t1+30000000; 200 0], x=randn(200))
 T = (s5 * s6)
 ungap!(T)
@@ -193,10 +194,12 @@ B = deepcopy(T[4])
 T*=S[1]
 sizetest(T, 5)
 
+sort!(T)
 S*=T[2]
 sizetest(S, 5)
-@test ≈(S.t[2][2,1], 1+length(A.x))
-@test ≈(S.t[2][2,2], (5-1/S.fs[2])*1.0e6)
+i = findid(A, S)
+@test ≈(S.t[i][2,1], 1+length(A.x))
+@test ≈(S.t[i][2,2], (5-1/S.fs[i])*1.0e6)
 
 printstyled(stdout,"      common channels and \"splat\" notation\n", color=:light_green)
 (S,T) = mktestseis()
@@ -248,11 +251,11 @@ n_targ = 7
 @test ≈(minimum([length(getfield(S,i)) for i in datafields]), n_targ)
 @test any(maximum([C.x.==i for i in S.x[1]])) == false
 
-# added 2019-02-23
-S = SeisData(randSeisData(5), SeisChannel(), SeisChannel(),
-    SeisChannel(id="UW.SEP..EHZ", name="Darth Exploded",
-    loc=[46.1967, -122.1875, 1440, 0.0, 0.0], x=rand(1024)))
-prune!(S)
-@test (S.n == 6)
-J = findchan("EHZ",S)
-@test (6 in J)
+# Ultimate merge test
+
+# Eight channels with the same ID
+# 1 & 2 are identical
+# 1 & 3 contain overlapping data with a 2 sample positive offset
+# 1 & 4 contain overlapping data with a 2 sample negative offset
+# 1 & 8 have different :loc fields, forcing 8 to use a new ID
+# 1 & 6 have different instrument responses
