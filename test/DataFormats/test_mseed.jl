@@ -21,8 +21,7 @@ if safe_isdir(path*"/SampleFiles/Restricted")
       for f in files
         println(stdout, "attempting to read ", f)
         S = SeisData()
-        @test_nowarn readmseed!(S, f, v=2)
-        readmseed!(S, f, v=0)
+        readmseed!(S, f, v=3)
         @test isempty(S) == false
 
         if occursin("text-encoded", f)
