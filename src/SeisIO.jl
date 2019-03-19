@@ -1,9 +1,10 @@
 __precompile__()
 module SeisIO
 using Blosc, Dates, DSP, LightXML, LinearAlgebra, Printf, Sockets
+using Compat: hasfield
 using FFTW: fft, ifft
 using Glob: glob
-using HTTP: request
+using HTTP: request, Messages.statustext
 using Statistics: mean
 using Polynomials: polyfit, polyval
 
@@ -13,6 +14,7 @@ path = Base.source_dir()
 include("constants.jl")
 include("CoreUtils/ls.jl")
 include("CoreUtils/time.jl")
+include("CoreUtils/namestrip.jl")
 
 # Utilities that don't require SeisIO types to work but may depend on CoreUtils
 for i in readdir(path*"/Utils")
@@ -31,8 +33,10 @@ for i in readdir(path*"/Types/Methods")
 end
 
 # Processing
-for i in readdir(path*"/Processing")
-  include(joinpath("Processing",i))
+for i in ls(path*"/Processing/*")
+  if endswith(i, ".jl")
+    include(joinpath("Processing",i))
+  end
 end
 
 # Data formats
@@ -43,11 +47,16 @@ for i in ls(path*"/Formats/*")
 end
 
 # Web clients
-include("Web/WebMisc.jl")         # Common functions for web data access
-include("Web/get_data.jl")          # Common method for retrieving data
-include("Web/FDSN.jl")
-include("Web/IRIS.jl")            # IRISws command line client
-include("Web/SeedLink.jl")
+for i in ls(path*"/Web/*")
+  if endswith(i, ".jl")
+    include(joinpath("Formats",i))
+  end
+end
+# include("Web/WebMisc.jl")         # Common functions for web data access
+# include("Web/get_data.jl")          # Common method for retrieving data
+# include("Web/FDSN.jl")
+# include("Web/IRIS.jl")            # IRISws command line client
+# include("Web/SeedLink.jl")
 
 # The RandSeis submodule
 include("RandSeis/RandSeis.jl")

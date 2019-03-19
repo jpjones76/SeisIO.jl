@@ -293,8 +293,7 @@ function SeedLink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
 
   # keepalive interval
   if kai < 240
-    @warn("KeepAlive interval increased to 240s as per IRIS netiquette guidelines.")
-    kai = 240
+    @warn("KeepAlive interval < 240s violates IRIS netiquette guidelines. YOU are responsible if you get banned for hammering.")
   end
 
   # Source for logging

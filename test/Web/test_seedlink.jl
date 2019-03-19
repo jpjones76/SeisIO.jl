@@ -38,7 +38,7 @@ open("runtests.log", "a") do out
     close(S2.c[1])
     @test_throws ErrorException SeedLink!(S2, [replace(sta[1], "SEP" => "XOX")], ["?????.D"])
 
-    S3 = SeedLink([replace(sta[1], "SEP" => "XOX")], pat, x_on_err=false)
+    S3 = SeedLink([replace(sta[1], "SEP" => "XOX")], ["*****.X"], x_on_err=false)
     write(S3.c[1], "BYE\r")
     close(S3.c[1])
   end
@@ -51,7 +51,7 @@ printstyled("    link 2: station file\n", color=:light_green)
 T = SeisData()
 open("runtests.log", "a") do out
   redirect_stdout(out) do
-    SeedLink!(T, sta, mode="DATA", refresh=9.9, kai=90.0)
+    SeedLink!(T, sta, mode="DATA", refresh=9.9, kai=15.0)
   end
 end
 

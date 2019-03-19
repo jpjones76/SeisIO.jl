@@ -1,6 +1,6 @@
 export get_pha
 
-function irisws(cha::String, d0, d1;
+function irisws(cha::String, d0::String, d1::String;
                 fmt::String   = KW.fmt,
                 to::Int       = KW.to,
                 opts::String  = KW.opts,
@@ -8,8 +8,9 @@ function irisws(cha::String, d0, d1;
                 w::Bool       = KW.w)
 
   # init
+  S = SeisData()
   Ch = SeisChannel()
-  parsed = false
+  parsable = false
   if fmt == "mseed"
     fmt = "miniseed"
   end
@@ -19,47 +20,41 @@ function irisws(cha::String, d0, d1;
   if isempty(c[3])
     c[3] = "--"
   end
+  ID = join([c[1], c[2], strip(c[3],'-'), c[4]], '.')
+  setfield!(Ch, :id, ID)
 
   # Build query URL
-  url = "http://service.iris.edu/irisws/timeseries/1/query?" * build_stream_query(c,d0,d1)* "&scale=AUTO&output=" * fmt
+  url = "http://service.iris.edu/irisws/timeseries/1/query?" *
+          build_stream_query(c,d0,d1) * "&scale=AUTO&output=" * fmt
   v > 0 && println(url)
+  Ch.src = url
+  req_info_str = datareq_summ("IRISWS data", ID, d0, d1)
 
   # Do request
-  R = request("GET", url, webhdr(), readtimeout=to)
-  if R.status == 200
+  (R, parsable) = get_HTTP_req(url, req_info_str, to)
+  if parsable
     if w
-      savereq(R.body, fmt, c[1], c[2], c[3], c[4], d0, d1, "R")
+      savereq(R, fmt, c[1], c[2], c[3], c[4], d0, d1, "R")
     end
     if fmt == "sacbl"
-      Ch = read_sac_stream(IOBuffer(R.body))
-      Ch.src = url
+      Ch = read_sac_stream(IOBuffer(R))
       if isempty(Ch.name)
         Ch.name = deepcopy(Ch.id)
       end
-
-      parsed = true
     elseif fmt == "miniseed"
-      S = SeisData()
-      parsemseed!(S, IOBuffer(R.body), v)
+      parsemseed!(S, IOBuffer(R), v)
       Ch = S[1]
-      Ch.src = url
       if isempty(Ch.loc)
         Ch.loc = zeros(Float64,5)
       end
-
-      parsed = true
     else
       # other parsers not yet written
-      v > 0 && @warn("Unusual format spec; returning empty channel with unparsed data in [channel].misc[\"data\"]")
+      @warn(string("Unsupported data format", req_info_str, "\nFORMAT = ", fmt,
+            "\n\nUnparsed request data in .misc[\"data\"]"))
+      Ch.misc["data"] = R
     end
   else
-    # This should be impossible to see
-    @warn("IRISWS request failed; returning empty channel with unparsed data in [channel].misc[\"data\"]")
-  end
-  if parsed == false
-    c[3] = strip(c[3],'-')
-    setfield!(Ch, :id, join(c, '.'))
-    Ch.misc["data"] = R.body
+    Ch.misc["data"] = String(R)
   end
   return Ch
 end
@@ -128,20 +123,24 @@ function get_pha(Δ::Float64, z::Float64;
 
   url = string("http://service.iris.edu/irisws/traveltime/1/query?", "distdeg=", Δ, "&evdepth=", z, pq, "&model=", model, "&mintimeonly=true&noheader=true")
   v > 0 && println(stdout, "url = ", url)
-  R = request("GET", url, webhdr(), readtimeout=to)
+  req_info_str = string("\nIRIS travel time request:\nΔ = ", Δ, "\nDepth = ", z, "\nPhases = ", pq, "\nmodel =", model)
+  (R, parsable) = get_HTTP_req(url, req_info_str, to)
 
-  # This assumes the request succeeds
-  req = String(take!(copy(IOBuffer(R.body))))
-  v > 0 && println(stdout, "Request result:\n", req)
+  if parsable
+    req = String(take!(copy(IOBuffer(R))))
+    v > 1 && println(stdout, "Request result:\n", req)
 
-  # Parse results
-  phase_data = split(req, '\n')
-  sa_prune!(phase_data)
-  Nf = length(split(phase_data[1]))
-  Np = length(phase_data)
-  Pha = Array{String, 2}(undef, Np, Nf)
-  for p = 1:Np
-    Pha[p,1:Nf] = split(phase_data[p])
+    # Parse results
+    phase_data = split(req, '\n')
+    sa_prune!(phase_data)
+    Nf = length(split(phase_data[1]))
+    Np = length(phase_data)
+    Pha = Array{String, 2}(undef, Np, Nf)
+    for p = 1:Np
+      Pha[p,1:Nf] = split(phase_data[p])
+    end
+  else
+    Pha = Array{String,2}(undef, 0, 0)
   end
   return Pha
 end
