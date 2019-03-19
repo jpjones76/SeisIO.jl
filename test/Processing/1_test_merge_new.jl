@@ -59,6 +59,21 @@ merge!(S, v=1)
 basic_checks(S)
 sizetest(S, 1)
 
+printstyled(stdout,"    Ability to handle irregularly-sampled data\n", color=:light_green)
+C = randSeisChannel(c=true)
+namestrip!(C)
+S = SeisData(C, randSeisChannel(c=true), randSeisChannel(c=true))
+namestrip!(S)
+for i = 2:3
+  S.id[i] = identity(S.id[1])
+  S.resp[i] = copy(S.resp[1])
+  S.loc[i] = copy(S.loc[1])
+  S.units[i] = identity(S.units[1])
+end
+T = merge(S, v=1)
+basic_checks(T)
+sizetest(T, 1)
+
 # ===========================================================================
 printstyled(stdout,"    (I) simple merges\n", color=:light_green)
 printstyled(stdout,"      (a) three channels, two w/same params, no overlapping data\n", color=:light_green)
