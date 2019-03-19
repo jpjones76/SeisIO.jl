@@ -5,14 +5,12 @@ export readwin32, readwin32!
 # Auxiliary functions not for export
 
 function findhex(hexID::UInt16, hexIDs::Array{UInt16,1})
-  j=0
   for d=1:length(hexIDs)
     if hexIDs[d]==hexID
-      j=d
-      break
+      return d
     end
   end
-  return j
+  return -1
 end
 
 function add_win32!(S::SeisData, cinfo::String)
@@ -133,7 +131,7 @@ function readwin32(filestr::String, cf::String; v::Int=KW.v, jst::Bool=true)
           end
           τ += (0x0000000a + UInt32(B))
 
-          if k == 0
+          if k < 0
             nx = 60*Nh*nf
             ts = (t_new-dtconst)*1000 - (jst == true ? 32400000000 : 0)
 
