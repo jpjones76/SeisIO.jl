@@ -76,14 +76,13 @@ function translate_resp!(X::Array{T,1}, fs::T,
   Nx = length(X)
   N2 = nextpow(2, Nx)
   f = [collect(0.0:1.0:N2/2.0); collect(-N2/2.0+1.0:1.0:-1.0)]*fs/N2  # Freqs
-  F0 = resp_f(resp_old, hc_old, f, fs)                                # Old resp
-  F1 =  resp_f(resp_new, hc_new, f, fs)                               # New resp
+  F0 = resp_f(resp_old, hc_old, 1.0, f, fs)                           # Old resp
+  F1 =  resp_f(resp_new, hc_new, 1.0, f, fs)                          # New resp
   xf = fft([X; zeros(T, N2-Nx)])                                      # FFT
   rf = F1.*conj(F0)./(F0.*conj(F0).+eps())
   X[:] = real(ifft(xf.*rf))[1:Nx]
   return nothing
 end
 
-# mkresp(r,g) = convert(PolynomialRatio, ZeroPoleGain([2.0,r[:,1]], [2.0,r[:,2]], g))
 resp_f(r::Array{Complex{T},2}, g::T, h::T, f::Array{T,1}, fs::T) where T = h*freqs(convert(PolynomialRatio, ZeroPoleGain([2.0; r[:,1]], [2.0; r[:,2]], g)), f, fs)
-resp_f(r::Array{Complex{T}, 2}, h::T, f::Array{T, 1}, fs::T) where T = h*freqs(convert(PolynomialRatio, ZeroPoleGain([2.0; r[:,1]], [2.0; r[:,2]], 1.0)), f, fs)
+# resp_f(r::Array{Complex{T}, 2}, h::T, f::Array{T, 1}, fs::T) where T = h*freqs(convert(PolynomialRatio, ZeroPoleGain([2.0; r[:,1]], [2.0; r[:,2]], 1.0)), f, fs)
