@@ -7,9 +7,7 @@ function parse_charr(chan_in::Array{String,1}; d='.'::Char, fdsn=false::Bool)
     for i = 1:N
       chan_line = [strip(String(j)) for j in split(chan_in[i], d, keepempty=true, limit=5)]
       L = length(chan_line)
-      if L < 2
-        continue
-      elseif L < 5
+      if L < 5
         resize!(chan_line, 5)
         chan_line[L+1:5] .= ""
       end
@@ -22,7 +20,8 @@ end
 function parse_chstr(chan_in::String; d=','::Char, fdsn=false::Bool, SL=false::Bool)
   chan_out = Array{String, 2}(undef, 0, 5)
   if safe_isfile(chan_in)
-    return parse_chstr(join([strip(j, ['\r','\n']) for j in filter(i -> !startswith(i, ['#','*']), open(readlines, chan_in))],','))
+    return parse_chstr(join([strip(j, ['\r','\n']) for j in
+      filter(i -> !startswith(i, ['#','*']), open(readlines, chan_in))],','))
   else
     chan_data = [strip(String(j)) for j in split(chan_in, d)]
     for j = 1:length(chan_data)
@@ -47,8 +46,9 @@ end
 function parse_sl(CC::Array{String,2})
   L = size(CC,1)
   S = CC[:,2].*(" "^L).*CC[:,1]
-  # P = [(i = isempty(i) ? "??" : i) for i in CC[:,3]] .* [(i = isempty(i) ? "???" : i) for i in CC[:,4]] .* collect(Main.Base.Iterators.repeated(".", L)) .* [(i = isempty(i) ? "D" : i) for i in CC[:,5]]
-    P = [(i = isempty(i) ? "??" : i) for i in CC[:,3]] .* [(i = isempty(i) ? "???" : i) for i in CC[:,4]] .* fill(".", L) .* [(i = isempty(i) ? "D" : i) for i in CC[:,5]]
+    P = [(i = isempty(i) ? "??" : i) for i in CC[:,3]] .*
+        [(i = isempty(i) ? "???" : i) for i in CC[:,4]] .* fill(".", L) .*
+        [(i = isempty(i) ? "D" : i) for i in CC[:,5]]
   return S,P
 end
 
@@ -98,5 +98,4 @@ function minreq!(S::Array{String,2})
   end
   return map(String, S)
 end
-minreq!(S::Array{String,1}, T::Array{String,1}) = minreq!(hcat(S,T))
 minreq(S::Array{String,2}) = (T = deepcopy(S); minreq!(T); return T)
