@@ -20,44 +20,6 @@ timestamp(t::Real) = tstr(u2d(t))
 timestamp(t::String) = tstr(Dates.DateTime(t))
 tnote(s::String) = string(timestamp(), ": ", s)
 
-# =========================================================
-# Not for export
-
-function t_expand(t::Array{Int64,2}, fs::Float64)
-  fs == 0.0 && return t[:,2]
-  t[end,1] == 1 && return [t[1,2]]
-  dt = round(Int64, 1.0/(fs*μs))
-  tt = dt.*ones(Int64, t[end,1])
-  tt[1] -= dt
-  for i = 1:size(t,1)
-    tt[t[i,1]] += t[i,2]
-  end
-  return cumsum(tt)
-end
-
-function t_collapse(tt::Array{Int64,1}, fs::Float64)
-  if fs == 0.0
-    t = hcat(collect(1:1:length(tt)), tt)
-  else
-    dt = round(Int64, 1.0/(fs*μs))
-    ts = Array{Int64,1}([dt; diff(tt)::Array{Int64,1}])
-    L = length(tt)
-    i = findall(ts .!= dt)
-    t = Array{Int64,2}([[1 tt[1]];[i ts[i].-dt]])
-    if isempty(i) || i[end] != L
-      t = vcat(t, hcat(L,0))
-    end
-  end
-  return t
-end
-
-function endtime(t::Array{Int64,2}, fs::Float64)
-  L = size(t,1)
-  return L == 0 ? 0 : getindex(sum(t, dims=1),2) + (t[L,1]-1)*round(Int64, 1.0/(fs*μs))
-end
-
-# =========================================================
-
 """
   m,d = j2md(y,j)
 
@@ -126,3 +88,92 @@ parsetimewin(s::String, t::Union{Real,DateTime}) = parsetimewin(DateTime(s), t)
 parsetimewin(s::Union{Real,DateTime}, t::String) = parsetimewin(s, DateTime(t))
 parsetimewin(s::String, t::String) = parsetimewin(DateTime(s), DateTime(t))
 parsetimewin(s::Real, t::Real) = parsetimewin(u2d(60*floor(Int, time()/60) + s), u2d(60*floor(Int, time()/60) + t))
+
+# =========================================================
+# Not for export
+
+function t_expand(t::Array{Int64,2}, fs::Float64)
+  fs == 0.0 && return t[:,2]
+  t[end,1] == 1 && return [t[1,2]]
+  dt = round(Int64, 1.0/(fs*μs))
+  tt = dt.*ones(Int64, t[end,1])
+  tt[1] -= dt
+  for i = 1:size(t,1)
+    tt[t[i,1]] += t[i,2]
+  end
+  return cumsum(tt)
+end
+
+function t_collapse(tt::Array{Int64,1}, fs::Float64)
+  if fs == 0.0
+    t = hcat(collect(1:1:length(tt)), tt)
+  else
+    dt = round(Int64, 1.0/(fs*μs))
+    ts = Array{Int64,1}([dt; diff(tt)::Array{Int64,1}])
+    L = length(tt)
+    i = findall(ts .!= dt)
+    t = Array{Int64,2}([[1 tt[1]];[i ts[i].-dt]])
+    if isempty(i) || i[end] != L
+      t = vcat(t, hcat(L,0))
+    end
+  end
+  return t
+end
+
+function endtime(t::Array{Int64,2}, fs::Float64)
+  L = size(t,1)
+  return L == 0 ? 0 : getindex(sum(t, dims=1),2) + (t[L,1]-1)*round(Int64, 1.0/(fs*μs))
+end
+
+function get_overlaps(ts::Array{Int64,1}, te::Array{Int64,1})
+  length(ts) == length(te) || throw(DimensionMismatch)
+  N = length(ts)
+  overlaps = falses(N, N)
+  k = sortperm(ts)
+  ts = ts[k]
+  te = te[k]
+  for i = 1:N
+    for j = 1:i
+      if min(ts[i]≤te[j], te[i]≥ts[j]) == true
+        overlaps[j,i] = true
+      end
+    end
+  end
+  return overlaps
+end
+
+function t_win(T::Array{Int64,2}, Δ::Int64)
+  n = size(T,1)-1
+  if T[n+1,2] != 0
+    T = vcat(T, [T[n+1,1] 0])
+    n += 1
+  end
+  w0 = -(Δ)
+  W = Array{Int64,2}(undef,n,2)
+  @inbounds for i = 1:n
+    W[i,1] = T[i,2] + w0 + Δ
+    W[i,2] = W[i,1] + Δ*(T[i+1,1]-T[i,1]-1)
+    w0 = W[i,2]
+  end
+  W[n,2] += Δ
+  return W
+end
+t_win(T::Array{Int64,2}, fs::Float64) = t_win(T, round(Int64, 1000000.0/fs))
+
+function w_time(W::Array{Int64,2}, Δ::Int64)
+  n = size(W,1)+1
+  T = Array{Int64,2}(undef,n,2)
+  T[1,1] = Int64(1)
+  T[1,2] = W[1,1]
+  @inbounds for i = 2:n
+    T[i,1] = T[i-1,1] + div(W[i-1,2]-W[i-1,1], Δ) + 1
+    T[i,2] = W[i,1] - W[i-1,2] - Δ
+  end
+  T[n,1] -= 1
+  T[n,2] = 0
+  if T[n,1] == T[n-1,1]
+    T = T[1:n-1,:]
+  end
+  return T
+end
+w_time(W::Array{Int64,2}, fs::Float64) = w_time(W, round(Int64, 1000000.0/fs))
