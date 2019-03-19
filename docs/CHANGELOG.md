@@ -1,3 +1,23 @@
+### 2019-03-18
+* Major rewrite to `merge!`
+  + Channels are no longer combined if they have different (non-empty) values
+    of resp, units, or loc, or if they have different fs values.
+  + Channels with no data (:x empty) or time info (:t empty) are deleted.
+  + Dramatic speed and performance improvements.
+  + Consistency fix: :x for each merged channel is now aligned in memory.    
+* Consistency fix: bad web requests to IRISws (with e.g. `get_data`) no longer
+  throw exceptions.
+* `readmseed` improvements
+  + Added support for blockette types:
+    - [300] Step Calibration Blockette (60 bytes)
+    - [310] Sine Calibration Blockette (60 bytes)
+    - [320] Pseudo-random Calibration Blockette (64 bytes)
+    - [390] Generic Calibration Blockette (28 bytes)
+    - [395] Calibration Abort Blockette (16 bytes)
+    - [2000] Variable Length Opaque Data Blockette
+  + Timing information from blockette type 500 (Timing Blockette) is now
+  saved in the :misc dictionary for the appropriate channel.
+
 ### 2019-03-12
 * `readmseed` improvements:
   + tested data decoders added for remaining SEED data formats. three exceptions:
