@@ -63,18 +63,21 @@ function get_data!(S::SeisIO.SeisData, method_in::String, C::Union{String,Array{
     elseif isa(C, Array{String,1})
       C = parse_charr(C, fdsn = true)
     end
-    minreq!(C)
-    FDSNget!(S, C, α, ω, fmt = fmt, opts = opts, q = q, si = si, src = src, to = to, v = v, w = w)
+    R = minreq(C)
+    FDSNget!(S, R, α, ω, fmt = fmt, opts = opts, q = q, si = si, src = src, to = to, v = v, w = w)
   elseif method_in == "IRIS"
     if isa(C, String)
-      C = String[strip(String(j)) for j in split(C, ',')]
+      R = String[strip(String(j)) for j in split(C, ',')]
     elseif isa(C, Array{String,2})
-      for j = 1:size(C,1)
-        C[j,1] = join(C[j,:],'.')
+      NC = size(C,1)
+      R = Array{String,1}(undef, NC)
+      for j = 1:NC
+        R[j] = join(C[j,:],'.')
       end
-      C = C[:,1]
+    else
+      R = deepcopy(C)
     end
-    IRISget!(S, C, α, ω, fmt = fmt, opts = opts, to = to, v = v, w = w)
+    IRISget!(S, R, α, ω, fmt = fmt, opts = opts, to = to, v = v, w = w)
   end
 
   # DND DND DND

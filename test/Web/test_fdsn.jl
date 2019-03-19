@@ -5,7 +5,7 @@ printstyled("  FDSN web requests\n", color=:light_green)
 printstyled("    data from IRIS\n", color=:light_green)
 fname = path*"/SampleFiles/fdsn.conf"
 S = SeisData()
-get_data!(S, "FDSN", fname, src="IRIS", s=-600, t=0, v=0, w=true)
+get_data!(S, "FDSN", fname, src="IRIS", s=-600, t=0, v=0)
 
 # Ensure station headers are set
 j = findid(S, "UW.HOOD..ENE")
@@ -18,7 +18,7 @@ L = [length(x) for x in S.x]
 
 # Try a string array for input
 S = SeisData()
-get_data!(S, "FDSN", ["UW.HOOD..E??", "CC.VALT..???"], src="IRIS", s=-600, t=0)
+get_data!(S, "FDSN", ["UW.HOOD..E??", "CC.VALT..???", "UW.XNXNX.99.QQQ"], src="IRIS", s=-600, t=0, opts="szsrecs=true")
 
 # Try a single string
 S = get_data("FDSN", "CC.JRO..BHZ", src="IRIS", s=-600, t=0)

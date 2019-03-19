@@ -18,7 +18,13 @@ end
 
 # Test a bum data format
 sta_matrix = vcat(["UW" "LON" "" "BHZ"],["UW" "LON" "" "BHE"])
-T = get_data("IRIS", sta_matrix, s=-600, t=0, v=0, fmt="audio")
+test_sta = deepcopy(sta_matrix)
+T = get_data("IRIS", sta_matrix, s=-600, t=0, v=1, fmt="audio")
+
+@test sta_matrix == test_sta
+
+# Test a bad request
+T = get_data("IRIS", "DE.NENA.99.LUFTBALLOONS", src="IRIS", s=ts, t=te, fmt="mseed", v=0)
 
 printstyled("    A more complex IRISWS request\n", color=:light_green)
 chans = ["UW.TDH..EHZ", "UW.VLL..EHZ"] # HOOD is either offline or not on IRISws right now
