@@ -4,11 +4,11 @@ export chanspec, webhdr, seis_www, track_on!, track_off!
 # Returns:
 #   R::Array{UInt8,1}, either request body or error data
 #   parsable::Bool, whether or not R is parsable
-function get_HTTP_req(url::String, req_info_str::String, to::Int; err::Bool=false)
+function get_HTTP_req(url::String, req_info_str::String, to::Int; status_exception::Bool=false)
   (R::Array{UInt8,1}, parsable::Bool) = try
     req = request(  "GET", url, webhdr,
                     readtimeout = to,
-                    status_exception = err  )
+                    status_exception = status_exception  )
     if req.status == 200
       (req.body, true)
 
@@ -26,7 +26,7 @@ function get_HTTP_req(url::String, req_info_str::String, to::Int; err::Bool=fals
                     "\n\nTrying to store error message in misc[\"data\"]"
                     )
           )
-    msg_data::Array{UInt8,1} = Array{UInt8,1}( hasfield(T, :response) ? String(err.response) : hasfield(typeof(err), :msg) ? string(err.msg) : "" )
+    msg_data::Array{UInt8,1} = Array{UInt8,1}( try; string(getfield(err, :response)); catch; try; string(getfield(err, :msg));  catch; ""; end; end )
     (msg_data, false)
   end
 
