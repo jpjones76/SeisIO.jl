@@ -203,8 +203,8 @@ end
 # merges into the channel with the most recent data
 function merge_non_ts!(S::SeisData, subgrp::Array{Int64,1})
   te = [maximum(t[:,2]) for t in S.t[subgrp]]
-  Ω = subgrp[indmax(te)]
-  T = vcat(S.t[subgrp][:,2]...)
+  Ω = subgrp[argmax(te)]
+  T = vcat(S.t[subgrp]...)[:,2]
   X = vcat(S.x[subgrp]...)
   ii = sortperm(T)
   S.t[Ω] = hcat(collect(1:1:length(T)), T[ii])
