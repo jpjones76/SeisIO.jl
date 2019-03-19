@@ -19,7 +19,7 @@ function getpf(froot::String, lc::Array{UInt8,1})
       return p
     end
   end
-  return froot*".nope"
+  return froot*"\0"
 end
 # ============================================================================
 
