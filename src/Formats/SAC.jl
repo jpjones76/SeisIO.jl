@@ -1,3 +1,4 @@
+import Base.merge!
 export readsac, rsac, sachdr, writesac, wsac
 
 # ============================================================================
