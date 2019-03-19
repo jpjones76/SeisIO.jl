@@ -15,9 +15,9 @@
 # x     ::Array{Float64,1}          = Array{Float64,1}(undef, 0)
 
 struct SLDefs
-  port::Int
-  gap::Int
-  kai::Int
+  port::Int64
+  gap::Int64
+  kai::Int64
   mode::String
   refresh::Real
   x_on_err::Bool
@@ -28,15 +28,15 @@ struct KWDefs
   evw::Array{Float64,1}
   fmt::String
   mag::Array{Float64,1}
-  nev::Int
+  nev::Int64
   opts::String
   pha::String
   q::Char
   reg::Array{Float64,1}
   si::Bool
   src::String
-  to::Int
-  v::Int
+  to::Int64
+  v::Int64
   w::Bool
   y::Bool
 end
