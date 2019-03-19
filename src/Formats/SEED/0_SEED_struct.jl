@@ -20,7 +20,7 @@ mutable struct Blk500
   t::Array{Int32,1}
   μsec::Int8
   reception_quality::Int8
-  exception_count::UInt16
+  exception_count::UInt32
   exception_type::String
   clock_model::String
   clock_status::String
@@ -29,13 +29,49 @@ end
 
 # [2000] Variable Length Opaque Data Blockette
 mutable struct Blk2000
-  blk_length::UInt16
-  odos::UInt16
-  record_number::UInt32
-  flags::Array{UInt8,1}
-  header_fields::Array{String,1}
-  opaque_data::Vector{UInt8}
-  Blk2000() = new(0x0000, 0x0000, 0x00000000, zeros(UInt8, 3), String["a","b","c", "d", "e"], Array{UInt8,1}(undef,0))
+  n::UInt32
+  NB::UInt16
+  os::UInt16
+  flag::UInt8
+  hdr::Array{UInt8,1}
+  data::Array{UInt8,1}
+  Blk2000() = new(
+                  0x00000000,
+                  0x0000,
+                  0x0000,
+                  0x00,
+                  Array{UInt8,1}(undef,0),
+                  Array{UInt8,1}(undef,0)
+                  )
+end
+
+# Calibration blockettes: [300], [310], [320], [390]
+mutable struct BlkCalib
+  t::Array{Int32,1}
+  n::UInt8
+  flags::UInt8
+  dur1::UInt32
+  dur2::UInt32
+  amplitude::Float32
+  period::Float32
+  channel::Array{UInt8,1}
+  ref::UInt32
+  coupling::Array{UInt8,1}
+  rolloff::Array{UInt8,1}
+  noise::Array{UInt8,1}
+  BlkCalib() = new( Array{Int32,1}(undef,7),
+                    0x00,
+                    0x00,
+                    0x00000000,
+                    0x00000000,
+                    zero(Float32),
+                    zero(Float32),
+                    Array{UInt8,1}(undef, 3),
+                    0x00000000,
+                    Array{UInt8,1}(undef, 12),
+                    Array{UInt8,1}(undef, 12),
+                    Array{UInt8,1}(undef, 8)
+                  )
 end
 
 mutable struct SeedVol
@@ -46,6 +82,8 @@ mutable struct SeedVol
   nsk::UInt16   # [Number of bytes to skip after end of data record]
   tc::Int32     # Time correction
   swap::Bool
+  parsable::Array{UInt16,1}
+  calibs::Array{UInt16,1}
 
   # hdr:
   hdr::Vector{UInt8}
@@ -74,6 +112,7 @@ mutable struct SeedVol
   B201::Blk201
   B500::Blk500
   B2000::Blk2000
+  Calib::BlkCalib
 
   # Steim
   steimvals::Array{UInt32,1}
@@ -92,6 +131,11 @@ mutable struct SeedVol
         0x0000,                             # nsk
         zero(Int32),                        # tc
         false,                              # swap
+
+        # blockettes with parsers
+        UInt16[0x0064, 0x00c9, 0x01f4, 0x018b, 0x03e8, 0x03e9, 0x07d0],
+        # calibiration blockettes (all use the same parser)
+        UInt16[0x012c, 0x0136, 0x0140, 0x0186],
 
         # header
         Array{UInt8,1}(undef,20),           # hdr::Vector{UInt8}
@@ -117,9 +161,10 @@ mutable struct SeedVol
         SeedDef(),                          # def::SeedDef
 
         # blockette fields
-        Blk201(),                           # B201:: Blk201
-        Blk500(),                           # B500:: Blk500
-        Blk2000(),                          # B2000:: Blk2000
+        Blk201(),                           # Blk201:: Blk201
+        Blk500(),                           # Blk500:: Blk500
+        Blk2000(),                          # Blk2000:: Blk2000
+        BlkCalib(),                         # Calib:: BlkCalib
 
         # steimvals::Array{UInt32,1}
         reverse(collect(0x00000000:0x00000002:0x0000001e), dims=1),
