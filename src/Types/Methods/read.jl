@@ -173,7 +173,7 @@ function rdata(io::IOStream, ver::Float32)
     y = read(io, UInt8)
 
     # U8 array
-    S.id[i] = strip(String(read!(io, Array{UInt8, 1}(undef, 15))))
+    S.id[i] = String(read!(io, Array{UInt8, 1}(undef, i64[10])))
     S.units[i]= String(read!(io, Array{UInt8, 1}(undef, i64[3])))
     S.src[i]  = String(read!(io, Array{UInt8, 1}(undef, i64[4])))
     S.name[i] = String(read!(io, Array{UInt8, 1}(undef, i64[5])))
@@ -218,12 +218,9 @@ function read_rec(io::IOStream, r::Float32, u::UInt8; v=0::Int)
 end
 """
     rseis(fstr::String[, c=C::Array{Int64,1}, v=0::Int])
-
 Read SeisIO files matching file pattern ``fstr`` into memory.
-
 If an array of record indices is passed to keyword c, only those record indices
 are read from each file.
-
 Set v>0 to control verbosity.
 """
 function rseis(patts::Union{String,Array{String,1}};
