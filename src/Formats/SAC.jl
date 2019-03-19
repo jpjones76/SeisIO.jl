@@ -47,7 +47,6 @@ function should_bswap(file::String)
       error("Invalid SAC file.")
     end
   end
-  return q
 end
 
 function write_sac_file(fname::String, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Array{UInt8,1}, x::Array{Float32,1}; t=[Float32(0)]::Array{Float32,1}, ts=true::Bool)
