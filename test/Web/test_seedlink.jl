@@ -66,7 +66,7 @@ wait_on_data!(T)
 printstyled("  SeedLink FETCH mode\n", color=:light_green)
 v = SeedLink(config_file, refresh=10.0, mode="FETCH")
 printstyled("    link initialized\n", color=:light_green)
-wait_on_data!(v, tmax=30.0)
+wait_on_data!(v, tmax=50.0)
 
 # SeedLink time mode (more complicated)
 printstyled("  SeedLink TIME mode\n", color=:light_green)
