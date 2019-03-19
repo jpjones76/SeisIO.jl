@@ -1,3 +1,4 @@
+import Compat.hasfield
 export chanspec, webhdr, seis_www, track_on!, track_off!
 
 # Generic handler for getting data by HTTP
