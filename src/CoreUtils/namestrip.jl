@@ -37,4 +37,3 @@ function namestrip(str::String, convention::String="File")
   end
   return String(chars)
 end
-namestrip!(S::SeisData) = (for (i,name) in enumerate(S.name); s = namestrip(name); S.name[i]=s; end)
