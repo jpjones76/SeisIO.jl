@@ -27,20 +27,6 @@ function SEED_Unenc(io::IO)
   return nothing
 end
 
-function SEED_Int24(io::IO)
-  nv = div(SEED.nx - SEED.u16[4], 3)
-  buf = Array{UInt8,1}(undef, 3*nv)
-  readbytes!(io, buf, 3*nv)
-  for i = 1:nv
-    y  = UInt32(buf[3*i-2]) << 24
-    y |= UInt32(buf[3*i-1]) << 16
-    y |= UInt32(buf[3*i]) << 8
-    SEED.x[i+1] = signed(y) >> 8
-  end
-  SEED.k = nv
-  return nothing
-end
-
 function SEED_Geoscope(io::IO)
   mm = 0x0fff
   gm = SEED.fmt == 0x0d ? 0x7000 : 0xf000
@@ -77,12 +63,10 @@ function SEED_CDSN(io::IO)
 end
 
 function SEED_SRO(io::IO)
-  mm = 0x0fff
-  gm = 0xf000
   for i = 0x0001:SEED.n
     x = SEED.swap ? ntoh(read(io, UInt16)) : read(io, UInt16)
-    m = Int32(x & mm)
-    g = Int32((x & gm) >> 12)
+    m = Int32(x & 0x0fff)
+    g = Int32((x & 0xf000) >> 12)
     if m > 0x07ff
       m -= 0x1000
     end
