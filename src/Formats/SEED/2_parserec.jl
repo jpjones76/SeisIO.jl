@@ -131,30 +131,28 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     # DND DND DND
 
     bt = SEED.swap ? ntoh(read(sid, UInt16)) : read(sid, UInt16)
-
     if v > 2
-      println(stdout, "Skipped SEED.u16[6] = ", SEED.u16[6], " bytes")
-      println(stdout, "Relative position SEED.u16[5] = ", SEED.u16[5],
-                      " bytes from record begin")
-      println(stdout, "Will seek SEED.nsk = ", SEED.nsk,
-                      " bytes from last blockete's end to data begin")
-      println(stdout, "Position = ", position(sid))
-      println(stdout, string("Blockette type to read: ", bt))
+      printstyled(string("Position = ", position(sid), "\n"), color=:light_green)
+      printstyled(string("Blockette type to read: ", bt, "\n"), color=:light_yellow)
+      println(stdout, "Skipped SEED.u16[6] = ", SEED.u16[6], " bytes since last blockette")
+      println(stdout, "Relative position SEED.u16[5] = ", SEED.u16[5], " bytes from record begin")
+      println(stdout, "We are SEED.nsk = ", SEED.nsk, " bytes to data begin")
     end
-
-    SEED.u16[6] = (SEED.swap ? ntoh(read(sid, UInt16)) : read(sid, UInt16)) -
-                    SEED.u16[5]
+    SEED.u16[6] = (SEED.swap ? ntoh(read(sid, UInt16)) : read(sid, UInt16))
 
     # Blockette parsing moved to individual functions named blk_####, e.g., blk_200
-    if bt in UInt16[0x0064, 0x00c9, 0x01f4, 0x03e8, 0x03e9, 0x07d0]
+    if bt in SEED.parsable
       blk_len = getfield(SeisIO, Symbol(string("blk_", bt)))(S, sid, c)
-      SEED.nsk -= blk_len
-      SEED.u16[6] -= blk_len
-      v > 2 && println(stdout, "Done reading blockette type ", bt, ".")
+    elseif bt in SEED.calibs
+      blk_len = blk_calib(S, sid, c, bt)
     else
-      # This is only for mini-SEED.
       v > 1 && println(stdout, id, ": no support for Blockette Type ", bt, "; skipped.")
-      skip(sid, SEED.u16[5] - 0x0004)
+      blk_len = (SEED.u16[6] == 0x0000 ? SEED.nsk : SEED.u16[6])
+      skip(sid, blk_len - 0x0004)
+    end
+    SEED.nsk -= blk_len
+    if SEED.u16[6] != 0x0000
+      SEED.u16[6] -= (blk_len + SEED.u16[5])
     end
   end
 

@@ -43,9 +43,7 @@ end
 
 function SEED_Geoscope(io::IO)
   mm = 0x0fff
-  gm3 = 0x7000
-  gm4 = 0xf000
-  gm = SEED.fmt == 0x0d ? gm3 : gm4
+  gm = SEED.fmt == 0x0d ? 0x7000 : 0xf000
   for i = 0x0001:SEED.n
     x = SEED.swap ? ntoh(read(io, UInt16)) : read(io, UInt16)
     m = Int32(x & mm)
@@ -58,12 +56,10 @@ function SEED_Geoscope(io::IO)
 end
 
 function SEED_CDSN(io::IO)
-  mm = 0x3fff
-  gm = 0xc000
   for i = 0x0001:SEED.n
     x = SEED.swap ? ntoh(read(io, UInt16)) : read(io, UInt16)
-    m = Int32(x & mm)
-    g = Int32((x & gm) >> 14)
+    m = Int32(x & 0x3fff)
+    g = Int32((x & 0xc000) >> 14)
     if (g == 0)
       mult = 1
     elseif g == 1
