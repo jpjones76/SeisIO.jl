@@ -147,9 +147,7 @@ function rdata(io::IOStream, ver::Float32)
   for i = 1:N
 
     # int
-    if ver < 0.3f0
-      i64 = read!(io, Array{Int64, 1}(undef, 8))
-    elseif ver < 0.4f0
+    if ver < 0.4f0
       i64 = read!(io, Array{Int64, 1}(undef, 9))
     else
       i64 = read!(io, Array{Int64, 1}(undef, 10))
@@ -163,11 +161,7 @@ function rdata(io::IOStream, ver::Float32)
     S.gain[i] = read(io, Float64)
 
     # float arrays
-    if ver < 0.3f0
-      S.loc[i] = read!(io, Array{Float64, 1}(undef, 5))
-    else
-      S.loc[i] = read!(io, Array{Float64, 1}(undef, i64[9]))
-    end
+    S.loc[i] = read!(io, Array{Float64, 1}(undef, i64[9]))
     if i64[2] > 0
       test_read_1 = read!(io, Array{Float64, 1}(undef, i64[2]))
       test_read_2 = read!(io, Array{Float64, 1}(undef, i64[2]))
@@ -179,11 +173,7 @@ function rdata(io::IOStream, ver::Float32)
     y = read(io, UInt8)
 
     # U8 array
-    if ver > 0.3f0
-      S.id[i] = String(read!(io, Array{UInt8, 1}(undef, i64[10])))
-    else
-      S.id[i] = strip(String(read!(io, Array{UInt8, 1}(undef, 15))))
-    end
+    S.id[i] = strip(String(read!(io, Array{UInt8, 1}(undef, 15))))
     S.units[i]= String(read!(io, Array{UInt8, 1}(undef, i64[3])))
     S.src[i]  = String(read!(io, Array{UInt8, 1}(undef, i64[4])))
     S.name[i] = String(read!(io, Array{UInt8, 1}(undef, i64[5])))
