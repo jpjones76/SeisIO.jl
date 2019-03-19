@@ -1,7 +1,7 @@
 using Compat, Dates, SeisIO, SeisIO.RandSeis, Test
 import DelimitedFiles: readdlm
 import Random: rand, randperm, randstring
-import SeisIO: FDSN_event_xml, FDSN_sta_xml, bad_chars, datafields, hdrfields, μs, safe_isfile, safe_isdir, sμ, t_expand
+import SeisIO: FDSN_event_xml, FDSN_sta_xml, bad_chars, datafields, hdrfields, minreq, minreq!, parse_charr, safe_isfile, safe_isdir, sμ, t_collapse, t_expand, t_win, tnote, w_time, μs
 import SeisIO.RandSeis: getyp2codes, pop_rand_dict!
 
 # All constants needed by tests are here
@@ -191,31 +191,4 @@ function wait_on_data!(S::SeisData; tmax::Real=60.0)
     @warn(string("No data after ", tmax, " s. Is the server down?"))
   end
   return nothing
-end
-
-
-function t_win(T::Array{Int64,2}, fs::Float64)
-  n = size(T,1)-1
-  w0 = Int64(0)
-  W = Array{Int64,2}(undef,n,2)
-  @inbounds for i = 1:n
-    W[i,1] = T[i,2] + w0
-    W[i,2] = W[i,1] + round(Int64, SeisIO.sμ*Float64(T[i+1,1]-T[i,1])/fs)
-    w0 = W[i,2]
-  end
-  return W
-end
-
-function w_time(W::Array{Int64,2}, fs::Float64)
-  w2 = Int64(0)
-  n = size(W,1)
-  T = Array{Int64,2}(undef,n+1,2)
-  T[1,1] = Int64(1)
-  @inbounds for i = 1:n
-    T[i,2] = W[i,1] - w2
-    T[i+1,1] = T[i,1] - round(Int64, (W[i,1]-W[i,2])*SeisIO.μs*fs)
-    w2 = W[i,2]
-  end
-  T[n+1,2] = Int64(0)
-  return T
 end

@@ -7,6 +7,10 @@ to = 30
 src = "IRIS"
 sta = "PB.B004..EH?,PB.B004..BS?,PB.B001..BS?,PB.B001..EH?"
 
+# First, a well-formatted string
+H = FDSNevq("2018-11-30T17:29:29.00", nev=1, src="IRIS")[1]
+
+# Now, not so hot
 H = FDSNevq("201103110547", mag=[3.0, 9.9], nev=1, src="IRIS")[1]
 
 # Create channel data
@@ -40,6 +44,13 @@ for i = 1:Ev.data.n
   t0 = pcat_end(pdat)
   ts = phase_time("S", pdat)
   @test s0 ≤ ts ≤ t0
+  @test_throws ErrorException phase_time("HEXONXONX", pdat)
+
+  if i == 1
+    pdat2 = [pdat; pdat[1:1,:]]
+    pha = pdat[1,3]
+    t_duplicate = phase_time(pha, pdat2)
+  end
 
   # Get phases
   (p1, s) = first_phase(pdat)

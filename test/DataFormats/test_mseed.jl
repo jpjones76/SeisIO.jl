@@ -2,6 +2,9 @@
 # It has a more complicated structure than the test.mseed file in more recent
 # versions of libmseed, which reads with no issues
 printstyled("  mini-SEED file read\n", color=:light_green)
+
+@test_throws ErrorException readmseed(string(path, "/SampleFiles/nonexist.mseed"), v=0)
+
 S = readmseed(string(path, "/SampleFiles/test.mseed"), v=0)
 @test isequal(S.id[1], "NL.HGN.00.BHZ")
 @test ≈(S.fs[1], 40.0)
@@ -28,7 +31,7 @@ if safe_isdir(path*"/SampleFiles/Restricted")
           @test occursin("Quanterra Packet Baler Model 14 Restart.", str[1])
 
         elseif occursin("detection.record",f )
-          ev_rec = get(S.misc[1], "mseed_events", "no record")[1]
+          ev_rec = get(S.misc[1], "seed_event", "no record")[1]
           @test ev_rec == "2004,7,28,20,28,6,185,80.0,0.39999998,18.0,dilatation,1,3,2,1,4,0,2,0,Z_SPWWSS"
 
         elseif occursin("SHW.UW", f)
@@ -58,7 +61,7 @@ if safe_isdir(path*"/SampleFiles/Restricted")
           Δ = [abs(.001*(W[i]-Y[i]).value)*C.fs for i=1:length(Y)]
           @test maximum(Δ) < 1.0
         else
-          @test isempty(S.x[1]) == false
+          @test isempty(S) == false
         end
       end
     end
