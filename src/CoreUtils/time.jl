@@ -125,23 +125,6 @@ function endtime(t::Array{Int64,2}, fs::Float64)
   return L == 0 ? 0 : getindex(sum(t, dims=1),2) + (t[L,1]-1)*round(Int64, 1.0/(fs*μs))
 end
 
-function get_overlaps(ts::Array{Int64,1}, te::Array{Int64,1})
-  length(ts) == length(te) || throw(DimensionMismatch)
-  N = length(ts)
-  overlaps = falses(N, N)
-  k = sortperm(ts)
-  ts = ts[k]
-  te = te[k]
-  for i = 1:N
-    for j = 1:i
-      if min(ts[i]≤te[j], te[i]≥ts[j]) == true
-        overlaps[j,i] = true
-      end
-    end
-  end
-  return overlaps
-end
-
 function t_win(T::Array{Int64,2}, Δ::Int64)
   n = size(T,1)-1
   if T[n+1,2] != 0
