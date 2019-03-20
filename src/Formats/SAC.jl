@@ -129,9 +129,9 @@ function read_sac_stream(f::IO, full=false::Bool, swap=false::Bool)
     for (i, v) in enumerate(iv)
       iv[i] = bswap(v)
     end
-    setfield!(S, :x, Array{Float64,1}(Float32[bswap(i) for i in read!(f, Array{Float32, 1}(undef, iv[10]))]))
+    setfield!(S, :x, Float32[bswap(i) for i in read!(f, Array{Float32, 1}(undef, iv[10]))])
   else
-    setfield!(S, :x, Array{Float64,1}(read!(f, Array{Float32, 1}(undef, iv[10]))))
+    setfield!(S, :x, read!(f, Array{Float32, 1}(undef, iv[10])))
   end
 
   # floats

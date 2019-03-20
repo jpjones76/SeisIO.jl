@@ -1,3 +1,13 @@
+### 2019-03-19
+* Arrrays in the SeisData "data" field :x can now be either Array{Float64,1}
+  or Array{Float32,1}.
+* `readsac`, `readsegy`, `readuw`, and `readwin32` now read to single-
+  precision channels, consistent with each file format's native precision.
+* SEED files and data (e.g. SeedLink, `readmseed`) continue to be double-precision.
+* Data processing operations should all preserve the precision of SeisData
+  channels; if you discover a set of operations that doesn't, please report it
+  as an issue!
+
 ### 2019-03-18
 * Major rewrite to `merge!`
   + Channels are no longer combined if they have different (non-empty) values

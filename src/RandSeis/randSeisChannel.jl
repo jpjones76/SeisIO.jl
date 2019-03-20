@@ -93,7 +93,7 @@ function populate_chan!(Ch::SeisChannel; s=false::Bool)
     # Change: length is always 20-120 minutes
     Ls = rand(1200:7200)
     Lx = ceil(Int, Ls*Ch.fs)
-    Ch.x = randn(Lx)
+    Ch.x = randn(rand() < 0.5 ? Float32 : Float64, Lx)
 
     L = rand(0:9)
     ts = time()-86400+randn()                                               # t

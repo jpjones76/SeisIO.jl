@@ -13,7 +13,7 @@ mutable struct SeisChannel
   misc  ::Dict{String,Any}
   notes ::Array{String,1}
   t     ::Array{Int64,2}
-  x     ::Array{Float64,1}
+  x     ::Union{Array{Float64,1},Array{Float32,1}}
 
   function SeisChannel(
       name  ::String,
@@ -27,7 +27,8 @@ mutable struct SeisChannel
       misc  ::Dict{String,Any},
       notes ::Array{String,1},
       t     ::Array{Int64,2},
-      x     ::Array{Float64,1})
+      x     ::Union{Array{Float64,1}, Array{Float32,1}}
+      )
 
       return new(name, id, loc, fs, gain, resp, units, src, misc, notes, t, x)
     end
@@ -46,7 +47,7 @@ SeisChannel(;
             misc  ::Dict{String,Any}          = Dict{String,Any}(),
             notes ::Array{String,1}           = Array{String,1}(undef, 0),
             t     ::Array{Int64,2}            = Array{Int64,2}(undef, 0, 2),
-            x     ::Array{Float64,1}          = Array{Float64,1}(undef, 0)
+            x     ::Union{Array{Float64,1}, Array{Float32,1}}          = Array{Float32,1}(undef, 0)
             ) = SeisChannel(name, id, loc, fs, gain, resp, units, src, misc, notes, t, x)
 
 in(s::String, C::SeisChannel) = C.id==s
