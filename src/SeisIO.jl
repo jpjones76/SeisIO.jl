@@ -5,7 +5,6 @@ using FFTW: fft, ifft
 using Glob: glob
 using HTTP: request, Messages.statustext
 using Statistics: mean
-using Polynomials: polyfit, polyval
 
 path = Base.source_dir()
 

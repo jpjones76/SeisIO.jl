@@ -273,8 +273,8 @@ function readwin32(filestr::String, cf::String; v::Int=KW.v, jst::Bool=true)
 
     S.id[ii] = id
     S.src[ii] = string("readwin32(", filestr, ",", cf, ")")
-    S.x[ii] = Array{Float64,1}(undef, xi[k])
-    map!(Float64, S.x[ii], data[k])
+    S.x[ii] = Array{Float32,1}(undef, xi[k])
+    map!(Float32, S.x[ii], data[k])
 
     # Fill gaps with mean of data
     J = length(gapStart[k])

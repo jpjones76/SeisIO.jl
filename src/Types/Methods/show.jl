@@ -2,7 +2,7 @@ import Base:show, size, summary
 
 si(w::Int, i::Int) = show_os + w*(i-1)
 showtail(io::IO, b::Bool) = b ? "…" : ""
-float_str(x::Float64) = @sprintf("%.3e", x)
+float_str(x::Union{Float32,Float64}) = @sprintf("%.3e", x)
 # maxgap(t::Array{Int64,2}) = @sprintf("%g", μs*maximum(t[2:end,2]))
 ngaps(t::Array{Int64,2}) = max(0, size(t,1)-2)
 
@@ -55,7 +55,13 @@ function show_t(io::IO, T::Array{Array{Int64,2},1}, w::Int, W::Int, b::Bool)
   return
 end
 
-function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, tip::String, b::Bool)
+# Array{Union{Array{Float64,1},Array{Float32,1}},1}
+# function show_x(io::IO, X::Array{Array{Float64,1},1}, w::Int, W::Int, tip::String, b::Bool)
+function show_x(io::IO,
+                X::Union{ Array{Array{Float64,1},1},
+                          Array{Array{Float32,1},1},
+                          Array{Union{Array{Float64,1}, Array{Float32,1}},1} },
+                w::Int, W::Int, tip::String, b::Bool)
   N = length(X)
   str = zeros(UInt8, W, 6)
   str[show_os-length(tip)-1:show_os,1] = UInt8.(codeunits(tip * ": "))
@@ -160,7 +166,6 @@ summary(S::SeisChannel) = string(typeof(S), " with ", length(S.x), " sample",
   (length(S.x) == 1 ? "" : "s"), ", gaps: ", ngaps(S.t))
 
 function show(io::IO, S::SeisData)
-  # loc_str = ["lat", "lon", "ele", "az", "inc"]
   W = max(80,displaysize(io)[2]-2)-show_os
   w = min(W, 36)
   nc = getfield(S, :n)
@@ -169,7 +174,6 @@ function show(io::IO, S::SeisData)
   println(io, "SeisData with ", nc, " channels (", N, " shown)")
   show_str(io, S.id[1:N], w, W, "id", N<nc)
   show_str(io, S.name[1:N], w, W, "name", N<nc)
-  # show_str(io, [@sprintf("%0.03f, %0.03f, %0.03f", S.loc[i][1], S.loc[i][2], S.loc[i][3]) for i = 1:N], w, W, "loc", N<nc)
   show_x(io, S.loc[1:N], w, W, "LOC", N<nc)
   show_str(io, [@sprintf("%.04g", S.fs[i]) for i = 1:N], w, W, "fs", N<nc)
   show_str(io, [@sprintf("%.03e", S.gain[i]) for i = 1:N], w, W, "gain", N<nc)

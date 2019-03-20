@@ -10,6 +10,7 @@ T = get_data("IRIS", [sta], src="IRIS", s=ts, t=te, fmt="mseed", v=0, w=true)
 @test(isempty(T)==false)
 sync!(S, s=ts, t=te)
 sync!(T, s=ts, t=te)
+@test S.x[1] ≈ Float32.(T.x[1])
 
 # Only notes and src should be different
 for f in Symbol[:id, :name, :loc, :fs, :gain, :resp, :units, :misc , :t, :x]

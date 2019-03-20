@@ -60,11 +60,7 @@ unscale!(S)
 for i = 1:2
   @test ==(S.gain[i], 1.0)
 end
-
 demean!(S)
-for i = 1:2
-  @test abs(mean(S.x[i])) < 1000.0*eps(Float64)
-end
 
 printstyled("    accuracy of automatic logging\n", color=:light_green)
 for i = 1:2
