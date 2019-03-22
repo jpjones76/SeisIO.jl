@@ -3,10 +3,11 @@ te = "2016-03-23T23:17:00"
 sta = "CC.JRO..BHZ"
 
 printstyled("  IRIS Web Services\n", color=:light_green)
-printstyled("    Equivalence of SAC and MSEED requests\n", color=:light_green)
+printstyled("    IRISWS continuous data requests\n", color=:light_green)
 S = get_data("IRIS", sta, src="IRIS", s=ts, t=te, fmt="sacbl", v=0, w=true)
 @test(isempty(S)==false)
 T = get_data("IRIS", [sta], src="IRIS", s=ts, t=te, fmt="mseed", v=0, w=true)
+printstyled("    Equivalence of SAC and MSEED requests\n", color=:light_green)
 @test(isempty(T)==false)
 sync!(S, s=ts, t=te)
 sync!(T, s=ts, t=te)
@@ -18,6 +19,7 @@ for f in Symbol[:id, :name, :loc, :fs, :gain, :resp, :units, :misc , :t, :x]
 end
 
 # Test a bum data format
+printstyled("    Testing a bad data format (should warn)\n", color=:light_green)
 sta_matrix = vcat(["UW" "LON" "" "BHZ"],["UW" "LON" "" "BHE"])
 test_sta = deepcopy(sta_matrix)
 T = get_data("IRIS", sta_matrix, s=-600, t=0, v=1, fmt="audio")
@@ -25,6 +27,7 @@ T = get_data("IRIS", sta_matrix, s=-600, t=0, v=1, fmt="audio")
 @test sta_matrix == test_sta
 
 # Test a bad request
+printstyled("    Testing a bad request format (should warn of an error)\n", color=:light_green)
 T = get_data("IRIS", "DE.NENA.99.LUFTBALLOONS", src="IRIS", s=ts, t=te, fmt="mseed", v=0)
 
 printstyled("    A more complex IRISWS request\n", color=:light_green)
