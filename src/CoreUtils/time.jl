@@ -25,7 +25,7 @@ tnote(s::String) = string(timestamp(), ": ", s)
 
 Convert Julian day j of year y to month m, day d
 """
-function j2md(y::T, j::T) where T
+function j2md(y::T, j::T) where T<:Integer
   m = zero(T)
   d = one(T)
   if j > T(31)
@@ -49,11 +49,12 @@ end
 
 Convert month `m`, day `d` of year `y` to Julian day (day of year)
 """
-function md2j(y::T, m::T, d::T) where T
+function md2j(y::T, m::T, d::T) where T<:Integer
   D = Array{T,1}([31,28,31,30,31,30,31,31,30,31,30,31])
   ((y%400 == 0) || (y%4 == 0 && y%100 != 0)) && (D[2]+=1)
   return (sum(D[1:m-1]) + d)
 end
+md2j(y::AbstractString, m::AbstractString, d::AbstractString) = md2j(parse(Int, y), parse(Int, m), parse(Int, d))
 
 """
     d0, d1 = parsetimewin(s, t)
