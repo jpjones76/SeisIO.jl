@@ -47,14 +47,13 @@ keyword isn't specified.
 | opts | ""         | String                 | user-specified options[^1]     |
 | pha  | "P"        | String                 | phases to get (comma-separated |
 |      |            |                        |    list; use "ttall" for all)  |
-| rad  | []         | Array{Float64,1}       | radius search: [center_lat,    |
-|      |            |                        |    center_lon, r_min, r_max];  |
-|      |            |                        |    center coords in degrees    |
-|      |            |                        |    (°), radii in km            |
+| rad  | []         | Array{Float64,1}       | radius search: `[center_lat,`  |
+|      |            |                        |    `center_lon, r_min, r_max]` |
+|      |            |                        |    in decimal degrees (°)      |
 | reg  | []         | Array{Float64,1}       | geographic search region:      |
-|      |            |                        |    [min_lat, max_lat,          |
-|      |            |                        |     min_lon, max_lon,          |
-|      |            |                        |     min_dep, max_dep]          |
+|      |            |                        |    `[min_lat, max_lat,`        |
+|      |            |                        |     `min_lon, max_lon,`        |
+|      |            |                        |    `min_dep, max_dep]`         |
 |      |            |                        |    lat, lon in degrees (°)     |
 |      |            |                        |    dep in km with down = +     |
 | si   | true       | Bool                   | autofill request station info? |
