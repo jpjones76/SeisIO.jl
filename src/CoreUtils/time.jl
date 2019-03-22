@@ -73,6 +73,9 @@ Convert times `s` and `t` to strings and sorts s.t. d0 < d1.
 | R     | R     | `s` and `t' are seconds from `now()` |
 
 (above, R = Real, DT = DateTime, S = String, I = Integer)
+
+### Relative Timekeeping
+Numeric time values are *relative to the start of the current minute*. Thus, if one of `-s` or `-t` is 0, the data request begins (or ends) at the start of the minute in which the request is submitted.
 """
 function parsetimewin(s::DateTime, t::DateTime)
   if s < t

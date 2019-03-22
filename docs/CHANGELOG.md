@@ -1,12 +1,25 @@
-### 2019-03-19
-* Arrrays in the SeisData "data" field :x can now be either Array{Float64,1}
-  or Array{Float32,1}.
-* `readsac`, `readsegy`, `readuw`, and `readwin32` now read to single-
+### 2019-03-22
+* `get_data / get_data!` can now handle long requests and coordinate searches with FDSN.
+  + Long requests are broken into subrequests of length `nd` days. Change
+  the length of each subrequest with keyword `nd=` (default: `nd=1`).
+  + Search in a rectangular region with keyword `reg`. Coordinates should be
+  an Array{Float64,1} in decimal degrees, arranged [min_lat, max_lat, min_lon, max_lon].
+  Treat North and East as positive.
+  + Search in a radius around a central point with keyword `rad`. Coordinates
+  should be an Array{Float64,1} arranged [center_lat, center_lon, r_min, r_max].
+  Use decimal degrees for the center and treat North and East as positive.
+  Specify radii in km.
+* Arrrays in the "data" field of a SeisData object (`:x`) can now be either
+  Array{Float64,1} or Array{Float32,1}.
+* `readsac`, `readsegy`, `readuw`, and `readwin32` now read into single-
   precision channels, consistent with each file format's native precision.
-* SEED files and data (e.g. SeedLink, `readmseed`) continue to be double-precision.
+* SEED files and SEED data (e.g. SeedLink, `readmseed`, FDSN requests) use
+  double-precision channels.
 * Data processing operations should all preserve the precision of SeisData
-  channels; if you discover a set of operations that doesn't, please report it
-  as an issue!
+  channels.
+* Deprecated keyword `q` (quality) from web requests due to its breakingly
+  non-standard implementation. Quality constraints can be added to the `opts`
+  keyword string (e.g. `opts="q=B&..."`) if needed.
 
 ### 2019-03-18
 * Major rewrite to `merge!`

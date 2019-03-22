@@ -29,6 +29,7 @@ files = ls("*.SAC")
 for f in files
   rm(f)
 end
+rm("FDSNsta.xml")
 
 printstyled("Done!\n", color=:light_green, bold=true)
 printstyled("To run some data acquisition examples, execute this command: include(\"", path, "/examples.jl\").\n", color=:cyan, bold=true)
