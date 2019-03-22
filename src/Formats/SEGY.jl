@@ -45,12 +45,6 @@ function do_trace(f::IO; full=false::Bool, passcal=false::Bool, fh=zeros(Int16, 
   shorts[5:6] = read!(f, Array{Int16, 1}(undef, 2))
   ints[16:19] = read!(f, Array{Int32, 1}(undef, 4))
   shorts[7:52]= read!(f, Array{Int16, 1}(undef, 46))
-  # read!(f, ints[1:7])
-  # read!(f, shorts[1:4])
-  # read!(f, ints[8:15])
-  # read!(f, shorts[5:6])
-  # read!(f, ints[16:19])
-  # read!(f, shorts[7:52])
   if passcal
     chars         = read!(f, Array{UInt8, 1}(undef, 18))
     shorts[53]    = read(f, Int16)
@@ -61,7 +55,7 @@ function do_trace(f::IO; full=false::Bool, passcal=false::Bool, fh=zeros(Int16, 
     shorts[62]    = read(f, Int16)
     ints[21:23]   = read!(f, Array{Int32, 1}(undef, 3)); # n = ints[21]
     nx = (shorts[20] == Int16(32767) ? ints[21] : Int32(shorts[20]))
-    x = map(Float64, read!(f, Array{fmt == Int16(1) ? Int32 : Int16, 1}(undef, nx)))
+    x = map(Float32, read!(f, Array{fmt == Int16(1) ? Int32 : Int16, 1}(undef, nx)))
     close(f)
 
     # trace processing
@@ -95,7 +89,7 @@ function do_trace(f::IO; full=false::Bool, passcal=false::Bool, fh=zeros(Int16, 
     ints[27]      = read(f, Int32)
     shorts[61:62] = read!(f, Array{Int16, 1}(undef, 2))
     ints[28:29]   = read!(f, Array{Int32, 1}(undef, 2))
-    x             = map(Float64, [bswap(i) for i in read!(f, Array{ftypes[fmt], 1}(undef, nx))])
+    x             = map(Float32, [bswap(i) for i in read!(f, Array{ftypes[fmt], 1}(undef, nx))])
 
 
     # not sure about this; where did this formula come from...?
@@ -106,7 +100,6 @@ function do_trace(f::IO; full=false::Bool, passcal=false::Bool, fh=zeros(Int16, 
     fs    = 1.0e6 / Float64(shorts[21])
     lat   = 0.0
     lon   = 0.0
-    # el    = Float64(ints[12]*shorts[5])
     el    = Float64(ints[9]) * Float64(abs(shorts[5]))^(shorts[5]<Int16(0) ? -1.0 : 1.0)
     sta   = @sprintf("%04i", shorts[55])
     cha   = shorts[1] in Int16(11):Int(1):Int16(17) ? trid(shorts[1]-Int16(10), fs=fs) : "YYY"

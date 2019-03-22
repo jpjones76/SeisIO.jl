@@ -52,7 +52,6 @@ function merge!(S::SeisData;
   N_warn = 0
   note_head = string(SeisIO.timestamp(), ": ")
   to_delete = Array{Int64,1}(undef, 0)
-  # println("\n\n\nMERGE BEGINS\n")
 
   for cnt = 1:length(UID)
     id = UID[cnt]
@@ -68,7 +67,6 @@ function merge!(S::SeisData;
 
     N_grp = length(GRP)
     (N_grp ≤ 1) && continue
-    # println("Merging ID = ", id, " (", N_grp, " members)")
 
     SUBGRPS = get_subgroups(S, GRP)
 
@@ -133,9 +131,6 @@ function merge!(S::SeisData;
         te_min = min(te_i, te_j)
         nov = 1 + div(te_min - ts_max, Δ)
 
-        # printstyled(string("merging (p) channel ", p, ", window ", p_i, " into (q) channel ", q, ", window ", q_i, "\n"), color=:green)
-        # println(stdout, "original src: S.t[", p, "] = ", S.t[p])
-        # println(stdout, "original dest: S.t[", q, "] = ", S.t[q])
         # (1) determine the times and indices of overlap within each pair
 
         # a. determine sample times of overlap
@@ -156,32 +151,23 @@ function merge!(S::SeisData;
         lxp = length(S.x[p])
         lxq = length(S.x[q])
 
-        # println("Checking overlap and misalignment:")
-        # println("   S.x[", p, "][", xsi_i, ":", xei_i, "]")
-        # println("   S.x[", q, "][", xsi_j, ":", xei_j, "]")
-
         # Check for misalignment:
         T, X, do_xtmerge, δj = check_alignment(Ti, Tj, Xi, Xj, Δ)
         if do_xtmerge
           xtmerge!(T, X, div(Δ,2))
         end
         if δj != 0
-          # println(stdout, "Missed shift of ", δj, " samples in i")
           xsi_i += δj
           xei_j -= δj
         end
 
         # (3) Merge X,T into S[q]
-        # # println(stdout, "deleting ", xei_j - xsi_j + 1, " indices from S.x[", q, "] starting at i = ", xsi_j)
         deleteat!(S.x[q], xsi_j:xei_j)
-        # # println(stdout, "now length(S.x[", q, "]) = ", length(S.x[q]))
-        # # println(stdout, "inserting ", length(X), " indices into S.x[", q, "] before i = ", xsi_j)
         if xsi_j == 1
           prepend!(S.x[q], X)
         else
           splice!(S.x[q], xsi_j:xsi_j-1, X)
         end
-        # # println(stdout, "now length(S.x[", q, "]) = ", length(S.x[q]))
 
         # (4) Delete S.x[p][xsi_i:xei_i]
         deleteat!(S.x[p], xsi_i:xei_i)
@@ -198,9 +184,6 @@ function merge!(S::SeisData;
           wq[i, 2] += nxq*Δ
         end
 
-        # println(stdout, "Decremented wq by ", nxq*Δ)
-        # println(stdout, "Incremented wp by ", nxp*Δ)
-
         # Sort by start time, to be safe
         ii = sortperm(wq[:,1])
         wq = wq[ii,:]
@@ -216,12 +199,9 @@ function merge!(S::SeisData;
           wp = wp[setdiff(1:end, p_i), :]
         end
         S.t[p] = w_time(wp, Δ)
-        # println(stdout, "post-merge S.t[", p, "] = ", S.t[p], ", lx = ", length(S.x[p]))
-        # println(stdout, "post-merge S.t[", q, "] = ", S.t[q], ", lx = ", length(S.x[q]))
 
         # Repeat until no further merges are possible
         (src, dest) = get_next_pair(S, subgrp, Δ)
-        # println(src,dest)
       end
 
       #= At this point, we have nothing left that can be merged. So we're going
@@ -229,10 +209,9 @@ function merge!(S::SeisData;
       ts, te, pa, pi, xsi, xei = get_time_windows(S, subgrp, Δ, rev=false)
       nt = length(ts)
       nx = sum(broadcast(+, xei-xsi, 1))
-      X = Array{Float64,1}(undef, nx)
+      X = Array{eltype(S.x[Ω]),1}(undef, nx)
       xi = 1
       for i = 1:nt
-        # println("placing trace ", pa[i], ", ", xsi[i], " - ", xei[i])
         lx     = xei[i] - xsi[i] + 1
         unsafe_copyto!(X, xi, S.x[pa[i]], xsi[i], lx)
         xi += lx

@@ -51,7 +51,7 @@ printstyled("    link 2: station file\n", color=:light_green)
 T = SeisData()
 open("runtests.log", "a") do out
   redirect_stdout(out) do
-    SeedLink!(T, sta, mode="DATA", refresh=9.9, kai=15.0)
+    SeedLink!(T, sta, mode="DATA", refresh=9.9, kai=15.0, v=1)
   end
 end
 
@@ -64,9 +64,9 @@ wait_on_data!(T)
 
 # FETCH mode (indistinguishable from DATA mode for most users)
 printstyled("  SeedLink FETCH mode\n", color=:light_green)
-v = SeedLink(config_file, refresh=10.0, mode="FETCH")
+V = SeedLink("GE.ISP..BH?.D", refresh=10.0, mode="FETCH", v=1)
 printstyled("    link initialized\n", color=:light_green)
-wait_on_data!(v, tmax=50.0)
+wait_on_data!(V, tmax=50.0)
 
 # SeedLink time mode (more complicated)
 printstyled("  SeedLink TIME mode\n", color=:light_green)

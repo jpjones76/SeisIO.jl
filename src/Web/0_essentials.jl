@@ -33,6 +33,27 @@ function get_HTTP_req(url::String, req_info_str::String, to::Int; status_excepti
   return R, parsable
 end
 
+function get_http_post(url::String, body::String, to::Int; status_exception::Bool=false)
+  try
+    req = request(  "POST", url, webhdr, body,
+                    readtimeout = to,
+                    status_exception = status_exception  )
+    if req.status == 200
+      return (req.body, true)
+    else
+      @warn(string( "Request failed!\nURL: ", url, "\nPOST BODY: \n", body, "\n",
+                    "RESPONSE: ", req.status, " (", statustext(req.status), ")\n" ) )
+      return (Array{UInt8,1}(string(req)), false)
+    end
+
+  catch err
+    @warn(string( "Error thrown:\nURL: ", url, "\nPOST BODY: \n", body, "\n",
+                  "ERROR TYPE: ", typeof(err), "\n" ) )
+    msg_data::Array{UInt8,1} = Array{UInt8,1}( try; string(getfield(err, :response)); catch; try; string(getfield(err, :msg));  catch; ""; end; end )
+    return (msg_data, false)
+  end
+end
+
 datareq_summ(src::String, ID::String, d0::String, d1::String) = ("\n" * src *
   " query:\nID = " * ID * "\nSTART = " * d0 * "\nEND = " * d1)
 

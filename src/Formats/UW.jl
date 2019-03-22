@@ -330,11 +330,11 @@ function uwdf(datafile::String; v=0::Int)
 
     s = cat(repeat([0x55 0x57 0x2e], N, 1), sta_u8, repeat([0x2e 0x2e], N, 1), cha_u8, dims=2)'
     id = [replace(String(s[:,i]), "\0" => "") for i = 1:N]
-    X = Array{Array{Float64, 1}, 1}(undef, N)
+    X = Array{Union{Array{Float32,1}, Array{Float64,1}},1}(undef, N)
     T = Array{Array{Int64, 2}, 1}(undef, N)
     for i = 1:N
       seek(fid, ch_os[i])
-      X[i] = Float64[bswap(j) for j in read!(fid, Array{f[i], 1}(undef, ch_len[i]))]
+      X[i] = Float32[bswap(j) for j in read!(fid, Array{f[i], 1}(undef, ch_len[i]))]
       T[i] = Int64[1 round(Int64, ch_time[i]*1000000); length(X[i]) 0]
     end
   end

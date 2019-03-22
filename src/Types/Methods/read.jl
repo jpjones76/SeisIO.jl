@@ -182,7 +182,7 @@ function rdata(io::IOStream, ver::Float32)
     else
       S.notes[i] = Array{String,1}(undef, 0)
     end
-    S.x[i]  = Blosc.decompress(Float64, read!(io, Array{UInt8, 1}(undef, i64[7])))
+    S.x[i]  = Blosc.decompress(code2typ(y), read!(io, Array{UInt8, 1}(undef, i64[7])))
     S.misc[i] = read_misc(io)
   end
   Base.GC.enable(true)
