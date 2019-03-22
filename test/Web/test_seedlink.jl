@@ -51,7 +51,7 @@ printstyled("    link 2: station file\n", color=:light_green)
 T = SeisData()
 open("runtests.log", "a") do out
   redirect_stdout(out) do
-    SeedLink!(T, sta, mode="DATA", refresh=9.9, kai=15.0)
+    SeedLink!(T, sta, mode="DATA", refresh=9.9, kai=15.0, v=1)
   end
 end
 
