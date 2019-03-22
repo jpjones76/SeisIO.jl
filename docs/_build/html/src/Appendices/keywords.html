@@ -24,7 +24,7 @@
         <script type="text/javascript" src="../../_static/jquery.js"></script>
         <script type="text/javascript" src="../../_static/underscore.js"></script>
         <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -214,62 +214,57 @@ as the Julia language matures.</p>
 <td>A{F,1}</td>
 <td>magnitude range for queries</td>
 </tr>
-<tr class="row-odd"><td>nev</td>
+<tr class="row-odd"><td>nd</td>
+<td>1</td>
+<td>I</td>
+<td>number of days per subrequest</td>
+</tr>
+<tr class="row-even"><td>nev</td>
 <td>1</td>
 <td>I</td>
 <td>number of events returned per query</td>
 </tr>
-<tr class="row-even"><td>opts</td>
+<tr class="row-odd"><td>opts</td>
 <td>“”</td>
 <td>S</td>
 <td>user-specified options <a class="footnote-reference" href="#id9" id="id2">[2]</a></td>
-</tr>
-<tr class="row-odd"><td>q</td>
-<td>‘B’</td>
-<td>C</td>
-<td>data quality <a class="footnote-reference" href="#id10" id="id3">[3]</a></td>
 </tr>
 <tr class="row-even"><td>pha</td>
 <td>“P”</td>
 <td>S</td>
 <td>seismic phase arrival times to retrieve</td>
 </tr>
-<tr class="row-odd"><td>reg</td>
-<td>[-90.0, 90.0,</td>
+<tr class="row-odd"><td>rad</td>
+<td>[]</td>
 <td>A{F,1}</td>
-<td>geographic search region <a class="footnote-reference" href="#id11" id="id4">[4]</a></td>
+<td>radial search region <a class="footnote-reference" href="#id10" id="id3">[3]</a></td>
 </tr>
-<tr class="row-even"><td>&#160;</td>
-<td>-180.0, 180.0,</td>
-<td>&#160;</td>
-<td>&#160;</td>
+<tr class="row-even"><td>reg</td>
+<td>[]</td>
+<td>A{F,1}</td>
+<td>rectangular search region <a class="footnote-reference" href="#id11" id="id4">[4]</a></td>
 </tr>
-<tr class="row-odd"><td>&#160;</td>
-<td>-30.0, 660.0]</td>
-<td>&#160;</td>
-<td>&#160;</td>
-</tr>
-<tr class="row-even"><td>si</td>
+<tr class="row-odd"><td>si</td>
 <td>true</td>
 <td>B</td>
 <td>autofill station info on data req? <a class="footnote-reference" href="#id12" id="id5">[5]</a></td>
 </tr>
-<tr class="row-odd"><td>to</td>
+<tr class="row-even"><td>to</td>
 <td>30</td>
 <td>I</td>
 <td>read timeout for web requests (s)</td>
 </tr>
-<tr class="row-even"><td>v</td>
+<tr class="row-odd"><td>v</td>
 <td>0</td>
 <td>I</td>
 <td>verbosity</td>
 </tr>
-<tr class="row-odd"><td>w</td>
+<tr class="row-even"><td>w</td>
 <td>false</td>
 <td>B</td>
 <td>write requests to disc? <a class="footnote-reference" href="#id13" id="id6">[6]</a></td>
 </tr>
-<tr class="row-even"><td>y</td>
+<tr class="row-odd"><td>y</td>
 <td>false</td>
 <td>B</td>
 <td>sync data after web request? <a class="footnote-reference" href="#id14" id="id7">[7]</a></td>
@@ -292,13 +287,13 @@ as the Julia language matures.</p>
 <table class="docutils footnote" frame="void" id="id10" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>Queries to some FDSN servers will fail with <strong>-q=’R’</strong>.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>Specify region <strong>[center_lat, center_lon, min_radius, max_radius, dep_min, dep_max]</strong>, with lat, lon, and radius in decimal degrees (°) and depth in km with + = down. Depths are only used for earthquake searches.</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="id11" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id4">[4]</a></td><td>Specify region <strong>[lat_min, lat_max, lon_min, lon_max, dep_min, dep_max]</strong>, with lat, lon in decimal degrees (°) and depth in km with + = down.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id4">[4]</a></td><td>Specify region <strong>[lat_min, lat_max, lon_min, lon_max, dep_min, dep_max]</strong>, with lat, lon in decimal degrees (°) and depth in km with + = down. Depths are only used for earthquake searches.</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="id12" rules="none">
@@ -310,13 +305,13 @@ as the Julia language matures.</p>
 <table class="docutils footnote" frame="void" id="id13" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id6">[6]</a></td><td><strong>-v=0</strong> = quiet; 1 = verbose, 2 = very verbose; 3 = debugging</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id6">[6]</a></td><td><strong>-v=0</strong> = quiet; 1 = verbose, 2 = debug; 3 = verbose debug</td></tr>
 </tbody>
 </table>
 <table class="docutils footnote" frame="void" id="id14" rules="none">
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id7">[7]</a></td><td>If <strong>-w=true</strong>, a file name is automatically generated from the request parameters, in addition to parsing data to a SeisData structure. Files are created even if data processing fails.</td></tr>
+<tr><td class="label"><a class="fn-backref" href="#id7">[7]</a></td><td>If <strong>-w=true</strong>, a file name is automatically generated from the request parameters, in addition to parsing data to a SeisData structure. Files are created from the raw download even if data processing fails, in contrast to get_data(… wsac=true).</td></tr>
 </tbody>
 </table>
 <div class="section" id="seedlink-keywords">

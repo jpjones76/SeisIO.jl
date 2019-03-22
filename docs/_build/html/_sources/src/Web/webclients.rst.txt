@@ -18,7 +18,7 @@ Data requests use ``get_data!`` as a wrapper to either FDSN or IRIS data service
 |
 | **KWs**
 | Keyword arguments; see also :ref:`SeisIO standard KWs<dkw>` or type ``?SeisIO.KW``.
-| Standard keywords: fmt, opts, q, si, to, v, w, y
+| Standard keywords: fmt, nd, opts, rad, reg, si, to, v, w, y
 | Other keywords:
 | ``--s``: Start time
 | ``--t``: Termination (end) time
@@ -51,10 +51,11 @@ Data Query
 
 FDSN data query with get_data! wrapper.
 
-| :ref:`Shared keywords<dkw>`: fmt, opts, q, s, si, t, to, v, w, y
+| :ref:`Shared keywords<dkw>`: fmt, nd, opts, rad, reg, s, si, t, to, v, w, y
 | Other keywords:
 | ``--s``: Start time
 | ``--t``: Termination (end) time
+| ``xml_file``: Name of XML file to save station metadata
 
 Station Query
 *************
@@ -76,7 +77,7 @@ Event Header Query
 .. function:: H = FDSNevq(ot)
    :noindex:
 
-:ref:`Shared keywords<dkw>`: evw, reg, mag, nev, src, to, w
+:ref:`Shared keywords<dkw>`: evw, rad, reg, mag, nev, src, to, v, w
 
 Multi-server query for the event(s) with origin time(s) closest to `ot`. Returns
 a SeisHdr.
@@ -96,7 +97,7 @@ Event Header and Data Query
 Get trace data for the event closest to origin time `ot` on channels `chans`.
 Returns a SeisEvent.
 
-| :ref:`Shared keywords<dkw>`: fmt, mag, opts, pha, q, src, to, v, w
+| :ref:`Shared keywords<dkw>`: fmt, mag, nd, opts, pha, rad, reg, src, to, v, w
 | Other keywords:
 | ``--len``: desired record length *in minutes*.
 

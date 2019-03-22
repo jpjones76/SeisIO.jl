@@ -18,19 +18,17 @@ as the Julia language matures.
 +--------+----------------+--------+------------------------------------------+
 | mag    | [6.0, 9.9]     | A{F,1} | magnitude range for queries              |
 +--------+----------------+--------+------------------------------------------+
+| nd     | 1              | I      | number of days per subrequest            |
++--------+----------------+--------+------------------------------------------+
 | nev    | 1              | I      | number of events returned per query      |
 +--------+----------------+--------+------------------------------------------+
 | opts   | ""             | S      | user-specified options [#]_              |
 +--------+----------------+--------+------------------------------------------+
-| q      | 'B'            | C      | data quality [#]_                        |
-+--------+----------------+--------+------------------------------------------+
 | pha    | "P"            | S      | seismic phase arrival times to retrieve  |
 +--------+----------------+--------+------------------------------------------+
-| reg    | [-90.0, 90.0,  | A{F,1} | geographic search region [#]_            |
+| rad    | []             | A{F,1} | radial search region [#]_                |
 +--------+----------------+--------+------------------------------------------+
-|        | -180.0, 180.0, |        |                                          |
-+--------+----------------+--------+------------------------------------------+
-|        | -30.0, 660.0]  |        |                                          |
+| reg    | []             | A{F,1} | rectangular search region [#]_           |
 +--------+----------------+--------+------------------------------------------+
 | si     | true           | B      | autofill station info on data req? [#]_  |
 +--------+----------------+--------+------------------------------------------+
@@ -47,11 +45,11 @@ as the Julia language matures.
 .. rubric:: Table Footnotes
 .. [#] Types: A = Array, B = Boolean, C = Char, DT = DateTime, F = Float, I = Integer, R = Real, S = String, U8 = Unsigned 8-bit integer
 .. [#] String is passed as-is, e.g. "szsrecs=true&repo=realtime" for FDSN. String should not begin with an ampersand.
-.. [#] Queries to some FDSN servers will fail with **-q='R'**.
-.. [#] Specify region **[lat_min, lat_max, lon_min, lon_max, dep_min, dep_max]**, with lat, lon in decimal degrees (°) and depth in km with + = down.
+.. [#] Specify region **[center_lat, center_lon, min_radius, max_radius, dep_min, dep_max]**, with lat, lon, and radius in decimal degrees (°) and depth in km with + = down. Depths are only used for earthquake searches.
+.. [#] Specify region **[lat_min, lat_max, lon_min, lon_max, dep_min, dep_max]**, with lat, lon in decimal degrees (°) and depth in km with + = down. Depths are only used for earthquake searches.
 .. [#] Not used with IRISWS.
-.. [#] **-v=0** = quiet; 1 = verbose, 2 = very verbose; 3 = debugging
-.. [#] If **-w=true**, a file name is automatically generated from the request parameters, in addition to parsing data to a SeisData structure. Files are created even if data processing fails.
+.. [#] **-v=0** = quiet; 1 = verbose, 2 = debug; 3 = verbose debug
+.. [#] If **-w=true**, a file name is automatically generated from the request parameters, in addition to parsing data to a SeisData structure. Files are created from the raw download even if data processing fails, in contrast to get_data(... wsac=true).
 
 SeedLink Keywords
 -----------------

@@ -9,6 +9,11 @@
   should be an Array{Float64,1} arranged [center_lat, center_lon, r_min, r_max].
   Use decimal degrees for the center and treat North and East as positive.
   Specify radii in km.
+  + Station XML for all FDSN `get_data` requests is now written to file by
+  default. The default file created is "FDSNsta.xml". Change this with keyword
+  `xml_file=`.
+* `get_data / get_data!` has an additional keyword, `wsac=true`, that
+  immediately writes post-processed data to SAC file.
 * Arrrays in the "data" field of a SeisData object (`:x`) can now be either
   Array{Float64,1} or Array{Float32,1}.
 * `readsac`, `readsegy`, `readuw`, and `readwin32` now read into single-
@@ -20,6 +25,8 @@
 * Deprecated keyword `q` (quality) from web requests due to its breakingly
   non-standard implementation. Quality constraints can be added to the `opts`
   keyword string (e.g. `opts="q=B&..."`) if needed.
+* Bug fix: standard keywords in `SeisIO.KW` are now faithfully propagated to all
+  web functions that allow them.
 
 ### 2019-03-18
 * Major rewrite to `merge!`
