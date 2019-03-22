@@ -24,7 +24,7 @@
         <script type="text/javascript" src="../../_static/jquery.js"></script>
         <script type="text/javascript" src="../../_static/underscore.js"></script>
         <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -215,7 +215,7 @@
 <div class="line"><br /></div>
 <div class="line"><strong>KWs</strong></div>
 <div class="line">Keyword arguments; see also <a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">SeisIO standard KWs</span></a> or type <code class="docutils literal notranslate"><span class="pre">?SeisIO.KW</span></code>.</div>
-<div class="line">Standard keywords: fmt, opts, q, si, to, v, w, y</div>
+<div class="line">Standard keywords: fmt, nd, opts, rad, reg, si, to, v, w, y</div>
 <div class="line">Other keywords:</div>
 <div class="line"><code class="docutils literal notranslate"><span class="pre">--s</span></code>: Start time</div>
 <div class="line"><code class="docutils literal notranslate"><span class="pre">--t</span></code>: Termination (end) time</div>
@@ -247,10 +247,11 @@
 
 <p>FDSN data query with get_data! wrapper.</p>
 <div class="line-block">
-<div class="line"><a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">Shared keywords</span></a>: fmt, opts, q, s, si, t, to, v, w, y</div>
+<div class="line"><a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">Shared keywords</span></a>: fmt, nd, opts, rad, reg, s, si, t, to, v, w, y</div>
 <div class="line">Other keywords:</div>
 <div class="line"><code class="docutils literal notranslate"><span class="pre">--s</span></code>: Start time</div>
 <div class="line"><code class="docutils literal notranslate"><span class="pre">--t</span></code>: Termination (end) time</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">xml_file</span></code>: Name of XML file to save station metadata</div>
 </div>
 </div>
 <div class="section" id="station-query">
@@ -281,7 +282,7 @@ remote station XML files by web query.</p>
 <code class="descname">H = FDSNevq(ot)</code></dt>
 <dd></dd></dl>
 
-<p><a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">Shared keywords</span></a>: evw, reg, mag, nev, src, to, w</p>
+<p><a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">Shared keywords</span></a>: evw, rad, reg, mag, nev, src, to, v, w</p>
 <p>Multi-server query for the event(s) with origin time(s) closest to <cite>ot</cite>. Returns
 a SeisHdr.</p>
 <p>Notes:</p>
@@ -304,7 +305,7 @@ a SeisHdr.</p>
 <p>Get trace data for the event closest to origin time <cite>ot</cite> on channels <cite>chans</cite>.
 Returns a SeisEvent.</p>
 <div class="line-block">
-<div class="line"><a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">Shared keywords</span></a>: fmt, mag, opts, pha, q, src, to, v, w</div>
+<div class="line"><a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">Shared keywords</span></a>: fmt, mag, nd, opts, pha, rad, reg, src, to, v, w</div>
 <div class="line">Other keywords:</div>
 <div class="line"><code class="docutils literal notranslate"><span class="pre">--len</span></code>: desired record length <em>in minutes</em>.</div>
 </div>

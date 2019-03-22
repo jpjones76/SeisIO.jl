@@ -17,244 +17,225 @@ function FDSN_chp(chans::Union{String,Array{String,1},Array{String,2}}; v::Int64
   return C
 end
 
-function LightXML_plunge(xtmp::Array{LightXML.XMLElement,1}, str::AbstractString)
-  xtmp2 = Array{LightXML.XMLElement,1}()
-  for i=1:length(xtmp)
-    append!(xtmp2, get_elements_by_tagname(xtmp[i], str))
-  end
-  return xtmp2
-end
-
-function LightXML_findall(xtmp::Array{LightXML.XMLElement,1}, str::String)
-  S = split(str, "/")
-  for i=1:length(S)
-    xtmp = LightXML_plunge(xtmp, S[i])
-  end
-  return xtmp
-end
-LightXML_findall(xdoc::LightXML.XMLDocument, str::String) = LightXML_findall([LightXML.root(xdoc)], str)
-LightXML_findall(xtmp::LightXML.XMLElement, str::String) = LightXML_findall([xtmp], str)
-
-function LightXML_str!(v::String, x::LightXML.XMLElement, s::String)
-  Q = LightXML_findall(x, s)
-  if isempty(Q) == false
-    v = content(Q[1])
-  end
-  return v
-end
-LightXML_float!(v::Float64, x::LightXML.XMLElement, s::String) = Float64(Meta.parse(LightXML_str!(string(v), x, s)))
-
-# FDSN event XML handler
-function FDSN_event_xml(string_data::String)
-  xevt = LightXML.parse_string(string_data)
-  events = LightXML_findall(xevt, "eventParameters/event")
-  N = length(events)
-  id = Array{Int64,1}(undef, N)
-  ot = Array{DateTime,1}(undef, N)
-  loc = Array{Float64,2}(undef, 3, N)
-  mag = Array{Float32,1}(undef, N)
-  msc = Array{String,1}(undef, N)
-  for (i,evt) in enumerate(events)
-    id[i] = ( try
-                Int64(Meta.parse(String(split(attribute(evt, "publicID"),'=')[2])))
-              catch
-                0
-              end )
-    ot[i] = DateTime(LightXML_str!("1970-01-01T00:00:00", evt, "origin/time/value"))
-    loc[1,i] = LightXML_float!(0.0, evt, "origin/latitude/value")
-    loc[2,i] = LightXML_float!(0.0, evt, "origin/longitude/value")
-    loc[3,i] = LightXML_float!(0.0, evt, "origin/depth/value")/1.0e3
-    mag[i] = Float32(LightXML_float!(-5.0, evt, "magnitude/mag/value"))
-
-    tmp = LightXML_str!("--", evt, "magnitude/type")
-    if isempty(tmp)
-        msc[i] = "M?"
-    else
-        msc[i] = tmp
-    end
-  end
-  return (id, ot, loc, mag, msc)
-end
-
-function FDSN_sta_xml(string_data::String)
-    xroot = LightXML.parse_string(string_data)
-    N = length(LightXML_findall(xroot, "Network/Station/Channel"))
-
-    ID    = Array{String,1}(undef, N)
-    NAME  = Array{String,1}(undef, N)
-    LOC   = Array{Array{Float64,1}}(undef, N)
-    UNITS = Array{String,1}(undef, N)
-    GAIN  = Array{Float64,1}(undef, N)
-    RESP  = Array{Array{Complex{Float64},2}}(undef, N)
-    MISC  = Array{Dict{String,Any}}(undef, N)
-    for j = 1:N
-        MISC[j] = Dict{String,Any}()
-    end
-    y = 0
-
-    xnet = LightXML_findall(xroot, "Network")
-    for net in xnet
-        nn = attribute(net, "code")
-
-        xsta = LightXML_findall(net, "Station")
-        for sta in xsta
-            ss = attribute(sta, "code")
-            loc_tmp = zeros(Float64, 3)
-            loc_tmp[1] = LightXML_float!(0.0, sta, "Latitude")
-            loc_tmp[2] = LightXML_float!(0.0, sta, "Longitude")
-            loc_tmp[3] = LightXML_float!(0.0, sta, "Elevation")/1.0e3
-            name = LightXML_str!("0.0", sta, "Site/Name")
-
-            xcha = LightXML_findall(sta, "Channel")
-            for cha in xcha
-                y += 1
-                czs = Array{Complex{Float64},1}()
-                cps = Array{Complex{Float64},1}()
-                ID[y]               = join([nn, ss, attribute(cha,"locationCode"), attribute(cha,"code")],'.')
-                NAME[y]             = identity(name)
-                LOC[y]              = zeros(Float64,5)
-                LOC[y][1:3]         = copy(loc_tmp)
-                LOC[y][4]           = LightXML_float!(0.0, cha, "Azimuth")
-                LOC[y][5]           = LightXML_float!(0.0, cha, "Dip") - 90.0
-                GAIN[y]             = 1.0
-                MISC[y]["normfreq"] = 1.0
-
-                xresp = LightXML_findall(cha, "Response")
-                if !isempty(xresp)
-                    MISC[y]["normfreq"] = LightXML_float!(0.0, xresp[1], "InstrumentSensitivity/Frequency")
-                    GAIN[y]             = LightXML_float!(1.0, xresp[1], "InstrumentSensitivity/Value")
-                    UNITS[y]            = LightXML_str!("unknown", xresp[1], "InstrumentSensitivity/InputUnits/Name")
-
-                    xstages = LightXML_findall(xresp[1], "Stage")
-                    for stage in xstages
-                        pz = LightXML_findall(stage, "PolesZeros")
-                        for j = 1:length(pz)
-                            append!(czs, [complex(LightXML_float!(0.0, z, "Real"), LightXML_float!(0.0, z, "Imaginary")) for z in LightXML_findall(pz[j], "Zero")])
-                            append!(cps, [complex(LightXML_float!(0.0, p, "Real"), LightXML_float!(0.0, p, "Imaginary")) for p in LightXML_findall(pz[j], "Pole")])
-                        end
-                    end
-                end
-                NZ = length(czs)
-                NP = length(cps)
-                if NZ < NP
-                    for z = NZ+1:NP
-                        push!(czs, complex(0.0,0.0))
-                    end
-                end
-                RESP[y] = hcat(czs,cps)
-            end
-        end
-    end
-    return ID, LOC, UNITS, GAIN, RESP, NAME, MISC
-end
-# =============================================================================
 """
+    S = FDSNsta(chans, KW)
 
-    FDSNsta!(S::SeisData, chans::Union{String,Array{String,1},Array{String,2}}, KWs)
+Retrieve station/channel info for formatted parameter file (or string) `chans`
+into an empty SeisData structure.
 
-Fill channels `chans` in `S` with parsed station XML data.
-
-Standard keywords: src, to, v
+Standard keywords: rad, reg, src, to, v
 
 Other keywords:
 * s: Start time
 * t: Termination (end) time
+* xml_file: Name of XML file to save station metadata
 
 See also: chanspec, parsetimewin, get_data!, SeisIO.KW
 """
-function FDSNsta!(S::SeisIO.SeisData, chans::Union{String,Array{String,1},Array{String,2}};
-  s = 0::Union{Real,DateTime,String},       # Start
-  t = (-600)::Union{Real,DateTime,String},  # End or Length (s)
-  src::String = KW.src,
-  to::Int = KW.to,
-  v::Int64 = KW.v)
+function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
+                  rad = Float64[]::Array{Float64,1},        # Search radius
+                  reg = Float64[]::Array{Float64,1},        # Search region
+                  s = 0::Union{Real,DateTime,String},       # Start
+                  src::String = KW.src,                     # Source server
+                  t = (-600)::Union{Real,DateTime,String},  # End or Length (s)
+                  to::Int = KW.to,                          # Read timeout (s)
+                  v::Int64 = KW.v,                          # Verbosity
+                  xml_file = "FDSNsta.xml"                  # XML filename
+                 )
 
   d0, d1 = parsetimewin(s, t)
-  C = FDSN_chp(chans, v=v)
-
-  for j = 1:size(C,1)
-    new_id = join(C[j,1:4], '.')
-    utail = build_stream_query(C[j,:], d0, d1)
-    station_url = string(fdsn_uhead(src), "station/1/query?level=response&", utail)
-    v > 1 && println(stdout, "station url = ", station_url)
-    req_info_str = datareq_summ("FDSN station", new_id, d0, d1)
-
-    # R = request("GET", station_url, webhdr(), readtimeout=to)
-    (R, parsable) = get_HTTP_req(station_url, req_info_str, to)
-    if parsable
-      (ID, LOC, UNITS, GAIN, RESP, NAME, MISC) = FDSN_sta_xml(String(R))
-      for i = 1:S.n
-        k = findid(S.id[i], ID)
-        k == 0 && continue
-        S.loc[i]    = LOC[k]
-        S.units[i]  = UNITS[k]
-        S.gain[i]   = GAIN[k]
-        S.resp[i]   = RESP[k]
-        S.name[i]   = NAME[k]
-        merge!(S.misc[i], MISC[k])
+  v > 0 && @info(tnote("Querying FDSN stations"))
+  URL = string(fdsn_uhead(src), "station/1/query")
+  BODY = "level=response\nformat=xml\n"
+  wc = "*"
+  if chans == wc
+    (isempty(reg) && isempty(rad)) && error("No query! Please specify a search radius, a rectangular search region, or some channels.")
+    if isempty(reg)
+      BODY *= string( "latitude=", rad[1], "\n",
+                      "longitude=", rad[2], "\n",
+                      "minradius=", rad[3], "\n",
+                      "maxradius=", rad[4], "\n")
+    else
+      BODY *= string( "minlatitude=", reg[1], "\n",
+                      "maxlatitude=", reg[2], "\n",
+                      "minlongitude=", reg[3], "\n",
+                      "maxlongitude=", reg[4], "\n" )
+    end
+    BODY *= string("* * * * ", d0, " ", d1, "\n")
+  else
+    C = FDSN_chp(chans, v=v)
+    Nc = size(C,1)
+    for i = 1:Nc
+      str = ""
+      for j = 1:4
+        str *= (" " * (isempty(C[i,j]) ? wc : C[i,j]))
       end
+      BODY *= string(str, " ", d0, " ", d1, "\n")
     end
   end
-  return nothing
+  if v > 2
+    printstyled(string("request url: ", URL), color=:light_green)
+    printstyled(string("request body: \n", BODY), color=:light_green)
+  end
+  open(xml_file, "w") do io
+    request("POST", URL, webhdr, BODY, response_stream=io)
+  end
+
+  # Build channel list
+  v > 0 && @info(tnote("Building list of channels"))
+  io = open(xml_file, "r")
+  xsta = read(io, String)
+  close(io)
+  (ID, NAME, LOC, FS, GAIN, RESP, UNITS, MISC) = FDSN_sta_xml(xsta)
+  v > 2 && println(stdout, "IDs from XML = ", ID)
+  # Transfer to a SeisData object
+  S = SeisData(length(ID))
+  for i = 1:S.n
+    S.id[i]     = ID[i]
+    S.name[i]   = NAME[i]
+    S.loc[i]    = LOC[i]
+    S.fs[i]     = FS[i]
+    S.gain[i]   = GAIN[i]
+    S.resp[i]   = RESP[i]
+    S.units[i]  = UNITS[i]
+    merge!(S.misc[i], MISC[i])
+  end
+  return S
 end
 
-function FDSNget!(seis::SeisIO.SeisData, C::Array{String,2}, d0::String, d1::String;
-  fmt::String = KW.fmt,
-  opts::String = KW.opts,
-  q::Char = KW.char,
-  si::Bool = KW.si,
-  src::String = KW.src,
-  to::Int = KW.to,
-  v::Int64 = KW.v,
-  w::Bool = KW.w)
+function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,2}};
+  fmt::String = KW.fmt,                     # Request format
+  nd::Int64 = KW.nd,                        # Number of days per request
+  opts::String = KW.opts,                   # User-defined options
+  rad = Float64[]::Array{Float64,1},        # Search radius
+  reg = Float64[]::Array{Float64,1},        # Search region
+  s = 0::Union{Real,DateTime,String},       # Start
+  si::Bool = KW.si,                         # Station info?
+  src::String = KW.src,                     # Source server
+  t = (-600)::Union{Real,DateTime,String},  # End or Length (s)
+  to::Int = KW.to,                          # Read timeout (s)
+  v::Int64 = KW.v,                          # Verbosity
+  w::Bool = KW.w,                           # Write to disk?
+  xml_file::String = "FDSNsta.xml",         # XML filename
+  y::Bool = KW.y                            # Sync?
+  )
 
-  uhead = fdsn_uhead(src)
-  # Trying to avoid scoping problems
-  S = SeisData()
-  for j = 1:size(C,1)
-    parsed = false
-    new_id = join(C[j,1:4], '.')
+  parse_err = false
+  n_badreq = 0
+  wc = "*"
+  d0, d1 = parsetimewin(s, t)
+  dt_end = DateTime(d1)
+  dt1 = deepcopy(dt_end)
+  dt0 = DateTime(d0)
 
-    # build URL
-    utail = build_stream_query(C[j,:], d0, d1)
-    url = string(uhead, "dataselect/1/query?quality=", q, "&format=", fmt, "&", utail)
-    if !isempty(opts)
-      url *= string("&", opts)
-    end
-    if v > 1
-      println(stdout, "data url = ", url)
-    end
-    req_info_str = datareq_summ("FDSNWS data", new_id, d0, d1)
+  # (1) Time-space query for station info
+  if si
+    S = FDSNsta(chans,
+                rad = rad,
+                reg = reg,
+                s = d0,
+                src = src,
+                t = d1,
+                to = to,
+                v = v,
+                xml_file = xml_file)
+  end
 
-    # Get data
-    (R, parsable) = get_HTTP_req(url, req_info_str, to)
-    if parsable
-      if w == true
-        savereq(R, fmt, C[j,1], C[j,2], C[j,3], C[j,4], d0, d1, string(q))
-      end
-      n = S.n
+  # (2) Build ID strings for data query
+  ID_str = Array{String,1}(undef,S.n)
+  for i = 1:S.n
+    ID_mat = split(S.id[i], ".")
+    ID_mat[isempty.(ID_mat)] .= wc
+    ID_str[i] = join(ID_mat, " ")
+  end
+  v > 1 && println(stdout, "data query strings:\n", ID_str)
 
-      # Parse data
-      if fmt == "mseed" || fmt == "miniseed"
-        parsemseed!(S, IOBuffer(R), v)
-      end
-      S.src[n+1:S.n] .= url
-
-      # Are we auto-filling station data?
-      if si == true
-        FDSNsta!(S, C[j:j,:], s = d0, t = d1, src = src, to = to, v = v)
-      end
-    else
-      S += SeisChannel(id = new_id,
-                       misc = Dict{String,Any}("data" => String(R)),
-                       src = url
-                       )
+  # (3) Data query
+  v > 0 && @info(tnote("Data query begins"))
+  URL = string(fdsn_uhead(src), "dataselect/1/query")
+  BODY = "format=" * fmt * "\n"
+  if !isempty(opts)
+    OPTS = split(opts, "&")
+    for opt in OPTS
+      BODY *= string(opt, "\n")
     end
   end
-  # Merge into seis
-  merge!(seis, S)
 
-  return nothing
+  # Set the data source
+  for i = 1:S.n
+    S.src[i] = URL
+  end
+
+  # Loop to grab data increments days counter dt0 by nd
+  while Float64((dt_end - dt0).value) > 0.0
+    if (dt1 - dt0).value > 86400000
+      dt1 = dt0 + Day(nd)
+    end
+    qtail = string(" ", dt0, " ", dt1, "\n")
+    QUERY = identity(BODY)
+    for i = 1:S.n
+      QUERY *= ID_str[i]*qtail
+    end
+    if v > 2
+      printstyled(string("request url: ", URL, "\n"), color=:light_green)
+      printstyled(string("request body: \n", QUERY), color=:light_green)
+    end
+
+    # Request via "POST"
+    if w
+      if fmt == "miniseed"
+        ext = "mseed"
+      else
+        fmt = ext
+      end
+      ymd = split(string(dt0), r"[A-Z]")
+      (y, m, d) = split(ymd[1], "-")
+      j = md2j(y, m, d)
+      fname = join([String(y),
+                    string(j),
+                    replace(split(string(dt0), 'T')[2], ':' => '.'),
+                    "FDSNWS",
+                    src,
+                    ext],
+                    '.')
+
+      open(fname, "w") do io
+        request("POST", URL, webhdr, QUERY, readtimeout=to, response_stream=io)
+      end
+      io = open(fname, "r")
+      parsable = true
+    else
+      (R, parsable) = get_http_post(URL, QUERY, to)
+      if parsable
+        io = IOBuffer(R)
+      end
+    end
+
+    # Parse data (if we can)
+    if parsable && (fmt == "mseed" || fmt == "miniseed")
+        parsemseed!(S, io, v)
+    else
+      parse_err = true
+      n_badreq += 1
+      S += SeisChannel(id = string("XX..", n_badreq),
+                       misc = Dict{String,Any}( "url" => URL,
+                                                "body" => QUERY,
+                                                "data" => String(R) ) )
+    end
+
+    dt0 += Day(nd)
+  end
+
+  # Remove empty channels if there were no parse errors
+  if !parse_err
+    v > 0 && @info(tnote("Removing empty channels."))
+    merge!(S)
+  end
+
+  append!(U,S)
+  # Done!
+  v > 0 && @info(tnote("Done."))
+  return U
 end
 
 """
@@ -262,18 +243,37 @@ end
 
 Multi-server query for the events with the closest origin time to `ot`.
 
-Standard keywords: evw, reg, mag, nev, src, to
+Standard keywords: evw, rad, reg, mag, nev, src, to
 
 See also: SeisIO.KW
 """
 function FDSNevq(ot::String;
+  evw::Array{Float64,1} =  KW.evw,
+  rad::Array{Float64,1} = KW.rad,
   reg::Array{Float64,1} = KW.reg,
   mag::Array{Float64,1} = KW.mag,
   nev::Int64 = KW.nev,
   src::String = KW.src,
   to::Int = KW.to,
-  evw::Array{Float64,1} =  KW.evw,
   v::Int64 = KW.v)
+
+  if isempty(reg) && !isempty(rad)
+    if length(rad) == 4
+      append!(rad, [-30.0, 700.0])
+    end
+    search_coords = string( "&latitude=", rad[1], "&longitude=", rad[2],
+                            "&minradius=", rad[3], "&maxradius=", rad[4],
+                            "&mindepth=", rad[5], "&maxdepth=", rad[6] )
+  else
+    if isempty(reg)
+      reg = Float64[-90.0, 90.0, -180.0, 180.0, -30.0, 700.0]
+    elseif length(reg) == 4
+      append!(reg, [-30.0, 700.0])
+    end
+    search_coords = string("&minlat=", reg[1], "&maxlat=", reg[2],
+                           "&minlon=", reg[3], "&maxlon=", reg[4],
+                           "&mindepth=", reg[5], "&maxdepth=", reg[6])
+  end
 
   # Determine time window
   if length(ot) <= 14
@@ -302,9 +302,7 @@ function FDSNevq(ot::String;
       v > 1 && println(stdout, "Querying ", k)
       url = string(fdsn_uhead(String(k)), "event/1/query?",
                                           "starttime=", d0, "&endtime=", d1,
-                                          "&minlat=", reg[1], "&maxlat=", reg[2],
-                                          "&minlon=", reg[3], "&maxlon=", reg[4],
-                                          "&mindepth=", reg[5], "&maxdepth=", reg[6],
+                                          search_coords,
                                           "&minmag=", mag[1], "&maxmag=", mag[2],
                                           "&format=xml")
       v > 0 && println(stdout, "URL = ", url)
@@ -330,96 +328,11 @@ function FDSNevq(ot::String;
 end
 
 """
-    S = FDSNsta(chans, KW)
-
-Retrieve station/channel info for formatted parameter file (or string) `chans`
-into an empty SeisData structure.
-
-Standard keywords: src, to, v
-
-Other keywords:
-* s: Start time
-* t: Termination (end) time
-
-See also: chanspec, parsetimewin, get_data!, SeisIO.KW
-"""
-function FDSNsta( chans::Union{String,Array{String,1},Array{String,2}};
-                  src::String = KW.src,
-                  s::Union{Real,DateTime,String} = 0,
-                  t::Union{Real,DateTime,String} = (-600),
-                  to::Int = KW.to,
-                  v::Int64 = KW.v)
-
-  d0, d1 = parsetimewin(s, t)
-  CC = FDSN_chp(chans, v=v)
-  uhead = string(fdsn_uhead(src), "station/1/query?")
-  seis = SeisData()
-
-  for j = 1:size(CC,1)
-    utail = build_stream_query(CC[j,:], d0, d1) * "&format=text&level=channel"
-    url = string(uhead, utail)
-    v > 0 && println(stdout, "Retrieving station data from URL = ", url)
-    req_info_str = datareq_summ("FDSN sta ", join(CC[j,:], '.'), d0, d1)
-
-    # R = request("GET", url, webhdr(), readtimeout=to)
-    (R, parsable) = get_HTTP_req(url, req_info_str, to)
-    if parsable
-      ch_data = String(R)
-      v > 1 && println(stdout, ch_data)
-      ch_data = split(ch_data, "\n")
-      Nch = size(ch_data,1)
-      for n = 2:Nch-1
-        C = String.(split(ch_data[n],"|"))
-        try
-          #Network | Station | Location | Channel
-          ID = join(C[1:4], '.')
-          NAME = deepcopy(ID)
-          LOC = Float64[  parse(Float32, C[5]),
-                          parse(Float32, C[6]),
-                          parse(Float32, C[7]) + parse(Float32, C[8]),
-                          parse(Float32, C[9]),
-                          90.0-parse(Float32, C[10]) ]
-
-          # fctopz to create a sensor response is only accurate for passive velocity sensors
-          RESP = try
-            fctopz(parse(Float64, C[13]), C[14])
-          catch
-            Array{Complex{Float64},2}(undef, 0, 0)
-          end
-          MISC = Dict{String,Any}( "SensorDescription" => C[11],
-                                    "SensorStart" => C[16],
-                                    "SensorEnd" => C[17] )
-          Ch = SeisChannel( name = NAME,
-                            id = ID,
-                            fs = parse(Float64, C[15]),
-                            gain = parse(Float64, C[12]),
-                            loc = LOC,
-                            misc = MISC,
-                            resp = RESP,
-                            src = url,
-                            units = C[14] )
-          note!(Ch, "Channel info from FDSNsta: " * src)
-          seis += Ch
-        catch err
-          ID = join(C[1:4], '.')
-          @warn("Failed to parse ", ID,"; caught $err. Maybe bad or missing parameter(s) returned by server.")
-          if v > 1
-            println(stdout, "Text dump of bad record line follows:")
-            println(stdout, ch_data[n])
-          end
-        end
-      end
-    end
-  end
-  return seis
-end
-
-"""
     FDSNevt(ot::String, chans::String)
 
 Get trace data for the event closest to origin time `ot` on channels `chans`.
 
-Standard keywords: fmt, mag, opts, pha, q, src, to, v, w
+Standard keywords: fmt, mag, nd, opts, pha, rad, reg, src, to, v, w
 
 Other keywords:
 * len::Real (120.0): desired record length in minutes
@@ -428,11 +341,14 @@ See also: distaz!, FDSNevq, FDSNsta, SeisKW
 """
 function FDSNevt(ot::String, chans::Union{String,Array{String,1},Array{String,2}};
   len::Real = 120.0,
+  evw::Array{Float64,1} =  KW.evw,
   fmt::String = KW.fmt,
   mag::Array{Float64,1} = KW.mag,
+  nd::Int64 = KW.nd,
   opts::String = KW.opts,
   pha::String = KW.pha,
-  q::Char = KW.q,
+  rad::Array{Float64,1} = KW.rad,
+  reg::Array{Float64,1} = KW.reg,
   src::String = KW.src,
   to::Int64 = KW.to,
   v::Int64 = KW.v,
@@ -441,15 +357,25 @@ function FDSNevt(ot::String, chans::Union{String,Array{String,1},Array{String,2}
   C = FDSN_chp(chans, v=v)
 
   # Create header
-  H = FDSNevq(ot, nev=1, mag=mag, to=to, v=v)[1]  # Get event of interest with FDSNevq
-  v > 0 && println(stdout, now(), ": header query complete.")
+  v > 0 && println(stdout, now(), ": event query begins.")
+  H = FDSNevq(ot, nev=1,
+                  rad=rad,
+                  reg=reg,
+                  mag=mag,
+                  src=src,
+                  to=to,
+                  evw=evw,
+                  v=v
+              )[1]
 
   # Create channel data
+  v > 0 && println(stdout, now(), ": data query begins.")
   s = H.ot                                      # Start time for FDSNsta is event origin time
   t = u2d(d2u(s) + 60*len)                      # End time is len minutes later
   (d0, d1) = parsetimewin(s,t)
   S = SeisData()
-  FDSNget!(S, C, d0, d1, fmt=fmt, opts=opts, q=q, si=true, src=src, to=to, v=v, w=w)
+  FDSNget!(S, C, fmt=fmt, nd=nd, rad=rad, reg=reg, s=d0, si=true, src=src, t=d1, to=to, v=v, w=w)
+
   v > 0 && println(stdout, now(), ": channels initialized.")
   v > 2 && println(stdout, S)
 

@@ -163,6 +163,9 @@ function wait_on_data!(S::SeisData; tmax::Real=60.0)
       sleep(t)
       τ += t
       while isempty(S)
+        if any(isopen.(S.c)) == false
+          break
+        end
         sleep(t)
         τ += t
         if τ > tmax
@@ -185,11 +188,11 @@ function wait_on_data!(S::SeisData; tmax::Real=60.0)
     end
   end
 
-  # Synchronize (the reason we used d0,d1 above)
+  # Synchronize (the reason we used d0,d1 in our test sessions)
   if !isempty(S)
     sync!(S, s="first")
   else
-    @warn(string("No data after ", tmax, " s. Is the server down?"))
+    @warn("No data. Is the server down?")
   end
   return nothing
 end

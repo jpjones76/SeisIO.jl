@@ -18,7 +18,7 @@ mutable struct SeisData
   notes::Array{Array{String,1},1}             # notes
   src::Array{String,1}                        # src
   t::Array{Array{Int64,2},1}                  # time
-  x::Array{Array{Float64,1},1}                # data
+  x::Array{Union{Array{Float64,1},Array{Float32,1}},1}  # data
 
   function SeisData()
     return new(0,
@@ -34,7 +34,7 @@ mutable struct SeisData
                 Array{Array{String,1},1}(undef,0),
                 Array{String,1}(undef,0),
                 Array{Array{Int64,2},1}(undef,0),
-                Array{Array{Float64,1},1}(undef,0)
+                Array{Union{Array{Float64,1},Array{Float32,1}},1}(undef,0)
               )
   end
 
@@ -52,7 +52,7 @@ mutable struct SeisData
               Array{Array{String,1},1}(undef,n),
               Array{String,1}(undef,n),
               Array{Array{Int64,2},1}(undef,n),
-              Array{Array{Float64,1},1}(undef,n)
+              Array{Union{Array{Float64,1},Array{Float32,1}},1}(undef,n)
             )
 
     # Fill these fields with something to prevent undefined reference errors
@@ -66,7 +66,7 @@ mutable struct SeisData
       S.notes[i]  = Array{String,1}(undef,0)                # notes
       S.misc[i]   = Dict{String,Any}()                      # misc
       S.t[i]      = Array{Int64,2}(undef,0,2)               # t
-      S.x[i]      = Array{Float64,1}(undef,0)               #  x
+      S.x[i]      = Array{Float64,1}(undef,0)               # x
       S.loc[i]    = Array{Float64,1}(undef,0)               # loc
       S.resp[i]   = Array{Complex{Float64},2}(undef,0,2)    # resp
     end

@@ -44,16 +44,16 @@ function get_separator(s::String)
 end
 
 # Create end times from t, fs, x
-function mk_end_times(t::Array{Array{T,2},1}, fs::Array{Float64,1}, x::Array{Array{Float64,1},1}) where T<: Integer
-  n = length(fs)
-  ts = [t[j][1,2] for j=1:n]
+function mk_end_times(S::SeisData)
+  n = length(S.fs)
+  ts = Int64[S.t[j][1,2] for j=1:n]
   te = copy(ts)
   @inbounds for j = 1:n
-    tt = view(t[j], :, 2)
-    if fs[j] == 0.0
+    tt = view(S.t[j], :, 2)
+    if S.fs[j] == 0.0
       te[j] = last(tt)
     else
-      te[j] = sum(tt) + round(T, sμ*length(x[j])/fs[j])
+      te[j] = sum(tt) + round(Int64, sμ*length(S.x[j])/S.fs[j])
     end
   end
   return ts, te
@@ -168,7 +168,6 @@ function w_struct(io::IOStream, S::SeisData)
     write(io, typ2code(eltype(S.x[i])))
 
     # U8 array
-    # writestr_fixlen(io, S.id[i], 15)
     write(io, id)
     write(io, units)
     write(io, src)
@@ -279,7 +278,7 @@ function wseis(fname::String, S...)
         if typeof(seis) == SeisData
             C[i] = UInt8('D')
             id = sa2u8(seis.id)
-            ts, te = mk_end_times(seis.t, seis.fs, seis.x)
+            ts, te = mk_end_times(seis)
             Nc[i] = seis.n
         elseif typeof(seis) == SeisHdr
             C[i] = UInt8('H')
@@ -289,7 +288,7 @@ function wseis(fname::String, S...)
         elseif typeof(seis) == SeisEvent
             C[i] = UInt8('E')
             id = sa2u8(seis.data.id)
-            ts, te = mk_end_times(seis.data.t, seis.data.fs, seis.data.x)
+            ts, te = mk_end_times(seis.data)
             Nc[i] = seis.data.n
         end
         append!(TS, ts)

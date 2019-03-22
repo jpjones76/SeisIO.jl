@@ -143,13 +143,14 @@ function sync!(S::SeisData;
       S.t[i] = t_collapse(t, S.fs[i])
 
       # prepend points to time series data that begin late
+      T = eltype(S.x[i])
       fμs = S.fs[i]*μs
       dtμ = round(Int64, 1/fμs)
-      μ_x = mean(S.x[i])
+      μ_x = T(mean(S.x[i]))
 
       if (start_times[i] - t_start) ≥ dtμ
         ni = div(start_times[i]-t_start, dtμ)
-        prepend!(S.x[i], ones(ni).*μ_x)
+        prepend!(S.x[i], ones(T, ni).*μ_x)
 
         # corrected 2019-02-28
         S.t[i][1,2] = S.t[i][1,2] - ni*dtμ
@@ -164,12 +165,11 @@ function sync!(S::SeisData;
                         round(Int64, length(S.x[i])/fμs)
         if (t_end - end_times[i]) ≥ dtμ
           ni = div(t_end-end_times[i], dtμ)
-          append!(S.x[i], ones(ni).*μ_x)
-
+          append!(S.x[i], ones(T,ni).*μ_x)
           note!(S, i, string("sync! appended ", ni, " values."))
         end
 
-        # Correct this if necessary
+        # Correct for length aberration if necessary
         S.t[i][end,1] = length(S.x[i])
         note!(S, i, string("sync! synchronized times to ", sstr, " -- ", tstr))
       else
