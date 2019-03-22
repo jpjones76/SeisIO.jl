@@ -12,8 +12,6 @@
   + Station XML for all FDSN `get_data` requests is now written to file by
   default. The default file created is "FDSNsta.xml". Change this with keyword
   `xml_file=`.
-* `get_data / get_data!` has an additional keyword, `wsac=true`, that
-  immediately writes post-processed data to SAC file.
 * Arrrays in the "data" field of a SeisData object (`:x`) can now be either
   Array{Float64,1} or Array{Float32,1}.
 * `readsac`, `readsegy`, `readuw`, and `readwin32` now read into single-
