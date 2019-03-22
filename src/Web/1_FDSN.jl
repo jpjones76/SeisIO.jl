@@ -1,4 +1,4 @@
-export FDSNevq, FDSNevt, FDSNsta, FDSNsearch
+export FDSNevq, FDSNevt, FDSNsta
 
 # =============================================================================
 # No export
@@ -17,189 +17,6 @@ function FDSN_chp(chans::Union{String,Array{String,1},Array{String,2}}; v::Int64
   return C
 end
 
-function LightXML_plunge(xtmp::Array{LightXML.XMLElement,1}, str::AbstractString)
-  xtmp2 = Array{LightXML.XMLElement,1}()
-  for i=1:length(xtmp)
-    append!(xtmp2, get_elements_by_tagname(xtmp[i], str))
-  end
-  return xtmp2
-end
-
-function LightXML_findall(xtmp::Array{LightXML.XMLElement,1}, str::String)
-  S = split(str, "/")
-  for i=1:length(S)
-    xtmp = LightXML_plunge(xtmp, S[i])
-  end
-  return xtmp
-end
-LightXML_findall(xdoc::LightXML.XMLDocument, str::String) = LightXML_findall([LightXML.root(xdoc)], str)
-LightXML_findall(xtmp::LightXML.XMLElement, str::String) = LightXML_findall([xtmp], str)
-
-function LightXML_str!(v::String, x::LightXML.XMLElement, s::String)
-  Q = LightXML_findall(x, s)
-  if isempty(Q) == false
-    v = content(Q[1])
-  end
-  return v
-end
-LightXML_float!(v::Float64, x::LightXML.XMLElement, s::String) = Float64(Meta.parse(LightXML_str!(string(v), x, s)))
-
-# FDSN event XML handler
-function FDSN_event_xml(string_data::String)
-  xevt = LightXML.parse_string(string_data)
-  events = LightXML_findall(xevt, "eventParameters/event")
-  N = length(events)
-  id = Array{Int64,1}(undef, N)
-  ot = Array{DateTime,1}(undef, N)
-  loc = Array{Float64,2}(undef, 3, N)
-  mag = Array{Float32,1}(undef, N)
-  msc = Array{String,1}(undef, N)
-  for (i,evt) in enumerate(events)
-    id[i] = ( try
-                Int64(Meta.parse(String(split(attribute(evt, "publicID"),'=')[2])))
-              catch
-                0
-              end )
-    ot[i] = DateTime(LightXML_str!("1970-01-01T00:00:00", evt, "origin/time/value"))
-    loc[1,i] = LightXML_float!(0.0, evt, "origin/latitude/value")
-    loc[2,i] = LightXML_float!(0.0, evt, "origin/longitude/value")
-    loc[3,i] = LightXML_float!(0.0, evt, "origin/depth/value")/1.0e3
-    mag[i] = Float32(LightXML_float!(-5.0, evt, "magnitude/mag/value"))
-
-    tmp = LightXML_str!("--", evt, "magnitude/type")
-    if isempty(tmp)
-        msc[i] = "M?"
-    else
-        msc[i] = tmp
-    end
-  end
-  return (id, ot, loc, mag, msc)
-end
-
-function FDSN_sta_xml(string_data::String)
-    xroot = LightXML.parse_string(string_data)
-    N = length(LightXML_findall(xroot, "Network/Station/Channel"))
-
-    ID    = Array{String,1}(undef, N)
-    NAME  = Array{String,1}(undef, N)
-    FS    = Array{Float64,1}(undef, N)
-    LOC   = Array{Array{Float64,1}}(undef, N)
-    UNITS = Array{String,1}(undef, N)
-    GAIN  = Array{Float64,1}(undef, N)
-    RESP  = Array{Array{Complex{Float64},2}}(undef, N)
-    MISC  = Array{Dict{String,Any}}(undef, N)
-    for j = 1:N
-        MISC[j] = Dict{String,Any}()
-    end
-    y = 0
-
-    xnet = LightXML_findall(xroot, "Network")
-    for net in xnet
-        nn = attribute(net, "code")
-
-        xsta = LightXML_findall(net, "Station")
-        for sta in xsta
-            ss = attribute(sta, "code")
-            loc_tmp = zeros(Float64, 3)
-            loc_tmp[1] = LightXML_float!(0.0, sta, "Latitude")
-            loc_tmp[2] = LightXML_float!(0.0, sta, "Longitude")
-            loc_tmp[3] = LightXML_float!(0.0, sta, "Elevation")/1.0e3
-            name = LightXML_str!("0.0", sta, "Site/Name")
-
-            xcha = LightXML_findall(sta, "Channel")
-            for cha in xcha
-                y += 1
-                czs = Array{Complex{Float64},1}()
-                cps = Array{Complex{Float64},1}()
-                ID[y]               = join([nn, ss, attribute(cha,"locationCode"), attribute(cha,"code")],'.')
-                NAME[y]             = identity(name)
-                FS[y]               = LightXML_float!(0.0, cha, "SampleRate")
-                LOC[y]              = zeros(Float64,5)
-                LOC[y][1:3]         = copy(loc_tmp)
-                LOC[y][4]           = LightXML_float!(0.0, cha, "Azimuth")
-                LOC[y][5]           = LightXML_float!(0.0, cha, "Dip") - 90.0
-                GAIN[y]             = 1.0
-                MISC[y]["normfreq"] = 1.0
-                MISC[y]["ClockDrift"] = LightXML_float!(0.0, cha, "ClockDrift")
-
-                xresp = LightXML_findall(cha, "Response")
-                if !isempty(xresp)
-                    MISC[y]["normfreq"] = LightXML_float!(0.0, xresp[1], "InstrumentSensitivity/Frequency")
-                    GAIN[y]             = LightXML_float!(1.0, xresp[1], "InstrumentSensitivity/Value")
-                    UNITS[y]            = replace(LightXML_str!("unknown", xresp[1], "InstrumentSensitivity/InputUnits/Name"), "**" => "")
-
-                    xstages = LightXML_findall(xresp[1], "Stage")
-                    for stage in xstages
-                        pz = LightXML_findall(stage, "PolesZeros")
-                        for j = 1:length(pz)
-                            append!(czs, [complex(LightXML_float!(0.0, z, "Real"), LightXML_float!(0.0, z, "Imaginary")) for z in LightXML_findall(pz[j], "Zero")])
-                            append!(cps, [complex(LightXML_float!(0.0, p, "Real"), LightXML_float!(0.0, p, "Imaginary")) for p in LightXML_findall(pz[j], "Pole")])
-                        end
-                    end
-                end
-                NZ = length(czs)
-                NP = length(cps)
-                if NZ < NP
-                    for z = NZ+1:NP
-                        push!(czs, complex(0.0,0.0))
-                    end
-                end
-                RESP[y] = hcat(czs,cps)
-            end
-        end
-    end
-    return ID, NAME, LOC, FS, GAIN, RESP, UNITS, MISC
-end
-# =============================================================================
-"""
-
-    FDSNsta!(S::SeisData, chans::Union{String,Array{String,1},Array{String,2}}, KWs)
-
-Fill channels `chans` in `S` with parsed station XML data.
-
-Standard keywords: src, to, v
-
-Other keywords:
-* s: Start time
-* t: Termination (end) time
-
-See also: chanspec, parsetimewin, get_data!, SeisIO.KW
-"""
-function FDSNsta!(S::SeisIO.SeisData, chans::Union{String,Array{String,1},Array{String,2}};
-  s = 0::Union{Real,DateTime,String},       # Start
-  src::String = KW.src,                     # FDSN source
-  t = (-600)::Union{Real,DateTime,String},  # End or Length (s)
-  to::Int = KW.to,                          # Read timeout (s)
-  v::Int64 = KW.v                           # Verbosity
-  )
-
-  d0, d1 = parsetimewin(s, t)
-  C = FDSN_chp(chans, v=v)
-
-  for j = 1:size(C,1)
-    new_id = join(C[j,1:4], '.')
-    utail = build_stream_query(C[j,:], d0, d1)
-    station_url = string(fdsn_uhead(src), "station/1/query?level=response&", utail)
-    v > 1 && println(stdout, "station url = ", station_url)
-    req_info_str = datareq_summ("FDSN station", new_id, d0, d1)
-
-    (R, parsable) = get_HTTP_req(station_url, req_info_str, to)
-    if parsable
-      (ID, NAME, LOC, FS, GAIN, RESP, UNITS, MISC) = FDSN_sta_xml(String(R))
-      for i = 1:S.n
-        k = findid(S.id[i], ID)
-        k == 0 && continue
-        S.loc[i]    = LOC[k]
-        S.units[i]  = UNITS[k]
-        S.gain[i]   = GAIN[k]
-        S.resp[i]   = RESP[k]
-        S.name[i]   = NAME[k]
-        merge!(S.misc[i], MISC[k])
-      end
-    end
-  end
-  return nothing
-end
 """
     S = FDSNsta(chans, KW)
 
@@ -215,7 +32,7 @@ Other keywords:
 
 See also: chanspec, parsetimewin, get_data!, SeisIO.KW
 """
-function FDSNsta(chans::Union{String,Array{String,1},Array{String,2}};
+function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
                   rad = Float64[]::Array{Float64,1},        # Search radius
                   reg = Float64[]::Array{Float64,1},        # Search region
                   s = 0::Union{Real,DateTime,String},       # Start
@@ -234,10 +51,10 @@ function FDSNsta(chans::Union{String,Array{String,1},Array{String,2}};
   if chans == wc
     (isempty(reg) && isempty(rad)) && error("No query! Please specify a search radius, a rectangular search region, or some channels.")
     if isempty(reg)
-      BODY *= string( "latitude=", reg[1], "\n",
-                      "longitude=", reg[2], "\n",
-                      "minradius=", reg[3], "\n",
-                      "maxradius=", reg[4], "\n")
+      BODY *= string( "latitude=", rad[1], "\n",
+                      "longitude=", rad[2], "\n",
+                      "minradius=", rad[3], "\n",
+                      "maxradius=", rad[4], "\n")
     else
       BODY *= string( "minlatitude=", reg[1], "\n",
                       "maxlatitude=", reg[2], "\n",
@@ -365,11 +182,38 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
     end
 
     # Request via "POST"
-    (R, parsable) = get_http_post(URL, QUERY, to)
+    if w
+      if fmt == "miniseed"
+        ext = "mseed"
+      else
+        fmt = ext
+      end
+      ymd = split(string(dt0), r"[A-Z]")
+      (y, m, d) = split(ymd[1], "-")
+      j = md2j(y, m, d)
+      fname = join([String(y),
+                    string(j),
+                    replace(split(string(dt0), 'T')[2], ':' => '.'),
+                    "FDSNWS",
+                    src,
+                    ext],
+                    '.')
+
+      open(fname, "w") do io
+        request("POST", URL, webhdr, QUERY, readtimeout=to, response_stream=io)
+      end
+      io = open(fname, "r")
+      parsable = true
+    else
+      (R, parsable) = get_http_post(URL, QUERY, to)
+      if parsable
+        io = IOBuffer(R)
+      end
+    end
 
     # Parse data (if we can)
     if parsable && (fmt == "mseed" || fmt == "miniseed")
-      parsemseed!(S, IOBuffer(R), v)
+        parsemseed!(S, io, v)
     else
       parse_err = true
       n_badreq += 1
@@ -382,18 +226,12 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
     dt0 += Day(nd)
   end
 
-  # (4) Write to disk
-  # a. remove empty channels if there were no parse errors
+  # Remove empty channels if there were no parse errors
   if !parse_err
     v > 0 && @info(tnote("Removing empty channels."))
     merge!(S)
   end
 
-  # b. write to SAC
-  if w
-    v > 0 && @info(tnote("Writing data to disk."))
-    writesac(S)
-  end
   append!(U,S)
   # Done!
   v > 0 && @info(tnote("Done."))
@@ -420,12 +258,17 @@ function FDSNevq(ot::String;
   v::Int64 = KW.v)
 
   if isempty(reg) && !isempty(rad)
-    search_coords = string("&latitude=", rad[1], "&longitude=", rad[2].
-                    "&minradius=", rad[3], "&maxradius=", rad[4],
-                    "&mindepth=", rad[5], "&maxdepth=", rad[6])
+    if length(rad) == 4
+      append!(rad, [-30.0, 700.0])
+    end
+    search_coords = string( "&latitude=", rad[1], "&longitude=", rad[2],
+                            "&minradius=", rad[3], "&maxradius=", rad[4],
+                            "&mindepth=", rad[5], "&maxdepth=", rad[6] )
   else
     if isempty(reg)
-        reg = Float64[-90.0, 90.0, -180.0,180.0, -30.0, 700.0]
+      reg = Float64[-90.0, 90.0, -180.0, 180.0, -30.0, 700.0]
+    elseif length(reg) == 4
+      append!(reg, [-30.0, 700.0])
     end
     search_coords = string("&minlat=", reg[1], "&maxlat=", reg[2],
                            "&minlon=", reg[3], "&maxlon=", reg[4],
