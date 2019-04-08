@@ -8,48 +8,45 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Introduction &mdash; SeisIO 0.1.0 beta documentation</title>
+  <title>Introduction &mdash; SeisIO 0.1.2 rc documentation</title>
   
 
   
   
+  
+  
 
   
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-  
     
 
   
-
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="SeisIO 0.1.0 beta documentation" href="../index.html"/>
-        <link rel="next" title="SeisIO Data Types" href="seisdata.html"/>
-        <link rel="prev" title="SeisIO" href="../index.html"/> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Working with Data" href="working_with_data.html" />
+    <link rel="prev" title="SeisIO" href="../index.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -63,7 +60,7 @@
             
             
               <div class="version">
-                0.1.0
+                0.1.2
               </div>
             
           
@@ -84,23 +81,41 @@
           
             
             
-                <p class="caption"><span class="caption-text">Table of Contents</span></p>
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#updating">Updating</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="seisdata.html">SeisIO Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="working_with_data.html">Working with Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="seisdata.html">Data Types</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Data Readers</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="Formats/fileformats.html">File Formats</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Web/webclients.html">Web Clients</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Appendices/function_list.html">Appendix A: Alphabetical Function List</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Appendices/seisdata_fields.html">Appendix B: Structure and Field Descriptions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Appendices/seisdata_fileformat.html">Appendix C: SeisIO File Format</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Appendices/web_syntax.html">Appendix D: Web Keywords and Syntax</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Appendices/examples.html">Appendix E: Web Client Examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Web Clients</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Web/webclients.html">Web Requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Web/seedlink.html">SeedLink</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Data Processing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Processing/processing.html">Data Processing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendices</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Appendices/function_list.html">Utility Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Appendices/seisdata_fields.html">Structure and Field Descriptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Appendices/seisdata_fileformat.html">SeisIO File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Appendices/web_syntax.html">Data Requests Syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Appendices/keywords.html">SeisIO Standard Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Appendices/examples.html">Examples</a></li>
 </ul>
 
             
@@ -112,34 +127,54 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">SeisIO</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">SeisIO</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
-    <li>Introduction</li>
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Introduction</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="../_sources/src/intro.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -150,43 +185,42 @@
 <p>SeisIO is a framework for working with geophysical time series data. The project is home to an expanding set of web clients, file format readers, and analysis utilities.</p>
 <div class="section" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
-<p>SeisIO stores data in minimalist data types that track record times and other necessary quantities for further processing. New data are easily merged into existing structures with basic commands like <code class="docutils literal"><span class="pre">+</span></code>. Unwanted channels can be removed just as easily. Data can be saved to a native SeisIO format or written to SAC.</p>
+<p>SeisIO stores data in minimalist data types that track record times and other necessary quantities for further processing. New data are easily merged into existing structures with basic commands like <code class="docutils literal notranslate"><span class="pre">+</span></code>. Unwanted channels can be removed just as easily. Data can be saved to a native SeisIO format or written to SAC.</p>
 </div>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>From the Julia prompt:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Pkg</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="s2">&quot;https://github.com/jpjones76/SeisIO.jl&quot;</span><span class="p">)</span>
-<span class="n">using</span> <span class="n">SeisIO</span>
+<p>From the Julia prompt: press <code class="docutils literal notranslate"><span class="pre">]</span></code> to enter the Pkg environment, then type</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">add</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">jpjones76</span><span class="o">/</span><span class="n">SeisIO</span><span class="o">.</span><span class="n">jl</span><span class="p">;</span> <span class="n">build</span><span class="p">;</span> <span class="n">precompile</span>
+</pre></div>
+</div>
+<p>Dependencies should be installed automatically. To run tests that verify functionality works correctly, type</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">test</span> <span class="n">SeisIO</span>
+</pre></div>
+</div>
+<p>in the Pkg environment. Allow 10-20 minutes for all tests to complete.</p>
+<p>To get started, exit the Pkg environment by pressing Control + C, then type</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">using</span> <span class="n">SeisIO</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="updating">
 <h2>Updating<a class="headerlink" href="#updating" title="Permalink to this headline">¶</a></h2>
-<p>The usual update syntax for the Julia language is</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Pkg</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
-<span class="n">workspace</span><span class="p">()</span>
-<span class="n">using</span> <span class="n">SeisIO</span>
-</pre></div>
-</div>
-<p>Please be aware that <code class="docutils literal"><span class="pre">workspace()</span></code> clears the Julia session&#8217;s memory. Save work before updating.</p>
-</div>
-<div class="section" id="dependencies">
-<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
-<p>Blosc, DSP, LightXML, Requests; these should be installed automatically when SeisIO is added with Pkg.clone.</p>
+<p>From the Julia prompt: press <code class="docutils literal notranslate"><span class="pre">]</span></code> to enter the Pkg environment, then type <code class="docutils literal notranslate"><span class="pre">update</span></code>. You may need to restart the Julia REPL afterward to use the updated version.</p>
 </div>
 </div>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="seisdata.html" class="btn btn-neutral float-right" title="SeisIO Data Types" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="working_with_data.html" class="btn btn-neutral float-right" title="Working with Data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../index.html" class="btn btn-neutral" title="SeisIO" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../index.html" class="btn btn-neutral float-left" title="SeisIO" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -195,11 +229,11 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2016, Joshua Jones.
+        &copy; Copyright 2016-2019, Joshua Jones, Ph.D.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -212,35 +246,15 @@
   
 
 
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'0.1.0 beta',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

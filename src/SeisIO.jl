@@ -1,79 +1,62 @@
+__precompile__()
 module SeisIO
-using Blosc, Dates, DSP, LightXML, LinearAlgebra, Printf, Random, SharedArrays, Sockets, Statistics
-using HTTP: request
-__precompile__(true)
+using Blosc, Dates, DSP, LightXML, LinearAlgebra, Printf, Sockets
+using FFTW: fft, ifft
+using Glob: glob
+using HTTP: request, Messages.statustext
+using Statistics: mean
+
 path = Base.source_dir()
-const datafields = [:id, :name, :loc, :fs, :gain, :resp, :units, :src, :notes, :misc, :t, :x]
-const hdrfields = [:id, :ot, :loc, :mag, :int, :mt, :np, :pax, :src, :notes, :misc]
 
-export SeisChannel, SeisData, SeisEvent, SeisHdr,             # Data Types
-wseis, wseism,                                                # Types/write.jl
-rseis, rseism,                                                # Types/read.jl
-mseis!,                                                       # Types/merge.jl
-ungap, ungap!, sync, sync!,                                   # Types/sync.jl
-readmseed, seeddef,                                           # Formats/mSEED.jl
-rlennasc,                                                     # Formats/LennartzAsc.jl
-readsac, rsac, sachdr, writesac, wsac,                        # Formats/SAC.jl
-readsegy, segyhdr,                                            # Formats/SEGY.jl
-readuw, uwdf, uwpf, uwpf!,                                    # Formats/UW.jl
-readwin32,                                                    # Formats/Win32.jl
-findid, pull,                                                 # Types/SeisData.jl
-FDSNevq, FDSNevt, FDSNget, FDSNsta,                           # Web/FDSN.jl
-IRISget, irisws,                                              # Web/IRIS.jl
-SeedLink, SeedLink!, SL_info, has_sta, has_live_stream,       # Web/SeedLink.jl
-chanspec, webhdr,                                             # Web/WebMisc.jl
-gcdist, getbandcode, lcfs,                                    # Utils/
-fctopz, translate_resp, equalize_resp!,                       # Utils/resp.jl
-d2u, j2md, md2j, parsetimewin, timestamp, u2d,                # CoreUtils/time.jl
-t_win, w_time,
-ls,                                                           # CoreUtils/ls.jl
-distaz!,                                                      # Misc/event_misc.jl
-autotap!, namestrip!, purge!, unscale!, demean!,              # Misc/processing.jl
-env, env!,                                                    # Misc/env.jl
-del_sta!,                                                     # Misc/del_sta.jl
-note!, clear_notes!,                                          # Misc/note.jl
-randseischannel, randseisdata, randseisevent, randseishdr     # Misc/randseis.jl
-
-# Everything depends on these
+# DO NOT CHANGE IMPORT ORDER
+include("constants.jl")
 include("CoreUtils/ls.jl")
 include("CoreUtils/time.jl")
-include("CoreUtils/safe_isfile.jl") # Temporary workaround for safe_isfile bad behaior in Windows
+include("CoreUtils/namestrip.jl")
 
-# Utilities that don't require SeisIO types to work
+# Utilities that don't require SeisIO types to work but may depend on CoreUtils
 for i in readdir(path*"/Utils")
   include(joinpath("Utils",i))
 end
 
-# Types and core type functionality: do not change order of operations
-include("Types/SEED.jl")
+# Types and methods: do not change order of operations
+include("Types/KWDefs.jl")
 include("Types/SeisData.jl")
 include("Types/SeisChannel.jl")
 include("Types/SeisHdr.jl")
 include("Types/SeisEvent.jl")
 include("Types/note.jl")
-include("Types/merge.jl")
-include("Types/read.jl")
-include("Types/show.jl")
-include("Types/sync.jl")
-include("Types/write.jl")
+for i in readdir(path*"/Types/Methods")
+  include(joinpath("Types/Methods",i))
+end
 
-# Miscellaneous SeisIO-dependent functions
-for i in readdir(path*"/Misc")
-  include(joinpath("Misc",i))
+# Processing
+for i in ls(path*"/Processing/*")
+  if endswith(i, ".jl")
+    include(joinpath("Processing",i))
+  end
 end
 
 # Data formats
-for i in readdir(path*"/Formats")
+for i in ls(path*"/Formats/*")
   if endswith(i, ".jl")
     include(joinpath("Formats",i))
   end
 end
 
 # Web clients
-include("Web/parse_chstr.jl")
-include("Web/WebMisc.jl")         # Common functions for web data access
+for i in ls(path*"/Web/*")
+  if endswith(i, ".jl")
+    include(joinpath("Formats",i))
+  end
+end
+# include("Web/WebMisc.jl")         # Common functions for web data access
+# include("Web/get_data.jl")          # Common method for retrieving data
+# include("Web/FDSN.jl")
+# include("Web/IRIS.jl")            # IRISws command line client
+# include("Web/SeedLink.jl")
 
-include("Web/FDSN.jl")
-include("Web/IRIS.jl")            # IRISws command line client
-include("Web/SeedLink.jl")
+# The RandSeis submodule
+include("RandSeis/RandSeis.jl")
+
 end

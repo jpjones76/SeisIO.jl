@@ -1,8 +1,6 @@
-*.jl.cov
-*.jl.*.cov
-*.jl.mem
+*.mem
+*.cov
 internal_tests/
 dev/
-devel/
-deprecated/
-test_0.5/
+test/SampleFiles/samples.tar.gz
+test/SampleFiles/Restricted/

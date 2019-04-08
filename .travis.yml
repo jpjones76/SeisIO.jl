@@ -1,27 +1,27 @@
-# Documentation: http://docs.travis-ci.com/user/languages/julia/
 language: julia
-os:
-  - linux
-  - osx
-julia:
-  - 0.7
-  - 1.0
-  - nightly
-  matrix:
-    allow_failures:
-      - julia: nightly
-      fast_finish: true
 notifications:
-  email: false
-# uncomment the following lines to override the default test script
-#script:
-#  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-#  - julia -e 'Pkg.clone(pwd()); Pkg.build("SeisIO"); Pkg.test("SeisIO"; coverage=true)'
-#  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-# script:
-#   - julia -e 'Pkg.clone(pwd())'
-#   - julia -e 'Pkg.test("SeisIO",coverage=true)'
+  email:
+    on_success: change
+    on_failure: always
+codecov: true
+coveralls: true
+os:
+- linux
+- osx
+julia:
+- 1.0
+- 1.1
+- nightly
+matrix:
+  allow_failures:
+  - julia: nightly
 after_success:
-  - julia -e 'cd(Pkg.dir("SeisIO")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(process_folder())'
-  #   - julia -e julia -e 'Pkg.add("Documenter")'
-  #   - julia -e 'cd(Pkg.dir("SeisIO")); include(joinpath("docs", "make.jl"))'
+- julia -e 'VERSION >= v"0.7.0-DEV.5183" && using Pkg; VERSION >= v"0.7.0-DEV.5183"
+  || cd(Pkg.dir("SeisIO")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder());
+  Codecov.submit(Coveralls.process_folder()); '
+before_install:
+- openssl aes-256-cbc -K $encrypted_d21b36055eee_key -iv $encrypted_d21b36055eee_iv
+  -in test/SampleFiles/samples.enc -out test/SampleFiles/samples.tar.gz -d
+- cd test/SampleFiles
+- tar zxvf samples.tar.gz
+- cd ../..

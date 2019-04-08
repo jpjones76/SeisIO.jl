@@ -1,4 +1,5 @@
-import Base:isequal, isempty, ==
+import Base:isequal, ==
+export SeisEvent
 
 """
     S = SeisEvent()
@@ -17,4 +18,4 @@ end
 # Methods from Base
 isequal(S::SeisEvent, T::SeisEvent) = min(isequal(S.hdr, T.hdr), isequal(S.data, T.data))
 ==(S::SeisEvent, T::SeisEvent) = isequal(S,T)
-isempty(S::SeisEvent) = min(isempty(S.data),isempty(S.hdr))
+# isempty(S::SeisEvent) = min(isempty(S.data),isempty(S.hdr))

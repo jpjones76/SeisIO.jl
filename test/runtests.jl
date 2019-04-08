@@ -1,48 +1,35 @@
-using Test, Compat, Dates, Random, SeisIO
+@warn("Tests require 10-12 minutes to execute.")
+import SeisIO
+cd(dirname(pathof(SeisIO))*"/../test")
+include("test_helpers.jl")
+printstyled(stdout, string(Dates.now(), ": tests begin, source_dir = ", path, "/\n"), color=:light_green, bold=true)
 
-path = Base.source_dir()
-println(stdout, "Tests require up to 20 minutes to execute.")
-println(stdout, Dates.now(), ": tests begin, source_dir = ", path)
+open("runtests.log", "w") do io
+  write(io, "stdout redirect:")
+end
 
-include(path*"/../src/SeisIO.jl")
-include("get_ts_data.jl") # Handler for timeseries data functions
 
-println("begin tests:")
+# huehuehue grep "include(joinpath" runtests.jl | awk -F "(" '{print $3}' | awk -F "," {'print $1'}
+for d in ["CoreUtils", "Types", "RandSeis", "NativeIO", "DataFormats", "Processing", "Web"]
+  printstyled(string("Testing ", d, "/\n"), color=:light_green, bold=true)
+  for i in readdir(path*"/"*d)
+    if endswith(i, ".jl")
+      include(joinpath(d,i))
+    end
+  end
+end
 
-println("time (test_time.jl)...")
-include(path*"/test_time.jl")
+# Done. Clean up.
+rm("runtests.log")
+files = ls("*.mseed")
+for f in files
+  rm(f)
+end
+files = ls("*.SAC")
+for f in files
+  rm(f)
+end
+rm("FDSNsta.xml")
 
-println("read/write \"misc\" dictionary (test_misc_rw.jl)...")
-include(path*"/test_misc_rw.jl")
-
-println("SAC (test_sac.jl)...")
-include(path*"/test_sac.jl")
-
-println("SeisData test 1 (test_seisdata_1.jl)...")
-include(path*"/test_seisdata_1.jl")
-
-println("seisdata test 2 (test_seisdata_2.jl)...")
-include(path*"/test_seisdata_2.jl")
-
-println("randseis and native format i/o (test_native_io.jl)...")
-include(path*"/test_native_io.jl")
-
-println("annotation and processing (test_note_proc.jl) ...")
-include(path*"/test_note_proc.jl")
-
-println("other (non-SAC) file formats (test_file_formats.jl)...")
-include(path*"/test_file_formats.jl")
-
-println("FDSN XML parsing (test_xml.jl)...")
-include(path*"/test_xml.jl")
-
-println("FDSN data queries (test_fdsn.jl)...")
-include(path*"/test_fdsn.jl")
-
-println("IRIS web services (test_iris.jl)...")
-include(path*"/test_iris.jl")
-
-println("SEEDlink client (test_seedlink.jl)...")
-include(path*"/test_seedlink.jl")
-
-println("To run some canonical examples, execute this command: include(\"", path, "/examples.jl\")")
+printstyled("Done!\n", color=:light_green, bold=true)
+printstyled("To run some data acquisition examples, execute this command: include(\"", path, "/examples.jl\").\n", color=:cyan, bold=true)

@@ -1,6 +1,5 @@
-const nul_f = -12345.0f0
-const nul_i = Int32(-12345)
-const nul_s = "-12345  "
+import Base.merge!
+export readsac, rsac, sachdr, writesac, wsac
 
 # ============================================================================
 # Utility functions not for export
@@ -31,6 +30,25 @@ get_sac_keys() = ["delta", "depmin", "depmax", "scale", "odelta",
                 "kuser1", "kuser2", "kcmpnm", "knetwk", "kdatrd", "kinst"]
 
 
+# Bytes 305:308 as a littleendian Int32 should read 0x06 0x00 0x00 0x00; compare each end to 0x0a to allow older SAC versions (if version in same place?)
+function should_bswap(file::String)
+  q::Bool = open(file, "r") do io
+    seek(io, 304)
+    u = read(io, UInt8)
+    skip(io, 2)
+    v = read(io, UInt8)
+    # Least significant byte in u
+    if 0x00 < u < 0x0a && v == 0x00
+      return false
+    # Most significant byte in u
+    elseif u == 0x00 && 0x00 < v < 0x0a
+      return true
+    else
+      error("Invalid SAC file.")
+    end
+  end
+end
+
 function write_sac_file(fname::String, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Array{UInt8,1}, x::Array{Float32,1}; t=[Float32(0)]::Array{Float32,1}, ts=true::Bool)
   f = open(fname, "w")
   write(f, fv)
@@ -45,9 +63,9 @@ function write_sac_file(fname::String, fv::Array{Float32,1}, iv::Array{Int32,1},
 end
 
 function fill_sac(S::SeisChannel, ts::Bool, leven::Bool)
-  fv = nul_f.*ones(Float32, 70)
-  iv = nul_i.*ones(Int32, 40)
-  cv = repeat(codeunits(nul_s), 24)
+  fv = sac_nul_f.*ones(Float32, 70)
+  iv = sac_nul_i.*ones(Int32, 40)
+  cv = repeat(codeunits(sac_nul_s), 24)
   cv[17:24] = codeunits(" "^8)
 
   # Ints
@@ -99,21 +117,32 @@ function fill_sac(S::SeisChannel, ts::Bool, leven::Bool)
   return (fv, iv, cv, fname)
 end
 
-function read_sac_stream(f::IO, full=false::Bool)
+function read_sac_stream(f::IO, full=false::Bool, swap=false::Bool)
   S = SeisChannel()
   fv = read!(f, Array{Float32, 1}(undef, 70))
   iv = read!(f, Array{Int32, 1}(undef, 40))
   cv = read!(f, Array{UInt8, 1}(undef, 192))
+  if swap == true
+    for (i, v) in enumerate(fv)
+      fv[i] = bswap(v)
+    end
+    for (i, v) in enumerate(iv)
+      iv[i] = bswap(v)
+    end
+    setfield!(S, :x, Float32[bswap(i) for i in read!(f, Array{Float32, 1}(undef, iv[10]))])
+  else
+    setfield!(S, :x, read!(f, Array{Float32, 1}(undef, iv[10])))
+  end
 
   # floats
   setfield!(S, :fs, Float64(1/fv[1]))
-  setfield!(S, :gain, Float64(fv[4] == nul_f ? 1.0f0 : fv[4]))
-  loc = [(fv[i] == nul_f ? 0.0 : Float64(fv[i])) for i in [32, 33, 34, 58, 59]]
+  setfield!(S, :gain, Float64(fv[4] == sac_nul_f ? 1.0f0 : fv[4]))
+  loc = [(fv[i] == sac_nul_f ? 0.0 : Float64(fv[i])) for i in [32, 33, 34, 58, 59]]
   setfield!(S, :loc, loc)
 
   # ints
   (m,d) = j2md(iv[1],iv[2])
-  ts = round(Int64, d2u(DateTime(iv[1],m,d,iv[3],iv[4],iv[5]))*sμ + Float64(Float32(iv[6]) + fv[6] == nul_f ? 0.0f0 : fv[6])*1.0e3)
+  ts = round(Int64, d2u(DateTime(iv[1], m, d, iv[3], iv[4], iv[5], iv[6]))*sμ + Float64((fv[6] == sac_nul_f ? 0.0f0 : fv[6])*1.0f3))
   setfield!(S, :t, Array{Int64,2}([1 ts; iv[10] 0]))
 
   # chars
@@ -125,14 +154,13 @@ function read_sac_stream(f::IO, full=false::Bool)
   nn = join(split(strip(cs[169:176], bads),'.')); nn = nn[1:min(length(nn),2)]
   setfield!(S, :id, join([nn,sta,ll,cc],'.'))
 
-  # Read data
-  setfield!(S, :x, Array{Float64,1}(read!(f, Array{Float32, 1}(undef, iv[10])))) #(read(f, Float32, iv[10])))
+
 
   # Create dictionary if full headers are desired
   if full
     (fk, ik, ck) = get_sac_keys()
-    ii = findall(fv .!= nul_f)
-    jj = findall(iv .!= nul_i)
+    ii = findall(fv .!= sac_nul_f)
+    jj = findall(iv .!= sac_nul_i)
     S.misc = Dict{String,Any}(zip(fk[ii], fv[ii]))
     merge!(S.misc, Dict{String,Any}(zip(ik[jj], iv[jj])))
     m = Int32(0)
@@ -164,10 +192,11 @@ Specify `full=true` to read all non-empty headers into S.misc. Header names will
 """
 function readsac(fname::String; full=false::Bool)
   f = open(realpath(fname), "r")
-  seis = read_sac_stream(f, full)
+  q = should_bswap(fname)
+  seis = read_sac_stream(f, full, q)
   close(f)
   seis.src = fname
-  note!(seis, string(["+src: readsac ", fname]))
+  note!(seis, string("+src: readsac ", fname))
   return seis
 end
 
@@ -178,7 +207,7 @@ end
 Print formatted SAC headers from file `f` to stdout.
 """
 function sachdr(fname::String)
-  seis = readsac(fname, true)
+  seis = readsac(fname, full=true)
   for k in sort(collect(keys(seis.misc)))
     println(stdout, uppercase(k), ": ", string(seis.misc[k]))
   end
@@ -186,12 +215,12 @@ function sachdr(fname::String)
 end
 
 """
-    writesac(S::Union{SeisData,SeisEvent}; ts=false, v=true)
+    writesac(S::Union{SeisData,SeisEvent}[; ts=false, v=0])
 
 Write all data in SeisData structure `S` to auto-generated SAC files. If S is a
 SeisEvent, event header information is also written.
 """
-function writesac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=true::Bool)
+function writesac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v::Int64=KW.v)
   if ts
     ift = Int32(4); leven = false
   else
@@ -199,9 +228,9 @@ function writesac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=true::Bool)
   end
   tdata = Array{Float32}(undef, 0)
   if isa(S, SeisEvent)
-    evt_info = map(Float32, vcat(S.hdr.loc, nul_f, S.hdr.mag[1]))
+    evt_info = map(Float32, vcat(S.hdr.loc, sac_nul_f, S.hdr.mag[1]))
     t_evt = d2u(S.hdr.ot)
-    evid  = S.hdr.id == 0 ? nul_s : String(S.hdr.id)
+    evid  = S.hdr.id == 0 ? sac_nul_s : String(S.hdr.id)
     EvL   = length(evid)
     N     = S.data.n
   else
@@ -226,17 +255,9 @@ function writesac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=true::Bool)
 
     # Write to file
     write_sac_file(fname, fv, iv, cv, x, t=tdata, ts=ts)
-    v && @printf(stdout, "%s: Wrote file %s from SeisData channel %i\n", string(now()), fname, i)
+    v > 0  && @printf(stdout, "%s: Wrote file %s from SeisData channel %i\n", string(now()), fname, i)
   end
 end
-writesac(S::SeisChannel; ts=false::Bool, v=true::Bool) = writesac(SeisData(S), ts=ts, v=v)
+writesac(S::SeisChannel; ts=false::Bool, v::Int64=KW.v) = writesac(SeisData(S), ts=ts, v=v)
 
 rsac(fname::String; full=false::Bool) = readsac(fname, full=full)
-
-"""
-    wsac(S::SeisData; ts=false, v=true)
-
-Write all data in SeisData structure `S` to auto-generated SAC files.
-"""
-wsac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v=true::Bool) = writesac(S, ts=ts, v=v)
-wsac(S::SeisChannel; ts=false::Bool, v=true::Bool) = writesac(SeisData(S), ts=ts, v=v)

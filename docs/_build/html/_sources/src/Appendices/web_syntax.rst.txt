@@ -1,6 +1,6 @@
-###################################
-Appendix D: Web Keywords and Syntax
-###################################
+####################
+Data Requests Syntax
+####################
 
 .. _cid:
 
@@ -16,8 +16,8 @@ The table below specifies valid types and expected syntax for channel lists.
 +-----------------+---------------------+-----------------------------------------+
 | Type            | Description         | Example                                 |
 +=================+=====================+=========================================+
-| String          | Comma-delineated ID | "PB.B004.01.BS1,PB.B002.01.BS1"         |
-|                 | list                |                                         |
+| String          | Comma-delineated    | "PB.B004.01.BS1,PB.B002.01.BS1"         |
+|                 | list of IDs         |                                         |
 +-----------------+---------------------+-----------------------------------------+
 | Array{String,1} | String array, one   | ["PB.B004.01.BS1","PB.B002.01.BS1"]     |
 |                 | ID string per entry |                                         |
@@ -28,19 +28,20 @@ The table below specifies valid types and expected syntax for channel lists.
 
 The expected component order is always network, station, location, channel; thus, "UW.TDH..EHZ" is OK, but "UW.TDH.EHZ" fails.
 
+.. function:: chanspec()
+
+Type ``?chanspec`` in Julia to print the above info. to stdout.
 
 Wildcards and Blanks
 ====================
 Allowed wildcards are client-specific.
 
-* The LOC field can be left blank in any client because it was rarely used until the mid-2000s: ``"UW.ELK..EHZ"`` and ``["UW" "ELK" "" "EHZ"]`` are all valid. Blank LOC fields are set to ``--`` in IRIS, ``*`` in FDSN, and ``??`` in SeedLink.
-
+* The LOC field can be left blank in any client: ``"UW.ELK..EHZ"`` and ``["UW" "ELK" "" "EHZ"]`` are all valid. Blank LOC fields are set to ``--`` in IRIS, ``*`` in FDSN, and ``??`` in SeedLink.
 * ``?`` acts as a single-character wildcard in FDSN & SeedLink. Thus, ``CC.VALT..???`` is valid.
-
 * ``*`` acts as a multi-character wildcard in FDSN. Thus, ``CC.VALT..*`` and ``CC.VALT..???`` behave identically in FDSN.
-
 * Partial specifiers are OK, but a network and station are always required: ``"UW.EL?"`` is OK, ``".ELK.."`` fails.
 
+.. _ccfg:
 
 Channel Configuration Files
 ===========================
@@ -78,6 +79,60 @@ One entry per line, ASCII text, format NN.SSSSS.LL.CCC.D. Due to client-specific
   CC.VALT..BHN
   CC.VALT..BHE
 
+.. _servers:
+
+Server List
+===========
+
+  +--------+---------------------------------------+
+  | String | Source                                |
+  +========+=======================================+
+  | BGR    | http://eida.bgr.de                    |
+  +--------+---------------------------------------+
+  | EMSC   | http://www.seismicportal.eu           |
+  +--------+---------------------------------------+
+  | ETH    | http://eida.ethz.ch                   |
+  +--------+---------------------------------------+
+  | GEONET | http://service.geonet.org.nz          |
+  +--------+---------------------------------------+
+  | GFZ    | http://geofon.gfz-potsdam.de          |
+  +--------+---------------------------------------+
+  | ICGC   | http://ws.icgc.cat                    |
+  +--------+---------------------------------------+
+  | INGV   | http://webservices.ingv.it            |
+  +--------+---------------------------------------+
+  | IPGP   | http://eida.ipgp.fr                   |
+  +--------+---------------------------------------+
+  | IRIS   | http://service.iris.edu               |
+  +--------+---------------------------------------+
+  | ISC    | http://isc-mirror.iris.washington.edu |
+  +--------+---------------------------------------+
+  | KOERI  | http://eida.koeri.boun.edu.tr         |
+  +--------+---------------------------------------+
+  | LMU    | http://erde.geophysik.uni-muenchen.de |
+  +--------+---------------------------------------+
+  | NCEDC  | http://service.ncedc.org              |
+  +--------+---------------------------------------+
+  | NIEP   | http://eida-sc3.infp.ro               |
+  +--------+---------------------------------------+
+  | NOA    | http://eida.gein.noa.gr               |
+  +--------+---------------------------------------+
+  | ORFEUS | http://www.orfeus-eu.org              |
+  +--------+---------------------------------------+
+  | RESIF  | http://ws.resif.fr                    |
+  +--------+---------------------------------------+
+  | SCEDC  | http://service.scedc.caltech.edu      |
+  +--------+---------------------------------------+
+  | TEXNET | http://rtserve.beg.utexas.edu         |
+  +--------+---------------------------------------+
+  | USGS   | http://earthquake.usgs.gov            |
+  +--------+---------------------------------------+
+  | USP    | http://sismo.iag.usp.br               |
+  +--------+---------------------------------------+
+
+  .. function:: seis_www()
+
+  Type ``?seis_www`` in Julia to print the above info. to stdout.
 
 .. _time_syntax:
 
@@ -99,78 +154,3 @@ Specify time inputs for web queries as a DateTime, Real, or String. The latter m
   R; R; Add ``s, t`` seconds to ``now()``
 
 (above, R = Real, DT = DateTime, S = String, I = Integer)
-
-
-.. _dkw:
-
-*******************
-Data Query Keywords
-*******************
-.. csv-table::
-  :header: kw, def, type [#]_, srvc [#]_, meaning
-  :delim: ;
-  :widths: 8, 8, 8, 8, 24
-
-  a; 240; R; SL; keepalive interval (s)
-  f; 0x00; u8; SL; safety check level
-  g; 3600; R; SL; maxmum gap since last packet received
-  m; "DATA"; S; SL; mode (DATA/TIME/FETCH)
-  p; 18000; I64; SL; port number
-  q; 'R'; c; FD, IW; quality (uses standard `FDSN/IRIS codes <https://ds.iris.edu/ds/nodes/dmc/manuals/breq_fast/#quality-option>`_ [#]_ )
-  r; 20; R; SL; refresh interval (s)
-  s; 0; U(R,DT,S); All; start time
-  src; "IRIS"; S; FD,IW; :ref:`source institution<FDSN_src>`
-  x; false; B; SL; strict mode (exit on errors)
-  t; 300 [#]_; U(R,D,S); All; end time
-  to; 10; R; FD,IW; timeout (s)
-  u; (iris); S; SL; url
-  v; 0; IW; All; verbosity level
-  w; false; B; All; write download directly to file? [#]_
-  y; false; B; FD,IW; synchronize channel times and fill gaps?
-
-
-.. rubric:: Table Footnotes
-
-.. [#] A = Array, B = Boolean, c = Char, DT = DateTime, F = Float, I = Integer, R = Real, S = String, u = Unsigned, U = Union
-.. [#] SL = SeedLink, IW = IRISws, FD = FDSN
-.. [#] ``Q='R'`` won't work on some FDSN servers.
-.. [#] Default is ``t=-300`` for IRIS and FDSN, ``t=300`` for SeedLink; the sign difference arises because of differences in service scope.
-.. [#] If ``w=true``, a file name is automatically generated from the request parameters.
-
-.. _FDSN_src:
-
-``src`` Options
-===============
-.. csv-table::
-  :header: ``src=``, URL Queried, Source Institution
-  :widths: 1, 4, 4
-  :delim: |
-
-  \"IRIS\"  | http://service.iris.edu/fdsnws/ | Incorporated Research Institutions for Seismology, US
-  \"RESIF\" | http://ws.resif.fr/fdsnws/ | Réseau Sismologique et Géodesique Français, FR
-  \"NCEDC\" | http://service.ncedc.org/fdsnws/ | Northern California Earthquake Data Center, US
-  \"GFZ\"   | http://geofon.gfz-potsdam.de/fdsnws/ | GFZ Potsdam, DE
-  \"All\"   | All of the above | All of the above [#]_
-
-.. rubric:: Table Footnotes
-
-.. [#] Presently only supported in event queries.
-
-.. _ekw:
-
-********************
-Event Query Keywords
-********************
-.. csv-table::
-  :header: Keyword, Type, Default, Description
-  :widths: 1, 1, 2, 4
-  :delim: |
-
-  dep | A{F64,2}  | \[-30.0 700.0\]   | depth range in km
-  lat | A{F64,2}  | \[-90.0 90.0\]    | latitude range in degrees
-  lon | A{F64,2}  | \[-180.0 180.0\]  | longitude range in degrees
-  mag | A{F64,2}  | \[6.0 9.9\]       | magnitude range
-  n   | Int       | 1                 | return N events with closest origin times
-  src | String    | \"IRIS\"          | :ref:`source institution<FDSN_src>`
-  w   | Int       | 86400             | search W seconds around T for events
-  x   | Bool      | false             | treat T as exact to one second; overrides w

@@ -1,51 +1,53 @@
-import Base:in, +, -, *, convert, isequal, length, push!, sizeof
+import Base:in, +, -, *, convert, isempty, isequal, length, push!, sizeof
+export SeisChannel
 
 mutable struct SeisChannel
-  name::String
-  id::String
-  loc::Array{Float64,1}
-  fs::Float64
-  gain::Float64
-  resp::Array{Complex{Float64},2}
-  units::String
-  src::String
-  misc::Dict{String,Any}
-  notes::Array{String,1}
-  t::Array{Int64,2}
-  x::Array{Float64,1}
+  name  ::String
+  id    ::String
+  loc   ::Array{Float64,1}
+  fs    ::Float64
+  gain  ::Float64
+  resp  ::Array{Complex{Float64},2}
+  units ::String
+  src   ::String
+  misc  ::Dict{String,Any}
+  notes ::Array{String,1}
+  t     ::Array{Int64,2}
+  x     ::Union{Array{Float64,1},Array{Float32,1}}
 
   function SeisChannel(
-    name::String,
-    id::String,
-    loc::Array{Float64,1},
-    fs::Float64,
-    gain::Float64,
-    resp::Array{Complex{Float64},2},
-    units::String,
-    src::String,
-    misc::Dict{String,Any},
-    notes::Array{String,1},
-    t::Array{Int64,2},
-    x::Array{Float64,1})
+      name  ::String,
+      id    ::String,
+      loc   ::Array{Float64,1},
+      fs    ::Float64,
+      gain  ::Float64,
+      resp  ::Array{Complex{Float64},2},
+      units ::String,
+      src   ::String,
+      misc  ::Dict{String,Any},
+      notes ::Array{String,1},
+      t     ::Array{Int64,2},
+      x     ::Union{Array{Float64,1}, Array{Float32,1}}
+      )
 
-    new(name, id, loc, fs, gain, resp, units, src, misc, notes, t, x)
-  end
+      return new(name, id, loc, fs, gain, resp, units, src, misc, notes, t, x)
+    end
 end
 
-# Use of keywords is (extremely) non-type-stable and not recommended
+# Are keywords type-stable now?
 SeisChannel(;
-            name="New Channel"::String,
-            id="...YYY"::String,
-            loc=zeros(Float64,5)::Array{Float64,1},
-            fs=0.0::Float64,
-            gain=1.0::Float64,
-            resp=Array{Complex{Float64},2}(undef,0,2)::Array{Complex{Float64},2},
-            units=""::String,
-            src=""::String,
-            misc=Dict{String,Any}()::Dict{String,Any},
-            notes=Array{String,1}([tnote("Channel initialized")])::Array{String,1},
-            t=Array{Int64,2}(undef,0,2)::Array{Int64,2},
-            x=Array{Float64,1}(undef,0)::Array{Float64,1}
+            name  ::String                    = "",
+            id    ::String                    = "",
+            loc   ::Array{Float64,1}          = Array{Float64,1}(undef, 0),
+            fs    ::Float64                   = zero(Float64),
+            gain  ::Float64                   = one(Float64),
+            resp  ::Array{Complex{Float64},2} = Array{Complex{Float64},2}(undef, 0, 2),
+            units ::String                    = "",
+            src   ::String                    = "",
+            misc  ::Dict{String,Any}          = Dict{String,Any}(),
+            notes ::Array{String,1}           = Array{String,1}(undef, 0),
+            t     ::Array{Int64,2}            = Array{Int64,2}(undef, 0, 2),
+            x     ::Union{Array{Float64,1}, Array{Float32,1}}          = Array{Float32,1}(undef, 0)
             ) = SeisChannel(name, id, loc, fs, gain, resp, units, src, misc, notes, t, x)
 
 in(s::String, C::SeisChannel) = C.id==s
@@ -58,6 +60,8 @@ end
 setindex!(S::SeisData, C::SeisChannel, j::Int) = (
   [(getfield(S, f))[j] = getfield(C, f) for f in datafields];
   return S)
+
+isempty(Ch::SeisChannel) = minimum([isempty(getfield(Ch,f)) for f in datafields])
 
 function pull(S::SeisData, i::Integer)
   T = deepcopy(getindex(S, i))
@@ -74,13 +78,10 @@ function SeisData(C::SeisChannel)
   return S
 end
 convert(::Type{SeisData}, C::SeisChannel) = SeisData(C)
-+(S::SeisData, C::SeisChannel) = (T = deepcopy(S); return T + SeisData(C))
++(S::SeisData, C::SeisChannel) = (deepcopy(S) + SeisData(C))
++(C::SeisChannel, S::SeisData) = (SeisData(C) + deepcopy(S))
 +(C::SeisChannel, D::SeisChannel) = SeisData(C,D)
 
-# push!(S::SeisData, C::SeisChannel)  = (
-#   [setfield!(S, i, push!(getfield(S,i), getfield(C,i))) for i in datafields];
-#   S.n += 1;
-#   return S)
 function push!(S::SeisData, C::SeisChannel)
   for i in datafields
     setfield!(S, i, push!(getfield(S,i), getfield(C,i)))
@@ -98,16 +99,18 @@ isequal(S::SeisChannel, U::SeisChannel) = minimum([hash(getfield(S,i))==hash(get
 
 Get the index to the first channel `c` in S where `S.id[c]==C.id`.
 """
-function findid(C::SeisChannel, S::SeisData)
-  c = 0
-  for i = 1:S.n
-    if S.id[i] == C.id
-      c = i
-      break
-    end
-  end
-  return c
-end
+findid(C::SeisChannel, S::SeisData) = findid(C.id, S)
 findid(S::SeisData, C::SeisChannel) = findid(C, S)
 
-sizeof(S::SeisChannel) = sum([sizeof(getfield(S,f)) for f in enumerate(datafields)]) + sizeof(getfield(S, :notes))
+function sizeof(Ch::SeisChannel)
+  s = sum([sizeof(getfield(Ch,f)) for f in datafields])
+  if !isempty(Ch.notes)
+    s += sum([sizeof(i) for i in Ch.notes])
+  end
+  if !isempty(Ch.misc)
+    s += sum([sizeof(i) for i in values(Ch.misc)])
+  end
+  return s
+end
+
+namestrip!(C::SeisChannel) = namestrip(C.name)

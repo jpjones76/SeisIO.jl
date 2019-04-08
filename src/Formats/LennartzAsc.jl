@@ -1,4 +1,5 @@
 using DelimitedFiles: readdlm
+export rlennasc
 
 """
     rlennasc(fname)
@@ -10,7 +11,6 @@ function rlennasc(f::String)
   S = SeisChannel()
   fid = open(fname, "r")
   h = split(readline(fid))
-  ts = 0
 
   sta = replace(h[3], "\'" => "")
   S.fs = 1000.0 / Base.parse(Float64, h[5])

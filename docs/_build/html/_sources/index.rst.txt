@@ -8,23 +8,55 @@ SeisIO
 ######
 SeisIO is a collection of utilities for reading and downloading geophysical timeseries data.
 
-********
-Contents
-********
+*****
+Intro
+*****
 .. toctree::
-   :caption: Table of Contents
-   :maxdepth: 3
+   :caption: Introduction
+   :maxdepth: 2
 
-   src/intro
-
+   src/intro.rst
+   src/working_with_data.rst
    src/seisdata.rst
+
+*****
+Files
+*****
+.. toctree::
+   :caption: Data Readers
+   :maxdepth: 2
 
    src/Formats/fileformats.rst
 
+***
+Web
+***
+.. toctree::
+   :caption: Web Clients
+   :maxdepth: 2
+
    src/Web/webclients.rst
+   src/Web/seedlink.rst
+
+**********
+Processing
+**********
+.. toctree::
+  :caption: Data Processing
+  :maxdepth: 2
+
+  src/Processing/processing.rst
+
+**********
+Appendices
+**********
+.. toctree::
+   :caption: Appendices
+   :maxdepth: 2
 
    src/Appendices/function_list.rst
    src/Appendices/seisdata_fields.rst
    src/Appendices/seisdata_fileformat.rst
    src/Appendices/web_syntax.rst
+   src/Appendices/keywords.rst
    src/Appendices/examples.rst

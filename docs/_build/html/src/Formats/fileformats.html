@@ -1,0 +1,488 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>File Formats &mdash; SeisIO 0.1.2 rc documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Web Requests" href="../Web/webclients.html" />
+    <link rel="prev" title="Data Types" href="../seisdata.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> SeisIO
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../working_with_data.html">Working with Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../seisdata.html">Data Types</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Data Readers</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">File Formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#format-descriptions">Format Descriptions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#usage-warnings">Usage Warnings</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#file-i-o-functions">File I/O Functions</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Web Clients</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Web/webclients.html">Web Requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Web/seedlink.html">SeedLink</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Data Processing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Processing/processing.html">Data Processing</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendices</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/function_list.html">Utility Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisdata_fields.html">Structure and Field Descriptions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisdata_fileformat.html">SeisIO File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/web_syntax.html">Data Requests Syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/keywords.html">SeisIO Standard Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SeisIO</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+      <li>File Formats</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/src/Formats/fileformats.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="file-formats">
+<h1>File Formats<a class="headerlink" href="#file-formats" title="Permalink to this headline">¶</a></h1>
+<p>Current format support: (e = endianness; B = big, l = little, * = either)</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="18%" />
+<col width="5%" />
+<col width="27%" />
+<col width="49%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Format</th>
+<th class="head">e</th>
+<th class="head">Command</th>
+<th class="head">Creates/modifies</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>miniSEED</td>
+<td>B</td>
+<td>readmseed!</td>
+<td>existing SeisData</td>
+</tr>
+<tr class="row-odd"><td>&#160;</td>
+<td>B</td>
+<td>readmseed</td>
+<td>new SeisData</td>
+</tr>
+<tr class="row-even"><td>SAC</td>
+<td>*</td>
+<td>readsac</td>
+<td>new SeisData</td>
+</tr>
+<tr class="row-odd"><td>&#160;</td>
+<td>*</td>
+<td>sachdr</td>
+<td>dumps header to stdout</td>
+</tr>
+<tr class="row-even"><td>&#160;</td>
+<td>l</td>
+<td>writesac</td>
+<td>sac files on disk</td>
+</tr>
+<tr class="row-odd"><td>SEG Y</td>
+<td>B</td>
+<td>readsegy (a)</td>
+<td>new SeisData</td>
+</tr>
+<tr class="row-even"><td>&#160;</td>
+<td>B</td>
+<td>segyhdr</td>
+<td>dumps header to stdout</td>
+</tr>
+<tr class="row-odd"><td>UW</td>
+<td>B</td>
+<td>readuw</td>
+<td>new SeisEvent</td>
+</tr>
+<tr class="row-even"><td>&#160;</td>
+<td>B</td>
+<td>uwpf!</td>
+<td>existing SeisEvent</td>
+</tr>
+<tr class="row-odd"><td>&#160;</td>
+<td>B</td>
+<td>uwpf</td>
+<td>new SeisHdr</td>
+</tr>
+<tr class="row-even"><td>&#160;</td>
+<td>B</td>
+<td>uwdf</td>
+<td>new SeisData</td>
+</tr>
+<tr class="row-odd"><td>win32</td>
+<td>B</td>
+<td>readwin32!</td>
+<td>existing SeisData</td>
+</tr>
+<tr class="row-even"><td>&#160;</td>
+<td>B</td>
+<td>readwin32</td>
+<td>new SeisData</td>
+</tr>
+</tbody>
+</table>
+<ol class="loweralpha simple">
+<li>Use keyword PASSCAL=true for PASSCAL SEG Y.</li>
+</ol>
+<div class="section" id="format-descriptions">
+<h2>Format Descriptions<a class="headerlink" href="#format-descriptions" title="Permalink to this headline">¶</a></h2>
+<p><strong>miniSEED</strong>: SEED stands for Standard for the Exchange of Earthquake Data; the data format is used by FDSN as a universal omnibus-type standard for seismic data. miniSEED is a data-only format with a limited number of blockette types. <a class="footnote-reference" href="#id9" id="id1">[1]</a></p>
+<p><strong>SAC</strong>: widely-used data format developed for the Seismic Analysis Code interpreter, supported in virtually every programming language. <a class="footnote-reference" href="#id10" id="id2">[2]</a> <a class="footnote-reference" href="#id11" id="id3">[3]</a> <a class="footnote-reference" href="#id12" id="id4">[4]</a></p>
+<p><strong>SEG Y</strong>: standard energy industry seismic data format, developed and maintained by the Society for Exploration Geophysicists<sup>(a)</sup> <a class="footnote-reference" href="#id13" id="id5">[5]</a> A single-channel SEG Y variant format, referred to here as “PASSCAL SEG Y” was developed by PASSCAL/New Mexico Tech and is used with PASSCAL field equipment. <a class="footnote-reference" href="#id14" id="id6">[6]</a></p>
+<p><strong>UW</strong>: the University of Washington data format was designed for event archival. A UW event is described by a pickfile and a corresponding data file, whose names are identical except for the last character, e.g. 99062109485o, 99062109485W.<sup>(b)</sup></p>
+<p><strong>Win32</strong> : data format developed by the NIED (National Research Institute for Earth Science and Disaster Prevention), Japan. Data are typically divided into files that contain a minute of continuous data from channels on a single network or subnet. Data within each file are stored by channel in 1s segments as variable-precision integers. Channel information for each stream is retrieved from an external channel information file.<sup>(c)</sup> <a class="footnote-reference" href="#id15" id="id7">[7]</a> <a class="footnote-reference" href="#id16" id="id8">[8]</a></p>
+<div class="section" id="usage-warnings">
+<h3>Usage Warnings<a class="headerlink" href="#usage-warnings" title="Permalink to this headline">¶</a></h3>
+<p><sup>(a)</sup>  <strong>SEG Y</strong> v <span class="math notranslate nohighlight">\(\le\)</span> rev 1 is supported. Trace header field
+definitions in SEG Y are not ridigly controlled by any central authority, so
+some industry SEG Y files may be unreadable. Please address questions about
+unreadable SEG Y files to their creators.</p>
+<p><sup>(b)</sup>  <strong>UW</strong> data format has no online documentation. Please contact the SeisIO creators or the Pacific Northwest Seismic Network (University of Washington, United States) if additional help is needed to read these files.</p>
+<p><sup>(c)</sup>  <strong>Win32</strong> channel information files are not strictly controlled by a central authority; inconsistencies in channel parameters (e.g. gains) are known to exist. Please remember that redistribution of Win32 files is strictly prohibited by the NIED (our travis-ci tests use an encrypted tarball).</p>
+<p class="rubric">External References</p>
+<table class="docutils footnote" frame="void" id="id9" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>FDSN SEED manual: <a class="reference external" href="https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf">https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id10" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>SAC data format intro: <a class="reference external" href="https://ds.iris.edu/ds/nodes/dmc/kb/questions/2/sac-file-format/">https://ds.iris.edu/ds/nodes/dmc/kb/questions/2/sac-file-format/</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id11" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>SAC file format: <a class="reference external" href="https://ds.iris.edu/files/sac-manual/manual/file_format.html">https://ds.iris.edu/files/sac-manual/manual/file_format.html</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id12" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[4]</a></td><td>SAC software homepage: <a class="reference external" href="https://seiscode.iris.washington.edu/projects/sac">https://seiscode.iris.washington.edu/projects/sac</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id13" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[5]</a></td><td>SEG Y Wikipedia page: <a class="reference external" href="http://wiki.seg.org/wiki/SEG_Y">http://wiki.seg.org/wiki/SEG_Y</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id14" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id6">[6]</a></td><td>PASSCAL SEG Y trace files: <a class="reference external" href="https://www.passcal.nmt.edu/content/seg-y-what-it-is">https://www.passcal.nmt.edu/content/seg-y-what-it-is</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id15" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id7">[7]</a></td><td>How to use Hi-net data: <a class="reference external" href="http://www.hinet.bosai.go.jp/about_data/?LANG=en">http://www.hinet.bosai.go.jp/about_data/?LANG=en</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id16" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id8">[8]</a></td><td>WIN data format (in Japanese): <a class="reference external" href="http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html">http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html</a></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="file-i-o-functions">
+<h2>File I/O Functions<a class="headerlink" href="#file-i-o-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="readmseed">
+<code class="descname">readmseed</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#readmseed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt>
+<code class="descname">readmseed!(S, fname)</code></dt>
+<dd></dd></dl>
+
+<p>Read miniSEED data file <code class="docutils literal notranslate"><span class="pre">fname</span></code> into a new or existing SeisData structure.</p>
+<dl class="function">
+<dt id="readsac">
+<code class="descname">readsac</code><span class="sig-paren">(</span><em>fname</em><span class="optional">[</span>, <em>full=false::Bool</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#readsac" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="rsac">
+<code class="descname">rsac</code><span class="sig-paren">(</span><em>fname</em><span class="optional">[</span>, <em>full=false::Bool</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#rsac" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Read SAC data file <code class="docutils literal notranslate"><span class="pre">fname</span></code> into a new SeisData structure. Specify keyword <code class="docutils literal notranslate"><span class="pre">full=true</span></code> to save all SAC header values in field <code class="docutils literal notranslate"><span class="pre">:misc</span></code>.</p>
+<dl class="function">
+<dt id="readsegy">
+<code class="descname">readsegy</code><span class="sig-paren">(</span><em>fname</em><span class="optional">[</span>, <em>passcal=true::Bool</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#readsegy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Read SEG Y data file <code class="docutils literal notranslate"><span class="pre">fname</span></code> into a new SeisData structure. Use keyword <code class="docutils literal notranslate"><span class="pre">passcal=true</span></code> for PASSCAL-modified SEG Y.</p>
+<dl class="function">
+<dt id="readuw">
+<code class="descname">readuw</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#readuw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Read UW data file into new SeisData structure. <code class="docutils literal notranslate"><span class="pre">fname</span></code> can be a pick file (ending in [a-z]), a data file (ending in W), or a file root (numeric UW event ID).</p>
+<dl class="function">
+<dt id="readwin32">
+<code class="descname">readwin32</code><span class="sig-paren">(</span><em>fstr</em>, <em>cf</em><span class="sig-paren">)</span><a class="headerlink" href="#readwin32" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Read win32 data from files matching pattern <code class="docutils literal notranslate"><span class="pre">fstr</span></code> into a new SeisData structure using channel information file <code class="docutils literal notranslate"><span class="pre">cf</span></code>. <code class="docutils literal notranslate"><span class="pre">fstr</span></code> can be a path with wild card filenames, but cannot use wild card directories.</p>
+<p>..function:: rlennasc(fname)</p>
+<p>Read Lennartz-formatted ASCII file into a new SeisData structure.</p>
+<dl class="function">
+<dt id="rseis">
+<code class="descname">rseis</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#rseis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Read SeisIO native format data into an array of SeisIO structures.</p>
+<dl class="function">
+<dt id="sachdr">
+<code class="descname">sachdr</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#sachdr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Print headers from SAC file to stdout.</p>
+<dl class="function">
+<dt id="segyhdr">
+<code class="descname">segyhdr</code><span class="sig-paren">(</span><em>fname</em><span class="optional">[</span>, <em>PASSCAL=true::Bool</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#segyhdr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Print headers from SEG Y file to stdout. Specify <code class="docutils literal notranslate"><span class="pre">passcal=true</span></code> for PASSCAL SEG Y.</p>
+<dl class="function">
+<dt id="uwdf">
+<code class="descname">uwdf</code><span class="sig-paren">(</span><em>dfname</em><span class="sig-paren">)</span><a class="headerlink" href="#uwdf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Parse UW event data file <code class="docutils literal notranslate"><span class="pre">dfname</span></code> into a new SeisEvent structure.</p>
+<dl class="function">
+<dt>
+<code class="descname">uwpf!(evt, pfname)</code></dt>
+<dd></dd></dl>
+
+<p>Parse UW event pick file into SeisEvent structure.</p>
+<dl class="function">
+<dt id="uwpf">
+<code class="descname">uwpf</code><span class="sig-paren">(</span><em>pfname</em><span class="sig-paren">)</span><a class="headerlink" href="#uwpf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Parse UW event pick file <code class="docutils literal notranslate"><span class="pre">pfname</span></code> into a new SeisEvent structure.</p>
+<dl class="function">
+<dt id="writesac">
+<code class="descname">writesac</code><span class="sig-paren">(</span><em>S</em><span class="optional">[</span>, <em>ts=true</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#writesac" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Write SAC data to SAC files with auto-generated names. Specify ts=true to write time stamps; this will flag the file as generic x-y data in the SAC interpreter.</p>
+<dl class="function">
+<dt id="wseis">
+<code class="descname">wseis</code><span class="sig-paren">(</span><em>fname</em>, <em>S</em><span class="sig-paren">)</span><a class="headerlink" href="#wseis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt>
+<code class="descname">wseis</code><span class="sig-paren">(</span><em>fname</em>, <em>S</em>, <em>T</em>, <em>U...</em><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<p>Write SeisIO data to fname. Multiple objects can be written at once.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../Web/webclients.html" class="btn btn-neutral float-right" title="Web Requests" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../seisdata.html" class="btn btn-neutral float-left" title="Data Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016-2019, Joshua Jones, Ph.D.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
