@@ -186,7 +186,7 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
       if fmt == "miniseed"
         ext = "mseed"
       else
-        fmt = ext
+        ext = fmt
       end
       ymd = split(string(dt0), r"[A-Z]")
       (y, m, d) = split(ymd[1], "-")
@@ -220,7 +220,7 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
       S += SeisChannel(id = string("XX..", n_badreq),
                        misc = Dict{String,Any}( "url" => URL,
                                                 "body" => QUERY,
-                                                "data" => String(R) ) )
+                                                "data" => String(take!(io)) ) )
     end
 
     dt0 += Day(nd)
