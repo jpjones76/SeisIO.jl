@@ -1,4 +1,4 @@
-@warn("Tests require 10-12 minutes to execute.")
+@warn("Tests require 6-8 minutes to execute.")
 import SeisIO
 cd(dirname(pathof(SeisIO))*"/../test")
 include("test_helpers.jl")
