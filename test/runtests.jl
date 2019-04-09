@@ -29,6 +29,10 @@ files = ls("*.SAC")
 for f in files
   rm(f)
 end
+files = ls("*.geocsv")
+for f in files
+  rm(f)
+end
 rm("FDSNsta.xml")
 
 printstyled("Done!\n", color=:light_green, bold=true)
