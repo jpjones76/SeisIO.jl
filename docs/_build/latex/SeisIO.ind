@@ -5,67 +5,67 @@
 \let\spxextra \sphinxstyleindexextra
 
   \bigletter C
-  \item \spxentry{chanspec()}\spxextra{built-in function}, \hyperpage{33}
+  \item \spxentry{chanspec()}\spxextra{built-in function}, \hyperpage{35}
 
   \indexspace
   \bigletter D
-  \item \spxentry{d2u()}\spxextra{built-in function}, \hyperpage{23}
+  \item \spxentry{d2u()}\spxextra{built-in function}, \hyperpage{25}
 
   \indexspace
   \bigletter F
-  \item \spxentry{fctopz()}\spxextra{built-in function}, \hyperpage{23}
-  \item \spxentry{find\_regex()}\spxextra{built-in function}, \hyperpage{23}
-  \item \spxentry{findchan()}\spxextra{built-in function}, \hyperpage{6}
-  \item \spxentry{findid()}\spxextra{built-in function}, \hyperpage{6}
+  \item \spxentry{fctopz()}\spxextra{built-in function}, \hyperpage{25}
+  \item \spxentry{find\_regex()}\spxextra{built-in function}, \hyperpage{25}
+  \item \spxentry{findchan()}\spxextra{built-in function}, \hyperpage{7}
+  \item \spxentry{findid()}\spxextra{built-in function}, \hyperpage{7}
 
   \indexspace
   \bigletter G
-  \item \spxentry{getbandcode()}\spxextra{built-in function}, \hyperpage{23}
+  \item \spxentry{getbandcode()}\spxextra{built-in function}, \hyperpage{25}
 
   \indexspace
   \bigletter H
-  \item \spxentry{has\_sta()}\spxextra{built-in function}, \hyperpage{19}
-  \item \spxentry{has\_stream()}\spxextra{built-in function}, \hyperpage{19}
+  \item \spxentry{has\_sta()}\spxextra{built-in function}, \hyperpage{21}
+  \item \spxentry{has\_stream()}\spxextra{built-in function}, \hyperpage{22}
 
   \indexspace
   \bigletter J
-  \item \spxentry{j2md()}\spxextra{built-in function}, \hyperpage{24}
+  \item \spxentry{j2md()}\spxextra{built-in function}, \hyperpage{26}
 
   \indexspace
   \bigletter L
-  \item \spxentry{lcfs()}\spxextra{built-in function}, \hyperpage{21}
-  \item \spxentry{ls()}\spxextra{built-in function}, \hyperpage{23}
+  \item \spxentry{lcfs()}\spxextra{built-in function}, \hyperpage{23}
+  \item \spxentry{ls()}\spxextra{built-in function}, \hyperpage{25, 26}
 
   \indexspace
   \bigletter M
-  \item \spxentry{md2j()}\spxextra{built-in function}, \hyperpage{24}
+  \item \spxentry{md2j()}\spxextra{built-in function}, \hyperpage{26}
 
   \indexspace
   \bigletter P
-  \item \spxentry{parsetimewin()}\spxextra{built-in function}, \hyperpage{24}
-  \item \spxentry{pull()}\spxextra{built-in function}, \hyperpage{21}
+  \item \spxentry{parsetimewin()}\spxextra{built-in function}, \hyperpage{26}
+  \item \spxentry{pull()}\spxextra{built-in function}, \hyperpage{23}
 
   \indexspace
   \bigletter R
-  \item \spxentry{randSeisEvent()}\spxextra{built-in function}, \hyperpage{24}
-  \item \spxentry{readmseed()}\spxextra{built-in function}, \hyperpage{12}
-  \item \spxentry{readsac()}\spxextra{built-in function}, \hyperpage{12}
-  \item \spxentry{readsegy()}\spxextra{built-in function}, \hyperpage{12}
-  \item \spxentry{readuw()}\spxextra{built-in function}, \hyperpage{12}
-  \item \spxentry{readwin32()}\spxextra{built-in function}, \hyperpage{12}
-  \item \spxentry{rsac()}\spxextra{built-in function}, \hyperpage{12}
-  \item \spxentry{rseis()}\spxextra{built-in function}, \hyperpage{13}
+  \item \spxentry{randSeisEvent()}\spxextra{built-in function}, \hyperpage{27}
+  \item \spxentry{readmseed()}\spxextra{built-in function}, \hyperpage{14}
+  \item \spxentry{readsac()}\spxextra{built-in function}, \hyperpage{14}
+  \item \spxentry{readsegy()}\spxextra{built-in function}, \hyperpage{14}
+  \item \spxentry{readuw()}\spxextra{built-in function}, \hyperpage{14}
+  \item \spxentry{readwin32()}\spxextra{built-in function}, \hyperpage{15}
+  \item \spxentry{rsac()}\spxextra{built-in function}, \hyperpage{14}
+  \item \spxentry{rseis()}\spxextra{built-in function}, \hyperpage{15}
 
   \indexspace
   \bigletter S
-  \item \spxentry{sachdr()}\spxextra{built-in function}, \hyperpage{13}
-  \item \spxentry{segyhdr()}\spxextra{built-in function}, \hyperpage{13}
-  \item \spxentry{seis\_www()}\spxextra{built-in function}, \hyperpage{34}
+  \item \spxentry{sachdr()}\spxextra{built-in function}, \hyperpage{15}
+  \item \spxentry{segyhdr()}\spxextra{built-in function}, \hyperpage{15}
+  \item \spxentry{seis\_www()}\spxextra{built-in function}, \hyperpage{37}
   \item \spxentry{SeisChannel()}\spxextra{built-in function}, \hyperpage{8}
   \item \spxentry{SeisData()}\spxextra{built-in function}, \hyperpage{8}
-  \item \spxentry{SeisEvent()}\spxextra{built-in function}, \hyperpage{8}
-  \item \spxentry{SeisHdr()}\spxextra{built-in function}, \hyperpage{8}
-  \item \spxentry{SL\_info()}\spxextra{built-in function}, \hyperpage{19}
+  \item \spxentry{SeisEvent()}\spxextra{built-in function}, \hyperpage{9}
+  \item \spxentry{SeisHdr()}\spxextra{built-in function}, \hyperpage{9}
+  \item \spxentry{SL\_info()}\spxextra{built-in function}, \hyperpage{21}
 
   \indexspace
   \bigletter T
@@ -73,14 +73,14 @@
 
   \indexspace
   \bigletter U
-  \item \spxentry{u2d()}\spxextra{built-in function}, \hyperpage{24}
-  \item \spxentry{uwdf()}\spxextra{built-in function}, \hyperpage{13}
-  \item \spxentry{uwpf()}\spxextra{built-in function}, \hyperpage{13}
+  \item \spxentry{u2d()}\spxextra{built-in function}, \hyperpage{26}
+  \item \spxentry{uwdf()}\spxextra{built-in function}, \hyperpage{15}
+  \item \spxentry{uwpf()}\spxextra{built-in function}, \hyperpage{15}
 
   \indexspace
   \bigletter W
-  \item \spxentry{webhdr()}\spxextra{built-in function}, \hyperpage{24}
-  \item \spxentry{writesac()}\spxextra{built-in function}, \hyperpage{13}
-  \item \spxentry{wseis()}\spxextra{built-in function}, \hyperpage{13}
+  \item \spxentry{webhdr()}\spxextra{built-in function}, \hyperpage{26}
+  \item \spxentry{writesac()}\spxextra{built-in function}, \hyperpage{15}
+  \item \spxentry{wseis()}\spxextra{built-in function}, \hyperpage{15}
 
 \end{sphinxtheindex}

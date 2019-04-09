@@ -47,6 +47,9 @@ function irisws(cha::String, d0::String, d1::String;
       if isempty(Ch.loc)
         Ch.loc = zeros(Float64,5)
       end
+    elseif fmt == "geocsv"
+      parse_geocsv_ts!(S, readlines(IOBuffer(R)))
+      Ch = S[1]
     else
       # other parsers not yet written
       @warn(string("Unsupported data format", req_info_str, "\nFORMAT = ", fmt,
