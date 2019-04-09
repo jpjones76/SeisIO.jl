@@ -1,4 +1,5 @@
 import Dates:DateTime
+export readgeocsv
 
 function assign_val!(C::SeisChannel, k::String, v::String)
   if k == "delimiter" ; C.misc["delim"] = mkdelim(v);
@@ -111,11 +112,11 @@ function parse_geocsv_ts!(S::SeisData, lines::Array{String,1})
 end
 
 """
-    S = read_geocsv_ts(fname)
+    S = readgeocsv(fname)
 
 Read GeoCSV time-series ASCII file `fname` to new SeisData object `S`.
 """
-function read_geocsv_ts(fname::String)
+function readgeocsv(fname::String)
   fname = relpath(fname)
 
   # (1) Read all lines into memory
