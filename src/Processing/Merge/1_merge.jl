@@ -63,6 +63,7 @@ function merge!(S::SeisData;
       @warn(string("Deleting channels (either :x or :t is empty): ", no_data, ", id = ", id))
       deleteat!(S, no_data)
       N_warn += 1
+      GRP = findall(S.id.==id)
     end
 
     N_grp = length(GRP)
