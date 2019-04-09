@@ -1,5 +1,5 @@
 lenn_file = string(path, "/SampleFiles/0215162000.c00")
-geocsv_file = string(path, "/SampleFiles/2019.99.02.42.00.FDSNWS.IRIS.geocsv")
+geocsv_file = string(path, "/SampleFiles/FDSNWS.IRIS.geocsv")
 
 printstyled("  Lennartz ASCII\n", color=:light_green)
 C = rlennasc(lenn_file)
