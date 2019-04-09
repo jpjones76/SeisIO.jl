@@ -1,13 +1,15 @@
-ts = "2016-03-23T23:10:00"
-te = "2016-03-23T23:17:00"
-sta = "CC.JRO..BHZ"
+ts = "2016-03-23T23:10:00"; te = "2016-03-23T23:17:00"; sta = "CC.JRO..BHZ"
 
 printstyled("  IRIS Web Services\n", color=:light_green)
 printstyled("    IRISWS continuous data requests\n", color=:light_green)
+printstyled("    SAC\n", color=:light_green)
 S = get_data("IRIS", sta, src="IRIS", s=ts, t=te, fmt="sacbl", v=0, w=true)
 @test(isempty(S)==false)
+
+printstyled("    MSEED\n", color=:light_green)
 T = get_data("IRIS", [sta], src="IRIS", s=ts, t=te, fmt="mseed", v=0, w=true)
-printstyled("    Equivalence of SAC and MSEED requests\n", color=:light_green)
+
+printstyled("     Equivalence of SAC and MSEED requests\n", color=:light_green)
 @test(isempty(T)==false)
 sync!(S, s=ts, t=te)
 sync!(T, s=ts, t=te)
@@ -17,6 +19,9 @@ sync!(T, s=ts, t=te)
 for f in Symbol[:id, :name, :loc, :fs, :gain, :resp, :units, :misc , :t, :x]
   @test getfield(S,f) == getfield(T,f)
 end
+
+printstyled("    GeoCSV\n", color=:light_green)
+U = get_data("IRIS", sta, src="IRIS", s=ts, t=te, fmt="geocsv", v=0)
 
 # Test a bum data format
 printstyled("    Testing a bad data format (should warn)\n", color=:light_green)
