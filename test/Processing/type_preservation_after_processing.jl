@@ -1,7 +1,7 @@
 # resp
 printstyled("  Type preservation after processing\n", color=:light_green)
 
-for f in String["autotap!", "demean!", "detrend!", "merge!", "sync!", "ungap!", "unscale!"]
+for f in String["demean!", "detrend!", "merge!", "sync!", "taper!", "ungap!", "unscale!"]
   printstyled(string("    ", f, "\n"), color=:light_green)
   S = randSeisData(s=1.0)
   T = [eltype(S.x[i]) for i=1:S.n]

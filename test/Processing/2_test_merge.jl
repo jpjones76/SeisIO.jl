@@ -60,7 +60,8 @@ S += (s1 * s2)
 @test ==(length(S.t),1)
 @test ==(length(S.x),1)
 @test S.id[1]=="DEAD.STA..EHZ"
-ungap!(S::SeisData; m=false, w=false) # why do I have to force type here
+U = deepcopy(S)
+ungap!(S, m=false, tap=false) # why do I have to force type here
 @test ==(length(S.x[1]), 260)
 @test ==(S.x[1][1:50], s1.x[1:50])
 @test ==(S.x[1][51:75], 0.5.*(s1.x[51:75] .+ s2.x[1:25]))
@@ -73,10 +74,11 @@ ungap!(S::SeisData; m=false, w=false) # why do I have to force type here
 # Auto-tapering after a merge
 T = deepcopy(S)
 ii = findall(isnan.(S.x[1]))
-autotap!(S)
+nanfill!(S)
+taper!(S, N_min = 0)
 @test length(findall(isnan.(S.x[1])))==0          # No more NaNs?
 @test sum(diff(S.x[1][ii]))==0                    # All NaNs filled w/same val?
-@test ≈(T.x[1][12:90], S.x[1][12:90])             # Un-windowed vals untouched?
+@test ≈(T.x[1][15:90], S.x[1][15:90])             # Un-windowed vals untouched?
 
 printstyled("    channel delete\n", color=:light_green)
 S -= 1
@@ -101,7 +103,7 @@ i = findid("DEAD.STA..EHE", S)
 j = findid("DEAD.STA..EHZ", S)
 @test ≈(S.fs[i], 100.0)
 @test ≈(S.gain[j], 10.0)
-ungap!(S, m=false, w=false)
+ungap!(S, m=false, tap=false)
 @test ≈(length(S.x[j]), 260)
 @test ≈(length(S.x[i]), 350)
 @test ≈(S.x[i][101]/S.gain[i], s4.x[1]/s4.gain)
