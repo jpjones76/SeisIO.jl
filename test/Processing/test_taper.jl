@@ -41,3 +41,11 @@ C = S[1]
 U = deepcopy(C)
 taper!(C)
 @test C==U
+
+# Test for L_tap < L in a SeisChannel
+C = randSeisChannel()
+nx = length(C.x)
+ny = round(Int, 2*fs)
+C.t = vcat(C.t[1:end-1,:], [nx+1 1000000], [nx + ny 0])
+append!(C.x, randn(eltype(C.x), ny))
+taper!(C)

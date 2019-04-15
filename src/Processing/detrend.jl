@@ -120,3 +120,6 @@ function detrend!(C::SeisChannel; n::Int64=1)
   note!(C, string("detrend! removed polynomial trend of degree ", n))
   return nothing
 end
+
+detrend!(Ev::SeisEvent) = detrend!(Ev.data)
+demean!(Ev::SeisEvent) = demean!(Ev.data)
