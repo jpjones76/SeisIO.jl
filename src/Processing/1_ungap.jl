@@ -34,6 +34,6 @@ function ungap!(S::SeisData; m::Bool=true, tap::Bool=false)
   return nothing
 end
 
-ungap(S::Union{SeisData,SeisChannel}; m::Bool=true) = (T = deepcopy(S); ungap!(T, m=m); return T)
-ungap!(Ev::SeisEvent; m::Bool=true) = (S = deepcopy(Ev.data); ungap!(S, m=m); Ev.data = deepcopy(S); return nothing)
-ungap(Ev::SeisEvent; m::Bool=true) = (S = deepcopy(Ev.data); ungap!(S, m=m); return SeisEvent(hdr=deepcopy(Ev.hdr, data=S)))
+ungap(S::Union{SeisData,SeisChannel}; m::Bool=true, tap::Bool=false) = (T = deepcopy(S); ungap!(T, m=m, tap=tap); return T)
+ungap!(Ev::SeisEvent; m::Bool=true, tap::Bool=false) = (S = deepcopy(Ev.data); ungap!(S, m=m, tap=tap); Ev.data = deepcopy(S); return nothing)
+ungap(Ev::SeisEvent; m::Bool=true, tap::Bool=false) = (S = deepcopy(Ev.data); ungap!(S, m=m, tap=tap); return SeisEvent(hdr=deepcopy(Ev.hdr, data=S)))
