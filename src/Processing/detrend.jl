@@ -1,7 +1,7 @@
 export demean!, demean, detrend!, detrend
 
 """
-    demean!(S::SeisData)
+    demean!(S::SeisData[; irr=false])
 
 Remove the mean from all channels `i` with `S.fs[i] > 0.0`. Specify `irr=true`
 to also remove the mean from irregularly sampled channels (with S.fs[i] == 0.0)
@@ -34,18 +34,46 @@ end
 demean(S::SeisData) = (U = deepcopy(S); demean!(U); return U)
 
 """
-    detrend!(S::SeisData)
+    demean!(C::SeisChannel)
+
+Remove the mean from data in `C`. Ignores NaNs.
+"""
+function demean!(C::SeisChannel)
+  T = eltype(C.x)
+  K = findall(isnan.(C.x))
+  if isempty(K)
+    L = length(C.x)
+    μ = T(sum(C.x) / T(L))
+    for j = 1:L
+      C.x[j] -= μ
+    end
+  else
+    J = findall(isnan.(C.x) .== false)
+    L = length(J)
+    μ = T(sum(C.x[J])/T(L))
+    for j in J
+      C.x[j] -= μ
+    end
+  end
+  note!(C, "demean! removed mean of C.x.")
+  return nothing
+end
+
+"""
+    detrend!(S::SeisData[; n=1, irr=false]))
 
 Remove the linear trend from all channels `i` with `S.fs[i] > 0.0`. Ignores NaNs.
 
-Channels of irregularly-sampled data are not (and cannot be) detrended.
+Specify `irr=true` to also remove the trend from irregularly sampled channels.
+
+To remove a higher-order polynomial fit than a linear trend, choose n>1.
 
 **Warning**: detrend! does *not* check for data gaps; if this is problematic,
 call ungap!(S, m=true) first!
 """
-function detrend!(S::SeisData; n::Int64=1)
+function detrend!(S::SeisData; n::Int64=1, irr::Bool=false)
   @inbounds for i = 1:S.n
-    S.fs[i] ≤ 0.0 && continue
+    (irr==false && S.fs[i]<=0.0) && continue
     L = length(S.x[i])
     T = eltype(S.x[i])
     τ = T.(t_expand(S.t[i], S.fs[i])) .- S.t[i][1,2]
@@ -64,3 +92,31 @@ function detrend!(S::SeisData; n::Int64=1)
   return nothing
 end
 detrend(S::SeisData; n::Int64=1) = (U = deepcopy(S); detrend!(U, n=n); return U)
+
+"""
+    detrend!(C::SeisChanel[; n=1]))
+
+Remove the linear trend from data in `C`. Ignores NaNs.
+
+To remove a higher-order polynomial fit than a linear trend, choose n>1.
+
+**Warning**: detrend! does *not* check for data gaps; if this is problematic,
+call ungap!(C, m=true) first!
+"""
+function detrend!(C::SeisChannel; n::Int64=1)
+  L = length(C.x)
+  T = eltype(C.x)
+  τ = T.(t_expand(C.t, C.fs)) .- C.t[1,2]
+  j = findall((isnan.(C.x)).==false)
+  if L == length(j)
+    p = polyfit(τ, C.x, n)
+    broadcast!(-, C.x, C.x, polyval(p, τ))
+  else
+    x = C.x[j]
+    p = polyfit(τ[j], x, n)
+    broadcast!(-, x, x, polyval(p, τ[j]))
+    C.x[j] = x
+  end
+  note!(C, string("detrend! removed polynomial trend of degree ", n))
+  return nothing
+end
