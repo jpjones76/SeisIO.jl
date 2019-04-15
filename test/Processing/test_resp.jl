@@ -1,6 +1,6 @@
 printstyled("  resp\n", color=:light_green)
 C = randSeisChannel()
-autotap!(C)
+taper!(C)
 
 r = fctopz(0.2, hc=1.0/sqrt(2.0))
 @test_throws ErrorException fctopz(0.2, units="m/s^2")

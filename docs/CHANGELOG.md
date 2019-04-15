@@ -1,3 +1,14 @@
+### 2019-04-15
+* Added `readgeocsv` for two-column GeoCSV ASCII time-series data
+* `taper!` has replaced `autotap!`
+  + `taper!` typically allocates memory <1% of the size of a seisData object
+    to apply a cosine taper to the edges of each segment in each channel.
+  + Calling `ungap!(S, w=true)` now calls `taper!` to do windowing.
+  + Tapering no longer fills NaNs with the mean of non-NaN values. This has
+    moved to a separate function, `nanfill!`.
+* Extended `demean!`, `detrend!` to SeisChannel
+* `ungap!` now uses Boolean keyword `tap` for tapering, rather than `w`.
+
 ### 2019-03-22
 * `get_data / get_data!` can now handle long requests and coordinate searches with FDSN.
   + Long requests are broken into subrequests of length `nd` days. Change
