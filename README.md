@@ -8,11 +8,13 @@ A minimalist, platform-agnostic package for working with univariate geophysical 
 ## Installation
 From the Julia command prompt:
 1. Press `]` to enter `pkg`.
-2. Type or copy: `add https://github.com/jpjones76/SeisIO.jl; build; precompile`
+2. Type or copy: `add SeisIO`
 3. Press backspace to exit `pkg`.
 4. Type or copy: `using SeisIO`
 
-...that's it. Everything should work. If not, and the problem isn't documented, please [open a new issue](https://github.com/jpjones76/SeisIO.jl/issues/). If possible, please include a text dump with the error message.
+If installation fails, and the problem isn't documented, please [open a new issue](https://github.com/jpjones76/SeisIO.jl/issues/). If possible, please include a text dump with the error message.
+
+#### [Contribute](docs/CONTRIBUTE.md)
 
 #### [Changelog](docs/CHANGELOG.md)
 
