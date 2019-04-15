@@ -224,7 +224,7 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
       S += SeisChannel(id = string("XX..", n_badreq),
                        misc = Dict{String,Any}( "url" => URL,
                                                 "body" => QUERY,
-                                                "data" => String(take!(io)) ) )
+                                                "data" => readlines(IOBuffer(R)) ) )
     end
 
     dt0 += Day(nd)
