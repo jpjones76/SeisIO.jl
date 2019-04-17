@@ -27,6 +27,11 @@ req_info_str = datareq_summ("IRISWS data", "DE.NENA.99.LUFTBALLOONS", d1, d2)
 @test parsable == false
 
 url = "http://service.iris.edu/irisws/timeseries/1/query?net=DE&sta=NENA&loc=99&cha=LUFTBALLOONS&start="*d1*"&end="*d2*"&scale=AUTO&output=miniseed"
+(req, parsable) = get_HTTP_req(url, req_info_str, to, status_exception=true)
+@test typeof(req) == Array{UInt8,1}
+@test startswith(String(req), "HTTP.Messages.Response")
+@test parsable == false
+
 (req, parsable) = get_http_post(url, NOOF, to, status_exception=true)
 @test typeof(req) == Array{UInt8,1}
 @test startswith(String(req), "HTTP.Messages.Response")
