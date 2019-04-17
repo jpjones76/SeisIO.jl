@@ -3,6 +3,9 @@ fs = 100.0
 nx = 10000000
 T = Float32
 
+
+printstyled("  filtfilt!\n", color=:light_green)
+
 # Methods
 C = randSeisChannel(s=true)
 C.fs = fs
@@ -103,3 +106,4 @@ for dm in String["Butterworth", "Chebyshev1", "Chebyshev2", "Elliptic"]
                                                r ≥ 0.20 ? 148 : 10))
   end
 end
+println("")
