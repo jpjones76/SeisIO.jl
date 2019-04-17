@@ -7,9 +7,9 @@ function update_filt(fl::T, fh::T, fs::T, np::Int64, rp::Int, rs::Int, rt::Strin
 
   # response type
   if rt == "Highpass"
-    ff = Highpass(fh, fs=fs)
+    ff = Highpass(fl, fs=fs)
   elseif rt == "Lowpass"
-    ff = Lowpass(fl, fs=fs)
+    ff = Lowpass(fh, fs=fs)
   else
     ff = getfield(DSP.Filters, Symbol(rt))(fl, fh, fs=fs)
   end
