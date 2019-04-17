@@ -1,0 +1,283 @@
+import DSP:filtfilt
+export filtfilt, filtfilt!
+
+#=  Regenerate filter; largely identical to DSP.Filters.filt_stepstate with
+    some optimization for SeisIO data handling =#
+function update_filt(fl::T, fh::T, fs::T, np::Int64, rp::Int, rs::Int, rt::String, dm::String) where T<:Real
+
+  # response type
+  if rt == "Highpass"
+    ff = Highpass(fh, fs=fs)
+  elseif rt == "Lowpass"
+    ff = Lowpass(fl, fs=fs)
+  else
+    ff = getfield(DSP.Filters, Symbol(rt))(fl, fh, fs=fs)
+  end
+
+  # design method
+  if dm == "Elliptic"
+    zp = Elliptic(np, rp, rs)
+  elseif dm == "Chebyshev1"
+    zp = Chebyshev1(np, rp)
+  elseif dm == "Chebyshev2"
+    zp = Chebyshev2(np, rs)
+  else
+    zp = Butterworth(np)
+  end
+
+  # polynomial ratio
+  pr = convert(PolynomialRatio, digitalfilter(ff, zp))
+
+  # create and scale coeffs
+  a = T.(coefa(pr))
+  b = T.(coefb(pr))
+  scale_factor = a[1]
+  if scale_factor != 1.0
+    r = T(1.0/a[1])
+    rmul!(a, r)
+    rmul!(b, r)
+  end
+
+  # size
+  bs = length(b)
+  as = length(a)
+  sz = max(bs, as)
+
+  # solve for Z
+  if sz == 0
+    error("a and b must have at least one element each")
+  elseif sz == 1
+    Z = T[]
+  else
+    # Pad the coefficients with zeros if needed
+    bs < sz && (b = copyto!(zeros(T, sz), b))
+    as < sz && (a = copyto!(zeros(T, sz), a))
+
+    # construct the companion matrix A and vector B:
+    A = [-a[2:sz] [I; zeros(T, 1, sz-2)]]
+    B = b[2:sz] - a[2:sz] * b[1]
+    # Solve si = A*si + B or equivalently (I - A)*si = B
+    Z = scale_factor \ (I - A) \ B
+  end
+
+  p = 3*(sz-1)
+  return (b, a, Z, p)
+end
+
+#=  Adapted from Julia DSP filtfilt for how SeisIO stores data; X and its
+    padded, interpolated version (Y) can be reused until fs or length(x)
+    changes =#
+function zero_phase_filt!(X::AbstractArray,
+                          Y::AbstractArray,
+                          b::Array{T,1},
+                          a::Array{T,1},
+                          zi::Array{T,1},
+                          p::Int64) where T<:Real
+    nx = length(X)
+    z_copy = copy(zi)
+
+    # Extrapolate X into Y
+    j = p
+    @inbounds for i = 1:nx
+      j += 1
+      Y[j] = X[i]
+    end
+
+    y = 2*first(X)
+    j = 2+p
+    @inbounds for i = 1:p
+      j -= 1
+      Y[i] = y - X[j]
+    end
+
+    y = 2*X[nx]
+    j = nx
+    k = nx+p
+    @inbounds for i = 1:p
+      j -= 1
+      k += 1
+      Y[k] = y - X[j]
+    end
+
+    # Filtering
+    reverse!(filt!(Y, b, a, Y, mul!(z_copy, zi, first(Y))))
+    filt!(Y, b, a, Y, mul!(z_copy, zi, first(Y)))
+    j = length(Y)-p+1
+    @inbounds for i = 1:nx
+      j -= 1
+      X[i] = Y[j]
+    end
+    return nothing
+end
+
+function filtfilt!(S::SeisData;
+    fl::Float64=1.0,
+    fh::Float64=15.0,
+    np::Int=4,
+    rp::Int=10,
+    rs::Int=30,
+    rt::String="Bandpass",
+    dm::String="Butterworth"
+    )
+
+  N = nx_max(S)
+
+  # Determine array structures
+  T = unique([eltype(i) for i in S.x])
+  nT = length(T)
+
+  sz = 0
+  yy = Any
+  for i = 1:nT
+    zz = sizeof(T[i])
+    if zz > sz
+      yy = T[i]
+      sz = zz
+    end
+  end
+  b, a, zi, p = update_filt(yy(fl), yy(fh), yy(maximum(S.fs)), np, rp, rs, rt, dm)
+  Y = Array{yy,1}(undef, N + 2*p) # right value for Butterworth
+
+  # Get groups
+  GRPS = get_unique(S, ["fs", "eltype"])
+
+  for grp in GRPS
+
+    # get fs, eltype
+    c = grp[1]
+    ty = eltype(S.x[c])
+    fs = ty(S.fs[c])
+
+    # reinterpret Y if needed
+    if ty != eltype(Y)
+      Y = reinterpret(ty, isa(Y, Base.ReinterpretArray) ? Y.parent : Y)
+    end
+
+    # Get views and window lengths of each segment
+    (L,X) = get_views(S, grp)
+    nL = length(L)
+
+    # Initialize filter
+    b, a, zi, p = update_filt(ty(fl), ty(fh), fs, np, rp, rs, rt, dm)
+
+    # Place the first copy outside the loop as we expect many cases where nL=1
+    nx = first(L)
+    yview = view(Y, 1 : nx+2*p)
+
+    # Use nx_last to track changes
+    nx_last = nx
+
+    # Loop over (rest of) views
+    for i = 1:nL
+      nx = L[i]
+      nx < 1 && continue
+      if nx != nx_last
+        nx_last = nx
+        yview = view(Y, 1 : nx+2*p)
+      end
+
+      # Zero-phase filter in X using Y
+      zero_phase_filt!(X[i], yview, b, a, zi, p)
+    end
+  end
+  return nothing
+end
+
+filtfilt(S::SeisData;
+  fl::Float64=1.0,
+  fh::Float64=15.0,
+  np::Int=4,
+  rp::Int=10,
+  rs::Int=30,
+  rt::String="Bandpass",
+  dm::String="Butterworth"
+  ) = (
+        U = deepcopy(S);
+        filtfilt!(U, fl=fl, fh=fh, np=np, rp=rp, rs=rs, rt=rt, dm=dm);
+        return U
+       )
+
+function filtfilt!(C::SeisChannel;
+    fl::Float64=1.0,
+    fh::Float64=15.0,
+    np::Int=4,
+    rp::Int=10,
+    rs::Int=30,
+    rt::String="Bandpass",
+    dm::String="Butterworth"
+    )
+
+  N = nx_max(C)
+
+  # Determine array structures
+  ty = eltype(C.x)
+
+  # Initialize filter
+  b, a, zi, p = update_filt(ty(fl), ty(fh), ty(C.fs), np, rp, rs, rt, dm)
+  Y = Array{ty,1}(undef, N + 2*p)
+
+  if size(C.t,1) == 1
+    zero_phase_filt!(C.x, Y, b, a, zi, p)
+  else
+
+    # Get views
+    (L,X) = get_views(C)
+    nL = length(L)
+    nx = first(L)
+    yview = view(Y, 1 : nx+2*p)
+
+    # Use nx_last to track changes
+    nx_last = nx
+
+    # Loop over (rest of) views
+    for i = 1:nL
+      nx = L[i]
+      if nx != nx_last
+        nx_last = nx
+        yview = view(Y, 1 : nx+2*p)
+      end
+
+      # Zero-phase filter in X using Y
+      zero_phase_filt!(X[i], yview, b, a, zi, p)
+    end
+  end
+  return nothing
+end
+
+filtfilt(C::SeisChannel;
+  fl::Float64=1.0,
+  fh::Float64=15.0,
+  np::Int=4,
+  rp::Int=10,
+  rs::Int=30,
+  rt::String="Bandpass",
+  dm::String="Butterworth"
+  ) = (
+        D = deepcopy(C);
+        filtfilt!(D, fl=fl, fh=fh, np=np, rp=rp, rs=rs, rt=rt, dm=dm);
+        return D
+       )
+
+filtfilt!(Ev::SeisEvent;
+  fl::Float64=1.0,
+  fh::Float64=15.0,
+  np::Int=4,
+  rp::Int=10,
+  rs::Int=30,
+  rt::String="Bandpass",
+  dm::String="Butterworth"
+  ) = filtfilt!(Ev.data, fl=fl, fh=fh, np=np, rp=rp, rs=rs, rt=rt, dm=dm)
+
+filtfilt(Ev::SeisEvent;
+  fl::Float64=1.0,
+  fh::Float64=15.0,
+  np::Int=4,
+  rp::Int=10,
+  rs::Int=30,
+  rt::String="Bandpass",
+  dm::String="Butterworth"
+  ) = (
+        S = deepcopy(Ev.data);
+        filtfilt!(S, fl=fl, fh=fh, np=np, rp=rp, rs=rs, rt=rt, dm=dm);
+        return SeisEvent(hdr = deepcopy(Ev.hdr), data=S)
+       )
