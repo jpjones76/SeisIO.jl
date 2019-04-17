@@ -5,16 +5,28 @@ T = Float32
 
 
 printstyled("  filtfilt!\n", color=:light_green)
+Δ = round(Int, 1.0e6/fs)
 
 # Methods
 C = randSeisChannel(s=true)
 C.fs = fs
-C.t = [1 100; nx 0]
+C.t = [1 100; div(nx,4) Δ; div(nx,2) 5*Δ+3; nx 0]
 C.x = randn(T, nx)
 D = filtfilt(C)
 filtfilt!(C)
 @test C == D
-naive_filt!(D)
+
+printstyled("    Equivalence with DSP.filtfilt\n", color=:light_green)
+for i = 1:10
+  C = randSeisChannel(s=true)
+  C.fs = fs
+  C.t = [1 100; nx 0]
+  C.x = randn(Float64, 100000)
+  D = deepcopy(C)
+  filtfilt!(C)
+  naive_filt!(D)
+  @test isapprox(C.x, D.x)
+end
 
 S = randSeisData(24, s=1.0)
 deleteat!(S, findall(S.fs.<40.0))
@@ -27,7 +39,7 @@ Ev1 = filtfilt(Ev)
 filtfilt!(Ev)
 @test Ev1 == Ev
 
-printstyled("    Former breaking cases:\n", color=:light_green)
+printstyled("    Former breaking cases\n", color=:light_green)
 printstyled("      very short data windows\n", color=:light_green)
 n_short = 5
 
