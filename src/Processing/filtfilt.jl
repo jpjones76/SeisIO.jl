@@ -110,6 +110,41 @@ function zero_phase_filt!(X::AbstractArray,
     return nothing
 end
 
+function do_filtfilt!(X::AbstractArray,
+                      Y::AbstractArray,
+                      yview::AbstractArray,
+                      L::Int64,
+                      last_L::Int64,
+                      b::Array{T,1},
+                      a::Array{T,1},
+                      zi::Array{T,1},
+                      p::Int64) where T<:Real
+
+  too_short::Bool = false
+  if L < 3*(2*p) # effecive filter order doubles for a zero-phase filter
+    L₀ = L
+    L = 6*p
+    x = copyto!(zeros(eltype(X), L), X)
+    X₀ = X
+    X = view(x, :)
+    too_short = true
+  end
+
+  if L != last_L
+    # condition to update filter
+    yview = view(Y, 1 : L+2*p)
+    last_L = L
+  end
+
+  # Zero-phase filter in X using Y
+  zero_phase_filt!(X, yview, b, a, zi, p)
+
+  if too_short
+    copyto!(X₀, 1, yview, 1, L₀)
+  end
+  return nothing
+end
+
 """
   filtfilt!(S::SeisData[; KWs])
 
@@ -167,7 +202,7 @@ function filtfilt!(S::SeisData;
     end
   end
   b, a, zi, p = update_filt(yy(fl), yy(fh), yy(maximum(S.fs)), np, rp, rs, rt, dm)
-  Y = Array{yy,1}(undef, N + 2*p) # right value for Butterworth
+  Y = Array{yy,1}(undef, max(N, 6*p) + 2*p) # right value for Butterworth
 
   # Get groups
   GRPS = get_unique(S, ["fs", "eltype"])
@@ -190,7 +225,6 @@ function filtfilt!(S::SeisData;
 
     # Initialize filter
     b, a, zi, p = update_filt(ty(fl), ty(fh), fs, np, rp, rs, rt, dm)
-    p_eff = rt in ["Bandpass", "Bandstop"] ? 2*p : p
 
     # Place the first copy outside the loop as we expect many cases where nL=1
     nx = first(L)
@@ -201,22 +235,7 @@ function filtfilt!(S::SeisData;
 
     # Loop over (rest of) views
     for i = 1:nL
-      nx = L[i]
-
-      # since L is sorted, this condition means no valid windows left
-      if nx < 3*p_eff
-        @warn(string("Some segments were too short for filtering (nx < ", 3*p_eff, ")."))
-        break
-      end
-
-      # condition to update filter
-      if nx != nx_last
-        nx_last = nx
-        yview = view(Y, 1 : nx+2*p)
-      end
-
-      # Zero-phase filter in X using Y
-      zero_phase_filt!(X[i], yview, b, a, zi, p)
+      do_filtfilt!(X[i], Y, yview, L[i], nx_last, b, a, zi, p)
     end
   end
   return nothing
@@ -253,8 +272,7 @@ function filtfilt!(C::SeisChannel;
 
   # Initialize filter
   b, a, zi, p = update_filt(ty(fl), ty(fh), ty(C.fs), np, rp, rs, rt, dm)
-  p_eff = rt in ["Bandpass", "Bandstop"] ? 2*p : p
-  Y = Array{ty,1}(undef, N + 2*p)
+  Y = Array{ty,1}(undef, max(N, 6*p) + 2*p)
 
   if size(C.t,1) == 1
     zero_phase_filt!(C.x, Y, b, a, zi, p)
@@ -271,21 +289,7 @@ function filtfilt!(C::SeisChannel;
 
     # Loop over (rest of) views
     for i = 1:nL
-      nx = L[i]
-
-      # since L is sorted, this condition means no valid windows left
-      if nx < 3*p_eff
-        @warn(string("Some segments were too short for filtering (nx < ", 3*p_eff, ")."))
-        break
-      end
-
-      if nx != nx_last
-        nx_last = nx
-        yview = view(Y, 1 : nx+2*p)
-      end
-
-      # Zero-phase filter in X using Y
-      zero_phase_filt!(X[i], yview, b, a, zi, p)
+      do_filtfilt!(X[i], Y, yview, L[i], nx_last, b, a, zi, p)
     end
   end
   return nothing
