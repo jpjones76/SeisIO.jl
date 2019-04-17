@@ -24,6 +24,35 @@ Ev1 = filtfilt(Ev)
 filtfilt!(Ev)
 @test Ev1 == Ev
 
+printstyled("    Former breaking cases:\n", color=:light_green)
+printstyled("      very short data windows\n", color=:light_green)
+n_short = 5
+
+C = randSeisChannel()
+C.fs = fs
+C.t = [1 0; n_short 0]
+C.x = randn(Float32, n_short)
+filtfilt!(C)
+
+S = randSeisData(24, s=1.0)
+deleteat!(S, findall(S.fs.<40.0))
+S.fs[S.n] = fs
+S.t[S.n] = [1 0; n_short 0]
+S.x[S.n] = randn(Float32, n_short)
+filtfilt!(S)
+
+printstyled("      repeated segment lengths\n", color=:light_green)
+n_rep = 2048
+
+S = randSeisData(24, s=1.0)
+deleteat!(S, findall(S.fs.<40.0))
+for i in (1, S.n)
+  S.fs[i] = fs
+  S.t[i] = [1 0; n_rep 0]
+  S.x[i] = randn(Float32, n_rep)
+end
+filtfilt!(S)
+
 printstyled("\n  Filters applied to SeisData:\n\n", color = :light_green)
 @printf("%12s | %10s | filt (MB) | data (MB) | ratio\n", "Name (dm=)", "Type (rt=)")
 @printf("%12s | %10s | --------- | --------- | -----\n", " -----------", "---------")
@@ -74,4 +103,3 @@ for dm in String["Butterworth", "Chebyshev1", "Chebyshev2", "Elliptic"]
                                                r ≥ 0.20 ? 148 : 10))
   end
 end
-println("")
