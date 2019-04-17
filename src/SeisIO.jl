@@ -14,11 +14,6 @@ include("CoreUtils/ls.jl")
 include("CoreUtils/time.jl")
 include("CoreUtils/namestrip.jl")
 
-# Utilities that don't require SeisIO types to work but may depend on CoreUtils
-for i in readdir(path*"/Utils")
-  include(joinpath("Utils",i))
-end
-
 # Types and methods: do not change order of operations
 include("Types/KWDefs.jl")
 include("Types/SeisData.jl")
@@ -28,6 +23,11 @@ include("Types/SeisEvent.jl")
 include("Types/note.jl")
 for i in readdir(path*"/Types/Methods")
   include(joinpath("Types/Methods",i))
+end
+
+# Utilities that may require SeisIO types to work
+for i in readdir(path*"/Utils")
+  include(joinpath("Utils",i))
 end
 
 # Processing
