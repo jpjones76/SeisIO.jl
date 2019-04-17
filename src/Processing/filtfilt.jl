@@ -78,14 +78,14 @@ function zero_phase_filt!(X::AbstractArray,
 
     # Extrapolate X into Y
     j = p
-    @inbounds for i = 1:nx
+    for i = 1:nx
       j += 1
       Y[j] = X[i]
     end
 
     y = 2*first(X)
     j = 2+p
-    @inbounds for i = 1:p
+    for i = 1:p
       j -= 1
       Y[i] = y - X[j]
     end
@@ -93,7 +93,7 @@ function zero_phase_filt!(X::AbstractArray,
     y = 2*X[nx]
     j = nx
     k = nx+p
-    @inbounds for i = 1:p
+    for i = 1:p
       j -= 1
       k += 1
       Y[k] = y - X[j]
@@ -190,6 +190,7 @@ function filtfilt!(S::SeisData;
 
     # Initialize filter
     b, a, zi, p = update_filt(ty(fl), ty(fh), fs, np, rp, rs, rt, dm)
+    p_eff = rt in ["Bandpass", "Bandstop"] ? 2*p : p
 
     # Place the first copy outside the loop as we expect many cases where nL=1
     nx = first(L)
@@ -203,7 +204,10 @@ function filtfilt!(S::SeisData;
       nx = L[i]
 
       # since L is sorted, this condition means no valid windows left
-      nx < 2 && break
+      if nx < 3*p_eff
+        @warn(string("Some segments were too short for filtering (nx < ", 3*p_eff, ")."))
+        break
+      end
 
       # condition to update filter
       if nx != nx_last
@@ -249,6 +253,7 @@ function filtfilt!(C::SeisChannel;
 
   # Initialize filter
   b, a, zi, p = update_filt(ty(fl), ty(fh), ty(C.fs), np, rp, rs, rt, dm)
+  p_eff = rt in ["Bandpass", "Bandstop"] ? 2*p : p
   Y = Array{ty,1}(undef, N + 2*p)
 
   if size(C.t,1) == 1
@@ -269,8 +274,11 @@ function filtfilt!(C::SeisChannel;
       nx = L[i]
 
       # since L is sorted, this condition means no valid windows left
-      nx < 2 && break
-      
+      if nx < 3*p_eff
+        @warn(string("Some segments were too short for filtering (nx < ", 3*p_eff, ")."))
+        break
+      end
+
       if nx != nx_last
         nx_last = nx
         yview = view(Y, 1 : nx+2*p)
