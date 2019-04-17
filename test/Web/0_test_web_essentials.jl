@@ -1,4 +1,4 @@
-import SeisIO: get_HTTP_req, webhdr, datareq_summ
+import SeisIO: get_HTTP_req, get_http_post, webhdr, datareq_summ
 xml_evfile = path*"/SampleFiles/fdsnws-event_2017-01-12T03-18-55Z.xml"
 xml_stfile = path*"/SampleFiles/fdsnws-station_2017-01-12T03-17-42Z.xml"
 d1 = "2019-03-14T02:18:00"
@@ -24,10 +24,14 @@ req_info_str = datareq_summ("IRISWS data", "DE.NENA.99.LUFTBALLOONS", d1, d2)
 (req,parsable) = get_HTTP_req(url, req_info_str, to, status_exception=false)
 @test typeof(req) == Array{UInt8,1}
 @test startswith(String(req), "HTTP.Messages.Response")
+@test parsable == false
 
-(req,parsable) = get_HTTP_req(url, req_info_str, to, status_exception=true)
+url = "http://service.iris.edu/irisws/timeseries/1/query?net=DE&sta=NENA&loc=99&cha=LUFTBALLOONS&start="*d1*"&end="*d2*"&scale=AUTO&output=miniseed"
+q = "HI ITS CLOVER LOL"
+(req, parsable) = get_http_post(url, q, to, status_exception=true)
 @test typeof(req) == Array{UInt8,1}
-@test occursin("HTTP/1.1 400 Bad Request", String(req))
+@test startswith(String(req), "HTTP.Messages.Response")
+@test parsable == false
 
 printstyled("  FDSN XML\n", color=:light_green)
 

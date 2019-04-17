@@ -46,4 +46,12 @@ for i = 1:3
   W.x[1][k] .= NaN
   detrend!(W)
   @test length(k) == length(findall(isnan.(W.x[1])))
+
+  C = randSeisChannel()
+  j = randperm(length(C.x))[1:rand(1:div(length(C.x),2))]
+  C.x[j] .= NaN
+  D = deepcopy(C)
+  demean!(C)
+  detrend!(D)
+  @test length(j) == length(findall(isnan.(C.x))) == length(findall(isnan.(D.x)))
 end
