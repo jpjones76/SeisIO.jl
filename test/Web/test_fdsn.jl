@@ -27,6 +27,8 @@ printstyled("    get_data with a config file for channel spec\n", color=:light_g
 
 S = SeisData()
 get_data!(S, "FDSN", fname, src="IRIS", s=-600, t=0, w=true)
+deleteat!(S, findall(S.fs.<25.0))
+filtfilt!(S, fl=0.01, fh=10.0)
 
 # Ensure station headers are set
 j = findid(S, "UW.HOOD..ENE")
