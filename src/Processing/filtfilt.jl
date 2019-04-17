@@ -32,33 +32,23 @@ function update_filt(fl::T, fh::T, fs::T, np::Int64, rp::Int, rs::Int, rt::Strin
   a = T.(coefa(pr))
   b = T.(coefb(pr))
   scale_factor = a[1]
-  if scale_factor != 1.0
-    r = T(1.0/a[1])
-    rmul!(a, r)
-    rmul!(b, r)
-  end
+  (scale_factor == 1.0) || (r = T(1.0/scale_factor); rmul!(a, r); rmul!(b, r))
 
   # size
   bs = length(b)
   as = length(a)
   sz = max(bs, as)
 
-  # solve for Z
-  if sz == 0
-    error("a and b must have at least one element each")
-  elseif sz == 1
-    Z = T[]
-  else
-    # Pad the coefficients with zeros if needed
-    bs < sz && (b = copyto!(zeros(T, sz), b))
-    as < sz && (a = copyto!(zeros(T, sz), a))
+  # Pad the coefficients with zeros if needed
+  bs < sz && (b = copyto!(zeros(T, sz), b))
+  as < sz && (a = copyto!(zeros(T, sz), a))
 
-    # construct the companion matrix A and vector B:
-    A = [-a[2:sz] [I; zeros(T, 1, sz-2)]]
-    B = b[2:sz] - a[2:sz] * b[1]
-    # Solve si = A*si + B or equivalently (I - A)*si = B
-    Z = scale_factor \ (I - A) \ B
-  end
+  # construct the companion matrix A and vector B:
+  A = [-a[2:sz] [I; zeros(T, 1, sz-2)]]
+  B = b[2:sz] - a[2:sz] * b[1]
+
+  # Solve for Z: (I - A)*si = B
+  Z = scale_factor \ (I - A) \ B
 
   p = 3*(sz-1)
   return (b, a, Z, p)
@@ -78,14 +68,14 @@ function zero_phase_filt!(X::AbstractArray,
 
     # Extrapolate X into Y
     j = p
-    for i = 1:nx
+    @inbounds for i = 1:nx
       j += 1
       Y[j] = X[i]
     end
 
     y = 2*first(X)
     j = 2+p
-    for i = 1:p
+    @inbounds for i = 1:p
       j -= 1
       Y[i] = y - X[j]
     end
@@ -93,7 +83,7 @@ function zero_phase_filt!(X::AbstractArray,
     y = 2*X[nx]
     j = nx
     k = nx+p
-    for i = 1:p
+    @inbounds for i = 1:p
       j -= 1
       k += 1
       Y[k] = y - X[j]
@@ -274,11 +264,11 @@ function filtfilt!(C::SeisChannel;
   b, a, zi, p = update_filt(ty(fl), ty(fh), ty(C.fs), np, rp, rs, rt, dm)
   Y = Array{ty,1}(undef, max(N, 6*p) + 2*p)
 
-  if size(C.t,1) == 1
-    zero_phase_filt!(C.x, Y, b, a, zi, p)
+  # Get views
+  if size(C.t,1) == 2
+    L = length(C.x)
+    do_filtfilt!(C.x, Y, view(Y,1:L+2*p), L, L, b, a, zi, p)
   else
-
-    # Get views
     (L,X) = get_views(C)
     nL = length(L)
     nx = first(L)
