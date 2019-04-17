@@ -8,8 +8,19 @@ struct SLDefs
   x_on_err::Bool
 end
 
+struct FiltDefs
+  fl::Float64
+  fh::Float64
+  np::Int64
+  rp::Int64
+  rs::Int64
+  rt::String
+  dm::String
+end
+
 struct KWDefs
   SL::SLDefs
+  Filt::FiltDefs
   evw::Array{Float64,1}
   fmt::String
   mag::Array{Float64,1}
@@ -78,14 +89,38 @@ general keywords.
 | refresh     | 20      | Real            | base refresh interval [s]         |
 | xonerr      | true    | Bool            | exit on error?                    |
 
+SeisIO.KW.Filt: Defaults parameters for time-series filtering.
+
+| Name  | Default       | Type    | Description                         |
+|:------|:--------------|:--------|:------------------------------------|
+| fl    | 1.0           | Float64 | lower corner frequency [Hz] [^1]    |
+| fh    | 15.0          | Float64 | upper corner frequency [Hz] [^1]    |
+| np    | 4             | Int64   | number of poles                     |
+| rp    | 10            | Int64   | pass-band ripple (dB)               |
+| rs    | 30            | Int64   | stop-band ripple (dB)               |
+| rt    | "Bandpass"    | String  | response type (type of filter)      |
+| dm    | "Butterworth" | String  | design mode (name of filter)        |
+
+[^1]: Remember the (counter-intuitive) convention that the lower corner frequency (fl) is used in a Highpass filter, and fh is used in a Lowpass filter. This convention is preserved in SeisIO.
+
 """
 const KW = KWDefs(
+
            SLDefs(18000,    # port::Int
                    3600,    # gap::Int
                     600,    # kai::Int
                  "DATA",    # mode::String
                    20.0,    # refresh::Real
                    true ),  # x_on_err::Bool
+
+           FiltDefs(1.0,    # fl::Float64
+                   15.0,    # fh::Float64
+                      4,    # np::Int64
+                     10,    # rp::Int64
+                     30,    # rs::Int64
+             "Bandpass",    # rt::String
+          "Butterworth" ),  # dm::String
+
     Float64[600.0, 600.0],  # evw::Real
                "miniseed",  # fmt::String
         Float64[6.0, 9.9],  # mag::Array{Float64,1}
