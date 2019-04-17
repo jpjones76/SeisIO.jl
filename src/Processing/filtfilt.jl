@@ -110,14 +110,45 @@ function zero_phase_filt!(X::AbstractArray,
     return nothing
 end
 
+"""
+  filtfilt!(S::SeisData[; KWs])
+
+Apply zero-phase filter to S.x.
+
+  filtfilt!(Ev::SeisEvent[; KWs])
+
+Apply zero-phase filter to Ev.data.x.
+
+  filtfilt!(C::SeisChannel[; KWs])
+
+Apply zero-phase filter to C.x
+
+Keywords control filtering behavior; specify as e.g. filtfilt!(S, fl=0.1, np=2, rt="Lowpass").
+
+### Keywords
+
+| Name  | Default       | Type    | Description                         |
+|:------|:--------------|:--------|:------------------------------------|
+| fl    | 1.0           | Float64 | lower corner frequency [Hz] [^1]    |
+| fh    | 15.0          | Float64 | upper corner frequency [Hz] [^1]    |
+| np    | 4             | Int64   | number of poles                     |
+| rp    | 10            | Int64   | pass-band ripple (dB)               |
+| rs    | 30            | Int64   | stop-band ripple (dB)               |
+| rt    | "Bandpass"    | String  | response type (type of filter)      |
+| dm    | "Butterworth" | String  | design mode (name of filter)        |
+
+[^1]: Remember the (counter-intuitive) convention that the lower corner frequency (fl) is used in a Highpass filter, and fh is used in a Lowpass filter. This convention is preserved in SeisIO.
+
+See also: DSP.jl documentation
+"""
 function filtfilt!(S::SeisData;
-    fl::Float64=1.0,
-    fh::Float64=15.0,
-    np::Int=4,
-    rp::Int=10,
-    rs::Int=30,
-    rt::String="Bandpass",
-    dm::String="Butterworth"
+    fl::Float64=KW.Filt.fl,
+    fh::Float64=KW.Filt.fh,
+    np::Int=KW.Filt.np,
+    rp::Int=KW.Filt.rp,
+    rs::Int=KW.Filt.rs,
+    rt::String=KW.Filt.rt,
+    dm::String=KW.Filt.dm
     )
 
   N = nx_max(S)
@@ -170,7 +201,11 @@ function filtfilt!(S::SeisData;
     # Loop over (rest of) views
     for i = 1:nL
       nx = L[i]
-      nx < 1 && continue
+
+      # since L is sorted, this condition means no valid windows left
+      nx < 2 && break
+
+      # condition to update filter
       if nx != nx_last
         nx_last = nx
         yview = view(Y, 1 : nx+2*p)
@@ -184,13 +219,13 @@ function filtfilt!(S::SeisData;
 end
 
 filtfilt(S::SeisData;
-  fl::Float64=1.0,
-  fh::Float64=15.0,
-  np::Int=4,
-  rp::Int=10,
-  rs::Int=30,
-  rt::String="Bandpass",
-  dm::String="Butterworth"
+  fl::Float64=KW.Filt.fl,
+  fh::Float64=KW.Filt.fh,
+  np::Int=KW.Filt.np,
+  rp::Int=KW.Filt.rp,
+  rs::Int=KW.Filt.rs,
+  rt::String=KW.Filt.rt,
+  dm::String=KW.Filt.dm
   ) = (
         U = deepcopy(S);
         filtfilt!(U, fl=fl, fh=fh, np=np, rp=rp, rs=rs, rt=rt, dm=dm);
@@ -198,14 +233,14 @@ filtfilt(S::SeisData;
        )
 
 function filtfilt!(C::SeisChannel;
-    fl::Float64=1.0,
-    fh::Float64=15.0,
-    np::Int=4,
-    rp::Int=10,
-    rs::Int=30,
-    rt::String="Bandpass",
-    dm::String="Butterworth"
-    )
+  fl::Float64=KW.Filt.fl,
+  fh::Float64=KW.Filt.fh,
+  np::Int=KW.Filt.np,
+  rp::Int=KW.Filt.rp,
+  rs::Int=KW.Filt.rs,
+  rt::String=KW.Filt.rt,
+  dm::String=KW.Filt.dm
+  )
 
   N = nx_max(C)
 
@@ -232,6 +267,10 @@ function filtfilt!(C::SeisChannel;
     # Loop over (rest of) views
     for i = 1:nL
       nx = L[i]
+
+      # since L is sorted, this condition means no valid windows left
+      nx < 2 && break
+      
       if nx != nx_last
         nx_last = nx
         yview = view(Y, 1 : nx+2*p)
@@ -245,13 +284,13 @@ function filtfilt!(C::SeisChannel;
 end
 
 filtfilt(C::SeisChannel;
-  fl::Float64=1.0,
-  fh::Float64=15.0,
-  np::Int=4,
-  rp::Int=10,
-  rs::Int=30,
-  rt::String="Bandpass",
-  dm::String="Butterworth"
+  fl::Float64=KW.Filt.fl,
+  fh::Float64=KW.Filt.fh,
+  np::Int=KW.Filt.np,
+  rp::Int=KW.Filt.rp,
+  rs::Int=KW.Filt.rs,
+  rt::String=KW.Filt.rt,
+  dm::String=KW.Filt.dm
   ) = (
         D = deepcopy(C);
         filtfilt!(D, fl=fl, fh=fh, np=np, rp=rp, rs=rs, rt=rt, dm=dm);
@@ -259,23 +298,23 @@ filtfilt(C::SeisChannel;
        )
 
 filtfilt!(Ev::SeisEvent;
-  fl::Float64=1.0,
-  fh::Float64=15.0,
-  np::Int=4,
-  rp::Int=10,
-  rs::Int=30,
-  rt::String="Bandpass",
-  dm::String="Butterworth"
+  fl::Float64=KW.Filt.fl,
+  fh::Float64=KW.Filt.fh,
+  np::Int=KW.Filt.np,
+  rp::Int=KW.Filt.rp,
+  rs::Int=KW.Filt.rs,
+  rt::String=KW.Filt.rt,
+  dm::String=KW.Filt.dm
   ) = filtfilt!(Ev.data, fl=fl, fh=fh, np=np, rp=rp, rs=rs, rt=rt, dm=dm)
 
 filtfilt(Ev::SeisEvent;
-  fl::Float64=1.0,
-  fh::Float64=15.0,
-  np::Int=4,
-  rp::Int=10,
-  rs::Int=30,
-  rt::String="Bandpass",
-  dm::String="Butterworth"
+  fl::Float64=KW.Filt.fl,
+  fh::Float64=KW.Filt.fh,
+  np::Int=KW.Filt.np,
+  rp::Int=KW.Filt.rp,
+  rs::Int=KW.Filt.rs,
+  rt::String=KW.Filt.rt,
+  dm::String=KW.Filt.dm
   ) = (
         S = deepcopy(Ev.data);
         filtfilt!(S, fl=fl, fh=fh, np=np, rp=rp, rs=rs, rt=rt, dm=dm);
