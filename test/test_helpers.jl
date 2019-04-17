@@ -7,7 +7,7 @@ import SeisIO.RandSeis: getyp2codes, pop_rand_dict!
 # All constants needed by tests are here
 const path = Base.source_dir()
 println(stdout, "SeisIO path = ", path)
-const unicode_chars = String.(readdlm("SampleFiles/julia-unicode.csv", '\n')[:,1])
+const unicode_chars = String.(readdlm(path*"/SampleFiles/julia-unicode.csv", '\n')[:,1])
 const n_unicode = length(unicode_chars)
 const breaking_dict = Dict{String,Any}(
   "0" => rand(Char), "1" => randstring(rand(51:100)),
@@ -25,6 +25,24 @@ const breaking_dict = Dict{String,Any}(
   "224" => collect(rand(Complex{Int8}, rand(4:24))), "225" => collect(rand(Complex{Int16}, rand(4:24))), "226" => collect(rand(Complex{Int32}, rand(4:24))), "227" => collect(rand(Complex{Int64}, rand(4:24))), "228" => collect(rand(Complex{Int128}, rand(4:24))),
   "240" => collect(rand(Complex{Float16}, rand(4:24))), "241" => collect(rand(Complex{Float32}, rand(4:24))), "242" => collect(rand(Complex{Float64}, rand(4:24)))
   )
+
+
+  NOOF = "
+  HI ITS CLOVER LOL﻿
+            ,-'-,  `---..
+           /             \\
+           =,             .
+    ______<3.  ` ,+,     ,\\`
+   ( \\    `-”.` .; `     `.\\
+   (_/\\      | ((         ) \\
+    |_ ;     \\   (        ,’ |\\
+    \\    ,- '  (,\\_____,’   / “\\
+     \\__---+ }._)              |\\
+     / _\\__`”)/                  +
+    ( /    ;” \\                  ++_
+     \\)    ,“  |)                ++  ++
+     :     “;  (                 *    +***
+  "
 
 # All functions used by tests are here
 Lx(T::SeisData) = [length(T.x[i]) for i=1:T.n]

@@ -130,7 +130,7 @@ function do_filtfilt!(X::AbstractArray,
   zero_phase_filt!(X, yview, b, a, zi, p)
 
   if too_short
-    copyto!(X₀, 1, yview, 1, L₀)
+    copyto!(X₀, 1, X, 1, L₀)
   end
   return nothing
 end
