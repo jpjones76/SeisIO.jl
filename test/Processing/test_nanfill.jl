@@ -16,7 +16,9 @@ nanfill!(Ev)
 nanfill!(S)
 nanfill!(C)
 
+E2 = ungap(Ev, tap=true)
 ungap!(Ev, tap=true)
+@test Ev == E2
 ungap!(C, tap=true)
 ungap!(S, tap=true)
 
