@@ -16,7 +16,13 @@ nanfill!(Ev)
 nanfill!(S)
 nanfill!(C)
 
+Ev2 = ungap(Ev, tap=true)
 ungap!(Ev, tap=true)
+for f in SeisIO.datafields
+  if f != :notes
+    @test getfield(Ev,f) == getfield(Ev2,f)
+  end
+end
 ungap!(C, tap=true)
 ungap!(S, tap=true)
 
