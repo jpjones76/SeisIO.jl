@@ -1,4 +1,5 @@
 using Printf
+import SeisIO: get_views
 fs = 100.0
 nx = 10000000
 T = Float32
@@ -40,6 +41,8 @@ Ev = SeisEvent(hdr=randSeisHdr(), data=deepcopy(S))
 U = filtfilt(S)
 filtfilt!(S)
 @test U == S
+
+get_views(S)
 
 Ev1 = filtfilt(Ev)
 filtfilt!(Ev)
@@ -114,7 +117,7 @@ for dm in String["Butterworth", "Chebyshev1", "Chebyshev2", "Elliptic"]
     r = b/n
     q = tc/td
 
-    @printf("%12s | %10s | %7.2f | %6.2f | %7.2f | %6.2f | %7.2f | ", dm, rt, sz/1024^2, tc*1000.0, b/1024^2, td*1000.0, n/1024^2)
+    @printf("%12s | %10s | %7.2f | %6.1f | %7.2f | %6.1f | %7.2f | ", dm, rt, sz/1024^2, tc*1000.0, b/1024^2, td*1000.0, n/1024^2)
     printstyled(@sprintf("%5.2f", q), color=printcol(q))
     @printf(" | ")
     printstyled(@sprintf("%4.2f", r), color=printcol(r))

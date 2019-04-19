@@ -27,6 +27,7 @@ ot = d2u(Ev.hdr.ot)
 
 for i = 1:Ev.data.n
   if i == 1
+    pdat = get_pha(Ev.data.misc[i]["dist"], Ev.hdr.loc[3], pha="", model="do.my.little.dance.on.the.catwalk", to=to) # should break
     pdat = get_pha(Ev.data.misc[i]["dist"], Ev.hdr.loc[3], pha="", to=to)
   elseif i == 2
     pdat = get_pha(Ev.data.misc[i]["dist"], Ev.hdr.loc[3], pha="all", to=to)

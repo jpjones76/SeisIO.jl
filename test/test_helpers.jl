@@ -196,10 +196,10 @@ function wait_on_data!(S::SeisData; tmax::Real=60.0)
       # write should close it instantly)
       for q = 1:length(S.c)
         if isopen(S.c[q])
-          close(S.c[q])
           if q == 3
             show(S)
           end
+          close(S.c[q])
         end
       end
       sleep(t)
