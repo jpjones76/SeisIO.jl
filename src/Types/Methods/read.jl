@@ -23,13 +23,9 @@ chk_seisio(io::IOStream, f_ok::Array{UInt8,1} =
 function read_string_array(io::IOStream)
   nd = Int64(read(io, UInt8))
   d = read!(io, Array{Int64}(undef, nd))
-  if d==[0]
-    S = Array{String,1}()
-  else
-    sep = Char(read(io, UInt8))
-    l = read(io, Int64)
-    S = reshape([String(j) for j in split(String(read!(io, Array{UInt8}(undef, l))), sep)], tuple(d[:]...))
-  end
+  sep = Char(read(io, UInt8))
+  l = read(io, Int64)
+  S = reshape([String(j) for j in split(String(read!(io, Array{UInt8}(undef, l))), sep)], tuple(d[:]...))
   return S
 end
 
@@ -54,10 +50,8 @@ function code2typ(c::UInt8)
     t = T[findtype(c-0x10, N)]
   elseif c == 0x01
     t = String
-  elseif c == 0x00
-    t = Char
   else
-    throw(TypeError)
+    t = Char
   end
   return t
 end
@@ -147,11 +141,7 @@ function rdata(io::IOStream, ver::Float32)
   for i = 1:N
 
     # int
-    if ver < 0.4f0
-      i64 = read!(io, Array{Int64, 1}(undef, 9))
-    else
-      i64 = read!(io, Array{Int64, 1}(undef, 10))
-    end
+    i64 = read!(io, Array{Int64, 1}(undef, 10))
     if i64[1] > 0
       S.t[i] = reshape(read!(io, Array{Int64, 1}(undef, i64[1])), div(i64[1],2), 2)
     end
