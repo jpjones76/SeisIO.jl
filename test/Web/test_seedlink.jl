@@ -47,14 +47,14 @@ end
 # DATA mode
 printstyled("  SeedLink DATA mode\n", color=:light_green)
 printstyled("    link 1: command-line station list\n", color=:light_green)
-printstyled("    link 2: station file\n", color=:light_green)
 T = SeisData()
 open("runtests.log", "a") do out
   redirect_stdout(out) do
-    SeedLink!(T, sta, mode="DATA", refresh=9.9, kai=15.0, v=1)
+    SeedLink!(T, sta, mode="DATA", refresh=9.9, kai=7.0, v=1)
   end
 end
 
+printstyled("    link 2: station file\n", color=:light_green)
 open("runtests.log", "a") do out
   redirect_stdout(out) do
     SeedLink!(T, config_file, mode="DATA", refresh=13.3, v=3)

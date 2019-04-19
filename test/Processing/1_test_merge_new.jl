@@ -1,3 +1,4 @@
+import SeisIO: xtmerge!
 printstyled(stdout,"  merge! behavior and intent\n", color=:light_green)
 nx = 100
 fs = 100.0
@@ -48,6 +49,16 @@ function mk_tcat(T::Array{Array{Int64,2},1}, fs::Float64)
   tt = sort(unique(vcat(τ...)))
   return t_collapse(tt, fs)
 end
+
+# ===========================================================================
+printstyled(stdout,"    xtmerge!\n", color=:light_green)
+x = randn(12)
+t = sort!(rand(Int64,12))
+x = vcat(x, x[1:6])
+t = vcat(t, t[1:6])
+xtmerge!(t, x, 10000)
+@test length(t) == 12
+@test length(x) == 12
 
 # ===========================================================================
 printstyled(stdout,"    Removal of traces with no data or time info\n", color=:light_green)

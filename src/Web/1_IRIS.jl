@@ -126,7 +126,7 @@ function get_pha(Δ::Float64, z::Float64;
 
   url = string("http://service.iris.edu/irisws/traveltime/1/query?", "distdeg=", Δ, "&evdepth=", z, pq, "&model=", model, "&mintimeonly=true&noheader=true")
   v > 0 && println(stdout, "url = ", url)
-  req_info_str = string("\nIRIS travel time request:\nΔ = ", Δ, "\nDepth = ", z, "\nPhases = ", pq, "\nmodel =", model)
+  req_info_str = string("\nIRIS travel time request:\nΔ = ", Δ, "\nDepth = ", z, "\nPhases = ", pq, "\nmodel = ", model)
   (R, parsable) = get_HTTP_req(url, req_info_str, to)
 
   if parsable
