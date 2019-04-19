@@ -119,8 +119,16 @@ setindex!(S::SeisData, U::SeisData, J::UnitRange) = setindex!(S, U, collect(J))
 
 isempty(S::SeisData) = (S.n == 0) ? true : minimum([isempty(getfield(S,f)) for f in datafields])
 
-isequal(S::SeisData, U::SeisData) = minimum([hash(getfield(S,i))==hash(getfield(U,i)) for i in datafields]::Array{Bool,1})
-==(S::SeisData, U::SeisData) = isequal(S,U)::Bool
+function isequal(S::SeisData, U::SeisData)
+  q::Bool = true
+  for i in datafields
+    if i != :notes
+      q = min(q, hash(getfield(S,i))==hash(getfield(U,i)))
+    end
+  end
+  return q
+end
+==(S::SeisData, U::SeisData) = isequal(S,U)
 
 function sizeof(S::SeisData)
   s = sizeof(S.c) + 8

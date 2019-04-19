@@ -77,5 +77,14 @@ SeisHdr(; id=0::Int64,
 # =============================================================================
 # Methods from Base
 sizeof(S::SeisHdr) = sum([sizeof(getfield(S,i)) for i in hdrfields]::Array{Int,1})
-isequal(S::SeisHdr, U::SeisHdr) = minimum([hash(getfield(S,i))==hash(getfield(U,i)) for i in hdrfields]::Array{Bool,1})
+
+function isequal(H::SeisHdr, K::SeisHdr)
+  q::Bool = true
+  for i in hdrfields
+    if i != :notes
+      q = min(q, hash(getfield(H,i))==hash(getfield(K,i)))
+    end
+  end
+  return q
+end
 ==(S::SeisHdr, T::SeisHdr) = isequal(S,T)
