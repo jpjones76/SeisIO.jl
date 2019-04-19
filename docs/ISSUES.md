@@ -2,10 +2,11 @@
 
 ## Oustanding
 * ``wseis`` cannot write a SeisData object if a channel contains no data.
+* It's not clear whether or not `SeedLink!` works with `mode="FETCH"`.
 
 ## External to SeisIO
 * Some data channels IDs in SeedLink are not unique or are duplicates with
-different LOC fields in :id.
+different LOC fields in `:id`.
   + This appears to happen when one stations transmits data in real time to
   multiple networks.
   + The workaround is to always specify a location code in request strings.
