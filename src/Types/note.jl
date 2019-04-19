@@ -44,6 +44,13 @@ function note!(S::SeisData, id::String, s::String)
   return nothing
 end
 
+function note!(S::SeisData, chans::Array{Int64,1}, s::String)
+  for c in chans
+    note!(S, c, s)
+  end
+  return nothing
+end
+
 note!(H::SeisHdr, s::String) = push!(H.notes, tnote(s))
 note!(S::SeisChannel, s::String) = push!(S.notes, tnote(s))
 
