@@ -96,7 +96,7 @@ SeisIO.KW.Filt: Defaults parameters for time-series filtering.
 | fl    | 1.0           | Float64 | lower corner frequency [Hz] [^1]    |
 | fh    | 15.0          | Float64 | upper corner frequency [Hz] [^1]    |
 | np    | 4             | Int64   | number of poles                     |
-| rp    | 10            | Int64   | pass-band ripple (dB)               |
+| rp    | 8             | Int64   | pass-band ripple (dB)               |
 | rs    | 30            | Int64   | stop-band ripple (dB)               |
 | rt    | "Bandpass"    | String  | response type (type of filter)      |
 | dm    | "Butterworth" | String  | design mode (name of filter)        |
@@ -116,7 +116,7 @@ const KW = KWDefs(
            FiltDefs(1.0,    # fl::Float64
                    15.0,    # fh::Float64
                       4,    # np::Int64
-                     10,    # rp::Int64
+                      8,    # rp::Int64
                      30,    # rs::Int64
              "Bandpass",    # rt::String
           "Butterworth" ),  # dm::String
