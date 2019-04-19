@@ -1,3 +1,16 @@
+### 2019-04-19
+* Information logged to `:notes` has been standardized.
+  + Format: `time: function, options/KWs, human-readable description`
+  + Fields in an automatic note are comma-separated, with the function name
+  always in the first field and human-readable information always in the last.
+  + All processing functions should once again log faithfully to `:notes`.
+* Added `filtfilt!` methods for zero-phase filtering of data in SeisData,
+  SeisChannel, and SeisEvent objects.
+* Equality (`==`) in SeisIO parametric types no longer checks for equality of
+  their respective `:notes` fields.
+* Extended `note!` to lists of channels in SeisData objects.
+* Added information for potential contributors.
+
 ### 2019-04-15
 * Added `readgeocsv` for two-column GeoCSV ASCII time-series data
 * `taper!` has replaced `autotap!`
