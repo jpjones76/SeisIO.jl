@@ -17,7 +17,7 @@ SeisIO welcomes contributions, but users should follow the rules below.
 ## Include tests
 * Good tests include a mix of unit tests and typical "use" cases.
 * Our target code coverage is 98%, with no file below 95%, on both [codecov.io](https://codecov.io) and [coveralls.io](https://coveralls.io).
-  - There are some files where 95% coverage is impossible (e.g., we have readers for SEED blockette types that we've never encountered). If your files include such a necessary exception, please warn us.
+  - For some files, 95% coverage is impossible (due to e.g. rarely-seen data formats). If one of your files can't reach 95% due to the need to code for such rare cases, please tell us before making your PR.
 
 ## Write comprehensible code
 * Code should be well-organized. Other contributors must be able to trace your function calls.
@@ -57,11 +57,12 @@ Your code must handle (or skip, as needed) channels in SeisData objects (and/or 
 * segments with very few data points (`length(S.x[i]) < 10`)
 * data that are neither seismic nor geodetic (e.g. timing, radiometers, SO₂ flux)
 * empty `:resp` fields
-* empty or unusual `:loc` fields. There is no standard way to describe a scientific instrument's position. For example, inertial seismometers alone can use any of these conventions:
-  - [lat. lon, (ele or depth), az, inc]
+* empty or unusual `:loc` fields. There is no standard way to describe a scientific instrument's position. For example, inertial seismometers can use any of these conventions to describe location:
+  - [lat. lon, (ele or depth)]
   - [easting, northing, (ele or depth), lat, lon], where [lat, lon] is the cooordinate system origin
   - [UTM-x, UTM-y, (ele or depth), UTM-zone]
   - [r, θ, lat, lon], where [r, θ] is a position relative to an origin at [lat, lon] (rare)
+  - In addition, adding positional descriptors to `:loc` (e.g., seismometer azimuth and incidence angle) introduces more ambiguity: for example, azimuth can be measured clockwise from north (cartographical) or counterclockwise from east (mathematical). The former is more common in geosciences, but many authors in the literature use the latter.
 
 You don't need to plan for others' PEBKAC errors, but nothing on the above list is a mistake.
 
