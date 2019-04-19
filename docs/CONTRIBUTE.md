@@ -12,62 +12,72 @@ SeisIO welcomes contributions, but users should follow the rules below.
 
 # **General Rules**
 
+## Please don't add dependencies
+
 ## Include tests
-* Your tests must pass before your code can be merged.
 * Good tests include a mix of unit tests and typical "use" cases.
-* Place tests in appropriate subdirectories of `test`.
-* Files added to (or changed in) `src` must have code coverage ≥95% in both [codecov.io](https://codecov.io) and [coveralls.io](https://coveralls.io).
+* Our target code coverage is 98%, with no file below 95%, on both [codecov.io](https://codecov.io) and [coveralls.io](https://coveralls.io).
+  - There are some files where 95% coverage is impossible (e.g., we have readers for SEED blockette types that we've never encountered). If your files include such a necessary exception, please warn us.
 
-## Don't make [spaghetti code](https://en.wikipedia.org/wiki/Spaghetti_code)
-* Code should be comprehensible and well-organized.
-* Please don't use intentionally arcane syntax or create gibberish with [metaprogramming](https://docs.julialang.org/en/v1/manual/metaprogramming/index.html).
-* Please don't nest wrapper functions.
+## Write comprehensible code
+* Code should be well-organized. Other contributors must be able to trace your function calls.
+* Keep wrapper functions to a bare minimum. Nested wrapper functions will be rejected.
+* Please only use [metaprogramming](https://docs.julialang.org/en/v1/manual/metaprogramming/index.html) when necessary (e.g., if there's a significant speed improvement).
 
-## Don't call other languages needlessly
-External program calls should only happen when necessary and are only permitted if the source code of what you're calling is free and available to the public.
+## Limit external calls
+For reasons of code transparency, calls to external functions or software should be kept to a minimum. All external calls must meet these conditions:
 
-External calls to the following are forbidden:
-* Wrapper functions to different languages
-* Software with (re)distribution restrictions, such as Seismic Analysis Code (SAC)
-* Commercial software, such as MATLAB
-* Python
-* R
+1. Julia can't do it natively, or Julia's version performs poorly.
+2. The call works correctly in Windows, Linux, and Mac OS, without invoking emulators, virtual machines, Cygwin, or "additional setup instructions".
+3. The source code of the external function call is free and publicly available. This explicitly excludes source code that can only be obtained by contacting a maintainer.
 
-## No new dependencies
-This rule does not apply to submodules.
+### Prohibited external calls
+* No calls to software with (re)distribution restrictions, such as Seismic Analysis Code (SAC)
+* No calls to commercial software, such as MATLAB™
+* No calls to software with many contributors and no clear control process, such as ObsPy, Octave, and the Arch User Repository (AUR)
 
-# **Additional Processing/Analysis Rules**
-In addition to the above, code for data processing or analysis must conform to the following specifications:
+# **Processing/Analysis Contributions**
+In addition to the above, code for data processing or analysis must conform to these specifications:
 
-## Leave unprocessed data channels alone
-Skip channels with data types or properties that are incompatible with your code; never delete or alter them. For example, code that assumes regularly-sampled data should skip irregularly-sampled channels (the best way to identify channels with regularly-sampled data is `findall(S.fs) .> 0.0`).
+## Record all operations in `:notes`
+All processing and analysis operations must be logged in the `:notes` field of each channel processed.
 
-## Don't assume ideal SeisData objects
-Your code must handle (or skip, as needed) channels in SeisData objects that have one or more of these undesirable features:
-* irregularly-sampled data
-* time gaps of arbitrary lengths
-* time-series segments of any length > 0, i.e., as short as a single data point between two gaps, or as long as memory limitations allow
-* unusual instrument types (e.g. timing channels, radiometers, resistivity)
+Use the function `note!` and add relevant information in comma-separated fields. Include the name of the function invoked, any options that affect the result, and human-readable information in the last field. Typical examples look like this:
+
+`2019-04-19T06:28:32.313: filtfilt!, fl=1.0, fh=15.0, np=4, rp=8, rs=30, rt=Bandpass, dm=Butterworth`
+
+It's best to log any changes to numeric values in the channel and affected field(s) in the human-readable field, e.g.,
+
+`2019-04-19T07:20:57.531: ungap!, m=true, tap=false, filled 4 gaps (sum = 1590288 μs)`
+
+## Don't assume ideal objects
+Your code must handle (or skip, as needed) channels in SeisData objects (and/or SeisChannel objects) with undesirable features. Explicit cases that your code must be able to handle or skip include:
+* irregularly-sampled data (`S.fs[i] == 0.0`)
+* (potentially very many) time gaps of arbitrary lengths (e.g., one SeisIO test file has `size(S.t[i],1) > 200`; the largest gap is over a week long)
+* segments with very few data points (`length(S.x[i]) < 10`)
+* data that are neither seismic nor geodetic (e.g. timing, radiometers, SO₂ flux)
 * empty `:resp` fields
-* empty or unusual `:loc` fields (there is no universal standard for describing a scientific instrument's position; code accordingly)
+* empty or unusual `:loc` fields. There is no standard way to describe a scientific instrument's position. For example, inertial seismometers alone can use any of these conventions:
+  - [lat. lon, (ele or depth), az, inc]
+  - [easting, northing, (ele or depth), lat, lon], where [lat, lon] is the cooordinate system origin
+  - [UTM-x, UTM-y, (ele or depth), UTM-zone]
+  - [r, θ, lat, lon], where [r, θ] is a position relative to an origin at [lat, lon] (rare)
 
-## Don't assume a processing work flow
-A routine that assumes prior processing should incorporate it. A routine that assumes a great deal of prior processing should probably be a private script unless the work flow is a widely recognized standard procedure.
+You don't need to plan for others' PEBKAC errors, but nothing on the above list is a mistake.
 
-## Ensure that data-specific code finds the right data
-Include a means of testing that data come from the intended instrument types.
+## Don't assume a work flow
+If a function assumes or requires specific preprocessing steps, apply them in the function body or check for them in the `:notes` field of each channel.
 
-### Identifying instrument type
-SeisIO uses SEED channel naming conventions for the `:id` field of most geophysical data. Thus, there are two ways to check whether channel data matches the desired instrument type:
-1. (Preferred) Get the single-character "channel instrument code" for channel `i` with ``split(S.id[i], '.')[4][2]``; compare with [standard SEED instrument codes](https://ds.iris.edu/ds/nodes/dmc/data/formats/seed-channel-naming/). This can break for non-SEED IDs, so enclosing this comparison in a `try/catch` loop might be necessary.
-2. Check `:units`. This is not always a good idea because some sources list units in "counts" (e.g., "counts/s", "counts/s**2") when the "stage zero" gain is included; this convention is useless and confusing but technically precise.
+Example: seismic data analysis often assumes a work flow in which each data segment is detrended (or de-meaned), then cosine tapered to start and end with `x = 0.0`. However, these steps make no sense for data from non-seismic instruments, including many examples colocated with seismometers whose data are archived at seismic data centers.
 
-# **Notes and Discussion**
+## Leave unprocessed data alone
+Skip channels (or segments within channels) that you don't process; never alter or delete unprocessed data.
 
-#### Why no Python calls in SeisIO core?
-- Opacity: Python packages can be distributed in a precompiled state; source code is not always available, which violates the transparency requirement.
-- Overhead: PyCall consumes >70 MB in Julia v1.1; PyPlot consumes >130 MB. Python code is not optimized for Julia, obviously; that can add overhead or slowdown.
-- Spaghetti code: mature Python packages often install dozens of dependencies, trading several GB disk space for a handful of functions. (Their "ecosystem" is more like a superfund site...)
-
-#### Why no R calls in SeisIO core?
-- Because R is not a fast language, performant R packages are thin wrapper functions to C++ and/or Java, which violates the rule "no external calls to wrapper functions to different languages".
+### Selecting the right data
+Whenever possible, SeisIO follows [SEED channel naming conventions](http://www.fdsn.org/seed_manual/SEEDManual_V2.4_Appendix-A.pdf) for the `:id` field of geophysical data. Thus, there are at least two ways to identify data channels of interest:
+1. Get the single-character "channel instrument code" for channel `i` with ``split(S.id[i], '.')[4][2]``; compare to [standard SEED instrument codes](https://ds.iris.edu/ds/nodes/dmc/data/formats/seed-channel-naming/).
+  - This can break for instruments whose IDs don't use the SEED naming standard; placing the `split` command in a `try/catch` loop is a useful precaution here.
+  - Channel code `Y` is ambiguous; beware of matching on it.
+2. Check `:units`. This can be problematic as a single check:
+  - Some sources report units in "counts" (e.g., "counts/s", "counts/s**2"), because the "stage zero" gain is also a unit conversion.
+  - Some units are ambiguous; for example, both displacement seismometers and GPS displacement have units of distance.
