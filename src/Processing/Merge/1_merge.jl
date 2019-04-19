@@ -219,7 +219,8 @@ function merge!(S::SeisData;
       end
       S.t[Ω] = combine_t_fields(S.t[subgrp], Δ)
       S.x[Ω] = X
-
+      note!(S, Ω, string("merge!, combined channels ", replace(repr(subgrp), ","=>""), " (N_sub = ",
+                          N_sub, ") into :t, :x"))
       append!(to_delete, rest)
     end
     # Done with SUBGRPS

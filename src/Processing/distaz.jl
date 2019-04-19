@@ -19,4 +19,6 @@ function distaz!(S::SeisEvent)
     S.data.misc[i]["az"] = D[i,2]
     S.data.misc[i]["baz"] = D[i,3]
   end
+  note!(S.data, "distaz!")
+  return nothing
 end

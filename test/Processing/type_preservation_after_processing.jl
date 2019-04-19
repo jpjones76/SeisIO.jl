@@ -1,9 +1,19 @@
 # resp
 printstyled("  Type preservation after processing\n", color=:light_green)
 
-for f in String["demean!", "detrend!", "merge!", "sync!", "taper!", "ungap!", "unscale!"]
+for f in String["demean!", "detrend!", "filtfilt!", "merge!", "sync!", "taper!", "ungap!", "unscale!"]
   printstyled(string("    ", f, "\n"), color=:light_green)
   S = randSeisData(s=1.0)
+  if f == "filtfilt!"
+    while true
+      i = findall(S.fs .< 30.0)
+      deleteat!(S, i)
+      if S.n > 0
+        break
+      end
+      S = randSeisData(s=1.0)
+    end
+  end
   T = [eltype(S.x[i]) for i=1:S.n]
   getfield(SeisIO, Symbol(f))(S)
   for i = 1:S.n

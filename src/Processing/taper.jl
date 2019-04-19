@@ -107,6 +107,10 @@ function taper!(C::SeisChannel; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10
       taper_seg!(Xr, W, L, μ, rev=true)
     end
   end
+  note!(C,  string( "taper!, ",
+                    "t_max = ", t_max, ", ",
+                    "α = ", α,  ", ",
+                    "N_min = ", N_min ) )
   return nothing
 end
 
@@ -205,6 +209,15 @@ function taper!(S::SeisData; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
       taper_seg!(Xl[j][k], W, L, means[j][k])
       taper_seg!(Xr[j][k], W, L, means[j][k], rev=true)
     end
+  end
+
+  # Annotate
+  for i = 1:S.n
+    S.fs[i] == 0.0 && continue
+    note!(S, i, string( "taper!, ",
+                        "t_max = ", t_max, ", ",
+                        "α = ", α,  ", ",
+                        "N_min = ", N_min ) )
   end
   return nothing
 end

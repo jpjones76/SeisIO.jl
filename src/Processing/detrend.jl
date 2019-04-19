@@ -27,7 +27,7 @@ function demean!(S::SeisData; irr::Bool=false)
         S.x[i][j] -= μ
       end
     end
-    note!(S, i, "demean! removed mean of S.x.")
+    note!(S, i, "demean!")
   end
   return nothing
 end
@@ -55,7 +55,7 @@ function demean!(C::SeisChannel)
       C.x[j] -= μ
     end
   end
-  note!(C, "demean! removed mean of C.x.")
+  note!(C, "demean!")
   return nothing
 end
 
@@ -87,7 +87,7 @@ function detrend!(S::SeisData; n::Int64=1, irr::Bool=false)
       broadcast!(-, x, x, polyval(p, τ[j]))
       S.x[i][j] = x
     end
-    note!(S, i, string("detrend! removed polynomial trend of degree ", n))
+    note!(S, i, string("detrend!, n = ", n))
   end
   return nothing
 end
@@ -117,7 +117,7 @@ function detrend!(C::SeisChannel; n::Int64=1)
     broadcast!(-, x, x, polyval(p, τ[j]))
     C.x[j] = x
   end
-  note!(C, string("detrend! removed polynomial trend of degree ", n))
+  note!(C, string("detrend!, n = ", n))
   return nothing
 end
 
