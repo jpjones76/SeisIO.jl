@@ -5,6 +5,7 @@ printstyled("  taper!\n", color=:light_green)
 # Unit tests
 # mktaper!
 N = 20
+fs = 100.0
 W = Array{Float32,1}(undef, N)
 L = length(W)
 mktaper!(W, N)
@@ -26,6 +27,10 @@ deleteat!(S, findall(S.fs.<1.0))
 taper!(S)
 
 # Test that tapering works on SeisChannel objects
+C = randSeisChannel(s=true)
+ungap!(C)
+taper!(C)
+
 C = randSeisChannel(s=true)
 taper!(C)
 
