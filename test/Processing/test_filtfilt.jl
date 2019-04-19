@@ -3,6 +3,12 @@ fs = 100.0
 nx = 10000000
 T = Float32
 
+function printcol(r::Float64)
+  return r ≥ 0.80 ? 1 :
+         r ≥ 0.60 ? 208 :
+         r ≥ 0.40 ? 184 :
+         r ≥ 0.20 ? 148 : 10
+end
 
 printstyled("  filtfilt!\n", color=:light_green)
 Δ = round(Int, 1.0e6/fs)
@@ -67,34 +73,29 @@ for i in (1, S.n)
   S.x[i] = randn(Float32, n_rep)
 end
 filtfilt!(S)
+GC.gc()
 
 printstyled("\n  Filters applied to SeisData:\n\n", color = :light_green)
-@printf("%12s | %10s | filt (MB) | data (MB) | ratio\n", "Name (dm=)", "Type (rt=)")
-@printf("%12s | %10s | --------- | --------- | -----\n", " -----------", "---------")
+@printf("%12s | %10s | time (ms) | filt (MB) | data (MB) | ratio\n", "Name (dm=)", "Type (rt=)")
+@printf("%12s | %10s | --------- | --------- | --------- | -----\n", " -----------", "---------")
 
-for j = 1:2
-  for dm in String["Butterworth", "Chebyshev1", "Chebyshev2", "Elliptic"]
-    for rt in String["Bandpass", "Bandstop", "Lowpass", "Highpass"]
-      S = randSeisData(24, s=1.0)
-      deleteat!(S, findall(S.fs.<40.0))
-      b = @allocated(filtfilt!(S, rt=rt, dm=dm))
-      s = sum([sizeof(S.x[i]) for i = 1:S.n])
-      r = b/s
-
-      if j == 2
-        @printf("%12s | %10s | %9.2f | %9.2f | ", dm, rt, b/1024^2, s/1024^2)
-        printstyled(@sprintf("%0.2f\n", r), color=(r ≥ 0.80 ? 1 :
-                                                   r ≥ 0.60 ? 208 :
-                                                   r ≥ 0.40 ? 184 :
-                                                   r ≥ 0.20 ? 148 : 10))
-      end
-    end
+for dm in String["Butterworth", "Chebyshev1", "Chebyshev2", "Elliptic"]
+  for rt in String["Bandpass", "Bandstop", "Lowpass", "Highpass"]
+    S = randSeisData(24, s=1.0)
+    deleteat!(S, findall(S.fs.<40.0))
+    (xx, t, b, xx, xx) = @timed filtfilt!(S, rt=rt, dm=dm)
+    s = sum([sizeof(S.x[i]) for i = 1:S.n])
+    r = b/s
+    @printf("%12s | %10s | %9.2f | %9.2f | %9.2f | ", dm, rt, t*1000, b/1024^2, s/1024^2)
+    printstyled(@sprintf("%0.2f\n", r), color=printcol(r))
+    GC.gc()
   end
 end
 
-printstyled(string("\n  Filters vs. naive filtfilt! on a long, gapless ", T, " SeisChannel:\n\n"), color = :light_green)
-@printf("%12s | %10s | filt (MB) | naive (MB) | data (MB) | ratio\n", "Name (dm=)", "Type (rt=)")
-@printf("%12s | %10s | --------- | ---------- | --------- | -----\n", " -----------", "---------")
+printstyled(string("\n  filtfilt! vs. naive_filtfilt! on a long, gapless ", T, " SeisChannel:\n\n"), color = :light_green)
+@printf("%12s | %10s |  data   |     filtfilt!    |  naive_filtfilt! |     ratio    |\n", "", "")
+@printf("%12s | %10s | sz (MB) | t (ms) | sz (MB) | t (ms) | sz (MB) | speed | size |\n", "Name (dm=)", "Type (rt=)")
+@printf("%12s | %10s | ------- | ------ | ------- | ------ | ------- | ----- | ---- |\n", " -----------", "---------")
 
 for dm in String["Butterworth", "Chebyshev1", "Chebyshev2", "Elliptic"]
   for rt in String["Bandpass", "Bandstop", "Lowpass", "Highpass"]
@@ -104,18 +105,21 @@ for dm in String["Butterworth", "Chebyshev1", "Chebyshev2", "Elliptic"]
     C.x = randn(T, nx)
     D = deepcopy(C)
 
-    b = @allocated(filtfilt!(C, rt=rt, dm=dm))
-    n = @allocated(naive_filt!(D, rt=rt, dm=dm))
-    s = sizeof(C.x)
-    p = b/s
-    q = n/s
-    r = p/q
+    # b = @allocated(filtfilt!(C, rt=rt, dm=dm))
+    (xx, tc, b, xx, xx) = @timed(filtfilt!(C, rt=rt, dm=dm))
+    (xx, td, n, xx, xx) = @timed(naive_filt!(D, rt=rt, dm=dm))
+    # n = @allocated(naive_filt!(D, rt=rt, dm=dm))
+    sz = sizeof(C.x)
+    p = b/sz
+    r = b/n
+    q = tc/td
 
-    @printf("%12s | %10s | %9.2f | %10.2f | %9.2f | ", dm, rt, b/1024^2, n/1024^2, s/1024^2)
-    printstyled(@sprintf("%0.2f\n", r), color=(r ≥ 0.80 ? 1 :
-                                               r ≥ 0.60 ? 208 :
-                                               r ≥ 0.40 ? 184 :
-                                               r ≥ 0.20 ? 148 : 10))
+    @printf("%12s | %10s | %7.2f | %6.2f | %7.2f | %6.2f | %7.2f | ", dm, rt, sz/1024^2, tc*1000.0, b/1024^2, td*1000.0, n/1024^2)
+    printstyled(@sprintf("%5.2f", q), color=printcol(q))
+    @printf(" | ")
+    printstyled(@sprintf("%4.2f", r), color=printcol(r))
+    @printf(" | \n")
+    GC.gc()
   end
 end
 println("")

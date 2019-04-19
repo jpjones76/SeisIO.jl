@@ -40,6 +40,10 @@ function equalize_resp!(S::SeisData, resp::Array{Complex{Float64},2};
       S.x[i] = X
       S.resp[i] = resp_new
       S.misc[i]["hc"] = hc_new
+      note!(S, i, string( "equalize_resp! changed :resp. Old response: ",
+                          "h = ", @sprintf("%.4f", h), ", ",
+                          "z = ", replace(repr(resp_old[:,1]), ","=>""), ", ",
+                          "p = ", replace(repr(resp_old[:,2]), ","=>"") ) )
     end
   end
   return nothing

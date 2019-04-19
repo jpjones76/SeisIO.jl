@@ -227,6 +227,15 @@ function filtfilt!(S::SeisData;
     for i = 1:nL
       do_filtfilt!(X[i], Y, yview, L[i], nx_last, b, a, zi, p)
     end
+
+    notestr = string("filtfilt!, fl = ", fl,
+                              ", fh = ", fh,
+                              ", np = ", np,
+                              ", rp = ", rp,
+                              ", rs = ", rs,
+                              ", rt = ", rt,
+                              ", dm = ", dm)
+    note!(S, grp, notestr)
   end
   return nothing
 end
@@ -282,6 +291,14 @@ function filtfilt!(C::SeisChannel;
       do_filtfilt!(X[i], Y, yview, L[i], nx_last, b, a, zi, p)
     end
   end
+  notestr = string("filtfilt!, fl = ", fl,
+                            ", fh = ", fh,
+                            ", np = ", np,
+                            ", rp = ", rp,
+                            ", rs = ", rs,
+                            ", rt = ", rt,
+                            ", dm = ", dm)
+  note!(C, notestr)
   return nothing
 end
 

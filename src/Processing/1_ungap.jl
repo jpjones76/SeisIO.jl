@@ -15,7 +15,9 @@ function ungap!(C::SeisChannel; m::Bool=true, tap::Bool=false)
   N = size(C.t,1)-2
   (N ≤ 0 || C.fs == 0) && return nothing
   gapfill!(C.x, C.t, C.fs, m=m)
-  note!(C, @sprintf("ungap! filled %i gaps (sum = %i microseconds)", N, sum(C.t[2:end-1,2])))
+  note!(C, @sprintf("%s filled %i gaps (sum = %i μs)",
+                    string("ungap!, m = ", m, ", tap = ", tap, ","),
+                    N, sum(C.t[2:end-1, 2])))
   C.t = [C.t[1:1,:]; [length(C.x) 0]]
   return nothing
 end
@@ -28,7 +30,9 @@ function ungap!(S::SeisData; m::Bool=true, tap::Bool=false)
     N = size(S.t[i],1)-2
     (N ≤ 0 || S.fs[i] == 0) && continue
     gapfill!(S.x[i], S.t[i], S.fs[i], m=m)
-    note!(S, i, @sprintf("ungap! filled %i gaps (sum = %i microseconds)", N, sum(S.t[i][2:end-1,2])))
+    note!(S, i, @sprintf("%s filled %i gaps (sum = %i μs)",
+                          string("ungap!, m = ", m, ", tap = ", tap, ","),
+                          N, sum(S.t[i][2:end-1, 2])))
     S.t[i] = [S.t[i][1:1,:]; [length(S.x[i]) 0]]
   end
   return nothing
