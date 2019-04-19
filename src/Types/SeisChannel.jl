@@ -90,7 +90,16 @@ function push!(S::SeisData, C::SeisChannel)
   return
 end
 
-isequal(S::SeisChannel, U::SeisChannel) = minimum([hash(getfield(S,i))==hash(getfield(U,i)) for i in datafields]::Array{Bool,1})
+function isequal(C::SeisChannel, D::SeisChannel)
+  q::Bool = true
+  for i in datafields
+    if i != :notes
+      q = min(q, hash(getfield(C,i))==hash(getfield(D,i)))
+    end
+  end
+  return q
+end
+
 ==(S::SeisChannel, U::SeisChannel) = isequal(S,U)::Bool
 
 """
