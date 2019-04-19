@@ -22,7 +22,9 @@ include("Types/SeisHdr.jl")
 include("Types/SeisEvent.jl")
 include("Types/note.jl")
 for i in readdir(path*"/Types/Methods")
-  include(joinpath("Types/Methods",i))
+  if endswith(i, ".jl")
+    include(joinpath("Types/Methods",i))
+  end
 end
 
 # Utilities that may require SeisIO types to work
