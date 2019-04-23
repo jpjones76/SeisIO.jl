@@ -1,15 +1,7 @@
-# Home of SEED data decoders
-function unpack!(S::SeedVol)
-  @inbounds for m = 0x01:0x01:S.u8[3]
-    S.k += 1
-    setindex!(S.x, >>(signed(<<(S.u[1], S.u8[1])), 0x20-S.u8[2]), S.k)
-    S.u8[1] += S.u8[2]
-  end
-end
+SEED_Char(io::IO, SEED::SeedVol) = replace(String(read(io, SEED.nx-SEED.u16[4], all=false)),
+                                            ['\r', '\0'] =>"")
 
-SEED_Char(io::IO) = replace(String(read(io, SEED.nx-SEED.u16[4], all=false)), ['\r', '\0'] =>"")
-
-function SEED_Unenc(io::IO)
+function SEED_Unenc!(io::IO, SEED::SeedVol)
   T::Type = if SEED.fmt == 0x01
       Int16
     elseif SEED.fmt == 0x03
@@ -21,17 +13,17 @@ function SEED_Unenc(io::IO)
     end
   nv = div(SEED.nx - SEED.u16[4], sizeof(T))
   for i = 1:nv
-    SEED.x[i] = Float64(SEED.swap ? ntoh(read(io, T)) : read(io, T))
+    SEED.x[i] = Float32(SEED.swap ? bswap(read(io, T)) : read(io, T))
   end
   SEED.k = nv
   return nothing
 end
 
-function SEED_Geoscope(io::IO)
+function SEED_Geoscope!(io::IO, SEED::SeedVol)
   mm = 0x0fff
   gm = SEED.fmt == 0x0d ? 0x7000 : 0xf000
   for i = 0x0001:SEED.n
-    x = SEED.swap ? ntoh(read(io, UInt16)) : read(io, UInt16)
+    x = SEED.swap ? bswap(read(io, UInt16)) : read(io, UInt16)
     m = Int32(x & mm)
     g = Int32((x & gm) >> 12)
     ex = -1*g
@@ -41,9 +33,9 @@ function SEED_Geoscope(io::IO)
   return nothing
 end
 
-function SEED_CDSN(io::IO)
+function SEED_CDSN!(io::IO, SEED::SeedVol)
   for i = 0x0001:SEED.n
-    x = SEED.swap ? ntoh(read(io, UInt16)) : read(io, UInt16)
+    x = SEED.swap ? bswap(read(io, UInt16)) : read(io, UInt16)
     m = Int32(x & 0x3fff)
     g = Int32((x & 0xc000) >> 14)
     if (g == 0)
@@ -62,9 +54,9 @@ function SEED_CDSN(io::IO)
   return nothing
 end
 
-function SEED_SRO(io::IO)
+function SEED_SRO!(io::IO, SEED::SeedVol)
   for i = 0x0001:SEED.n
-    x = SEED.swap ? ntoh(read(io, UInt16)) : read(io, UInt16)
+    x = SEED.swap ? bswap(read(io, UInt16)) : read(io, UInt16)
     m = Int32(x & 0x0fff)
     g = Int32((x & 0xf000) >> 12)
     if m > 0x07ff
@@ -77,9 +69,9 @@ function SEED_SRO(io::IO)
   return nothing
 end
 
-function SEED_DWWSSN(io::IO)
+function SEED_DWWSSN!(io::IO, SEED::SeedVol)
   for i = 0x0001:SEED.n
-    x = signed(UInt32(SEED.swap ? ntoh(read(io, UInt16)) : read(io, UInt16)))
+    x = signed(UInt32(SEED.swap ? bswap(read(io, UInt16)) : read(io, UInt16)))
     SEED.x[i] = x > 32767 ? x - 65536 : x
   end
   SEED.k = SEED.n
@@ -87,92 +79,149 @@ function SEED_DWWSSN(io::IO)
 end
 
 # Steim1 or Steim2
-function SEED_Steim(io::IO)
-  nf = div(SEED.nx-SEED.u16[4], 0x0040)
-  SEED.k = 0
-  @inbounds for i = 1:nf
-    for j = 1:16
-      SEED.u[1] = SEED.xs ? ntoh(read(io, UInt32)) : read(io, UInt32)
-      if j == 1
-        SEED.u[2] = copy(SEED.u[1])
-      end
-      SEED.u[3] = (SEED.u[2] >> SEED.steimvals[j]) & 0x00000003
-      if SEED.u[3] == 0x00000001
-        SEED.u8[1] = 0x00
-        SEED.u8[2] = 0x08
-        SEED.u8[3] = 0x04
-      elseif SEED.fmt == 0x0a
-        SEED.u8[1] = 0x00
-        if SEED.u[3] == 0x00000002
-          SEED.u8[2] = 0x10
-          SEED.u8[3] = 0x02
-        elseif SEED.u[3] == 0x00000003
-          SEED.u8[2] = 0x20
-          SEED.u8[3] = 0x01
-        end
-      else
-        dd = SEED.u[1] >> 0x0000001e
-        if SEED.u[3] == 0x00000002
-          SEED.u8[1] = 0x02
-          if dd == 0x00000001
-            SEED.u8[2] = 0x1e
-            SEED.u8[3] = 0x01
-          elseif dd == 0x00000002
-            SEED.u8[2] = 0x0f
-            SEED.u8[3] = 0x02
-          elseif dd == 0x00000003
-            SEED.u8[2] = 0x0a
-            SEED.u8[3] = 0x03
-          end
-        elseif SEED.u[3] == 0x00000003
-          if dd == 0x00000000
-            SEED.u8[1] = 0x02
-            SEED.u8[2] = 0x06
-            SEED.u8[3] = 0x05
-          elseif dd == 0x00000001
-            SEED.u8[1] = 0x02
-            SEED.u8[2] = 0x05
-            SEED.u8[3] = 0x06
-          else
-            SEED.u8[1] = 0x04
-            SEED.u8[2] = 0x04
-            SEED.u8[3] = 0x07
-          end
-        end
-      end
-      if SEED.u[3] != 0x00000000
-        unpack!(SEED)
-      end
-      if i == 1
-        if j == 2
-          SEED.x0 = Float64(signed(SEED.u[1]))
-        elseif j == 3
-          SEED.xn = Float64(signed(SEED.u[1]))
-        end
-      end
+function SEED_Steim!(io::IO, SEED::SeedVol)
+  x = getfield(SEED, :x)
+  buf = getfield(SEED, :buf)
+  ff = getfield(SEED, :x32)
+  nb = getfield(SEED, :nx) - getindex(getfield(SEED, :u16), 4)
+  nc = Int64(div(nb, 0x0040))
+  ni = div(nb, 0x0004)
+  readbytes!(io, buf, nb)
+
+  # Parse buf as UInt32s
+  if ni > lastindex(ff)
+    resize!(ff, ni)
+  end
+  yy = zero(UInt32)
+  if getfield(SEED, :xs) == true
+    @inbounds for ib = 1:ni
+      yy  = UInt32(buf[4*ib-3]) << 24
+      yy |= UInt32(buf[4*ib-2]) << 16
+      yy |= UInt32(buf[4*ib-1]) << 8
+      yy |= UInt32(buf[4*ib])
+      ff[ib] = yy
+    end
+  else
+    @inbounds for il = 1:ni
+      yy  = UInt32(buf[4*il]) << 24
+      yy |= UInt32(buf[4*il-1]) << 16
+      yy |= UInt32(buf[4*il-2]) << 8
+      yy |= UInt32(buf[4*il-3])
+      ff[il] = yy
     end
   end
 
-  n = SEED.k
-  if SEED.wo != 0x01
-    SEED.x[1:n] = reverse(SEED.x[1:n])
+  k = zero(Int64)
+  x0 = zero(Float32)
+  xn = zero(Float32)
+  a = zero(UInt8)
+  b = zero(UInt8)
+  c = zero(UInt8)
+  d = zero(UInt8)
+  fq = zero(Float32)
+  m = zero(UInt8)
+  p = zero(UInt32)
+  q = zero(Int32)
+  u = zero(UInt32)
+  y = zero(UInt32)
+  z = zero(UInt32)
+  χ = zero(UInt32)
+  r = zero(Int64)
+  for i = 1:nc
+    z = getindex(ff, 1+r)
+    for j = 1:16
+      χ = getindex(ff, j+r)
+      y = (z >> steim[j]) & 0x00000003
+      if y == 0x00000001
+        a = 0x00
+        b = 0x08
+        c = 0x04
+      elseif SEED.fmt == 0x0a
+        a = 0x00
+        if y == 0x00000002
+          b = 0x10
+          c = 0x02
+        elseif y == 0x00000003
+          b = 0x20
+          c = 0x01
+        end
+      else
+        p = χ >> 0x0000001e
+        if y == 0x00000002
+          a = 0x02
+          if p == 0x00000001
+            b = 0x1e
+            c = 0x01
+          elseif p == 0x00000002
+            b = 0x0f
+            c = 0x02
+          elseif p == 0x00000003
+            b = 0x0a
+            c = 0x03
+          end
+        elseif y == 0x00000003
+          if p == 0x00000000
+            a = 0x02
+            b = 0x06
+            c = 0x05
+          elseif p == 0x00000001
+            a = 0x02
+            b = 0x05
+            c = 0x06
+          else
+            a = 0x04
+            b = 0x04
+            c = 0x07
+          end
+        end
+      end
+      if y != 0x00000000
+        u = χ << a
+        m = zero(UInt8)
+        d = 0x20 - b
+        while m < c
+          k = k + 1
+          q = signed(u)
+          q >>= d
+          fq = Float32(q)
+          setindex!(x, fq, k)
+          m = m + 0x01
+          u <<= b
+        end
+      end
+      if i == 1
+        if j == 2
+          x0 = Float32(signed(χ))
+        elseif j == 3
+          xn = Float32(signed(χ))
+        end
+      end
+    end
+    r = r+16
   end
-  SEED.x[1] = SEED.x0
+
+  if SEED.wo != 0x01
+    vx = view(getfield(SEED, :x), 1:k)
+    reverse!(vx)
+  end
+  setindex!(x, x0, 1)
 
   # Cumsum by hand
-  xa = SEED.x0
-  @inbounds for i = 2:n
-    xa += SEED.x[i]
-    SEED.x[i] = xa
+  xa = copy(x0)
+  @inbounds for i1 = 2:k
+    xa = xa + getindex(x, i1)
+    setindex!(x, xa, i1)
   end
 
   # Check data values
-  if abs(SEED.x[n] - SEED.xn) > eps()
-    println(stdout, string("RDMSEED: data integrity -- Steim-", SEED.fmt - 0x09, " sequence #", String(SEED.hdr[1:6]), " integrity check failed, last_data=", SEED.x[n], ", should be xn=", SEED.xn))
+  if isapprox(getindex(x, k), xn) == false
+    println(stdout, string("RDMSEED: data integrity -- Steim-",
+                            getfield(SEED, :fmt) - 0x09, " sequence #",
+                            String(copy(getfield(SEED, :seq))),
+                            " integrity check failed, last_data=",
+                            getindex(getfield(SEED, :x), k),
+                            ", should be xn=", xn))
   end
+  setfield!(SEED, :k, k)
   return nothing
-end
-
-function SEED_DecErr(io::IO)
-  error(string("No decoder for data format ", SEED.fmt, "!"))
 end
