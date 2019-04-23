@@ -1,3 +1,12 @@
+### 2019-04-23
+* Performance improvements (speed, memory)
+  + `endtime`, `j2md`, `md2j` should be noticeably faster and more efficient
+  + SEED improvements:
+    - SEED file reads and data downloads now create Float32 data arrays.
+    - Precision warnings are possible with SEED volumes whose data records use uncompressed Float64 encoding, but SEED volumes that do this are very rare.
+* Consistency changes:
+  + `SeisData(n)` now initializes `n` arrays of Float32 precision in `:x`, rather than Float64
+
 ### 2019-04-19
 * Information logged to `:notes` has been standardized.
   + Format: `time: function, options/KWs, human-readable description`
