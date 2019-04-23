@@ -66,7 +66,7 @@ mutable struct SeisData
       S.notes[i]  = Array{String,1}(undef,0)                # notes
       S.misc[i]   = Dict{String,Any}()                      # misc
       S.t[i]      = Array{Int64,2}(undef,0,2)               # t
-      S.x[i]      = Array{Float64,1}(undef,0)               # x
+      S.x[i]      = Array{Float32,1}(undef,0)               # x
       S.loc[i]    = Array{Float64,1}(undef,0)               # loc
       S.resp[i]   = Array{Complex{Float64},2}(undef,0,2)    # resp
     end
