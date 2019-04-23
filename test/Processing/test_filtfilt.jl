@@ -78,7 +78,19 @@ end
 filtfilt!(S)
 GC.gc()
 
-printstyled("\n  Filters applied to SeisData:\n\n", color = :light_green)
+printstyled("  Checking that all filters work\n", color=:light_green)
+for dm in String["Butterworth", "Chebyshev1", "Chebyshev2", "Elliptic"]
+  for rt in String["Bandpass", "Bandstop", "Lowpass", "Highpass"]
+    S = randSeisData(3, s=1.0)
+    while maximum(S.fs) < 40.0
+      S = randSeisData(3, s=1.0)
+    end
+    deleteat!(S, findall(S.fs.<40.0))
+    filtfilt!(S, rt=rt, dm=dm)
+  end
+end
+
+printstyled("\n  Test filters on SeisData:\n\n", color = :light_green)
 @printf("%12s | %10s | time (ms) | filt (MB) | data (MB) | ratio\n", "Name (dm=)", "Type (rt=)")
 @printf("%12s | %10s | --------- | --------- | --------- | -----\n", " -----------", "---------")
 
@@ -95,7 +107,7 @@ for dm in String["Butterworth", "Chebyshev1", "Chebyshev2", "Elliptic"]
   end
 end
 
-printstyled(string("\n  filtfilt! vs. naive_filtfilt! on a long, gapless ", T, " SeisChannel:\n\n"), color = :light_green)
+printstyled(string("\n  Test filters on a long, gapless ", T, " SeisChannel:\n\n"), color = :light_green)
 @printf("%12s | %10s |  data   |     filtfilt!    |  naive_filtfilt! |     ratio    |\n", "", "")
 @printf("%12s | %10s | sz (MB) | t (ms) | sz (MB) | t (ms) | sz (MB) | speed | size |\n", "Name (dm=)", "Type (rt=)")
 @printf("%12s | %10s | ------- | ------ | ------- | ------ | ------- | ----- | ---- |\n", " -----------", "---------")
