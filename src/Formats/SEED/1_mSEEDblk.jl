@@ -178,12 +178,11 @@ end
 
 # [1000] Data Only SEED Blockette (8 bytes)
 function blk_1000(S::SeisIO.SeisData, sid::IO, c::Int64)
-  SEED.fmt = read(sid, UInt8)
-  SEED.wo  = read(sid, UInt8)
-  SEED.lx  = read(sid, UInt8)
+  SEED.fmt  = read(sid, UInt8)
+  SEED.wo   = read(sid, UInt8)
+  lx        = read(sid, UInt8)
   skip(sid, 1)
-
-  SEED.nx   = UInt16(2^SEED.lx)
+  SEED.nx   = 2^lx
   SEED.xs   = ((SEED.swap == true) && (SEED.wo == 0x01))
   return 0x0008
 end

@@ -13,7 +13,7 @@ S = readmseed(string(path, "/SampleFiles/test.mseed"), v=0)
 @test ≈(S.x[1][1:5], [ 2787, 2776, 2774, 2780, 2783 ])
 
 if safe_isdir(path*"/SampleFiles/Restricted")
-  printstyled("    file reads with many time gaps\n", color=:light_green)
+  printstyled("    mseed test files (time gaps, blockette types)\n", color=:light_green)
 
   open("runtests.log", "a") do out
     redirect_stdout(out) do
