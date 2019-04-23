@@ -11,9 +11,13 @@ const bad_chars = Dict{String,Array{UInt8,1}}(
                0x2b, 0x2c, 0x2d, 0x2e, 0x2f, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
                0x40, 0x5b, 0x5c, 0x5d, 0x5e, 0x60, 0x7b, 0x7c, 0x7d, 0x7e, 0x7f] )
 const datafields = [:id, :name, :loc, :fs, :gain, :resp, :units, :src, :notes, :misc, :t, :x]
+const days_per_month = Int32[31,28,31,30,31,30,31,31,30,31,30,31]
+const days_per_month_leap = Int32[31,29,31,30,31,30,31,31,30,31,30,31]
 const dtconst = 62135683200000
 const first_start = -62167219200
 const hdrfields = [:id, :ot, :loc, :mag, :int, :mt, :np, :pax, :src, :notes, :misc]
+const id_positions = Int8[11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+const id_spacer = 0x2e
 const last_end = 253402257599
 const show_os = 8
 const sac_nul_f = -12345.0f0
@@ -21,6 +25,7 @@ const sac_nul_i = Int32(-12345)
 const sac_nul_s = "-12345  "
 const seisio_file_begin = UInt8[0x53, 0x45, 0x49, 0x53, 0x49, 0x4f]
 const sep = Base.Filesystem.pathsep()
+const steim = reverse(collect(0x00000000:0x00000002:0x0000001e), dims=1)
 const sμ = 1000000.0
 const vJulia = Float32(Meta.parse(string(VERSION.major,".",VERSION.minor)))
 const vSeisIO = Float32(0.4)
