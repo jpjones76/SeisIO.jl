@@ -26,22 +26,32 @@ tnote(s::String) = string(timestamp(), ": ", s)
 Convert Julian day j of year y to month m, day d
 """
 function j2md(y::T, j::T) where T<:Integer
-  m = zero(T)
-  d = one(T)
-  if j > T(31)
-    D = Array{T,1}([31,28,31,30,31,30,31,31,30,31,30,31])
-    ((y%T(400) == T(0)) || (y%T(4) == T(0) && y%T(100) != T(0))) && (D[2]+=T(1))
-    z = zero(T)
+  if T != Int32
+    y = Int32(y)
+    j = Int32(j)
+  end
+  z = zero(Int32)
+  o = one(Int32)
+  m = z
+  d = o
+  if j > Int32(31)
+    if j > 59 && ((y % Int32(400) == z) ||
+                  (y % Int32(4)   == z &&
+                   y % Int32(100) != z))
+      D = days_per_month_leap
+    else
+      D = days_per_month
+    end
     while j > z
       d = j
-      m += one(T)
+      m += o
       j -= D[m]
     end
   else
-    m = one(T)
-    d = T(j)
+    m = o
+    d = j
   end
-  return m, d
+  return m,d
 end
 
 """
@@ -50,11 +60,26 @@ end
 Convert month `m`, day `d` of year `y` to Julian day (day of year)
 """
 function md2j(y::T, m::T, d::T) where T<:Integer
-  D = Array{T,1}([31,28,31,30,31,30,31,31,30,31,30,31])
-  ((y%400 == 0) || (y%4 == 0 && y%100 != 0)) && (D[2]+=1)
-  return (sum(D[1:m-1]) + d)
+  if T != Int32
+    y = Int32(y)
+    m = Int32(m)
+    d = Int32(d)
+  end
+  z = zero(Int32)
+  j = sum(days_per_month[1:m-1]) + d
+  if m > 2 && ((y % Int32(400) == z) ||
+               (y % Int32(4)   == z &&
+                y % Int32(100) != z))
+    j+=1
+  end
+  return T(j)
 end
 md2j(y::AbstractString, m::AbstractString, d::AbstractString) = md2j(parse(Int, y), parse(Int, m), parse(Int, d))
+
+function y2μs(y::T) where T<:Integer
+  y = Int64(y)-1
+  return 86400000000 * (y*365 + div(y,4) - div(y,100) + div(y,400)) - 62135596800000000
+end
 
 """
     d0, d1 = parsetimewin(s, t)
@@ -124,10 +149,22 @@ function t_collapse(tt::Array{Int64,1}, fs::Float64)
   return t
 end
 
-function endtime(t::Array{Int64,2}, fs::Float64)
-  L = size(t,1)
-  return L == 0 ? 0 : getindex(sum(t, dims=1),2) + (t[L,1]-1)*round(Int64, 1.0/(fs*μs))
+function endtime(t::Array{Int64,2}, Δ::Int64)
+  if isempty(t)
+    t_end = 0
+  else
+    L = size(t,1)
+    t_end = (t[L,1]-1)*Δ
+    if L > 2
+      t_end += getindex(sum(t, dims=1),2)
+    else
+      t_end += t[1,2]
+    end
+    # t_end = getindex(sum(t, dims=1),2) + (t[L,1]-1)*Δ
+  end
+  return t_end
 end
+endtime(t::Array{Int64,2}, fs::Float64) = endtime(t, round(Int64, 1.0/(fs*μs)))
 
 function t_win(T::Array{Int64,2}, Δ::Int64)
   n = size(T,1)-1
