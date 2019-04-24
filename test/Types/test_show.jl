@@ -22,5 +22,6 @@ open("runtests.log", "a") do out
     summary(randSeisHdr())
 
     chanspec()
+    mseed_support()
   end
 end
