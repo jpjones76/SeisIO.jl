@@ -66,6 +66,7 @@ d0, d1 = parsetimewin(s, t)
 # t_collapse, t_expand
 T = Int64[1 1451606400000000; 100001 30000000; 250001 12330000; 352303 99000000; 360001 0]
 fs = 100.0
+Δ = round(Int64, sμ/fs)
 t_long = t_expand(T, fs)
 @test ≈(T, t_collapse(t_long, fs))
 
@@ -74,7 +75,12 @@ fs1 = 0.0
 @test ≈(T1, t_collapse(t_expand(T1, fs1), fs1))
 
 # endtime
+printstyled(stdout, "    endtime\n", color=:light_green)
 @test endtime(T, fs) == last(t_long)
+@test endtime(T, Δ) == endtime(T, fs)
+@test endtime(Array{Int64,2}(undef, 0, 0), Δ) == 0
+@test endtime(Array{Int64,2}(undef, 0, 0), 100Δ) == 0
+@test endtime(Array{Int64,2}(undef, 0, 0), fs) == 0
 
 printstyled(stdout, "    t_win, w_time\n", color=:light_green)
 printstyled(stdout, "      Faithful representation of gaps\n", color=:light_green)
