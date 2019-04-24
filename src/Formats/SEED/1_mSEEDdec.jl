@@ -1,21 +1,53 @@
-SEED_Char(io::IO, SEED::SeedVol) = replace(String(read(io, SEED.nx-SEED.u16[4], all=false)),
+SEED_Char(io::IO, SEED::SeedVol, nb::UInt16) = replace(String(read(io, nb, all=false)),
                                             ['\r', '\0'] =>"")
 
-function SEED_Unenc!(io::IO, SEED::SeedVol)
+# This gets special handling as Float64 arrays are assumed in S.x[c]
+function SEED_Float64!(io::IO, S::SeisData, c::Int64, xi::Int64, nb::UInt16)
+  buf = getfield(SEED, :buf)
+  x = getindex(getfield(S, :x), c)
+  readbytes!(io, buf, nb)
+  nx = div(nb, 8)
+  if getfield(SEED, :xs) == true
+    j = xi
+    @inbounds for i = 1:nx
+      j += 1
+      y  = UInt32(buf[8*i-7]) << 56
+      y |= UInt32(buf[8*i-6]) << 48
+      y |= UInt32(buf[8*i-5]) << 40
+      y |= UInt32(buf[8*i-4]) << 32
+      y |= UInt32(buf[8*i-3]) << 24
+      y |= UInt32(buf[8*i-2]) << 16
+      y |= UInt32(buf[8*i-1]) << 8
+      y |= UInt32(buf[8*i])
+      x[j] = y
+    end
+  else
+    xr = reinterpret(Float64, buf)
+    copyto!(x, xi+1, xr, 1, nx)
+  end
+  setfield!(SEED, :k, Int64(nx))
+  return nothing
+end
+
+function SEED_Unenc!(io::IO, S::SeisData, c::Int64, xi::Int64, nb::UInt16)
+  buf = getfield(SEED, :buf)
+  x = getindex(getfield(S, :x), c)
+  readbytes!(io, buf, nb)
   T::Type = if SEED.fmt == 0x01
       Int16
     elseif SEED.fmt == 0x03
       Int32
     elseif SEED.fmt == 0x04
       Float32
-    elseif SEED.fmt == 0x05
-      Float64
     end
-  nv = div(SEED.nx - SEED.u16[4], sizeof(T))
-  for i = 1:nv
-    SEED.x[i] = Float32(SEED.swap ? bswap(read(io, T)) : read(io, T))
+  if getfield(SEED, :swap) == true
+    xr = bswap.(reinterpret(T, buf))
+  else
+    xr = reinterpret(T, buf)
   end
-  SEED.k = nv
+  nx = div(nb, sizeof(T))
+  copyto!(x, xi+1, xr, 1, nx)
+  setfield!(SEED, :k, Int64(nx))
   return nothing
 end
 
@@ -79,11 +111,10 @@ function SEED_DWWSSN!(io::IO, SEED::SeedVol)
 end
 
 # Steim1 or Steim2
-function SEED_Steim!(io::IO, SEED::SeedVol)
+function SEED_Steim!(io::IO, SEED::SeedVol, nb::UInt16)
   x = getfield(SEED, :x)
   buf = getfield(SEED, :buf)
   ff = getfield(SEED, :x32)
-  nb = getfield(SEED, :nx) - getindex(getfield(SEED, :u16), 4)
   nc = Int64(div(nb, 0x0040))
   ni = div(nb, 0x0004)
   readbytes!(io, buf, nb)
