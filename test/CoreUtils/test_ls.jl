@@ -47,7 +47,7 @@ if safe_isfile(cfile)
                 "/SampleFiles/*",
                 "/SampleFiles/Restricted/2014092709*cnt"
               ]
-  T_expect =  [63, 124, 60]
+  T_expect =  [63, 126, 60]
 
   # Test that ls finds the same number of files as `ls -1`
   for (n,v) in enumerate(T)
@@ -62,4 +62,9 @@ if safe_isfile(cfile)
   @test change_sep(ls(T[3])) == change_sep(regex_find("SampleFiles", r"Restricted/2014092709.*cnt$"))
 else
   printstyled("  extended ls tests skipped. (files not found; is this Appveyor?)\n", color=:green)
+end
+
+if Sys.iswindows()
+  @test safe_isfile("http://google.com") == false
+  @test safe_isdir("http://google.com") == false
 end
