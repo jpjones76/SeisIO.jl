@@ -3,17 +3,22 @@ import SeisIO: getpf
 uwf1 = joinpath(path, "SampleFiles/99011116541")
 uwf2 = joinpath(path, "SampleFiles/94100613522o")
 uwf3 = joinpath(path, "SampleFiles/02062915175o")
+uwf4 = joinpath(path, "SampleFiles/00012502123W")
+uwf5 = joinpath(path, "SampleFiles/02062915205o")
 
 froot = splitdir(uwf1)[2]
 @test getpf(froot*"xxx", collect(UInt8, 0x61:0x7a)) == froot*"xxx\0"
 
 printstyled("  UW\n", color=:light_green)
 
-printstyled("    data files\n", color=:light_green)
 
 # Can we read from pickfile only? datafile only?
+printstyled("    read (pickfile, datafile) from pickfile name\n", color=:light_green)
 W = readuw(uwf1*"o")
+
+printstyled("    read (pickfile, datafile) from datafile name\n", color=:light_green)
 W = readuw(uwf1*"W")
+
 for i in ["UW.WWVB..TIM","UW.TCG..TIM","UW.TDH..EHZ","UW.VLM..EHZ"]
   @test !isempty(findall(W.data.id.==i))
   @test !isempty(findall(W.data.name.==i))
@@ -22,6 +27,7 @@ for i in ["UW.WWVB..TIM","UW.TCG..TIM","UW.TDH..EHZ","UW.VLM..EHZ"]
 end
 
 # Can we read from filename stub?
+printstyled("    read (pickfile, datafile) from filename stub\n", color=:light_green)
 W = readuw(uwf1)
 @test W.hdr.mag[1] == 3.0f0
 @test occursin("99011116541o", W.hdr.src)
@@ -39,7 +45,7 @@ i = findfirst(W.data.id.=="UW.VFP..EHZ")
 i = findfirst(W.data.id.=="UW.VLM..EHZ")
 @test ≈(W.data.misc[i]["t_s"][1], 24.236)
 
-printstyled("    pick files\n", color=:light_green)
+printstyled("    pickfile handling\n", color=:light_green)
 
 # What about when there is no data file?
 W = readuw(uwf2)
@@ -49,3 +55,9 @@ W = readuw(uwf2)
 
 W = readuw(uwf3)
 @test W.hdr.id == 41568
+
+printstyled("    data file with a time correction structure\n", color=:light_green)
+W = readuw(uwf4)
+
+printstyled("    pick file with nonnumeric error info\n", color=:light_green)
+W = readuw(uwf5)

@@ -153,7 +153,11 @@ function uwpf(pickfile::String, v::Int)
       if k == "FIXXYZT"
         D[k] = s
       elseif !isempty(s)
+        try
           D[k] = Base.parse(j == 5 ? Int32 : Float32, s)
+        catch
+          D[k*"_err"] = s
+        end
       end
     end
   end
@@ -266,8 +270,8 @@ function uwdf(datafile::String; v=0::Int)
           push!(chno, read(fid, Int32))
           push!(corr, read(fid, Int32))
         end
-        bswap && [chno[n] = bswap(chno[n]) for n in chno]
-        bswap && [corr[n] = bswap(corr[n]) for n in chno]
+        chno = bswap.(chno)
+        corr = bswap.(corr)
         chno .+= 1
         tc_os = -8*nstructs
         seek(fid, fpos)
