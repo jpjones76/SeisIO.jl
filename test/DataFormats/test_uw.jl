@@ -57,7 +57,7 @@ W = readuw(uwf3)
 @test W.hdr.id == 41568
 
 printstyled("    data file with a time correction structure\n", color=:light_green)
-W = readuw(uwf4)
+W = readuw(uwf4, v=2)
 
 printstyled("    pick file with nonnumeric error info\n", color=:light_green)
-W = readuw(uwf5)
+W = readuw(uwf5, v=2)
