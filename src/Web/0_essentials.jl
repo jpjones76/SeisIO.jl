@@ -101,16 +101,12 @@ function track_off!(S::SeisData)
   u = falses(S.n)
   (ids, nxs) = S.misc[k]["track"]
   for (n, id) in enumerate(S.id)
-    if id in ids == false
+    j = findfirst(x -> x == id, ids)
+    if j == nothing
       u[n] = true
     else
-      j = findfirst(x -> x == id, ids)
-      if j == nothing
+      if nxs[j] != length(S.x[n])
         u[n] = true
-      else
-        if nxs[j] != length(S.x[n])
-          u[n] = true
-        end
       end
     end
   end
