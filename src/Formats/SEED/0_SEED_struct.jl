@@ -1,9 +1,3 @@
-# SeedDef: default SEED values
-struct SeedDef
-  nx::Int
-  SeedDef() = new(8640000)
-end
-
 # [201] Murdock Event Detection Blockette (60 bytes)
 mutable struct Blk201
   sig::Array{Float32,1}
@@ -112,8 +106,8 @@ mutable struct SeedVol
   dt::Float64
   r1::Int16
   r2::Int16
-  r1_last::Int16
-  r2_last::Int16
+  r1_old::Int16
+  r2_old::Int16
   Δ::Int64
   xs::Bool
   k::Int
@@ -126,7 +120,7 @@ mutable struct SeedVol
   buf::Array{UInt8,1}       # Buffer for reading steim data
 
   # Defaults
-  def::SeedDef
+  # def::SeedDef
 
   # Blockette containers
   B201::Blk201
@@ -156,8 +150,8 @@ mutable struct SeedVol
         0.0,                                # dt::Float64
         zero(Int16),                        # r1::Int16
         zero(Int16),                        # r2::Int16
-        zero(Int16),                        # r1_last::Int16
-        zero(Int16),                        # r2_last::Int16
+        zero(Int16),                        # r1_old::Int16
+        zero(Int16),                        # r2_old::Int16
         0,                                  # Δ::Int64
         false,                              # xs::Bool
         0,                                  # k::Int
@@ -168,9 +162,6 @@ mutable struct SeedVol
         Array{UInt8,1}(undef, 4),           # u8::Array{UInt8,1}
         Array{UInt32,1}(undef, 16384),      # x32::Array{UInt32,1}
         Array{UInt8,1}(undef, 65536),       # buf::Array{UInt8,1}
-
-        # structure to hold SEED defaults
-        SeedDef(),                          # def::SeedDef
 
         # blockette fields
         Blk201(),                           # Blk201:: Blk201
