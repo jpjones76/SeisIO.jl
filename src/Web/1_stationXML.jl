@@ -25,6 +25,24 @@ function LightXML_str!(v::String, x::LightXML.XMLElement, s::String)
 end
 LightXML_float!(v::Float64, x::LightXML.XMLElement, s::String) = Float64(Meta.parse(LightXML_str!(string(v), x, s)))
 
+function FDSN_ot(ot_str::String)
+  d = DateTime("1970-01-01T00:00:00")
+  try
+    d = DateTime(ot_str)
+  catch
+    ot_arr = split(ot_str, ['-','T',':'], limit=6)
+    (length(ot_arr) == 6) || (return d)
+    yyyy = parse(Int, ot_arr[1])
+    MM = parse(Int, ot_arr[2])
+    DD = parse(Int, ot_arr[3])
+    hh = parse(Int, ot_arr[4])
+    mm = parse(Int, ot_arr[5])
+    ss = parse(Int, ot_arr[6][1:2])
+    return DateTime(yyyy, MM, DD, hh, mm, ss)
+  end
+  return d
+end
+
 # FDSN event XML handler
 function FDSN_event_xml(string_data::String)
   xevt = LightXML.parse_string(string_data)
@@ -41,7 +59,8 @@ function FDSN_event_xml(string_data::String)
               catch
                 0
               end )
-    ot[i] = DateTime(LightXML_str!("1970-01-01T00:00:00", evt, "origin/time/value"))
+    ot_str = LightXML_str!("1970-01-01T00:00:00", evt, "origin/time/value")
+    ot[i] = FDSN_ot(ot_str)
     loc[1,i] = LightXML_float!(0.0, evt, "origin/latitude/value")
     loc[2,i] = LightXML_float!(0.0, evt, "origin/longitude/value")
     loc[3,i] = LightXML_float!(0.0, evt, "origin/depth/value")/1.0e3
