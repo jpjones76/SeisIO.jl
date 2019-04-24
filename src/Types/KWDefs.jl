@@ -26,6 +26,8 @@ struct KWDefs
   mag::Array{Float64,1}
   nd::Int64
   nev::Int64
+  nx_add::Int64
+  nx_new::Int64
   opts::String
   pha::String
   rad::Array{Float64,1}
@@ -47,31 +49,36 @@ keyword isn't specified.
 
 ### Keywords
 
-| KW   | Default    | Allowed Data Types     | Meaning                        |
-|------|:-----------|:-----------------------|:-------------------------------|
-| evw  | [600.0,    | Array{Float64,1}       | search for events from `ot-t1` |
-|      |  600.0]    |                        |   to `ot+t2`                   |
-| fmt  | "miniseed" | String                 | request data format            |
-| mag  | [6.0, 9.9] | Array{Float64,1}       | search magitude range          |
-| nd   | 1          | Int64                  | number of days per subrequest  |
-| nev  | 1          | Int                    | number of events per query     |
-| opts | ""         | String                 | user-specified options[^1]     |
-| pha  | "P"        | String                 | phases to get (comma-separated |
-|      |            |                        |    list; use "ttall" for all)  |
-| rad  | []         | Array{Float64,1}       | radius search: `[center_lat,`  |
-|      |            |                        |    `center_lon, r_min, r_max]` |
-|      |            |                        |    in decimal degrees (°)      |
-| reg  | []         | Array{Float64,1}       | geographic search region:      |
-|      |            |                        |    `[min_lat, max_lat,`        |
-|      |            |                        |     `min_lon, max_lon,`        |
-|      |            |                        |    `min_dep, max_dep]`         |
-|      |            |                        |    lat, lon in degrees (°)     |
-|      |            |                        |    dep in km with down = +     |
-| si   | true       | Bool                   | autofill request station info? |
-| to   | 30         | Int                    | timeout (s) for web requests   |
-| v    | 0          | Int                    | verbosity                      |
-| w    | false      | Bool                   | write requests to disc?        |
-| y    | false      | Bool                   | sync after web requests?       |
+| KW       | Default    | Allowed Data Types | Meaning                        |
+|----------|:-----------|:-------------------|:-------------------------------|
+| evw      | [600.0,    | Array{Float64,1}   | search for events from `ot-t1` |
+|          |  600.0]    |                    |   to `ot+t2`                   |
+| fmt      | "miniseed" | String             | request data format            |
+| mag      | [6.0, 9.9] | Array{Float64,1}   | search magitude range          |
+| nd       | 1          | Int64              | number of days per subrequest  |
+| nev      | 1          | Int64              | number of events per query     |
+| nx_add   | 360000     | Int64              | minimum length increase of an  |
+|          |            |                    |    undersized data array       |
+| nx_new   | 8640000    | Int64              | number of samples allocated    |
+|          |            |                    |    for a new data channel      |
+| opts     | ""         | String             | user-specified options[^1]     |
+| pha      | "P"        | String             | phases to get (comma-separated |
+|          |            |                    |    list; use "ttall" for all)  |
+| rad      | []         | Array{Float64,1}   | radius search: `[center_lat,`  |
+|          |            |                    |    `center_lon, r_min, r_max]` |
+|          |            |                    |    in decimal degrees (°)      |
+| reg      | []         | Array{Float64,1}   | geographic search region:      |
+|          |            |                    |    `[min_lat, max_lat,`        |
+|          |            |                    |     `min_lon, max_lon,`        |
+|          |            |                    |    `min_dep, max_dep]`         |
+|          |            |                    |    lat, lon in degrees (°)     |
+|          |            |                    |    dep in km with down = +     |
+| si       | true       | Bool               | autofill request station info? |
+| to       | 30         | Int64              | timeout (s) for web requests   |
+| v        | 0          | Int64              | verbosity                      |
+| w        | false      | Bool               | write requests to disc?        |
+| y        | false      | Bool               | sync after web requests?       |
+
 
 [^1]: Format as for an http request request URL, e.g. "szsrecs=true&repo=realtime" for FDSN (note: string should not begin with an ampersand).
 
@@ -85,7 +92,7 @@ general keywords.
 | gap         | 3600    | Real            | max. gap since last packet [s]    |
 | kai         | 600     | Real            | keepalive interval [s]            |
 | mode        | "DATA"  | String          | TIME, DATA, or FETCH              |
-| port        | 18000   | Integer         | port number                       |
+| port        | 18000   | Int64           | port number                       |
 | refresh     | 20      | Real            | base refresh interval [s]         |
 | xonerr      | true    | Bool            | exit on error?                    |
 
@@ -106,9 +113,9 @@ SeisIO.KW.Filt: Defaults parameters for time-series filtering.
 """
 const KW = KWDefs(
 
-           SLDefs(18000,    # port::Int
-                   3600,    # gap::Int
-                    600,    # kai::Int
+           SLDefs(18000,    # port::Int64
+                   3600,    # gap::Int64
+                    600,    # kai::Int64
                  "DATA",    # mode::String
                    20.0,    # refresh::Real
                    true ),  # x_on_err::Bool
@@ -124,15 +131,17 @@ const KW = KWDefs(
     Float64[600.0, 600.0],  # evw::Real
                "miniseed",  # fmt::String
         Float64[6.0, 9.9],  # mag::Array{Float64,1}
-                        1,  # nd::Int
-                        1,  # nev::Int
+                        1,  # nd::Int64
+                        1,  # nev::Int64
+                   360000,  # nx_add::Int64
+                  8640000,  # nx_new::Int64
                         "", # opts::String
                        "P", # pha::String
-                 Float64[], # rad: Array{}
-                 Float64[], # reg: Array{}
+                 Float64[], # rad: Array{Float64,1}
+                 Float64[], # reg: Array{Float64,1}
                       true, # si::Bool
                     "IRIS", # src::String
-                        30, # to::Int
+                        30, # to::Int64
                          0, # v::Int (verbosity)
                      false, # w::Bool (write to disk)
                      false) # y::Bool (syc)
