@@ -378,7 +378,7 @@ function readuw(filename::String; v=0::Int)
   pf = String("")
   df = String("")
   ec = UInt8(filename[end])
-  lc = collect(UInt8, 0x61:0x7a)
+  lc = vcat(collect(UInt8, 0x61:0x76), 0x78, 0x79, 0x7a) # skip 'w'
   if Base.in(ec, lc)
     pf = filename
     df = filename[1:end-1]*"W"
