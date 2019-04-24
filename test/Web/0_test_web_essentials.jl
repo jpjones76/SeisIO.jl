@@ -107,3 +107,7 @@ end
 @test ≈(RESP[2], r1)
 @test ≈(RESP[end-1], r2)
 @test ≈(RESP[end], r2)
+
+chanspec()
+chanspec()
+chanspec()
