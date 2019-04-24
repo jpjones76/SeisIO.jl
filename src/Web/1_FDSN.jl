@@ -252,7 +252,7 @@ Standard keywords: evw, rad, reg, mag, nev, src, to
 See also: SeisIO.KW
 """
 function FDSNevq(ot::String;
-  evw::Array{Float64,1} =  KW.evw,
+  evw::Union{Array{Real,1},Array{Float64,1},Array{Int64,1}} = KW.evw,
   rad::Array{Float64,1} = KW.rad,
   reg::Array{Float64,1} = KW.reg,
   mag::Array{Float64,1} = KW.mag,
@@ -280,53 +280,57 @@ function FDSNevq(ot::String;
   end
 
   # Determine time window
-  if length(ot) <= 14
-    ot0 = string(ot[1:4],"-",ot[5:6],"-",ot[7:8],"T",ot[9:10],":",ot[11:12])
-    if length(ot) > 12
-      ot = string(ot0, ":", ot[13:14])
-    else
-      ot = string(ot0, ":00")
+  ot2::Float64 = try
+    d2u(DateTime(ot))
+  catch
+    if length(ot) <= 14
+      ot0 = string(ot[1:4],"-",ot[5:6],"-",ot[7:8],"T",ot[9:10],":",ot[11:12])
+      if length(ot) > 12
+        ot1 = string(ot0, ":", ot[13:14])
+      else
+        ot1 = string(ot0, ":00")
+      end
     end
+    d2u(DateTime(ot1))
   end
-  ot = d2u(DateTime(ot))
-  d0 = string(u2d(ot - abs(evw[1])))
-  d1 = string(u2d(ot + evw[2]))
-  oti = round(Int64, ot*sμ)
+  d0 = string(u2d(ot2 - abs(evw[1])))
+  d1 = string(u2d(ot2 + abs(evw[2])))
+  oti = round(Int64, ot2*sμ)
 
-  # Do multi-server query (not tested)
+  # multi-server query (most FDSN servers do NOT have an event service)
   if lowercase(src) == "all"
-    sources = collect(keys(seis_www))
+    sources = String["EMSC", "INGV", "IRIS", "LMU", "NCEDC", "NIEP", "ORFEUS", "SCEDC", "USGS", "USP"]
   else
     sources = split(src,",")
   end
   sources = [strip(i) for i in sources]
   catalog = Array{SeisHdr,1}(undef, 0)
-  ot = Array{Int64,1}(undef, 0)
+  origin_times = Array{Int64,1}(undef, 0)
   for k in sources
-      v > 1 && println(stdout, "Querying ", k)
-      url = string(fdsn_uhead(String(k)), "event/1/query?",
-                                          "starttime=", d0, "&endtime=", d1,
-                                          search_coords,
-                                          "&minmag=", mag[1], "&maxmag=", mag[2],
-                                          "&format=xml")
-      v > 0 && println(stdout, "URL = ", url)
-      req_info_str = "\nFDSN event query:"
+    v > 1 && println(stdout, "Querying ", k)
+    url = string(fdsn_uhead(String(k)), "event/1/query?",
+                                        "starttime=", d0, "&endtime=", d1,
+                                        search_coords,
+                                        "&minmag=", mag[1], "&maxmag=", mag[2],
+                                        "&format=xml")
+    v > 0 && println(stdout, "URL = ", url)
+    req_info_str = "\nFDSN event query:"
 
-      # R = request("GET", url, webhdr(), readtimeout=to)
-      (R, parsable) = get_HTTP_req(url, req_info_str, to)
-      if parsable
-          str_req = String(R)
-          v > 1 && println(stdout, "REQUEST BODY:\n", str_req)
-          (id, ot_tmp, loc, mm, msc) = FDSN_event_xml(str_req)
-          for i = 1:length(id)
-              eh = SeisHdr(id=id[i], ot=ot_tmp[i], loc=loc[:,i], mag=(mm[i], msc[i]), src=url)
-              push!(catalog, eh)
-              push!(ot, round(Int64, d2u(eh.ot)*sμ))
-          end
-          v > 1 && println(stdout, "CATALOG:\n", catalog)
+    # R = request("GET", url, webhdr(), readtimeout=to)
+    (R, parsable) = get_HTTP_req(url, req_info_str, to)
+    if parsable
+      str_req = String(R)
+      v > 1 && println(stdout, "REQUEST BODY:\n", str_req)
+      (id, ot_tmp, loc, mm, msc) = FDSN_event_xml(str_req)
+      for i = 1:length(id)
+          eh = SeisHdr(id=id[i], ot=ot_tmp[i], loc=loc[:,i], mag=(mm[i], msc[i]), src=url)
+          push!(catalog, eh)
+          push!(origin_times, round(Int64, d2u(eh.ot)*sμ))
       end
+      v > 1 && println(stdout, "CATALOG:\n", catalog)
+    end
   end
-  k = sortperm(abs.(ot.-oti))
+  k = sortperm(abs.(origin_times.-oti))
   n0 = min(length(k), nev)
   n0 < nev && @warn(string("Catalog only contains ", n0, " events (original request was ", nev,")"))
   return catalog[k[1:n0]]
@@ -346,7 +350,7 @@ See also: distaz!, FDSNevq, FDSNsta, SeisKW
 """
 function FDSNevt(ot::String, chans::Union{String,Array{String,1},Array{String,2}};
   len::Real = 120.0,
-  evw::Array{Float64,1} =  KW.evw,
+  evw::Union{Array{Real,1},Array{Float64,1},Array{Int64,1}} = KW.evw,
   fmt::String = KW.fmt,
   mag::Array{Float64,1} = KW.mag,
   nd::Int64 = KW.nd,
