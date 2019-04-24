@@ -138,17 +138,17 @@ function blk_calib(S::SeisIO.SeisData, sid::IO, c::Int64, bt::UInt16)
 end
 
 # [395] Calibration Abort Blockette (16 bytes)
-function blk_395(S::SeisIO.SeisData, sid::IO, c::Int64)
-  blk_time!(SEED.Calib.t, sid, SEED.swap)
-  skip(sid, 2)
-  if !haskey(S.misc[c], "seed_calib")
-    S.misc[c]["seed_calib"] = Array{String, 1}(undef,0)
-  end
-  push!(S.misc[c]["seed_calib"], "Abort," * join(SEED.Calib.t, ","))
-  return 0x0010
-end
+# function blk_395(S::SeisIO.SeisData, sid::IO, c::Int64)
+#   blk_time!(SEED.Calib.t, sid, SEED.swap)
+#   skip(sid, 2)
+#   if !haskey(S.misc[c], "seed_calib")
+#     S.misc[c]["seed_calib"] = Array{String, 1}(undef,0)
+#   end
+#   push!(S.misc[c]["seed_calib"], "Abort," * join(SEED.Calib.t, ","))
+#   return 0x0010
+# end
 
-#  [500] Timing Blockette (200 bytes)
+# [500] Timing Blockette (200 bytes)
 function blk_500(S::SeisIO.SeisData, sid::IO, c::Int64)
   SEED.B500.vco_correction    = SEED.swap ? ntoh(read(sid, Float32)) : read(sid, Float32)
   blk_time!(SEED.B500.t, sid, SEED.swap)
@@ -187,7 +187,7 @@ function blk_1000(S::SeisIO.SeisData, sid::IO, c::Int64)
   return 0x0008
 end
 
-# [1001] Data Extension Blockette  (8 bytes)
+# [1001] Data Extension Blockette (8 bytes)
 function blk_1001(S::SeisIO.SeisData, sid::IO, c::Int64)
   skip(sid, 1)
   SEED.tc += read(sid, Int8)
