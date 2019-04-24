@@ -28,6 +28,7 @@ if safe_isdir(path*"/SampleFiles/Restricted")
 
   open("runtests.log", "a") do out
     redirect_stdout(out) do
+      mseed_support()
       files = ls(path*"/SampleFiles/Restricted/*mseed")
       for f in files
         println(stdout, "attempting to read ", f)
