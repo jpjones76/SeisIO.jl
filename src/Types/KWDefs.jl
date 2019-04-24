@@ -21,7 +21,7 @@ end
 struct KWDefs
   SL::SLDefs
   Filt::FiltDefs
-  evw::Array{Float64,1}
+  evw::Array{Real,1}
   fmt::String
   mag::Array{Float64,1}
   nd::Int64
@@ -51,8 +51,8 @@ keyword isn't specified.
 
 | KW       | Default    | Allowed Data Types | Meaning                        |
 |----------|:-----------|:-------------------|:-------------------------------|
-| evw      | [600.0,    | Array{Float64,1}   | search for events from `ot-t1` |
-|          |  600.0]    |                    |   to `ot+t2`                   |
+| evw      | [600,      | Array{Real,1}      | search for events in window    |
+|          |  600]      |                    |   (ot-|t1|, ot+|t2|)           |
 | fmt      | "miniseed" | String             | request data format            |
 | mag      | [6.0, 9.9] | Array{Float64,1}   | search magitude range          |
 | nd       | 1          | Int64              | number of days per subrequest  |
@@ -128,7 +128,7 @@ const KW = KWDefs(
              "Bandpass",    # rt::String
           "Butterworth" ),  # dm::String
 
-    Float64[600.0, 600.0],  # evw::Real
+               [600, 600],  # evw::Real
                "miniseed",  # fmt::String
         Float64[6.0, 9.9],  # mag::Array{Float64,1}
                         1,  # nd::Int64
