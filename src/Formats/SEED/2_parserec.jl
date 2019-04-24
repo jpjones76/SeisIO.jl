@@ -25,8 +25,8 @@ function update_dt!(SEED::SeedVol)
   end
   setfield!(SEED, :dt, dt)
   setfield!(SEED, :Δ, round(Int64, sμ*dt))
-  setfield!(SEED, :r1_last, r1)
-  setfield!(SEED, :r2_last, r2)
+  setfield!(SEED, :r1_old, r1)
+  setfield!(SEED, :r2_old, r2)
   return nothing
 end
 
@@ -50,10 +50,12 @@ function update_hdr!(SEED::SeedVol)
 end
 
 ###############################################################################
-function parserec!(S::SeisData, sid::IO, v::Int)
+function parserec!(S::SeisData, SEED::SeedVol, sid::IO, v::Int64, nx_new::Int64, nx_add::Int64)
   # =========================================================================
   u16 = getfield(SEED, :u16)
   u8 = getfield(SEED, :u8)
+  xi = 0
+  te = 0
 
   # Fixed section of data header (48 bytes)
   pos = position(sid)
@@ -96,7 +98,7 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     hdrswap!(SEED)
   end
 
-  if SEED.r1 != SEED.r1_last || SEED.r2 != SEED.r2_last
+  if SEED.r1 != SEED.r1_old || SEED.r2 != SEED.r2_old
     update_dt!(SEED)
   end
 
@@ -116,10 +118,8 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     if v > 2
       println(stdout, "New channel; ID = ", id, ", S.id = ", S.id)
     end
-    L = getfield(getfield(SEED, :def), :nx)
+    L = nx_new
     nt = 2
-    xi = 0
-    te = 0
     C = SeisChannel(id = id,
                     name = id,
                     fs = 1.0/getfield(SEED, :dt),
@@ -134,11 +134,12 @@ function parserec!(S::SeisData, sid::IO, v::Int)
     x = getindex(getfield(S, :x), c)
     L = lastindex(x)
     nt = div(lastindex(t), 2)
-    xi = nt > 0 ? getindex(t, nt) : 0
-    te = endtime(t, getindex(getfield(S, :fs), c))
+    if nt > 0
+      xi = getindex(t, nt)
+      te = endtime(t, getindex(getfield(S, :fs), c))
+    end
     if xi + n > L
-      nx_new = xi + getfield(getfield(SEED, :def), :nx)
-      resize!(x, nx_new)
+      resize!(x, xi + max(n, nx_add))
       v > 1 && println(stdout, id, ": ",
                                "resized from length ", L, " ",
                                "to length ", nx_new)
@@ -184,8 +185,6 @@ function parserec!(S::SeisData, sid::IO, v::Int)
       blk_len = blk_100(S, sid, c)
     elseif bt == 0x00c9
       blk_len = blk_201(S, sid, c)
-    elseif bt == 0x018b
-      blk_len = blk_395(S, sid, c)
     elseif bt == 0x01f4
       blk_len = blk_500(S, sid, c)
     elseif bt == 0x07d0
@@ -212,22 +211,27 @@ function parserec!(S::SeisData, sid::IO, v::Int)
 
   # Get data format
   fmt = getfield(SEED, :fmt)
+  nb = getfield(SEED, :nx) - u16[4]
 
   # debug output
   if v > 2
     println(stdout, "To parse: nx = ", n, " sample blockette, ",
-    "compressed size = ", SEED.nx - u16[4], " bytes, fmt = ", fmt)
+    "compressed size = ", nb, " bytes, fmt = ", fmt)
   end
 
   if fmt == 0x0a || fmt == 0x0b
-    SEED_Steim!(sid, SEED)
+    SEED_Steim!(sid, SEED, nb)
   elseif fmt == 0x00
     # ASCII is a special case as it's typically not data
     D = getindex(getfield(S, :misc), c)
     if !haskey(D, "seed_ascii")
       D["seed_ascii"] = Array{String,1}(undef,0)
     end
-    push!(D["seed_ascii"], SEED_Char(sid, SEED))
+    push!(D["seed_ascii"], SEED_Char(sid, SEED, nb))
+  elseif fmt in UInt8[0x01, 0x03, 0x04]
+    SEED_Unenc!(sid, S, c, xi, nb)
+  elseif fmt == 0x05
+    SEED_Float64!(sid, S, c, xi, nb)
   elseif fmt == 0x0d || fmt == 0x0e
     SEED_Geoscope!(sid, SEED)
   elseif fmt == 0x10
@@ -237,12 +241,17 @@ function parserec!(S::SeisData, sid::IO, v::Int)
   elseif fmt == 0x20
     SEED_DWWSSN!(sid, SEED)
   else
-    SEED_Unenc!(sid, SEED)
+    warn_str = string("readmseed, unsupported format = ", fmt, ", ", nb, " bytes skipped.")
+    @warn(warn_str); note!(S, c, warn_str)
+    skip(sid, nb)
+    return nothing
   end
 
   if fmt > 0x00
     # Update S.x[c]
-    unsafe_copyto!(x, xi+1, getfield(SEED, :x), 1, getfield(SEED, :k))
+    if fmt > 0x05
+      unsafe_copyto!(x, xi+1, getfield(SEED, :x), 1, getfield(SEED, :k))
+    end
 
     # Update S.t[c]
 
