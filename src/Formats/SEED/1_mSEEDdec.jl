@@ -70,15 +70,7 @@ function SEED_CDSN!(io::IO, SEED::SeedVol)
     x = SEED.swap ? bswap(read(io, UInt16)) : read(io, UInt16)
     m = Int32(x & 0x3fff)
     g = Int32((x & 0xc000) >> 14)
-    if (g == 0)
-      mult = 1
-    elseif g == 1
-      mult = 4
-    elseif g == 2
-      mult = 16
-    elseif g == 3
-      mult = 128
-    end
+    mult = 4^g * g==3 ? 2 : 1
     m -= 0x1fff
     setindex!(SEED.x, m*mult, i)
   end

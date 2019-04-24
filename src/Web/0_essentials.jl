@@ -133,9 +133,7 @@ function savereq(D::Array{UInt8,1}, ext::String, net::String, sta::String,
     loc = ""
   end
   fname = string(join([y, string(j), i, namestrip(net), namestrip(sta), namestrip(loc), namestrip(cha)],'.'), ".", q, ".", ext)
-  if safe_isfile(fname)
-    @warn(string("File ", fname, " contains an identical request. Overwriting."))
-  end
+  safe_isfile(fname) && @warn(string("File ", fname, " contains an identical request. Overwriting."))
   f = open(fname, "w")
   write(f, D)
   close(f)
