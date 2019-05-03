@@ -24,10 +24,10 @@ for n = 1:size(files,1)
   if safe_isfile(fname) == false
     continue
   else
+    f_call = files[n,2]
+    opt = files[n,3]
     printstyled(string("    ", f_call, "\n"), color=:light_green)
   end
-  f_call = files[n,2]
-  opt = files[n,3]
   if opt == "pa-full"
     S = read_data("passcal", fname, full=true)
   elseif opt == "win"
