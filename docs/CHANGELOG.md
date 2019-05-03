@@ -1,3 +1,65 @@
+### 2019-05-03
+Release candidate
+* File read functions have been standardized and optimized, yielding significant
+performance improvements.
+* Each file read function can either update an existing SeisData object
+(e.g. readsac!(S, ...)) or create a new one (e.g., S = readsac(...)).
+* All file read functions accept wildcards in the file pattern(s).
+* Each file read function now returns a SeisData object, even for a single file.
+* A new wrapper, `read_data`/`read_data!`, has been written to work with
+all supported file formats. See the program help for info. This (very
+thin) wrapper is intended to standardize file read syntax while adding as
+little overhead as possible. The general calls are merely two:
+  + `read_data!(S, fmt::String, filestr, KWs)`
+  + `S = read_data(fmt::String, filestr, KWs)`
+* The old reader function calls like "readsac" are still being exported
+through v0.2.0, but that will change in a future release. Please adjust
+your scripts to use the generic read_data method.
+* Keyword defaults can once again change. Julia fixed it in 1.1, I guess?
+Use `dump(SeisIO.KW)` to see all parameter defaults; change with SeisIO.KW.name
+= val, e.g., `SeisIO.KW.nx_new = 360000`.
+
+#### Format-Specific Changes
+* `readmseed!`
+  - now creates Float32 data arrays by default
+  - `readmseed` method added
+  - memory allocation reoptimized for large files. This can be changed
+    to accommodate smaller files with two new keywords:
+    - `readmseed(..., nx_new=N)` allocates `N` samples to `:x` for a new
+      channel. After data read, unused memory is freed by resizing `:x`.
+      (Default: 86400000)
+    - `readmseed(..., nx_add=N)` increases `S.x[i]` by at least `N`
+      samples when new data are added to any channel `i`. (Default:
+      360000)
+* `readsac`
+  + now always returns a SeisData object. Use [1] after a read request to
+  return a SeisChannel, e.g. `C = readsac("longfile.sac")[1]`
+* `readsegy`
+  - if `full=true`, the file text header is now saved in `:misc` under
+  keyword "txthdr" in each channel.
+* `readuw`
+  + now operates only on data files, accepts wildcard string patterns, and
+  returns a SeisData object.
+  + can now handle time correction structures
+  + the old `readuw` function still exists, but is renamed `readuwevt`
+* `readwin32`
+  + now accepts wild card strings for channel files as well as data files
+  + by design, this means multiple channel files can be used simultaneously.
+  However, no checks are made for redundancy or conflicting info.
+* `rlennasc`
+  - renamed to `readlennasc`
+* New supported read format: GeoCSV. `readgeocsv` reads the tspair subformat by
+default. The tslist format can be read with keyword `tspair=false`.
+
+### 2019-04-24
+* Bug fixes:
+  + FDSN XML can now parse nonstandard time formats.
+  + `FDSNevq` keyword `src="all"` now only queries sources with the FDSN event service.
+  + `readuw`
+    - can now handle time correction structures
+    - can now read pick files with non-numeric info in error ("E") lines
+    - can now read a data file with no pick file in Windows and Mac OS
+
 ### 2019-04-23
 * Performance improvements (speed, memory)
   + `endtime`, `j2md`, `md2j` should be noticeably faster and more efficient
