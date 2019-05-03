@@ -108,6 +108,7 @@ if safe_isfile(cfile)
   # Now test the other two bits types, 4-bit Int ...
   printstyled("    testing Int4 and Int24 handling\n", color=:light_green)
   fname = path*"/SampleFiles/Restricted/2014092700000302.cnt"
+  cfile = path*"/SampleFiles/Restricted/03_02_27_20140927*ch"
   S = SeisData()
   open("runtests.log", "a") do out
     redirect_stdout(out) do
