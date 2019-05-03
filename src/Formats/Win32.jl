@@ -265,7 +265,7 @@ function readwin32(dfilestr::String, cfilestr::String;
     # http://data.sokki.jmbsc.or.jp/cdrom/seismological/catalog/appendix/apendixe.htm
     (net, sta, cha) = split(S.id[i], ".", limit=3, keepempty=true)
     # Band code
-    bb = getbandcode(getindex(getfield(S, :fs, i)), fc=fci)
+    bb = getbandcode(getindex(getfield(S, :fs), i), fc=fci)
     # Channel code
     cc = String(cha)[1:1]
 
