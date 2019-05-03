@@ -14,21 +14,24 @@ printstyled("  UW\n", color=:light_green)
 
 # Can we read from pickfile only? datafile only?
 printstyled("    read (pickfile, datafile) from pickfile name\n", color=:light_green)
-W = readuw(uwf1*"o")
+W = readuwevt(uwf1*"o")
 
 printstyled("    read (pickfile, datafile) from datafile name\n", color=:light_green)
-W = readuw(uwf1*"W")
+open("runtests.log", "a") do out
+  redirect_stdout(out) do
+    W = readuwevt(uwf1*"W", v=3)
+  end
+end
 
 for i in ["UW.WWVB..TIM","UW.TCG..TIM","UW.TDH..EHZ","UW.VLM..EHZ"]
   @test !isempty(findall(W.data.id.==i))
-  @test !isempty(findall(W.data.name.==i))
   n = findfirst(W.data.id.==i)
   @test ≈(W.data.fs[n], 100.0)
 end
 
 # Can we read from filename stub?
 printstyled("    read (pickfile, datafile) from filename stub\n", color=:light_green)
-W = readuw(uwf1)
+W = readuwevt(uwf1)
 @test W.hdr.mag[1] == 3.0f0
 @test occursin("99011116541o", W.hdr.src)
 @test W.hdr.ot == DateTime("1999-01-11T16:54:11.96")
@@ -48,16 +51,16 @@ i = findfirst(W.data.id.=="UW.VLM..EHZ")
 printstyled("    pickfile handling\n", color=:light_green)
 
 # What about when there is no data file?
-W = readuw(uwf2)
+W = readuwevt(uwf2)
 @test W.hdr.mag[1] == 0.9f0
 @test occursin("94100613522o", W.hdr.src)
 @test W.hdr.ot == DateTime("1994-10-06T13:52:39.02")
 
-W = readuw(uwf3)
+W = readuwevt(uwf3)
 @test W.hdr.id == 41568
 
 printstyled("    data file with a time correction structure\n", color=:light_green)
-W = readuw(uwf4, v=2)
+W = readuwevt(uwf4, v=2)
 
 printstyled("    pick file with nonnumeric error info\n", color=:light_green)
-W = readuw(uwf5, v=2)
+W = readuwevt(uwf5, v=2)

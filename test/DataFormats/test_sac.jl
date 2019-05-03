@@ -6,16 +6,16 @@ printstyled("  SAC\n", color=:light_green)
 printstyled("    read\n", color=:light_green)
 @test_throws ErrorException readsac(path*"/SampleFiles/99011116541W")
 
-SAC1 = readsac(sac_file)
+SAC1 = readsac(sac_file)[1]
 @test ≈(SAC1.fs, 100.0)
 @test ≈(length(SAC1.x), 1000)
 
-SAC2 = readsac(sac_file, full=true)
+SAC2 = readsac(sac_file, full=true)[1]
 @test ≈(1/SAC1.fs, SAC2.misc["delta"])
 @test ≈(length(SAC1.x), SAC2.misc["npts"])
 
 printstyled("    bigendian read\n", color=:light_green)
-SAC3 = readsac(sac_be_file, full=true)
+SAC3 = readsac(sac_be_file, full=true)[1]
 @test ≈(1/SAC3.fs, SAC3.misc["delta"])
 @test ≈(length(SAC3.x), SAC3.misc["npts"])
 

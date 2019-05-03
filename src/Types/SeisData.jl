@@ -1,9 +1,55 @@
 import Base:in, getindex, setindex!, append!, deleteat!, delete!, +, -, *, isequal,
-length, size, sizeof, ==, isempty, sort!, sort, lastindex
+length, size, sizeof, ==, isempty, sort!, sort, lastindex, firstindex
 
 export SeisData, findid, pull, prune!, findchan
 
 # This is type-stable for S = SeisData() but not for keyword args
+
+@doc """
+    SeisData
+
+A custom structure designed to contain the minimum necessary information for
+processing univariate geophysical data.
+
+    SeisChannel
+
+A single channel designed to contain the minimum necessary information for
+processing univariate geophysical data.
+
+    SeisHdr
+
+A container for earthquake source information; specific to seismology.
+
+    SeisEvent
+
+A structure for discrete seismic events, comprising a SeisHdr for the event
+  descriptor and a SeisData for data.
+
+## Fields: SeisData, SeisChannel, SeisEvent.data
+
+| **Field** | **Description** |
+|:-------|:------ |
+| :n     | Number of channels [^1] |
+| :c     | TCP connections feeding data to this object [^1] |
+| :id    | Channel ids. use NET.STA.LOC.CHAN format when possible  |
+| :name  | Freeform channel names |
+| :loc   | Location (position) vector; freeform  |
+| :fs    | Sampling frequency in Hz; set to 0.0 for irregularly-sampled data. |
+| :gain  | Scalar gain; divide data by the gain to convert to units  |
+| :resp  | Instrument response; two-column matrix, format [zeros poles] |
+| :units | String describing data units. UCUM standards are assumed. |
+| :src   | Freeform string describing data source. |
+| :misc  | Dictionary for non-critical information. |
+| :notes | Timestamped notes; includes automatically-logged acquisition and |
+|        | processing information. |
+| :t     | Matrix of time gaps, formatted [Sample# GapLength] |
+|        | gaps are in μs measured from the Unix epoch |
+| :x     | Data |
+
+[^1]: Not present in SeisChannel objects.
+
+See documentation (https://seisio.readthedocs.io/) for more details.
+""" SeisData
 mutable struct SeisData
   n::Int64
   c::Array{TCPSocket,1}                       # connections
@@ -97,6 +143,8 @@ end
 # s = S[i:j] returns a SeisData struct
 # S[i:j].foo = bar won't work
 lastindex(S::SeisData) = S.n
+firstindex(S::SeisData) = 1
+size(S::SeisData) = (S.n,)
 
 function getindex(S::SeisData, J::Array{Int,1})
   U = SeisData()

@@ -1,13 +1,13 @@
-SEED_Char(io::IO, SEED::SeedVol, nb::UInt16) = replace(String(read(io, nb, all=false)),
+SEED_Char(io::IO, BUF::SeisIOBuf, nb::UInt16) = replace(String(read(io, nb, all=false)),
                                             ['\r', '\0'] =>"")
 
 # This gets special handling as Float64 arrays are assumed in S.x[c]
 function SEED_Float64!(io::IO, S::SeisData, c::Int64, xi::Int64, nb::UInt16)
-  buf = getfield(SEED, :buf)
+  buf = getfield(BUF, :buf)
   x = getindex(getfield(S, :x), c)
   readbytes!(io, buf, nb)
   nx = div(nb, 8)
-  if getfield(SEED, :xs) == true
+  if getfield(BUF, :xs) == true
     j = xi
     @inbounds for i = 1:nx
       j += 1
@@ -25,88 +25,88 @@ function SEED_Float64!(io::IO, S::SeisData, c::Int64, xi::Int64, nb::UInt16)
     xr = reinterpret(Float64, buf)
     copyto!(x, xi+1, xr, 1, nx)
   end
-  setfield!(SEED, :k, Int64(nx))
+  setfield!(BUF, :k, Int64(nx))
   return nothing
 end
 
 function SEED_Unenc!(io::IO, S::SeisData, c::Int64, xi::Int64, nb::UInt16)
-  buf = getfield(SEED, :buf)
+  buf = getfield(BUF, :buf)
   x = getindex(getfield(S, :x), c)
   readbytes!(io, buf, nb)
-  T::Type = if SEED.fmt == 0x01
+  T::Type = if BUF.fmt == 0x01
       Int16
-    elseif SEED.fmt == 0x03
+    elseif BUF.fmt == 0x03
       Int32
-    elseif SEED.fmt == 0x04
+    elseif BUF.fmt == 0x04
       Float32
     end
-  if getfield(SEED, :swap) == true
+  if getfield(BUF, :swap) == true
     xr = bswap.(reinterpret(T, buf))
   else
     xr = reinterpret(T, buf)
   end
   nx = div(nb, sizeof(T))
   copyto!(x, xi+1, xr, 1, nx)
-  setfield!(SEED, :k, Int64(nx))
+  setfield!(BUF, :k, Int64(nx))
   return nothing
 end
 
-function SEED_Geoscope!(io::IO, SEED::SeedVol)
+function SEED_Geoscope!(io::IO, BUF::SeisIOBuf)
   mm = 0x0fff
-  gm = SEED.fmt == 0x0d ? 0x7000 : 0xf000
-  for i = 0x0001:SEED.n
-    x = SEED.swap ? bswap(read(io, UInt16)) : read(io, UInt16)
+  gm = BUF.fmt == 0x0d ? 0x7000 : 0xf000
+  for i = 0x0001:BUF.n
+    x = BUF.swap ? bswap(read(io, UInt16)) : read(io, UInt16)
     m = Int32(x & mm)
     g = Int32((x & gm) >> 12)
     ex = -1*g
-    setindex!(SEED.x, ldexp(Float64(m-2048), ex), i)
+    setindex!(BUF.x, ldexp(Float64(m-2048), ex), i)
   end
-  SEED.k = SEED.n
+  BUF.k = BUF.n
   return nothing
 end
 
-function SEED_CDSN!(io::IO, SEED::SeedVol)
-  for i = 0x0001:SEED.n
-    x = SEED.swap ? bswap(read(io, UInt16)) : read(io, UInt16)
+function SEED_CDSN!(io::IO, BUF::SeisIOBuf)
+  for i = 0x0001:BUF.n
+    x = BUF.swap ? bswap(read(io, UInt16)) : read(io, UInt16)
     m = Int32(x & 0x3fff)
     g = Int32((x & 0xc000) >> 14)
     mult = 4^g * g==3 ? 2 : 1
     m -= 0x1fff
-    setindex!(SEED.x, m*mult, i)
+    setindex!(BUF.x, m*mult, i)
   end
-  SEED.k = SEED.n
+  BUF.k = BUF.n
   return nothing
 end
 
-function SEED_SRO!(io::IO, SEED::SeedVol)
-  for i = 0x0001:SEED.n
-    x = SEED.swap ? bswap(read(io, UInt16)) : read(io, UInt16)
+function SEED_SRO!(io::IO, BUF::SeisIOBuf)
+  for i = 0x0001:BUF.n
+    x = BUF.swap ? bswap(read(io, UInt16)) : read(io, UInt16)
     m = Int32(x & 0x0fff)
     g = Int32((x & 0xf000) >> 12)
     if m > 0x07ff
       m -= 0x1000
     end
     ex = -1*g + 10
-    setindex!(SEED.x, ldexp(Float64(m), ex), i)
+    setindex!(BUF.x, ldexp(Float64(m), ex), i)
   end
-  SEED.k = SEED.n
+  BUF.k = BUF.n
   return nothing
 end
 
-function SEED_DWWSSN!(io::IO, SEED::SeedVol)
-  for i = 0x0001:SEED.n
-    x = signed(UInt32(SEED.swap ? bswap(read(io, UInt16)) : read(io, UInt16)))
-    SEED.x[i] = x > 32767 ? x - 65536 : x
+function SEED_DWWSSN!(io::IO, BUF::SeisIOBuf)
+  for i = 0x0001:BUF.n
+    x = signed(UInt32(BUF.swap ? bswap(read(io, UInt16)) : read(io, UInt16)))
+    BUF.x[i] = x > 32767 ? x - 65536 : x
   end
-  SEED.k = SEED.n
+  BUF.k = BUF.n
   return nothing
 end
 
 # Steim1 or Steim2
-function SEED_Steim!(io::IO, SEED::SeedVol, nb::UInt16)
-  x = getfield(SEED, :x)
-  buf = getfield(SEED, :buf)
-  ff = getfield(SEED, :x32)
+function SEED_Steim!(io::IO, BUF::SeisIOBuf, nb::UInt16)
+  x = getfield(BUF, :x)
+  buf = getfield(BUF, :buf)
+  ff = getfield(BUF, :x32)
   nc = Int64(div(nb, 0x0040))
   ni = div(nb, 0x0004)
   readbytes!(io, buf, nb)
@@ -116,7 +116,7 @@ function SEED_Steim!(io::IO, SEED::SeedVol, nb::UInt16)
     resize!(ff, ni)
   end
   yy = zero(UInt32)
-  if getfield(SEED, :xs) == true
+  if getfield(BUF, :xs) == true
     @inbounds for ib = 1:ni
       yy  = UInt32(buf[4*ib-3]) << 24
       yy |= UInt32(buf[4*ib-2]) << 16
@@ -159,7 +159,7 @@ function SEED_Steim!(io::IO, SEED::SeedVol, nb::UInt16)
         a = 0x00
         b = 0x08
         c = 0x04
-      elseif SEED.fmt == 0x0a
+      elseif BUF.fmt == 0x0a
         a = 0x00
         if y == 0x00000002
           b = 0x10
@@ -223,8 +223,8 @@ function SEED_Steim!(io::IO, SEED::SeedVol, nb::UInt16)
     r = r+16
   end
 
-  if SEED.wo != 0x01
-    vx = view(getfield(SEED, :x), 1:k)
+  if BUF.wo != 0x01
+    vx = view(getfield(BUF, :x), 1:k)
     reverse!(vx)
   end
   setindex!(x, x0, 1)
@@ -239,12 +239,12 @@ function SEED_Steim!(io::IO, SEED::SeedVol, nb::UInt16)
   # Check data values
   if isapprox(getindex(x, k), xn) == false
     println(stdout, string("RDMSEED: data integrity -- Steim-",
-                            getfield(SEED, :fmt) - 0x09, " sequence #",
-                            String(copy(getfield(SEED, :seq))),
+                            getfield(BUF, :fmt) - 0x09, " sequence #",
+                            String(copy(getfield(BUF, :seq))),
                             " integrity check failed, last_data=",
-                            getindex(getfield(SEED, :x), k),
+                            getindex(getfield(BUF, :x), k),
                             ", should be xn=", xn))
   end
-  setfield!(SEED, :k, k)
+  setfield!(BUF, :k, k)
   return nothing
 end

@@ -2,7 +2,7 @@ export ls, regex_find
 
 # safe_isfile, safe_isdir adapted from https://github.com/JuliaPackaging/BinaryProvider.jl/commit/08a314a225206a68665c6f730d7c3feeda1ba615
 # Temporary hack around https://github.com/JuliaLang/julia/issues/26685
-function safe_isfile(path)
+function safe_isfile(path::String)
   try
     return isfile(path)
   catch err
@@ -10,7 +10,7 @@ function safe_isfile(path)
   end
 end
 
-function safe_isdir(path)
+function safe_isdir(path::String)
   try
     return isdir(path)
   catch err
@@ -57,11 +57,16 @@ function regex_find(path::String, r::Regex)
   return sort(s2)
 end
 
-"""
+@doc """
     ls(str::String)
 
-Similar functionality to Bash ls with OS-agnostic output. Accepts wildcards. Always returns full path and file name.
-"""
+Similar functionality to Bash ls -1 with OS-agnostic output. Accepts wildcards.
+Always returns full path and file name.
+
+    ls()
+
+Return full path and file name of files in current working directory.
+""" ls
 function ls(s::String)
   safe_isfile(s) && return [realpath(s)]
   safe_isdir(s) && return [joinpath(realpath(s), i) for i in readdir(s)]
@@ -119,9 +124,4 @@ function ls(s::String)
   return s1
 end
 
-"""
-    ls()
-
-Return full path and file name of files in current working directory.
-"""
 ls() = [joinpath(realpath("."), i) for i in readdir(pwd())]

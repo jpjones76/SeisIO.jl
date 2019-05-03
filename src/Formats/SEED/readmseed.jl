@@ -1,22 +1,22 @@
 export readmseed, readmseed!
 
-function seed_cleanup!(S::SeisData, SEED::SeedVol)
+function seed_cleanup!(S::SeisData, BUF::SeisIOBuf)
   trunc_x!(S)
-  fill!(getfield(SEED, :hdr_old), zero(UInt8))
-  setfield!(SEED, :r1_old, zero(Int16))
-  setfield!(SEED, :r2_old, zero(Int16))
+  fill!(getfield(BUF, :hdr_old), zero(UInt8))
+  setfield!(BUF, :r1_old, zero(Int16))
+  setfield!(BUF, :r2_old, zero(Int16))
   return nothing
 end
 
 function parsemseed!(S::SeisData, sid::IO, v::Int64, nx_new::Int64, nx_add::Int64)
   while !eof(sid)
-    parserec!(S, SEED, sid, v, nx_new, nx_add)
+    parserec!(S, BUF, sid, v, nx_new, nx_add)
   end
-  seed_cleanup!(S, SEED)
+  seed_cleanup!(S, BUF)
   return S
 end
 
-"""
+@doc """
     readmseed(fname[, KWs])
 
 Read mini-SEED file `fname` into a new SeisData structure.
@@ -25,7 +25,7 @@ Read mini-SEED file `fname` into a new SeisData structure.
 
 Read mini-SEED file `fname` into existing SeisData structure `S`.
 
-### Keywords
+### Supported Keywords
 * swap: Byte swap. Set false for no (little-Endian). readmseed should be able
 to determinme whether to byte swap automatically; only use this keyword if you
 encounter errors. (Default: false)
@@ -35,14 +35,22 @@ encounter errors. (Default: false)
 * nx_add: increase `S.x[i]` by at least `N` samples when new data are added to
 channel `i`. (Default: 360000) [^a]
 
-[^a]: After data read, unused memory is freed by resizing arrays in S.x; thus, for best performance, set nx_new ≥ the longest expected time-series length in samples.
-"""
+[^a]: After data read, unused memory is freed by resizing arrays in S.x.
+
+!!! tip
+
+    For best performance, if `n_sm` is the smallest expected number of samples,
+and `n_lg` is the largest, set `nx_new = n_sm, nx_add = n_lg-n_sm`. A poor
+choice of nx_new and nx_add will dramatically impact performance.
+
+See also: mseed_support
+""" readmseed
 function readmseed!(S::SeisData, fname::String;
                     swap=false::Bool,
                     v::Int=KW.v,
                     nx_new::Int64=KW.nx_new,
                     nx_add::Int64=KW.nx_add)
-  setfield!(SEED, :swap, swap)
+  setfield!(BUF, :swap, swap)
 
   if safe_isfile(fname)
     fid = open(fname, "r")
@@ -56,11 +64,15 @@ function readmseed!(S::SeisData, fname::String;
   end
   return nothing
 end
-readmseed(fname::String;
-          swap=false::Bool,
-          v::Int=KW.v,
-          nx_new::Int64=KW.nx_new,
-          nx_add::Int64=KW.nx_add
-          ) = (S = SeisData();
-               readmseed!(S, fname, swap=swap, v=v, nx_new=nx_new, nx_add=nx_add);
-               return S)
+
+@doc (@doc readmseed)
+function readmseed(fname::String;
+                    swap=false::Bool,
+                    v::Int=KW.v,
+                    nx_new::Int64=KW.nx_new,
+                    nx_add::Int64=KW.nx_add
+                  )
+  S = SeisData()
+  readmseed!(S, fname, swap=swap, v=v, nx_new=nx_new, nx_add=nx_add)
+  return S
+end

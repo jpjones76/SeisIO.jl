@@ -1,5 +1,5 @@
 import Dates:DateTime, Hour, now
-import SeisIO:t_collapse, t_expand, endtime
+import SeisIO:t_collapse, t_expand, endtime, mktime
 printstyled("  time\n", color=:light_green)
 
 t0 = time()
@@ -134,3 +134,20 @@ t = [1 0; 6 2Δ; 7 4Δ; 8 Δ; 10 Δ]
 printstyled(stdout, "      Negative gap at end\n", color=:light_green)
 t = [1 0; 6 2Δ; 7 4Δ; 8 Δ; 10 -5Δ]
 @test w_time(t_win(t, Δ), Δ) == t
+
+printstyled(stdout, "    mktime\n", color=:light_green)
+fv = 0.0005
+iv = Array{Int32,1}([1980, 082, 10, 35, 39, 890])
+(m,d) = j2md(iv[1], iv[2])
+
+ts_0 = round(Int64, d2u(DateTime(iv[1], m, d, iv[3], iv[4], iv[5]))*sμ) +
+       iv[6]*1000 +
+       round(Int64,fv*1000.0)
+ts_1 = Date(iv[1], m, d).instant.periods.value * 86400000000 +
+       div(Time(iv[3], iv[4], iv[5]).instant.value, 1000) +
+       iv[6]*1000 +
+       round(Int64,fv*1000.0) -
+       SeisIO.dtconst
+ts_2 = mktime(iv[1], iv[2], iv[3], iv[4], iv[5], iv[6]*Int32(1000)) +
+       round(Int64, fv*1000.0)
+@test ts_0 == ts_1 == ts_2

@@ -1,4 +1,4 @@
-printstyled("  phase_utils.jl\n", color=:light_green)
+printstyled("  gcdist\n", color=:light_green)
 src = [46.8523, -121.7603]
 src2 = [48.7767, -121.8144]
 rec = [45.5135 -122.6801; 44.0442 -123.0925; 42.3265 -122.8756]

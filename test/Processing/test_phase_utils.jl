@@ -1,6 +1,8 @@
 # Test: cycle through a phase catalog, getting phase times and requesting data
 # This test works identically to the old FDSNevt without the data query
 import SeisIO: pcat_start, pcat_end, phase_time, next_phase, parse_chstr, minreq!, first_phase
+printstyled("  phase_utils\n", color=:light_green)
+GC.gc()
 spad = 10.0
 epad = 10.0
 to = 30

@@ -1,4 +1,4 @@
-export readuw, uwdf, uwpf, uwpf!
+export readuw, readuw!, readuwevt, uwdf, uwpf, uwpf!
 
 # ============================================================================
 # Utility functions not for export
@@ -23,13 +23,20 @@ function getpf(froot::String, lc::Array{UInt8,1})
 end
 # ============================================================================
 
-"""
-    uwpf!(S, f)
+@doc """
+    uwpf!(H, f[, v::Int64])
 
-Read University of Washington-format seismic pick info from pickfile `f` into header of SeisEvent `S`.
+Read UW-format seismic pick info from pickfile `f` into SeisHdr object `S`.
+`v` controls verbosity; set `v > 0` to dump verbose debug info. to STDOUT.
 
-*Caution*: Low-level reader. *No* sanity checks are done to ensure `S` and `f` are the same event!
-"""
+    H = uwpf(pf[, v])
+
+Read UW-format seismic pick file `pf` into SeisHdr object `H`.
+
+!!! caution
+
+    Reader does *not* check that `S` and `f` are the same event!
+""" uwpf
 function uwpf!(S::SeisEvent, pickfile::String; v=0::Int)
   setfield!(S, :hdr, uwpf(pickfile, v))
   N = S.data.n
@@ -72,12 +79,7 @@ function uwpf!(S::SeisEvent, pickfile::String; v=0::Int)
   return S
 end
 
-"""
-    H = uwpf(pf, v::Int)
-
-Read University of Washington-format seismic pick file `pf` into SeisHdr struct `H`. `v` controls verbosity; set `v > 0` to dump verbose debug info. to STDOUT.
-
-"""
+@doc (@doc uwpf)
 function uwpf(pickfile::String, v::Int)
   pf = open(pickfile, "r")
   seekstart(pf)
@@ -219,7 +221,10 @@ Read University of Washington-format seismic data file `df` into SeisData struct
 
 Specify verbose mode (for debugging).
 """
-function uwdf(datafile::String; v=0::Int)
+function uwdf(datafile::String;
+              v::Int=KW.v,
+              full::Bool=false
+              )
   fname = realpath(datafile)
   D = Dict{String,Any}()
 
@@ -227,14 +232,28 @@ function uwdf(datafile::String; v=0::Int)
   fid = open(fname, "r")
 
   # Process master header
-  N = bswap(read(fid, Int16))
-  skip(fid, 4)
-  lmin = bswap(read(fid, Int32))
-  lsec = bswap(read(fid, Int32))
-  skip(fid, 8)
-  flags = [bswap(i) for i in read!(fid, Array{Int16, 1}(undef, 10))]
-  extras = replace(String(read!(fid, Array{UInt8, 1}(undef, 10))), "\0" => " ")
-  comment = replace(String(read!(fid, Array{UInt8, 1}(undef, 80))), "\0" => " ")
+  N             = Int64(bswap(read(fid, Int16)))
+  mast_fs       = bswap(read(fid, Int32))
+  mast_lmin     = bswap(read(fid, Int32))
+  mast_lsec     = bswap(read(fid, Int32))
+  mast_nx       = bswap(read(fid, Int32))
+  # mast_tape_no  = bswap(read(fid, Int16))
+  # mast_event_no = bswap(read(fid, Int16))
+  # flags         = read!(fid, Array{Int16, 1}(undef, 10))
+  skip(fid, 24)
+  extra         = read(fid, 10)
+  skip(fid, 80)
+
+  if v > 2
+    println("mast_header:")
+    println("N = ", N)
+    println("mast_fs = ", mast_fs)
+    println("mast_lmin = ", mast_lmin)
+    println("mast_lsec = ", mast_lsec)
+    println("mast_nx = ", mast_nx)
+    println("extra = ", Char.(extra))
+  end
+
 
   # Set M time with lmin and lsec GREGORIAN MINUTES JESUS CHRIST WTF
   # uw_ot = lmin*60 + lsec*1.0e-6 + uw_dconv
@@ -243,135 +262,231 @@ function uwdf(datafile::String; v=0::Int)
   seekend(fid)
   skip(fid, -4)
   nstructs = bswap(read(fid, Int32))
-  v>0 && println(stdout, "nstructs=", nstructs)
+  v>0 && println(stdout, "nstructs = ", nstructs)
   structs_os = (-12*nstructs)-4
   tc_os = 0
-  v>0 && println(stdout, "structs_os=", structs_os)
+  v>1 && println(stdout, "structs_os = ", structs_os)
 
   # Set version of UW seismic data file (char may be empty, leave code as-is!)
-  uwformat = extras[3] == '2' ? 2 : 1
+  uw2::Bool = extra[3] == 0x32 ? true : false
+  chno = Array{Int32, 1}(undef, N)
+  corr = Array{Int32, 1}(undef, N)
 
-  # Read in UW2 data structures
-  chno = Array{Int32, 1}(undef, 0)
-  corr = Array{Int32, 1}(undef, 0)
-  if uwformat == 2
+  # Read in UW2 data structures from record end
+  if uw2
     seekend(fid)
     skip(fid, structs_os)
-    for i1 = 1:nstructs
-      structtag     = replace(String(read!(fid, Array{UInt8, 1}(undef, 4))), "\0" => "")
-      nstructs      = bswap(read(fid, Int32))
+    for j = 1:nstructs
+      structtag     = read(fid, UInt8)
+      skip(fid, 3)
+      M             = bswap(read(fid, Int32))
       byteoffset    = bswap(read(fid, Int32))
-      if structtag == "CH2"
-        N = nstructs
-      elseif structtag == "TC2"
-        fpos = position(fid)
+      if structtag == 0x43 # 'C'
+        N = Int64(M)
+      elseif structtag == 0x54 # 'T'
+        fpos        = position(fid)
         seek(fid, byteoffset)
-        for n = 1:nstructs
-          push!(chno, read(fid, Int32))
-          push!(corr, read(fid, Int32))
+        chno = Array{Int32, 1}(undef, M)
+        corr = Array{Int32, 1}(undef, M)
+        n = 0
+        @inbounds while n < M
+          n += 1
+          chno[n]   = read(fid, Int32)
+          corr[n]   = read(fid, Int32)
         end
-        chno = bswap.(chno)
-        corr = bswap.(corr)
-        chno .+= 1
-        tc_os = -8*nstructs
+        chno .= (bswap.(chno) .+ 1)
+        corr .= bswap.(corr)
+        tc_os = -8*M
         seek(fid, fpos)
       end
     end
   end
-  N = Int64(N)
   v>0 && println(stdout, "Processing ", N , " channels.")
 
   # Write time corrections
-  timecorr = zeros(Float32, N)
+  timecorr = zeros(Int64, N)
   if length(chno) > 0
-    for n = 1:length(chno)
-      timecorr[chno[n]] = corr[n]*Float32(1.0e-6)
+    for n = 1:N
+      # corr is in μs
+      timecorr[chno[n]] = Int64(corr[n])
     end
   end
 
-  # Read UW2 channel headers
-  if uwformat == 2
+  # Read UW2 channel headers ========================================
+  S = SeisData()
+
+  if uw2
     seekend(fid)
-    skip(fid, Int(-56*N + structs_os + tc_os))
-    f = Array{DataType, 1}(undef, N)
-    I32 = Array{Int32, 2}(undef, 6, N)  # chlen, offset, lmin, lsec, fs, expan1
-    U8 = Array{UInt8, 2}(undef, 32, N)  # (8 = 4*int16, unused) + name(8), tmp(4), compflg(4), chid(4)
-    for i = 1:N
-      I32[1:6,i] = read!(fid, Array{Int32,1}(undef, 6))
-      U8[1:32,i] = read!(fid, Array{UInt8,1}(undef, 32))
-    end
-    I32 = [bswap(i) for i in I32]'
-    U8 = U8'
-
-    # Parse I32
-    ch_len = I32[:,1]
-    ch_os = I32[:,2]
-    ch_time = I32[:,3].*60.0 .+ I32[:,4]*1.0e-6 .+ timecorr .+ uw_dconv
-    fs = map(Float64, I32[:,5])./1000.0
-
-    # Divide up U8
-    sta_u8 = U8[:,09:16]
-    fmt_u8 = U8[:,17:20]'
-    cha_u8 = U8[:,21:24]
-
-    # Format codes
-    c = reverse(fmt_u8, dims=1)
-    for i = 1:N
-      f[i] = Int16
-      for j = 1:4
-        if c[j,i] == 0x46 # 'F'
-          f[i] = Float32
-          break
-        elseif c[j,i] == 0x4c # 'L'
-          f[i] = Int32
-          break
-        elseif c[j,i] == 0x53 # 'S'
-          f[i] = Int16
-          break
-        end
+    skip(fid, -56*N + structs_os + tc_os)
+    I32 = Array{Int32, 2}(undef, 5, N)    # chlen, offset, lmin, lsec (μs), fs, expan1 (unused)
+    I16 = Array{Int16, 2}(undef, 3, N)    # lta, trig, bias, fill (unused)
+    U8  = Array{UInt8, 2}(undef, 24, N)   # name(8), tmp(4), compflg(4), chid(4), expan2(4)
+    i = 0
+    @inbounds while i < N
+      i += 1
+      I32[1,i] = read(fid, Int32)
+      I32[2,i] = read(fid, Int32)
+      I32[3,i] = read(fid, Int32)
+      I32[4,i] = read(fid, Int32)
+      I32[5,i] = read(fid, Int32)
+      if full == true
+        skip(fid, 4)
+        I16[1,i] = read(fid, Int16)
+        I16[2,i] = read(fid, Int16)
+        I16[3,i] = read(fid, Int16)
+        skip(fid, 2)
+      else
+        skip(fid, 12)
+      end
+      j = 0
+      while j < 24
+        j += 1
+        U8[j,i] = read(fid, UInt8)
       end
     end
+    I32 = I32'
+    U8 = U8'
 
-    s = cat(repeat([0x55 0x57 0x2e], N, 1), sta_u8, repeat([0x2e 0x2e], N, 1), cha_u8, dims=2)'
-    id = [replace(String(s[:,i]), "\0" => "") for i = 1:N]
-    X = Array{Union{Array{Float32,1}, Array{Float64,1}},1}(undef, N)
-    T = Array{Array{Int64, 2}, 1}(undef, N)
-    for i = 1:N
-      seek(fid, ch_os[i])
-      X[i] = Float32[bswap(j) for j in read!(fid, Array{f[i], 1}(undef, ch_len[i]))]
-      T[i] = Int64[1 round(Int64, ch_time[i]*1000000); length(X[i]) 0]
+    # Parse I32 -------------------------------------------
+    I32 .= bswap.(I32)
+    ch_len  = view(I32, :, 1)     # "ch_len" is the length in samples of each channel
+    ch_os   = view(I32, :, 2)     # "ch_os" is the byte offset of each channel
+    lmin    = view(I32, :, 3)     # "lmin" is Gregorian minutes, which we'll correct with uw_dconv
+    lsec    = view(I32, :, 4)     # "lsec" is in μs
+    fs      = view(I32, :, 5)     # "fs" is in [1/1000 seconds], not Hz!
+
+    # old time conversions
+    # ch_time = (I32[:,3].*60.0 .+ I32[:,4]*1.0e-6 .+ timecorr .+ uw_dconv)
+    # setindex!(t, round(Int64, ch_time[i]*1000000), 3)
+    ch_time = lsec .+ 1000000*Int64.(lmin*60) .+ timecorr .+ uw_dconv
+
+    # Parse I16 -------------------------------------------
+    if full == true
+      I16 = I16'
+      I16 .= bswap.(I16)
     end
+
+    # Parse U8 --------------------------------------------
+    # cols 01:08    channel name
+    # cols 09:12    format code
+    # cols 13:16    compflg(4)
+    # cols 17:20    chid
+    # cols 21:24    expan2
+    if full == true
+      U8[U8.==0x00] .= 0x20
+    end
+    sta_u8  = view(U8, :, 1:8)
+    fmt_u8  = view(U8, :, 9)
+    cha_u8  = view(U8, :, 13:16)
+    chid    = view(U8, :, 17:20)
+    expan2  = view(U8, :, 21:24)
+
+    seek(fid, ch_os[1])
+    buf = getfield(BUF, :buf)
+    checkbuf!(buf, 4*maximum(ch_len))
+    id = zeros(UInt8, 15)
+    i = 0
+    os = 0
+    @inbounds while i < N
+      i += 1
+      skip(fid, os)
+      nx = getindex(ch_len, i)
+
+      # Generate ID
+      fill!(id, 0x00)
+      id[1] = 0x55
+      id[2] = 0x57
+      id[3] = 0x2e
+      id[12] = 0x2e
+      fill_id!(id, sta_u8[i,:], 1, 8, 4, 8)
+      fill_id!(id, cha_u8[i,:], 1, 4, 13, 15)
+      id_str = String(id[id.!=0x00])
+
+      # Save to SeisChannel
+      C = SeisChannel()
+      setfield!(C, :id, id_str)
+      setfield!(C, :fs, Float64(getindex(fs, i))*1.0e-3)
+      setfield!(C, :units, "m/s")
+      setfield!(C, :src, fname)
+      if full == true
+        D = getfield(C, :misc)
+        D["lta"]    = I16[i,1]
+        D["trig"]   = I16[i,2]
+        D["bias"]   = I16[i,3]
+        D["chid"]   = String(chid[i,:])
+        D["expan2"] = String(expan2[i,:])
+        if i == 1
+          D["mast_fs"]    = mast_fs*1.0f-3
+          D["mast_lmin"]  = mast_lmin
+          D["mast_lsec"]  = mast_lsec
+          D["mast_nx"]    = mast_nx
+          D["extra"]     = String(extra)
+
+          # Go back to master header; grab what we skipped
+          p = position(fid)
+          seek(fid, 18)         # we have the first few fields already
+          D["mast_tape_no"]   = bswap(read(fid, Int16))
+          D["mast_event_no"]  = bswap(read(fid, Int16))
+          D["flags"]          = bswap.(read!(fid, Array{Int16, 1}(undef, 10)))
+          skip(fid, 10)         # we have "extra" already
+          comment             = read(fid,80)
+          D["comment"] = String(comment[comment.!=0x00])
+
+          # Return to where we were
+          seek(fid, p)
+        end
+      end
+
+      # Generate T
+      t = Array{Int64,2}(undef,2,2)
+      setindex!(t, one(Int64), 1)
+      setindex!(t, nx, 2)
+      setindex!(t, ch_time[i], 3)
+      setindex!(t, zero(Int64), 4)
+      setfield!(C, :t, t)
+
+      # Generate X
+      x = Array{Float32,1}(undef, nx)
+      if fmt_u8[i] == 0x53
+        readbytes!(fid, buf, 2*nx)
+        fillx_i16_be!(x, buf, nx, 0)
+      elseif fmt_u8[i] == 0x4c
+        readbytes!(fid, buf, 4*nx)
+        fillx_i32_be!(x, buf, nx, 0)
+      else
+        readbytes!(fid, buf, 4*nx)
+        x .= bswap.(reinterpret(Float32, buf))[1:nx]
+      end
+      setfield!(C, :x, x)
+
+      # Push to SeisData
+      push!(S,C)
+
+      if i < N
+        os = getindex(ch_os, i+1) - position(fid)
+      end
+    end
+    note!(S, string("+src: readuw(", fname, ")"))
+  else
+    @warn(string("UW-1 format not supported; data not read."))
   end
   close(fid)
-
-  S = SeisData(N)
-  setfield!(S, :name, id)
-  setfield!(S, :id, id)
-  setfield!(S, :fs, fs)
-  setfield!(S, :x, X)
-  setfield!(S, :t, T)
-  setfield!(S, :src, repeat([fname], N))
-  setfield!(S, :units, repeat(["counts"], N))
-  note!(S, string("+src: readuw ", fname))
   return S
 end
 
-"""
-    S = readuw(f)
+@doc """
+    Ev = readuwevt(fpat)
 
-Read University of Washington-format seismic data in file `f` into SeisEvent `S`. `f` can be a data file, a pick file, or a stub for one or both.
-
-### Requirements
-* A data file must end in 'W'
-* A pick file must end in [a-z] and contain exactly one event. Pick files from teleseisms aren't read.
+Read University of Washington-format event data with file pattern stub `fpat`
+into SeisEvent `Ev`. `fstub` can be a datafile name, a pickname, or a stub:
+* A datafile name must end in 'W'
+* A pickfile name must end in a lowercase letter (a-z except w) and should
+describe a single event.
 * A filename stub must be complete except for the last letter, e.g. "99062109485".
-
-### Example
-    S = readuw("99062109485")
-
-Read data file 99062109485W and pick file 99062109485o in the current working directory.
-"""
-function readuw(filename::String; v=0::Int)
+* Wild cards for multi-file read are not supported by `readuw` because the
+data format is strictly an event-oriented design.
+""" readuwevt
+function readuwevt(filename::String; v::Int64=KW.v)
 
   # Identify pickfile and datafile
   filename = Sys.iswindows() ? realpath(filename) : relpath(filename)
@@ -395,20 +510,67 @@ function readuw(filename::String; v=0::Int)
   if safe_isfile(df)
     # Datafile wrapper
     v>0 && println(stdout, "Reading datafile ", df)
-    S = SeisEvent(data=uwdf(df, v=v))
+    Ev = SeisEvent(data=uwdf(df, v=v, full=true))
     v>0 && println(stdout, "Done reading data file.")
 
     # Pickfile wrapper
     if safe_isfile(pf)
       v>0 && println(stdout, "Reading pickfile ", pf)
-      uwpf!(S, pf)
+      uwpf!(Ev, pf)
       v>0 && println(stdout, "Done reading pick file.")
+
+      # Move event keys to event header dict
+      klist = ("extra", "flags", "mast_event_no", "mast_fs", "mast_lmin", "mast_lsec", "mast_nx", "mast_tape_no")
+      D_data = getindex(getfield(Ev.data, :misc), 1)
+      D_hdr = getfield(Ev.hdr, :misc)
+      for k in klist
+        D_hdr[k] = D_data[k]
+        delete!(D_data, k)
+      end
+      D_hdr["comment_df"] = D_data["comment"]
+      delete!(D_data, "comment")
     else
       v>0 && println(stdout, "Skipping pickfile (not found or not given)")
     end
   else
-    # Pickfile only
-    S = SeisEvent(hdr=uwpf(pf, v))
+    # Pickfile only*
+    Ev = SeisEvent(hdr=uwpf(pf, v))
   end
+
+  return Ev
+end
+
+@doc """
+    readuw!(S::SeisData, dfpat)
+
+Read University of Washington-format seismic data files matching file pattern
+`dfpat` into SeisData structure S. This syntax supports wildcards.
+
+    S = readuw(dfpat)
+
+As above, but creates a new SeisData object.
+""" readuw
+function readuw!(S::SeisData, filestr::String;
+                  v::Int64=KW.v,
+                  full::Bool=false)
+
+  if safe_isfile(filestr)
+    append!(S, uwdf(filestr, v=v, full=full))
+  else
+    files = ls(filestr)
+    nf = length(files)
+    for fname in files
+      append!(S, uwdf(fname, v=v))
+    end
+  end
+  return nothing
+end
+
+@doc (@doc readuw)
+function readuw(filestr::String;
+                v::Int64=KW.v,
+                full::Bool=false)
+  S = SeisData()
+  readuw!(S, filestr, v=v, full=full)
   return S
 end

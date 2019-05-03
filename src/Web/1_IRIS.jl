@@ -37,7 +37,7 @@ function irisws(cha::String, d0::String, d1::String;
       savereq(R, fmt, c[1], c[2], c[3], c[4], d0, d1, "R")
     end
     if fmt == "sacbl"
-      Ch = read_sac_stream(IOBuffer(R))
+      Ch = read_sac_stream(IOBuffer(R), BUF.sac_fv, BUF.sac_iv, BUF.sac_cv, false, false)
       if isempty(Ch.name)
         Ch.name = deepcopy(Ch.id)
       end
@@ -48,7 +48,7 @@ function irisws(cha::String, d0::String, d1::String;
         Ch.loc = zeros(Float64,5)
       end
     elseif fmt == "geocsv"
-      parse_geocsv_ts!(S, readlines(IOBuffer(R)))
+      read_geocsv_tspair!(S, IOBuffer(R))
       Ch = S[1]
     else
       # other parsers not yet written
