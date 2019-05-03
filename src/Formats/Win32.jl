@@ -249,9 +249,7 @@ function readwin32(dfilestr::String, cfilestr::String;
     χ = getindex(S.x, i)
 
     # Ensure we aren't overcompensating
-    if lastindex(χ) != getindex(xi, i)
-       resize!(χ, xi[i])
-     end
+    lastindex(χ) == getindex(xi, i) || resize!(χ, xi[i])
 
     # Get resp for passive velocity sensors
     fci = getindex(fc, i)

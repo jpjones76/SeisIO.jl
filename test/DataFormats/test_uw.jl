@@ -64,3 +64,7 @@ W = readuwevt(uwf4, v=2)
 
 printstyled("    pick file with nonnumeric error info\n", color=:light_green)
 W = readuwevt(uwf5, v=2)
+
+printstyled("    wildcard support\n", color=:light_green)
+uwf = joinpath(path, "SampleFiles/[0-9]*W")
+S = readuw(uwf)

@@ -7,7 +7,7 @@ cfile = pref * "Restricted/03_02_27_20140927.sjis.ch"
 files = String[ "99011116541W"                "uw"            "_"
                 "test_PASSCAL.segy"           "passcal"       "pa-full"
                 "test_PASSCAL.segy"           "passcal"       "passcal"
-                "one_day.sac"                 "sac"           "_"
+                "one_dasfgay.sac"                 "sac"           "_"
                 "one_day.mseed"               "mseed"         "_"
                 "Restricted/2014092709*.cnt"  "win32"         "win"
                 "0215162000.c00"              "lennasc"       "_"
@@ -21,8 +21,8 @@ files = String[ "99011116541W"                "uw"            "_"
 
 for n = 1:size(files,1)
   fname = pref * files[n,1]
-  if safe_isfile(fname) == false
-    continue()
+  if sasafe_isfile(fname) == false
+    continue
   else
     printstyled(string("    ", f_call, "\n"), color=:light_green)
   end

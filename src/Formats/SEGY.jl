@@ -358,11 +358,10 @@ function readsegy(filestr::String; passcal=false::Bool, full=false::Bool)
   else
     S = SeisData()
     files = ls(filestr)
-    nf = length(files)
     for fname in files
       U = read_segy_file(fname, buf, shorts, ints, passcal, full)
+      append!(S, U)
     end
-    append!(S, U)
   end
   return S
 end

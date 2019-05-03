@@ -66,6 +66,15 @@ open("runtests.log", "a") do out
   end
 end
 
+printstyled("    wildcard support\n", color=:light_green)
+segfpat = joinpath(path, "SampleFiles/*PASSCAL*segy")
+SEG = readsegy(segfpat, passcal=true, full=true)
+@test S.n == 1
+@test Float64(SEG.misc[1]["max"]) == maximum(SEG.x[1]) == 2047.0
+@test Float64(SEG.misc[1]["min"]) == minimum(SEG.x[1]) == -2048.0
+@test ≈(SEG.x[1][1:10], [47.0, 46.0, 45.0, 44.0, 51.0, 52.0, 57.0, 59.0, 40.0, 34.0])
+@test length(SEG.x[1]) == SEG.misc[1]["num_samps"] == 8640047
+
 if safe_isfile(segy_file_2)
  printstyled("    SEG Y rev 1\n", color=:light_green)
   SEG = readsegy(segy_file_2)
