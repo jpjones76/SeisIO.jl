@@ -1,4 +1,5 @@
-printstyled("  read_data\n", color=:light_green)
+import SeisIO:safe_isfile
+if printstyled("  read_data\n", color=:light_green)
 nx_add = 1400000
 nx_new = 36000
 pref = path * "/SampleFiles/"
@@ -20,9 +21,13 @@ files = String[ "99011116541W"                "uw"            "_"
 
 for n = 1:size(files,1)
   fname = pref * files[n,1]
+  if safe_isfile(fname) == false
+    continue()
+  else
+    printstyled(string("    ", f_call, "\n"), color=:light_green)
+  end
   f_call = files[n,2]
   opt = files[n,3]
-  printstyled(string("    ", f_call, "\n"), color=:light_green)
   if opt == "pa-full"
     S = read_data("passcal", fname, full=true)
   elseif opt == "win"
