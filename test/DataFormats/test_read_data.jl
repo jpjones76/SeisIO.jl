@@ -1,5 +1,5 @@
 import SeisIO:safe_isfile
-if printstyled("  read_data\n", color=:light_green)
+printstyled("  read_data\n", color=:light_green)
 nx_add = 1400000
 nx_new = 36000
 pref = path * "/SampleFiles/"
