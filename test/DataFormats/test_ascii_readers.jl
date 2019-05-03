@@ -12,5 +12,5 @@ i = findid("CC.JRO..BHZ", S)
 @test ≈(S.fs[i], 50.0)
 @test ≈(S.loc[i], [46.275269, -122.218262, 1219.0, 0.0, -90.0, 0.0])
 
-printstyled(    "Wildcard support")
-S = readgeocsv(string(path, "/SampleFiles/FDSNWS.IRIS.geo*"))
+# printstyled(    "Wildcard support")
+# S = readgeocsv(string(path, "/SampleFiles/FDSNWS.IRIS.geo*"))
