@@ -21,7 +21,7 @@ files = String[ "99011116541W"                "uw"            "_"
 
 for n = 1:size(files,1)
   fname = pref * files[n,1]
-  if sasafe_isfile(fname) == false
+  if safe_isfile(fname) == false
     continue
   else
     printstyled(string("    ", f_call, "\n"), color=:light_green)
