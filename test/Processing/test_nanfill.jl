@@ -1,3 +1,4 @@
+printstyled("  nanfill\n", color=:light_green)
 S = randSeisData()
 L = length(S.x[1])
 C = deepcopy(S[1])

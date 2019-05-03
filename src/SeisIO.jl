@@ -20,6 +20,7 @@ include("Types/SeisData.jl")
 include("Types/SeisChannel.jl")
 include("Types/SeisHdr.jl")
 include("Types/SeisEvent.jl")
+include("Types/SeisIOBuf.jl")
 include("Types/note.jl")
 for i in readdir(path*"/Types/Methods")
   if endswith(i, ".jl")
@@ -57,6 +58,14 @@ end
 # include("Web/FDSN.jl")
 # include("Web/IRIS.jl")            # IRISws command line client
 # include("Web/SeedLink.jl")
+
+# Wrappers
+for i in ls(path*"/Wrappers/*")
+  if endswith(i, ".jl")
+    include(joinpath("Wrappers",i))
+  end
+end
+
 
 # The RandSeis submodule
 include("RandSeis/RandSeis.jl")

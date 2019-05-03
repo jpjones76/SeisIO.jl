@@ -1,5 +1,5 @@
 # Define default values for keyword arguments.
-struct SLDefs
+mutable struct SLDefs
   port::Int64
   gap::Int64
   kai::Int64
@@ -8,7 +8,7 @@ struct SLDefs
   x_on_err::Bool
 end
 
-struct FiltDefs
+mutable struct FiltDefs
   fl::Float64
   fh::Float64
   np::Int64
@@ -18,7 +18,7 @@ struct FiltDefs
   dm::String
 end
 
-struct KWDefs
+mutable struct KWDefs
   SL::SLDefs
   Filt::FiltDefs
   evw::Array{Real,1}
@@ -112,7 +112,6 @@ SeisIO.KW.Filt: Defaults parameters for time-series filtering.
 
 """
 const KW = KWDefs(
-
            SLDefs(18000,    # port::Int64
                    3600,    # gap::Int64
                     600,    # kai::Int64

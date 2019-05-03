@@ -79,7 +79,7 @@ mutable struct BlkCalib
                   )
 end
 
-mutable struct SeedVol
+mutable struct SeisIOBuf
   fmt::UInt8    # 0x0a
   nx::UInt16    # 0x1000
   wo::UInt8     # 0x01
@@ -117,10 +117,12 @@ mutable struct SeedVol
   x::Array{Float32,1}       # Data buffer
   u8::Array{UInt8,1}        # Flags (Stored as four UInt8s)
   x32::Array{UInt32,1}      # Unsigned 32-bit steim-encoded data
-  buf::Array{UInt8,1}       # Buffer for reading steim data
-
-  # Defaults
-  # def::SeedDef
+  buf::Array{UInt8,1}       # Buffer for reading UInt8 data
+  int16_buf::Array{Int16,1} # Buffer for int16s in headers
+  int32_buf::Array{Int32,1} # Buffer for int16s in headers
+  sac_fv::Array{Float32,1}
+  sac_iv::Array{Int32,1}
+  sac_cv::Array{UInt8,1}
 
   # Blockette containers
   B201::Blk201
@@ -128,7 +130,7 @@ mutable struct SeedVol
   B2000::Blk2000
   Calib::BlkCalib
 
-  function SeedVol()
+  function SeisIOBuf()
     new(0xff,                               # fmt
         0x1000,                             # nx
         0x01,                               # wo
@@ -162,6 +164,11 @@ mutable struct SeedVol
         Array{UInt8,1}(undef, 4),           # u8::Array{UInt8,1}
         Array{UInt32,1}(undef, 16384),      # x32::Array{UInt32,1}
         Array{UInt8,1}(undef, 65536),       # buf::Array{UInt8,1}
+        Array{Int16,1}(undef, 62),          # int16_buf::Array{Int16,1}
+        Array{Int32,1}(undef, 29),          # int32_buf::Array{Int32,1}
+        Array{Float32,1}(undef, 70),        # sac_fv::Array{Float32,1}
+        Array{Int32,1}(undef, 40),          # sac_iv::Array{Int32,1}
+        Array{UInt8,1}(undef, 192),         # sac_cv::Array{UInt8,1}
 
         # blockette fields
         Blk201(),                           # Blk201:: Blk201
@@ -172,4 +179,4 @@ mutable struct SeedVol
   end
 end
 
-const SEED = SeedVol()
+const BUF = SeisIOBuf()

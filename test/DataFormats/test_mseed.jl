@@ -12,7 +12,7 @@ S = readmseed(string(path, "/SampleFiles/test.mseed"), v=0)
 @test isequal(string(u2d(S.t[1][1,2]*1.0e-6)), "2003-05-29T02:13:22.043")
 @test ≈(S.x[1][1:5], [ 2787, 2776, 2774, 2780, 2783 ])
 
-# Test breaks if memory-resident SeedVol structure SEED is not reset
+# Test breaks if memory-resident SeisIOBuf structure SEED is not reset
 S1 = readmseed(string(path, "/SampleFiles/test.mseed"), v=0)
 @test S == S1
 
@@ -74,12 +74,13 @@ if safe_isdir(path*"/SampleFiles/Restricted")
 
           Y = Array{DateTime,1}(undef,0)
           for f in fnames
-            seis = readsac(f)
+            seis = readsac(f)[1]
             push!(Y, u2d(seis.t[1,2]*1.0e-6))
           end
           #[round(u2d(i*1.0e-6), Second) for i in t]
+          # println("W = ", string.(W))
+          # println("Y = ", string.(Y))
           Δ = [abs(.001*(W[i]-Y[i]).value)*C.fs for i=1:length(Y)]
-          println(Δ)
           @test maximum(Δ) < 1.0
         else
           @test isempty(S) == false

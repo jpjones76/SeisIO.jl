@@ -15,7 +15,7 @@ if safe_isfile(cfile)
     redirect_stdout(out) do
       fname = path*"/SampleFiles/Restricted/2014092709*.cnt"
       cfile = path*"/SampleFiles/Restricted/03_02_27_20140927.euc.ch"
-      S = readwin32(fname, cfile, v=1)
+      S = readwin32(fname, cfile, v=3)
 
       # There should be 8 channels
       @test S.n==8
@@ -49,7 +49,7 @@ if safe_isfile(cfile)
 
       U = SeisData()
       for f in testfiles
-        T = rsac(f)
+        T = readsac(f)[1]
         push!(U, T)
       end
 
@@ -114,9 +114,10 @@ if safe_isfile(cfile)
       readwin32!(S, fname, cfile, v=1)
     end
   end
-  @test length(S.x[1]) == 60*S.fs[1]
-  @test maximum(S.x[1]) == 11075.0
-  @test minimum(S.x[1]) == -5026.0
+  i = findid("V.ONTA.23.EHH", S)
+  @test length(S.x[i]) == 60*S.fs[i]
+  @test maximum(S.x[i]) == 11075.0
+  @test minimum(S.x[i]) == -5026.0
 
   # ...and 24-bit bigendian Int...
   fname = path*"/SampleFiles/Restricted/2014092712000302.cnt"

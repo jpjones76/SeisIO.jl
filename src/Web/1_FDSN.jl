@@ -215,8 +215,10 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
     if parsable && fmt in ["mseed", "miniseed", "geocsv"]
       if fmt == "mseed" || fmt == "miniseed"
         parsemseed!(S, io, v, KW.nx_add, KW.nx_add)
-      elseif fmt == "geocsv"
-        parse_geocsv_ts!(S, readlines(io))
+      elseif fmt == "geocsv" || fmt == "geocsv.tspair"
+        read_geocsv_tspair!(S, io)
+      elseif fmt == "geocsv.slist"
+        read_geocsv_slist!(S, io)
       end
     else
       parse_err = true

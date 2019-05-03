@@ -1,4 +1,4 @@
-export d2u, j2md, md2j, parsetimewin, timestamp, u2d, t_win, w_time
+export d2u, j2md, md2j, parsetimewin, timestamp, u2d
 
 function tstr(t::DateTime)
   Y, M, D, h, m, s, μ = year(t), month(t), day(t), hour(t), minute(t), second(t), millisecond(t)
@@ -12,8 +12,16 @@ function tstr(t::DateTime)
   return string(Y, "-", M, "-", D, "T", h, ":", m, ":", s, ".", μ)
 end
 
+"Alias to Dates.unix2datetime"
 u2d(k::Real) = Dates.unix2datetime(k)
+"Alias to Dates.datetime2unix"
 d2u(k::DateTime) = Dates.datetime2unix(k)
+
+@doc """
+    timestamp()
+
+Return current time formatted YYYY-mm-ddTHH:MM:SS.nnn.
+""" timestamp
 timestamp() = tstr(Dates.unix2datetime(time()))
 timestamp(t::DateTime) = tstr(t)
 timestamp(t::Real) = tstr(u2d(t))
@@ -60,26 +68,28 @@ end
 Convert month `m`, day `d` of year `y` to Julian day (day of year)
 """
 function md2j(y::T, m::T, d::T) where T<:Integer
+  j = zero(Int32)
   if T != Int32
     y = Int32(y)
     m = Int32(m)
     d = Int32(d)
   end
   z = zero(Int32)
-  j = sum(days_per_month[1:m-1]) + d
+  i = one(Int8)
+  while i < m
+    j = j+getindex(days_per_month, i)
+    i = i+1
+  end
+  j = j+d
   if m > 2 && ((y % Int32(400) == z) ||
                (y % Int32(4)   == z &&
                 y % Int32(100) != z))
-    j+=1
+    j = j+1
   end
   return T(j)
 end
 md2j(y::AbstractString, m::AbstractString, d::AbstractString) = md2j(parse(Int, y), parse(Int, m), parse(Int, d))
 
-function y2μs(y::T) where T<:Integer
-  y = Int64(y)-1
-  return 86400000000 * (y*365 + div(y,4) - div(y,100) + div(y,400)) - 62135596800000000
-end
 
 """
     d0, d1 = parsetimewin(s, t)
@@ -87,7 +97,9 @@ end
 Convert times `s` and `t` to strings and sorts s.t. d0 < d1.
 
 ### Time Specification
-`s` and `t` can be real numbers, DateTime objects, or ASCII strings. Strings must follow the format "yyyy-mm-ddTHH:MM:SS.nnn", e.g. `s="2016-03-23T11:17:00.333"`. Exact behavior depends on the data types of s and t:
+`s` and `t` can be real numbers, DateTime objects, or ASCII strings. Strings
+must follow the format "yyyy-mm-ddTHH:MM:SS.nnn", e.g.
+`s="2016-03-23T11:17:00.333"`. Exact behavior depends on the types of s and t:
 
 | **s** | **t** | **Behavior**                         |
 |:------|:------|:-------------------------------------|
@@ -101,7 +113,9 @@ Convert times `s` and `t` to strings and sorts s.t. d0 < d1.
 (above, R = Real, DT = DateTime, S = String, I = Integer)
 
 ### Relative Timekeeping
-Numeric time values are *relative to the start of the current minute*. Thus, if one of `-s` or `-t` is 0, the data request begins (or ends) at the start of the minute in which the request is submitted.
+Numeric time values are interpreted *relative to the start of the current minute*.
+Thus, if `-s` or `-t` is 0, the data request begins (or ends) at the start of
+the minute in which the request is submitted.
 """
 function parsetimewin(s::DateTime, t::DateTime)
   if s < t
@@ -120,6 +134,41 @@ parsetimewin(s::Real, t::Real) = parsetimewin(u2d(60*floor(Int, time()/60) + s),
 
 # =========================================================
 # Not for export
+function y2μs(y::T) where T<:Integer
+  y = Int64(y)-1
+  return 86400000000 * (y*365 + div(y,4) - div(y,100) + div(y,400)) - 62135596800000000
+end
+
+# ts = round(Int64, d2u(DateTime(iv[1], m, d, iv[3], iv[4], iv[5], iv[6]))*sμ
+mktime(y::T, j::T, h::T, m::T, s::T, μ::T) where T<:Integer = (y2μs(y) +
+          Int64(j-one(T))*86400000000 +
+          Int64(h)*3600000000 +
+          Int64(m)*60000000 +
+          Int64(s)*1000000 +
+          Int64(μ))
+mktime(t::Array{T,1}) where T<:Integer =(y2μs(t[1]) +
+          Int64(t[2]-one(T))*86400000000 +
+          Int64(t[3])*3600000000 +
+          Int64(t[4])*60000000 +
+          Int64(t[5])*1000000 +
+          Int64(t[6]))
+
+function endtime(t::Array{Int64,2}, Δ::Int64)
+  if isempty(t)
+    t_end = 0
+  else
+    L = size(t,1)
+    t_end = (t[L,1]-1)*Δ
+    if L > 2
+      t_end += getindex(sum(t, dims=1),2)
+    else
+      t_end += t[1,2]
+    end
+    # t_end = getindex(sum(t, dims=1),2) + (t[L,1]-1)*Δ
+  end
+  return t_end
+end
+endtime(t::Array{Int64,2}, fs::Float64) = endtime(t, round(Int64, 1.0/(fs*μs)))
 
 function t_expand(t::Array{Int64,2}, fs::Float64)
   fs == 0.0 && return t[:,2]
@@ -148,23 +197,6 @@ function t_collapse(tt::Array{Int64,1}, fs::Float64)
   end
   return t
 end
-
-function endtime(t::Array{Int64,2}, Δ::Int64)
-  if isempty(t)
-    t_end = 0
-  else
-    L = size(t,1)
-    t_end = (t[L,1]-1)*Δ
-    if L > 2
-      t_end += getindex(sum(t, dims=1),2)
-    else
-      t_end += t[1,2]
-    end
-    # t_end = getindex(sum(t, dims=1),2) + (t[L,1]-1)*Δ
-  end
-  return t_end
-end
-endtime(t::Array{Int64,2}, fs::Float64) = endtime(t, round(Int64, 1.0/(fs*μs)))
 
 function t_win(T::Array{Int64,2}, Δ::Int64)
   n = size(T,1)-1
@@ -201,3 +233,20 @@ function w_time(W::Array{Int64,2}, Δ::Int64)
   return T
 end
 w_time(W::Array{Int64,2}, fs::Float64) = w_time(W, round(Int64, 1000000.0/fs))
+
+function unpack_u8(v::UInt8)
+  a = signed(div(v,0x10))*Int8(10)
+  b = signed(rem(v,0x10))
+  return Int64(a+b)
+end
+
+function datehex2μs!(a::Array{Int64,1}, datehex::Array{UInt8,1})
+  a[1] = 100*unpack_u8(getindex(datehex, 1)) + unpack_u8(getindex(datehex, 2))
+  a[2] = md2j(getindex(a,1), unpack_u8(getindex(datehex, 3)), unpack_u8(getindex(datehex, 4))) - 1
+  setindex!(a, y2μs(getindex(a,1)), 1)
+  a[3] = unpack_u8(getindex(datehex, 5))
+  a[4] = unpack_u8(getindex(datehex, 6))
+  a[5] = unpack_u8(getindex(datehex, 7))
+  a[6] = unpack_u8(getindex(datehex, 8))
+  return a[1] + a[2]*86400000000 + a[3]*3600000000 + a[4]*60000000 + a[5]*1000000 + a[6]*10000
+end

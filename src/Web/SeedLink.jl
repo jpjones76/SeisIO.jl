@@ -285,7 +285,7 @@ function SeedLink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
   # ==========================================================================
   # init, warnings, sanity checks
   Ns = size(sta,1)
-  SEED.swap = false
+  setfield!(BUF, :swap, false)
 
   # Refresh interval
   refresh = maximum([refresh, eps()])
@@ -413,11 +413,11 @@ function SeedLink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
           (v > 1) && @printf(stdout, "%s: Processing packets ", string(now()))
           while !eof(buf)
             pkt_id = String(read!(buf, Array{UInt8, 1}(undef, 8)))
-            parserec!(S, SEED, buf, v, 65536, 65536)
+            parserec!(S, BUF, buf, v, 65536, 65536)
             (v > 1) && @printf(stdout, "%s, ", pkt_id)
           end
           (v > 1) && @printf(stdout, "\b\b...done current packet dump.\n")
-          seed_cleanup!(S, SEED)
+          seed_cleanup!(S, BUF)
         end
 
         # SeedLink (non-standard) keep-alive gets sent every kai seconds

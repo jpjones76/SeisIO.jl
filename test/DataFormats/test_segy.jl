@@ -9,8 +9,9 @@ SEG = readsegy(segy_file_1, passcal=true, full=true)
 printstyled("      header integrity\n", color=:light_green)
 
 SEG = readsegy(segy_file_1, passcal=true, full=true)
-@test 1/SEG.gain[1] == SEG.misc[1]["scale_fac"] == 4.80184e+08
+@test SEG.gain[1] == SEG.misc[1]["scale_fac"] == 4.80184e+08
 @test SEG.fs[1] == 100.0 == 1.0e6 / SEG.misc[1]["delta"]
+@test lastindex(SEG.x[1]) == 8640047
 @test SEG.misc[1]["trace_seq_line"] == 1
 @test SEG.misc[1]["trace_seq_file"] == 1
 @test SEG.misc[1]["event_no"] == 1
@@ -36,9 +37,9 @@ SEG = readsegy(segy_file_1, passcal=true, full=true)
 @test SEG.misc[1]["trigms"] == 0
 @test SEG.misc[1]["data_form"] == 1
 @test SEG.misc[1]["inst_no"] == 0x0000
-@test SEG.misc[1]["station_name"] == "TDH"
-@test SEG.misc[1]["sensor_serial"] == ""
-@test SEG.misc[1]["channel_name"] == "EHZ"
+@test strip(SEG.misc[1]["sensor_serial"]) == ""
+@test strip(SEG.misc[1]["station_name"]) == "TDH"
+@test strip(SEG.misc[1]["channel_name"]) == "EHZ"
 
 # Location
 printstyled("      sensor position\n", color=:light_green)

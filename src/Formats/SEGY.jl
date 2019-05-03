@@ -1,4 +1,4 @@
-export readsegy, segyhdr
+export readsegy, readsegy!, segyhdr
 
 # ============================================================================
 # Utility functions not for export
@@ -33,76 +33,163 @@ function auto_coords(xy::Array{Int32, 1}, c::Array{Int16, 1})
   return lat, lon
 end
 
-function do_trace(f::IO; full=false::Bool, passcal=false::Bool, fh=zeros(Int16, 3)::Array{Int16, 1}, src=""::String)
-  ftypes = Array{DataType, 1}([UInt32, Int32, Int16, Any, Float32, Any, Any, Int8]) # Note: type 1 is IBM Float32
-  shorts = Array{Int16, 1}(undef, 62)
-  ints   = Array{Int32, 1}(undef, passcal ? 23 : 29)
+function do_trace(f::IO,
+                  buf::Array{UInt8,1},
+                  shorts::Array{Int16,1},
+                  ints::Array{Int32,1},
+                  passcal::Bool,
+                  full::Bool,
+                  src::String,
+                  fh::Array{Int16,1}
+                  )
 
   # First part of trace header is quite standard
-  ints[1:7]   = read!(f, Array{Int32, 1}(undef, 7))
-  shorts[1:4] = read!(f, Array{Int16, 1}(undef, 4))
-  ints[8:15]  = read!(f, Array{Int32, 1}(undef, 8))
-  shorts[5:6] = read!(f, Array{Int16, 1}(undef, 2))
-  ints[16:19] = read!(f, Array{Int32, 1}(undef, 4))
-  shorts[7:52]= read!(f, Array{Int16, 1}(undef, 46))
+  checkbuf!(ints, 29)
+  checkbuf!(shorts, 62)
+  readbytes!(f, buf, 180)
+
+  intbuf = reinterpret(Int32, buf)
+  copyto!(ints, 1, intbuf, 1, 7)
+  copyto!(ints, 8, intbuf, 10, 8)
+  copyto!(ints, 16, intbuf, 19, 4)
+
+  shortbuf = reinterpret(Int16, buf)
+  copyto!(shorts, 1, shortbuf, 1, 4)
+  copyto!(shorts, 5, shortbuf, 35, 2)
+  copyto!(shorts, 7, shortbuf, 45, 46)
+
   if passcal
-    chars         = read!(f, Array{UInt8, 1}(undef, 18))
-    shorts[53]    = read(f, Int16)
-    ints[20]      = read(f, Int32); dt = ints[20]
-    shorts[54:61] = read!(f, Array{Int16, 1}(undef, 8)); fmt = shorts[54]
+    readbytes!(f, buf, 40)
+
     scale_fac     = read(f, Float32)
     inst_no       = read(f, UInt16)
     shorts[62]    = read(f, Int16)
-    ints[21:23]   = read!(f, Array{Int32, 1}(undef, 3)); # n = ints[21]
-    nx = (shorts[20] == Int16(32767) ? ints[21] : Int32(shorts[20]))
-    x = map(Float32, read!(f, Array{fmt == Int16(1) ? Int32 : Int16, 1}(undef, nx)))
+    ints[21]      = read(f, Int32)
+    ints[22]      = read(f, Int32)
+    ints[23]      = read(f, Int32)
+
+    setindex!(shorts, shortbuf[10], 53)
+    copyto!(shorts, 54, shortbuf, 13, 8)
+    setindex!(ints, intbuf[6], 20)
+
+    chars = buf[1:18]
+    dt    = getindex(ints,20)
+    n     = getindex(shorts, 20)
+    fmt   = getindex(shorts, 54)
+    nx    = (n == typemax(Int16) ? getindex(ints,21) : Int32(n))
+    T     = (fmt == one(Int16) ? Int32 : Int16)
+    nb    = checkbuf!(buf, nx, T)
+
+    readbytes!(f, buf, nb)
     close(f)
 
     # trace processing
-    fs    = 1.0e6 / Float64(shorts[21] == Int16(1) ? dt : shorts[21])
-    gain  = Float64(shorts[23]) * 10.0^(Float64(shorts[24])/10.0) / Float64(scale_fac)
-    lat, lon = auto_coords(ints[18:19], shorts[6:7])
-    if passcal == true && abs(lat) < 0.1 && abs(lon) < 0.1
+    y = reinterpret(T, buf)
+    x = Array{Float32,1}(undef, nx)
+    copyto!(x, 1, y, 1, nx)
+    # faster than reprocessing with fillx_ for long files
+
+    z = getindex(shorts, 5)
+    δ = getindex(shorts, 21)
+    fs        = 1.0e6 / Float64(δ == one(Int16) ? dt : δ)
+    gain      = Float64(scale_fac)  * 10.0^(-1.0*Float64(shorts[24]) / 10.0) / Float64(shorts[23])
+    lat, lon  = auto_coords(ints[18:19], shorts[6:7])
+    if abs(lat) < 0.1 && abs(lon) < 0.1
       lat *= 3600.0
       lon *= 3600.0
     end
-    el    = Float64(ints[9]) * Float64(abs(shorts[5]))^(shorts[5]<Int16(0) ? -1.0 : 1.0)
-    sta   = strip(replace(String(chars[1:6]),"\0" => ""))
-    sensor_serial = strip(replace(String(chars[7:14]),"\0" => ""))
-    c = strip(replace(String(chars[15:18]),"\0" => ""))
+    el        = Float64(ints[9]) * Float64(abs(z))^(z < zero(Int16) ? -1.0 : 1.0)
 
-    if uppercase(c) in ["Z","N","E"]
-      cha = string(getbandcode(fs), 'H', c[1])
-    elseif length(c) < 2
-      cha = "YYY"
-    else
-      cha = c
+    # Create ID
+    id_arr = zeros(UInt8,8)
+    i = one(Int8)
+    o = one(Int8)
+    while i < Int8(18)
+      if chars[i] == 0x00
+        chars[i] = 0x20
+      end
+      i = i+o
     end
+    fill_id!(id_arr, chars, one(Int16), Int16(6), Int16(2), Int16(6))
+    id_arr[1] = 0x2e
+    id_arr[8] = 0x2e
+    deleteat!(id_arr, id_arr.==0x00)
+
+    # Channel part is tedious; people use one-char channel names like "Z"
+    ch_arr = chars[15:18]
+    deleteat!(ch_arr, ch_arr.==0x00)
+    nc = lastindex(ch_arr)
+    if nc == 1
+      c = uppercase(Char(ch_arr[1]))
+      if c in ('Z','N','E')
+        cha = string(getbandcode(fs), 'H', c)
+      else
+        cha = "YYY"
+      end
+    elseif nc ≥ 3
+      cha = String(ch_arr[1:3])
+    else
+      cha = "YYY"
+    end
+    id = String(id_arr) * cha
+
   else
     (dt, nx, fmt) = fh
-    ints[20:24]   = read!(f, Array{Int32, 1}(undef, 5))
-    shorts[53:54] = read!(f, Array{Int16, 1}(undef, 2))
-    ints[25]      = read(f, Int32)
-    shorts[55:59] = read!(f, Array{Int16, 1}(undef, 5))
+    dt = fh[1]
+    nx = fh[2]
+    fmt = fh[3]
+    readbytes!(f, buf, 38)
     ints[26]      = read(f, Int32)
     shorts[60]    = read(f, Int16)
     ints[27]      = read(f, Int32)
-    shorts[61:62] = read!(f, Array{Int16, 1}(undef, 2))
-    ints[28:29]   = read!(f, Array{Int32, 1}(undef, 2))
-    x             = map(Float32, [bswap(i) for i in read!(f, Array{ftypes[fmt], 1}(undef, nx))])
+    shorts[61]    = read(f, Int16)
+    shorts[62]    = read(f, Int16)
+    ints[28]      = read(f, Int32)
+    ints[29]      = read(f, Int32)
 
+    copyto!(ints, 20, intbuf, 1, 5)
+    copyto!(shorts, 53, shortbuf, 11, 2)
+    ints[25] = getindex(intbuf, 7)
+    copyto!(shorts, 55, shortbuf, 15, 5)
+
+    T = getindex(segy_ftypes, fmt)
+    nb = checkbuf!(buf, nx, T)
+    readbytes!(f, buf, nb)
+
+    # trace processing
+    x = Array{Float32,1}(undef, nx)
+    if T == Int16
+      fillx_i16_be!(x, buf, nx, 0)
+    elseif T == Int32
+      fillx_i32_be!(x, buf, nx, 0)
+    elseif T == Int8
+      fillx_i8!(x, buf, nx, 0)
+    elseif T == Float32
+      x .= bswap.(reinterpret(Float32, buf))[1:nx]
+    elseif T == UInt32
+      fillx_u32_be!(x, buf, nx, 0)
+    else
+      error("Trace data Type unsupported!")
+    end
 
     # not sure about this; where did this formula come from...?
-    shorts = ntoh.(shorts)
-    ints   = ntoh.(ints)
+    shorts  .= ntoh.(shorts)
+    ints    .= ntoh.(ints)
+    z       = getindex(shorts, 5)
+    δ       = getindex(shorts, 21)
+    fs      = 1.0e6 / Float64(δ)
+    gain    = Float64(ints[25]) * 10.0^(Float64(shorts[53] +
+                                                shorts[23] +
+                                                shorts[24])/10.0) # *2.0^shorts[47]
+    lat     = 0.0
+    lon     = 0.0
+    el      = Float64(ints[9]) * Float64(abs(z))^(z<Int16(0) ? -1.0 : 1.0)
 
-    gain  = Float64(ints[25]) * 10.0^(Float64(shorts[53]+sum(shorts[23:24]))/10.0) # *2.0^shorts[47]
-    fs    = 1.0e6 / Float64(shorts[21])
-    lat   = 0.0
-    lon   = 0.0
-    el    = Float64(ints[9]) * Float64(abs(shorts[5]))^(shorts[5]<Int16(0) ? -1.0 : 1.0)
-    sta   = @sprintf("%04i", shorts[55])
-    cha   = shorts[1] in Int16(11):Int(1):Int16(17) ? trid(shorts[1]-Int16(10), fs=fs) : "YYY"
+    # Create ID
+    sta = string(shorts[55])
+    cha = Int16(10) < shorts[1] < Int16(18) ? trid(shorts[1]-Int16(10), fs=fs) : "YYY"
+    id = "." * sta[1:min(lastindex(sta),5)] * ".." * cha
+
   end
   if full == true
     shorts_k = String["trace_id_code", "n_summed_z", "n_summed_h", "data_use",
@@ -135,100 +222,158 @@ function do_trace(f::IO; full=false::Bool, passcal=false::Bool, fh=zeros(Int16, 
       String["cdp_x", "cdp_y", "inline_3d", "crossline_3d", "shot_point",
       "trans_mant", "unassigned_1", "unassigned_2"] )
     misc = Dict{String,Any}(zip([shorts_k; ints_k],[shorts; ints]))
-    misc["scale_fac"] = 1/gain
+    misc["scale_fac"] = gain
+    if passcal
+      sta = String(chars[1:6])
+      misc["inst_no"] = inst_no
+      misc["sensor_serial"] = String(chars[7:14])
+    end
     misc["station_name"] = sta
     misc["channel_name"] = cha
-    if passcal
-      misc["inst_no"] = inst_no
-      misc["sensor_serial"] = sensor_serial
-    end
   end
 
   # Trace info
-  (m,d)     = j2md(shorts[41], shorts[42])
-  ts        = round(Int64, d2u(DateTime(shorts[41], m, d, shorts[43], shorts[44], shorts[45]))*1000000 +
-                   (shorts[53] + sum(shorts[15:17]))*1000)
-  loc       = [lat, lon, el, 0.0, 0.0]
-  t         = [1 ts; length(x) 0]
-  id        = uppercase(replace(join(["", sta, "00", cha], '.'), "\0" => ""))
-  chan      = SeisChannel()
-  setfield!(chan, :name, id)
-  setfield!(chan, :id, id)
-  setfield!(chan, :loc, loc)
-  setfield!(chan, :gain, gain)
-  setfield!(chan, :fs, fs)
-  setfield!(chan, :src, src)
-  setfield!(chan, :t, t)
-  setfield!(chan, :x, x)
+  ts = mktime(shorts[41], shorts[42], shorts[43], shorts[45], shorts[45], zero(Int16)) +
+        shorts[53] + 1000*sum(shorts[15:17])
+  loc = Float64[lat, lon, el, 0.0, 0.0]
+  C = SeisChannel()
+  setfield!(C, :name, id)
+  setfield!(C, :id, id)
+  setfield!(C, :loc, loc)
+  setfield!(C, :gain, gain)
+  setfield!(C, :fs, fs)
+  setfield!(C, :src, src)
+  setfield!(C, :t, Array{Int64,2}(undef,2,2))
+  setindex!(getfield(C,:t), one(Int64), 1)
+  setindex!(getfield(C,:t), Int64(nx), 2)
+  setindex!(getfield(C,:t), ts, 3)
+  setindex!(getfield(C,:t), zero(Int64), 4)
+  setfield!(C, :x, x)
+  # unsafe_copyto!(getfield(C, :x), 1, x, 1, nx)
+
   if full == true
-    setfield!(chan, :misc, misc)
+    setfield!(C, :misc, misc)
   end
-  note!(chan, string("+src: readsegy ", src))
-  return chan
+  note!(C, string("+src: readsegy ", src))
+  return C
 end
-# ============================================================================
 
-"""
-    seis = readsegy(fname)
-
-Read SEG-Y file `fname` into SeisData object `seis`.
-
-### Keywords
-* `passcal=true` for PASSCAL/NMT modified SEG-Y
-* `full=true` to store full SEG-Y headers as a dictionary in `seis.misc`.
-"""
-function readsegy(fname::String; passcal=false::Bool, full=false::Bool)
-  fname = realpath(fname)
+function read_segy_file(fname::String,
+                        buf::Array{UInt8,1},
+                        shorts::Array{Int16,1},
+                        ints::Array{Int32,1},
+                        passcal::Bool,
+                        full::Bool)
   f = open(fname, "r")
+  trace_fh = Array{Int16,1}(undef,3)
   if passcal == true
-    seis = SeisData(do_trace(f, full=full, passcal=passcal, src=fname))
-    seis.src[1] = fname
+    S = SeisData(do_trace(f, buf, shorts, ints, true, full, fname, trace_fh))
   else
-    fh = Array{Int16, 1}(undef, 27)
-    seis = SeisData()
+    shorts  = getfield(BUF, :int16_buf)
+    checkbuf!(shorts, 62)
+    S = SeisData()
 
     # File header
-    txthdr        = join(read!(f, Array{Cchar,1 }(undef, 3200)))
-    ids           = read!(f, Array{Int32, 1}(undef, 3))
-    fh[1:24]      = read!(f, Array{Int16, 1}(undef, 24))
+    filehdr       = read(f, 3200)
+    jobid         = bswap(read(f, Int32))
+    lineid        = bswap(read(f, Int32))
+    reelid        = bswap(read(f, Int32))
+    readbytes!(f, buf, 48)
+    fillx_i16_be!(shorts, buf, 24, 0)
+    skip(f, 240)
 
     # My sample files have the Int16s in little endian order...?
-    fh = [bswap(i) for i in fh]
-    skip(f, 240)
-    fh[25:27] = read!(f, Array{Int16, 1}(undef, 3))
+    for i = 25:27
+      shorts[i] = read(f, Int16)
+    end
     skip(f, 94)
 
     # Process file header
-    ids = [bswap(i) for i in ids]
-    nh = 0
-    if fh[end] > Int16(0)
-      nh = fh[end]
-    end
+    nh = max(zero(Int16), getindex(shorts, 27))
     if full == false
       skip(f, 3200*nh)
     else
-      fhd = Dict{String,Any}()
-      fhd["exthdr"] = [replace(join(read!(f, Array{Cchar, 1}(undef, 3200))), "\0" => " ") for i = 1:nh]
-      merge!(fhd, Dict{String,Any}(zip(["jobid", "lineid", "reelid", "ntr",
-      "naux", "filedt", "origdt", "filenx", "orignx", "fmt", "cdpfold",
-      "trasort", "vsum", "swst", "swen0", "swlen", "swtyp", "tapnum", "swtapst",
-      "swtapen", "taptyp", "corrtra", "bgainrec", "amprec", "msys", "zupdn",
-      "vibpol", "segyver", "isfixed", "ntxthdr"],
-      [ids; fh])))
+      exthdr = Array{String,1}(undef, nh)
+      for i = 1:nh
+        exthdr[i] = read(f, 3200)
+      end
+
+      fhd = Dict{String,Any}(
+              zip(String["ntr", "naux", "filedt", "origdt", "filenx",
+                         "orignx", "fmt", "cdpfold", "trasort", "vsum",
+                         "swst", "swen0", "swlen", "swtyp", "tapnum",
+                         "swtapst", "swtapen", "taptyp", "corrtra", "bgainrec",
+                         "amprec", "msys", "zupdn", "vibpol", "segyver",
+                         "isfixed", "n_exthdr"], shorts[1:27])
+                            )
+      fhd["jobid"]  = jobid
+      fhd["lineid"] = lineid
+      fhd["reelid"] = reelid
+      fhd["filehdr"] = filehdr
+      fhd["exthdr"] = exthdr
     end
 
+    trace_fh[1] = getindex(shorts,3)
+    trace_fh[2] = getindex(shorts,5)
+    trace_fh[3] = getindex(shorts,7)
+
     # Channel headers
-    for i = 1:fh[1]
-      seis += do_trace(f, full=full, passcal=passcal, fh=fh[[3,5,7]], src=fname)
-      seis.src[seis.n] = fname
+    nt = shorts[1]
+    for i = 1:nt
+      push!(S, do_trace(f, buf, shorts, ints, false, full, fname, trace_fh))
       if full == true
-        merge!(seis.misc[i], fhd)
+        merge!(S.misc[i], fhd)
       end
     end
   end
   close(f)
-  return seis
+  return S
 end
+
+# ============================================================================
+
+@doc """
+    S = readsegy(fname[, KWs])
+
+Read SEG Y files matching file pattern `fpat` into a new SeisData object. `fpat`
+is a string pattern; wild cards are accepted.
+
+    readsegy!(S, fname[, KWs])
+
+As above, for an existing SeisData object.
+
+### Keywords
+* `passcal=true` for PASSCAL/NMT modified SEG Y (single-channel files with no
+SEG Y file header)
+* `full=true` returns full SEG Y headers in `S.misc`.
+""" readsegy
+function readsegy(filestr::String; passcal=false::Bool, full=false::Bool)
+  buf     = getfield(BUF, :buf)
+  shorts  = getfield(BUF, :int16_buf)
+  ints    = getfield(BUF, :int32_buf)
+  checkbuf!(buf, 240)
+
+  if safe_isfile(filestr)
+    S = read_segy_file(filestr, buf, shorts, ints, passcal, full)
+  else
+    S = SeisData()
+    files = ls(filestr)
+    nf = length(files)
+    for fname in files
+      U = read_segy_file(fname, buf, shorts, ints, passcal, full)
+    end
+    append!(S, U)
+  end
+  return S
+end
+
+@doc (@doc readsegy)
+function readsegy!(S::SeisData, filestr::String; passcal=false::Bool, full=false::Bool)
+  U = readsegy(filestr, passcal=passcal, full=full)
+  append!(S, U)
+  return nothing
+end
+
 
 """
     segyhdr(f)
@@ -239,15 +384,15 @@ function segyhdr(fname::String; passcal=false::Bool)
   seis = readsegy(fname::String; passcal=passcal, full=true)
   if passcal
     printstyled(stdout, @sprintf("%20s: %s\n", "PASSCAL SEG-Y FILE", realpath(fname)), color=:green, bold=true)
-    for k in sort(collect(keys(seis.misc)))
-      @printf(stdout, "%20s: %s\n", k, string(seis.misc[k]))
+    D = getindex(getfield(seis, :misc),1)
+    for k in sort(collect(keys(D)))
+      @printf(stdout, "%20s: %s\n", k, string(get(D, k, "")))
     end
   else
     W = displaysize(stdout)[2]-2
     S = fill("", length(seis.misc[1])+1)
     p = 1
     w = 32
-    # @printf(stdout, "%20s: %s\n", "SEG-Y HEADER", realpath(fname))
     printstyled(stdout, @sprintf("%20s: %s\n", "SEG-Y FILE", realpath(fname)), color=:green, bold=true)
     for i = 1:seis.n
       if p > 1
@@ -257,13 +402,14 @@ function segyhdr(fname::String; passcal=false::Bool)
       end
       S[1] *= s
       S[1] *= " "^(w-length(s))
-      for (j,k) in enumerate(sort(collect(keys(seis.misc[i]))))
-        if k == "exthdr"
+      D = getindex(getfield(seis, :misc),1)
+      for (j,k) in enumerate(sort(collect(keys(D))))
+        if k == "exthdr" || k == "filehdr"
           val = get(seis.misc[i], k, repr(nothing))
           if val == "nothing" || isempty(val)
             s = "(empty)"
           else
-            s = s[1:8]*"…"
+            s = length(val) > 8 ? String(val[1:8])*"…" : String(val)
           end
         else
           s = string(get(seis.misc[i], k, repr(nothing)))
