@@ -3,7 +3,6 @@ geocsv_file = string(path, "/SampleFiles/FDSNWS.IRIS.geocsv")
 
 printstyled("  Lennartz ASCII\n", color=:light_green)
 C = readlennasc(lenn_file)[1]
-@test(C.src == lenn_file)
 @test ≈(C.fs, 62.5)
 
 printstyled("  GeoCSV timeseries\n", color=:light_green)
