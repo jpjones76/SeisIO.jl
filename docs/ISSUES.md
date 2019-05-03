@@ -1,16 +1,13 @@
 # Known Issues
 
 ## Oustanding
-* ``wseis`` cannot write a SeisData object if a channel contains no data.
-* It's not clear whether or not `SeedLink!` works with `mode="FETCH"`.
+* ``wseis`` cannot write a SeisData object if one channel contains no data.
+* It's not clear whether or not `SeedLink!` works with `mode="FETCH"`. This mode appears to always close connections immediately without returning data.
+* `FDSNevq` makes no checks for duplicate events; using keyword `src="all"` is likely to yield duplicates.
 
 ## External to SeisIO
-* Some data channels IDs in SeedLink are not unique or are duplicates with
+1. Some data channels IDs in SeedLink are not unique, or are duplicates with
 different LOC fields in `:id`.
-  + This appears to happen when one stations transmits data in real time to
-  multiple networks.
-  + The workaround is to always specify a location code in request strings.
-
-## Possibly resolved
-* Rarely, `SeedLink!` used to cause a Julia session to hang by failing to
-  initialize a connection. (Last seen July 2017)
+  * This appears to happen with stations that transmit to multiple data
+  centers, e.g., jointly operated by multiple networks.
+  * Workaround: set a location code in the appropriate request strings.
