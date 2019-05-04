@@ -1,4 +1,4 @@
-export chanspec, webhdr, seis_www, track_on!, track_off!
+export chanspec, seis_www, track_on!, track_off!
 
 # Generic handler for getting data by HTTP
 # Returns:
