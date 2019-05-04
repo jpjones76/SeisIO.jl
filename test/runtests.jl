@@ -34,6 +34,7 @@ for f in files
   rm(f)
 end
 rm("FDSNsta.xml")
+rm("FDSNevq.log")
 
 test_end = Dates.now()
 δt = 0.001*(test_end-test_start).value

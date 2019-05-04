@@ -55,3 +55,18 @@ for i = 1:3
   detrend!(D)
   @test length(j) == length(findall(isnan.(C.x))) == length(findall(isnan.(D.x)))
 end
+
+# Safe demean, detrend
+C = randSeisChannel()
+D = detrend(C)
+S = randSeisData()
+T = detrend(S)
+V = randSeisEvent()
+W = detrend(V)
+
+C = randSeisChannel()
+D = demean(C)
+S = randSeisData()
+T = demean(S)
+V = randSeisEvent()
+W = demean(V)

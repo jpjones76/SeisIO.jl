@@ -14,3 +14,14 @@ T = equalize_resp(S, r)
 @test typeof(T.x[1]) == Array{Float32,1}
 equalize_resp!(S, r) # doesnt work
 @test S==T
+
+# Method extensions
+V = randSeisEvent()
+W = equalize_resp(V, r)
+equalize_resp!(V, r)
+@test V == W
+
+C = randSeisChannel()
+D = equalize_resp(C, r)
+equalize_resp!(C, r)
+@test C == D

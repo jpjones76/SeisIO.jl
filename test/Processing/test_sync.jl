@@ -243,3 +243,44 @@ for i in [1,2,3,4,6]
   @test any(Z.id.==S.id[i])
 end
 @test (any(Z.id.==S.id[5]) == false)
+
+# ===========================================================================
+# method extenson to SeisChannel
+ts₆ = S.t[1][1,2]
+te₆ = S.t[1][1,2] + round(Int, 1.0e6*nx/fs)
+ds₆ = u2d(ts₆*1.0e-6)
+de₆ =  u2d(te₆*1.0e-6)
+C = deepcopy(S[1])
+sync!(C, s=ds₆)
+W = SeisData(C)
+basic_checks(W)
+ts_new, te_new = get_edge_times(W)
+wx = Lx(W)
+
+# Repeat with an end time
+C = deepcopy(S[1])
+W = SeisData(sync(C, s=ds₆, t=de₆))
+basic_checks(W)
+ts_new, te_new = get_edge_times(W)
+wx = Lx(W)
+
+# ===========================================================================
+# method extenson to SeisEvent
+ts₆ = S.t[1][1,2]
+te₆ = S.t[1][1,2] + round(Int, 1.0e6*nx/fs)
+ds₆ = u2d(ts₆*1.0e-6)
+de₆ =  u2d(te₆*1.0e-6)
+Ev = SeisEvent(hdr = randSeisHdr(), data = deepcopy(S))
+sync!(Ev, s=ds₆)
+W = Ev.data
+basic_checks(W)
+ts_new, te_new = get_edge_times(W)
+wx = Lx(W)
+
+# Expectations:
+@test sx[2]-wx[2] == 100                      # Trace 2 is 100 samples shorter
+for i in [1,3,4,5,6]
+  @test sx[i] == wx[i]                        # No change in other trace lengths
+end
+@test minimum(ts_new .≥ ts₆) == true           # We start at ts₆, not before
+@test findfirst(ts_new .== ts₆).== 1          # Defined start time
