@@ -257,7 +257,7 @@ will be keys that contain the corresponding values.
 Read SAC files matching file pattern `fpat` into an existing SeisData object.
 `fpat` is a string pattern that can use wild cards.
 """ readsac
-function readsac!(S, filestr::String; full=false::Bool)
+function readsac!(S, filestr::String; full::Bool=KW.full)
   fv = getfield(BUF, :sac_fv)
   iv = getfield(BUF, :sac_iv)
   cv = getfield(BUF, :sac_cv)
@@ -278,7 +278,7 @@ function readsac!(S, filestr::String; full=false::Bool)
 end
 
 @doc (@doc readsac)
-function readsac(filestr::String; full=false::Bool)
+function readsac(filestr::String; full::Bool=KW.full)
   S = SeisData()
   readsac!(S, filestr, full=full)
   return S
@@ -311,7 +311,7 @@ Write all data in SeisData structure `S` to auto-generated SAC files. If S is
 a SeisEvent, event header information is also written to the header of each SAC
 file.
 """
-function writesac(S::Union{SeisEvent,SeisData}; ts=false::Bool, v::Int64=KW.v)
+function writesac(S::Union{SeisEvent,SeisData}; ts::Bool=false, v::Int64=KW.v)
   if ts
     ift = Int32(4); leven = false
   else

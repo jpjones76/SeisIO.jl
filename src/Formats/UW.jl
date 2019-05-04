@@ -36,9 +36,9 @@ Read UW-format seismic pick file `pf` into SeisHdr object `H`.
 !!! caution
 
     Reader does *not* check that `S` and `f` are the same event!
-""" uwpf
-function uwpf!(S::SeisEvent, pickfile::String; v=0::Int)
-  setfield!(S, :hdr, uwpf(pickfile, v))
+""" uwpf!
+function uwpf!(S::SeisEvent, pickfile::String; v::Int64=KW.v)
+  setfield!(S, :hdr, uwpf(pickfile, v=v))
   N = S.data.n
 
   # Pick lines (requires reopening/rereading file)
@@ -79,8 +79,8 @@ function uwpf!(S::SeisEvent, pickfile::String; v=0::Int)
   return S
 end
 
-@doc (@doc uwpf)
-function uwpf(pickfile::String, v::Int)
+@doc (@doc uwpf!)
+function uwpf(pickfile::String; v::Int64=KW.v)
   pf = open(pickfile, "r")
   seekstart(pf)
   D = Dict{String, Any}()
@@ -223,7 +223,7 @@ Specify verbose mode (for debugging).
 """
 function uwdf(datafile::String;
               v::Int=KW.v,
-              full::Bool=false
+              full::Bool=KW.full
               )
   fname = realpath(datafile)
   D = Dict{String,Any}()
@@ -532,7 +532,7 @@ function readuwevt(filename::String; v::Int64=KW.v)
     end
   else
     # Pickfile only*
-    Ev = SeisEvent(hdr=uwpf(pf, v))
+    Ev = SeisEvent(hdr=uwpf(pf, v=v))
   end
 
   return Ev
@@ -550,7 +550,7 @@ As above, but creates a new SeisData object.
 """ readuw
 function readuw!(S::SeisData, filestr::String;
                   v::Int64=KW.v,
-                  full::Bool=false)
+                  full::Bool=KW.full)
 
   if safe_isfile(filestr)
     append!(S, uwdf(filestr, v=v, full=full))
@@ -567,7 +567,7 @@ end
 @doc (@doc readuw)
 function readuw(filestr::String;
                 v::Int64=KW.v,
-                full::Bool=false)
+                full::Bool=KW.full)
   S = SeisData()
   readuw!(S, filestr, v=v, full=full)
   return S
