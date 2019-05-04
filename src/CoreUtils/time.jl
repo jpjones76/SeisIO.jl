@@ -110,7 +110,7 @@ or ASCII strings. Strings must follow the format "yyyy-mm-ddTHH:MM:SS.nnn", e.g.
 | DT    | R     | Add `t` seconds to `s`, then sort    |
 | S     | R, DT | Convert `s` → DateTime, then sort    |
 | R, DT | S     | Convert `t` → DateTime, then sort    |
-| R     | R     | `s` and `t' are seconds from `now()` |
+| R     | R     | `s` and `t` are seconds from `now()` |
 
 (above, R = Real, DT = DateTime, S = String, I = Integer)
 
@@ -119,9 +119,7 @@ Numeric time values are interpreted *relative to the start of the current minute
 Thus, if `-s` or `-t` is 0, the data request begins (or ends) at the start of
 the minute in which the request is submitted.
 """ timespec
-function timespec()
-  return nothing
-end
+timespec() = nothing
 
 """
 d0, d1 = parsetimewin(s, t)
