@@ -6,8 +6,8 @@ SeisIO Standard Keywords
 
 SeisIO.KW is a memory-resident structure of default values for common keywords
 used by package functions. KW has one substructure, SL, with keywords specific
-to SeedLink. These defaults current cannot be modified, but this may change
-as the Julia language matures.
+to SeedLink. These defaults can be modified, e.g., SeisIO.KW.nev=2 changes the
+default for nev to 2.
 
 +--------+----------------+--------+------------------------------------------+
 | KW     | Default        | T [#]_ | Meaning                                  |
@@ -21,6 +21,10 @@ as the Julia language matures.
 | nd     | 1              | I      | number of days per subrequest            |
 +--------+----------------+--------+------------------------------------------+
 | nev    | 1              | I      | number of events returned per query      |
++--------+----------------+--------+------------------------------------------+
+| nx_add | 360000         | I      | length increase of undersized data array |
++--------+----------------+--------+------------------------------------------+
+| nx_new | 8640000        | I      | number of samples for a new channel      |
 +--------+----------------+--------+------------------------------------------+
 | opts   | ""             | S      | user-specified options [#]_              |
 +--------+----------------+--------+------------------------------------------+
@@ -53,6 +57,8 @@ as the Julia language matures.
 
 SeedLink Keywords
 -----------------
+Change these with SeisIO.KW.SL.[key] = value, e.g., SeisIO.KW.SL.refresh = 30.
+
 .. csv-table::
   :header: kw, def, type, meaning
   :delim: ;

@@ -1,3 +1,8 @@
+### 2019-05-04
+Release candidate
+* Added a global keyword for Boolean option `full` in data readers.
+* Added help functions `?seed_support` and `?timespec`.
+
 ### 2019-05-03
 Release candidate
 * File read functions have been standardized and optimized, yielding significant

@@ -88,21 +88,21 @@
               <p class="caption"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">First Steps</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../working_with_data.html">Working with Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../seisdata.html">Data Types</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Data Readers</span></p>
+<p class="caption"><span class="caption-text">Reading Files</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">Reading Files</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Web Clients</span></p>
+<p class="caption"><span class="caption-text">Downloading Data</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Web/webclients.html">Web Requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Web/seedlink.html">SeedLink</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Data Processing</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Processing/processing.html">Data Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Processing/processing.html">Data Processing Functions</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul class="current">
@@ -183,8 +183,8 @@
 <span id="dkw"></span><h1>SeisIO Standard Keywords<a class="headerlink" href="#seisio-standard-keywords" title="Permalink to this headline">¶</a></h1>
 <p>SeisIO.KW is a memory-resident structure of default values for common keywords
 used by package functions. KW has one substructure, SL, with keywords specific
-to SeedLink. These defaults current cannot be modified, but this may change
-as the Julia language matures.</p>
+to SeedLink. These defaults can be modified, e.g., SeisIO.KW.nev=2 changes the
+default for nev to 2.</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="11%" />
@@ -224,6 +224,16 @@ as the Julia language matures.</p>
 <td>1</td>
 <td>I</td>
 <td>number of events returned per query</td>
+</tr>
+<tr class="row-odd"><td>nx_add</td>
+<td>360000</td>
+<td>I</td>
+<td>length increase of undersized data array</td>
+</tr>
+<tr class="row-even"><td>nx_new</td>
+<td>8640000</td>
+<td>I</td>
+<td>number of samples for a new channel</td>
 </tr>
 <tr class="row-odd"><td>opts</td>
 <td>“”</td>
@@ -317,6 +327,7 @@ as the Julia language matures.</p>
 </table>
 <div class="section" id="seedlink-keywords">
 <h2>SeedLink Keywords<a class="headerlink" href="#seedlink-keywords" title="Permalink to this headline">¶</a></h2>
+<p>Change these with SeisIO.KW.SL.[key] = value, e.g., SeisIO.KW.SL.refresh = 30.</p>
 <table border="1" class="colwidths-given docutils">
 <colgroup>
 <col width="17%" />

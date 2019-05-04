@@ -36,8 +36,8 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Data Types" href="seisdata.html" />
-    <link rel="prev" title="Introduction" href="intro.html" /> 
+    <link rel="next" title="Reading Files" href="Formats/fileformats.html" />
+    <link rel="prev" title="First Steps" href="tutorial.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -88,36 +88,31 @@
               <p class="caption"><span class="caption-text">Introduction</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">First Steps</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Working with Data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#first-steps">First Steps</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#operations-on-seisdata-structures">Operations on SeisData structures</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#adding-channels-to-a-seisdata-structure">Adding channels to a SeisData structure</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#search-sort-and-prune">Search, Sort, and Prune</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#merge">Merge</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#creating-data-containers">Creating Data Containers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#acquiring-data">Acquiring Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#keeping-track">Keeping Track</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#taking-notes">Taking Notes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id1">Keeping Track</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#source-logging">Source Logging</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#channel-maintenance">Channel Maintenance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#taking-notes">Taking Notes</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="seisdata.html">Data Types</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Data Readers</span></p>
+<p class="caption"><span class="caption-text">Reading Files</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Formats/fileformats.html">File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Formats/fileformats.html">Reading Files</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Web Clients</span></p>
+<p class="caption"><span class="caption-text">Downloading Data</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="Web/webclients.html">Web Requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Web/seedlink.html">SeedLink</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Data Processing</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Processing/processing.html">Data Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Processing/processing.html">Data Processing Functions</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul>
@@ -192,173 +187,47 @@
            <div itemprop="articleBody">
             
   <div class="section" id="working-with-data">
-<h1>Working with Data<a class="headerlink" href="#working-with-data" title="Permalink to this headline">¶</a></h1>
-<p>SeisIO is designed around the principle of easy, fluid, and fast data access.
-At the most basic level, SeisIO uses an array-like custom structure called a
-<strong>SeisChannel</strong> for single-channel data; <strong>SeisData</strong> structures store
-multichannel data and can be created by combining <strong>SeisChannel</strong> objects.</p>
-<div class="section" id="first-steps">
-<h2>First Steps<a class="headerlink" href="#first-steps" title="Permalink to this headline">¶</a></h2>
-<p>Create a new, empty <strong>SeisChannel</strong> object with</p>
-<dl class="function">
-<dt>
-<code class="descname">Ch = SeisChannel()</code></dt>
-<dd></dd></dl>
-
-<p>The meanings of the field names are explained <cite>here&lt;dkw&gt;</cite>. You can edit
-field values manually, e.g.,</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Ch</span><span class="o">.</span><span class="n">loc</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">90.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">9300.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
-<span class="n">Ch</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;South pole&quot;</span>
-</pre></div>
+<span id="wwd"></span><h1>Working with Data<a class="headerlink" href="#working-with-data" title="Permalink to this headline">¶</a></h1>
+<p>This section describes how to track and manage SeisIO data.</p>
+<div class="section" id="creating-data-containers">
+<h2>Creating Data Containers<a class="headerlink" href="#creating-data-containers" title="Permalink to this headline">¶</a></h2>
+<p>Create a new, empty object using any of the following commands:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="14%" />
+<col width="86%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Object</th>
+<th class="head">Purpose</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>SeisChannel()</td>
+<td>A single channel of univariate (usually time-series) data</td>
+</tr>
+<tr class="row-odd"><td>SeisData()</td>
+<td>Multichannel univariate (usually time-series) data</td>
+</tr>
+<tr class="row-even"><td>SeisHdr()</td>
+<td>Header structure for discrete seismic events</td>
+</tr>
+<tr class="row-odd"><td>SeisEvent()</td>
+<td>Discrete seismic events; includes SeisHdr and SeisData objects</td>
+</tr>
+</tbody>
+</table>
 </div>
-<p>or you can set them with keywords at creation:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Ch</span> <span class="o">=</span> <span class="n">SeisChannel</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;MANOWAR JAJAJA&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>SeisData structures are collections of channel data. They can be created with
-the SeisData() command, which can optionally create any number of empty channels
-at a time, e.g.,</p>
-<dl class="function">
-<dt>
-<code class="descname">S = SeisData(1)</code></dt>
-<dd></dd></dl>
-
-<p>They can be explored similarly:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">S</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;South pole&quot;</span>
-<span class="n">S</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">90.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">9300.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]</span>
-</pre></div>
-</div>
-<p>A collection of channels becomes a SeisData structure:</p>
-<dl class="function">
-<dt>
-<code class="descname">S = SeisData(SeisChannel(), SeisChannel())</code></dt>
-<dd></dd></dl>
-
-<p>You can push channels onto existing SeisData structures, like adding one key
-to a dictionary:</p>
-<dl class="function">
-<dt>
-<code class="descname">push!(S, Ch)</code></dt>
-<dd></dd></dl>
-
-<p>Note that this copies Ch to a new channel in S – S[3] is not a view into C.
-This is deliberate, as otherwise the workspace quickly becomes a mess of
-redundant channels. Clean up with <code class="docutils literal notranslate"><span class="pre">Ch</span> <span class="pre">=</span> <span class="pre">[]</span></code> to free memory before moving on.</p>
-</div>
-<div class="section" id="operations-on-seisdata-structures">
-<h2>Operations on SeisData structures<a class="headerlink" href="#operations-on-seisdata-structures" title="Permalink to this headline">¶</a></h2>
-<p>We’re now ready for a short tutorial of what we can do with data structures.
-In the commands below, as in most of this documentation, <strong>Ch</strong> is a
-SeisChannel object and <strong>S</strong> is a SeisData object.</p>
-<div class="section" id="adding-channels-to-a-seisdata-structure">
-<h3>Adding channels to a SeisData structure<a class="headerlink" href="#adding-channels-to-a-seisdata-structure" title="Permalink to this headline">¶</a></h3>
-<p>You’ve already seen one way to add a channel to SeisData: push!(S, SeisChannel())
-adds an empty channel. Here are others:</p>
-<dl class="function">
-<dt>
-<code class="descname">append!(S, SeisData(n))</code></dt>
-<dd></dd></dl>
-
-<p>Adds n channels to the end of S by creating a new n-channel SeisData and
-appending it, similar to adding two dictionaries together.</p>
-<p>These methods are aliased to the addition operator:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">S</span> <span class="o">+=</span> <span class="n">SeisChannel</span><span class="p">()</span>      <span class="c1"># equivalent to push!(S, SeisChannel())</span>
-<span class="n">S</span> <span class="o">+=</span> <span class="n">randseisdata</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>    <span class="c1"># adds a random 3-element SeisData structure to S in place</span>
-<span class="n">S</span> <span class="o">=</span> <span class="n">SeisData</span><span class="p">(</span><span class="n">randseisdata</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="n">SeisChannel</span><span class="p">(),</span>
-      <span class="n">SeisChannel</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;UW.SEP..EHZ&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Darth Exploded&quot;</span><span class="p">,</span>
-      <span class="n">loc</span><span class="o">=</span><span class="p">[</span><span class="mf">46.1967</span><span class="p">,</span> <span class="o">-</span><span class="mf">122.1875</span><span class="p">,</span> <span class="mi">1440</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">]))</span>
-</pre></div>
-</div>
-<p>Most web request functions can append to an existing SeisData object by placing
-an exclamation mark after the function call. You can see how this works by
-running the <cite>examples&lt;webex&gt;</cite>.</p>
-</div>
-<div class="section" id="search-sort-and-prune">
-<h3>Search, Sort, and Prune<a class="headerlink" href="#search-sort-and-prune" title="Permalink to this headline">¶</a></h3>
-<p>The easiest way to find channels of interest in a data structure is to
-use findid, but you can obtain an array of partial matches with findchan:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">S</span> <span class="o">=</span> <span class="n">SeisData</span><span class="p">(</span><span class="n">randseisdata</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="n">SeisChannel</span><span class="p">(),</span>
-      <span class="n">SeisChannel</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s2">&quot;UW.SEP..EHZ&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Darth Exploded&quot;</span><span class="p">,</span>
-      <span class="n">loc</span><span class="o">=</span><span class="p">[</span><span class="mf">46.1967</span><span class="p">,</span> <span class="o">-</span><span class="mf">122.1875</span><span class="p">,</span> <span class="mi">1440</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="n">rand</span><span class="p">(</span><span class="mi">1024</span><span class="p">)))</span>
-<span class="n">findid</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="s2">&quot;UW.SEP..EHZ&quot;</span><span class="p">)</span>    <span class="c1"># 7</span>
-<span class="n">findchan</span><span class="p">(</span><span class="n">S</span><span class="p">,</span> <span class="s2">&quot;EHZ&quot;</span><span class="p">)</span>          <span class="c1"># [7], maybe others depending on randseisdata</span>
-</pre></div>
-</div>
-<p>You can sort by channel ID with the <cite>sort</cite> command.</p>
-<p>Several functions exist to prune empty and unwanted channels from SeisData
-structures.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>delete!(S, 1:2)  # Delete first two channels of S
-S -= 3           # Delete third channel of S
-
-# Extract S[1] as a SeisChannel, removing it from S
-C = pull(S, 1)
-
-# Delete all channels whose S.x is empty
-prune!(S)
-
-# Delete channels containing &quot;.SEP.&quot;
-delete!(S, &quot;.SEP.&quot;, exact=false)
-</pre></div>
-</div>
-<p>In the last example, specifying exact=false means that any channel whose ID
-partly matches the string “.SEP.” gets deleted; by default, passing
-a string to delete!(S, str) only matches channels where str is the exact ID.
-This is an efficient way to remove unresponsive subnets and unwanted channel
-types, but beware of clumsy over-matching.</p>
-</div>
-<div class="section" id="merge">
-<h3>Merge<a class="headerlink" href="#merge" title="Permalink to this headline">¶</a></h3>
-<p>SeisData structures can be merged using the function <strong>merge!</strong>, but this is
-much more complicated than addition.</p>
-<dl class="function">
-<dt>
-<code class="descname">merge!(S)</code></dt>
-<dd></dd></dl>
-
+<div class="section" id="acquiring-data">
+<h2>Acquiring Data<a class="headerlink" href="#acquiring-data" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Does nothing to channels with unique IDs.</li>
-<li>For sets of channels in S that share an ID…
-+ Adjusts all matching channels to the :gain, :fs, :loc, and :resp fields of the channel the latest data
-+ Time-sorts data from all matching channels by <cite>S.t</cite>
-+ Averages data points that occur simultaneously in multiple members of the set</li>
-<li>throws an error if joining data that have the same ID and different units.</li>
+<li>Read files with <a class="reference internal" href="Formats/fileformats.html#readdata"><span class="std std-ref">read_data</span></a></li>
+<li>Make web requets with <a class="reference internal" href="Web/webclients.html#getdata"><span class="std std-ref">get_data</span></a></li>
+<li>Initiate real-time streaming sessions to SeisData objects with <a class="reference internal" href="Web/seedlink.html#seedlink-section"><span class="std std-ref">SeedLink!</span></a></li>
 </ul>
-</div>
 </div>
 <div class="section" id="keeping-track">
 <h2>Keeping Track<a class="headerlink" href="#keeping-track" title="Permalink to this headline">¶</a></h2>
-<p>Because tracking arbitrary operations can be difficult, several functions have
-been written to keep track of data and operations in a semi-automated way.</p>
-<div class="section" id="taking-notes">
-<h3>Taking Notes<a class="headerlink" href="#taking-notes" title="Permalink to this headline">¶</a></h3>
-<p>Most functions that add or process data note this in the appropriate channel’s :notes field.
-However, you can also make your own notes with the note! command:</p>
-<dl class="function">
-<dt>
-<code class="descname">note!(S, i, str)</code></dt>
-<dd></dd></dl>
-
-<p>Append <strong>str</strong> with a timestamp to the :notes field of channel number <strong>i</strong> of <strong>S</strong>.</p>
-<dl class="function">
-<dt>
-<code class="descname">note!(S, id, str)</code></dt>
-<dd></dd></dl>
-
-<p>As above for the first channel in <strong>S</strong> whose id is an exact match to <strong>id</strong>.</p>
-<dl class="function">
-<dt>
-<code class="descname">note!(S, str)</code></dt>
-<dd></dd></dl>
-
-<p>if <strong>str* mentions a channel name or ID, only the corresponding channel(s) in **S</strong> is annotated; otherwise, all channels are annotated.</p>
-<p>Clear all notes from channel <code class="docutils literal notranslate"><span class="pre">i</span></code> of <code class="docutils literal notranslate"><span class="pre">S</span></code>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">clear_notes!(S,</span> <span class="pre">id)</span></code></p>
-<p>Clear all notes from the first channel in <code class="docutils literal notranslate"><span class="pre">S</span></code> whose id field exactly matches <code class="docutils literal notranslate"><span class="pre">id</span></code>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">clear_notes!(S)</span></code></p>
-<p>Clear all notes from every channel in <code class="docutils literal notranslate"><span class="pre">S</span></code>.</p>
-</div>
-<div class="section" id="id1">
-<h3>Keeping Track<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <p>A number of auxiliary functions exist to keep track of channels:</p>
 <dl class="function">
 <dt id="findchan">
@@ -370,13 +239,17 @@ However, you can also make your own notes with the note! command:</p>
 <code class="descname">findchan</code><span class="sig-paren">(</span><em>S::SeisData</em>, <em>id::String</em><span class="sig-paren">)</span></dt>
 <dd></dd></dl>
 
-<p>Get all channel indices i in S with id <span class="math notranslate nohighlight">\(\in\)</span> S.id[i]. Can do partial id matches, e.g. findchan(S, “UW.”) returns indices to all channels whose IDs begin with “UW.”.</p>
+<p>Get all channel indices i in S with id <span class="math notranslate nohighlight">\(\in\)</span> S.id[i]. Can do partial id
+matches, e.g. findchan(S, “UW.”) returns indices to all channels whose IDs begin
+with “UW.”.</p>
 <dl class="function">
 <dt id="findid">
 <code class="descname">findid</code><span class="sig-paren">(</span><em>S::SeisData</em>, <em>id</em><span class="sig-paren">)</span><a class="headerlink" href="#findid" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<p>Return the index of the first channel in <strong>S</strong> where id = <strong>id</strong>.</p>
+<p>Return the index of the first channel in <strong>S</strong> where id = <strong>id</strong>. Requires an
+exact string match; intended as a low-memory equivalent to findfirst for
+ids.</p>
 <dl class="function">
 <dt>
 <code class="descname">findid</code><span class="sig-paren">(</span><em>S::SeisData</em>, <em>Ch::SeisChannel</em><span class="sig-paren">)</span></dt>
@@ -388,7 +261,8 @@ However, you can also make your own notes with the note! command:</p>
 <code class="descname">namestrip!(S[, convention])</code></dt>
 <dd></dd></dl>
 
-<p>Remove bad characters from the :name fields of <strong>S</strong>. Specify convention as a string (default is “File”):</p>
+<p>Remove bad characters from the :name fields of <strong>S</strong>. Specify convention as a
+string (default is “File”):</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="24%" />
@@ -420,7 +294,7 @@ However, you can also make your own notes with the note! command:</p>
 </tr>
 </tbody>
 </table>
-<p><sup>(a)</sup> <code class="docutils literal notranslate"><span class="pre">DEL</span></code> is \x7f (ASCII/Unicode U+007f).</p>
+<p><sup>(a)</sup> <code class="docutils literal notranslate"><span class="pre">DEL</span></code> here is \x7f (ASCII/Unicode U+007f).</p>
 <dl class="function">
 <dt id="timestamp">
 <code class="descname">timestamp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#timestamp" title="Permalink to this definition">¶</a></dt>
@@ -445,14 +319,65 @@ changes to data vector sizes in S.x.</p>
 length(S.x[i]) changes for channel i (e.g. filtering is not tracked).</p>
 <p><strong>Warning</strong>: If you have or suspect gapped data in any channel, calling
 ungap! while tracking is active will flag a channel as changed.</p>
-</div>
 <div class="section" id="source-logging">
 <h3>Source Logging<a class="headerlink" href="#source-logging" title="Permalink to this headline">¶</a></h3>
-<p>SeisIO functions record the <em>last</em> source used to populate each channel in the
-:src field. Typically this is a string.</p>
+<p>The :src field records the <em>last</em> source used to populate each channel (usually
+a file name and path or a web request URL).</p>
 <p>When a data source is added to a channel, including the first time data are
 added, this is recorded in :notes with the syntax (timestamp) +src: (function) (src).</p>
 </div>
+</div>
+<div class="section" id="channel-maintenance">
+<h2>Channel Maintenance<a class="headerlink" href="#channel-maintenance" title="Permalink to this headline">¶</a></h2>
+<p>A few functions exist specifically to simplify data maintenance:</p>
+<dl class="function">
+<dt>
+<code class="descname">prune!(S::SeisData)</code></dt>
+<dd></dd></dl>
+
+<p>Delete all channels from S that have no data (i.e. S.x is empty or non-existent).</p>
+<dl class="function">
+<dt>
+<code class="descname">C = pull(S::SeisData, id::String)</code></dt>
+<dd></dd></dl>
+
+<p>Extract the first channel with id=id from S and return it as a new SeisChannel
+structure. The corresponding channel in S is deleted.</p>
+<dl class="function">
+<dt>
+<code class="descname">C = pull(S::SeisData, i::integer)</code></dt>
+<dd></dd></dl>
+
+<p>Extract channel <strong>i</strong> from <strong>S</strong> as a new SeisChannel object <strong>C</strong>, and delete
+the corresponding channel from <strong>S</strong>.</p>
+</div>
+<div class="section" id="taking-notes">
+<h2>Taking Notes<a class="headerlink" href="#taking-notes" title="Permalink to this headline">¶</a></h2>
+<p>Functions that add and process data note these operations in the :notes field
+of each object affected. One can also add custom notes with the note! command:</p>
+<dl class="function">
+<dt>
+<code class="descname">note!(S, i, str)</code></dt>
+<dd></dd></dl>
+
+<p>Append <strong>str</strong> with a timestamp to the :notes field of channel number <strong>i</strong> of <strong>S</strong>.</p>
+<dl class="function">
+<dt>
+<code class="descname">note!(S, id, str)</code></dt>
+<dd></dd></dl>
+
+<p>As above for the first channel in <strong>S</strong> whose id is an exact match to <strong>id</strong>.</p>
+<dl class="function">
+<dt>
+<code class="descname">note!(S, str)</code></dt>
+<dd></dd></dl>
+
+<p>if <strong>str* mentions a channel name or ID, only the corresponding channel(s) in **S</strong> is annotated; otherwise, all channels are annotated.</p>
+<p>Clear all notes from channel <code class="docutils literal notranslate"><span class="pre">i</span></code> of <code class="docutils literal notranslate"><span class="pre">S</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">clear_notes!(S,</span> <span class="pre">id)</span></code></p>
+<p>Clear all notes from the first channel in <code class="docutils literal notranslate"><span class="pre">S</span></code> whose id field exactly matches <code class="docutils literal notranslate"><span class="pre">id</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">clear_notes!(S)</span></code></p>
+<p>Clear all notes from every channel in <code class="docutils literal notranslate"><span class="pre">S</span></code>.</p>
 </div>
 </div>
 
@@ -464,10 +389,10 @@ added, this is recorded in :notes with the syntax (timestamp) +src: (function) (
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="seisdata.html" class="btn btn-neutral float-right" title="Data Types" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="Formats/fileformats.html" class="btn btn-neutral float-right" title="Reading Files" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="intro.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="tutorial.html" class="btn btn-neutral float-left" title="First Steps" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -61,10 +61,6 @@ Convert times **s** and **t** to strings α, ω sorted α < ω.
 **s** and **t** can be real numbers, DateTime objects, or ASCII strings.
 Expected string format is "yyyy-mm-ddTHH:MM:SS.nnn", e.g. 2016-03-23T11:17:00.333.
 
-.. function:: webhdr()
-
-Generate a Dict{String,String} to set UserAgent in web requests.
-
 "Safe" synchronize of start and end times of all trace data in SeisData structure ``S`` to a new structure ``U``.
 
 .. function:: u2d(x)

@@ -87,21 +87,21 @@
               <p class="caption"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="src/intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/tutorial.html">First Steps</a></li>
 <li class="toctree-l1"><a class="reference internal" href="src/working_with_data.html">Working with Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="src/seisdata.html">Data Types</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Data Readers</span></p>
+<p class="caption"><span class="caption-text">Reading Files</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="src/Formats/fileformats.html">File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Formats/fileformats.html">Reading Files</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Web Clients</span></p>
+<p class="caption"><span class="caption-text">Downloading Data</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="src/Web/webclients.html">Web Requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="src/Web/seedlink.html">SeedLink</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Data Processing</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="src/Processing/processing.html">Data Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Processing/processing.html">Data Processing Functions</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul>
@@ -186,18 +186,23 @@
 <li class="toctree-l1"><a class="reference internal" href="src/intro.html">Introduction</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="src/intro.html#overview">Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="src/intro.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/intro.html#getting-started">Getting Started</a></li>
 <li class="toctree-l2"><a class="reference internal" href="src/intro.html#updating">Updating</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/intro.html#getting-help">Getting Help</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src/tutorial.html">First Steps</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/tutorial.html#start-here">Start Here</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/tutorial.html#operations-on-seisdata-structures">Operations on SeisData structures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/tutorial.html#next-steps">Next Steps</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="src/working_with_data.html">Working with Data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="src/working_with_data.html#first-steps">First Steps</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src/working_with_data.html#operations-on-seisdata-structures">Operations on SeisData structures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/working_with_data.html#creating-data-containers">Creating Data Containers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/working_with_data.html#acquiring-data">Acquiring Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="src/working_with_data.html#keeping-track">Keeping Track</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="src/seisdata.html">Data Types</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="src/seisdata.html#initialization">Initialization</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src/seisdata.html#commands-by-category">Commands by Category</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/working_with_data.html#channel-maintenance">Channel Maintenance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/working_with_data.html#taking-notes">Taking Notes</a></li>
 </ul>
 </li>
 </ul>
@@ -206,11 +211,13 @@
 <div class="section" id="files">
 <h2>Files<a class="headerlink" href="#files" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Data Readers</span></p>
+<p class="caption"><span class="caption-text">Reading Files</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="src/Formats/fileformats.html">File Formats</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="src/Formats/fileformats.html#format-descriptions">Format Descriptions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src/Formats/fileformats.html#file-i-o-functions">File I/O Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Formats/fileformats.html">Reading Files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/Formats/fileformats.html#supported-file-formats">Supported File Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Formats/fileformats.html#supported-keywords">Supported Keywords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Formats/fileformats.html#format-descriptions-and-notes">Format Descriptions and Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Formats/fileformats.html#other-file-i-o-functions">Other File I/O Functions</a></li>
 </ul>
 </li>
 </ul>
@@ -219,7 +226,7 @@
 <div class="section" id="web">
 <h2>Web<a class="headerlink" href="#web" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Web Clients</span></p>
+<p class="caption"><span class="caption-text">Downloading Data</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="src/Web/webclients.html">Web Requests</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="src/Web/webclients.html#examples">Examples</a></li>
@@ -228,8 +235,8 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="src/Web/seedlink.html">SeedLink</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="src/Web/seedlink.html#seedlink-client">SeedLink Client</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src/Web/seedlink.html#seedlink-utilities">SeedLink Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Web/seedlink.html#special-rules">Special Rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Web/seedlink.html#special-methods">Special Methods</a></li>
 </ul>
 </li>
 </ul>
@@ -240,7 +247,12 @@
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Data Processing</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="src/Processing/processing.html">Data Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Processing/processing.html">Data Processing Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/Processing/processing.html#signal-processing">Signal Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Processing/processing.html#merge-and-synchronize">Merge and Synchronize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Processing/processing.html#other-processing-functions">Other Processing Functions</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>

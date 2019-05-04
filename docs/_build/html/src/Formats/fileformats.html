@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>File Formats &mdash; SeisIO 0.1.3 rc documentation</title>
+  <title>Reading Files &mdash; SeisIO 0.1.3 rc documentation</title>
   
 
   
@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Web Requests" href="../Web/webclients.html" />
-    <link rel="prev" title="Data Types" href="../seisdata.html" /> 
+    <link rel="prev" title="Working with Data" href="../working_with_data.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -88,28 +88,33 @@
               <p class="caption"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">First Steps</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../working_with_data.html">Working with Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../seisdata.html">Data Types</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Data Readers</span></p>
+<p class="caption"><span class="caption-text">Reading Files</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">File Formats</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#format-descriptions">Format Descriptions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#usage-warnings">Usage Warnings</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Reading Files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#supported-file-formats">Supported File Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#supported-keywords">Supported Keywords</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#performance-tip">Performance Tip</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#examples">Examples</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#file-i-o-functions">File I/O Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#format-descriptions-and-notes">Format Descriptions and Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-file-i-o-functions">Other File I/O Functions</a></li>
 </ul>
 </li>
 </ul>
-<p class="caption"><span class="caption-text">Web Clients</span></p>
+<p class="caption"><span class="caption-text">Downloading Data</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Web/webclients.html">Web Requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Web/seedlink.html">SeedLink</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Data Processing</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Processing/processing.html">Data Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Processing/processing.html">Data Processing Functions</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul>
@@ -164,7 +169,7 @@
     
       <li><a href="../../index.html">Docs</a> &raquo;</li>
         
-      <li>File Formats</li>
+      <li>Reading Files</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -183,204 +188,262 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="file-formats">
-<h1>File Formats<a class="headerlink" href="#file-formats" title="Permalink to this headline">¶</a></h1>
-<p>Current format support: (e = endianness; B = big, l = little, * = either)</p>
-<table border="1" class="docutils">
-<colgroup>
-<col width="18%" />
-<col width="5%" />
-<col width="27%" />
-<col width="49%" />
-</colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">Format</th>
-<th class="head">e</th>
-<th class="head">Command</th>
-<th class="head">Creates/modifies</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr class="row-even"><td>miniSEED</td>
-<td>B</td>
-<td>readmseed!</td>
-<td>existing SeisData</td>
-</tr>
-<tr class="row-odd"><td>&#160;</td>
-<td>B</td>
-<td>readmseed</td>
-<td>new SeisData</td>
-</tr>
-<tr class="row-even"><td>SAC</td>
-<td>*</td>
-<td>readsac</td>
-<td>new SeisData</td>
-</tr>
-<tr class="row-odd"><td>&#160;</td>
-<td>*</td>
-<td>sachdr</td>
-<td>dumps header to stdout</td>
-</tr>
-<tr class="row-even"><td>&#160;</td>
-<td>l</td>
-<td>writesac</td>
-<td>sac files on disk</td>
-</tr>
-<tr class="row-odd"><td>SEG Y</td>
-<td>B</td>
-<td>readsegy (a)</td>
-<td>new SeisData</td>
-</tr>
-<tr class="row-even"><td>&#160;</td>
-<td>B</td>
-<td>segyhdr</td>
-<td>dumps header to stdout</td>
-</tr>
-<tr class="row-odd"><td>UW</td>
-<td>B</td>
-<td>readuw</td>
-<td>new SeisEvent</td>
-</tr>
-<tr class="row-even"><td>&#160;</td>
-<td>B</td>
-<td>uwpf!</td>
-<td>existing SeisEvent</td>
-</tr>
-<tr class="row-odd"><td>&#160;</td>
-<td>B</td>
-<td>uwpf</td>
-<td>new SeisHdr</td>
-</tr>
-<tr class="row-even"><td>&#160;</td>
-<td>B</td>
-<td>uwdf</td>
-<td>new SeisData</td>
-</tr>
-<tr class="row-odd"><td>win32</td>
-<td>B</td>
-<td>readwin32!</td>
-<td>existing SeisData</td>
-</tr>
-<tr class="row-even"><td>&#160;</td>
-<td>B</td>
-<td>readwin32</td>
-<td>new SeisData</td>
-</tr>
-</tbody>
-</table>
-<ol class="loweralpha simple">
-<li>Use keyword PASSCAL=true for PASSCAL SEG Y.</li>
-</ol>
-<div class="section" id="format-descriptions">
-<h2>Format Descriptions<a class="headerlink" href="#format-descriptions" title="Permalink to this headline">¶</a></h2>
-<p><strong>miniSEED</strong>: SEED stands for Standard for the Exchange of Earthquake Data; the data format is used by FDSN as a universal omnibus-type standard for seismic data. miniSEED is a data-only format with a limited number of blockette types. <a class="footnote-reference" href="#id9" id="id1">[1]</a></p>
-<p><strong>SAC</strong>: widely-used data format developed for the Seismic Analysis Code interpreter, supported in virtually every programming language. <a class="footnote-reference" href="#id10" id="id2">[2]</a> <a class="footnote-reference" href="#id11" id="id3">[3]</a> <a class="footnote-reference" href="#id12" id="id4">[4]</a></p>
-<p><strong>SEG Y</strong>: standard energy industry seismic data format, developed and maintained by the Society for Exploration Geophysicists<sup>(a)</sup> <a class="footnote-reference" href="#id13" id="id5">[5]</a> A single-channel SEG Y variant format, referred to here as “PASSCAL SEG Y” was developed by PASSCAL/New Mexico Tech and is used with PASSCAL field equipment. <a class="footnote-reference" href="#id14" id="id6">[6]</a></p>
-<p><strong>UW</strong>: the University of Washington data format was designed for event archival. A UW event is described by a pickfile and a corresponding data file, whose names are identical except for the last character, e.g. 99062109485o, 99062109485W.<sup>(b)</sup></p>
-<p><strong>Win32</strong> : data format developed by the NIED (National Research Institute for Earth Science and Disaster Prevention), Japan. Data are typically divided into files that contain a minute of continuous data from channels on a single network or subnet. Data within each file are stored by channel in 1s segments as variable-precision integers. Channel information for each stream is retrieved from an external channel information file.<sup>(c)</sup> <a class="footnote-reference" href="#id15" id="id7">[7]</a> <a class="footnote-reference" href="#id16" id="id8">[8]</a></p>
-<div class="section" id="usage-warnings">
-<h3>Usage Warnings<a class="headerlink" href="#usage-warnings" title="Permalink to this headline">¶</a></h3>
-<p><sup>(a)</sup>  <strong>SEG Y</strong> v <span class="math notranslate nohighlight">\(\le\)</span> rev 1 is supported. Trace header field
-definitions in SEG Y are not ridigly controlled by any central authority, so
-some industry SEG Y files may be unreadable. Please address questions about
-unreadable SEG Y files to their creators.</p>
-<p><sup>(b)</sup>  <strong>UW</strong> data format has no online documentation. Please contact the SeisIO creators or the Pacific Northwest Seismic Network (University of Washington, United States) if additional help is needed to read these files.</p>
-<p><sup>(c)</sup>  <strong>Win32</strong> channel information files are not strictly controlled by a central authority; inconsistencies in channel parameters (e.g. gains) are known to exist. Please remember that redistribution of Win32 files is strictly prohibited by the NIED (our travis-ci tests use an encrypted tarball).</p>
-<p class="rubric">External References</p>
-<table class="docutils footnote" frame="void" id="id9" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>FDSN SEED manual: <a class="reference external" href="https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf">https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf</a></td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="id10" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>SAC data format intro: <a class="reference external" href="https://ds.iris.edu/ds/nodes/dmc/kb/questions/2/sac-file-format/">https://ds.iris.edu/ds/nodes/dmc/kb/questions/2/sac-file-format/</a></td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="id11" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id3">[3]</a></td><td>SAC file format: <a class="reference external" href="https://ds.iris.edu/files/sac-manual/manual/file_format.html">https://ds.iris.edu/files/sac-manual/manual/file_format.html</a></td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="id12" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id4">[4]</a></td><td>SAC software homepage: <a class="reference external" href="https://seiscode.iris.washington.edu/projects/sac">https://seiscode.iris.washington.edu/projects/sac</a></td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="id13" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id5">[5]</a></td><td>SEG Y Wikipedia page: <a class="reference external" href="http://wiki.seg.org/wiki/SEG_Y">http://wiki.seg.org/wiki/SEG_Y</a></td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="id14" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id6">[6]</a></td><td>PASSCAL SEG Y trace files: <a class="reference external" href="https://www.passcal.nmt.edu/content/seg-y-what-it-is">https://www.passcal.nmt.edu/content/seg-y-what-it-is</a></td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="id15" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id7">[7]</a></td><td>How to use Hi-net data: <a class="reference external" href="http://www.hinet.bosai.go.jp/about_data/?LANG=en">http://www.hinet.bosai.go.jp/about_data/?LANG=en</a></td></tr>
-</tbody>
-</table>
-<table class="docutils footnote" frame="void" id="id16" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id8">[8]</a></td><td>WIN data format (in Japanese): <a class="reference external" href="http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html">http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html</a></td></tr>
-</tbody>
-</table>
-</div>
-</div>
-<div class="section" id="file-i-o-functions">
-<h2>File I/O Functions<a class="headerlink" href="#file-i-o-functions" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="reading-files">
+<span id="readdata"></span><h1>Reading Files<a class="headerlink" href="#reading-files" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
-<dt id="readmseed">
-<code class="descname">readmseed</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#readmseed" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">read_data!(S, fmt::String, filepat [, KWs])</code></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt>
-<code class="descname">readmseed!(S, fname)</code></dt>
+<code class="descname">S = read_data(fmt::String, filepat [, KWs])</code></dt>
 <dd></dd></dl>
 
-<p>Read miniSEED data file <code class="docutils literal notranslate"><span class="pre">fname</span></code> into a new or existing SeisData structure.</p>
+<div class="line-block">
+<div class="line">Read data from a supported file format into memory.</div>
+<div class="line"><br /></div>
+<div class="line"><strong>fmt</strong></div>
+<div class="line">Lowercase string describin the file format. See below.</div>
+<div class="line"><br /></div>
+<div class="line"><strong>filepat</strong></div>
+<div class="line">Read files with names matching pattern <code class="docutils literal notranslate"><span class="pre">filepat</span></code>. Supports wildcards.</div>
+<div class="line"><br /></div>
+<div class="line"><strong>KWs</strong></div>
+<div class="line">Keyword arguments; see also <a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">SeisIO standard KWs</span></a> or type <code class="docutils literal notranslate"><span class="pre">?SeisIO.KW</span></code>.</div>
+<div class="line">Standard keywords: full, nx_add, nx_new, v</div>
+<div class="line">Other keywords: See below.</div>
+</div>
+<div class="section" id="supported-file-formats">
+<h2>Supported File Formats<a class="headerlink" href="#supported-file-formats" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="67%" />
+<col width="33%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">File Format</th>
+<th class="head">String</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>GeoCSV, time-sample pair</td>
+<td>geocsv</td>
+</tr>
+<tr class="row-odd"><td>GeoCSV, sample list</td>
+<td>geocsv.slist</td>
+</tr>
+<tr class="row-even"><td>Lennartz ASCII</td>
+<td>lenartzascii</td>
+</tr>
+<tr class="row-odd"><td>Mini-SEED, SEED</td>
+<td>mseed</td>
+</tr>
+<tr class="row-even"><td>PASSCAL SEG Y</td>
+<td>passcal</td>
+</tr>
+<tr class="row-odd"><td>SAC</td>
+<td>sac</td>
+</tr>
+<tr class="row-even"><td>SEG Y (rev 0 or rev 1)</td>
+<td>segy</td>
+</tr>
+<tr class="row-odd"><td>UW</td>
+<td>uw</td>
+</tr>
+<tr class="row-even"><td>Win32</td>
+<td>win32</td>
+</tr>
+</tbody>
+</table>
+<p>Strings are case-sensitive to prevent any performance impact from using matches
+and/or lowercase().</p>
+</div>
+<div class="section" id="supported-keywords">
+<h2>Supported Keywords<a class="headerlink" href="#supported-keywords" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">KW</th>
+<th class="head">Used By</th>
+<th class="head">Type</th>
+<th class="head">Default</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>cf</td>
+<td>win32</td>
+<td>String</td>
+<td>“”</td>
+<td>win32 channel info filestr</td>
+</tr>
+<tr class="row-odd"><td>full</td>
+<td>sac</td>
+<td>Bool</td>
+<td>false</td>
+<td>read full header into <strong>:misc</strong>?</td>
+</tr>
+<tr class="row-even"><td>&#160;</td>
+<td>segy</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>&#160;</td>
+<td>uw</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>nx_add</td>
+<td>mseed</td>
+<td>Int64</td>
+<td>360000</td>
+<td>minimum size increase of <strong>:x</strong></td>
+</tr>
+<tr class="row-odd"><td>nx_new</td>
+<td>mseed</td>
+<td>Int64</td>
+<td>86400000</td>
+<td>length of <strong>:x</strong> for new channels</td>
+</tr>
+<tr class="row-even"><td>jst</td>
+<td>win32</td>
+<td>Bool</td>
+<td>true</td>
+<td>are sample times JST (UTC+9)?</td>
+</tr>
+<tr class="row-odd"><td>swap</td>
+<td>seed</td>
+<td>Bool</td>
+<td>true</td>
+<td>byte swap?</td>
+</tr>
+<tr class="row-even"><td>v</td>
+<td>mseed</td>
+<td>Int64</td>
+<td>0</td>
+<td>verbosity</td>
+</tr>
+<tr class="row-odd"><td>&#160;</td>
+<td>uw</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>&#160;</td>
+<td>win32</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="performance-tip">
+<h3>Performance Tip<a class="headerlink" href="#performance-tip" title="Permalink to this headline">¶</a></h3>
+<p>With mseed or win32 data, adjust <cite>nx_new</cite> and <cite>nx_add</cite> based on the sizes of
+the data vectors that you expect to read. If the largest has <cite>Nmax</cite> samples,
+and the smallest has <cite>Nmin</cite>, we recommend <cite>nx_new=Nmin</cite> and <cite>nx_add=Nmax-Nmin</cite>.</p>
+<p>Default values can be changed in SeisIO keywords, e.g.,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SeisIO</span><span class="o">.</span><span class="n">KW</span><span class="o">.</span><span class="n">nx_new</span> <span class="o">=</span> <span class="mi">60000</span>
+<span class="n">SeisIO</span><span class="o">.</span><span class="n">KW</span><span class="o">.</span><span class="n">nx_add</span> <span class="o">=</span> <span class="mi">360000</span>
+</pre></div>
+</div>
+<p>The system-wide defaults are <cite>nx_new=86400000</cite> and <cite>nx_add=360000</cite>. Using these
+values with very small jobs will greatly decrease performance.</p>
+<div class="section" id="examples">
+<h4>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><dl class="first docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">S</span> <span class="pre">=</span> <span class="pre">read_data(&quot;uw&quot;,</span> <span class="pre">&quot;99011116541W&quot;,</span> <span class="pre">full=true)</span></code></dt>
+<dd><ul class="first last">
+<li>Read UW-format data file <code class="docutils literal notranslate"><span class="pre">99011116541W</span></code></li>
+<li>Store full header information in <code class="docutils literal notranslate"><span class="pre">:misc</span></code></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">read_data!(S,</span> <span class="pre">&quot;sac&quot;,</span> <span class="pre">&quot;MSH80*.SAC&quot;)</span></code></dt>
+<dd><ul class="first last">
+<li>Read SAC-format files matching string pattern <cite>MSH80*.SAC</cite></li>
+<li>Read into existing SeisData object <code class="docutils literal notranslate"><span class="pre">S</span></code></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt><code class="docutils literal notranslate"><span class="pre">S</span> <span class="pre">=</span> <span class="pre">read_data(&quot;win32&quot;,</span> <span class="pre">&quot;20140927*.cnt&quot;,</span> <span class="pre">cf=&quot;20140927*ch&quot;,</span> <span class="pre">nx_new=360000)</span></code></dt>
+<dd><ul class="first last">
+<li>Read win32-format data files with names matching pattern <code class="docutils literal notranslate"><span class="pre">2014092709*.cnt</span></code></li>
+<li>Use ASCII channel information filenames that match pattern <code class="docutils literal notranslate"><span class="pre">20140927*ch</span></code></li>
+<li>Assign new channels an initial size of <code class="docutils literal notranslate"><span class="pre">nx_new</span></code> samples</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="section" id="format-descriptions-and-notes">
+<h2>Format Descriptions and Notes<a class="headerlink" href="#format-descriptions-and-notes" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://geows.ds.iris.edu/documents/GeoCSV.pdf">GeoCSV</a>: an extension of “human-readable”, tabular file format Comma-
+Separated Values (CSV).</p>
+<p><strong>Lennartz ASCII</strong>: ASCII output of Lennartz portable digitizers.</p>
+<p><a class="reference external" href="https://www.passcal.nmt.edu/content/seg-y-what-it-is">PASSCAL</a>: A single-channel variant SEG Y format developed by PASSCAL/New
+Mexico Tech and commonly used with PASSCAL field equipment. PASSCAL differs from
+SEG Y in that PASSCAL format uses neither file headers nor extended textural
+headers, and the number of samples per trace can exceed 32767.</p>
+<p><a class="reference external" href="https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf">SEED</a>: SEED stands for
+Standard for the Exchange of Earthquake Data; used by the International
+Federation of Digital Seismograph Networks (FDSN) as an omnibus seismic data
+standard. mini-SEED is a data-only variant that uses only data blockettes
+and allows longer data records.</p>
+<p><a class="reference external" href="https://ds.iris.edu/files/sac-manual/manual/file_format.html">SAC</a>: the
+Seismic Analysis Code data format, originally developed for the eponymous
+command-line interpreter. Widely used, and supported in virtually every
+programming language.</p>
+<p><a class="reference external" href="http://wiki.seg.org/wiki/SEG_Y">SEG Y</a>: Society of Exploration Geophysicists
+data format. Common in the energy industry, developed and maintained by the SEG.
+Only SEG Y rev 0 and <a class="reference external" href="https://seg.org/Portals/0/SEG/News%20and%20Resources/Technical%20Standards/seg_y_rev1.pdf">rev 1</a>
+with standard headers are supported.</p>
+<p><strong>UW</strong>: the University of Washington data format has no online reference and is
+no longer in use. It was created by the Pacific Northwest Seismic Network and
+used for local event archival until at least 2004. A UW event is described by a
+pickfile and a corresponding data file, whose names are identical except for
+the last character; for example, the files 99062109485o and 99062109485W
+describe event 99062109485. Unlike the win32 data format, the data file is
+self-contained; the pick file is not required to use raw trace data. Only UW-2
+data files are supported by SeisIO; we have never encountered a UW-1 data file
+outside of Exabyte tapes and have no reason to suspect that any remain in
+circulation.</p>
+<p><a class="reference external" href="http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html">Win32</a>: data format developed
+by the NIED (National Research Institute for Earth Science and Disaster Prevention),
+Japan.  Data are typically divided into files that contain a minute of continuous
+data from several channels. Data within each file are stored by channel in
+one-second segments as variable-precision delta-encoded integers. Channel
+information is retrieved from an external channel information file. Although
+accurate channel files are needed to use win32 data, these files are not strictly
+controlled by any central authority and inconsistencies in channel parameters,
+particularly gains, are known to exist.</p>
+</div>
+<div class="section" id="other-file-i-o-functions">
+<h2>Other File I/O Functions<a class="headerlink" href="#other-file-i-o-functions" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="readsac">
-<code class="descname">readsac</code><span class="sig-paren">(</span><em>fname</em><span class="optional">[</span>, <em>full=false::Bool</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#readsac" title="Permalink to this definition">¶</a></dt>
+<dt id="readuwevt">
+<code class="descname">readuwevt</code><span class="sig-paren">(</span><em>fpat</em><span class="sig-paren">)</span><a class="headerlink" href="#readuwevt" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt id="rsac">
-<code class="descname">rsac</code><span class="sig-paren">(</span><em>fname</em><span class="optional">[</span>, <em>full=false::Bool</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#rsac" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<p>Read SAC data file <code class="docutils literal notranslate"><span class="pre">fname</span></code> into a new SeisData structure. Specify keyword <code class="docutils literal notranslate"><span class="pre">full=true</span></code> to save all SAC header values in field <code class="docutils literal notranslate"><span class="pre">:misc</span></code>.</p>
-<dl class="function">
-<dt id="readsegy">
-<code class="descname">readsegy</code><span class="sig-paren">(</span><em>fname</em><span class="optional">[</span>, <em>passcal=true::Bool</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#readsegy" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<p>Read SEG Y data file <code class="docutils literal notranslate"><span class="pre">fname</span></code> into a new SeisData structure. Use keyword <code class="docutils literal notranslate"><span class="pre">passcal=true</span></code> for PASSCAL-modified SEG Y.</p>
-<dl class="function">
-<dt id="readuw">
-<code class="descname">readuw</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#readuw" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<p>Read UW data file into new SeisData structure. <code class="docutils literal notranslate"><span class="pre">fname</span></code> can be a pick file (ending in [a-z]), a data file (ending in W), or a file root (numeric UW event ID).</p>
-<dl class="function">
-<dt id="readwin32">
-<code class="descname">readwin32</code><span class="sig-paren">(</span><em>fstr</em>, <em>cf</em><span class="sig-paren">)</span><a class="headerlink" href="#readwin32" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<p>Read win32 data from files matching pattern <code class="docutils literal notranslate"><span class="pre">fstr</span></code> into a new SeisData structure using channel information file <code class="docutils literal notranslate"><span class="pre">cf</span></code>. <code class="docutils literal notranslate"><span class="pre">fstr</span></code> can be a path with wild card filenames, but cannot use wild card directories.</p>
-<p>..function:: rlennasc(fname)</p>
-<p>Read Lennartz-formatted ASCII file into a new SeisData structure.</p>
+<p>Read University of Washington-format event data with file pattern stub fpat.
+fstub can be a datafile name, a pickname, or a stub.</p>
 <dl class="function">
 <dt id="rseis">
 <code class="descname">rseis</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#rseis" title="Permalink to this definition">¶</a></dt>
@@ -422,7 +485,8 @@ unreadable SEG Y files to their creators.</p>
 <code class="descname">writesac</code><span class="sig-paren">(</span><em>S</em><span class="optional">[</span>, <em>ts=true</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#writesac" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<p>Write SAC data to SAC files with auto-generated names. Specify ts=true to write time stamps; this will flag the file as generic x-y data in the SAC interpreter.</p>
+<p>Write SAC data to SAC files with auto-generated names. Specify ts=true to write
+time stamps; this will flag the file as generic x-y data in the SAC interpreter.</p>
 <dl class="function">
 <dt id="wseis">
 <code class="descname">wseis</code><span class="sig-paren">(</span><em>fname</em>, <em>S</em><span class="sig-paren">)</span><a class="headerlink" href="#wseis" title="Permalink to this definition">¶</a></dt>
@@ -448,7 +512,7 @@ unreadable SEG Y files to their creators.</p>
         <a href="../Web/webclients.html" class="btn btn-neutral float-right" title="Web Requests" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../seisdata.html" class="btn btn-neutral float-left" title="Data Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../working_with_data.html" class="btn btn-neutral float-left" title="Working with Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

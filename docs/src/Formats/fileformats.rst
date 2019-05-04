@@ -1,107 +1,155 @@
-############
-File Formats
-############
+.. _readdata:
 
-Current format support: (e = endianness; B = big, l = little, * = either)
+#############
+Reading Files
+#############
+.. function:: read_data!(S, fmt::String, filepat [, KWs])
+.. function:: S = read_data(fmt::String, filepat [, KWs])
 
-+----------+---+---------------+---------------------------+
-| Format   | e | Command       | Creates/modifies          |
-+==========+===+===============+===========================+
-| miniSEED | B | readmseed!    | existing SeisData         |
-+----------+---+---------------+---------------------------+
-|          | B | readmseed     | new SeisData              |
-+----------+---+---------------+---------------------------+
-| SAC      | \*| readsac       | new SeisData              |
-+----------+---+---------------+---------------------------+
-|          | \*| sachdr        | dumps header to stdout    |
-+----------+---+---------------+---------------------------+
-|          | l | writesac      | sac files on disk         |
-+----------+---+---------------+---------------------------+
-| SEG Y    | B | readsegy (a)  | new SeisData              |
-+----------+---+---------------+---------------------------+
-|          | B | segyhdr       | dumps header to stdout    |
-+----------+---+---------------+---------------------------+
-| UW       | B | readuw        | new SeisEvent             |
-+----------+---+---------------+---------------------------+
-|          | B | uwpf!         | existing SeisEvent        |
-+----------+---+---------------+---------------------------+
-|          | B | uwpf          | new SeisHdr               |
-+----------+---+---------------+---------------------------+
-|          | B | uwdf          | new SeisData              |
-+----------+---+---------------+---------------------------+
-| win32    | B | readwin32!    | existing SeisData         |
-+----------+---+---------------+---------------------------+
-|          | B | readwin32     | new SeisData              |
-+----------+---+---------------+---------------------------+
+| Read data from a supported file format into memory.
+|
+| **fmt**
+| Lowercase string describin the file format. See below.
+|
+| **filepat**
+| Read files with names matching pattern ``filepat``. Supports wildcards.
+|
+| **KWs**
+| Keyword arguments; see also :ref:`SeisIO standard KWs<dkw>` or type ``?SeisIO.KW``.
+| Standard keywords: full, nx_add, nx_new, v
+| Other keywords: See below.
 
-(a) Use keyword PASSCAL=true for PASSCAL SEG Y.
+**********************
+Supported File Formats
+**********************
+.. csv-table::
+  :header: File Format, String
+  :delim: |
+  :widths: 2, 1
 
-*******************
-Format Descriptions
-*******************
+  GeoCSV, time-sample pair  | geocsv
+  GeoCSV, sample list       | geocsv.slist
+  Lennartz ASCII            | lenartzascii
+  Mini-SEED, SEED           | mseed
+  PASSCAL SEG Y             | passcal
+  SAC                       | sac
+  SEG Y (rev 0 or rev 1)    | segy
+  UW                        | uw
+  Win32                     | win32
 
-**miniSEED**: SEED stands for Standard for the Exchange of Earthquake Data; the data format is used by FDSN as a universal omnibus-type standard for seismic data. miniSEED is a data-only format with a limited number of blockette types. [#]_
+Strings are case-sensitive to prevent any performance impact from using matches
+and/or lowercase().
 
-**SAC**: widely-used data format developed for the Seismic Analysis Code interpreter, supported in virtually every programming language. [#]_ [#]_ [#]_
+**********************
+Supported Keywords
+**********************
+.. csv-table::
+  :header: KW, Used By, Type, Default, Meaning
+  :delim: |
+  :widths: 1, 1, 1, 1, 4
 
-**SEG Y**: standard energy industry seismic data format, developed and maintained by the Society for Exploration Geophysicists\ :sup:`(a)` [#]_ A single-channel SEG Y variant format, referred to here as "PASSCAL SEG Y" was developed by PASSCAL/New Mexico Tech and is used with PASSCAL field equipment. [#]_
-
-**UW**: the University of Washington data format was designed for event archival. A UW event is described by a pickfile and a corresponding data file, whose names are identical except for the last character, e.g. 99062109485o, 99062109485W.\ :sup:`(b)`
-
-**Win32** : data format developed by the NIED (National Research Institute for Earth Science and Disaster Prevention), Japan. Data are typically divided into files that contain a minute of continuous data from channels on a single network or subnet. Data within each file are stored by channel in 1s segments as variable-precision integers. Channel information for each stream is retrieved from an external channel information file.\ :sup:`(c)` [#]_ [#]_
-
-Usage Warnings
---------------
-:sup:`(a)`  **SEG Y** v :math:`\le` rev 1 is supported. Trace header field
-definitions in SEG Y are not ridigly controlled by any central authority, so
-some industry SEG Y files may be unreadable. Please address questions about
-unreadable SEG Y files to their creators.
-
-:sup:`(b)`  **UW** data format has no online documentation. Please contact the SeisIO creators or the Pacific Northwest Seismic Network (University of Washington, United States) if additional help is needed to read these files.
-
-:sup:`(c)`  **Win32** channel information files are not strictly controlled by a central authority; inconsistencies in channel parameters (e.g. gains) are known to exist. Please remember that redistribution of Win32 files is strictly prohibited by the NIED (our travis-ci tests use an encrypted tarball).
-
-
-.. rubric:: External References
-.. [#] FDSN SEED manual: https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf
-.. [#] SAC data format intro: https://ds.iris.edu/ds/nodes/dmc/kb/questions/2/sac-file-format/
-.. [#] SAC file format: https://ds.iris.edu/files/sac-manual/manual/file_format.html
-.. [#] SAC software homepage: https://seiscode.iris.washington.edu/projects/sac
-.. [#] SEG Y Wikipedia page: http://wiki.seg.org/wiki/SEG_Y
-.. [#] PASSCAL SEG Y trace files: https://www.passcal.nmt.edu/content/seg-y-what-it-is
-.. [#] How to use Hi-net data: http://www.hinet.bosai.go.jp/about_data/?LANG=en
-.. [#] WIN data format (in Japanese): http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html
+  cf     | win32    | String  | \"\"      | win32 channel info filestr
+  full   | sac      | Bool    | false     | read full header into **:misc**?
+         | segy     |         |           |
+         | uw       |         |           |
+  nx_add | mseed    | Int64   | 360000    | minimum size increase of **:x**
+  nx_new | mseed    | Int64   | 86400000  | length of **:x** for new channels
+  jst    | win32    | Bool    | true      | are sample times JST (UTC+9)?
+  swap   | seed     | Bool    | true      | byte swap?
+  v      | mseed    | Int64   | 0         | verbosity
+         | uw       |         |           |
+         | win32    |         |           |
 
 
-******************
-File I/O Functions
-******************
+Performance Tip
+===============
+With mseed or win32 data, adjust `nx_new` and `nx_add` based on the sizes of
+the data vectors that you expect to read. If the largest has `Nmax` samples,
+and the smallest has `Nmin`, we recommend `nx_new=Nmin` and `nx_add=Nmax-Nmin`.
 
-.. function:: readmseed(fname)
-.. function:: readmseed!(S, fname)
+Default values can be changed in SeisIO keywords, e.g.,
+::
 
-Read miniSEED data file ``fname`` into a new or existing SeisData structure.
+  SeisIO.KW.nx_new = 60000
+  SeisIO.KW.nx_add = 360000
 
-.. function:: readsac(fname[, full=false::Bool])
-.. function:: rsac(fname[, full=false::Bool])
+The system-wide defaults are `nx_new=86400000` and `nx_add=360000`. Using these
+values with very small jobs will greatly decrease performance.
 
-Read SAC data file ``fname`` into a new SeisData structure. Specify keyword ``full=true`` to save all SAC header values in field ``:misc``.
+Examples
+--------
 
-.. function:: readsegy(fname[, passcal=true::Bool])
+1. ``S = read_data("uw", "99011116541W", full=true)``
+    + Read UW-format data file ``99011116541W``
+    + Store full header information in ``:misc``
+2. ``read_data!(S, "sac", "MSH80*.SAC")``
+    + Read SAC-format files matching string pattern `MSH80*.SAC`
+    + Read into existing SeisData object ``S``
+3. ``S = read_data("win32", "20140927*.cnt", cf="20140927*ch", nx_new=360000)``
+    + Read win32-format data files with names matching pattern ``2014092709*.cnt``
+    + Use ASCII channel information filenames that match pattern ``20140927*ch``
+    + Assign new channels an initial size of ``nx_new`` samples
 
-Read SEG Y data file ``fname`` into a new SeisData structure. Use keyword ``passcal=true`` for PASSCAL-modified SEG Y.
 
-.. function:: readuw(fname)
+*****************************
+Format Descriptions and Notes
+*****************************
 
-Read UW data file into new SeisData structure. ``fname`` can be a pick file (ending in [a-z]), a data file (ending in W), or a file root (numeric UW event ID).
+`GeoCSV\ <http://geows.ds.iris.edu/documents/GeoCSV.pdf>`_: an extension of "human-readable", tabular file format Comma-
+Separated Values (CSV).
 
-.. function:: readwin32(fstr, cf)
+**Lennartz ASCII**: ASCII output of Lennartz portable digitizers.
 
-Read win32 data from files matching pattern ``fstr`` into a new SeisData structure using channel information file ``cf``. ``fstr`` can be a path with wild card filenames, but cannot use wild card directories.
+`PASSCAL\ <https://www.passcal.nmt.edu/content/seg-y-what-it-is>`_: A single-channel variant SEG Y format developed by PASSCAL/New
+Mexico Tech and commonly used with PASSCAL field equipment. PASSCAL differs from
+SEG Y in that PASSCAL format uses neither file headers nor extended textural
+headers, and the number of samples per trace can exceed 32767.
 
-..function:: rlennasc(fname)
+`SEED\ <https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf>`_: SEED stands for
+Standard for the Exchange of Earthquake Data; used by the International
+Federation of Digital Seismograph Networks (FDSN) as an omnibus seismic data
+standard. mini-SEED is a data-only variant that uses only data blockettes
+and allows longer data records.
 
-Read Lennartz-formatted ASCII file into a new SeisData structure.
+`SAC\ <https://ds.iris.edu/files/sac-manual/manual/file_format.html>`_: the
+Seismic Analysis Code data format, originally developed for the eponymous
+command-line interpreter. Widely used, and supported in virtually every
+programming language.
+
+`SEG Y\ <http://wiki.seg.org/wiki/SEG_Y>`_: Society of Exploration Geophysicists
+data format. Common in the energy industry, developed and maintained by the SEG.
+Only SEG Y rev 0 and `rev 1\ <https://seg.org/Portals/0/SEG/News%20and%20Resources/Technical%20Standards/seg_y_rev1.pdf>`_
+with standard headers are supported.
+
+**UW**: the University of Washington data format has no online reference and is
+no longer in use. Created by the Pacific Northwest Seismic Network for event
+archival; used through the early 2000s. A UW event is described by a pickfile
+and a corresponding data file, whose names are identical except for the last
+character; for example, the files 99062109485o and 99062109485W
+describe event 99062109485. Unlike the win32 data format, the data file is
+self-contained; the pick file is not required to use raw trace data. Only UW-2
+data files are supported by SeisIO; we have never encountered a UW-1 data file
+outside of Exabyte tapes and have no reason to suspect that any remain in
+circulation.
+
+`Win32\ <http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html>`_: data format developed
+by the NIED (National Research Institute for Earth Science and Disaster Prevention),
+Japan.  Data are typically divided into files that contain a minute of continuous
+data from several channels. Data within each file are stored by channel in
+one-second segments as variable-precision delta-encoded integers. Channel
+information is retrieved from an external channel information file. Although
+accurate channel files are needed to use win32 data, these files are not strictly
+controlled by any central authority and inconsistencies in channel parameters,
+particularly gains, are known to exist.
+
+************************
+Other File I/O Functions
+************************
+
+.. function:: readuwevt(fpat)
+
+Read University of Washington-format event data with file pattern stub fpat.
+fstub can be a datafile name, a pickname, or a stub.
 
 .. function:: rseis(fname)
 
@@ -129,7 +177,8 @@ Parse UW event pick file ``pfname`` into a new SeisEvent structure.
 
 .. function:: writesac(S[, ts=true])
 
-Write SAC data to SAC files with auto-generated names. Specify ts=true to write time stamps; this will flag the file as generic x-y data in the SAC interpreter.
+Write SAC data to SAC files with auto-generated names. Specify ts=true to write
+time stamps; this will flag the file as generic x-y data in the SAC interpreter.
 
 .. function:: wseis(fname, S)
 .. function:: wseis(fname, S, T, U...)
