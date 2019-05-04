@@ -16,6 +16,20 @@ function parsemseed!(S::SeisData, sid::IO, v::Int64, nx_new::Int64, nx_add::Int6
   return S
 end
 
+function read_seed_file!(S::SeisData, fname::String, v::Int64, nx_new::Int64, nx_add::Int64)
+  io = open(fname, "r")
+  skip(io, 6)
+  c = read(io, UInt8)
+  if c in (0x44, 0x52, 0x4d, 0x51)
+    seekstart(io)
+    parsemseed!(S, io, v, nx_new, nx_add)
+    close(io)
+  else
+    error("Invalid file type!")
+  end
+  return nothing
+end
+
 @doc """
     readmseed(fname[, KWs])
 
@@ -51,16 +65,14 @@ function readmseed!(S::SeisData, fname::String;
                     nx_new::Int64=KW.nx_new,
                     nx_add::Int64=KW.nx_add)
   setfield!(BUF, :swap, swap)
-
   if safe_isfile(fname)
-    fid = open(fname, "r")
-    skip(fid, 6)
-    (findfirst(isequal(read(fid, Char)), "DRMQ") > 0) || error("Scan failed due to invalid file type")
-    seek(fid, 0)
-    parsemseed!(S, fid, v, nx_new, nx_add)
-    close(fid)
+    read_seed_file!(S, fname, v, nx_new, nx_add)
   else
-    error("Invalid file name!")
+    files = ls(fname)
+    nf = length(files)
+    for file in files
+      read_seed_file!(S, file, v, nx_new, nx_add)
+    end
   end
   return nothing
 end
