@@ -1,7 +1,9 @@
-export mseed_support
+export seed_support, mseed_support
 
-"""
-# MiniSEED Support
+@doc """
+# SEED Support
+SeisIO supports mini-SEED, the "data-only" extension of the SEED (Standard for
+the Exchange of Earthquake Data) file format.
 
 ## Supported Blockette Types
 
@@ -22,18 +24,15 @@ Information unrelated to data or timing is stored in `:misc` as String arrays;
 each blockette gets a single String in the named key, separated by a newline
 character (\\n).
 
-### Unsupported Blockette Types
-Any blockette of a type not in the above table is skipped by readmseed.
-
 ## Supported Data Encodings
 
 | Format  | Data Encoding                                               |
 |---------|:------------------------------------------------------------|
-| 0       | ASCII text [^b]                                             |
+| 0       | ASCII text [^a]                                             |
 | 1       | Int16 unencoded                                             |
 | 3       | Int32 unencoded                                             |
 | 4       | Float32 unencoded                                           |
-| 5       | Float64 unencoded [^c]                                      |
+| 5       | Float64 unencoded [^b]                                      |
 | 10      | Steim-1                                                     |
 | 11      | Steim-2                                                     |
 | 12      | GEOSCOPE multiplexed, 16-bit gain ranged, 3-bit exponent    |
@@ -42,24 +41,28 @@ Any blockette of a type not in the above table is skipped by readmseed.
 | 30      | SRO                                                         |
 | 32      | DWWSSN gain ranged                                          |
 
-[^b]: Saved to C.misc["seed_ascii"]; generally not used for data
-[^c]: Converted to Float32
-
-### Unsupported Data Encodings
-These have never been encountered by SeisIO and may not exist in real seismic
-data.
-
-| Format  | Data Encoding                                               |
-|---------|:------------------------------------------------------------|
-| 2       | Int24 unencoded                                             |
-| 12      | GEOSCOPE multiplexed, 24-bit integer                        |
-| 15      | US National Network                                         |
-| 17      | Graefenberg, 16-bit gain ranged                             |
-| 18      | IPG - Strasbourg, 16-bit gain ranged                        |
-| 19      | Steim-3                                                     |
-| 31      | HGLP                                                        |
-| 33      | RSTN 16-bit gain ranged                                     |
-"""
-function mseed_support()
+[^a]: Saved to C.misc["seed_ascii"]; generally not used for data
+[^b]: Converted to Float32
+""" seed_support
+function seed_support()
     return nothing
 end
+
+@doc (@doc seed_support)
+mseed_support() = seed_support()
+
+#
+# ### Unsupported Data Encodings
+# These have never been encountered by SeisIO and may not exist in real seismic
+# data.
+#
+# | Format  | Data Encoding                                               |
+# |---------|:------------------------------------------------------------|
+# | 2       | Int24 unencoded                                             |
+# | 12      | GEOSCOPE multiplexed, 24-bit integer                        |
+# | 15      | US National Network                                         |
+# | 17      | Graefenberg, 16-bit gain ranged                             |
+# | 18      | IPG - Strasbourg, 16-bit gain ranged                        |
+# | 19      | Steim-3                                                     |
+# | 31      | HGLP                                                        |
+# | 33      | RSTN 16-bit gain ranged                                     |

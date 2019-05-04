@@ -23,24 +23,6 @@ half the sampling interval.
     merge!(S::SeisData)
 
 "Flatten" a SeisData structure by merging data from each unique ID into a single channel.
-
-#### Merge Behavior
-* Non-overlapping data are concatenated and sample times are adjusted.
-* If two data segments contain no gaps, a "fast merge" operation checks and
-  corrects for 1-2 sample time shifts to prevent start time rounding inconsistencies.
-  However, these checks are only possible on a per-channel basis.
-* For gapped or non-identical data, pairs of samples x_i, x_j : |t_i-t_j| < (1/2*S.fs)
-  are averaged. Warnings are thrown when non-identical data are merged.
-
-#### Potential Pitfalls
-* It's best to only merge unprocessed data. Merging data segments that were
-processed independently (e.g. detrended) will throw many warnings because the
-processed traces differ slightly in the overlap window.
-* If necessary, time series from the same channel sampled at different Fs will
-be resampled to the lowest Fs for that channel ID.
-
-`merge!` always invokes `sort!` before return to ensure that the "*" operator is
-commutative.
 """
 function merge!(S::SeisData;
     v::Int = KW.v)

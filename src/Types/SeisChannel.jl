@@ -123,4 +123,5 @@ function sizeof(Ch::SeisChannel)
   return s
 end
 
+@doc (@doc namestrip)
 namestrip!(C::SeisChannel) = namestrip(C.name)

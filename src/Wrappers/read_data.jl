@@ -15,7 +15,6 @@ SeisData object `S`.
 Read data in file format `fmt` matching file pattern `filestr` into an existing
 SeisData object `S`.
 
-## Format Strings
 | Format                    | String          |
 | :---                      | :---            |
 | GeoCSV, time-sample pair  | geocsv          |
@@ -28,10 +27,6 @@ SeisData object `S`.
 | UW                        | uw              |
 | Win32                     | win32           |
 
-Strings are case-sensitive to prevent any performance impact from using matches
-and/or lowercase().
-
-## Supported Keywords
 |KW      | Used By  | Type    | Default   | Meaning                         |
 |:---    |:---      |:---     |:---       |:---                             |
 |cf      | win32    | String  | ""        | win32 channel info filestr      |

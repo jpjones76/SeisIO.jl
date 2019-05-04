@@ -245,7 +245,7 @@ has_stream(sta::Array{String,2};
 # (4) A stream with no data for `gap` seconds is considered offline if `f=0x02`.
 # (5) File name is auto-generated. Each `SeedLink!` call uses a unique file.
 
-"""
+@doc """
     SeedLink!(S, sta)
 
 Begin acquiring SeedLink data to SeisData structure `S`. New channels
@@ -266,7 +266,7 @@ When finished, close connection manually with `close(S.c[n])` where n is connect
 
 * Standard keywords: fmt, opts, q, si, to, v, w, y
 * SL keywords: gap, kai, mode, port, refresh, safety, x_on_err
-"""
+""" SeedLink!
 function SeedLink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
                     gap::Real=KW.SL.gap,
                     kai::Real=KW.SL.kai,
@@ -464,6 +464,7 @@ function SeedLink!(S::SeisData, C::Union{String,Array{String,1},Array{String,2}}
   return S
 end
 
+@doc (@doc SeedLink!)
 function SeedLink(sta::Array{String,1}, pat::Array{String,1};
   gap::Real=KW.SL.gap,
   kai::Real=KW.SL.kai,
