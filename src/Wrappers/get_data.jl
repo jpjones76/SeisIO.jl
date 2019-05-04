@@ -1,6 +1,6 @@
 export get_data!, get_data
 
-"""
+@doc """
     get_data!(S, method, channels, KWs)
 
 ## Arguments
@@ -24,7 +24,7 @@ Other keywords:
 4. `S = get_data("FDSN", "HV.MOKD..HHZ", s="2012-01-01T00:00:00", t=(-3600))`: using FDSNWS, fill a new SeisData structure `S` with an hour of data ending at 2012-01-01, 00:00:00 UTC, from HV.MOKD..HHZ (USGS Hawai'i Volcano Observatory).
 
 See also: chanspec, parsetimewin, seis_www, SeisIO.KW
-"""
+""" get_data!
 function get_data!(S::SeisIO.SeisData, method_in::String, C="*"::Union{String,Array{String,1},Array{String,2}};
            fmt::String = KW.fmt                              ,  # File format
                nd::Int = KW.nd                               ,  # Number of days per request (in long requests)
@@ -96,11 +96,7 @@ function get_data!(S::SeisIO.SeisData, method_in::String, C="*"::Union{String,Ar
   return nothing
 end
 
-"""
-    S = get_data(method::String, channels, src::String; KWs)
-
-See ?get_data!
-"""
+@doc (@doc get_data)
 function get_data(method_in::String, C="*"::Union{String,Array{String,1},Array{String,2}};
            fmt::String = KW.fmt                              ,  # File format
                nd::Int = KW.nd                               ,  # Number of days per request (in long requests)

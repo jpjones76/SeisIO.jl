@@ -1,13 +1,13 @@
 export ungap, ungap!
 
-"""
+@doc """
     ungap!(S[, m=true])
 
 Fill time gaps in S with the mean of data in S. If S is a SeisData structure,
 time gaps in channel [i] are filled with the mean value of each channel's data.
 
 If m=false, gaps are filled with NANs.
-"""
+""" ungap!
 function ungap!(C::SeisChannel; m::Bool=true, tap::Bool=false)
   if tap
     taper!(C)
@@ -38,6 +38,7 @@ function ungap!(S::SeisData; m::Bool=true, tap::Bool=false)
   return nothing
 end
 
+@doc (@doc ungap!)
 ungap(S::Union{SeisData,SeisChannel}; m::Bool=true, tap::Bool=false) = (T = deepcopy(S); ungap!(T, m=m, tap=tap); return T)
 ungap!(Ev::SeisEvent; m::Bool=true, tap::Bool=false) = (S = deepcopy(Ev.data); ungap!(S, m=m, tap=tap); Ev.data = deepcopy(S); return nothing)
 ungap(Ev::SeisEvent; m::Bool=true, tap::Bool=false) = (S = deepcopy(Ev.data); ungap!(S, m=m, tap=tap); return SeisEvent(hdr=deepcopy(Ev.hdr), data=S))

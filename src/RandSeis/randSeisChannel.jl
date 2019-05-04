@@ -112,8 +112,15 @@ end
 """
     randSeisChannel()
 
-Generate a random channel of seismic data as a SeisChannel.
+Generate a random channel of geophysical time-series data as a SeisChannel.
 
+    randSeisChannel(c=true)
+
+Generate a random channel of irregularly-sampled data.
+
+    randSeisChannel(s=true)
+
+Generate a random channel of regularly-sampled seismic data.
 """
 function randSeisChannel(; c=false::Bool, s=false::Bool)
   Ch = SeisChannel()

@@ -1,4 +1,4 @@
-export d2u, j2md, md2j, parsetimewin, timestamp, u2d
+export d2u, j2md, md2j, parsetimewin, timestamp, u2d, timespec
 
 function tstr(t::DateTime)
   Y, M, D, h, m, s, μ = year(t), month(t), day(t), hour(t), minute(t), second(t), millisecond(t)
@@ -91,14 +91,16 @@ end
 md2j(y::AbstractString, m::AbstractString, d::AbstractString) = md2j(parse(Int, y), parse(Int, m), parse(Int, d))
 
 
-"""
-    d0, d1 = parsetimewin(s, t)
+@doc """
+# Time Specification
 
-Convert times `s` and `t` to strings and sorts s.t. d0 < d1.
+Most functions that allow time specifiation use two reserved key words to track
+time:
+* `s`: Start (begin) time
+* `t`: Termination (end) time
 
-### Time Specification
-`s` and `t` can be real numbers, DateTime objects, or ASCII strings. Strings
-must follow the format "yyyy-mm-ddTHH:MM:SS.nnn", e.g.
+The values passed to keywords `s` and `t` can be real numbers, DateTime objects,
+or ASCII strings. Strings must follow the format "yyyy-mm-ddTHH:MM:SS.nnn", e.g.
 `s="2016-03-23T11:17:00.333"`. Exact behavior depends on the types of s and t:
 
 | **s** | **t** | **Behavior**                         |
@@ -112,10 +114,21 @@ must follow the format "yyyy-mm-ddTHH:MM:SS.nnn", e.g.
 
 (above, R = Real, DT = DateTime, S = String, I = Integer)
 
-### Relative Timekeeping
+## Relative Timekeeping
 Numeric time values are interpreted *relative to the start of the current minute*.
 Thus, if `-s` or `-t` is 0, the data request begins (or ends) at the start of
 the minute in which the request is submitted.
+""" timespec
+function timespec()
+  return nothing
+end
+
+"""
+d0, d1 = parsetimewin(s, t)
+
+Convert times `s` and `t` to strings and sorts s.t. d0 < d1.
+
+See also: ?timespec
 """
 function parsetimewin(s::DateTime, t::DateTime)
   if s < t
