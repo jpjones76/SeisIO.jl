@@ -59,7 +59,7 @@
 
 
 \title{SeisIO Documentation}
-\date{Apr 08, 2019}
+\date{May 04, 2019}
 \release{0.1.3 rc}
 \author{Joshua Jones}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -83,12 +83,30 @@ SeisIO is a collection of utilities for reading and downloading geophysical time
 
 \section{Introduction}
 \label{\detokenize{src/intro:introduction}}\label{\detokenize{src/intro::doc}}
-SeisIO is a framework for working with geophysical time series data. The project is home to an expanding set of web clients, file format readers, and analysis utilities.
+SeisIO is a framework for working with univariate geophysical data.
+SeisIO is designed around three basic principles:
+\begin{itemize}
+\item {} 
+Ease of use: you shouldn’t \sphinxstyleemphasis{need} a PhD to study geophysical data.
+
+\item {} 
+Fluidity: working with data shouldn’t feel \sphinxstyleemphasis{clumsy}.
+
+\item {} 
+Performance: speed and efficient memory usage \sphinxstyleemphasis{matter}.
+
+\end{itemize}
+
+The project is home to an expanding set of web clients, file format readers,
+and analysis utilities.
 
 
 \subsection{Overview}
 \label{\detokenize{src/intro:overview}}
-SeisIO stores data in minimalist data types that track record times and other necessary quantities for further processing. New data are easily merged into existing structures with basic commands like \sphinxcode{\sphinxupquote{+}}. Unwanted channels can be removed just as easily. Data can be saved to a native SeisIO format or written to SAC.
+SeisIO stores data in minimalist containers that track the bare necessities for
+analysis. New data are easily added with basic commands like \sphinxcode{\sphinxupquote{+}}. Unwanted
+channels can be removed just as easily. Data can be saved to a native SeisIO
+format or written to other supported file formats.
 
 
 \subsection{Installation}
@@ -96,39 +114,78 @@ SeisIO stores data in minimalist data types that track record times and other ne
 From the Julia prompt: press \sphinxcode{\sphinxupquote{{]}}} to enter the Pkg environment, then type
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n}{add} \PYG{n}{https}\PYG{p}{:}\PYG{o}{/}\PYG{o}{/}\PYG{n}{github}\PYG{o}{.}\PYG{n}{com}\PYG{o}{/}\PYG{n}{jpjones76}\PYG{o}{/}\PYG{n}{SeisIO}\PYG{o}{.}\PYG{n}{jl}\PYG{p}{;} \PYG{n}{build}\PYG{p}{;} \PYG{n}{precompile}
+\PYG{n}{add} \PYG{n}{SeisIO}\PYG{p}{;} \PYG{n}{build}\PYG{p}{;} \PYG{n}{precompile}
 \end{sphinxVerbatim}
 
-Dependencies should be installed automatically. To run tests that verify functionality works correctly, type
+Dependencies should install automatically. To verify that everything works
+correctly, type
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{test} \PYG{n}{SeisIO}
 \end{sphinxVerbatim}
 
-in the Pkg environment. Allow 10-20 minutes for all tests to complete.
-
-To get started, exit the Pkg environment by pressing Control + C, then type
+and allow 10-20 minutes for tests to complete. To get started, exit the Pkg
+environment by pressing Backspace or Control + C, then type
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{using} \PYG{n}{SeisIO}
 \end{sphinxVerbatim}
 
+at the Julia prompt. You’ll need to repeat that last step whenever you restart
+Julia, as with any command-line interpreter (CLI) language.
+
+
+\subsection{Getting Started}
+\label{\detokenize{src/intro:getting-started}}
+The {\hyperref[\detokenize{src/tutorial:tutorial}]{\sphinxcrossref{\DUrole{std,std-ref}{tutorial}}}} is designed as a gentle introduction for people
+less familiar with the Julia language. If you already have some familiarity
+with Julia, you probably want to start with one of the following topics:
+\begin{itemize}
+\item {} 
+{\hyperref[\detokenize{src/working_with_data:wwd}]{\sphinxcrossref{\DUrole{std,std-ref}{Working with Data}}}}: learn how to manage data using SeisIO
+
+\item {} 
+{\hyperref[\detokenize{src/Formats/fileformats:readdata}]{\sphinxcrossref{\DUrole{std,std-ref}{Reading Data}}}}: learn how to read data from file
+
+\item {} 
+{\hyperref[\detokenize{src/Web/webclients:getdata}]{\sphinxcrossref{\DUrole{std,std-ref}{Requesting Data}}}}: learn how to make web requests
+
+\end{itemize}
+
 
 \subsection{Updating}
 \label{\detokenize{src/intro:updating}}
-From the Julia prompt: press \sphinxcode{\sphinxupquote{{]}}} to enter the Pkg environment, then type \sphinxcode{\sphinxupquote{update}}. You may need to restart the Julia REPL afterward to use the updated version.
+From the Julia prompt: press \sphinxcode{\sphinxupquote{{]}}} to enter the Pkg environment, then type
+\sphinxcode{\sphinxupquote{update}}. Once updates finish, restart Julia to use them.
 
 
-\section{Working with Data}
-\label{\detokenize{src/working_with_data:working-with-data}}\label{\detokenize{src/working_with_data::doc}}
-SeisIO is designed around the principle of easy, fluid, and fast data access.
-At the most basic level, SeisIO uses an array-like custom structure called a
-\sphinxstylestrong{SeisChannel} for single-channel data; \sphinxstylestrong{SeisData} structures store
-multichannel data and can be created by combining \sphinxstylestrong{SeisChannel} objects.
+\subsection{Getting Help}
+\label{\detokenize{src/intro:getting-help}}
+In addition to these documents, a number of help documents can be called at the
+Julia prompt. These commands are a useful starting point:
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+?chanspec           \PYGZsh{} how to specify channels in web requests
+?get\PYGZus{}data           \PYGZsh{} how to download data
+?read\PYGZus{}data          \PYGZsh{} how to read data from file
+?timespec           \PYGZsh{} how to specify times in web requests and data processing
+?seed\PYGZus{}support       \PYGZsh{} how much of the SEED data standard is supported?
+?seis\PYGZus{}www           \PYGZsh{} list strings for data sources in web requests
+?SeisData           \PYGZsh{} information about SeisIO data types
+?SeisIO.KW          \PYGZsh{} SeisIO shared keywords and their meanings
+\end{sphinxVerbatim}
 
 
-\subsection{First Steps}
-\label{\detokenize{src/working_with_data:first-steps}}
+\section{First Steps}
+\label{\detokenize{src/tutorial:first-steps}}\label{\detokenize{src/tutorial:tutorial}}\label{\detokenize{src/tutorial::doc}}
+SeisIO is designed around easy, fluid, and fast data access.
+At the most basic level, SeisIO uses an array-like custom object called a
+\sphinxstylestrong{SeisChannel} for single-channel data; \sphinxstylestrong{SeisData} objects store
+multichannel data and can be created by combining SeisChannels.
+
+
+\subsection{Start Here}
+\label{\detokenize{src/tutorial:start-here}}
 Create a new, empty \sphinxstylestrong{SeisChannel} object with
 
 
@@ -137,8 +194,8 @@ Create a new, empty \sphinxstylestrong{SeisChannel} object with
 \end{fulllineitems}
 
 
-The meanings of the field names are explained \sphinxtitleref{here\textless{}dkw\textgreater{}}. You can edit
-field values manually, e.g.,
+The meanings of the field names are explained {\hyperref[\detokenize{src/Appendices/keywords:dkw}]{\sphinxcrossref{\DUrole{std,std-ref}{here}}}}; you can also type
+\sphinxcode{\sphinxupquote{?SeisChannel}} at the Julia prompt. You can edit field values manually, e.g.,
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{Ch}\PYG{o}{.}\PYG{n}{loc} \PYG{o}{=} \PYG{p}{[}\PYG{o}{\PYGZhy{}}\PYG{l+m+mf}{90.0}\PYG{p}{,} \PYG{l+m+mf}{0.0}\PYG{p}{,} \PYG{l+m+mf}{9300.0}\PYG{p}{,} \PYG{l+m+mf}{0.0}\PYG{p}{,} \PYG{l+m+mf}{0.0}\PYG{p}{]}
@@ -191,14 +248,14 @@ redundant channels. Clean up with \sphinxcode{\sphinxupquote{Ch = {[}{]}}} to fr
 
 
 \subsection{Operations on SeisData structures}
-\label{\detokenize{src/working_with_data:operations-on-seisdata-structures}}
+\label{\detokenize{src/tutorial:operations-on-seisdata-structures}}
 We’re now ready for a short tutorial of what we can do with data structures.
 In the commands below, as in most of this documentation, \sphinxstylestrong{Ch} is a
 SeisChannel object and \sphinxstylestrong{S} is a SeisData object.
 
 
 \subsubsection{Adding channels to a SeisData structure}
-\label{\detokenize{src/working_with_data:adding-channels-to-a-seisdata-structure}}
+\label{\detokenize{src/tutorial:adding-channels-to-a-seisdata-structure}}
 You’ve already seen one way to add a channel to SeisData: push!(S, SeisChannel())
 adds an empty channel. Here are others:
 
@@ -223,11 +280,11 @@ These methods are aliased to the addition operator:
 
 Most web request functions can append to an existing SeisData object by placing
 an exclamation mark after the function call. You can see how this works by
-running the \sphinxtitleref{examples\textless{}webex\textgreater{}}.
+running the {\hyperref[\detokenize{src/Appendices/examples:webex}]{\sphinxcrossref{\DUrole{std,std-ref}{examples}}}}.
 
 
 \subsubsection{Search, Sort, and Prune}
-\label{\detokenize{src/working_with_data:search-sort-and-prune}}
+\label{\detokenize{src/tutorial:search-sort-and-prune}}
 The easiest way to find channels of interest in a data structure is to
 use findid, but you can obtain an array of partial matches with findchan:
 
@@ -265,80 +322,75 @@ This is an efficient way to remove unresponsive subnets and unwanted channel
 types, but beware of clumsy over-matching.
 
 
-\subsubsection{Merge}
-\label{\detokenize{src/working_with_data:merge}}
-SeisData structures can be merged using the function \sphinxstylestrong{merge!}, but this is
-much more complicated than addition.
+\subsection{Next Steps}
+\label{\detokenize{src/tutorial:next-steps}}
+Because tracking arbitrary operations can be difficult, several functions have
+been written to keep track of data and operations in a semi-automated way. See
+the next section, {\hyperref[\detokenize{src/working_with_data:wwd}]{\sphinxcrossref{\DUrole{std,std-ref}{working with data}}}}, for detailed discussion of
+managing data from the Julia command prompt.
 
 
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{merge!(S)}}}
-\end{fulllineitems}
+\section{Working with Data}
+\label{\detokenize{src/working_with_data:working-with-data}}\label{\detokenize{src/working_with_data:wwd}}\label{\detokenize{src/working_with_data::doc}}
+This section describes how to track and manage SeisIO data.
 
-\begin{itemize}
+
+\subsection{Creating Data Containers}
+\label{\detokenize{src/working_with_data:creating-data-containers}}
+Create a new, empty object using any of the following commands:
+
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{7}|\X{6}{7}|}
+\hline
+\sphinxstyletheadfamily 
+Object
+&\sphinxstyletheadfamily 
+Purpose
+\\
+\hline
+SeisChannel()
+&
+A single channel of univariate (usually time-series) data
+\\
+\hline
+SeisData()
+&
+Multichannel univariate (usually time-series) data
+\\
+\hline
+SeisHdr()
+&
+Header structure for discrete seismic events
+\\
+\hline
+SeisEvent()
+&
+Discrete seismic events; includes SeisHdr and SeisData objects
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsection{Acquiring Data}
+\label{\detokenize{src/working_with_data:acquiring-data}}\begin{itemize}
 \item {} 
-Does nothing to channels with unique IDs.
+Read files with {\hyperref[\detokenize{src/Formats/fileformats:readdata}]{\sphinxcrossref{\DUrole{std,std-ref}{read\_data}}}}
 
 \item {} 
-For sets of channels in S that share an ID…
-+ Adjusts all matching channels to the :gain, :fs, :loc, and :resp fields of the channel the latest data
-+ Time-sorts data from all matching channels by \sphinxtitleref{S.t}
-+ Averages data points that occur simultaneously in multiple members of the set
+Make web requets with {\hyperref[\detokenize{src/Web/webclients:getdata}]{\sphinxcrossref{\DUrole{std,std-ref}{get\_data}}}}
 
 \item {} 
-throws an error if joining data that have the same ID and different units.
+Initiate real-time streaming sessions to SeisData objects with {\hyperref[\detokenize{src/Web/seedlink:seedlink-section}]{\sphinxcrossref{\DUrole{std,std-ref}{SeedLink!}}}}
 
 \end{itemize}
 
 
 \subsection{Keeping Track}
 \label{\detokenize{src/working_with_data:keeping-track}}
-Because tracking arbitrary operations can be difficult, several functions have
-been written to keep track of data and operations in a semi-automated way.
-
-
-\subsubsection{Taking Notes}
-\label{\detokenize{src/working_with_data:taking-notes}}
-Most functions that add or process data note this in the appropriate channel’s :notes field.
-However, you can also make your own notes with the note! command:
-
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{note!(S,~i,~str)}}}
-\end{fulllineitems}
-
-
-Append \sphinxstylestrong{str} with a timestamp to the :notes field of channel number \sphinxstylestrong{i} of \sphinxstylestrong{S}.
-
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{note!(S,~id,~str)}}}
-\end{fulllineitems}
-
-
-As above for the first channel in \sphinxstylestrong{S} whose id is an exact match to \sphinxstylestrong{id}.
-
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{note!(S,~str)}}}
-\end{fulllineitems}
-
-
-if \sphinxstylestrong{str* mentions a channel name or ID, only the corresponding channel(s) in **S} is annotated; otherwise, all channels are annotated.
-
-Clear all notes from channel \sphinxcode{\sphinxupquote{i}} of \sphinxcode{\sphinxupquote{S}}.
-
-\sphinxcode{\sphinxupquote{clear\_notes!(S, id)}}
-
-Clear all notes from the first channel in \sphinxcode{\sphinxupquote{S}} whose id field exactly matches \sphinxcode{\sphinxupquote{id}}.
-
-\sphinxcode{\sphinxupquote{clear\_notes!(S)}}
-
-Clear all notes from every channel in \sphinxcode{\sphinxupquote{S}}.
-
-
-\subsubsection{Keeping Track}
-\label{\detokenize{src/working_with_data:id1}}
 A number of auxiliary functions exist to keep track of channels:
 \index{findchan() (built-in function)@\spxentry{findchan()}\spxextra{built-in function}}
 
@@ -353,7 +405,9 @@ A number of auxiliary functions exist to keep track of channels:
 \end{fulllineitems}
 
 
-Get all channel indices i in S with id \(\in\) S.id{[}i{]}. Can do partial id matches, e.g. findchan(S, “UW.”) returns indices to all channels whose IDs begin with “UW.”.
+Get all channel indices i in S with id \(\in\) S.id{[}i{]}. Can do partial id
+matches, e.g. findchan(S, “UW.”) returns indices to all channels whose IDs begin
+with “UW.”.
 \index{findid() (built-in function)@\spxentry{findid()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
@@ -361,7 +415,9 @@ Get all channel indices i in S with id \(\in\) S.id{[}i{]}. Can do partial id ma
 \end{fulllineitems}
 
 
-Return the index of the first channel in \sphinxstylestrong{S} where id = \sphinxstylestrong{id}.
+Return the index of the first channel in \sphinxstylestrong{S} where id = \sphinxstylestrong{id}. Requires an
+exact string match; intended as a low-memory equivalent to findfirst for
+ids.
 \index{findid() (built-in function)@\spxentry{findid()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
@@ -377,7 +433,8 @@ Equivalent to findfirst(S.id.==Ch.id).
 \end{fulllineitems}
 
 
-Remove bad characters from the :name fields of \sphinxstylestrong{S}. Specify convention as a string (default is “File”):
+Remove bad characters from the :name fields of \sphinxstylestrong{S}. Specify convention as a
+string (default is “File”):
 
 
 \begin{savenotes}\sphinxattablestart
@@ -424,7 +481,7 @@ Characters Removed:sup:\sphinxtitleref{(a)}
 \par
 \sphinxattableend\end{savenotes}
 
-$^{\text{(a)}}$ \sphinxcode{\sphinxupquote{DEL}} is \textbackslash{}x7f (ASCII/Unicode U+007f).
+$^{\text{(a)}}$ \sphinxcode{\sphinxupquote{DEL}} here is \textbackslash{}x7f (ASCII/Unicode U+007f).
 \index{timestamp() (built-in function)@\spxentry{timestamp()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
@@ -461,512 +518,420 @@ ungap! while tracking is active will flag a channel as changed.
 
 \subsubsection{Source Logging}
 \label{\detokenize{src/working_with_data:source-logging}}
-SeisIO functions record the \sphinxstyleemphasis{last} source used to populate each channel in the
-:src field. Typically this is a string.
+The :src field records the \sphinxstyleemphasis{last} source used to populate each channel (usually
+a file name and path or a web request URL).
 
 When a data source is added to a channel, including the first time data are
 added, this is recorded in :notes with the syntax (timestamp) +src: (function) (src).
 
 
-\section{Data Types}
-\label{\detokenize{src/seisdata:data-types}}\label{\detokenize{src/seisdata:seisdata}}\label{\detokenize{src/seisdata::doc}}\begin{itemize}
-\item {} 
-SeisChannel: single-channel univariate data
-
-\item {} 
-SeisData: multi-channel univariate data
-
-\item {} 
-SeisHdr: seismic event header
-
-\item {} 
-SeisEvent: composite type for events with header and trace data
-
-\end{itemize}
-
-Data types in SeisIO can be manipulated using standard Julia commands.
-
-
-\subsection{Initialization}
-\label{\detokenize{src/seisdata:initialization}}
-
-\subsubsection{SeisChannel}
-\label{\detokenize{src/seisdata:seischannel}}\index{SeisChannel() (built-in function)@\spxentry{SeisChannel()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{src/seisdata:SeisChannel}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{SeisChannel}}}{}{}
-\end{fulllineitems}
-
-
-Initialize an empty SeisChannel structure.
-\index{SeisChannel() (built-in function)@\spxentry{SeisChannel()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{SeisChannel}}}{\emph{; {[}KWs{]}}}{}
-\end{fulllineitems}
-
-
-Set fields at creation by specifying fieldnames as keywords, e.g. \sphinxstylestrong{SeisChannel(fs=100.0)} creates a new SeisChannel structure with fs = 100.0 Hz.
-
-
-\subsubsection{SeisData}
-\label{\detokenize{src/seisdata:id1}}\index{SeisData() (built-in function)@\spxentry{SeisData()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{src/seisdata:SeisData}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{SeisData}}}{}{}
-\end{fulllineitems}
-
-
-Initialize an empty SeisData structure. Fields cannot be set at creation.
-\index{SeisData() (built-in function)@\spxentry{SeisData()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{SeisData}}}{\emph{n}}{}
-\end{fulllineitems}
-
-
-Initialize an empty SeisData structure with S.n channel containers.
-\index{SeisData() (built-in function)@\spxentry{SeisData()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{SeisData}}}{\emph{S::SeisData}, \emph{Ev::SeisEvent}, \emph{C1::SeisChannel}, \emph{C2::SeisChannel}}{}
-\end{fulllineitems}
-
-
-Create a SeisData structure by copying S and appending Ev.data, C1, and C2. This syntax can be used to form a new SeisData structure from arbitrary combinations of SeisData and SeisChannel objects.
-
-
-\subsubsection{SeisHdr, SeisEvent}
-\label{\detokenize{src/seisdata:seishdr-seisevent}}\index{SeisHdr() (built-in function)@\spxentry{SeisHdr()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{src/seisdata:SeisHdr}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{SeisHdr}}}{}{}
-\end{fulllineitems}
-
-
-Create an empty SeisHdr structure.
-\index{SeisHdr() (built-in function)@\spxentry{SeisHdr()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{SeisHdr}}}{\emph{; KWs}}{}
-\end{fulllineitems}
-
-
-Set fields at creation by specifying fieldnames as keywords.
-\index{SeisEvent() (built-in function)@\spxentry{SeisEvent()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{src/seisdata:SeisEvent}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{SeisEvent}}}{}{}
-\end{fulllineitems}
-
-
-Initialize an empty SeisEvent structure with an empty SeisHdr in .hdr and an empty SeisData in .data.
-
-
-\subsubsection{Example}
-\label{\detokenize{src/seisdata:example}}
-Create a new SeisData structure with three channels
-
-\begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n}{C1} \PYG{o}{=} \PYG{n}{SeisChannel}\PYG{p}{(}\PYG{n}{name}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{BRASIL}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{,} \PYG{n+nb}{id}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{IU.SAML.00.BHZ}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
-\PYG{n}{C2} \PYG{o}{=} \PYG{n}{SeisChannel}\PYG{p}{(}\PYG{n}{name}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{UKRAINE}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{,} \PYG{n+nb}{id}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{IU.KIEV.00.BHE}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
-\PYG{n}{S} \PYG{o}{=} \PYG{n}{SeisData}\PYG{p}{(}\PYG{n}{C1}\PYG{p}{,} \PYG{n}{C2}\PYG{p}{,} \PYG{n}{SeisChannel}\PYG{p}{(}\PYG{n}{name}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+s2}{CHICAGO}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}\PYG{p}{)}
-\end{sphinxVerbatim}
-
-
-\subsubsection{SeisData Indexing}
-\label{\detokenize{src/seisdata:seisdata-indexing}}
-Individual channels in a SeisData structure can be accessed by channel index. Indexing a single channel, e.g. \sphinxstylestrong{C=S{[}3{]}}, outputs a SeisChannel; indexing several outputs a new SeisData structure.
-
-The same syntax can be used to ovewrwrite data by channel (or channel range). For example, \sphinxstylestrong{S{[}2{]} = T}, where T is a SeisChannel instance, replaces the second channel of S with T.
-
-Multiple channels in a SeisData structure S can be overwritten with another SeisData structure T using \sphinxstylestrong{setindex!(S, T, I)}; the last input is the range of indices in S to overwrite (which must satisfy \sphinxstylestrong{length(I) == T.n}).
-
-\sphinxstyleemphasis{Julia is a “pass by reference” language}. The precaution here is best illustrated by example: if we assign \sphinxstylestrong{T = S{[}2{]}}, subsequent changes to \sphinxstylestrong{T} modify \sphinxstylestrong{S{[}2{]}} in place.
-
-
-\subsection{Commands by Category}
-\label{\detokenize{src/seisdata:commands-by-category}}
-SeisIO extends a number of built-in Julia methods to work with its custom data types. In addition, many custom functions exist to simplify processing.
-
-
-\subsubsection{Append, Merge}
-\label{\detokenize{src/seisdata:append-merge}}
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{append!(S::SeisData,~U::SeisData)}}}
-\end{fulllineitems}
-
-
-Append all channels in \sphinxstylestrong{U} to \sphinxstylestrong{S}. No checks against redundancy are performed; can result in duplicate channels (fix with \sphinxstylestrong{merge!(S)}).
+\subsection{Channel Maintenance}
+\label{\detokenize{src/working_with_data:channel-maintenance}}
+A few functions exist specifically to simplify data maintenance:
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{merge!(S::SeisData,~U::SeisData)}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{prune!(S::SeisData)}}}
 \end{fulllineitems}
 
+
+Delete all channels from S that have no data (i.e. S.x is empty or non-existent).
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{S~+=~U}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{C~=~pull(S::SeisData,~id::String)}}}
 \end{fulllineitems}
 
 
-Merge \sphinxstylestrong{U} into \sphinxstylestrong{S}. Also works if \sphinxstylestrong{U} is a SeisChannel structure. Merges are based on matching channel IDs; channels in \sphinxstylestrong{U} without IDs in \sphinxstylestrong{S} are simply assigned to new channels. \sphinxstylestrong{merge!} and \sphinxstylestrong{+=} work identically for SeisData and SeisChannel instances.
-
-Data can be merged directly from the output of any SeisIO command that outputs a compatible structure; for example, \sphinxstylestrong{S += readsac(sacfile.sac)} merges data from \sphinxstylestrong{sacfile.sac} into S.
-
-For two channels \sphinxtitleref{i}, \sphinxtitleref{j} with identical ids, pairs of non-NaN data \sphinxtitleref{x}$_{\text{i}}$, \sphinxtitleref{x}$_{\text{j}}$ with overlapping time stamps (i.e. \textbar{} \sphinxtitleref{t}$_{\text{i}}$ - \sphinxtitleref{t}$_{\text{j}}$ \textbar{} \textless{} 0.5/fs) are \sphinxstyleemphasis{averaged}.
+Extract the first channel with id=id from S and return it as a new SeisChannel
+structure. The corresponding channel in S is deleted.
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{merge!(S::SeisData)}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{C~=~pull(S::SeisData,~i::integer)}}}
 \end{fulllineitems}
 
 
-Applying \sphinxstylestrong{merge!} to a single SeisData structure merges pairs of channels with identical IDs.
+Extract channel \sphinxstylestrong{i} from \sphinxstylestrong{S} as a new SeisChannel object \sphinxstylestrong{C}, and delete
+the corresponding channel from \sphinxstylestrong{S}.
 
 
-\subsubsection{Delete, Extract}
-\label{\detokenize{src/seisdata:delete-extract}}
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{delete!(S::SeisData,~j)}}}
-\end{fulllineitems}
-
+\subsection{Taking Notes}
+\label{\detokenize{src/working_with_data:taking-notes}}
+Functions that add and process data note these operations in the :notes field
+of each object affected. One can also add custom notes with the note! command:
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{deleteat!(S::SeisData,~j)}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{note!(S,~i,~str)}}}
 \end{fulllineitems}
 
+
+Append \sphinxstylestrong{str} with a timestamp to the :notes field of channel number \sphinxstylestrong{i} of \sphinxstylestrong{S}.
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{S-=j}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{note!(S,~id,~str)}}}
 \end{fulllineitems}
 
 
-Delete channel number(s) \sphinxstylestrong{j} from \sphinxstylestrong{S}. \sphinxstylestrong{j} can be an Int, UnitRange, Array\{Int,1\}, a String, or a Regex. In the last two cases, any channel with an id that matches \sphinxstylestrong{j} will be deleted; for example, \sphinxstylestrong{S-=”CC.VALT”} deletes all channels whose IDs match \sphinxstylestrong{“CC.VALT”}.
+As above for the first channel in \sphinxstylestrong{S} whose id is an exact match to \sphinxstylestrong{id}.
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{T~=~pull(S,~i)}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{note!(S,~str)}}}
 \end{fulllineitems}
 
 
-If \sphinxstylestrong{i} is a string, extract the first channel from \sphinxstylestrong{S} with \sphinxstylestrong{id=i} and return it as a new SeisData structure \sphinxstylestrong{T}. The corresponding channel in \sphinxstylestrong{S} is deleted. If \sphinxstylestrong{i} is an integer, \sphinxstylestrong{pull} operates on the corresponding channel number.
+if \sphinxstylestrong{str* mentions a channel name or ID, only the corresponding channel(s) in **S} is annotated; otherwise, all channels are annotated.
 
+Clear all notes from channel \sphinxcode{\sphinxupquote{i}} of \sphinxcode{\sphinxupquote{S}}.
 
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{purge!(S)}}}
-\end{fulllineitems}
+\sphinxcode{\sphinxupquote{clear\_notes!(S, id)}}
 
+Clear all notes from the first channel in \sphinxcode{\sphinxupquote{S}} whose id field exactly matches \sphinxcode{\sphinxupquote{id}}.
 
-Remove all empty channels from \sphinxstylestrong{S}. Empty channels are defined as the set of all channel indices \sphinxstylestrong{i} s.t. \sphinxstylestrong{isempty(S.x{[}i{]}) = true}.
+\sphinxcode{\sphinxupquote{clear\_notes!(S)}}
 
-
-\subsubsection{Read, Write}
-\label{\detokenize{src/seisdata:read-write}}
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{A~=~rseis(fname::String)}}}
-\end{fulllineitems}
-
-
-Read SeisIO data from \sphinxstylestrong{fname} into an array of SeisIO structures.
-
-
-\begin{fulllineitems}
-\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{wsac}}}{\emph{S}}{}
-\end{fulllineitems}
-
-
-Write SAC data from SeisData structure \sphinxstylestrong{S} to SAC files with auto-generated names. SAC data can only be saved to single precision.
-
-Specify \sphinxstylestrong{ts=true} to write time stamps. Time stamped SAC files created by SeisIO are treated by the SAC program itself as unevenly spaced, generic \sphinxstylestrong{x-y} data (\sphinxstylestrong{LEVEN=0, IFTYPE=4}). Third-party readers might interpret timestamped files less predictably: depending on the reader, timestamped data might be loaded as the real part of a complex time series, with time stamps as the imaginary part … or the other way around … or they might not load at all.
-
-
-\begin{fulllineitems}
-\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{wseis}}}{\emph{fname::String}, \emph{S}}{}
-\end{fulllineitems}
-
-
-Write SeisIO data from S to \sphinxstylestrong{fname}. Supports splat expansion for writing multiple objects, e.g. \sphinxstylestrong{wseis(fname, S, T, U)} writes \sphinxstylestrong{S}, \sphinxstylestrong{T}, and \sphinxstylestrong{U} to \sphinxstylestrong{fname}.
-
-To write arrays of SeisIO objects to file, use “splat” notation: for example, for an array \sphinxstylestrong{A} of type \sphinxstylestrong{Array\{SeisEvent,1\}}, use syntax \sphinxstylestrong{wseis(fname, A…)}.
-
-
-\subsubsection{Search, Sort}
-\label{\detokenize{src/seisdata:search-sort}}
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{sort!(S::SeisData,~rev=false)}}}
-\end{fulllineitems}
-
-
-In-place sort by \sphinxstylestrong{S.id}. Specify \sphinxstylestrong{rev=true} to reverse the sort order.
-
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{i~=~findid(S,~C)}}}
-\end{fulllineitems}
-
-
-Return the index of the first channel in S with id matching \sphinxstylestrong{C}. If \sphinxstylestrong{C} is a string, \sphinxstylestrong{findid} is equivalent to \sphinxstylestrong{findfirst(S.id.==C)}; if \sphinxstylestrong{C} is a SeisChannel, \sphinxstylestrong{findid} is equivalent to \sphinxstylestrong{findfirst(S.id.==C.id)}.
+Clear all notes from every channel in \sphinxcode{\sphinxupquote{S}}.
 
 
 \chapter{Files}
 \label{\detokenize{index:files}}
 
-\section{File Formats}
-\label{\detokenize{src/Formats/fileformats:file-formats}}\label{\detokenize{src/Formats/fileformats::doc}}
-Current format support: (e = endianness; B = big, l = little, * = either)
+\section{Reading Files}
+\label{\detokenize{src/Formats/fileformats:reading-files}}\label{\detokenize{src/Formats/fileformats:readdata}}\label{\detokenize{src/Formats/fileformats::doc}}
 
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{read\_data!(S,~fmt::String,~filepat~{[},~KWs{]})}}}
+\end{fulllineitems}
+
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{S~=~read\_data(fmt::String,~filepat~{[},~KWs{]})}}}
+\end{fulllineitems}
+
+
+\begin{DUlineblock}{0em}
+\item[] Read data from a supported file format into memory.
+\item[] 
+\item[] \sphinxstylestrong{fmt}
+\item[] Lowercase string describin the file format. See below.
+\item[] 
+\item[] \sphinxstylestrong{filepat}
+\item[] Read files with names matching pattern \sphinxcode{\sphinxupquote{filepat}}. Supports wildcards.
+\item[] 
+\item[] \sphinxstylestrong{KWs}
+\item[] Keyword arguments; see also {\hyperref[\detokenize{src/Appendices/keywords:dkw}]{\sphinxcrossref{\DUrole{std,std-ref}{SeisIO standard KWs}}}} or type \sphinxcode{\sphinxupquote{?SeisIO.KW}}.
+\item[] Standard keywords: full, nx\_add, nx\_new, v
+\item[] Other keywords: See below.
+\end{DUlineblock}
+
+
+\subsection{Supported File Formats}
+\label{\detokenize{src/Formats/fileformats:supported-file-formats}}
 
 \begin{savenotes}\sphinxattablestart
 \centering
-\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
+\begin{tabular}[t]{|\X{2}{3}|\X{1}{3}|}
 \hline
 \sphinxstyletheadfamily 
-Format
+File Format
 &\sphinxstyletheadfamily 
-e
-&\sphinxstyletheadfamily 
-Command
-&\sphinxstyletheadfamily 
-Creates/modifies
+String
 \\
 \hline
-miniSEED
+GeoCSV, time-sample pair
 &
-B
-&
-readmseed!
-&
-existing SeisData
+geocsv
 \\
-\hline&
-B
+\hline
+GeoCSV, sample list
 &
-readmseed
+geocsv.slist
+\\
+\hline
+Lennartz ASCII
 &
-new SeisData
+lenartzascii
+\\
+\hline
+Mini-SEED, SEED
+&
+mseed
+\\
+\hline
+PASSCAL SEG Y
+&
+passcal
 \\
 \hline
 SAC
 &
-*
-&
-readsac
-&
-new SeisData
-\\
-\hline&
-*
-&
-sachdr
-&
-dumps header to stdout
-\\
-\hline&
-l
-&
-writesac
-&
-sac files on disk
+sac
 \\
 \hline
-SEG Y
+SEG Y (rev 0 or rev 1)
 &
-B
-&
-readsegy (a)
-&
-new SeisData
-\\
-\hline&
-B
-&
-segyhdr
-&
-dumps header to stdout
+segy
 \\
 \hline
 UW
 &
-B
-&
-readuw
-&
-new SeisEvent
-\\
-\hline&
-B
-&
-uwpf!
-&
-existing SeisEvent
-\\
-\hline&
-B
-&
-uwpf
-&
-new SeisHdr
-\\
-\hline&
-B
-&
-uwdf
-&
-new SeisData
+uw
 \\
 \hline
+Win32
+&
 win32
-&
-B
-&
-readwin32!
-&
-existing SeisData
-\\
-\hline&
-B
-&
-readwin32
-&
-new SeisData
 \\
 \hline
-\end{tabulary}
+\end{tabular}
 \par
 \sphinxattableend\end{savenotes}
-\begin{enumerate}
-\def\theenumi{\alph{enumi}}
-\def\labelenumi{(\theenumi )}
-\makeatletter\def\p@enumii{\p@enumi (\theenumi )}\makeatother
+
+Strings are case-sensitive to prevent any performance impact from using matches
+and/or lowercase().
+
+
+\subsection{Supported Keywords}
+\label{\detokenize{src/Formats/fileformats:supported-keywords}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{8}|\X{1}{8}|\X{1}{8}|\X{1}{8}|\X{4}{8}|}
+\hline
+\sphinxstyletheadfamily 
+KW
+&\sphinxstyletheadfamily 
+Used By
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+Default
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+cf
+&
+win32
+&
+String
+&
+“”
+&
+win32 channel info filestr
+\\
+\hline
+full
+&
+sac
+&
+Bool
+&
+false
+&
+read full header into \sphinxstylestrong{:misc}?
+\\
+\hline&
+segy
+&&&\\
+\hline&
+uw
+&&&\\
+\hline
+nx\_add
+&
+mseed
+&
+Int64
+&
+360000
+&
+minimum size increase of \sphinxstylestrong{:x}
+\\
+\hline
+nx\_new
+&
+mseed
+&
+Int64
+&
+86400000
+&
+length of \sphinxstylestrong{:x} for new channels
+\\
+\hline
+jst
+&
+win32
+&
+Bool
+&
+true
+&
+are sample times JST (UTC+9)?
+\\
+\hline
+swap
+&
+seed
+&
+Bool
+&
+true
+&
+byte swap?
+\\
+\hline
+v
+&
+mseed
+&
+Int64
+&
+0
+&
+verbosity
+\\
+\hline&
+uw
+&&&\\
+\hline&
+win32
+&&&\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsubsection{Performance Tip}
+\label{\detokenize{src/Formats/fileformats:performance-tip}}
+With mseed or win32 data, adjust \sphinxtitleref{nx\_new} and \sphinxtitleref{nx\_add} based on the sizes of
+the data vectors that you expect to read. If the largest has \sphinxtitleref{Nmax} samples,
+and the smallest has \sphinxtitleref{Nmin}, we recommend \sphinxtitleref{nx\_new=Nmin} and \sphinxtitleref{nx\_add=Nmax-Nmin}.
+
+Default values can be changed in SeisIO keywords, e.g.,
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{SeisIO}\PYG{o}{.}\PYG{n}{KW}\PYG{o}{.}\PYG{n}{nx\PYGZus{}new} \PYG{o}{=} \PYG{l+m+mi}{60000}
+\PYG{n}{SeisIO}\PYG{o}{.}\PYG{n}{KW}\PYG{o}{.}\PYG{n}{nx\PYGZus{}add} \PYG{o}{=} \PYG{l+m+mi}{360000}
+\end{sphinxVerbatim}
+
+The system-wide defaults are \sphinxtitleref{nx\_new=86400000} and \sphinxtitleref{nx\_add=360000}. Using these
+values with very small jobs will greatly decrease performance.
+
+
+\paragraph{Examples}
+\label{\detokenize{src/Formats/fileformats:examples}}\begin{enumerate}
+\def\theenumi{\arabic{enumi}}
+\def\labelenumi{\theenumi .}
+\makeatletter\def\p@enumii{\p@enumi \theenumi .}\makeatother
+\item {} \begin{description}
+\item[{\sphinxcode{\sphinxupquote{S = read\_data("uw", "99011116541W", full=true)}}}] \leavevmode\begin{itemize}
 \item {} 
-Use keyword PASSCAL=true for PASSCAL SEG Y.
+Read UW-format data file \sphinxcode{\sphinxupquote{99011116541W}}
+
+\item {} 
+Store full header information in \sphinxcode{\sphinxupquote{:misc}}
+
+\end{itemize}
+
+\end{description}
+
+\item {} \begin{description}
+\item[{\sphinxcode{\sphinxupquote{read\_data!(S, "sac", "MSH80*.SAC")}}}] \leavevmode\begin{itemize}
+\item {} 
+Read SAC-format files matching string pattern \sphinxtitleref{MSH80*.SAC}
+
+\item {} 
+Read into existing SeisData object \sphinxcode{\sphinxupquote{S}}
+
+\end{itemize}
+
+\end{description}
+
+\item {} \begin{description}
+\item[{\sphinxcode{\sphinxupquote{S = read\_data("win32", "20140927*.cnt", cf="20140927*ch", nx\_new=360000)}}}] \leavevmode\begin{itemize}
+\item {} 
+Read win32-format data files with names matching pattern \sphinxcode{\sphinxupquote{2014092709*.cnt}}
+
+\item {} 
+Use ASCII channel information filenames that match pattern \sphinxcode{\sphinxupquote{20140927*ch}}
+
+\item {} 
+Assign new channels an initial size of \sphinxcode{\sphinxupquote{nx\_new}} samples
+
+\end{itemize}
+
+\end{description}
 
 \end{enumerate}
 
 
-\subsection{Format Descriptions}
-\label{\detokenize{src/Formats/fileformats:format-descriptions}}
-\sphinxstylestrong{miniSEED}: SEED stands for Standard for the Exchange of Earthquake Data; the data format is used by FDSN as a universal omnibus-type standard for seismic data. miniSEED is a data-only format with a limited number of blockette types. %
-\begin{footnote}[1]\sphinxAtStartFootnote
-FDSN SEED manual: \sphinxurl{https://www.fdsn.org/seed\_manual/SEEDManual\_V2.4.pdf}
-%
-\end{footnote}
+\subsection{Format Descriptions and Notes}
+\label{\detokenize{src/Formats/fileformats:format-descriptions-and-notes}}
+\sphinxhref{http://geows.ds.iris.edu/documents/GeoCSV.pdf}{GeoCSV}: an extension of “human-readable”, tabular file format Comma-
+Separated Values (CSV).
 
-\sphinxstylestrong{SAC}: widely-used data format developed for the Seismic Analysis Code interpreter, supported in virtually every programming language. %
-\begin{footnote}[2]\sphinxAtStartFootnote
-SAC data format intro: \sphinxurl{https://ds.iris.edu/ds/nodes/dmc/kb/questions/2/sac-file-format/}
-%
-\end{footnote} %
-\begin{footnote}[3]\sphinxAtStartFootnote
-SAC file format: \sphinxurl{https://ds.iris.edu/files/sac-manual/manual/file\_format.html}
-%
-\end{footnote} %
-\begin{footnote}[4]\sphinxAtStartFootnote
-SAC software homepage: \sphinxurl{https://seiscode.iris.washington.edu/projects/sac}
-%
-\end{footnote}
+\sphinxstylestrong{Lennartz ASCII}: ASCII output of Lennartz portable digitizers.
 
-\sphinxstylestrong{SEG Y}: standard energy industry seismic data format, developed and maintained by the Society for Exploration Geophysicists$^{\text{(a)}}$ %
-\begin{footnote}[5]\sphinxAtStartFootnote
-SEG Y Wikipedia page: \sphinxurl{http://wiki.seg.org/wiki/SEG\_Y}
-%
-\end{footnote} A single-channel SEG Y variant format, referred to here as “PASSCAL SEG Y” was developed by PASSCAL/New Mexico Tech and is used with PASSCAL field equipment. %
-\begin{footnote}[6]\sphinxAtStartFootnote
-PASSCAL SEG Y trace files: \sphinxurl{https://www.passcal.nmt.edu/content/seg-y-what-it-is}
-%
-\end{footnote}
+\sphinxhref{https://www.passcal.nmt.edu/content/seg-y-what-it-is}{PASSCAL}: A single-channel variant SEG Y format developed by PASSCAL/New
+Mexico Tech and commonly used with PASSCAL field equipment. PASSCAL differs from
+SEG Y in that PASSCAL format uses neither file headers nor extended textural
+headers, and the number of samples per trace can exceed 32767.
 
-\sphinxstylestrong{UW}: the University of Washington data format was designed for event archival. A UW event is described by a pickfile and a corresponding data file, whose names are identical except for the last character, e.g. 99062109485o, 99062109485W.$^{\text{(b)}}$
+\sphinxhref{https://www.fdsn.org/seed\_manual/SEEDManual\_V2.4.pdf}{SEED}: SEED stands for
+Standard for the Exchange of Earthquake Data; used by the International
+Federation of Digital Seismograph Networks (FDSN) as an omnibus seismic data
+standard. mini-SEED is a data-only variant that uses only data blockettes
+and allows longer data records.
 
-\sphinxstylestrong{Win32} : data format developed by the NIED (National Research Institute for Earth Science and Disaster Prevention), Japan. Data are typically divided into files that contain a minute of continuous data from channels on a single network or subnet. Data within each file are stored by channel in 1s segments as variable-precision integers. Channel information for each stream is retrieved from an external channel information file.$^{\text{(c)}}$ %
-\begin{footnote}[7]\sphinxAtStartFootnote
-How to use Hi-net data: \sphinxurl{http://www.hinet.bosai.go.jp/about\_data/?LANG=en}
-%
-\end{footnote} %
-\begin{footnote}[8]\sphinxAtStartFootnote
-WIN data format (in Japanese): \sphinxurl{http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html}
-%
-\end{footnote}
+\sphinxhref{https://ds.iris.edu/files/sac-manual/manual/file\_format.html}{SAC}: the
+Seismic Analysis Code data format, originally developed for the eponymous
+command-line interpreter. Widely used, and supported in virtually every
+programming language.
 
+\sphinxhref{http://wiki.seg.org/wiki/SEG\_Y}{SEG Y}: Society of Exploration Geophysicists
+data format. Common in the energy industry, developed and maintained by the SEG.
+Only SEG Y rev 0 and \sphinxhref{https://seg.org/Portals/0/SEG/News\%20and\%20Resources/Technical\%20Standards/seg\_y\_rev1.pdf}{rev 1}
+with standard headers are supported.
 
-\subsubsection{Usage Warnings}
-\label{\detokenize{src/Formats/fileformats:usage-warnings}}
-$^{\text{(a)}}$  \sphinxstylestrong{SEG Y} v \(\le\) rev 1 is supported. Trace header field
-definitions in SEG Y are not ridigly controlled by any central authority, so
-some industry SEG Y files may be unreadable. Please address questions about
-unreadable SEG Y files to their creators.
+\sphinxstylestrong{UW}: the University of Washington data format has no online reference and is
+no longer in use. It was created by the Pacific Northwest Seismic Network and
+used for local event archival until at least 2004. A UW event is described by a
+pickfile and a corresponding data file, whose names are identical except for
+the last character; for example, the files 99062109485o and 99062109485W
+describe event 99062109485. Unlike the win32 data format, the data file is
+self-contained; the pick file is not required to use raw trace data. Only UW-2
+data files are supported by SeisIO; we have never encountered a UW-1 data file
+outside of Exabyte tapes and have no reason to suspect that any remain in
+circulation.
 
-$^{\text{(b)}}$  \sphinxstylestrong{UW} data format has no online documentation. Please contact the SeisIO creators or the Pacific Northwest Seismic Network (University of Washington, United States) if additional help is needed to read these files.
-
-$^{\text{(c)}}$  \sphinxstylestrong{Win32} channel information files are not strictly controlled by a central authority; inconsistencies in channel parameters (e.g. gains) are known to exist. Please remember that redistribution of Win32 files is strictly prohibited by the NIED (our travis-ci tests use an encrypted tarball).
-\subsubsection*{External References}
+\sphinxhref{http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html}{Win32}: data format developed
+by the NIED (National Research Institute for Earth Science and Disaster Prevention),
+Japan.  Data are typically divided into files that contain a minute of continuous
+data from several channels. Data within each file are stored by channel in
+one-second segments as variable-precision delta-encoded integers. Channel
+information is retrieved from an external channel information file. Although
+accurate channel files are needed to use win32 data, these files are not strictly
+controlled by any central authority and inconsistencies in channel parameters,
+particularly gains, are known to exist.
 
 
-\subsection{File I/O Functions}
-\label{\detokenize{src/Formats/fileformats:file-i-o-functions}}\index{readmseed() (built-in function)@\spxentry{readmseed()}\spxextra{built-in function}}
+\subsection{Other File I/O Functions}
+\label{\detokenize{src/Formats/fileformats:other-file-i-o-functions}}\index{readuwevt() (built-in function)@\spxentry{readuwevt()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Formats/fileformats:readmseed}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{readmseed}}}{\emph{fname}}{}
+\phantomsection\label{\detokenize{src/Formats/fileformats:readuwevt}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{readuwevt}}}{\emph{fpat}}{}
 \end{fulllineitems}
 
 
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{readmseed!(S,~fname)}}}
-\end{fulllineitems}
-
-
-Read miniSEED data file \sphinxcode{\sphinxupquote{fname}} into a new or existing SeisData structure.
-\index{readsac() (built-in function)@\spxentry{readsac()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Formats/fileformats:readsac}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{readsac}}}{\emph{fname}\sphinxoptional{, \emph{full=false::Bool}}}{}
-\end{fulllineitems}
-
-\index{rsac() (built-in function)@\spxentry{rsac()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Formats/fileformats:rsac}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{rsac}}}{\emph{fname}\sphinxoptional{, \emph{full=false::Bool}}}{}
-\end{fulllineitems}
-
-
-Read SAC data file \sphinxcode{\sphinxupquote{fname}} into a new SeisData structure. Specify keyword \sphinxcode{\sphinxupquote{full=true}} to save all SAC header values in field \sphinxcode{\sphinxupquote{:misc}}.
-\index{readsegy() (built-in function)@\spxentry{readsegy()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Formats/fileformats:readsegy}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{readsegy}}}{\emph{fname}\sphinxoptional{, \emph{passcal=true::Bool}}}{}
-\end{fulllineitems}
-
-
-Read SEG Y data file \sphinxcode{\sphinxupquote{fname}} into a new SeisData structure. Use keyword \sphinxcode{\sphinxupquote{passcal=true}} for PASSCAL-modified SEG Y.
-\index{readuw() (built-in function)@\spxentry{readuw()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Formats/fileformats:readuw}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{readuw}}}{\emph{fname}}{}
-\end{fulllineitems}
-
-
-Read UW data file into new SeisData structure. \sphinxcode{\sphinxupquote{fname}} can be a pick file (ending in {[}a-z{]}), a data file (ending in W), or a file root (numeric UW event ID).
-\index{readwin32() (built-in function)@\spxentry{readwin32()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Formats/fileformats:readwin32}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{readwin32}}}{\emph{fstr}, \emph{cf}}{}
-\end{fulllineitems}
-
-
-Read win32 data from files matching pattern \sphinxcode{\sphinxupquote{fstr}} into a new SeisData structure using channel information file \sphinxcode{\sphinxupquote{cf}}. \sphinxcode{\sphinxupquote{fstr}} can be a path with wild card filenames, but cannot use wild card directories.
-
-..function:: rlennasc(fname)
-
-Read Lennartz-formatted ASCII file into a new SeisData structure.
+Read University of Washington-format event data with file pattern stub fpat.
+fstub can be a datafile name, a pickname, or a stub.
 \index{rseis() (built-in function)@\spxentry{rseis()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
@@ -1022,7 +987,8 @@ Parse UW event pick file \sphinxcode{\sphinxupquote{pfname}} into a new SeisEven
 \end{fulllineitems}
 
 
-Write SAC data to SAC files with auto-generated names. Specify ts=true to write time stamps; this will flag the file as generic x-y data in the SAC interpreter.
+Write SAC data to SAC files with auto-generated names. Specify ts=true to write
+time stamps; this will flag the file as generic x-y data in the SAC interpreter.
 \index{wseis() (built-in function)@\spxentry{wseis()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
@@ -1043,8 +1009,9 @@ Write SeisIO data to fname. Multiple objects can be written at once.
 \label{\detokenize{index:web}}
 
 \section{Web Requests}
-\label{\detokenize{src/Web/webclients:web-requests}}\label{\detokenize{src/Web/webclients::doc}}
-Data requests use \sphinxcode{\sphinxupquote{get\_data!}} as a wrapper to either FDSN or IRIS data services; for live streaming, see SeedLink.
+\label{\detokenize{src/Web/webclients:web-requests}}\label{\detokenize{src/Web/webclients:getdata}}\label{\detokenize{src/Web/webclients::doc}}
+Data requests use \sphinxcode{\sphinxupquote{get\_data!}} for FDSN or IRIS data services; for (near)
+real-time streaming, see {\hyperref[\detokenize{src/Web/seedlink:seedlink-section}]{\sphinxcrossref{\DUrole{std,std-ref}{SeedLink}}}}.
 
 
 \begin{fulllineitems}
@@ -1249,10 +1216,7 @@ TauP manual: \sphinxurl{http://www.seis.sc.edu/downloads/TauP/taup.pdf}
 
 
 \section{SeedLink}
-\label{\detokenize{src/Web/seedlink:seedlink}}\label{\detokenize{src/Web/seedlink::doc}}
-
-\subsection{SeedLink Client}
-\label{\detokenize{src/Web/seedlink:seedlink-client}}
+\label{\detokenize{src/Web/seedlink:seedlink}}\label{\detokenize{src/Web/seedlink:seedlink-section}}\label{\detokenize{src/Web/seedlink::doc}}
 \sphinxhref{https://www.seiscomp3.org/wiki/doc/applications/seedlink}{SeedLink} is a
 TCP/IP-based data transmission protocol that allows near-real-time access to
 data from thousands of geophysical monitoring instruments. See
@@ -1277,9 +1241,22 @@ data from thousands of geophysical monitoring instruments. See
 
 
 \begin{DUlineblock}{0em}
+\item[] \sphinxstylestrong{chans}
+\item[] Channel specification can use any of the following options:
+\item[] 
+\item[] 1. A comma-separated String where each pattern follows the syntax NET.STA.LOC.CHA.DFLAG, e.g. UW.TDH..EHZ.D. Use “?” to match any single character.
+\item[] 2. An Array\{String,1\} with one pattern per entry, following the above syntax.
+\item[] 3. The name of a configuration text file, with one channel pattern per line; see {\hyperref[\detokenize{src/Appendices/web_syntax:ccfg}]{\sphinxcrossref{\DUrole{std,std-ref}{Channel Configuration File syntax}}}}.
+\item[] 
+\item[] \sphinxstylestrong{patts}
+\item[] Data selection patterns. See official SeedLink documentation; syntax is identical.
+\item[] 
+\item[] \sphinxstylestrong{KWs}
+\item[] Keyword arguments; see also {\hyperref[\detokenize{src/Appendices/keywords:dkw}]{\sphinxcrossref{\DUrole{std,std-ref}{SeisIO standard KWs}}}} or type \sphinxcode{\sphinxupquote{?SeisIO.KW}}.
 \item[] Standard keywords: fmt, opts, q, si, to, v, w, y
 \item[] SL keywords: gap, kai, mode, port, refresh, safety, x\_on\_err
-\item[] Other keywords: \sphinxcode{\sphinxupquote{u}} specifies the URL without “\sphinxurl{http://}”
+\item[] Other keywords:
+\item[] \sphinxcode{\sphinxupquote{u}} specifies the URL without “\sphinxurl{http://}”
 \end{DUlineblock}
 
 Initiate a SeedLink session in DATA mode to feed data from channels \sphinxcode{\sphinxupquote{chans}} with
@@ -1289,31 +1266,7 @@ connection is closed. One SeisData object can support multiple connections,
 provided that each connection’s streams feed unique channels.
 
 
-\subsubsection{Argument Syntax}
-\label{\detokenize{src/Web/seedlink:argument-syntax}}
-\sphinxstylestrong{chans}
-
-Channel specification can use any of the following options:
-\begin{enumerate}
-\def\theenumi{\arabic{enumi}}
-\def\labelenumi{\theenumi .}
-\makeatletter\def\p@enumii{\p@enumi \theenumi .}\makeatother
-\item {} 
-A comma-separated String where each pattern follows the syntax NET.STA.LOC.CHA.DFLAG, e.g. UW.TDH..EHZ.D. Use “?” to match any single character.
-
-\item {} 
-An Array\{String,1\} with one pattern per entry, following the above syntax.
-
-\item {} 
-The name of a configuration text file, with one channel pattern per line; see {\hyperref[\detokenize{src/Appendices/web_syntax:ccfg}]{\sphinxcrossref{\DUrole{std,std-ref}{Channel Configuration File syntax}}}}.
-
-\end{enumerate}
-
-\sphinxstylestrong{patts}
-Data selection patterns. See SeedLink documentation; syntax is identical.
-
-
-\subsubsection{Special Rules}
+\subsection{Special Rules}
 \label{\detokenize{src/Web/seedlink:special-rules}}\begin{enumerate}
 \def\theenumi{\arabic{enumi}}
 \def\labelenumi{\theenumi .}
@@ -1360,7 +1313,7 @@ This is not an “issue”. There will never be a workaround. It’s what happen
 \end{enumerate}
 
 
-\subsubsection{Special Methods}
+\subsection{Special Methods}
 \label{\detokenize{src/Web/seedlink:special-methods}}\begin{itemize}
 \item {} 
 \sphinxcode{\sphinxupquote{close(S.c{[}i{]})}} ends SeedLink connection \sphinxcode{\sphinxupquote{i}}.
@@ -1371,7 +1324,7 @@ This is not an “issue”. There will never be a workaround. It’s what happen
 \end{itemize}
 
 
-\subsection{SeedLink Utilities}
+\subsubsection{SeedLink Utilities}
 \label{\detokenize{src/Web/seedlink:seedlink-utilities}}\index{SL\_info() (built-in function)@\spxentry{SL\_info()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
@@ -1437,27 +1390,26 @@ patterns (formatted LLCCC.D, e.g. {[}“??EHZ.D”, “??BH?.?”{]}).
 \chapter{Processing}
 \label{\detokenize{index:processing}}
 
-\section{Data Processing}
-\label{\detokenize{src/Processing/processing:data-processing}}\label{\detokenize{src/Processing/processing::doc}}
-Basic data processing operations are described below.
+\section{Data Processing Functions}
+\label{\detokenize{src/Processing/processing:data-processing-functions}}\label{\detokenize{src/Processing/processing::doc}}
+Supported processing operations are described below. Functions are organized
+categorically.
+
+In most cases, a “safe” version of each function can be invoked to create a
+new SeisData object with the processed output.
+
+Any function that can logically operate on a SeisChannel object will do so. Any
+function that operates on a SeisData object will also operate on a SeisEvent
+object by applying itself to the SeisData object in the \sphinxcode{\sphinxupquote{:data}} field.
 
 
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{autotap!(S)}}}
-\end{fulllineitems}
+\subsection{Signal Processing}
+\label{\detokenize{src/Processing/processing:signal-processing}}
+Remove the mean from all channels i with S.fs{[}i{]} \textgreater{} 0.0. Specify irr=true to also
+remove the mean from irregularly sampled channels. Ignores NaNs.
 
-
-Cosine taper each channel in S around time gaps, then fill time gaps with the mean of non-NaN data points.
-
-Remove the mean from all channels i with S.fs{[}i{]} \textgreater{} 0.0. Specify irr=true to also remove the mean from irregularly sampled channels. Ignores NaNs.
-
-“Safe” demean with results output to a new structure.
-
-Remove the polynomial trend of degree n from every regularly-sampled channel i in S using a least-squares polynomial fit. Ignores NaNs. Channels of irregularly-sampled data are not (and cannot be) detrended.
-
-\sphinxstylestrong{Warning}: detrend! does \sphinxstyleemphasis{not} check for data gaps; if this is problematic, call ungap!(S, m=true) first!
-
-“Safe” detrend with results output to a new structure.
+Remove the polynomial trend of degree n from every regularly-sampled channel i
+in S using a least-squares polynomial fit. Ignores NaNs.
 
 
 \begin{fulllineitems}
@@ -1465,15 +1417,263 @@ Remove the polynomial trend of degree n from every regularly-sampled channel i i
 \end{fulllineitems}
 
 
-Translate all data in SeisData structure \sphinxcode{\sphinxupquote{S}} to instrument response \sphinxcode{\sphinxupquote{resp\_new}}. Expected structure of \sphinxcode{\sphinxupquote{resp\_new}} is a complex Float64 2d array with zeros in \sphinxcode{\sphinxupquote{resp{[}:,1{]}}}, poles in \sphinxcode{\sphinxupquote{resp{[}:,2{]}}}. If channel \sphinxcode{\sphinxupquote{i}} has key \sphinxcode{\sphinxupquote{S.misc{[}i{]}{[}"hc"{]}}}, the corresponding value is used as the critical damping constant; otherwise a value of 1.0 is assumed.
-\index{lcfs() (built-in function)@\spxentry{lcfs()}\spxextra{built-in function}}
+Translate all data in SeisData structure \sphinxstylestrong{S} to instrument response \sphinxstylestrong{resp\_new}.
+Expected structure of \sphinxstylestrong{resp\_new} is a complex Float64 2d array with zeros in
+\sphinxstylestrong{resp{[}:,1{]}}, poles in \sphinxstylestrong{resp{[}:,2{]}}. If channel \sphinxstylestrong{i} has key \sphinxstylestrong{S.misc{[}i{]}{[}“hc”{]}},
+the corresponding value is used as the critical damping constant; otherwise a
+value of 1.0 is assumed.
+
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Processing/processing:lcfs}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{lcfs}}}{\emph{fs::Array\{Float64}, \emph{1\}}}{}
+\pysigline{\sphinxbfcode{\sphinxupquote{filtfilt!(S::SeisData{[};~KWs{]})}}}
 \end{fulllineitems}
 
 
-Find \sphinxstyleemphasis{L*owest *C*ommon *fs}, the lowest sampling frequency at which data can be upsampled by repeating an integer number of copies of each sample value.
+Apply a zero-phase filter to data in \sphinxstylestrong{S.x}.
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{filtfilt!(Ev::SeisEvent{[};~KWs{]})}}}
+\end{fulllineitems}
+
+
+Apply zero-phase filter to \sphinxstylestrong{Ev.data.x}.
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{filtfilt!(C::SeisChannel{[};~KWs{]})}}}
+\end{fulllineitems}
+
+
+Apply zero-phase filter to \sphinxstylestrong{C.x}
+
+Filtering is applied to each contiguous data segment of each channel separately.
+
+\#\#\# Keywords
+Keywords control filtering behavior; specify e.g. filtfilt!(S, fl=0.1, np=2, rt=”Lowpass”).
+Default values can be changed by adjustin the {\hyperref[\detokenize{src/Appendices/keywords:dkw}]{\sphinxcrossref{\DUrole{std,std-ref}{shared keywords}}}}, e.g.,
+SeisIO.KW.Filt.np = 2 changes the default number of poles to 2.
+
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{8}|\X{2}{8}|\X{1}{8}|\X{4}{8}|}
+\hline
+\sphinxstyletheadfamily 
+KW
+&\sphinxstyletheadfamily 
+Default
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+Description
+\\
+\hline
+fl
+&
+1.0
+&
+Float64
+&
+lower corner frequency {[}Hz{]} $^{\text{(a)}}$
+\\
+\hline
+fh
+&
+15.0
+&
+Float64
+&
+upper corner frequency {[}Hz{]} $^{\text{(a)}}$
+\\
+\hline
+np
+&
+4
+&
+Int64
+&
+number of poles
+\\
+\hline
+rp
+&
+10
+&
+Int64
+&
+pass-band ripple (dB)
+\\
+\hline
+rs
+&
+30
+&
+Int64
+&
+stop-band ripple (dB)
+\\
+\hline
+rt
+&
+“Bandpass”
+&
+String
+&
+response type (type of filter)
+\\
+\hline
+dm
+&
+“Butterworth”
+&
+String
+&
+design mode (name of filter)
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+$^{\text{(a)}}$  By convention, the lower corner frequency (fl) is used in a Highpass
+filter, and fh is used in a Lowpass filter.
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{taper!(S)}}}
+\end{fulllineitems}
+
+
+Cosine taper each channel in S around time gaps.
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{unscale!(S{[},~irr=false{]})}}}
+\end{fulllineitems}
+
+
+Divide the gains from all channels \sphinxstylestrong{i} with \sphinxstylestrong{S.fs{[}i{]} \textgreater{} 0.0}. Specify \sphinxstylestrong{irr=true} to
+also remove gains of irregularly-sampled channels.
+
+
+\subsection{Merge and Synchronize}
+\label{\detokenize{src/Processing/processing:merge-and-synchronize}}\label{\detokenize{src/Processing/processing:merge}}
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{merge!(S::SeisData,~U::SeisData)}}}
+\end{fulllineitems}
+
+
+Merge two SeisData structures. For timeseries data, a single-pass merge-and-prune
+operation is applied to value pairs whose sample times are separated by less than
+half the sampling interval.
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{merge!(S::SeisData)}}}
+\end{fulllineitems}
+
+
+“Flatten” a SeisData structure by merging data from identical channels.
+
+
+\subsubsection{Merge Behavior}
+\label{\detokenize{src/Processing/processing:merge-behavior}}
+Two (or more) channels are merged if they have the same values for each of
+these fields:
++ \sphinxcode{\sphinxupquote{:id}}
++ \sphinxcode{\sphinxupquote{:fs}}
++ \sphinxcode{\sphinxupquote{:resp}}
++ \sphinxcode{\sphinxupquote{:units}}
++ \sphinxcode{\sphinxupquote{:loc}}
+Unset (empty) values for \sphinxcode{\sphinxupquote{:resp}}, \sphinxcode{\sphinxupquote{:units}}, and \sphinxcode{\sphinxupquote{:loc}} are treated as a
+match to any non-empty value in the corresponding field.
+
+
+\paragraph{How Merges Work}
+\label{\detokenize{src/Processing/processing:how-merges-work}}\begin{itemize}
+\item {} 
+Non-overlapping data are concatenated and time gaps are adjusted as needed.
+
+\item {} 
+Redundant data are removed.
+
+\item {} 
+Data that overlap in time and have different values are averaged pairwise if
+x$_{\text{i}}$, x$_{\text{j}}$ : \textbar{} t$_{\text{i}}$-t$_{\text{j}}$ \textbar{} \textless{} (0.5*S.fs). Warnings are thrown
+when this situation is encountered.
+
+\end{itemize}
+
+It’s best to merge only unprocessed data. Merging data segments that were
+processed independently (e.g. detrended) throws many warnings if values differ
+at overlapping times.
+
+
+\paragraph{When SeisIO Won’t Merge}
+\label{\detokenize{src/Processing/processing:when-seisio-won-t-merge}}
+SeisIO does \sphinxstylestrong{not} combine data channels if \sphinxstylestrong{any} of the five fields above
+are non-empty and different. For example, if a SeisData object S contains two
+channels, each with id “XX.FOO..BHZ”, but one has fs=100 Hz and the other fs=50 Hz,
+\sphinxstylestrong{merge!} does nothing.
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{sync!(S::SeisData)}}}
+\end{fulllineitems}
+
+
+Synchronize the start times of all data in S to begin at or after the last
+start time in S.
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{sync!(S::SeisData{[},~s=ST,~t=EN,~v=VV{]})}}}
+\end{fulllineitems}
+
+
+Synchronize all data in S to start at \sphinxtitleref{ST} and terminate at \sphinxtitleref{EN} with verbosity level VV.
+
+For regularly-sampled channels, gaps between the specified and true times
+are filled with the mean; this isn’t possible with irregularly-sampled data.
+
+
+\paragraph{Specifying start time (s)}
+\label{\detokenize{src/Processing/processing:specifying-start-time-s}}\begin{itemize}
+\item {} 
+s=”last”: (Default) sync to the last start time of any channel in \sphinxtitleref{S}.
+
+\item {} 
+s=”first”: sync to the first start time of any channel in \sphinxtitleref{S}.
+
+\item {} 
+A numeric value is treated as an epoch time (\sphinxtitleref{?time} for details).
+
+\item {} 
+A DateTime is treated as a DateTime. (see Dates.DateTime for details.)
+
+\item {} 
+Any string other than “last” or “first” is parsed as a DateTime.
+
+\end{itemize}
+
+
+\paragraph{Specifying end time (t)}
+\label{\detokenize{src/Processing/processing:specifying-end-time-t}}\begin{itemize}
+\item {} 
+t=”none”: (Default) end times are not synchronized.
+
+\item {} 
+t=”last”: synchronize all channels to end at the last end time in \sphinxtitleref{S}.
+
+\item {} 
+t=”first” synchronize to the first end time in \sphinxtitleref{S}.
+
+\item {} 
+numeric, datetime, and non-reserved strings are treated as for \sphinxtitleref{-s}.
+
+\end{itemize}
 
 
 \begin{fulllineitems}
@@ -1484,78 +1684,25 @@ Find \sphinxstyleemphasis{L*owest *C*ommon *fs}, the lowest sampling frequency a
 Merge multiple SeisData structures into S.
 
 
+\subsection{Other Processing Functions}
+\label{\detokenize{src/Processing/processing:other-processing-functions}}
+
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{prune!(S::SeisData)}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{nanfill!(S)}}}
 \end{fulllineitems}
 
 
-Delete all channels from S that have no data (i.e. S.x is empty or non-existent).
-\index{pull() (built-in function)@\spxentry{pull()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Processing/processing:pull}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{pull}}}{\emph{S::SeisData}, \emph{id::String}}{}
-\end{fulllineitems}
-
-
-Extract the first channel with id=id from S and return it as a new SeisChannel structure. The corresponding channel in S is deleted.
+For each channel \sphinxstylestrong{i} in \sphinxstylestrong{S}, replace all NaNs in \sphinxstylestrong{S.x{[}i{]}} with the mean
+of non-NaN values.
 
 
 \begin{fulllineitems}
-\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{pull}}}{\emph{S::SeisData}, \emph{i::integer}}{}
+\pysigline{\sphinxbfcode{\sphinxupquote{ungap!(S{[},~m=true{]})}}}
 \end{fulllineitems}
 
 
-Extract channel i from S as a new SeisChannel struct, deleting it from S.
-
-Synchronize the start times of all data in S to begin at or after the last
-start time in S.
-
-Synchronize all data in S to start at \sphinxtitleref{ST} and terminate at \sphinxtitleref{EN} with verbosity level VV.
-
-For regularly-sampled channels, gaps between the specified and true times
-are filled with the mean; this isn’t possible with irregularly-sampled data.
-
-\#\#\#\# Specifying start time
-* s=”last”: (Default) sync to the last start time of any channel in \sphinxtitleref{S}.
-* s=”first”: sync to the first start time of any channel in \sphinxtitleref{S}.
-* A numeric value is treated as an epoch time (\sphinxtitleref{?time} for details).
-* A DateTime is treated as a DateTime. (see Dates.DateTime for details.)
-* Any string other than “last” or “first” is parsed as a DateTime.
-
-\#\#\#\# Specifying end time (t)
-* t=”none”: (Default) end times are not synchronized.
-* t=”last”: synchronize all channels to end at the last end time in \sphinxtitleref{S}.
-* t=”first” synchronize to the first end time in \sphinxtitleref{S}.
-* numeric, datetime, and non-reserved strings are treated as for \sphinxtitleref{-s}.
-
-Related functions: time, Dates.DateTime, parsetimewin
-
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{ungap!(S,~{[}m=true,~w=true{]})}}}
-\end{fulllineitems}
-
-
-Cosine taper all subsequences of regularly-sampled data and fill gaps with the
-mean of non-NaN data points. \sphinxstylestrong{m=false} leaves time gaps set to NaNs;
-\sphinxstylestrong{w=false} prevents cosine tapering.
-
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{T~=~ungap(S)}}}
-\end{fulllineitems}
-
-
-“Safe” ungap of SeisData object S to a new SeisData object T.
-
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{unscale!(S{[},~all=false{]})}}}
-\end{fulllineitems}
-
-
-Divide the gains from all channels i with S.fs{[}i{]} \textgreater{} 0.0. Specify all=true to
-also remove gains of irregularly-sampled channels.
+For each channel \sphinxstylestrong{i} in \sphinxstylestrong{S}, fill time gaps in \sphinxstylestrong{S.t{[}i{]}} with the mean of
+non-NAN data in \sphinxstylestrong{S.x{[}i{]}}. If \sphinxstylestrong{m=false}, gaps are filled with NANs.
 
 
 \chapter{Appendices}
@@ -1662,14 +1809,6 @@ Remove unwanted characters from S.
 Convert times \sphinxstylestrong{s} and \sphinxstylestrong{t} to strings \(\alpha\), \(\omega\) sorted \(\alpha\) \textless{} \(\omega\).
 \sphinxstylestrong{s} and \sphinxstylestrong{t} can be real numbers, DateTime objects, or ASCII strings.
 Expected string format is “yyyy-mm-ddTHH:MM:SS.nnn”, e.g. 2016-03-23T11:17:00.333.
-\index{webhdr() (built-in function)@\spxentry{webhdr()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Appendices/function_list:webhdr}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{webhdr}}}{}{}
-\end{fulllineitems}
-
-
-Generate a Dict\{String,String\} to set UserAgent in web requests.
 
 “Safe” synchronize of start and end times of all trace data in SeisData structure \sphinxcode{\sphinxupquote{S}} to a new structure \sphinxcode{\sphinxupquote{U}}.
 \index{u2d() (built-in function)@\spxentry{u2d()}\spxextra{built-in function}}
@@ -3631,8 +3770,8 @@ Add \sphinxcode{\sphinxupquote{s, t}} seconds to \sphinxcode{\sphinxupquote{now(
 \label{\detokenize{src/Appendices/keywords:seisio-standard-keywords}}\label{\detokenize{src/Appendices/keywords:dkw}}\label{\detokenize{src/Appendices/keywords::doc}}
 SeisIO.KW is a memory-resident structure of default values for common keywords
 used by package functions. KW has one substructure, SL, with keywords specific
-to SeedLink. These defaults current cannot be modified, but this may change
-as the Julia language matures.
+to SeedLink. These defaults can be modified, e.g., SeisIO.KW.nev=2 changes the
+default for nev to 2.
 
 
 \begin{savenotes}\sphinxattablestart
@@ -3696,6 +3835,24 @@ nev
 I
 &
 number of events returned per query
+\\
+\hline
+nx\_add
+&
+360000
+&
+I
+&
+length increase of undersized data array
+\\
+\hline
+nx\_new
+&
+8640000
+&
+I
+&
+number of samples for a new channel
 \\
 \hline
 opts
@@ -3811,6 +3968,8 @@ If \sphinxstylestrong{-w=true}, a file name is automatically generated from the 
 
 \subsection{SeedLink Keywords}
 \label{\detokenize{src/Appendices/keywords:seedlink-keywords}}
+Change these with SeisIO.KW.SL.{[}key{]} = value, e.g., SeisIO.KW.SL.refresh = 30.
+
 
 \begin{savenotes}\sphinxattablestart
 \centering

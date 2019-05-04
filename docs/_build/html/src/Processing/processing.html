@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Data Processing &mdash; SeisIO 0.1.3 rc documentation</title>
+  <title>Data Processing Functions &mdash; SeisIO 0.1.3 rc documentation</title>
   
 
   
@@ -88,21 +88,35 @@
               <p class="caption"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">First Steps</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../working_with_data.html">Working with Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../seisdata.html">Data Types</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Data Readers</span></p>
+<p class="caption"><span class="caption-text">Reading Files</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">Reading Files</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Web Clients</span></p>
+<p class="caption"><span class="caption-text">Downloading Data</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Web/webclients.html">Web Requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Web/seedlink.html">SeedLink</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Data Processing</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Processing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Processing Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#signal-processing">Signal Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#merge-and-synchronize">Merge and Synchronize</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#merge-behavior">Merge Behavior</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#how-merges-work">How Merges Work</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#when-seisio-won-t-merge">When SeisIO Won’t Merge</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specifying-start-time-s">Specifying start time (s)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#specifying-end-time-t">Specifying end time (t)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#other-processing-functions">Other Processing Functions</a></li>
+</ul>
+</li>
 </ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul>
@@ -157,7 +171,7 @@
     
       <li><a href="../../index.html">Docs</a> &raquo;</li>
         
-      <li>Data Processing</li>
+      <li>Data Processing Functions</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -176,94 +190,228 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="data-processing">
-<h1>Data Processing<a class="headerlink" href="#data-processing" title="Permalink to this headline">¶</a></h1>
-<p>Basic data processing operations are described below.</p>
-<dl class="function">
-<dt>
-<code class="descname">autotap!(S)</code></dt>
-<dd></dd></dl>
-
-<p>Cosine taper each channel in S around time gaps, then fill time gaps with the mean of non-NaN data points.</p>
-<p>Remove the mean from all channels i with S.fs[i] &gt; 0.0. Specify irr=true to also remove the mean from irregularly sampled channels. Ignores NaNs.</p>
-<p>“Safe” demean with results output to a new structure.</p>
-<p>Remove the polynomial trend of degree n from every regularly-sampled channel i in S using a least-squares polynomial fit. Ignores NaNs. Channels of irregularly-sampled data are not (and cannot be) detrended.</p>
-<p><strong>Warning</strong>: detrend! does <em>not</em> check for data gaps; if this is problematic, call ungap!(S, m=true) first!</p>
-<p>“Safe” detrend with results output to a new structure.</p>
+  <div class="section" id="data-processing-functions">
+<h1>Data Processing Functions<a class="headerlink" href="#data-processing-functions" title="Permalink to this headline">¶</a></h1>
+<p>Supported processing operations are described below. Functions are organized
+categorically.</p>
+<p>In most cases, a “safe” version of each function can be invoked to create a
+new SeisData object with the processed output.</p>
+<p>Any function that can logically operate on a SeisChannel object will do so. Any
+function that operates on a SeisData object will also operate on a SeisEvent
+object by applying itself to the SeisData object in the <code class="docutils literal notranslate"><span class="pre">:data</span></code> field.</p>
+<div class="section" id="signal-processing">
+<h2>Signal Processing<a class="headerlink" href="#signal-processing" title="Permalink to this headline">¶</a></h2>
+<p>Remove the mean from all channels i with S.fs[i] &gt; 0.0. Specify irr=true to also
+remove the mean from irregularly sampled channels. Ignores NaNs.</p>
+<p>Remove the polynomial trend of degree n from every regularly-sampled channel i
+in S using a least-squares polynomial fit. Ignores NaNs.</p>
 <dl class="function">
 <dt>
 <code class="descname">equalize_resp!(S, resp_new::Array[, hc_new=HC, C=CH])</code></dt>
 <dd></dd></dl>
 
-<p>Translate all data in SeisData structure <code class="docutils literal notranslate"><span class="pre">S</span></code> to instrument response <code class="docutils literal notranslate"><span class="pre">resp_new</span></code>. Expected structure of <code class="docutils literal notranslate"><span class="pre">resp_new</span></code> is a complex Float64 2d array with zeros in <code class="docutils literal notranslate"><span class="pre">resp[:,1]</span></code>, poles in <code class="docutils literal notranslate"><span class="pre">resp[:,2]</span></code>. If channel <code class="docutils literal notranslate"><span class="pre">i</span></code> has key <code class="docutils literal notranslate"><span class="pre">S.misc[i][&quot;hc&quot;]</span></code>, the corresponding value is used as the critical damping constant; otherwise a value of 1.0 is assumed.</p>
+<p>Translate all data in SeisData structure <strong>S</strong> to instrument response <strong>resp_new</strong>.
+Expected structure of <strong>resp_new</strong> is a complex Float64 2d array with zeros in
+<strong>resp[:,1]</strong>, poles in <strong>resp[:,2]</strong>. If channel <strong>i</strong> has key <strong>S.misc[i][“hc”]</strong>,
+the corresponding value is used as the critical damping constant; otherwise a
+value of 1.0 is assumed.</p>
 <dl class="function">
-<dt id="lcfs">
-<code class="descname">lcfs</code><span class="sig-paren">(</span><em>fs::Array{Float64</em>, <em>1}</em><span class="sig-paren">)</span><a class="headerlink" href="#lcfs" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">filtfilt!(S::SeisData[; KWs])</code></dt>
 <dd></dd></dl>
 
-<p>Find <em>L*owest *C*ommon *fs</em>, the lowest sampling frequency at which data can be upsampled by repeating an integer number of copies of each sample value.</p>
+<p>Apply a zero-phase filter to data in <strong>S.x</strong>.</p>
+<dl class="function">
+<dt>
+<code class="descname">filtfilt!(Ev::SeisEvent[; KWs])</code></dt>
+<dd></dd></dl>
+
+<p>Apply zero-phase filter to <strong>Ev.data.x</strong>.</p>
+<dl class="function">
+<dt>
+<code class="descname">filtfilt!(C::SeisChannel[; KWs])</code></dt>
+<dd></dd></dl>
+
+<p>Apply zero-phase filter to <strong>C.x</strong></p>
+<p>Filtering is applied to each contiguous data segment of each channel separately.</p>
+<p>### Keywords
+Keywords control filtering behavior; specify e.g. filtfilt!(S, fl=0.1, np=2, rt=”Lowpass”).
+Default values can be changed by adjustin the <a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">shared keywords</span></a>, e.g.,
+SeisIO.KW.Filt.np = 2 changes the default number of poles to 2.</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="13%" />
+<col width="25%" />
+<col width="13%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">KW</th>
+<th class="head">Default</th>
+<th class="head">Type</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>fl</td>
+<td>1.0</td>
+<td>Float64</td>
+<td>lower corner frequency [Hz] <sup>(a)</sup></td>
+</tr>
+<tr class="row-odd"><td>fh</td>
+<td>15.0</td>
+<td>Float64</td>
+<td>upper corner frequency [Hz] <sup>(a)</sup></td>
+</tr>
+<tr class="row-even"><td>np</td>
+<td>4</td>
+<td>Int64</td>
+<td>number of poles</td>
+</tr>
+<tr class="row-odd"><td>rp</td>
+<td>10</td>
+<td>Int64</td>
+<td>pass-band ripple (dB)</td>
+</tr>
+<tr class="row-even"><td>rs</td>
+<td>30</td>
+<td>Int64</td>
+<td>stop-band ripple (dB)</td>
+</tr>
+<tr class="row-odd"><td>rt</td>
+<td>“Bandpass”</td>
+<td>String</td>
+<td>response type (type of filter)</td>
+</tr>
+<tr class="row-even"><td>dm</td>
+<td>“Butterworth”</td>
+<td>String</td>
+<td>design mode (name of filter)</td>
+</tr>
+</tbody>
+</table>
+<p><sup>(a)</sup>  By convention, the lower corner frequency (fl) is used in a Highpass
+filter, and fh is used in a Lowpass filter.</p>
+<dl class="function">
+<dt>
+<code class="descname">taper!(S)</code></dt>
+<dd></dd></dl>
+
+<p>Cosine taper each channel in S around time gaps.</p>
+<dl class="function">
+<dt>
+<code class="descname">unscale!(S[, irr=false])</code></dt>
+<dd></dd></dl>
+
+<p>Divide the gains from all channels <strong>i</strong> with <strong>S.fs[i] &gt; 0.0</strong>. Specify <strong>irr=true</strong> to
+also remove gains of irregularly-sampled channels.</p>
+</div>
+<div class="section" id="merge-and-synchronize">
+<span id="merge"></span><h2>Merge and Synchronize<a class="headerlink" href="#merge-and-synchronize" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descname">merge!(S::SeisData, U::SeisData)</code></dt>
+<dd></dd></dl>
+
+<p>Merge two SeisData structures. For timeseries data, a single-pass merge-and-prune
+operation is applied to value pairs whose sample times are separated by less than
+half the sampling interval.</p>
+<dl class="function">
+<dt>
+<code class="descname">merge!(S::SeisData)</code></dt>
+<dd></dd></dl>
+
+<p>“Flatten” a SeisData structure by merging data from identical channels.</p>
+<div class="section" id="merge-behavior">
+<h3>Merge Behavior<a class="headerlink" href="#merge-behavior" title="Permalink to this headline">¶</a></h3>
+<p>Two (or more) channels are merged if they have the same values for each of
+these fields:
++ <code class="docutils literal notranslate"><span class="pre">:id</span></code>
++ <code class="docutils literal notranslate"><span class="pre">:fs</span></code>
++ <code class="docutils literal notranslate"><span class="pre">:resp</span></code>
++ <code class="docutils literal notranslate"><span class="pre">:units</span></code>
++ <code class="docutils literal notranslate"><span class="pre">:loc</span></code>
+Unset (empty) values for <code class="docutils literal notranslate"><span class="pre">:resp</span></code>, <code class="docutils literal notranslate"><span class="pre">:units</span></code>, and <code class="docutils literal notranslate"><span class="pre">:loc</span></code> are treated as a
+match to any non-empty value in the corresponding field.</p>
+<div class="section" id="how-merges-work">
+<h4>How Merges Work<a class="headerlink" href="#how-merges-work" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li>Non-overlapping data are concatenated and time gaps are adjusted as needed.</li>
+<li>Redundant data are removed.</li>
+<li>Data that overlap in time and have different values are averaged pairwise if
+x<sub>i</sub>, x<sub>j</sub> : | t<sub>i</sub>-t<sub>j</sub> | &lt; (0.5*S.fs). Warnings are thrown
+when this situation is encountered.</li>
+</ul>
+<p>It’s best to merge only unprocessed data. Merging data segments that were
+processed independently (e.g. detrended) throws many warnings if values differ
+at overlapping times.</p>
+</div>
+<div class="section" id="when-seisio-won-t-merge">
+<h4>When SeisIO Won’t Merge<a class="headerlink" href="#when-seisio-won-t-merge" title="Permalink to this headline">¶</a></h4>
+<p>SeisIO does <strong>not</strong> combine data channels if <strong>any</strong> of the five fields above
+are non-empty and different. For example, if a SeisData object S contains two
+channels, each with id “XX.FOO..BHZ”, but one has fs=100 Hz and the other fs=50 Hz,
+<strong>merge!</strong> does nothing.</p>
+<dl class="function">
+<dt>
+<code class="descname">sync!(S::SeisData)</code></dt>
+<dd></dd></dl>
+
+<p>Synchronize the start times of all data in S to begin at or after the last
+start time in S.</p>
+<dl class="function">
+<dt>
+<code class="descname">sync!(S::SeisData[, s=ST, t=EN, v=VV])</code></dt>
+<dd></dd></dl>
+
+<p>Synchronize all data in S to start at <cite>ST</cite> and terminate at <cite>EN</cite> with verbosity level VV.</p>
+<p>For regularly-sampled channels, gaps between the specified and true times
+are filled with the mean; this isn’t possible with irregularly-sampled data.</p>
+</div>
+<div class="section" id="specifying-start-time-s">
+<h4>Specifying start time (s)<a class="headerlink" href="#specifying-start-time-s" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li>s=”last”: (Default) sync to the last start time of any channel in <cite>S</cite>.</li>
+<li>s=”first”: sync to the first start time of any channel in <cite>S</cite>.</li>
+<li>A numeric value is treated as an epoch time (<cite>?time</cite> for details).</li>
+<li>A DateTime is treated as a DateTime. (see Dates.DateTime for details.)</li>
+<li>Any string other than “last” or “first” is parsed as a DateTime.</li>
+</ul>
+</div>
+<div class="section" id="specifying-end-time-t">
+<h4>Specifying end time (t)<a class="headerlink" href="#specifying-end-time-t" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li>t=”none”: (Default) end times are not synchronized.</li>
+<li>t=”last”: synchronize all channels to end at the last end time in <cite>S</cite>.</li>
+<li>t=”first” synchronize to the first end time in <cite>S</cite>.</li>
+<li>numeric, datetime, and non-reserved strings are treated as for <cite>-s</cite>.</li>
+</ul>
 <dl class="function">
 <dt>
 <code class="descname">mseis!(S::SeisData, U::SeisData, ...)</code></dt>
 <dd></dd></dl>
 
 <p>Merge multiple SeisData structures into S.</p>
+</div>
+</div>
+</div>
+<div class="section" id="other-processing-functions">
+<h2>Other Processing Functions<a class="headerlink" href="#other-processing-functions" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt>
-<code class="descname">prune!(S::SeisData)</code></dt>
+<code class="descname">nanfill!(S)</code></dt>
 <dd></dd></dl>
 
-<p>Delete all channels from S that have no data (i.e. S.x is empty or non-existent).</p>
-<dl class="function">
-<dt id="pull">
-<code class="descname">pull</code><span class="sig-paren">(</span><em>S::SeisData</em>, <em>id::String</em><span class="sig-paren">)</span><a class="headerlink" href="#pull" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<p>Extract the first channel with id=id from S and return it as a new SeisChannel structure. The corresponding channel in S is deleted.</p>
+<p>For each channel <strong>i</strong> in <strong>S</strong>, replace all NaNs in <strong>S.x[i]</strong> with the mean
+of non-NaN values.</p>
 <dl class="function">
 <dt>
-<code class="descname">pull</code><span class="sig-paren">(</span><em>S::SeisData</em>, <em>i::integer</em><span class="sig-paren">)</span></dt>
+<code class="descname">ungap!(S[, m=true])</code></dt>
 <dd></dd></dl>
 
-<p>Extract channel i from S as a new SeisChannel struct, deleting it from S.</p>
-<p>Synchronize the start times of all data in S to begin at or after the last
-start time in S.</p>
-<p>Synchronize all data in S to start at <cite>ST</cite> and terminate at <cite>EN</cite> with verbosity level VV.</p>
-<p>For regularly-sampled channels, gaps between the specified and true times
-are filled with the mean; this isn’t possible with irregularly-sampled data.</p>
-<p>#### Specifying start time
-* s=”last”: (Default) sync to the last start time of any channel in <cite>S</cite>.
-* s=”first”: sync to the first start time of any channel in <cite>S</cite>.
-* A numeric value is treated as an epoch time (<cite>?time</cite> for details).
-* A DateTime is treated as a DateTime. (see Dates.DateTime for details.)
-* Any string other than “last” or “first” is parsed as a DateTime.</p>
-<p>#### Specifying end time (t)
-* t=”none”: (Default) end times are not synchronized.
-* t=”last”: synchronize all channels to end at the last end time in <cite>S</cite>.
-* t=”first” synchronize to the first end time in <cite>S</cite>.
-* numeric, datetime, and non-reserved strings are treated as for <cite>-s</cite>.</p>
-<p>Related functions: time, Dates.DateTime, parsetimewin</p>
-<dl class="function">
-<dt>
-<code class="descname">ungap!(S, [m=true, w=true])</code></dt>
-<dd></dd></dl>
-
-<p>Cosine taper all subsequences of regularly-sampled data and fill gaps with the
-mean of non-NaN data points. <strong>m=false</strong> leaves time gaps set to NaNs;
-<strong>w=false</strong> prevents cosine tapering.</p>
-<dl class="function">
-<dt>
-<code class="descname">T = ungap(S)</code></dt>
-<dd></dd></dl>
-
-<p>“Safe” ungap of SeisData object S to a new SeisData object T.</p>
-<dl class="function">
-<dt>
-<code class="descname">unscale!(S[, all=false])</code></dt>
-<dd></dd></dl>
-
-<p>Divide the gains from all channels i with S.fs[i] &gt; 0.0. Specify all=true to
-also remove gains of irregularly-sampled channels.</p>
+<p>For each channel <strong>i</strong> in <strong>S</strong>, fill time gaps in <strong>S.t[i]</strong> with the mean of
+non-NAN data in <strong>S.x[i]</strong>. If <strong>m=false</strong>, gaps are filled with NANs.</p>
+</div>
 </div>
 
 

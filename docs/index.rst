@@ -16,14 +16,14 @@ Intro
    :maxdepth: 2
 
    src/intro.rst
+   src/tutorial.rst
    src/working_with_data.rst
-   src/seisdata.rst
 
 *****
 Files
 *****
 .. toctree::
-   :caption: Data Readers
+   :caption: Reading Files
    :maxdepth: 2
 
    src/Formats/fileformats.rst
@@ -32,7 +32,7 @@ Files
 Web
 ***
 .. toctree::
-   :caption: Web Clients
+   :caption: Downloading Data
    :maxdepth: 2
 
    src/Web/webclients.rst

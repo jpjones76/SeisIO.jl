@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="SeedLink" href="seedlink.html" />
-    <link rel="prev" title="File Formats" href="../Formats/fileformats.html" /> 
+    <link rel="prev" title="Reading Files" href="../Formats/fileformats.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -88,14 +88,14 @@
               <p class="caption"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">First Steps</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../working_with_data.html">Working with Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../seisdata.html">Data Types</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Data Readers</span></p>
+<p class="caption"><span class="caption-text">Reading Files</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">Reading Files</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Web Clients</span></p>
+<p class="caption"><span class="caption-text">Downloading Data</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Web Requests</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#examples">Examples</a></li>
@@ -117,7 +117,7 @@
 </ul>
 <p class="caption"><span class="caption-text">Data Processing</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Processing/processing.html">Data Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Processing/processing.html">Data Processing Functions</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul>
@@ -192,8 +192,9 @@
            <div itemprop="articleBody">
             
   <div class="section" id="web-requests">
-<h1>Web Requests<a class="headerlink" href="#web-requests" title="Permalink to this headline">¶</a></h1>
-<p>Data requests use <code class="docutils literal notranslate"><span class="pre">get_data!</span></code> as a wrapper to either FDSN or IRIS data services; for live streaming, see SeedLink.</p>
+<span id="getdata"></span><h1>Web Requests<a class="headerlink" href="#web-requests" title="Permalink to this headline">¶</a></h1>
+<p>Data requests use <code class="docutils literal notranslate"><span class="pre">get_data!</span></code> for FDSN or IRIS data services; for (near)
+real-time streaming, see <a class="reference internal" href="seedlink.html#seedlink-section"><span class="std std-ref">SeedLink</span></a>.</p>
 <dl class="function">
 <dt>
 <code class="descname">get_data!(S, method, channels; KWs)</code></dt>
@@ -352,7 +353,7 @@ Returns a SeisEvent.</p>
         <a href="seedlink.html" class="btn btn-neutral float-right" title="SeedLink" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../Formats/fileformats.html" class="btn btn-neutral float-left" title="File Formats" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../Formats/fileformats.html" class="btn btn-neutral float-left" title="Reading Files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

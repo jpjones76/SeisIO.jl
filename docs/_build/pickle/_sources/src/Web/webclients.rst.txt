@@ -1,8 +1,11 @@
+.. _getdata:
+
 ************
 Web Requests
 ************
 
-Data requests use ``get_data!`` as a wrapper to either FDSN or IRIS data services; for live streaming, see SeedLink.
+Data requests use ``get_data!`` for FDSN or IRIS data services; for (near)
+real-time streaming, see :ref:`SeedLink<seedlink-section>`.
 
 .. function:: get_data!(S, method, channels; KWs)
 .. function:: S = get_data(method, channels; KWs)

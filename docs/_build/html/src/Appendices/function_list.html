@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Structure and Field Descriptions" href="seisdata_fields.html" />
-    <link rel="prev" title="Data Processing" href="../Processing/processing.html" /> 
+    <link rel="prev" title="Data Processing Functions" href="../Processing/processing.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -88,21 +88,21 @@
               <p class="caption"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">First Steps</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../working_with_data.html">Working with Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../seisdata.html">Data Types</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Data Readers</span></p>
+<p class="caption"><span class="caption-text">Reading Files</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">Reading Files</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Web Clients</span></p>
+<p class="caption"><span class="caption-text">Downloading Data</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Web/webclients.html">Web Requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Web/seedlink.html">SeedLink</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Data Processing</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Processing/processing.html">Data Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Processing/processing.html">Data Processing Functions</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul class="current">
@@ -256,12 +256,6 @@
 <p>Convert times <strong>s</strong> and <strong>t</strong> to strings α, ω sorted α &lt; ω.
 <strong>s</strong> and <strong>t</strong> can be real numbers, DateTime objects, or ASCII strings.
 Expected string format is “yyyy-mm-ddTHH:MM:SS.nnn”, e.g. 2016-03-23T11:17:00.333.</p>
-<dl class="function">
-<dt id="webhdr">
-<code class="descname">webhdr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#webhdr" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<p>Generate a Dict{String,String} to set UserAgent in web requests.</p>
 <p>“Safe” synchronize of start and end times of all trace data in SeisData structure <code class="docutils literal notranslate"><span class="pre">S</span></code> to a new structure <code class="docutils literal notranslate"><span class="pre">U</span></code>.</p>
 <dl class="function">
 <dt id="u2d">
@@ -324,7 +318,7 @@ field contents. Access it by typing “using SeisIO.RandSeis”</p>
         <a href="seisdata_fields.html" class="btn btn-neutral float-right" title="Structure and Field Descriptions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../Processing/processing.html" class="btn btn-neutral float-left" title="Data Processing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../Processing/processing.html" class="btn btn-neutral float-left" title="Data Processing Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
