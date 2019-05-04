@@ -41,3 +41,5 @@ if Sys.iswindows() == false
     end
   end
 end
+
+@test_throws ErrorException read_data("deez", "nutz.sac")
