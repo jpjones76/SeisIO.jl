@@ -14,8 +14,10 @@ S = readmseed(string(path, "/SampleFiles/test.mseed"), v=0)
 
 # Test breaks if memory-resident SeisIOBuf structure SEED is not reset
 S1 = readmseed(string(path, "/SampleFiles/test.mseed"), v=0)
-S2 = readmseed(string(path, "/SampleFiles/t*.mseed"), v=0)
-@test S == S1 == S2
+if Sys.iswindows() == false
+  S2 = readmseed(string(path, "/SampleFiles/t*.mseed"), v=0)
+  @test S == S1 == S2
+end
 
 
 mseed_vals = readdlm("DataFormats/test_mseed_vals.txt", ',', comments=true, comment_char='#')
