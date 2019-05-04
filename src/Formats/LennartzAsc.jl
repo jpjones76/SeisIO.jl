@@ -1,14 +1,9 @@
 using DelimitedFiles: readdlm
 export readlennasc, readlennasc!
 
-@doc """
-    readlennasc(fname)
-
-Read Lennartz-type ASCII file fname with mini-header on first line.
-""" readlennasc
-function readlennasc!(S::SeisData, f::String)
-  id_sep = "."
+function read_lenn_file!(S::SeisData, f::String)
   fname = realpath(f)
+  id_sep = "."
   C = SeisChannel()
   nx = countlines(fname) - 1
   i = 1
@@ -44,6 +39,24 @@ function readlennasc!(S::SeisData, f::String)
   setfield!(C, :t, T)
   setfield!(C, :x, X)
   push!(S, C)
+  return nothing
+end
+
+@doc """
+    readlennasc(fname)
+
+Read Lennartz-type ASCII file fname with mini-header on first line.
+""" readlennasc
+function readlennasc!(S::SeisData, filestr::String)
+  if safe_isfile(filestr)
+    read_lenn_file!(S, filestr)
+  else
+    files = ls(filestr)
+    nf = length(files)
+    for fname in files
+      read_lenn_file!(S, fname)
+    end
+  end
   return nothing
 end
 
