@@ -57,7 +57,7 @@ const sμ = 1000000.0
 const vJulia = Float32(Meta.parse(string(VERSION.major,".",VERSION.minor)))
 const vSeisIO = Float32(0.4)
 const uw_dconv = -11676096000000000
-const webhdr = Dict("UserAgent" => "Julia-SeisIO-FSDN.jl/0.1.3")
+const webhdr = Dict("UserAgent" => "Julia-SeisIO-FSDN.jl/0.2.0")
 const μs = 1.0e-6
 
 unsep = Sys.iswindows() ? "/" : "\\" # the un-separator; which of /, \ is NOT likely to show up in a glob
