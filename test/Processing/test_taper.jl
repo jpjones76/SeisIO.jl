@@ -54,3 +54,15 @@ ny = round(Int, 2*fs)
 C.t = vcat(C.t[1:end-1,:], [nx+1 1000000], [nx + ny 0])
 append!(C.x, randn(eltype(C.x), ny))
 taper!(C)
+
+# test on SeisEvent
+V = randSeisEvent()
+taper!(V)
+
+# Test for out-of-place tapering
+C = randSeisChannel()
+S = randSeisData(10, c=1.0, s=0.0)[2:10]
+V = randSeisEvent()
+D = taper(C)
+T = taper(S)
+W = taper(V)

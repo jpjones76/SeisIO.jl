@@ -21,7 +21,12 @@ open("runtests.log", "a") do out
     summary(randSeisEvent())
     summary(randSeisHdr())
 
-    chanspec()
-    mseed_support()
+    # invoke help-only functions
+    for i = 1:10
+      chanspec()
+      seed_support()
+      mseed_support()
+      timespec()
+    end
   end
 end
