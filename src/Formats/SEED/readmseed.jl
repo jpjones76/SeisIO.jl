@@ -46,8 +46,8 @@ choice of nx_new and nx_add will dramatically impact performance.
 See also: mseed_support
 """ readmseed
 function readmseed!(S::SeisData, fname::String;
-                    swap=false::Bool,
-                    v::Int=KW.v,
+                    swap::Bool=false,
+                    v::Int64=KW.v,
                     nx_new::Int64=KW.nx_new,
                     nx_add::Int64=KW.nx_add)
   setfield!(BUF, :swap, swap)
@@ -67,7 +67,7 @@ end
 
 @doc (@doc readmseed)
 function readmseed(fname::String;
-                    swap=false::Bool,
+                    swap::Bool=false,
                     v::Int=KW.v,
                     nx_new::Int64=KW.nx_new,
                     nx_add::Int64=KW.nx_add
