@@ -1,4 +1,4 @@
-export taper!
+export taper, taper!
 
 # Create increasing part of a cosine taper
 function mktaper!(W::Array{T,1}, L::Int64) where T<:Real
@@ -27,8 +27,13 @@ function taper_seg!(X::AbstractVector, W::Array{T,1}, L::Int64, μ::T; rev::Bool
 end
 
 # Taper a SeisChannel
-"""
+@doc """
     taper!(C[; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10])
+
+Cosine taper all time-series data in C. Tapers each segment of each channel
+that contains at least `N_min` total samples.
+
+    taper!(S[; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10])
 
 Cosine taper all time-series data in S. Tapers each segment of each channel
 that contains at least `N_min` total samples.
@@ -36,13 +41,13 @@ that contains at least `N_min` total samples.
 Does not modify irregularly-sampled data channels.
 
 Keywords:
-N_min: Data segments with N < N_min total samples are not tapered.
-t_max: Maximum taper edge in seconds.
-α: Taper edge area; as for a Tukey window, the first and last 100*α% of samples
-in each window are tapered, up to t_max seconds of data.
+* `N_min`: Data segments with N < N_min total samples are not tapered.
+* `t_max`: Maximum taper edge in seconds.
+* `α``: Taper edge area; as for a Tukey window, the first and last 100*α% of
+samples in each window are tapered, up to `t_max` seconds of data.
 
 See also: DSP.Windows.tukey
-"""
+""" taper!
 function taper!(C::SeisChannel; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
   if !(C.fs > 0.0)
     return nothing
@@ -118,22 +123,6 @@ end
 # I could probably clean it up by creating one master taper
 # and passing/editing views into the taper.
 
-"""
-    taper!(S[; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10])
-
-Cosine taper all time-series data in S. Tapers each segment of each channel
-that contains at least `N_min` total samples.
-
-Does not modify irregularly-sampled data channels.
-
-Keywords:
-N_min: Data segments with N < N_min total samples are not tapered.
-t_max: Maximum taper edge in seconds.
-α: Taper edge area; as for a Tukey window, the first and last 100*α% of samples
-in each window are tapered, up to t_max seconds of data.
-
-See also: DSP.Windows.tukey
-"""
 function taper!(S::SeisData; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
   if !any(getfield(S, :fs) .> 0.0)
     return nothing
@@ -220,4 +209,25 @@ function taper!(S::SeisData; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
                         "N_min = ", N_min ) )
   end
   return nothing
+end
+taper!(V::SeisEvent;
+        t_max::Real=10.0,
+        α::Real=0.05,
+        N_min::Int64=10) = taper!(V.data, t_max = t_max, α=α, N_min=N_min)
+
+@doc (@doc taper!)
+function taper(C::SeisChannel; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
+  U = deepcopy(C)
+  taper!(U, t_max = t_max, α=α, N_min=N_min)
+  return U
+end
+function taper(S::SeisData; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
+  U = deepcopy(S)
+  taper!(U, t_max = t_max, α=α, N_min=N_min)
+  return U
+end
+function taper(V::SeisEvent; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
+  U = deepcopy(V)
+  taper!(U.data, t_max = t_max, α=α, N_min=N_min)
+  return U
 end

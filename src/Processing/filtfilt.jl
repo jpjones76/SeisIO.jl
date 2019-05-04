@@ -135,7 +135,7 @@ function do_filtfilt!(X::AbstractArray,
   return nothing
 end
 
-"""
+@doc """
   filtfilt!(S::SeisData[; KWs])
 
 Apply zero-phase filter to S.x.
@@ -162,10 +162,11 @@ Keywords control filtering behavior; specify as e.g. filtfilt!(S, fl=0.1, np=2, 
 | rt    | "Bandpass"    | String  | response type (type of filter)      |
 | dm    | "Butterworth" | String  | design mode (name of filter)        |
 
-[^1]: Remember the (counter-intuitive) convention that the lower corner frequency (fl) is used in a Highpass filter, and fh is used in a Lowpass filter. This convention is preserved in SeisIO.
+[^1]: By convention, the lower corner frequency (fl) is used in a Highpass
+filter, and fh is used in a Lowpass filter.
 
 See also: DSP.jl documentation
-"""
+""" filtfilt!
 function filtfilt!(S::SeisData;
     fl::Float64=KW.Filt.fl,
     fh::Float64=KW.Filt.fh,
@@ -240,20 +241,6 @@ function filtfilt!(S::SeisData;
   return nothing
 end
 
-filtfilt(S::SeisData;
-  fl::Float64=KW.Filt.fl,
-  fh::Float64=KW.Filt.fh,
-  np::Int=KW.Filt.np,
-  rp::Int=KW.Filt.rp,
-  rs::Int=KW.Filt.rs,
-  rt::String=KW.Filt.rt,
-  dm::String=KW.Filt.dm
-  ) = (
-        U = deepcopy(S);
-        filtfilt!(U, fl=fl, fh=fh, np=np, rp=rp, rs=rs, rt=rt, dm=dm);
-        return U
-       )
-
 function filtfilt!(C::SeisChannel;
   fl::Float64=KW.Filt.fl,
   fh::Float64=KW.Filt.fh,
@@ -302,6 +289,31 @@ function filtfilt!(C::SeisChannel;
   return nothing
 end
 
+filtfilt!(Ev::SeisEvent;
+  fl::Float64=KW.Filt.fl,
+  fh::Float64=KW.Filt.fh,
+  np::Int=KW.Filt.np,
+  rp::Int=KW.Filt.rp,
+  rs::Int=KW.Filt.rs,
+  rt::String=KW.Filt.rt,
+  dm::String=KW.Filt.dm
+  ) = filtfilt!(Ev.data, fl=fl, fh=fh, np=np, rp=rp, rs=rs, rt=rt, dm=dm)
+
+@doc (@doc filtfilt!)
+filtfilt(S::SeisData;
+  fl::Float64=KW.Filt.fl,
+  fh::Float64=KW.Filt.fh,
+  np::Int=KW.Filt.np,
+  rp::Int=KW.Filt.rp,
+  rs::Int=KW.Filt.rs,
+  rt::String=KW.Filt.rt,
+  dm::String=KW.Filt.dm
+  ) = (
+        U = deepcopy(S);
+        filtfilt!(U, fl=fl, fh=fh, np=np, rp=rp, rs=rs, rt=rt, dm=dm);
+        return U
+       )
+
 filtfilt(C::SeisChannel;
   fl::Float64=KW.Filt.fl,
   fh::Float64=KW.Filt.fh,
@@ -316,16 +328,6 @@ filtfilt(C::SeisChannel;
         return D
        )
 
-filtfilt!(Ev::SeisEvent;
-  fl::Float64=KW.Filt.fl,
-  fh::Float64=KW.Filt.fh,
-  np::Int=KW.Filt.np,
-  rp::Int=KW.Filt.rp,
-  rs::Int=KW.Filt.rs,
-  rt::String=KW.Filt.rt,
-  dm::String=KW.Filt.dm
-  ) = filtfilt!(Ev.data, fl=fl, fh=fh, np=np, rp=rp, rs=rs, rt=rt, dm=dm)
-
 filtfilt(Ev::SeisEvent;
   fl::Float64=KW.Filt.fl,
   fh::Float64=KW.Filt.fh,
@@ -335,7 +337,7 @@ filtfilt(Ev::SeisEvent;
   rt::String=KW.Filt.rt,
   dm::String=KW.Filt.dm
   ) = (
-        S = deepcopy(Ev.data);
-        filtfilt!(S, fl=fl, fh=fh, np=np, rp=rp, rs=rs, rt=rt, dm=dm);
-        return SeisEvent(hdr = deepcopy(Ev.hdr), data=S)
+        W = deepcopy(Ev);
+        filtfilt!(W.data, fl=fl, fh=fh, np=np, rp=rp, rs=rs, rt=rt, dm=dm);
+        return W
        )

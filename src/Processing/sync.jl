@@ -19,7 +19,7 @@ function get_sync_inds(t::AbstractArray{Int64,1}, Ω::Bool, t₀::Int64, t₁::I
   end
 end
 
-"""
+@doc """
 sync!(S::SeisData)
 
 Synchronize the start times of all data in S to begin at or after the last
@@ -46,7 +46,7 @@ are filled with the mean; this isn't possible with irregularly-sampled data.
 * numeric, datetime, and non-reserved strings are treated as for `-s`.
 
 Related functions: time, Dates.DateTime, parsetimewin
-"""
+""" sync!
 function sync!(S::SeisData;
                 s="last"::Union{String,DateTime},
                 t="none"::Union{String,DateTime},
@@ -195,16 +195,22 @@ function sync!(S::SeisData;
   return nothing
 end
 
-"""
-    T = sync(S)
+sync!(V::SeisEvent;
+  s="last"::Union{String,DateTime},
+  t="none"::Union{String,DateTime},
+  v::Int64=KW.v ) = sync!(V.data, s=s, t=t, v=v)
 
-Synchronize time ranges of S and pad data gaps.
+function sync!(C::SeisChannel;
+                s::DateTime,
+                t="none"::Union{String,DateTime},
+                v::Int64=KW.v )
+  S = SeisData(C)
+  sync!(S, s=s, t=t, v=v)
+  return nothing
+end
 
-    T = sync(S, rs=true)
-
-Synchronize S and downsample data to the lowest non-null interval in S.fs.
-"""
-function sync( S::SeisData;
+@doc (@doc sync!)
+function sync(S::SeisData;
                 s="last"::Union{String,DateTime},
                 t="none"::Union{String,DateTime},
                 v::Int64=KW.v )
@@ -212,4 +218,25 @@ function sync( S::SeisData;
   T = deepcopy(S)
   sync!(T, s=s, t=t, v=v)
   return T
+end
+
+function sync(V::SeisEvent;
+                s="last"::Union{String,DateTime},
+                t="none"::Union{String,DateTime},
+                v::Int64=KW.v )
+
+  W = deepcopy(V)
+  sync!(W.data, s=s, t=t, v=v)
+  return W
+end
+
+function sync(C::SeisChannel;
+                s::DateTime,
+                t="none"::Union{String,DateTime},
+                v::Int64=KW.v )
+
+  U = deepcopy(C)
+  S = SeisData(U)
+  sync!(S, s=s, t=t, v=v)
+  return S[1]
 end
