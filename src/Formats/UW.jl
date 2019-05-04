@@ -467,8 +467,6 @@ function uwdf(datafile::String;
       end
     end
     note!(S, string("+src: readuw(", fname, ")"))
-  else
-    @warn(string("UW-1 format not supported; data not read."))
   end
   close(fid)
   return S
