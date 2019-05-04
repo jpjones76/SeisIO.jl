@@ -1,7 +1,14 @@
 ### 2019-05-04
 Release candidate
-* Added a global keyword for Boolean option `full` in data readers.
+* Added a keyword to `SeisIO.KW` for Boolean option `full` in data readers.
 * Added help functions `?seed_support` and `?timespec`.
+* All processing methods have been extended to SeisChannel, SeisData, and
+SeisEvent objects; in the latter case, they affect the `:data` field.
+  + Exception: `merge`
+    - Can't be used on SeisChannel or SeisEvent objects; that makes no sense.
+    - `mseis!` can still merge SeisEvent and SeisChanne objects into SeisData structures.
+* All processing functions now have out-of-place (copying) versions, as well as
+in-place versions.
 
 ### 2019-05-03
 Release candidate
