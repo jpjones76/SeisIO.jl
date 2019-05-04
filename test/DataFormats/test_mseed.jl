@@ -3,7 +3,7 @@
 # versions of libmseed, which reads with no issues
 printstyled("  mini-SEED file read\n", color=:light_green)
 
-@test_throws ErrorException readmseed("/data/Code/SeisIO/test/SampleFiles/one_day.sac")
+@test_throws ErrorException readmseed(string(path, "/SampleFiles/one_day.sac"))
 
 S = readmseed(string(path, "/SampleFiles/test.mseed"), v=0)
 @test isequal(S.id[1], "NL.HGN.00.BHZ")
