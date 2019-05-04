@@ -344,7 +344,7 @@ As above, for an existing SeisData object.
 SEG Y file header)
 * `full=true` returns full SEG Y headers in `S.misc`.
 """ readsegy
-function readsegy(filestr::String; passcal=false::Bool, full=false::Bool)
+function readsegy(filestr::String; passcal::Bool=false, full::Bool=KW.full)
   buf     = getfield(BUF, :buf)
   shorts  = getfield(BUF, :int16_buf)
   ints    = getfield(BUF, :int32_buf)
@@ -364,7 +364,7 @@ function readsegy(filestr::String; passcal=false::Bool, full=false::Bool)
 end
 
 @doc (@doc readsegy)
-function readsegy!(S::SeisData, filestr::String; passcal=false::Bool, full=false::Bool)
+function readsegy!(S::SeisData, filestr::String; passcal::Bool=false, full::Bool=KW.full)
   U = readsegy(filestr, passcal=passcal, full=full)
   append!(S, U)
   return nothing
@@ -376,7 +376,7 @@ end
 
 Print formatted, sorted SEG-Y headers of file `f` to stdout. Pass keyword argument `passcal=true` for PASSCAL/NMT modified SEG-Y.
 """
-function segyhdr(fname::String; passcal=false::Bool)
+function segyhdr(fname::String; passcal::Bool=false)
   seis = readsegy(fname::String; passcal=passcal, full=true)
   if passcal
     printstyled(stdout, @sprintf("%20s: %s\n", "PASSCAL SEG-Y FILE", realpath(fname)), color=:green, bold=true)
