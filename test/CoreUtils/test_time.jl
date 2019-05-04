@@ -150,4 +150,7 @@ ts_1 = Date(iv[1], m, d).instant.periods.value * 86400000000 +
        SeisIO.dtconst
 ts_2 = mktime(iv[1], iv[2], iv[3], iv[4], iv[5], iv[6]*Int32(1000)) +
        round(Int64, fv*1000.0)
-@test ts_0 == ts_1 == ts_2
+iv[6] *= Int32(1000)
+ts_3 = mktime(iv) + round(Int64, fv*1000.0)
+@test ts_0 == ts_1 == ts_2 == ts_3
+# timespec()

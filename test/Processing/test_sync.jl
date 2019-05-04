@@ -284,3 +284,17 @@ for i in [1,3,4,5,6]
 end
 @test minimum(ts_new .≥ ts₆) == true           # We start at ts₆, not before
 @test findfirst(ts_new .== ts₆).== 1          # Defined start time
+
+Ev = SeisEvent(hdr = randSeisHdr(), data = deepcopy(S))
+W = sync(Ev, s=ds₆).data
+basic_checks(W)
+ts_new, te_new = get_edge_times(W)
+wx = Lx(W)
+
+# Expectations:
+@test sx[2]-wx[2] == 100                      # Trace 2 is 100 samples shorter
+for i in [1,3,4,5,6]
+  @test sx[i] == wx[i]                        # No change in other trace lengths
+end
+@test minimum(ts_new .≥ ts₆) == true           # We start at ts₆, not before
+@test findfirst(ts_new .== ts₆).== 1          # Defined start time
