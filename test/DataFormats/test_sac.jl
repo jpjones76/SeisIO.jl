@@ -14,6 +14,9 @@ SAC2 = readsac(sac_file, full=true)[1]
 @test ≈(1/SAC1.fs, SAC2.misc["delta"])
 @test ≈(length(SAC1.x), SAC2.misc["npts"])
 
+printstyled("    wildcard read\n", color=:light_green)
+SAC = readsac(path*"/SampleFiles/*.sac", full=true)
+
 printstyled("    bigendian read\n", color=:light_green)
 SAC3 = readsac(sac_be_file, full=true)[1]
 @test ≈(1/SAC3.fs, SAC3.misc["delta"])
