@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2019.4.8)  4 MAY 2019 01:02
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2019.4.8)  4 MAY 2019 04:49
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1340,7 +1340,7 @@ Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 4208.
 Here is how much of TeX's memory you used:
  14105 strings out of 494923
  198129 string characters out of 6180743
- 323467 words of memory out of 5000000
+ 323464 words of memory out of 5000000
  16856 multiletter control sequences out of 15000+600000
  77058 words of font info for 113 fonts, out of 8000000 for 9000
  15 hyphenation exceptions out of 8191
@@ -1359,7 +1359,7 @@ nts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/ur
 w/helvetic/uhvro8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utm
 b8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/s
 hare/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on SeisIO.pdf (47 pages, 274512 bytes).
+Output written on SeisIO.pdf (47 pages, 273049 bytes).
 PDF statistics:
  705 PDF objects out of 1000 (max. 8388607)
  594 compressed objects within 6 object streams

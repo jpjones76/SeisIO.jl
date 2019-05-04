@@ -60,7 +60,7 @@
 
 \title{SeisIO Documentation}
 \date{May 04, 2019}
-\release{0.1.3 rc}
+\release{0.2.0}
 \author{Joshua Jones}
 \newcommand{\sphinxlogo}{\vbox{}}
 \renewcommand{\releasename}{Release}
@@ -901,10 +901,10 @@ Only SEG Y rev 0 and \sphinxhref{https://seg.org/Portals/0/SEG/News\%20and\%20Re
 with standard headers are supported.
 
 \sphinxstylestrong{UW}: the University of Washington data format has no online reference and is
-no longer in use. It was created by the Pacific Northwest Seismic Network and
-used for local event archival until at least 2004. A UW event is described by a
-pickfile and a corresponding data file, whose names are identical except for
-the last character; for example, the files 99062109485o and 99062109485W
+no longer in use. Created by the Pacific Northwest Seismic Network for event
+archival; used through the early 2000s. A UW event is described by a pickfile
+and a corresponding data file, whose names are identical except for the last
+character; for example, the files 99062109485o and 99062109485W
 describe event 99062109485. Unlike the win32 data format, the data file is
 self-contained; the pick file is not required to use raw trace data. Only UW-2
 data files are supported by SeisIO; we have never encountered a UW-1 data file

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Reading Files &mdash; SeisIO 0.1.3 rc documentation</title>
+  <title>Reading Files &mdash; SeisIO 0.2.0 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                0.1.3
+                0.2.0
               </div>
             
           
@@ -416,10 +416,10 @@ data format. Common in the energy industry, developed and maintained by the SEG.
 Only SEG Y rev 0 and <a class="reference external" href="https://seg.org/Portals/0/SEG/News%20and%20Resources/Technical%20Standards/seg_y_rev1.pdf">rev 1</a>
 with standard headers are supported.</p>
 <p><strong>UW</strong>: the University of Washington data format has no online reference and is
-no longer in use. It was created by the Pacific Northwest Seismic Network and
-used for local event archival until at least 2004. A UW event is described by a
-pickfile and a corresponding data file, whose names are identical except for
-the last character; for example, the files 99062109485o and 99062109485W
+no longer in use. Created by the Pacific Northwest Seismic Network for event
+archival; used through the early 2000s. A UW event is described by a pickfile
+and a corresponding data file, whose names are identical except for the last
+character; for example, the files 99062109485o and 99062109485W
 describe event 99062109485. Unlike the win32 data format, the data file is
 self-contained; the pick file is not required to use raw trace data. Only UW-2
 data files are supported by SeisIO; we have never encountered a UW-1 data file
