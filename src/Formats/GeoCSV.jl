@@ -445,17 +445,16 @@ GeoCSV .zip files are **NOT** supported.
 wrong times, the user must manually correct `S.t`.
 """ readgeocsv
 function readgeocsv!(S::SeisData, filestr::String; tspair::Bool=true)
-
   if safe_isfile(filestr)
     read_geocsv_file!(S, filestr, tspair)
   else
     files = ls(filestr)
     nf = length(files)
     for fname in files
-      read_geocsv_file!(S, filestr, tspair)
+      read_geocsv_file!(S, fname, tspair)
     end
   end
-  return S
+  return nothing
 end
 
 @doc (@doc readgeocsv)

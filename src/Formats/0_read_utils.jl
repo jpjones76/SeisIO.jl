@@ -31,6 +31,33 @@ function checkbuf!(buf::AbstractArray, nx::T) where {T<:Integer}
   end
 end
 
+function fillx_i4!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::Int64)
+  j = os
+  i = 0
+  while i < nx
+    i += 1
+    j += 1
+    y = getindex(buf, i)
+    x[j] = Int32(y >> 4)
+    if i < nx
+      j += 1
+      x[j] = Int32((y << 4) >> 4)
+    end
+  end
+  return nothing
+end
+
+function fillx_i8!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::Int64)
+  j = os
+  i = 0
+  while i < nx
+    i += 1
+    j += 1
+    x[j] = signed(buf[i])
+  end
+  return nothing
+end
+
 function fillx_i16_le!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::Int64)
   y = zero(UInt16)
   j = os
@@ -120,37 +147,6 @@ function fillx_u32_be!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::I
   end
   return nothing
 end
-
-function fillx_i8!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::Int64)
-  j = os
-  i = 0
-  while i < nx
-    i += 1
-    j += 1
-    x[j] = signed(buf[i])
-  end
-  return nothing
-end
-
-function fillx_i4!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::Int64)
-  j = os
-  i = 0
-  while i < nx
-    i += 1
-    j += 1
-    y = getindex(buf, i)
-    x[j] = Int32(y >> 4)
-    if i < nx
-      j += 1
-      x[j] = Int32((y << 4) >> 4)
-    end
-  end
-  return nothing
-end
-# i = zero(UInt16)
-# while i < B
-#   i += one(UInt16)
-
 
 # An order of magnitude faster than parse
 function mkuint(vi::Int8, v_buf::Array{UInt8,1})

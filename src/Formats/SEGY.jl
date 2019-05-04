@@ -294,10 +294,7 @@ function read_segy_file(fname::String,
       skip(f, 3200*nh)
     else
       exthdr = Array{String,1}(undef, nh)
-      for i = 1:nh
-        exthdr[i] = read(f, 3200)
-      end
-
+      for i = 1:nh; exthdr[i] = read(f, 3200); end
       fhd = Dict{String,Any}(
               zip(String["ntr", "naux", "filedt", "origdt", "filenx",
                          "orignx", "fmt", "cdpfold", "trasort", "vsum",

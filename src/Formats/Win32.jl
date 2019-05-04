@@ -137,7 +137,7 @@ function readwin32(dfilestr::String, cfilestr::String;
 
         # Bytes to read
         lsecb = Int64(ntoh(read(fid, UInt32)))
-        τ = zero(Int64)
+        τ = 0
 
         while τ < lsecb
           orgID = read(fid, UInt8)
