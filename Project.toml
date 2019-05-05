@@ -7,7 +7,7 @@ version = "0.2.0"
 Blosc = ">=0.5.1"
 DSP = ">=0.5.1"
 Glob = ">=1.2.0"
-julia = "0.7,1"
+julia = "1"
 
 [deps]
 Blosc = "a74b3585-a348-5f62-a45c-50e91977d574"
