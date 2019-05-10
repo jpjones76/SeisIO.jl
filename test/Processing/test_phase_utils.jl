@@ -1,6 +1,18 @@
-# Test: cycle through a phase catalog, getting phase times and requesting data
-# This test works identically to the old FDSNevt without the data query
-import SeisIO: pcat_start, pcat_end, phase_time, next_phase, parse_chstr, minreq!, first_phase
+printstyled("  gcdist\n", color=:light_green)
+src = [46.8523, -121.7603]
+src2 = [48.7767, -121.8144]
+rec = [45.5135 -122.6801; 44.0442 -123.0925; 42.3265 -122.8756]
+
+G0 = gcdist(src, rec)                           # vec, arr
+G1 = gcdist(src[1], src[2], rec)                # lat, lon, arr
+G2 = gcdist(src[1], src[2], rec[1,1], rec[1,2]) # s_lat, s_lon, r_lat, r_lon
+G3 = gcdist(vcat(src',src2'), rec[1,:])             # arr, arr
+G4 = gcdist(vcat(src',src2'), rec[1,:])             # arr, rec[1,:]
+
+@test G0 == G1
+@test G0[1,:] == G1[1,:] == G2[1,:]
+@test G3 == G4
+
 printstyled("  phase_utils\n", color=:light_green)
 GC.gc()
 spad = 10.0
@@ -20,75 +32,73 @@ s = H.ot                                      # Start time for FDSNsta is event 
 t = u2d(d2u(s) + 3600.0)                      # End time is 60 minutes later; we'll truncate
 S = FDSNsta(sta, s=s, t=t, to=to)
 
-# Initialize SeisEvent structure
-Ev = SeisEvent(hdr = H, data = S)
-distaz!(Ev)
+# Check that nothing is initially in the phase catalog
+Ev = SeisEvent(hdr=H, data=S[1:1])
+@test length(Ev.data.pha[1]) == 0
 
-# Actual test begins
-ot = d2u(Ev.hdr.ot)
+printstyled("    request with invalid parameter\n", color=:light_green)
+redirect_stdout(out) do
+  get_pha!(Ev, pha="", model="do.my.little.dance.on.the.catwalk", to=to, v=2)
+end
+@test length(Ev.data.pha[1]) == 0
 
+printstyled("    request with user-specified phase list\n", color=:light_green)
+Ev = SeisEvent(hdr=H, data=S[1:1])
+get_pha!(Ev, pha="P,S", to=to)
+@test length(Ev.data.pha[1]) == 2
+println("")
+show(Ev.data.pha[1])
+println("")
+
+printstyled("    request styles that return all phases\n", color=:light_green)
+Ev = SeisEvent(hdr=H, data=S[1:1])
+get_pha!(Ev, pha="", to=to)
+pcat1 = Ev.data.pha[1]
+
+Ev = SeisEvent(hdr=H, data=S[1:1])
+get_pha!(Ev, pha="all", to=to)
+pcat2 = Ev.data.pha[1]
+
+Ev = SeisEvent(hdr=H, data=S[1:1])
+get_pha!(Ev, pha="ttall", to=to)
+pcat3 = Ev.data.pha[1]
+
+@test pcat1 == pcat2 == pcat3
+
+# This should work for all stations, yielding only the S time
+printstyled("    multi-channel request\n", color=:light_green)
+J = findall([endswith(id, "EHZ") for id in S.id])
+
+printstyled("      default phase\n", color=:light_green)
+Ev = SeisEvent(hdr=H, data=S[J])
+SeisIO.KW.pha = "S"
+get_pha!(Ev, to=to)
 for i = 1:Ev.data.n
-  if i == 1
-    pdat = get_pha(Ev.data.misc[i]["dist"], Ev.hdr.loc[3], pha="", model="do.my.little.dance.on.the.catwalk", to=to) # should break
-    pdat = get_pha(Ev.data.misc[i]["dist"], Ev.hdr.loc[3], pha="", to=to)
-  elseif i == 2
-    pdat = get_pha(Ev.data.misc[i]["dist"], Ev.hdr.loc[3], pha="all", to=to)
-  else
-    pdat = get_pha(Ev.data.misc[i]["dist"], Ev.hdr.loc[3], pha="ttall", to=to)
-  end
-  # Check that there's a P phase and an S phase
-  for p in String["P","S"]
-    j = findfirst(pdat[:,3].==p)
-    @test (typeof(j) == Nothing) == false
-  end
+  @test length(Ev.data.pha[i]) == 1
+  @test haskey(Ev.data.pha[i], "S")
+end
+SeisIO.KW.pha = "P"
 
-  # get the start and end of the phase catalog and S arrival time, apply sanity check
-  s0 = pcat_start(pdat)
-  t0 = pcat_end(pdat)
-  ts = phase_time("S", pdat)
-  @test s0 ≤ ts ≤ t0
-  @test_throws ErrorException phase_time("HEXONXONX", pdat)
-
-  if i == 1
-    pdat2 = [pdat; pdat[1:1,:]]
-    pha = pdat[1,3]
-    t_duplicate = phase_time(pha, pdat2)
-  end
-
-  # Get phases
-  (p1, s) = first_phase(pdat)
-  (p2, t) = next_phase(p1, pdat)
-  @test p1 in ["P", "pP"]
-  pha_str = string(p1, " : ", p2)
-
-  # Save to Ev.data.misc
-  Ev.data.misc[i]["pha_str"] = pha_str
-  Ev.data.misc[i]["pha"] = pdat
-
-  # get time window
-  s0 = u2d(ot + s - spad)
-  t0 = u2d(ot + t + epad)
-  (d0, d1) = parsetimewin(s0, t0)
-  @test (t0-s0).value < 300000     # Should be short for this test
-
-  # This should not be necessary
-  # fill Ev.data with event data
-  # S = get_data("FDSN", Ev.data.id[i], s=d0, t=d1, si=false, src=src)
-  # Ev.data.t[i] = S.t[1]
-  # Ev.data.x[i] = S.x[1]
-  # Ev.data.src[i] = S.src[1]
-  # @test occursin("fdsnws/dataselect", Ev.data.src[i])
+printstyled("      user-specified phase list\n", color=:light_green)
+Ev = SeisEvent(hdr=H, data=S[J])
+get_pha!(Ev, pha="pP,PP", to=to)
+for i = 1:Ev.data.n
+  @test length(Ev.data.pha[i]) == 2
+  @test haskey(Ev.data.pha[i], "PP")
+  @test haskey(Ev.data.pha[i], "pP")
 end
 
-# Check that channels contain identical phase arrival estimates
-for str in ["pha_str", "pha"]
-  @test Ev.data.misc[1][str] == Ev.data.misc[2][str] == Ev.data.misc[3][str] == Ev.data.misc[4][str] == Ev.data.misc[5][str] == Ev.data.misc[6][str] == Ev.data.misc[7][str]
-  @test Ev.data.misc[8][str] == Ev.data.misc[9][str] == Ev.data.misc[10][str] == Ev.data.misc[11][str] == Ev.data.misc[12][str] == Ev.data.misc[13][str] == Ev.data.misc[14][str]
+# This should work for all stations, yielding all times
+printstyled("      all phases\n", color=:light_green)
+Ev = SeisEvent(hdr=H, data=S[J])
+get_pha!(Ev, pha="all", to=to)
+for i = 1:Ev.data.n
+  @test length(Ev.data.pha[i]) > 1
+  @test haskey(Ev.data.pha[i], "P")
+  @test haskey(Ev.data.pha[i], "S")
+  @test haskey(Ev.data.pha[i], "pP")
+  @test haskey(Ev.data.pha[i], "PP")
 end
-
-# These tests are superfluous
-# wseis("tohoku.seis", Ev)
-# R = rseis("tohoku.seis")[1]
-# @test R == Ev
-# R = [];
-# rm("tohoku.seis");
+println("")
+show(Ev.data.pha[1])
+println("")

@@ -1,5 +1,3 @@
-import SeisIO:mktaper!, taper_seg!
-import Statistics:mean
 printstyled("  taper!\n", color=:light_green)
 
 # Unit tests

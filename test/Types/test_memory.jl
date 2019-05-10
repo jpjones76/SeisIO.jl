@@ -1,4 +1,4 @@
-printstyled("  Unique memory allocation of SeisData objects\n", color=:light_green)
+printstyled("  uniqueness of memory allocation\n", color=:light_green)
 nx = 1024
 
 S = SeisData(2)
@@ -20,10 +20,10 @@ end
 # Manually set all fields in the stupidest way possible
 S.id[1] *= "...YYY"
 S.name[1] *= "New Station"
-append!(S.loc[1], zeros(Float64,3))
+S.loc[1] = UTMLoc()
 S.fs[1] += 100.0
 S.gain[1] *= 2.0
-S.resp[1] = [S.resp[1]; [0.0+0.0*im 1.0+1.0*im; 0.0+0.0*im 1.0-1.0*im]]
+S.resp[1] = GenResp(resp=[0.0+0.0*im 1.0+1.0*im; 0.0+0.0*im 1.0-1.0*im])
 S.units[1] *= "Unknown"
 S.src[1] *= "www"
 append!(S.notes[1], ["sadfasgasfg","kn4ntl42ntlk4n"])
@@ -40,10 +40,10 @@ end
 S = SeisData(2)
 S.id[1] = "...YYY"
 S.name[1] = "New Station"
-S.loc[1] = zeros(Float64,5)
+S.loc[1] = GeoLoc()
 S.fs[1] = 100.0
 S.gain[1] = 2.0
-S.resp[1] = [0.0+0.0*im 1.0+1.0*im; 0.0+0.0*im 1.0-1.0*im]
+S.resp[1] = PZResp([0.0+0.0*im 1.0+0.767*im; 0.0+0.0*im 1.0-0.767*im])
 S.units[1] = "Unknown"
 S.src[1] = "www"
 S.notes[1] = ["sadfasgasfg","kn4ntl42ntlk4n"]
@@ -53,10 +53,10 @@ S.x[1] = rand(nx)
 
 S.id[2] = "...zzz"
 S.name[2] = "Old Station"
-S.loc[2] = ones(Float64,5)
+S.loc[2] = GeoLoc()
 S.fs[2] = 50.0
 S.gain[2] = 22.0
-S.resp[2] = [0.0+0.0*im 1.0+0.767*im; 0.0+0.0*im 1.0-0.767*im]
+S.resp[2] = PZResp64(z = [0.0+0.0*im, 0.0+0.0*im], p = [1.0+1.0*im, 1.0-1.0*im])
 S.units[2] = "ms/2"
 S.src[2] = "file"
 S.notes[2] = ["0913840183","klnelgng"]

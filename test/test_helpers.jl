@@ -1,12 +1,20 @@
-using Compat, Dates, DSP, SeisIO, SeisIO.RandSeis, Test
+using Compat, Dates, DSP, Logging, Printf, SeisIO, SeisIO.RandSeis, Test
+import Dates: DateTime, Hour, now
 import DelimitedFiles: readdlm
 import Random: rand, randperm, randstring
-import SeisIO: FDSN_event_xml, FDSN_sta_xml, bad_chars, datafields, hdrfields, minreq, minreq!, parse_charr, safe_isfile, safe_isdir, sμ, t_collapse, t_expand, t_win, tnote, w_time, μs
+import SeisIO: BUF, GphysData, FDSN_event_xml, FDSN_sta_xml,
+  bad_chars, checkbuf!, datafields, datareq_summ, endtime,
+  fillx_i32_be!, fillx_i32_le!, findhex, first_phase, get_HTTP_req,
+  get_http_post, get_separator, get_views, getpf, int2tstr, mean, minreq!,
+  mktaper!, mktime, next_phase, parse_charr, parse_chstr, parse_sl,
+  pcat_end, pcat_start, phase_time, resp_f, safe_isdir, safe_isfile, sep, sμ, t_collapse,
+  t_expand, t_win, taper_seg!, tnote, tstr2int, w_time, webhdr, xtmerge!, μs
 import SeisIO.RandSeis: getyp2codes, pop_rand_dict!
+import Statistics: mean
 
+# ===========================================================================
 # All constants needed by tests are here
 const path = Base.source_dir()
-println(stdout, "SeisIO path = ", path)
 const unicode_chars = String.(readdlm(path*"/SampleFiles/julia-unicode.csv", '\n')[:,1])
 const n_unicode = length(unicode_chars)
 const breaking_dict = Dict{String,Any}(
@@ -25,9 +33,7 @@ const breaking_dict = Dict{String,Any}(
   "224" => collect(rand(Complex{Int8}, rand(4:24))), "225" => collect(rand(Complex{Int16}, rand(4:24))), "226" => collect(rand(Complex{Int32}, rand(4:24))), "227" => collect(rand(Complex{Int64}, rand(4:24))), "228" => collect(rand(Complex{Int128}, rand(4:24))),
   "240" => collect(rand(Complex{Float16}, rand(4:24))), "241" => collect(rand(Complex{Float32}, rand(4:24))), "242" => collect(rand(Complex{Float64}, rand(4:24)))
   )
-
-
-  NOOF = "
+const NOOF = "
   HI ITS CLOVER LOL﻿
           ,-'-,  `---..
          /             \\
@@ -43,16 +49,29 @@ const breaking_dict = Dict{String,Any}(
    \\)    ,“  |)                ++  ++
    💧     “💧  (                 *    +***
 "
-
+# ===========================================================================
 # All functions used by tests are here
-Lx(T::SeisData) = [length(T.x[i]) for i=1:T.n]
+Lx(T::GphysData) = [length(T.x[i]) for i=1:T.n]
 change_sep(S::Array{String,1}) = [replace(i, "/" => sep) for i in S]
-test_fields_preserved(S1::SeisData, S2::SeisData, x::Int, y::Int) =
+test_fields_preserved(S1::GphysData, S2::GphysData, x::Int, y::Int) =
   @test(minimum([getfield(S1,f)[x]==getfield(S2,f)[y] for f in datafields]))
-test_fields_preserved(S1::SeisChannel, S2::SeisData, y::Int) =
+test_fields_preserved(S1::SeisChannel, S2::GphysData, y::Int) =
   @test(minimum([getfield(S1,f)==getfield(S2,f)[y] for f in datafields]))
 
-function sizetest(S::SeisData, nt::Int)
+function loop_time(ts::Int64, te::Int64; ti::Int64=86400000000)
+  t1 = deepcopy(ts)
+  j = 0
+  while t1 < te
+    j += 1
+    t1 = min(ts + ti, te)
+    s_str = int2tstr(ts + 1)
+    t_str = int2tstr(t1)
+    ts += ti
+  end
+  return j
+end
+
+function sizetest(S::GphysData, nt::Int)
   @test ≈(S.n, nt)
   @test ≈(maximum([length(getfield(S,i)) for i in datafields]), nt)
   @test ≈(minimum([length(getfield(S,i)) for i in datafields]), nt)
@@ -90,7 +109,7 @@ function mktestseis()
   return (S,T)
 end
 
-function remove_low_gain!(S::SeisData)
+function remove_low_gain!(S::GphysData)
     # Remove low-gain seismic data channels
     i_low = findall([occursin(r".EL?", S.id[i]) for i=1:S.n])
     if !isempty(i_low)
@@ -103,7 +122,7 @@ function remove_low_gain!(S::SeisData)
 end
 
 # Test that data are time synched correctly within a SeisData structure
-function sync_test!(S::SeisData)
+function sync_test!(S::GphysData)
     local L = [length(S.x[i])/S.fs[i] for i = 1:S.n]
     local t = [S.t[i][1,2] for i = 1:S.n]
     @test maximum(L) - minimum(L) ≤ maximum(2.0./S.fs)
@@ -133,7 +152,11 @@ function breaking_seis()
   end
 
   # Test short data, loc arrays
-  S.loc[3] = rand(Float64,3)
+  S.loc[1] = GenLoc()
+  S.loc[2] = GeoLoc()
+  S.loc[3] = UTMLoc()
+  S.loc[4] = XYLoc()
+
   S.x[4] = rand(Float64,4)
   S.t[4] = vcat(S.t[4][1:1,:], [4 0])
 
@@ -144,7 +167,7 @@ function breaking_seis()
   return S
 end
 
-function basic_checks(T::SeisData)
+function basic_checks(T::GphysData)
   # Basic checks
   for i = 1:T.n
     if T.fs[i] == 0.0
@@ -156,7 +179,7 @@ function basic_checks(T::SeisData)
   return nothing
 end
 
-function get_edge_times(S::SeisData)
+function get_edge_times(S::GphysData)
   ts = [S.t[i][1,2] for i=1:S.n]
   te = copy(ts)
   for i=1:S.n
@@ -170,43 +193,42 @@ function get_edge_times(S::SeisData)
 end
 
 
-function wait_on_data!(S::SeisData; tmax::Real=60.0)
+function wait_on_data!(S::GphysData; tmax::Real=60.0)
   τ = 0.0
   t = 10.0
   printstyled(string("      (sleep up to ", tmax + t, " s)\n"), color=:green)
-  open("runtests.log", "a") do out
-    redirect_stdout(out) do
+  redirect_stdout(out) do
 
-      # Here we actually wait for data to arrive
+    # Here we actually wait for data to arrive
+    sleep(t)
+    τ += t
+    while isempty(S)
+      if any(isopen.(S.c)) == false
+        break
+      end
       sleep(t)
       τ += t
-      while isempty(S)
-        if any(isopen.(S.c)) == false
-          break
-        end
-        sleep(t)
-        τ += t
-        if τ > tmax
-          show(S)
-          break
-        end
+      if τ > tmax
+        show(S)
+        break
       end
-
-      # Close the connection cleanly (write & close are redundant, but
-      # write should close it instantly)
-      for q = 1:length(S.c)
-        if isopen(S.c[q])
-          if q == 3
-            show(S)
-          end
-          close(S.c[q])
-        end
-      end
-      sleep(t)
     end
+
+    # Close the connection cleanly (write & close are redundant, but
+    # write should close it instantly)
+    for q = 1:length(S.c)
+      if isopen(S.c[q])
+        if q == 3
+          show(S)
+        end
+        close(S.c[q])
+      end
+    end
+    sleep(t)
   end
 
   # Synchronize (the reason we used d0,d1 in our test sessions)
+  prune!(S)
   if !isempty(S)
     sync!(S, s="first")
   else
@@ -257,3 +279,17 @@ function naive_filt!(C::SeisChannel;
   C.x[:] = filtfilt(pr, C.x)
   return nothing
 end
+
+function printcol(r::Float64)
+  return r ≥ 1.00 ? 1 :
+         r ≥ 0.75 ? 202 :
+         r ≥ 0.50 ? 190 :
+         r ≥ 0.25 ? 148 : 10
+end
+
+# ===========================================================================
+# Redirect info, warnings, and errors to the logger
+out = open("runtests.log", "a")
+logger = SimpleLogger(out)
+global_logger(logger)
+@info("stdout redirect and logging")
