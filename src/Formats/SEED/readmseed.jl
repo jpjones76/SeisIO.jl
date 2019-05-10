@@ -59,16 +59,16 @@ choice of nx_new and nx_add will dramatically impact performance.
 
 See also: mseed_support
 """ readmseed
-function readmseed!(S::SeisData, fname::String;
+function readmseed!(S::SeisData, filestr::String;
                     swap::Bool=false,
                     v::Int64=KW.v,
                     nx_new::Int64=KW.nx_new,
                     nx_add::Int64=KW.nx_add)
   setfield!(BUF, :swap, swap)
-  if safe_isfile(fname)
-    read_seed_file!(S, fname, v, nx_new, nx_add)
+  if safe_isfile(filestr)
+    read_seed_file!(S, filestr, v, nx_new, nx_add)
   else
-    files = ls(fname)
+    files = ls(filestr)
     nf = length(files)
     for file in files
       read_seed_file!(S, file, v, nx_new, nx_add)
