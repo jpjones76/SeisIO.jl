@@ -58,7 +58,7 @@ FDSN data query with get_data! wrapper.
 | Other keywords:
 | ``--s``: Start time
 | ``--t``: Termination (end) time
-| ``xml_file``: Name of XML file to save station metadata
+| ``xf``: Name of XML file to save station metadata
 
 Station Query
 *************
