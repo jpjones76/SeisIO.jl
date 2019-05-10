@@ -1,4 +1,4 @@
-export get_pha
+export get_pha!
 
 function irisws(cha::String, d0::String, d1::String;
                 fmt::String   = KW.fmt,
@@ -45,7 +45,7 @@ function irisws(cha::String, d0::String, d1::String;
       parsemseed!(S, IOBuffer(R), v, KW.nx_add, KW.nx_add)
       Ch = S[1]
       if isempty(Ch.loc)
-        Ch.loc = zeros(Float64,5)
+        Ch.loc = GeoLoc()
       end
     elseif fmt == "geocsv"
       read_geocsv_tspair!(S, IOBuffer(R))
@@ -111,39 +111,60 @@ Additional keywords:
 [2] Crotwell, H. P., Owens, T. J., & Ritsema, J. (1999). The TauP Toolkit:
 Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.
 """
-function get_pha(Δ::Float64, z::Float64;
-  pha::String = KW.pha,
-  model="iasp91"::String,
-  to::Int64 = KW.to,
-  v::Int64 = KW.v)
+function get_pha!(Ev::SeisEvent;
+                  pha::String   = KW.pha,
+                  model::String = "iasp91",
+                  to::Int64     = KW.to,
+                  v::Int64      = KW.v
+                  )
+
+  # Check that distaz has been done
+  TD = getfield(Ev, :data)
+  N = getfield(TD, :n)
+  z = zeros(Float64, N)
+  if (TD.az == z) && (TD.baz == z) && (TD.dist == z)
+    v > 0 && println(stdout, "az, baz, and dist are unset; calling distaz!...")
+    distaz!(Ev)
+  end
 
   # Generate URL and do web query
+  src_dep = getfield(getfield(getfield(Ev, :hdr), :loc), :dep)
   if isempty(pha) || pha == "all"
     pq = "&phases=ttall"
   else
     pq = string("&phases=", pha)
   end
+  url_tail = string("&evdepth=", src_dep, pq, "&model=", model, "&mintimeonly=true&noheader=true")
 
-  url = string("http://service.iris.edu/irisws/traveltime/1/query?", "distdeg=", Δ, "&evdepth=", z, pq, "&model=", model, "&mintimeonly=true&noheader=true")
-  v > 0 && println(stdout, "url = ", url)
-  req_info_str = string("\nIRIS travel time request:\nΔ = ", Δ, "\nDepth = ", z, "\nPhases = ", pq, "\nmodel = ", model)
-  (R, parsable) = get_HTTP_req(url, req_info_str, to)
+  # Loop begins
+  dist = getfield(TD, :dist)
+  PC = getfield(TD, :pha)
+  for i = 1:N
+    Δ = getindex(dist, i)
+    pcat = getindex(PC, i)
 
-  if parsable
-    req = String(take!(copy(IOBuffer(R))))
-    v > 1 && println(stdout, "Request result:\n", req)
+    url = string("http://service.iris.edu/irisws/traveltime/1/query?", "distdeg=", Δ, url_tail)
+    v > 1 && println(stdout, "url = ", url)
+
+    req_info_str = string("\nIRIS travel time request:\nΔ = ", Δ, "\nDepth = ", z, "\nPhases = ", pq, "\nmodel = ", model)
+    (R, parsable) = get_HTTP_req(url, req_info_str, to)
 
     # Parse results
-    phase_data = split(req, '\n')
-    sa_prune!(phase_data)
-    Nf = length(split(phase_data[1]))
-    Np = length(phase_data)
-    Pha = Array{String, 2}(undef, Np, Nf)
-    for p = 1:Np
-      Pha[p,1:Nf] = split(phase_data[p])
+    if parsable
+      req = String(take!(copy(IOBuffer(R))))
+      pdat = split(req, '\n')
+      deleteat!(pdat, findall(isempty, pdat))   # can have trailing blank line
+      npha = length(pdat)
+      for j = 1:npha
+        pha = split(pdat[j], keepempty=false)
+        pcat[pha[10]] = SeisPha(parse(Float64, pha[8]),
+                                parse(Float64, pha[4]),
+                                parse(Float64, pha[5]),
+                                parse(Float64, pha[6]),
+                                parse(Float64, pha[7]),
+                                ' ')
+      end
     end
-  else
-    Pha = Array{String,2}(undef, 0, 0)
   end
-  return Pha
+  return nothing
 end
