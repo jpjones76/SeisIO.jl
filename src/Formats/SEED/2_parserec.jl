@@ -118,31 +118,34 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
     if v > 2
       println(stdout, "New channel; ID = ", id, ", S.id = ", S.id)
     end
+    x = Array{Float32, 1}(undef, nx_new)
     L = nx_new
     nt = 2
-    C = SeisChannel(id = id,
-                    name = id,
-                    fs = 1.0/getfield(BUF, :dt),
-                    x = Array{Float32, 1}(undef, L))
+
+    C = SeisChannel()
+    setfield!(C, :id, id)
+    setfield!(C, :name, identity(id))
+    setfield!(C, :fs, 1.0/getfield(BUF, :dt))
+    setfield!(C, :x, x)
     push!(S, C)
     c = S.n
+
     (v > 1) && println(stdout, "Added channel: ", id)
-    x = getindex(getfield(S, :x), c)
   else
     # assumes fs doesn't change within a SeisData structure
     t = getindex(getfield(S, :t), c)
     x = getindex(getfield(S, :x), c)
-    L = lastindex(x)
     nt = div(lastindex(t), 2)
+    L = lastindex(x)
+
     if nt > 0
       xi = getindex(t, nt)
       te = endtime(t, getindex(getfield(S, :fs), c))
     end
     if xi + n > L
       resize!(x, xi + max(n, nx_add))
-      v > 1 && println(stdout, id, ": ",
-                               "resized from length ", L, " ",
-                               "to length ", nx_new)
+      (v > 1) && println(stdout, id, ": resized from length ", L,
+                                      " to length ", nx_new)
     end
   end
 
@@ -280,12 +283,12 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
 
     # New channel
     if te == 0
-      setindex!(getfield(S, :t), Array{Int64, 2}(undef, 2, 2), c)
-      t = getindex(getfield(S, :t), c)
+      t = Array{Int64, 2}(undef, 2, 2)
       setindex!(t, one(Int64), 1)
       setindex!(t, n, 2)
       setindex!(t, τ + Δ, 3)
       setindex!(t, zero(Int64), 4)
+      setindex!(getfield(S, :t), t, c)
 
     # Existing channel
     else
