@@ -1,5 +1,3 @@
-import SeisIO: getpf
-
 uwf1 = joinpath(path, "SampleFiles/99011116541")
 uwf2 = joinpath(path, "SampleFiles/94100613522o")
 uwf3 = joinpath(path, "SampleFiles/02062915175o")
@@ -17,10 +15,9 @@ printstyled("    read (pickfile, datafile) from pickfile name\n", color=:light_g
 W = readuwevt(uwf1*"o")
 
 printstyled("    read (pickfile, datafile) from datafile name\n", color=:light_green)
-open("runtests.log", "a") do out
-  redirect_stdout(out) do
-    W = readuwevt(uwf1*"W", v=3)
-  end
+
+redirect_stdout(out) do
+  W = readuwevt(uwf1*"W", v=3)
 end
 
 for i in ["UW.WWVB..TIM","UW.TCG..TIM","UW.TDH..EHZ","UW.VLM..EHZ"]
@@ -38,7 +35,7 @@ W = readuwevt(uwf1)
 
 S = breaking_seis()
 n = S.n
-S += W.data
+S += convert(SeisData, W.data)
 @test S.n == n + W.data.n
 
 i = findfirst(W.data.id.=="UW.TDH..EHZ")
@@ -60,10 +57,14 @@ W = readuwevt(uwf3)
 @test W.hdr.id == 41568
 
 printstyled("    data file with a time correction structure\n", color=:light_green)
-W = readuwevt(uwf4, v=2)
+redirect_stdout(out) do
+  W = readuwevt(uwf4, v=2)
+end
 
 printstyled("    pick file with nonnumeric error info\n", color=:light_green)
-W = readuwevt(uwf5, v=2)
+redirect_stdout(out) do
+  W = readuwevt(uwf5, v=2)
+end
 
 printstyled("    wildcard support\n", color=:light_green)
 uwf = joinpath(path, "SampleFiles/[0-9]*W")

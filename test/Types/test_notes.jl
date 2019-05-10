@@ -4,7 +4,7 @@ Ch = randSeisChannel()
 clear_notes!(Ch)
 @test length(Ch.notes) == 1
 
-printstyled("  Notes (annotation and logging)\n", color=:light_green)
+printstyled("  annotation and logging\n", color=:light_green)
 S = randSeisData(2)
 id_str = "XX.STA.00.EHZ"
 S.id[1] = id_str

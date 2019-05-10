@@ -1,5 +1,13 @@
 printstyled("  RandSeis utils\n", color=:light_green)
 
+fs_range = exp10.(range(-6, stop=4, length=50))
+fc_range = exp10.(range(-4, stop=2, length=20))
+
+for fs in fs_range
+  for fc in fc_range
+    getbandcode(fs, fc=fc)
+  end
+end
 
 # This should do it
 D = Dict{String,Any}()
@@ -30,7 +38,7 @@ for i = 1:10
   randSeisEvent()
 end
 
-printstyled("    namestrip, namestrip!\n", color=:light_green)
+printstyled("  namestrip, namestrip!\n", color=:light_green)
 str = String(0x00:0xff)
 S = randSeisData(3)
 S.name[2] = str
@@ -39,10 +47,8 @@ for key in keys(bad_chars)
   test_str = namestrip(str, key)
   @test length(test_str) == 256 - (32 + length(bad_chars[key]))
 end
-open("runtests.log", "a") do out
-  redirect_stdout(out) do
-    test_str = namestrip(str, "Nonexistent List")
-  end
+redirect_stdout(out) do
+  test_str = namestrip(str, "Nonexistent List")
 end
 namestrip!(S)
 @test length(S.name[2]) == 210

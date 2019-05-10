@@ -1,4 +1,4 @@
-printstyled(stdout,"  Extended methods\n", color=:light_green)
+printstyled(stdout,"  extended methods\n", color=:light_green)
 
 printstyled(stdout,"    getindex\n", color=:light_green)
 (S,T) = mktestseis()
@@ -16,6 +16,7 @@ test_fields_preserved(D,S,2,i_targ+1)
 printstyled(stdout,"    setindex!\n", color=:light_green)
 A = SeisData(3)
 setindex!(A, C, 3)
+test_fields_preserved(C, A, 3)
 A[1:2]=D
 test_fields_preserved(A, S, 2, i_targ+1)
 test_fields_preserved(C, S, 3)
@@ -130,7 +131,7 @@ sizetest(T, 1)
 @test findid(V.id[1], T.id) == 0
 @test findid(V.id[2], T.id) == 0
 @test findid(V.id[3], T.id) == 0
-sort!(V)
+V = sort(V)
 
 deleteat!(X,1)
 @test findid(V,X) == [2,3,1]
@@ -140,8 +141,60 @@ Y = sort(X)
 # added 2019-02-23
 S = SeisData(randSeisData(5), SeisChannel(), SeisChannel(),
     SeisChannel(id="UW.SEP..EHZ", name="Darth Exploded",
-    loc=[46.1967, -122.1875, 1440, 0.0, 0.0], x=rand(1024)))
+    loc=GeoLoc(lat=46.1967, lon=-122.1875, el=1440.0), x=rand(1024)))
 prune!(S)
 @test (S.n == 6)
 J = findchan("EHZ",S)
 @test (6 in J)
+
+printstyled(stdout,"    show\n", color=:light_green)
+S = breaking_seis()
+T = randSeisData(1)
+
+
+redirect_stdout(out) do
+  show(SeisChannel())
+  show(SeisData())
+  show(SeisHdr())
+  show(SeisEvent())
+
+
+  show(randSeisChannel())
+  show(S)
+  show(T)
+  show(randSeisHdr())
+  show(randSeisEvent())
+
+  summary(randSeisChannel())
+  summary(randSeisData())
+  summary(randSeisEvent())
+  summary(randSeisHdr())
+
+  # invoke help-only functions
+  @test seed_support() == nothing
+  @test chanspec() == nothing
+  @test mseed_support() == nothing
+  @test timespec() == nothing
+end
+
+printstyled("  SeisChannel methods\n", color=:light_green)
+
+id = "UW.SEP..EHZ"
+name = "Darth Exploded"
+
+Ch = randSeisChannel()
+Ch.id = id
+Ch.name = name
+S = SeisData(Ch)
+
+@test in(id, Ch) == true
+@test isempty(Ch) == false
+@test convert(SeisData, Ch) == SeisData(Ch)
+@test findid(Ch, S) == 1
+@test sizeof(Ch) > 0
+@test lastindex(S) == 1
+
+S = randSeisData()
+C = randSeisChannel()
+U = C + S
+@test findid(C,U) == 1

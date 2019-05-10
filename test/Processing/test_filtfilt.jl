@@ -1,15 +1,6 @@
-using Printf
-import SeisIO: get_views
 fs = 100.0
 nx = 10000000
 T = Float32
-
-function printcol(r::Float64)
-  return r ≥ 0.80 ? 1 :
-         r ≥ 0.60 ? 208 :
-         r ≥ 0.40 ? 184 :
-         r ≥ 0.20 ? 148 : 10
-end
 
 printstyled("  filtfilt!\n", color=:light_green)
 Δ = round(Int, 1.0e6/fs)
@@ -23,7 +14,7 @@ D = filtfilt(C)
 filtfilt!(C)
 @test C == D
 
-printstyled("    Equivalence with DSP.filtfilt\n", color=:light_green)
+printstyled("    equivalence with DSP.filtfilt\n", color=:light_green)
 for i = 1:10
   C = randSeisChannel(s=true)
   C.fs = fs
@@ -37,18 +28,22 @@ end
 
 S = randSeisData(24, s=1.0)
 deleteat!(S, findall(S.fs.<40.0))
-Ev = SeisEvent(hdr=randSeisHdr(), data=deepcopy(S))
+Ev = SeisEvent(hdr=randSeisHdr(), data=convert(EventTraceData, deepcopy(S)))
 U = filtfilt(S)
 filtfilt!(S)
+nanfill!(U)
+nanfill!(S)
 @test U == S
 
 get_views(S)
 
 Ev1 = filtfilt(Ev)
 filtfilt!(Ev)
+nanfill!(Ev)
+nanfill!(Ev1)
 @test Ev1 == Ev
 
-printstyled("    Former breaking cases\n", color=:light_green)
+printstyled("    former breaking cases\n", color=:light_green)
 printstyled("      very short data windows\n", color=:light_green)
 n_short = 5
 
@@ -78,7 +73,7 @@ end
 filtfilt!(S)
 GC.gc()
 
-printstyled("  Checking that all filters work\n", color=:light_green)
+printstyled("    checking that all filters work\n", color=:light_green)
 for dm in String["Butterworth", "Chebyshev1", "Chebyshev2", "Elliptic"]
   for rt in String["Bandpass", "Bandstop", "Lowpass", "Highpass"]
     S = randSeisData(3, s=1.0)
@@ -90,7 +85,7 @@ for dm in String["Butterworth", "Chebyshev1", "Chebyshev2", "Elliptic"]
   end
 end
 
-printstyled("\n  Test filters on SeisData:\n\n", color = :light_green)
+printstyled("    test all filters on SeisData\n\n", color = :light_green)
 @printf("%12s | %10s | time (ms) | filt (MB) | data (MB) | ratio\n", "Name (dm=)", "Type (rt=)")
 @printf("%12s | %10s | --------- | --------- | --------- | -----\n", " -----------", "---------")
 
@@ -107,7 +102,7 @@ for dm in String["Butterworth", "Chebyshev1", "Chebyshev2", "Elliptic"]
   end
 end
 
-printstyled(string("\n  Test filters on a long, gapless ", T, " SeisChannel:\n\n"), color = :light_green)
+printstyled(string("\n    test all filters on a long, gapless ", T, " SeisChannel\n\n"), color = :light_green)
 @printf("%12s | %10s |  data   |     filtfilt!    |  naive_filtfilt! |     ratio    |\n", "", "")
 @printf("%12s | %10s | sz (MB) | t (ms) | sz (MB) | t (ms) | sz (MB) | speed | size |\n", "Name (dm=)", "Type (rt=)")
 @printf("%12s | %10s | ------- | ------ | ------- | ------ | ------- | ----- | ---- |\n", " -----------", "---------")

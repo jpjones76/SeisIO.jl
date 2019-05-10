@@ -1,5 +1,3 @@
-import SeisIO:sep, safe_isfile, safe_isdir
-
 printstyled("  safe_isfile\n", color=:light_green)
 @test safe_isfile("runtests.jl") == true
 @test safe_isfile("foo.jl") == false

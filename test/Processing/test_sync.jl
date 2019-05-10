@@ -44,6 +44,7 @@ ts₁ = maximum(ts)
 
 # TEST 1 =====================================================================
 # Sync to last start; don't sync ends
+printstyled(stdout,"    sync to last start; don't sync ends\n", color=:light_green)
 T = sync(S)
 basic_checks(T)
 ts_new, te_new = get_edge_times(T)
@@ -84,6 +85,7 @@ basic_checks(T)
 
 # TEST 3 =====================================================================
 # Sync to last start; sync to first end
+printstyled(stdout,"    sync to last start; sync to first end\n", color=:light_green)
 te₀ = minimum(te)
 te₁ = maximum(te)
 
@@ -101,6 +103,7 @@ tx = Lx(T)
 
 # TEST 4 =====================================================================
 # Sync to first start; sync to first end
+printstyled(stdout,"    sync to first start; sync to last end\n", color=:light_green)
 U = sync(S, s="first", t="first")
 basic_checks(U)
 ts_new, te_new = get_edge_times(U)
@@ -145,6 +148,7 @@ end
 # Sync to s = DateTime (first trace start), t = "none"
 # trace 3 should be 100 samples shorter
 # so should trace 2
+printstyled(stdout,"    sync to DateTime; don't sync ends\n", color=:light_green)
 ts₆ = S.t[1][1,2]
 te₆ = S.t[1][1,2] + round(Int, 1.0e6*nx/fs)
 ds₆ = u2d(ts₆*1.0e-6)
@@ -211,9 +215,13 @@ found = findall([occursin("appended 101", i) for i in X.notes[2]])
 
 # TEST 8 =====================================================================
 # A few simple combinations; do these work?
+printstyled(stdout,"    sync start to DateTime; sync first end\n", color=:light_green)
 X = sync(S, s=ds₆, t="first"); basic_checks(X)
+
+printstyled(stdout,"    sync start to DateTime; sync to last end\n", color=:light_green)
 X = sync(S, s=ds₆, t="last"); basic_checks(X)
 
+printstyled(stdout,"    sync start to string time; sync to last end\n", color=:light_green)
 ss = string(ds₆)
 Y = sync(S, s=ds₆, t="last", v=3); basic_checks(Y)
 
@@ -226,16 +234,16 @@ end
 
 # TEST 9 =====================================================================
 # Do we actually prune campaign data when all times are out of range?
+printstyled(stdout,"    prune all irregular data when all times are out of range\n", color=:light_green)
 
 ss = string(ds₆)
 Z = deepcopy(S)
 t = deepcopy(Z.t[5])
 t = hcat(t[:,1:1], vcat(0, diff(t[:,2:2], dims=1)))
 Z.t[5] = deepcopy(t)
-open("runtests.log", "a") do out
-  redirect_stdout(out) do
-    sync!(Z, v=3); basic_checks(Z)
-  end
+
+redirect_stdout(out) do
+  sync!(Z, v=3); basic_checks(Z)
 end
 
 # Expect: Z[5] is gone
@@ -246,6 +254,7 @@ end
 
 # ===========================================================================
 # method extenson to SeisChannel
+printstyled(stdout,"    SeisChannel method extension\n", color=:light_green)
 ts₆ = S.t[1][1,2]
 te₆ = S.t[1][1,2] + round(Int, 1.0e6*nx/fs)
 ds₆ = u2d(ts₆*1.0e-6)
@@ -266,6 +275,7 @@ wx = Lx(W)
 
 # ===========================================================================
 # method extenson to SeisEvent
+printstyled(stdout,"    SeisEvent method extension\n", color=:light_green)
 ts₆ = S.t[1][1,2]
 te₆ = S.t[1][1,2] + round(Int, 1.0e6*nx/fs)
 ds₆ = u2d(ts₆*1.0e-6)

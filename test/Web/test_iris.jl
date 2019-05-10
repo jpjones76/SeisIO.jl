@@ -9,7 +9,7 @@ S = get_data("IRIS", sta, src="IRIS", s=ts, t=te, fmt="sacbl", v=0, w=true)
 printstyled("    MSEED\n", color=:light_green)
 T = get_data("IRIS", [sta], src="IRIS", s=ts, t=te, fmt="mseed", v=0, w=true)
 
-printstyled("     Equivalence of SAC and MSEED requests\n", color=:light_green)
+printstyled("     equivalence of SAC and MSEED requests\n", color=:light_green)
 @test(isempty(T)==false)
 sync!(S, s=ts, t=te)
 sync!(T, s=ts, t=te)
@@ -24,18 +24,20 @@ printstyled("    GeoCSV\n", color=:light_green)
 U = get_data("IRIS", sta, src="IRIS", s=ts, t=te, fmt="geocsv", v=0)
 
 # Test a bum data format
-printstyled("    Testing a bad data format (should warn)\n", color=:light_green)
+printstyled("    bad data format\n", color=:light_green)
 sta_matrix = vcat(["UW" "LON" "" "BHZ"],["UW" "LON" "" "BHE"])
 test_sta = deepcopy(sta_matrix)
-T = get_data("IRIS", sta_matrix, s=-600, t=0, v=1, fmt="audio")
+redirect_stdout(out) do
+  T = get_data("IRIS", sta_matrix, s=-600, t=0, v=2, fmt="audio")
+end
 
 @test sta_matrix == test_sta
 
 # Test a bad request
-printstyled("    Testing a bad request format (should warn of an error)\n", color=:light_green)
+printstyled("    bad request format\n", color=:light_green)
 T = get_data("IRIS", "DE.NENA.99.LUFTBALLOONS", src="IRIS", s=ts, t=te, fmt="mseed", v=0)
 
-printstyled("    A more complex IRISWS request\n", color=:light_green)
+printstyled("    complicated IRISWS request\n", color=:light_green)
 chans = ["UW.TDH..EHZ", "UW.VLL..EHZ"] # HOOD is either offline or not on IRISws right now
 st = -86400.0
 en = -86100.0
