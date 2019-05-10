@@ -164,6 +164,29 @@ mktime(t::Array{T,1}) where T<:Integer =(y2μs(t[1]) +
           Int64(t[5])*1000000 +
           Int64(t[6]))
 
+# convert a formatted time string to integer μs from the Unix epoch
+function tstr2int(s::String)
+  str = split(s, ".", limit=2)
+  if length(str) < 2
+    μ = 0
+  else
+    μ = parse(Int64, rpad(str[2], 6, '0'))
+  end
+  return DateTime(str[1]).instant.periods.value*1000 - dtconst + μ
+end
+
+# convert a time in integer μs (measured from the Unix epoch) to a string
+function int2tstr(t::Int64)
+  dt = unix2datetime(div(t, 1000000))
+  v = 1000*getfield(getfield(getfield(dt, :instant), :periods), :value)
+  r = string(t - v + dtconst)
+  s = string(dt) * "." * lpad(r, 6, '0')
+  return s
+end
+
+# =========================================================
+# Time windowing functions
+
 function endtime(t::Array{Int64,2}, Δ::Int64)
   if isempty(t)
     t_end = 0
