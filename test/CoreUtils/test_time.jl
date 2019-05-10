@@ -1,5 +1,3 @@
-import Dates:DateTime, Hour, now
-import SeisIO:t_collapse, t_expand, endtime, mktime
 printstyled("  time\n", color=:light_green)
 
 t0 = time()
@@ -83,7 +81,7 @@ printstyled(stdout, "    endtime\n", color=:light_green)
 @test endtime(Array{Int64,2}(undef, 0, 0), fs) == 0
 
 printstyled(stdout, "    t_win, w_time\n", color=:light_green)
-printstyled(stdout, "      Faithful representation of gaps\n", color=:light_green)
+printstyled(stdout, "      faithful representation of gaps\n", color=:light_green)
 fs = 100.0
 Δ = round(Int64, sμ/fs)
 t = [1 0; 6 980000; 8 100000; 10 0]
@@ -108,30 +106,30 @@ t2 = t_win(t, Δ)
 @test t2[2,:] == [1030000, 1040000]
 @test t2[3,:] == [1150000, 1170000]
 
-printstyled(stdout, "      Arbitrary windows containing gaps\n", color=:light_green)
+printstyled(stdout, "      arbitrary windows containing gaps\n", color=:light_green)
 t = [1 999999998990000; 101 10000; 297 0]
 @test w_time(t_win(t, Δ), Δ) == t
 
 t = [1 999999998990000; 101 10000; 297 1000000; 303 40000; 500 1000000; 10000 0]
 @test w_time(t_win(t, Δ), Δ) == t
 
-printstyled(stdout, "      Length-0 gaps\n", color=:light_green)
+printstyled(stdout, "      length-0 gap\n", color=:light_green)
 t = [1 0; 6 0; 8 0; 10 0]
 @test w_time(t_win(t, Δ), Δ) == t
 
-printstyled(stdout, "      Negative gaps\n", color=:light_green)
+printstyled(stdout, "      negative gap\n", color=:light_green)
 t = [1 0; 6 -2Δ; 8 -10Δ; 10 0]
 @test w_time(t_win(t, Δ), Δ) == t
 
-printstyled(stdout, "      Single-point gap\n", color=:light_green)
+printstyled(stdout, "      single-point gap\n", color=:light_green)
 t = [1 0; 6 2Δ; 7 4Δ; 8 Δ; 10 0]
 @test w_time(t_win(t, Δ), Δ) == t
 
-printstyled(stdout, "      Non-null gap at end\n", color=:light_green)
+printstyled(stdout, "      non-null gap at end\n", color=:light_green)
 t = [1 0; 6 2Δ; 7 4Δ; 8 Δ; 10 Δ]
 @test w_time(t_win(t, Δ), Δ) == t
 
-printstyled(stdout, "      Negative gap at end\n", color=:light_green)
+printstyled(stdout, "      negative gap at end\n", color=:light_green)
 t = [1 0; 6 2Δ; 7 4Δ; 8 Δ; 10 -5Δ]
 @test w_time(t_win(t, Δ), Δ) == t
 
@@ -154,3 +152,34 @@ iv[6] *= Int32(1000)
 ts_3 = mktime(iv) + round(Int64, fv*1000.0)
 @test ts_0 == ts_1 == ts_2 == ts_3
 # timespec()
+
+printstyled(stdout, "    int2tstr, tstr2int\n", color=:light_green)
+s = "2018-01-01T00:00:00.000001"
+t = "2018-01-04T00:00:00.003900"
+si = tstr2int(s)
+ti = tstr2int(t)
+j = loop_time(si, ti)
+
+t = "2018-01-04T00:00:00.39"
+for (n,s) in enumerate(["2018-01-01T00:00:00.000001",
+                        "2018-01-01T00:00:00",
+                        "2018-01-01T00:00:00.035",
+                        "2016-02-29T00:00:00.02",
+                        "2018-02-28T00:00:00.33"])
+
+  s_str = identity(s)
+  if length(s) == 19
+    s_str *= "."
+  end
+  s_str = rpad(s_str, 26, '0')
+  @test (int2tstr(tstr2int(s))) == s_str
+  if n < 4
+    @test loop_time(tstr2int(s), tstr2int(t)) == 4
+    @test loop_time(tstr2int(s), tstr2int(t), ti=43200000000) == 7
+    @test loop_time(tstr2int(s), tstr2int(t), ti=3600000000) == 73
+  elseif n == 4
+    @test loop_time(tstr2int(s), tstr2int("2016-03-02T00:00:02")) == 3
+  elseif n == 5
+    @test loop_time(tstr2int(s), tstr2int("2018-03-02T00:00:02")) == 3
+  end
+end
