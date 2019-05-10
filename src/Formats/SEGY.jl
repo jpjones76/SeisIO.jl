@@ -235,7 +235,17 @@ function do_trace(f::IO,
   # Trace info
   ts = mktime(shorts[41], shorts[42], shorts[43], shorts[45], shorts[45], zero(Int16)) +
         shorts[53] + 1000*sum(shorts[15:17])
-  loc = Float64[lat, lon, el, 0.0, 0.0]
+  t = Array{Int64,2}(undef,2,2)
+  setindex!(t, one(Int64), 1)
+  setindex!(t, Int64(nx), 2)
+  setindex!(t, ts, 3)
+  setindex!(t, zero(Int64), 4)
+
+  loc = GeoLoc()
+  loc.lat = lat
+  loc.lon = lon
+  loc.el = el
+
   C = SeisChannel()
   setfield!(C, :name, id)
   setfield!(C, :id, id)
@@ -243,11 +253,7 @@ function do_trace(f::IO,
   setfield!(C, :gain, gain)
   setfield!(C, :fs, fs)
   setfield!(C, :src, src)
-  setfield!(C, :t, Array{Int64,2}(undef,2,2))
-  setindex!(getfield(C,:t), one(Int64), 1)
-  setindex!(getfield(C,:t), Int64(nx), 2)
-  setindex!(getfield(C,:t), ts, 3)
-  setindex!(getfield(C,:t), zero(Int64), 4)
+  setfield!(C, :t, t)
   setfield!(C, :x, x)
   # unsafe_copyto!(getfield(C, :x), 1, x, 1, nx)
 

@@ -1,13 +1,13 @@
 export unscale, unscale!
 
 @doc """
-    unscale!(S::SeisData)
+    unscale!(S::GphysData)
 
 Divide out the gains of all channels `i` : `S.fs[i] > 0.0`. Specify `all=true`
 to also remove the gain of irregularly-sampled channels (i.e., channels `i` : `S.fs[i] == 0.0`)
 
 """ unscale!
-function unscale!(S::SeisData; irr::Bool=false)
+function unscale!(S::GphysData; irr::Bool=false)
   @inbounds for i = 1:S.n
     (irr==false && S.fs[i]<=0.0) && continue
     if S.gain[i] != 1.0
@@ -19,18 +19,18 @@ function unscale!(S::SeisData; irr::Bool=false)
   end
   return nothing
 end
-unscale!(C::SeisChannel) = (C.x .= C.x.*(1.0/C.gain); C.gain = 1.0)
+unscale!(C::GphysChannel) = (rmul!(C.x, eltype(C.x)(1.0/C.gain)); C.gain = 1.0)
 unscale!(V::SeisEvent; irr::Bool=false) = unscale!(V.data, irr=irr)
 
 @doc (@doc unscale!)
-function unscale(S::SeisData; irr::Bool=false)
+function unscale(S::GphysData; irr::Bool=false)
   U = deepcopy(S)
   unscale!(U, irr=irr)
   return U
 end
-function unscale(C::SeisChannel; irr::Bool=false)
+function unscale(C::GphysChannel; irr::Bool=false)
   U = deepcopy(C)
-  U.x .= U.x.*(1.0/U.gain)
+  rmul!(U.x, eltype(C.x)(1.0/U.gain))
   U.gain = 1.0
   return U
 end

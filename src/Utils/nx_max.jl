@@ -1,4 +1,4 @@
-function nx_max(S::SeisData)
+function nx_max(S::GphysData)
   N = 0
   window_lengths = Array{Int64,1}(undef,0)
   t = Array{Int64,2}(undef,0,0)
@@ -13,7 +13,7 @@ function nx_max(S::SeisData)
   return N
 end
 
-function nx_max(C::SeisChannel)
+function nx_max(C::GphysChannel)
   @assert C.fs > 0.0
   window_lengths = diff(C.t[:,1])
   window_lengths[end] += 1

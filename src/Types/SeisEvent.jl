@@ -1,12 +1,22 @@
-import Base:isequal, ==, sizeof
 export SeisEvent
 
-@doc (@doc SeisData)
 mutable struct SeisEvent
   hdr::SeisHdr
-  data::SeisData
+  data::EventTraceData
 
-  SeisEvent(; hdr=SeisHdr()::SeisHdr, data=SeisData()::SeisData) = return new(hdr, data)
+  SeisEvent(hdr::SeisHdr, data::EventTraceData) = new(hdr, data)
+end
+
+function SeisEvent(;
+                    hdr ::SeisHdr = SeisHdr(),
+                    data::T       = EventTraceData()
+                    ) where {T<:GphysData}
+
+  if T != EventTraceData
+    return SeisEvent(hdr, convert(EventTraceData, data))
+  else
+    return SeisEvent(hdr, data)
+  end
 end
 
 # =============================================================================

@@ -1,4 +1,3 @@
-import Base.Libc:TmStruct
 export readgeocsv, readgeocsv!
 
 function get_sep(vi::Int8, v_buf::Array{UInt8,1})
@@ -17,7 +16,7 @@ function get_sep(vi::Int8, v_buf::Array{UInt8,1})
 end
 
 function assign_val!(C::SeisChannel,
-                      loc::Array{Float64,1},
+                      loc::GeoLoc,
                       k_buf::Array{UInt8,1},
                       v_buf::Array{UInt8,1},
                       ki::Int8,
@@ -47,17 +46,17 @@ function assign_val!(C::SeisChannel,
       # setfield!(C, :fs, ccall(:strtod, Float64, (Cstring, Ptr), ptr, C_NULL))
       setfield!(C, :fs, parse(Float64, unsafe_string(ptr)))
     elseif k == "latitude_deg"
-      loc_i = Int8(1)
+      setfield!(loc, :lat, parse(Float64, unsafe_string(ptr)))
     elseif k == "longitude_deg"
-      loc_i = Int8(2)
+      setfield!(loc, :lon, parse(Float64, unsafe_string(ptr)))
     elseif k == "elevation_m"
-      loc_i = Int8(3)
+      setfield!(loc, :el, parse(Float64, unsafe_string(ptr)))
     elseif k == "azimuth_deg"
-      loc_i = Int8(4)
+      setfield!(loc, :az, parse(Float64, unsafe_string(ptr)))
     elseif k == "dip_deg"
-      loc_i = Int8(5)
+      setfield!(loc, :inc, 90.0-parse(Float64, unsafe_string(ptr)))
     elseif k == "depth_m"
-      loc_i = Int8(6)
+      setfield!(loc, :dep, parse(Float64, unsafe_string(ptr)))
     elseif k == "scale_factor"
       # setfield!(C, :gain, ccall(:strtod, Float64, (Cstring, Ptr), ptr, C_NULL))
       setfield!(C, :gain, parse(Float64, unsafe_string(ptr)))
@@ -70,11 +69,11 @@ function assign_val!(C::SeisChannel,
       C.misc[k] = unsafe_string(ptr)
     end
 
-    if loc_i > z
-      # d = ccall(:strtod, Float64, (Cstring, Ptr), ptr, C_NULL)
-      d = parse(Float64, unsafe_string(ptr))
-      setindex!(loc, d, loc_i)
-    end
+    # if loc_i > z
+    #   # d = ccall(:strtod, Float64, (Cstring, Ptr), ptr, C_NULL)
+    #   d = parse(Float64, unsafe_string(ptr))
+    #   setindex!(loc, d, loc_i)
+    # end
   end
   return nothing
 end
@@ -136,7 +135,7 @@ function read_geocsv_slist!(S::SeisData, io::IO)
   nx = zero(UInt64)
 
   C = SeisChannel()
-  loc = Array{Float64,1}(undef, 6)
+  loc = GeoLoc()
   T = Array{Int64,2}(undef, 0, 2)
   X = Array{Float32,1}(undef, 0)
 
@@ -169,7 +168,7 @@ function read_geocsv_slist!(S::SeisData, io::IO)
         setfield!(C, :x, X)
         push!(S, C)
         C = SeisChannel()
-        loc = Array{Float64,1}(undef, 6)
+        loc = GeoLoc()
         i = oo
         reading_data = false
       end
@@ -248,7 +247,7 @@ function read_geocsv_tspair!(S::SeisData, io::IO)
   nx = zero(UInt64)
 
   C = SeisChannel()
-  loc = Array{Float64,1}(undef, 6)
+  loc = GeoLoc()
   T = Array{Int64,2}(undef, 0, 2)
   X = Array{Float32,1}(undef, 0)
 
@@ -297,7 +296,7 @@ function read_geocsv_tspair!(S::SeisData, io::IO)
           setfield!(C, :x, X)
           push!(S, C)
           C = SeisChannel()
-          loc = Array{Float64,1}(undef, 6)
+          loc = GeoLoc()
           i = oo
           reading_data = false
         end

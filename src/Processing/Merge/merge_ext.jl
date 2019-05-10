@@ -50,7 +50,7 @@ function mseis!(S...)
     elseif typeof(S[i]) == SeisChannel
       append!(S[1], SeisData(S[i]))
     elseif typeof(S[i]) == SeisEvent
-      append!(S[1], S[i].data)
+      append!(S[1], convert(SeisData, S[i].data))
     end
   end
   return merge!(S[1])

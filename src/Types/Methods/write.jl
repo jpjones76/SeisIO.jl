@@ -3,6 +3,8 @@ Blosc.set_compressor("blosclz")
 Blosc.set_num_threads(Sys.CPU_THREADS)
 
 # SeisIO file format version changes
+# 0.5 :loc, :resp are now custom types with their own io subroutines
+#     Julia version is no longer written to file
 # 0.4 SeisData.id[i] no longer needs to be a length ≤ 15 ASCII string
 #     seis files have a new file TOC field: number of channels in each record
 # 0.3 SeisData.loc[i] no longer is assumed to be length 5
@@ -12,29 +14,6 @@ Blosc.set_num_threads(Sys.CPU_THREADS)
 # Auxiliary file write functions
 sa2u8(s::Array{String,1}) = map(UInt8, collect(join(s,'\0')))
 
-# allowed values in misc: char, string, numbers, and arrays of same.
-tos(t::Type) = round(Int64, log2(sizeof(t)))
-function typ2code(t::Type)
-  n = 0xff
-  if t == Char
-    n = 0x00
-  elseif t == String
-    n = 0x01
-  elseif t <: Unsigned
-    n = 0x10 + tos(t)
-  elseif t <: Signed
-    n = 0x20 + tos(t)
-  elseif t <: AbstractFloat
-    n = 0x30 + tos(t)-1
-  elseif t <: Complex
-    n = 0x40 + typ2code(real(t))
-  elseif t <: Array
-    n = 0x80 + typ2code(eltype(t))
-  end
-  return UInt8(n)
-end
-# Who needs "switch"...
-
 function get_separator(s::String)
     for i = 0x00:0x01:0xff
         c = Char(i)
@@ -43,21 +22,6 @@ function get_separator(s::String)
     error("No valid separators!")
 end
 
-# Create end times from t, fs, x
-function mk_end_times(S::SeisData)
-  n = length(S.fs)
-  ts = Int64[S.t[j][1,2] for j=1:n]
-  te = copy(ts)
-  @inbounds for j = 1:n
-    tt = view(S.t[j], :, 2)
-    if S.fs[j] == 0.0
-      te[j] = last(tt)
-    else
-      te[j] = sum(tt) + round(Int64, sμ*length(S.x[j])/S.fs[j])
-    end
-  end
-  return ts, te
-end
 
 # ============================================================================
 # Write functions
@@ -118,20 +82,29 @@ end
 # write methods
 
 # SeisData
-function w_struct(io::IOStream, S::SeisData)
+function w_struct(io::IOStream, S::T) where {T<:GphysData}
   write(io, UInt32(S.n))
+  if T == EventTraceData
+    write(io, 0x01)
+  else
+    write(io, 0x00)
+  end
   x = Array{UInt8,1}(undef, max(0, maximum([sizeof(S.x[i]) for i=1:S.n])))
   for i = 1:S.n
     c = get_separator(join(S.notes[i]))
-    r = length(S.resp[i])
-    l = Blosc.compress!(x, S.x[i], level=9)
+    X = getindex(getfield(S, :x), i)
+    Loc = getindex(getfield(S, :loc), i)
+    Resp = getindex(getfield(S, :resp), i)
+
+    # compress X
+    l = Blosc.compress!(x, X, level=9)
     if l == 0
       @warn(string("Compression ratio > 1.0 for channel ", i, "; are data OK?"))
-      x = Blosc.compress(S.x[i], level=9)
+      x = Blosc.compress(X, level=9)
       l = length(x)
     end
 
-    id = codeunits(S.id[i])
+    id    = codeunits(S.id[i])
     notes = codeunits(join(S.notes[i], c))
     units = codeunits(S.units[i])
     src   = codeunits(S.src[i])
@@ -139,14 +112,12 @@ function w_struct(io::IOStream, S::SeisData)
 
     # Int
     write(io, length(S.t[i]))
-    write(io, r)
     write(io, length(units))
     write(io, length(src))
     write(io, length(name))
     write(io, length(notes))
     write(io, l)
     write(io, length(S.x[i]))
-    write(io, length(S.loc[i]))
     write(io, length(S.id[i]))
 
     # Int array
@@ -156,16 +127,11 @@ function w_struct(io::IOStream, S::SeisData)
     write(io, S.fs[i])
     write(io, S.gain[i])
 
-    # Float arrays
-    write(io, S.loc[i])
-    if r > 0
-      write(io, real(S.resp[i][:]))
-      write(io, imag(S.resp[i][:]))
-    end
-
     # U8
     write(io, UInt8(c))
-    write(io, typ2code(eltype(S.x[i])))
+    write(io, typ2code(eltype(X)))
+    write(io, loctype2code(Loc))
+    write(io, resptype2code(Resp))
 
     # U8 array
     write(io, id)
@@ -175,7 +141,22 @@ function w_struct(io::IOStream, S::SeisData)
     write(io, notes)
     write(io, x[1:l])
 
+    # loc
+    writeloc(io, Loc)
+
+    # resp
+    write_resp(io, Resp)
+
+    # misc
     write_misc(io, S.misc[i])
+
+    # Additional things for EventTraceData
+    if T == EventTraceData
+      write(io, S.az[i])
+      write(io, S.baz[i])
+      write(io, S.dist[i])
+      write(io, S.pha[i])
+    end
   end
 end
 
@@ -185,6 +166,8 @@ function w_struct(io::IOStream, H::SeisHdr)
   i = getfield(H, :int)                             # intensity
   s = map(UInt8, collect(getfield(H, :src)))        # source string as char array
   a = getfield(H, :notes)
+  mt = getfield(H, :mt); L_mt = length(mt)
+  ax = getfield(H, :axes); L_ax = 3*length(ax)
 
   c = Char('\0')
   n = Array{UInt8,1}(undef,0)
@@ -195,23 +178,29 @@ function w_struct(io::IOStream, H::SeisHdr)
   j = codeunits(i[2])                               # magnitude scale as char array
   k = codeunits(m[2])                               # intensity scale as char array
 
+  loc = getfield(H, :loc)
+
   # Write begins here -------------------------------------------------------
-  # 6 Int64
+  # 8 Int64
   write(io, getfield(H, :id))                               # numeric event ID, already an Int64
-  write(io, Int64(round(d2u(getfield(H, :ot))*1.0e6)))      # event ot in integer μs from Unix epoch
+  write(io, round(Int64, d2u(getfield(H, :ot))*1.0e6))      # event ot in integer μs from Unix epoch
   write(io, Int64(length(k)))                               # length of magnitude scale string
   write(io, Int64(length(j)))                               # length of intensity scale string
   write(io, Int64(length(s)))                               # length of src string
   write(io, Int64(length(n)))                               # length of joined notes string
+  write(io, Int64(L_mt))                                    # length of moment tensor vector
+  write(io, Int64(L_ax))                                    # length of moment tensor vector
 
   # 1 Float32
   write(io, m[1])                                           # mag
 
-  # 26 Float64s (3 in Loc, 8 in Moment Tensor, 6 in Nodal Planes, 9 in Axes)
-  write(io, getfield(H, :loc))                              # loc
-  write(io, getfield(H, :mt))                               # mt
-  write(io, getfield(H, :np))                               # np
-  write(io, getfield(H, :pax))                              # pax
+  # Float64s (Moment Tensor, Axes)
+  if L_mt > 0
+    write(io, mt)                                           # mt
+  end
+  if L_ax > 0
+    write(io, ax)                                           # ax
+  end
 
   # 2 + length(k) + length(j) + length(s) + length(n) UInt8s
   write(io, c, i[1])
@@ -224,8 +213,11 @@ function w_struct(io::IOStream, H::SeisHdr)
       write(io, n)      # notes chars
   end
 
+  # Loc
+  writeloc(io, loc)     # SeisHdr only allows GeoLoc in :loc
+
   # Misc
-  write_misc(io, H.misc)
+  write_misc(io, getfield(H, :misc))
 end
 
 # SeisEvent
@@ -265,7 +257,6 @@ function wseis(fname::String, S...)
     io = open(fname, "w")
     write(io, map(UInt8, collect("SEISIO")))
     write(io, vSeisIO)
-    write(io, vJulia)
     write(io, L)
     p = position(io)
     skip(io, sizeof(C) + sizeof(B) + sizeof(Nc))

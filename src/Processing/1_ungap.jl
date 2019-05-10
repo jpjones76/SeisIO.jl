@@ -8,7 +8,7 @@ time gaps in channel [i] are filled with the mean value of each channel's data.
 
 If m=false, gaps are filled with NANs.
 """ ungap!
-function ungap!(C::SeisChannel; m::Bool=true, tap::Bool=false)
+function ungap!(C::GphysChannel; m::Bool=true, tap::Bool=false)
   if tap
     taper!(C)
   end
@@ -22,7 +22,7 @@ function ungap!(C::SeisChannel; m::Bool=true, tap::Bool=false)
   return nothing
 end
 
-function ungap!(S::SeisData; m::Bool=true, tap::Bool=false)
+function ungap!(S::GphysData; m::Bool=true, tap::Bool=false)
   if tap
     taper!(S)
   end
@@ -39,6 +39,6 @@ function ungap!(S::SeisData; m::Bool=true, tap::Bool=false)
 end
 
 @doc (@doc ungap!)
-ungap(S::Union{SeisData,SeisChannel}; m::Bool=true, tap::Bool=false) = (T = deepcopy(S); ungap!(T, m=m, tap=tap); return T)
+ungap(S::Union{GphysData,GphysChannel}; m::Bool=true, tap::Bool=false) = (T = deepcopy(S); ungap!(T, m=m, tap=tap); return T)
 ungap!(Ev::SeisEvent; m::Bool=true, tap::Bool=false) = (S = deepcopy(Ev.data); ungap!(S, m=m, tap=tap); Ev.data = deepcopy(S); return nothing)
 ungap(Ev::SeisEvent; m::Bool=true, tap::Bool=false) = (S = deepcopy(Ev.data); ungap!(S, m=m, tap=tap); return SeisEvent(hdr=deepcopy(Ev.hdr), data=S))
