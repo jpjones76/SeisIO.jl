@@ -28,19 +28,19 @@ Standard keywords: rad, reg, src, to, v
 Other keywords:
 * s: Start time
 * t: Termination (end) time
-* xml_file: Name of XML file to save station metadata
+* xf: Name of XML file to save station metadata
 
 See also: chanspec, parsetimewin, get_data!, SeisIO.KW
 """
 function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
-                  rad = Float64[]::Array{Float64,1},        # Search radius
-                  reg = Float64[]::Array{Float64,1},        # Search region
-                  s = 0::Union{Real,DateTime,String},       # Start
-                  src::String = KW.src,                     # Source server
-                  t = (-600)::Union{Real,DateTime,String},  # End or Length (s)
-                  to::Int = KW.to,                          # Read timeout (s)
-                  v::Int64 = KW.v,                          # Verbosity
-                  xml_file = "FDSNsta.xml"                  # XML filename
+                  rad ::Array{Float64,1}  = KW.rad,         # Search radius
+                  reg ::Array{Float64,1}  = KW.reg,         # Search region
+                  s   ::TimeSpec          = 0,              # Start
+                  src ::String            = KW.src,         # Source server
+                  t   ::TimeSpec          = (-600),         # End or Length (s)
+                  to  ::Int               = KW.to,          # Read timeout (s)
+                  v   ::Int64             = KW.v,           # Verbosity
+                  xf  ::String            = "FDSNsta.xml"   # XML filename
                  )
 
   d0, d1 = parsetimewin(s, t)
@@ -48,19 +48,24 @@ function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
   URL = string(fdsn_uhead(src), "station/1/query")
   BODY = "level=response\nformat=xml\n"
   wc = "*"
+
+  # Add geographic search to BODY
+  if !isempty(rad)
+    BODY *= string( "latitude=", rad[1], "\n",
+                    "longitude=", rad[2], "\n",
+                    "minradius=", rad[3], "\n",
+                    "maxradius=", rad[4], "\n")
+  end
+  if !isempty(reg)
+    BODY *= string( "minlatitude=", reg[1], "\n",
+                    "maxlatitude=", reg[2], "\n",
+                    "minlongitude=", reg[3], "\n",
+                    "maxlongitude=", reg[4], "\n" )
+  end
+
+  # Add channel search to BODY
   if chans == wc
     (isempty(reg) && isempty(rad)) && error("No query! Please specify a search radius, a rectangular search region, or some channels.")
-    if isempty(reg)
-      BODY *= string( "latitude=", rad[1], "\n",
-                      "longitude=", rad[2], "\n",
-                      "minradius=", rad[3], "\n",
-                      "maxradius=", rad[4], "\n")
-    else
-      BODY *= string( "minlatitude=", reg[1], "\n",
-                      "maxlatitude=", reg[2], "\n",
-                      "minlongitude=", reg[3], "\n",
-                      "maxlongitude=", reg[4], "\n" )
-    end
     BODY *= string("* * * * ", d0, " ", d1, "\n")
   else
     C = FDSN_chp(chans, v=v)
@@ -73,17 +78,19 @@ function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
       BODY *= string(str, " ", d0, " ", d1, "\n")
     end
   end
-  if v > 2
-    printstyled(string("request url: ", URL), color=:light_green)
-    printstyled(string("request body: \n", BODY), color=:light_green)
+  if v > 1
+    printstyled("request url:", color=:light_green)
+    println(URL)
+    printstyled("request body: \n", color=:light_green)
+    println(BODY)
   end
-  open(xml_file, "w") do io
+  open(xf, "w") do io
     request("POST", URL, webhdr, BODY, response_stream=io)
   end
 
   # Build channel list
   v > 0 && @info(tnote("Building list of channels"))
-  io = open(xml_file, "r")
+  io = open(xf, "r")
   xsta = read(io, String)
   close(io)
   (ID, NAME, LOC, FS, GAIN, RESP, UNITS, MISC) = FDSN_sta_xml(xsta)
@@ -104,41 +111,42 @@ function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
 end
 
 function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,2}};
-  fmt::String = KW.fmt,                     # Request format
-  nd::Int64 = KW.nd,                        # Number of days per request
-  opts::String = KW.opts,                   # User-defined options
-  rad = Float64[]::Array{Float64,1},        # Search radius
-  reg = Float64[]::Array{Float64,1},        # Search region
-  s = 0::Union{Real,DateTime,String},       # Start
-  si::Bool = KW.si,                         # Station info?
-  src::String = KW.src,                     # Source server
-  t = (-600)::Union{Real,DateTime,String},  # End or Length (s)
-  to::Int = KW.to,                          # Read timeout (s)
-  v::Int64 = KW.v,                          # Verbosity
-  w::Bool = KW.w,                           # Write to disk?
-  xml_file::String = "FDSNsta.xml",         # XML filename
-  y::Bool = KW.y                            # Sync?
+  fmt       ::String            = KW.fmt,         # Request format
+  nd        ::Real              = KW.nd,          # Number of days per request
+  opts      ::String            = KW.opts,        # User-defined options
+  rad       ::Array{Float64,1}  = KW.rad,         # Search radius
+  reg       ::Array{Float64,1}  = KW.reg,         # Search region
+  s         ::TimeSpec          = 0,              # Start
+  si        ::Bool              = KW.si,          # Station info?
+  src       ::String            = KW.src,         # Source server
+  t         ::TimeSpec          = (-600),         # End or Length (s)
+  to        ::Int64             = KW.to,          # Read timeout (s)
+  v         ::Int64             = KW.v,           # Verbosity
+  w         ::Bool              = KW.w,           # Write to disk?
+  xf        ::String            = "FDSNsta.xml",  # XML filename
+  y         ::Bool              = KW.y            # Sync?
   )
 
   parse_err = false
   n_badreq = 0
   wc = "*"
   d0, d1 = parsetimewin(s, t)
-  dt_end = DateTime(d1)
-  dt1 = deepcopy(dt_end)
-  dt0 = DateTime(d0)
+  # dt_end = DateTime(d1)
+  # dt1 = deepcopy(dt_end)
+  # dt0 = DateTime(d0)
 
   # (1) Time-space query for station info
   if si
     S = FDSNsta(chans,
-                rad = rad,
-                reg = reg,
-                s = d0,
-                src = src,
-                t = d1,
-                to = to,
-                v = v,
-                xml_file = xml_file)
+                rad   = rad,
+                reg   = reg,
+                s     = d0,
+                src   = src,
+                t     = d1,
+                to    = to,
+                v     = v,
+                xf    = xf
+                )
   end
 
   # (2) Build ID strings for data query
@@ -148,7 +156,12 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
     ID_mat[isempty.(ID_mat)] .= wc
     ID_str[i] = join(ID_mat, " ")
   end
-  v > 1 && println(stdout, "data query strings:\n", ID_str)
+  if v > 1
+    printstyled("data query strings:\n", color=:light_green)
+    for i = 1:length(ID_str)
+      println(stdout, ID_str[i])
+    end
+  end
 
   # (3) Data query
   v > 0 && @info(tnote("Data query begins"))
@@ -166,17 +179,24 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
     S.src[i] = URL
   end
 
-  # Loop to grab data increments days counter dt0 by nd
-  while Float64((dt_end - dt0).value) > 0.0
-    if (dt1 - dt0).value > 86400000
-      dt1 = dt0 + Day(nd)
-    end
-    qtail = string(" ", dt0, " ", dt1, "\n")
+  # Create variables for query
+  ts = tstr2int(d0)
+  ti = round(Int64, nd*86400000000)
+  te = tstr2int(d1)
+  t1 = deepcopy(ts)
+  rn = 0
+  while t1 < te
+    rn += 1
+    os = rn > 1 ? 1 : 0
+    t1 = min(ts + ti, te)
+    s_str = int2tstr(ts + os)
+    t_str = int2tstr(t1)
+    qtail = string(" ", s_str, " ", t_str, "\n")
     QUERY = identity(BODY)
     for i = 1:S.n
       QUERY *= ID_str[i]*qtail
     end
-    if v > 2
+    if v > 1
       printstyled(string("request url: ", URL, "\n"), color=:light_green)
       printstyled(string("request body: \n", QUERY), color=:light_green)
     end
@@ -188,12 +208,12 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
       else
         ext = fmt
       end
-      ymd = split(string(dt0), r"[A-Z]")
+      ymd = split(string(s_str), r"[A-Z]")
       (y, m, d) = split(ymd[1], "-")
       j = md2j(y, m, d)
       fname = join([String(y),
                     string(j),
-                    replace(split(string(dt0), 'T')[2], ':' => '.'),
+                    replace(split(s_str, 'T')[2], ':' => '.'),
                     "FDSNWS",
                     src,
                     ext],
@@ -229,7 +249,7 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
                                                 "data" => readlines(IOBuffer(R)) ) )
     end
 
-    dt0 += Day(nd)
+    ts += ti
   end
 
   # Remove empty channels if there were no parse errors
@@ -325,7 +345,7 @@ function FDSNevq(ot::String;
       v > 1 && println(stdout, "REQUEST BODY:\n", str_req)
       (id, ot_tmp, loc, mm, msc) = FDSN_event_xml(str_req)
       for i = 1:length(id)
-          eh = SeisHdr(id=id[i], ot=ot_tmp[i], loc=loc[:,i], mag=(mm[i], msc[i]), src=url)
+          eh = SeisHdr(id=id[i], ot=ot_tmp[i], loc=loc[i], mag=(mm[i], msc[i]), src=url)
           push!(catalog, eh)
           push!(origin_times, round(Int64, d2u(eh.ot)*sμ))
       end
@@ -347,23 +367,26 @@ Standard keywords: fmt, mag, nd, opts, pha, rad, reg, src, to, v, w
 
 Other keywords:
 * len::Real (120.0): desired record length in minutes
+* model::String ("iasp91"): Earth velocity model for phase calculations
 
 See also: distaz!, FDSNevq, FDSNsta, SeisKW
 """
 function FDSNevt(ot::String, chans::Union{String,Array{String,1},Array{String,2}};
-  len::Real = 120.0,
+  len::Real             = 120.0,
   evw::Union{Array{Real,1},Array{Float64,1},Array{Int64,1}} = KW.evw,
-  fmt::String = KW.fmt,
+  fmt::String           = KW.fmt,
   mag::Array{Float64,1} = KW.mag,
-  nd::Int64 = KW.nd,
-  opts::String = KW.opts,
-  pha::String = KW.pha,
+  model::String         = "iasp91",
+  nd::Real              = KW.nd,
+  opts::String          = KW.opts,
+  pha::String           = KW.pha,
   rad::Array{Float64,1} = KW.rad,
   reg::Array{Float64,1} = KW.reg,
-  src::String = KW.src,
-  to::Int64 = KW.to,
-  v::Int64 = KW.v,
-  w::Bool = KW.w)
+  src::String           = KW.src,
+  to::Int64             = KW.to,
+  v::Int64              = KW.v,
+  w::Bool               = KW.w
+  )
 
   C = FDSN_chp(chans, v=v)
 
@@ -387,22 +410,20 @@ function FDSNevt(ot::String, chans::Union{String,Array{String,1},Array{String,2}
   S = SeisData()
   FDSNget!(S, C, fmt=fmt, nd=nd, rad=rad, reg=reg, s=d0, si=true, src=src, t=d1, to=to, v=v, w=w)
 
-  v > 0 && println(stdout, now(), ": channels initialized.")
+  v > 1 && println(stdout, now(), ": channels initialized.")
   v > 2 && println(stdout, S)
 
   # Initialize SeisEvent structure
   Ev = SeisEvent(hdr = H, data = S)
-  v > 0 && println(stdout, now(), ": SeisEvent created.")
+  v > 1 && println(stdout, now(), ": SeisEvent created.")
   v > 1 && println(stdout, S)
 
   # Update Ev with distance, azimuth
   distaz!(Ev)
-  v > 0 && println(stdout, now(), ": Δ,Θ updated.")
+  v > 1 && println(stdout, now(), ": Δ,Θ updated.")
 
-  # Add phase arrival times to S
-  for i = 1:S.n
-    Ev.data.misc[i]["phase_data"] = get_pha(Ev.data.misc[i]["dist"], Ev.hdr.loc[3], to=to, v=v)
-    v > 2 && println(stdout, Ev.data.misc[i]["phase_data"])
-  end
+  # Add phase arrivals to :data
+  v > 0 && println(stdout, now(), ": phase query begins.")
+  get_pha!(Ev, pha=pha, model=model, to=to, v=v)
   return Ev
 end
