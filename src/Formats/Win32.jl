@@ -19,8 +19,8 @@ function win32_cfile!( fname::String,
                         hex_bytes::Array{UInt8,1},
                         hexIDs::Array{UInt16,1},
                         S::SeisData,
-                        fc::Array{Float64,1},
-                        hc::Array{Float64,1},
+                        fc::Array{Float32,1},
+                        hc::Array{Float32,1},
                         nx_new::Int64
                       )
 
@@ -35,14 +35,14 @@ function win32_cfile!( fname::String,
       # Assign identifying info to placeholder arrays
       hex2bytes!(hex_bytes, chan_info[1])
       push!(hexIDs, reinterpret(UInt16, hex_bytes)[1])
-      push!(fc, 1.0/parse(Float64, chan_info[10]))
-      push!(hc, parse(Float64, chan_info[11]))
+      push!(fc, one(Float32)/parse(Float32, chan_info[10]))
+      push!(hc, parse(Float32, chan_info[11]))
 
       # Create new channel in S from chan_info
-      loc           = zeros(Float64,5)
-      loc[1]        = parse(Float64, chan_info[14])
-      loc[2]        = parse(Float64, chan_info[15])
-      loc[3]        = parse(Float64, chan_info[16])
+      loc           = GeoLoc()
+      loc.lat       = parse(Float64, chan_info[14])
+      loc.lon       = parse(Float64, chan_info[15])
+      loc.el        = parse(Float64, chan_info[16])
 
       C = SeisChannel()
       setfield!(C, :id, string(chan_info[4], ".", chan_info[5]))
@@ -91,8 +91,8 @@ function readwin32(dfilestr::String, cfilestr::String;
   # Parse channel file(s)
   hex_bytes = Array{UInt8,1}(undef,2)
   hexIDs    = Array{UInt16,1}(undef, 0)
-  fc        = Array{Float64,1}(undef,0)
-  hc        = Array{Float64,1}(undef,0)
+  fc        = Array{Float32,1}(undef,0)
+  hc        = Array{Float32,1}(undef,0)
   if safe_isfile(cfilestr)
     win32_cfile!(cfilestr, hex_bytes, hexIDs, S, fc, hc, nx_new)
   else
@@ -252,10 +252,16 @@ function readwin32(dfilestr::String, cfilestr::String;
     lastindex(χ) == getindex(xi, i) || resize!(χ, xi[i])
 
     # Get resp for passive velocity sensors
+    resp = PZResp()
     fci = getindex(fc, i)
     if S.units[i] == "m/s"
-      setindex!(getfield(S, :resp), fctopz(fci, hc=getindex(hc, i)), i)
+      hc = getindex(hc, i)
+      p, z = fctopz(fci, hc)
+      setfield!(resp, :c, one(Float32))
+      setfield!(resp, :p, p)
+      setfield!(resp, :p, z)
     end
+    setindex!(getfield(S, :resp), resp, i)
 
     # There will be issues here. Japanese files use NIED or local station
     # names, which don't necessarily use international station or network codes.
@@ -269,12 +275,12 @@ function readwin32(dfilestr::String, cfilestr::String;
 
     if cc == "U"
       cc = "Z"
-      S.loc[i][5] = 180.0
+      S.loc[i].inc = 180.0
     elseif cc == "N"
-      S.loc[i][5] = 90.0
+      S.loc[i].inc = 90.0
     elseif cc == "E"
-      S.loc[i][4] = 90.0
-      S.loc[i][5] = 90.0
+      S.loc[i].az = 90.0
+      S.loc[i].inc = 90.0
     end
     id = string(net, ".", sta, ".", locID[i], ".", bb, "H", cc)
     setindex!(getfield(S, :id), id, i)

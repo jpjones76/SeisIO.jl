@@ -86,7 +86,7 @@ function uwpf(pickfile::String; v::Int64=KW.v)
   D = Dict{String, Any}()
 
   # Initialize variables that will fill SeisHdr structure
-  LOC = Array{Float64, 1}(undef, 3); LOC[1:3] .= NaN;
+  LOC = EQLoc()
   MAG = -5.0f0
   ID = zero(Int64)
   OT = zero(Float64)
@@ -115,7 +115,7 @@ function uwpf(pickfile::String; v::Int64=KW.v)
 
   # origin time, event depth, and magnitude
   OT += Base.parse(Float64, ah[1])
-  LOC[3] = Base.parse(Float64, ah[4])
+  LOC.dep = Base.parse(Float64, ah[4])
   MAG = Base.parse(Float32, ah[6])
 
   # record whether depth is fixed
@@ -138,8 +138,8 @@ function uwpf(pickfile::String; v::Int64=KW.v)
   end
 
   # Convert lat and lon to decimal degrees
-  LOC[1] = (Base.parse(Float64, evla[1:3]) + Base.parse(Float64, evla[5:6])/60.0 + Base.parse(Float64, evla[7:8])/6000.0) * (evla[4] == 'S' ? -1.0 : 1.0)
-  LOC[2] = (Base.parse(Float64, evlo[1:4]) + Base.parse(Float64, evlo[6:7])/60.0 + Base.parse(Float64, evlo[8:9])/6000.0) * (evlo[5] == 'W' ? -1.0 : 1.0)
+  LOC.lat = (Base.parse(Float64, evla[1:3]) + Base.parse(Float64, evla[5:6])/60.0 + Base.parse(Float64, evla[7:8])/6000.0) * (evla[4] == 'S' ? -1.0 : 1.0)
+  LOC.lon = (Base.parse(Float64, evlo[1:4]) + Base.parse(Float64, evlo[6:7])/60.0 + Base.parse(Float64, evlo[8:9])/6000.0) * (evlo[5] == 'W' ? -1.0 : 1.0)
 
   # Error line
   seekstart(pf)
@@ -203,11 +203,11 @@ function uwpf(pickfile::String; v::Int64=KW.v)
 
   # Create SeisHdr struct
   H = SeisHdr()
-  isnan(LOC[1]) || setfield!(H, :loc, LOC)
-  MAG == -5.0f0 || setfield!(H, :mag, (MAG, "M_c (UW)"))
-  ID == 0       || setfield!(H, :id, ID)
-  OT == 0.0     || setfield!(H, :ot, u2d(OT))
-  isempty(D)    || setfield!(H, :misc, D)
+  setfield!(H, :loc, LOC)
+  MAG == -5.0f0   || setfield!(H, :mag, (MAG, "M_c (UW)"))
+  ID == 0         || setfield!(H, :id, ID)
+  OT == 0.0       || setfield!(H, :ot, u2d(OT))
+  isempty(D)      || setfield!(H, :misc, D)
   setfield!(H, :src, pickfile)
   return H
 end
@@ -486,10 +486,10 @@ data format is strictly an event-oriented design.
 """ readuwevt
 function readuwevt(filename::String; v::Int64=KW.v)
 
+  df = String("")
   # Identify pickfile and datafile
   filename = Sys.iswindows() ? realpath(filename) : relpath(filename)
   pf = String("")
-  df = String("")
   ec = UInt8(filename[end])
   lc = vcat(collect(UInt8, 0x61:0x76), 0x78, 0x79, 0x7a) # skip 'w'
   if Base.in(ec, lc)
@@ -508,7 +508,7 @@ function readuwevt(filename::String; v::Int64=KW.v)
   if safe_isfile(df)
     # Datafile wrapper
     v>0 && println(stdout, "Reading datafile ", df)
-    Ev = SeisEvent(data=uwdf(df, v=v, full=true))
+    Ev = SeisEvent(data = convert(EventTraceData, uwdf(df, v=v, full=true)))
     v>0 && println(stdout, "Done reading data file.")
 
     # Pickfile wrapper
@@ -532,7 +532,7 @@ function readuwevt(filename::String; v::Int64=KW.v)
     end
   else
     # Pickfile only*
-    Ev = SeisEvent(hdr=uwpf(pf, v=v))
+    Ev = SeisEvent(hdr = uwpf(pf, v=v))
   end
 
   return Ev

@@ -24,6 +24,7 @@ function LightXML_str!(v::String, x::LightXML.XMLElement, s::String)
   return v
 end
 LightXML_float!(v::Float64, x::LightXML.XMLElement, s::String) = Float64(Meta.parse(LightXML_str!(string(v), x, s)))
+LightXML_float32!(v::Float32, x::LightXML.XMLElement, s::String) = Float32(Meta.parse(LightXML_str!(string(v), x, s)))
 
 function FDSN_ot(ot_str::String)
   d = DateTime("1970-01-01T00:00:00")
@@ -50,7 +51,7 @@ function FDSN_event_xml(string_data::String)
   N = length(events)
   id = Array{Int64,1}(undef, N)
   ot = Array{DateTime,1}(undef, N)
-  loc = Array{Float64,2}(undef, 3, N)
+  loc = Array{EQLoc,1}(undef, N)
   mag = Array{Float32,1}(undef, N)
   msc = Array{String,1}(undef, N)
   for (i,evt) in enumerate(events)
@@ -61,10 +62,11 @@ function FDSN_event_xml(string_data::String)
               end )
     ot_str = LightXML_str!("1970-01-01T00:00:00", evt, "origin/time/value")
     ot[i] = FDSN_ot(ot_str)
-    loc[1,i] = LightXML_float!(0.0, evt, "origin/latitude/value")
-    loc[2,i] = LightXML_float!(0.0, evt, "origin/longitude/value")
-    loc[3,i] = LightXML_float!(0.0, evt, "origin/depth/value")/1.0e3
-    mag[i] = Float32(LightXML_float!(-5.0, evt, "magnitude/mag/value"))
+    loc[i] = EQLoc()
+    loc[i].lat = LightXML_float!(0.0, evt, "origin/latitude/value")
+    loc[i].lon = LightXML_float!(0.0, evt, "origin/longitude/value")
+    loc[i].dep = LightXML_float!(0.0, evt, "origin/depth/value")*1.0e-3
+    mag[i] = LightXML_float32!(-5.0f0, evt, "magnitude/mag/value")
 
     tmp = LightXML_str!("--", evt, "magnitude/type")
     if isempty(tmp)
@@ -83,10 +85,10 @@ function FDSN_sta_xml(string_data::String)
     ID    = Array{String,1}(undef, N)
     NAME  = Array{String,1}(undef, N)
     FS    = Array{Float64,1}(undef, N)
-    LOC   = Array{Array{Float64,1}}(undef, N)
+    LOC   = Array{GeoLoc,1}(undef, N)
     UNITS = Array{String,1}(undef, N)
     GAIN  = Array{Float64,1}(undef, N)
-    RESP  = Array{Array{Complex{Float64},2}}(undef, N)
+    RESP  = Array{PZResp,1}(undef, N)
     MISC  = Array{Dict{String,Any}}(undef, N)
     for j = 1:N
         MISC[j] = Dict{String,Any}()
@@ -100,24 +102,26 @@ function FDSN_sta_xml(string_data::String)
         xsta = LightXML_findall(net, "Station")
         for sta in xsta
             ss = attribute(sta, "code")
-            loc_tmp = zeros(Float64, 3)
-            loc_tmp[1] = LightXML_float!(0.0, sta, "Latitude")
-            loc_tmp[2] = LightXML_float!(0.0, sta, "Longitude")
-            loc_tmp[3] = LightXML_float!(0.0, sta, "Elevation")/1.0e3
+            loc_tmp = GeoLoc()
+            loc_tmp.lat = LightXML_float!(0.0, sta, "Latitude")
+            loc_tmp.lon = LightXML_float!(0.0, sta, "Longitude")
+            loc_tmp.el = LightXML_float!(0.0, sta, "Elevation")
             name = LightXML_str!("0.0", sta, "Site/Name")
 
             xcha = LightXML_findall(sta, "Channel")
             for cha in xcha
                 y += 1
-                czs = Array{Complex{Float64},1}()
-                cps = Array{Complex{Float64},1}()
+                czs = Array{Complex{Float32},1}(undef, 0)
+                cps = Array{Complex{Float32},1}(undef, 0)
                 ID[y]               = join([nn, ss, attribute(cha,"locationCode"), attribute(cha,"code")],'.')
                 NAME[y]             = identity(name)
                 FS[y]               = LightXML_float!(0.0, cha, "SampleRate")
-                LOC[y]              = zeros(Float64,5)
-                LOC[y][1:3]         = copy(loc_tmp)
-                LOC[y][4]           = LightXML_float!(0.0, cha, "Azimuth")
-                LOC[y][5]           = LightXML_float!(0.0, cha, "Dip") - 90.0
+                LOC[y]              = GeoLoc()
+                LOC[y].lat          = loc_tmp.lat
+                LOC[y].lon          = loc_tmp.lon
+                LOC[y].el           = loc_tmp.el
+                LOC[y].az           = LightXML_float!(0.0, cha, "Azimuth")
+                LOC[y].inc          = LightXML_float!(0.0, cha, "Dip") - 90.0
                 GAIN[y]             = 1.0
                 MISC[y]["normfreq"] = 1.0
                 MISC[y]["ClockDrift"] = LightXML_float!(0.0, cha, "ClockDrift")
@@ -132,19 +136,17 @@ function FDSN_sta_xml(string_data::String)
                     for stage in xstages
                         pz = LightXML_findall(stage, "PolesZeros")
                         for j = 1:length(pz)
-                            append!(czs, [complex(LightXML_float!(0.0, z, "Real"), LightXML_float!(0.0, z, "Imaginary")) for z in LightXML_findall(pz[j], "Zero")])
-                            append!(cps, [complex(LightXML_float!(0.0, p, "Real"), LightXML_float!(0.0, p, "Imaginary")) for p in LightXML_findall(pz[j], "Pole")])
+                            append!(czs, [complex(LightXML_float32!(0.0f0, z, "Real"), LightXML_float32!(0.0f0, z, "Imaginary")) for z in LightXML_findall(pz[j], "Zero")])
+                            append!(cps, [complex(LightXML_float32!(0.0f0, p, "Real"), LightXML_float32!(0.0f0, p, "Imaginary")) for p in LightXML_findall(pz[j], "Pole")])
                         end
                     end
                 end
                 NZ = length(czs)
                 NP = length(cps)
                 if NZ < NP
-                    for z = NZ+1:NP
-                        push!(czs, complex(0.0,0.0))
-                    end
+                  append!(czs, zeros(Complex{Float32}, NP-NZ))
                 end
-                RESP[y] = hcat(czs,cps)
+                RESP[y] = PZResp(1.0f0, cps, czs)
             end
         end
     end

@@ -9,16 +9,24 @@ backazimuth for each channel. Values are stored in
 
 """
 function distaz!(S::SeisEvent)
-  rec = Array{Float64, 2}(undef, S.data.n, 2)
-  for i = 1:S.data.n
-    rec[i,:] = S.data.loc[i][1:2]
+  TD = getfield(S, :data)
+  ChanLoc = getfield(TD, :loc)
+  SrcLoc = getfield(getfield(S, :hdr), :loc)
+  N = getfield(TD, :n)
+  rec = Array{Float64, 2}(undef, N, 2)
+  for i = 1:N
+    loc = getindex(ChanLoc, i)
+    if typeof(loc) == GeoLoc
+      rec[i,:] = [loc.lat loc.lon]
+    else
+      error(string(":loc for channel ", i, " is not a GeoLoc!"))
+    end
   end
-  D = gcdist(S.hdr.loc[1:2], rec)
-  for i = 1:S.data.n
-    S.data.misc[i]["dist"] = D[i,1]
-    S.data.misc[i]["az"] = D[i,2]
-    S.data.misc[i]["baz"] = D[i,3]
-  end
-  note!(S.data, "distaz!")
+  D = gcdist(SrcLoc.lat, SrcLoc.lon, rec)
+  @assert size(D,1) == N
+  TD.dist = D[:,1]
+  TD.az   = D[:,2]
+  TD.baz  = D[:,3]
+  note!(TD, "distaz!")
   return nothing
 end

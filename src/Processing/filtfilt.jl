@@ -1,4 +1,4 @@
-import DSP:filtfilt
+# import DSP:filtfilt
 export filtfilt, filtfilt!
 
 #=  Regenerate filter; largely identical to DSP.Filters.filt_stepstate with
@@ -136,7 +136,7 @@ function do_filtfilt!(X::AbstractArray,
 end
 
 @doc """
-  filtfilt!(S::SeisData[; KWs])
+  filtfilt!(S::GphysData[; KWs])
 
 Apply zero-phase filter to S.x.
 
@@ -144,7 +144,7 @@ Apply zero-phase filter to S.x.
 
 Apply zero-phase filter to Ev.data.x.
 
-  filtfilt!(C::SeisChannel[; KWs])
+  filtfilt!(C::GphysChannel[; KWs])
 
 Apply zero-phase filter to C.x
 
@@ -167,7 +167,7 @@ filter, and fh is used in a Lowpass filter.
 
 See also: DSP.jl documentation
 """ filtfilt!
-function filtfilt!(S::SeisData;
+function filtfilt!(S::GphysData;
     fl::Float64=KW.Filt.fl,
     fh::Float64=KW.Filt.fh,
     np::Int=KW.Filt.np,
@@ -241,7 +241,7 @@ function filtfilt!(S::SeisData;
   return nothing
 end
 
-function filtfilt!(C::SeisChannel;
+function filtfilt!(C::GphysChannel;
   fl::Float64=KW.Filt.fl,
   fh::Float64=KW.Filt.fh,
   np::Int=KW.Filt.np,
@@ -300,7 +300,7 @@ filtfilt!(Ev::SeisEvent;
   ) = filtfilt!(Ev.data, fl=fl, fh=fh, np=np, rp=rp, rs=rs, rt=rt, dm=dm)
 
 @doc (@doc filtfilt!)
-filtfilt(S::SeisData;
+filtfilt(S::GphysData;
   fl::Float64=KW.Filt.fl,
   fh::Float64=KW.Filt.fh,
   np::Int=KW.Filt.np,
@@ -314,7 +314,7 @@ filtfilt(S::SeisData;
         return U
        )
 
-filtfilt(C::SeisChannel;
+filtfilt(C::GphysChannel;
   fl::Float64=KW.Filt.fl,
   fh::Float64=KW.Filt.fh,
   np::Int=KW.Filt.np,

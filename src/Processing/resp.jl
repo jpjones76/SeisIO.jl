@@ -1,7 +1,7 @@
 export fctopz, equalize_resp!, equalize_resp
 
-function resp_f(r::Array{Complex{T},2}, g::T, h::T, f::Array{T,1}, fs::T) where T <: Real
-  zp = ZeroPoleGain([T(2.0); r[:,1]], [T(2.0); r[:,2]], g)
+function resp_f(z::Array{Complex{T},1}, p::Array{Complex{T},1}, g::T, h::T, f::Array{T,1}, fs::T) where T <: Real
+  zp = ZeroPoleGain(pushfirst!(copy(z), Complex{T}(2.0)), pushfirst!(copy(p), Complex{T}(2.0)), g)
   pr = convert(PolynomialRatio, zp)
   return h*freqs(pr, f, fs)
 end
@@ -11,129 +11,160 @@ end
 
 Convert critical frequency fc to a matrix of complex poles and zeros. zeros are in resp[:,1], poles in resp[:,2].
 """
-function fctopz(fc::T; hc=1.0/sqrt(2.0)::T, units="m/s"::String) where T <: Real
-  pp = 2.0*pi
-  if units == "m/s"
-    cr = sqrt(complex(hc^2-1.0))
-    cp = complex(zeros(T,2))
-    cz = [-hc+cr, -hc-cr].*pp*fc
-    return [cp cz]
-  else
-    error("NYI")
-  end
+function fctopz(f::T, c::T) where T <: AbstractFloat
+  fxp = T(2.0*pi)*f
+  r = sqrt(Complex(c^2 - one(T)))
+  p = zeros(Complex{T}, 1)
+  z = Complex{T}[r-c, -c-r].*fxp
+  return p, z
 end
 
-# """
-#     Y = translate_resp!(X, fs, resp_old, resp_new)
-#
-# Translate frequency response of `X`, sampled at `fs`, from `resp_old` to `resp_new`. zeros are in resp[:,1], poles in resp[:,2].
-# """
 function translate_resp!( X::Array{T,1},
                           fs::T,
-                          resp_old::Array{Complex{T},2},
-                          resp_new::Array{Complex{T},2};
-                          hc_old::T=1.0/sqrt(2.0),
-                          hc_new::T=1.0/sqrt(2.0)) where T <: Real
+                          z_old::Array{Complex{T},1},
+                          p_old::Array{Complex{T},1},
+                          c_old::T,
+                          z_new::Array{Complex{T},1},
+                          p_new::Array{Complex{T},1},
+                          c_new::T) where T <: Real
 
-  resp_old == resp_new && return nothing
   Nx = length(X)
   N2 = nextpow(2, Nx)
-  f = T.([collect(0.0:1.0:N2/2.0); collect(-N2/2.0+1.0:1.0:-1.0)]*fs/N2)  # Frequencies
-  F0 = resp_f(resp_old, hc_old, one(T), f, fs)                            # Old resp
-  F1 =  resp_f(resp_new, hc_new, one(T), f, fs)                           # New resp
+  f = T[collect(0.0:1.0:N2/2.0); collect(-N2/2.0+1.0:1.0:-1.0)]           # Frequencies
+  f[1] = eps(T)
+  rmul!(f, T(fs/N2))
+  F0 =  resp_f(z_old, p_old, c_old, one(T), f, fs)                        # Old resp
+  F1 =  resp_f(z_new, p_new, c_new, one(T), f, fs)                        # New resp
   xf = fft([X; zeros(T, N2-Nx)])                                          # FFT
   rf = map(Complex{T}, (F1.*conj(F0) ./ (F0.*conj(F0).+eps(T))))
   X[:] = real(ifft(xf.*rf))[1:Nx]
   return nothing
 end
 
+function translate_resp!( X::Array{T,1},
+                          fs::T,
+                          Ro::Union{PZResp,PZResp64},
+                          Rn::Union{PZResp,PZResp64}) where T <: Real
+
+  Nx = length(X)
+  N2 = nextpow(2, Nx)
+  f = T[collect(zero(T):one(T):T(N2)/T(2.0)); collect(T(-N2)/T(2.0)+one(T):one(T):-one(T))]           # Frequencies
+  f[1] = eps(T)
+  rmul!(f, T(fs/N2))
+  F0 =  resp_f(Ro.z, Ro.z, Ro.c, one(T), f, fs)                           # Old resp
+  F1 =  resp_f(Rn.z, Rn.p, Rn.c, one(T), f, fs)                           # New resp
+  xf = fft([X; zeros(T, N2-Nx)])                                          # FFT
+  rf = map(Complex{T}, (F1.*conj(F0) ./ (F0.*conj(F0).+eps(T))))
+  X[:] = real(ifft(xf.*rf))[1:Nx]
+  return nothing
+end
+
+function check_resp_type(R::Union{PZResp,PZResp64}, T::Type)
+  if typeof(getfield(R, :c)) == T
+    return R
+  elseif T == Float64
+    return PZResp64(T.(R.c), Complex{T}.(R.p), Complex{T}.(R.z))
+  else
+    return PZResp(T.(R.c), Complex{T}.(R.p), Complex{T}.(R.z))
+  end
+end
 
 @doc """
-    equalize_resp!(S::SeisData, resp_new::Array{Complex{Float64},2})
+    equalize_resp!(S::GphysData, resp_new:ZPGain)
 
-Translate all data in S.x to instrument response resp_new. zeros are in
-resp[:,1], poles in resp[:,2]. If channel `i` has key `S.misc[i]["hc"]`, this
-is used as the critical damping constant, else a value of 1.0 is assumed.
+Translate all data in S.x to instrument response resp_new.
 
-    equalize_resp!(S, resp_new[, hc_new=hᵪ, C=C])
+    equalize_resp!(S, resp_new[, c_new=hᵪ, C=C])
 
-As above, but specify hc_new as a KW and only operate on channel numbers C.
+As above, but specify c_new as a KW and only operate on channel numbers C.
 
-    equalize_resp(S, resp_new[, hc_new=hᵪ, C=C])
+    equalize_resp(S, resp_new[, c_new=hᵪ, C=C])
 
 "Safe" translation of frequency responses of channels S[C], output to a new
 SeisData object.
 
 """ equalize_resp!
-function equalize_resp!(S::SeisData, resp::Array{Complex{Float64},2};
-  hc_new::Float64=1.0/sqrt(2.0),
-  C::Array{Int64,1}=Int64[])
+function equalize_resp!(S::GphysData, R_new::Union{PZResp,PZResp64};
+                        C::Array{Int64,1} = Int64[]
+                        )
 
-  pp = 2.0*Float64(pi)
   if isempty(C)
     C = collect(1:S.n)
   end
-  for i in C
-    T = eltype(S.x[i])
-    resp_old = map(Complex{T}, S.resp[i])
-    resp_new = map(Complex{T}, resp)
-    fs = T.(S.fs[i])
-    h_new = T.(hc_new)
-    if resp_old != resp_new && fs > 0.0
-      h = T.(haskey(S.misc[i],"hc") ? S.misc[i]["hc"] : 1.0/sqrt(2.0))
-      X = S.x[i]
-      translate_resp!(X, fs, resp_old, resp_new, hc_old=h, hc_new=h_new)
 
-      # Changes: x, resp, misc["hc"]
-      S.x[i] = X
-      S.resp[i] = resp
-      S.misc[i]["hc"] = hc_new
-      note!(S, i, string( "equalize_resp! changed :resp. Old response: ",
-                          "h = ", @sprintf("%.4f", h), ", ",
-                          "z = ", replace(repr(resp_old[:,1]), ","=>""), ", ",
-                          "p = ", replace(repr(resp_old[:,2]), ","=>"") ) )
+  RESP = getfield(S, :resp)
+  FS = getfield(S, :fs)
+  X = getfield(S, :x)
+  for i in C
+    fs = getindex(FS, i)
+    fs == 0.0 && continue
+
+    x = getindex(X, i)
+    T = eltype(x)
+    R = getindex(RESP, i)
+
+    # Check resp types
+    Ro = check_resp_type(R, T)
+    Rn = check_resp_type(R_new, T)
+
+    if Ro != Rn
+      # Check fs
+      if typeof(fs) != T
+        fs = T.(fs)
+      end
+
+      translate_resp!(x, fs, Ro, Rn)
+      setindex!(RESP, Rn, i)
+      note!(S, i, string( "equalize_resp!, changed :resp. Old response: ",
+                          repr("text/plain", R, context=:compact=>true) ) )
     end
   end
   return nothing
 end
-equalize_resp!(V::SeisEvent, resp::Array{Complex{Float64},2};
-  hc_new::Float64=1.0/sqrt(2.0),
-  C::Array{Int64,1}=Int64[]) = equalize_resp!(V.data, resp, hc_new=hc_new, C=C)
+@doc (@doc equalize_resp!)
+function equalize_resp(S::GphysData, R_new::Union{PZResp,PZResp64}; C::Array{Int64,1} = Int64[])
+  U = deepcopy(S)
+  equalize_resp!(U, R_new, C=C)
+  return U
+end
 
-function equalize_resp!(Ch::SeisChannel, resp::Array{Complex{Float64},2};
-                        hc_new::Float64=1.0/sqrt(2.0),
-                        C::Array{Int64,1}=Int64[])
+# SeisEvent methods
+equalize_resp!(V::SeisEvent, R_new::Union{PZResp,PZResp64}; C::Array{Int64,1} = Int64[]) =
+  equalize_resp!(V.data, R_new, C=C)
+function equalize_resp(V::SeisEvent, R_new::Union{PZResp,PZResp64}; C::Array{Int64,1} = Int64[])
+  U = deepcopy(V)
+  equalize_resp!(U.data, R_new, C=C)
+  return U
+end
 
-  S = SeisData(Ch)
-  equalize_resp!(S, resp, hc_new=hc_new, C=C)
+# Seischannel methods
+function equalize_resp!(Ch::GphysChannel, R_new::Union{PZResp,PZResp64})
+  fs = getfield(Ch, :fs)
+  fs == 0.0 && return nothing
 
-  # This must be set manually due to copying
-  Ch.resp = resp
+  # Check resp types
+  R = getfield(Ch, :resp)
+  x = getfield(Ch, :x)
+  T = eltype(x)
+  Ro = check_resp_type(R, T)
+  Rn = check_resp_type(R_new, T)
+
+  if Ro != Rn
+    # Check fs
+    if typeof(fs) != T
+      fs = T.(fs)
+    end
+
+    translate_resp!(x, fs, Ro, Rn)
+    setfield!(Ch, :resp, Rn)
+    setfield!(Ch, :x, x)
+    note!(Ch, string( "equalize_resp!, changed :resp. Old response: ",
+                    repr("text/plain", R, context=:compact=>true) ) )
+  end
   return nothing
 end
-
-@doc (@doc equalize_resp!)
-function equalize_resp(S::SeisData, resp::Array{Complex{Float64},2};
-                        hc_new::Float64=1.0/sqrt(2.0),
-                        C::Array{Int64,1}=Int64[] )
-  U = deepcopy(S)
-  equalize_resp!(U, resp, hc_new=hc_new, C=C)
+function equalize_resp(Ch::GphysChannel, R_new::Union{PZResp,PZResp64})
+  U = deepcopy(Ch)
+  equalize_resp!(U, R_new)
   return U
-end
-
-function equalize_resp(V::SeisEvent, resp::Array{Complex{Float64},2};
-                        hc_new::Float64=1.0/sqrt(2.0),
-                        C::Array{Int64,1}=Int64[] )
-  U = deepcopy(V)
-  equalize_resp!(U.data, resp, hc_new=hc_new, C=C)
-  return U
-end
-
-function equalize_resp(Ch::SeisChannel, resp::Array{Complex{Float64},2};
-  hc_new::Float64=1.0/sqrt(2.0),
-  C::Array{Int64,1}=Int64[])
-
-  U = SeisData(deepcopy(Ch))
-  equalize_resp!(U, resp, hc_new=hc_new, C=C)
-  return U[1]
 end

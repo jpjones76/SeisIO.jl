@@ -15,7 +15,7 @@ Standard keywords: fmt, nd, opts, rad, reg, si, src, to, v, w, y
 Other keywords:
 * s: Start time
 * t: Termination (end) time
-* xml_file: Name of XML file to save station metadata
+* xf: Name of XML file to save station metadata
 
 ## Examples
 1. `get_data!(S, "FDSN", "UW.SEP..EHZ,UW.SHW..EHZ,UW.HSR..EHZ", src="IRIS", t=(-600))`: using FDSNWS, get the last 10 minutes of data from three short-period vertical-component channels at Mt. St. Helens, USA.
@@ -27,18 +27,18 @@ See also: chanspec, parsetimewin, seis_www, SeisIO.KW
 """ get_data!
 function get_data!(S::SeisIO.SeisData, method_in::String, C="*"::Union{String,Array{String,1},Array{String,2}};
            fmt::String = KW.fmt                              ,  # File format
-               nd::Int = KW.nd                               ,  # Number of days per request (in long requests)
+              nd::Real = KW.nd                               ,  # Number of days per request (in long requests)
           opts::String = KW.opts                             ,  # Options string
  rad::Array{Float64,1} = KW.rad                              ,  # Query radius
  reg::Array{Float64,1} = KW.reg                              ,  # Query region
-                     s = 0::Union{Real,DateTime,String}      ,  # Start
+           s::TimeSpec = 0                                   ,  # Start
               si::Bool = KW.si                               ,  # Fill station info?
            src::String = KW.src                              ,  # Data source
-                     t = (-600)::Union{Real,DateTime,String} ,  # End or Length (s)
+           t::TimeSpec = (-600)                              ,  # End or Length (s)
              to::Int64 = KW.to                               ,  # Timeout (s)
               v::Int64 = KW.v                                ,  # Verbosity
                w::Bool = KW.w                                ,  # Write to disc?
-      xml_file::String = "FDSNsta.xml"                       ,  # XML save file
+            xf::String = "FDSNsta.xml"                       ,  # XML save file
                y::Bool = KW.y                                   # Sync
      )
 
@@ -66,7 +66,7 @@ function get_data!(S::SeisIO.SeisData, method_in::String, C="*"::Union{String,Ar
               to=to,
               v=v,
               w=w,
-              xml_file=xml_file,
+              xf=xf,
               y=y)
   elseif method_in == "IRIS"
     if isa(C, String)
@@ -99,18 +99,18 @@ end
 @doc (@doc get_data)
 function get_data(method_in::String, C="*"::Union{String,Array{String,1},Array{String,2}};
            fmt::String = KW.fmt                              ,  # File format
-               nd::Int = KW.nd                               ,  # Number of days per request (in long requests)
+              nd::Real = KW.nd                               ,  # Number of days per request (in long requests)
           opts::String = KW.opts                             ,  # Options string
  rad::Array{Float64,1} = KW.rad                              ,  # Query radius
  reg::Array{Float64,1} = KW.reg                              ,  # Query region
-                     s = 0::Union{Real,DateTime,String}      ,  # Start
+           s::TimeSpec = 0                                   ,  # Start
               si::Bool = KW.si                               ,  # Fill station info?
            src::String = KW.src                              ,  # Data source
-                     t = (-600)::Union{Real,DateTime,String} ,  # End or Length (s)
+           t::TimeSpec = (-600)                              ,  # End or Length (s)
              to::Int64 = KW.to                               ,  # Timeout (s)
               v::Int64 = KW.v                                ,  # Verbosity
                w::Bool = KW.w                                ,  # Write to disc?
-      xml_file::String = "FDSNsta.xml"                       ,  # XML save file
+            xf::String = "FDSNsta.xml"                       ,  # XML save file
                y::Bool = KW.y                                   # Sync
      )
 
@@ -128,7 +128,7 @@ function get_data(method_in::String, C="*"::Union{String,Array{String,1},Array{S
             to=to,
             v=v,
             w=w,
-            xml_file=xml_file,
+            xf=xf,
             y=y)
   v > 2 && println(stdout, "S = \n", S)
   return S

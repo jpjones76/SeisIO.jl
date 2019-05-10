@@ -1,4 +1,4 @@
-import Base.merge!
+# import Base.merge!
 export readsac, readsac!, sachdr, writesac
 
 # ============================================================================
@@ -43,7 +43,8 @@ function fill_sac(S::SeisChannel, ts::Bool, leven::Bool)
   cv[17:22] .= 0x20
 
   # Ints
-  tt = Int32[Base.parse(Int32, i) for i in split(string(u2d(S.t[1,2]*μs)),r"[\.\:T\-]")]
+  T = getfield(S, :t)
+  tt = Int32[Base.parse(Int32, i) for i in split(string(u2d(T[1,2]*μs)),r"[\.\:T\-]")]
   length(tt) == 6 && append!(tt, zero(Int32))
   y = tt[1]
   j = Int32(md2j(y, tt[2], tt[3]))
@@ -57,27 +58,36 @@ function fill_sac(S::SeisChannel, ts::Bool, leven::Bool)
   dt = 1.0/S.fs
   fv[1] = Float32(dt)
   fv[4] = Float32(S.gain)
-  fv[6] = 0.0f0
-  fv[7] = Float32(dt*length(S.x) + sum(S.t[2:end,2])*μs)
+  fv[6] = rem(T[1,2], 1000)*1.0f-3
+  fv[7] = Float32(dt*length(S.x) + sum(T[2:end,2])*μs)
   if !isempty(S.loc)
-    if maximum(abs.(S.loc)) > 0.0
-      fv[32:34] = S.loc[1:3]
-      fv[58:59] = S.loc[4:5]
+    loc = getfield(S, :loc)
+    if typeof(loc) == GeoLoc
+      fv[32] = loc.lat
+      fv[33] = loc.lon
+      fv[34] = loc.el
+      fv[58] = loc.az
+      fv[59] = loc.inc
     end
   end
 
   # Chars (ugh...)
-  id = split(S.id,'.')
+  id = String.(split(S.id,'.'))
   ci = [169, 1, 25, 161]
   Lc = [8, 16, 8, 8]
-  ss = Array{String, 1}(undef, 4)
   for i = 1:4
-    ss[i] = String(id[i])
-    s = codeunits(ss[i])
-    Ls = length(s)
-    L = Lc[i]
-    c = ci[i]
-    cv[c:c+L-1] .= 0x20
+    if !isempty(id[i])
+      L_max = Lc[i]
+      si = ci[i]
+      ei = ci[i] + L_max - 1
+      s = codeunits(id[i])
+      Ls = length(s)
+      L = min(Ls, L_max)
+      copyto!(cv, si, s, 1, L)
+      if L < L_max
+        cv[si+L+1:ei] .= 0x20
+      end
+    end
   end
 
   # Assign a filename
@@ -87,7 +97,7 @@ function fill_sac(S::SeisChannel, ts::Bool, leven::Bool)
   m_s = string(tt[5]); m_s="0"^(2-length(m_s))*m_s
   s_s = string(tt[6]); s_s="0"^(2-length(s_s))*s_s
   ms_s = string(tt[7]); ms_s="0"^(3-length(ms_s))*ms_s
-  fname = join([y_s, j_s, h_s, m_s, s_s, ms_s, ss[1], ss[2], ss[3], ss[4], "R.SAC"],'.')
+  fname = join([y_s, j_s, h_s, m_s, s_s, ms_s, id[1], id[2], id[3], id[4], "R.SAC"],'.')
   return (fv, iv, cv, fname)
 end
 
@@ -111,13 +121,14 @@ function read_sac_stream(f::IO, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Ar
   if gain == Float64(sac_nul_f)
     gain = one(Float64)
   end
-  loc = zeros(Float64, 5)
+  loc = GeoLoc()
   j = 0
+  lf = (:lat, :lon, :el, :az, :inc)
   for k in (32,33,34,58,59)
     j += 1
     val = getindex(fv, k)
     if val != sac_nul_f
-      setindex!(loc, Float64(val), j)
+      setfield!(loc, lf[j], Float64(val))
     end
   end
 
@@ -138,7 +149,7 @@ function read_sac_stream(f::IO, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Ar
   i = 1
   while i < 193
     c = getindex(cv, i)
-    if c == sac_nul_start
+    if c == sac_nul_start && i < 188
       val = getindex(cv, i+1:i+5)
       if val == sac_nul_Int8
         cv[i:i+5] .= 0x20

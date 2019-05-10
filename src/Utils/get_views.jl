@@ -1,5 +1,5 @@
 # low-memory way of accessing data by segment
-function get_views(S::SeisData, inds::Array{Int64,1})
+function get_views(S::GphysData, inds::Array{Int64,1})
   L = Array{Int64,1}(undef,0)
   X = Array{SubArray,1}(undef,0)
   si::Int = 0
@@ -19,9 +19,9 @@ function get_views(S::SeisData, inds::Array{Int64,1})
   L = L[ii]
   return L,X
 end
-get_views(S::SeisData) = get_views(S, collect(1:S.n))
+get_views(S::GphysData) = get_views(S, collect(1:S.n))
 
-function get_views(C::SeisChannel)
+function get_views(C::GphysChannel)
   L = Array{Int64,1}(undef,0)
   X = Array{SubArray,1}(undef,0)
   si::Int = 0

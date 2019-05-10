@@ -1,4 +1,4 @@
-function del_flagged!(S::SeisData, dflag::BitArray{1}, reason::String)
+function del_flagged!(S::GphysData, dflag::BitArray{1}, reason::String)
   d = findall(dflag)
   L = length(d)
   if L > 0

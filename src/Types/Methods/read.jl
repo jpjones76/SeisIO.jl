@@ -29,33 +29,6 @@ function read_string_array(io::IOStream)
   return S
 end
 
-findtype(c::UInt8, N::Array{Int64,1}) = findfirst(N.==2^c)
-function code2typ(c::UInt8)
-  t = Any::Type
-  if c >= 0x80
-    t = Array{code2typ(c-0x80)}
-  elseif c >= 0x40
-    t = Complex{code2typ(c-0x40)}
-  elseif c >= 0x30
-    T = Array{Type,1}([BigFloat, Float16, Float32, Float64])
-    N = Int[24, 2, 4, 8]
-    t = T[findtype(c-0x2f, N)]
-  elseif c >= 0x20
-    T = Array{Type,1}([Int128, Int16, Int32, Int64, Int8])
-    N = Int[16, 2, 4, 8, 1]
-    t = T[findtype(c-0x20, N)]
-  elseif c >= 0x10
-    T = Array{Type,1}([UInt128, UInt16, UInt32, UInt64, UInt8])
-    N = Int[16, 2, 4, 8, 1]
-    t = T[findtype(c-0x10, N)]
-  elseif c == 0x01
-    t = String
-  else
-    t = Char
-  end
-  return t
-end
-
 function read_misc(io::IOStream)
   D = Dict{String,Any}()
   L = read(io, Int64)
@@ -97,10 +70,23 @@ end
 function rhdr(io::IOStream)
   H = SeisHdr()
 
-  i64   = read!(io, Array{Int64, 1}(undef, 6))
+  i64   = read!(io, Array{Int64, 1}(undef, 8))
+  L_mt  = i64[7]
+  L_ax  = i64[8]
   m     = read(io, Float32)
-  f64   = read!(io, Array{Float64, 1}(undef, 26))
+  mt    = Array{Float64, 1}(undef, L_mt)
+  ax    = Array{Float64, 1}(undef, L_ax)
+  if L_mt > 0
+    read!(io, mt)
+  end
+  if L_ax > 0
+    read!(io, ax)
+  end
   u8    = read!(io, Array{UInt8, 1}(undef, 2 + sum(i64[3:6])))
+
+  Loc = EQLoc()
+  readloc!(io, Loc)
+  setfield!(H, :loc, Loc)                                           # Loc
   setfield!(H, :misc, read_misc(io))                                # Misc
 
   # First two u8s are separator and intensity value
@@ -123,13 +109,14 @@ function rhdr(io::IOStream)
       k = k + i64[6]
       setfield!(H, :notes, String.(split(String(u8[j:k]), Char(c))))# Notes
   end
-  setfield!(H, :loc, f64[1:3])                                      # Event location
-  setfield!(H, :mt, f64[4:11])                                      # Moment tensor
-  setfield!(H, :np, [(f64[12], f64[13], f64[14]),
-                    (f64[15], f64[16], f64[17])])                   # Nodal planes
-  setfield!(H, :pax, [(f64[18], f64[19], f64[20]),
-                      (f64[21], f64[22], f64[23]),
-                      (f64[24], f64[25], f64[26])])                 # Pricinpal axes
+  setfield!(H, :mt, mt)                                             # Moment tensor
+  axes = Array{NTuple{3,Float64},1}(undef, 0)                       # Axes
+  j = 0
+  while j < L_mt
+    push!(axes, (ax[j+1], ax[j+2], ax[j+3]))
+    j += 3
+  end
+  setfield!(H, :axes, axes)
   return H
 end
 
@@ -137,11 +124,16 @@ end
 function rdata(io::IOStream, ver::Float32)
   Base.GC.enable(false)
   N = convert(Int64, read(io, UInt32))
-  S = SeisData(N)
+  y_code = read(io, UInt8)
+  if y_code == 0x01
+    S = EventTraceData(N)
+  else
+    S = SeisData(N)
+  end
   for i = 1:N
 
     # int
-    i64 = read!(io, Array{Int64, 1}(undef, 10))
+    i64 = read!(io, Array{Int64, 1}(undef, 8))
     if i64[1] > 0
       S.t[i] = reshape(read!(io, Array{Int64, 1}(undef, i64[1])), div(i64[1],2), 2)
     end
@@ -150,30 +142,47 @@ function rdata(io::IOStream, ver::Float32)
     S.fs[i] = read(io, Float64)
     S.gain[i] = read(io, Float64)
 
-    # float arrays
-    S.loc[i] = read!(io, Array{Float64, 1}(undef, i64[9]))
-    if i64[2] > 0
-      test_read_1 = read!(io, Array{Float64, 1}(undef, i64[2]))
-      test_read_2 = read!(io, Array{Float64, 1}(undef, i64[2]))
-      S.resp[i] = reshape(complex.(test_read_1, test_read_2), div(i64[2],2), 2)
-    end
-
     # U8
     c = read(io, UInt8)
     y = read(io, UInt8)
+    loc_c = read(io, UInt8)
+    resp_c = read(io, UInt8)
 
     # U8 array
-    S.id[i] = String(read!(io, Array{UInt8, 1}(undef, i64[10])))
-    S.units[i]= String(read!(io, Array{UInt8, 1}(undef, i64[3])))
-    S.src[i]  = String(read!(io, Array{UInt8, 1}(undef, i64[4])))
-    S.name[i] = String(read!(io, Array{UInt8, 1}(undef, i64[5])))
-    if i64[6] > 0
-      S.notes[i] = map(String, split(String(read!(io, Array{UInt8, 1}(undef, i64[6]))), Char(c)))
+    S.id[i]     = String(read!(io, Array{UInt8, 1}(undef, i64[8])))
+    S.units[i]  = String(read!(io, Array{UInt8, 1}(undef, i64[2])))
+    S.src[i]    = String(read!(io, Array{UInt8, 1}(undef, i64[3])))
+    S.name[i]   = String(read!(io, Array{UInt8, 1}(undef, i64[4])))
+    if i64[5] > 0
+      S.notes[i] = map(String, split(String(read!(io, Array{UInt8, 1}(undef, i64[5]))), Char(c)))
     else
       S.notes[i] = Array{String,1}(undef, 0)
     end
-    S.x[i]  = Blosc.decompress(code2typ(y), read!(io, Array{UInt8, 1}(undef, i64[7])))
+    S.x[i]  = Blosc.decompress(code2typ(y), read!(io, Array{UInt8, 1}(undef, i64[6])))
+
+    # loc
+    Loc = code2loctype(loc_c)()
+    readloc!(io, Loc)
+    setindex!(getfield(S, :loc), Loc, i)
+
+    # resp
+    if resp_c == 0x01 || resp_c == 0x02
+      R = readPZResp(io)
+    else
+      R = readGenResp(io)
+    end
+    setindex!(getfield(S, :resp), R, i)
+
+    # misc
     S.misc[i] = read_misc(io)
+
+    # extras for EventTraceData
+    if y_code == 0x01
+      S.az[i] = read(io, Float64)
+      S.baz[i] = read(io, Float64)
+      S.dist[i] = read(io, Float64)
+      S.pha[i] = read(io, PhaseCat)
+    end
   end
   Base.GC.enable(true)
   return S
@@ -197,7 +206,7 @@ function build_file_list(patts::Union{String,Array{String,1}})
   return file_list
 end
 
-function read_rec(io::IOStream, r::Float32, u::UInt8; v=0::Int)
+function read_rec(io::IOStream, r::Float32, u::UInt8)
   if u == 0x48
     return rhdr(io)
   elseif u == 0x45
@@ -230,7 +239,6 @@ function rseis(patts::Union{String,Array{String,1}};
       continue
     end
     r = read(io, Float32)   # SeisIO file format version
-    j = read(io, Float32)   # Julia version
     L = read(io, Int64)
     C = read!(io, Array{UInt8, 1}(undef, L))
     B = read!(io, Array{UInt64, 1}(undef, L))
@@ -240,7 +248,8 @@ function rseis(patts::Union{String,Array{String,1}};
     if isempty(c)
       (v > 1) && @printf(stdout, "Reading %i total objects from file %s.\n", L, f)
       for n = 1:L
-        push!(A, read_rec(io, r, C[n], v=v))
+        push!(A, read_rec(io, r, C[n]))
+        (v > 1) && @printf(stdout, "Read object %i/%i of type %s.\n", n, L, typeof(A[n]))
       end
     else
       if minimum(c) > L
@@ -253,7 +262,7 @@ function rseis(patts::Union{String,Array{String,1}};
         n = c[k]
         if n in RNs
           seek(io, B[n])
-          push!(A, read_rec(io, r, C[n], v=v))
+          push!(A, read_rec(io, r, C[n]))
           (v > 1) && @printf(stdout, "Read %s object from %s, bytes %i:%i.\n", typeof(A[end]), f, B[n], ((n == L) ? position(io) : B[n+1]))
         else
           (v > 0) && @info(string((n > L ? "No" : "Skipped"), " record ", c[k], " in ", f))

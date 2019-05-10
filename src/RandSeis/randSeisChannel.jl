@@ -3,8 +3,21 @@ export randSeisChannel
 # Things that work for both regularly and irregularly sampled data
 function pop_chan_tail!(Ch::SeisChannel)
   ((Ch.gain == 1) || isnan(Ch.gain)) && (Ch.gain = rand()*10^rand(0:10))    # gain
-  if isempty(Ch.loc) || Ch.loc == zeros(Float64,5)
-    Ch.loc = rand(Float64, rand(1:100))
+  if isempty(Ch.loc)
+    loc = GeoLoc()
+    for f in fieldnames(GeoLoc)
+      x = rand(Float64)
+      if f != :datum
+        if f == :lat || f == :inc
+          x = 180*(x-0.5)
+        elseif f == :lon || f == :az
+          x = 360*(x-0.5)
+        end
+        setfield!(loc, f, x)
+      else
+        setfield!(loc, f, x > 0.5 ? "WGS-84" : x > 0.25 ? "ETRS89" : x > 0.1 ? "GRS 80" : "JGD2011")
+      end
+    end
   end                                                                       # loc
   if isempty(Ch.misc)
     pop_rand_dict!(Ch.misc, rand(4:24))                                     # misc
@@ -81,10 +94,15 @@ function populate_chan!(Ch::SeisChannel; s=false::Bool)
 
   # A random instrument response function
   if isempty(Ch.resp)
+    T = rand() < 0.5 ? Float32 : Float64
     i = rand(1:4)
-    zstub = zeros(2*i)
-    pstub = 10 .*rand(i)
-    Ch.resp = [complex(zstub) [pstub .+ pstub.*im; pstub .- pstub*im]]    # resp
+    zstub = zeros(T, 2*i)
+    pstub = 10 .*rand(T, i)
+    if T == Float32
+      Ch.resp = PZResp(0.0f0, complex.(zstub), vcat(pstub .+ pstub.*im, pstub .- pstub*im))    # resp
+    else
+      Ch.resp = PZResp64(0.0, complex.(zstub), vcat(pstub .+ pstub.*im, pstub .- pstub*im))    # resp
+    end
   end
 
   # random noise for data, with random short time gaps; gaussian noise for a

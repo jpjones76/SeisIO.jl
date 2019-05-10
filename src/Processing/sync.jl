@@ -20,7 +20,7 @@ function get_sync_inds(t::AbstractArray{Int64,1}, Ω::Bool, t₀::Int64, t₁::I
 end
 
 @doc """
-sync!(S::SeisData)
+sync!(S::GphysData)
 
 Synchronize the start times of all data in S to begin at or after the last
 start time in S.
@@ -47,7 +47,7 @@ are filled with the mean; this isn't possible with irregularly-sampled data.
 
 Related functions: time, Dates.DateTime, parsetimewin
 """ sync!
-function sync!(S::SeisData;
+function sync!(S::GphysData;
                 s="last"::Union{String,DateTime},
                 t="none"::Union{String,DateTime},
                 v::Int64=KW.v,
@@ -210,7 +210,7 @@ function sync!(C::SeisChannel;
 end
 
 @doc (@doc sync!)
-function sync(S::SeisData;
+function sync(S::GphysData;
                 s="last"::Union{String,DateTime},
                 t="none"::Union{String,DateTime},
                 v::Int64=KW.v )

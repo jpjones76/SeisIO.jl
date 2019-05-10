@@ -26,7 +26,7 @@ function taper_seg!(X::AbstractVector, W::Array{T,1}, L::Int64, μ::T; rev::Bool
   return nothing
 end
 
-# Taper a SeisChannel
+# Taper a GphysChannel
 @doc """
     taper!(C[; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10])
 
@@ -48,7 +48,7 @@ samples in each window are tapered, up to `t_max` seconds of data.
 
 See also: DSP.Windows.tukey
 """ taper!
-function taper!(C::SeisChannel; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
+function taper!(C::GphysChannel; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
   if !(C.fs > 0.0)
     return nothing
   end
@@ -123,7 +123,7 @@ end
 # I could probably clean it up by creating one master taper
 # and passing/editing views into the taper.
 
-function taper!(S::SeisData; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
+function taper!(S::GphysData; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
   if !any(getfield(S, :fs) .> 0.0)
     return nothing
   end
@@ -216,12 +216,12 @@ taper!(V::SeisEvent;
         N_min::Int64=10) = taper!(V.data, t_max = t_max, α=α, N_min=N_min)
 
 @doc (@doc taper!)
-function taper(C::SeisChannel; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
+function taper(C::GphysChannel; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
   U = deepcopy(C)
   taper!(U, t_max = t_max, α=α, N_min=N_min)
   return U
 end
-function taper(S::SeisData; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
+function taper(S::GphysData; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
   U = deepcopy(S)
   taper!(U, t_max = t_max, α=α, N_min=N_min)
   return U

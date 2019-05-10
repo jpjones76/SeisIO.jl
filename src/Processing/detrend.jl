@@ -12,7 +12,7 @@ Remove the mean from data in `C`.
 
 Ignores NaNs.
 """ demean!
-function demean!(S::SeisData; irr::Bool=false)
+function demean!(S::GphysData; irr::Bool=false)
   @inbounds for i = 1:S.n
     (irr==false && S.fs[i]<=0.0) && continue
     T = eltype(S.x[i])
@@ -36,7 +36,7 @@ function demean!(S::SeisData; irr::Bool=false)
   return nothing
 end
 
-function demean!(C::SeisChannel)
+function demean!(C::GphysChannel)
   T = eltype(C.x)
   K = findall(isnan.(C.x))
   if isempty(K)
@@ -60,8 +60,8 @@ end
 demean!(Ev::SeisEvent) = demean!(Ev.data)
 
 @doc (@doc demean!)
-demean(S::SeisData) = (U = deepcopy(S); demean!(U); return U)
-demean(C::SeisChannel) = (U = deepcopy(C); demean!(U); return U)
+demean(S::GphysData) = (U = deepcopy(S); demean!(U); return U)
+demean(C::GphysChannel) = (U = deepcopy(C); demean!(U); return U)
 demean(Ev::SeisEvent) = (U = deepcopy(Ev); demean!(U.data); return U)
 
 @doc """
@@ -84,7 +84,7 @@ To remove a higher-order polynomial fit than a linear trend, choose n>1.
     detrend! does *not* check for data gaps; if this is problematic,
 call ungap!(S, m=true) first!
 """ detrend!
-function detrend!(S::SeisData; n::Int64=1, irr::Bool=false)
+function detrend!(S::GphysData; n::Int64=1, irr::Bool=false)
   @inbounds for i = 1:S.n
     (irr==false && S.fs[i]<=0.0) && continue
     L = length(S.x[i])
@@ -105,7 +105,7 @@ function detrend!(S::SeisData; n::Int64=1, irr::Bool=false)
   return nothing
 end
 
-function detrend!(C::SeisChannel; n::Int64=1)
+function detrend!(C::GphysChannel; n::Int64=1)
   L = length(C.x)
   T = eltype(C.x)
   τ = T.(t_expand(C.t, C.fs)) .- C.t[1,2]
@@ -126,6 +126,6 @@ end
 detrend!(Ev::SeisEvent; n::Int64=1) = detrend!(Ev.data, n=n)
 
 @doc (@doc detrend!)
-detrend(S::SeisData; n::Int64=1) = (U = deepcopy(S); detrend!(U, n=n); return U)
-detrend(C::SeisChannel; n::Int64=1) = (U = deepcopy(C); detrend!(U, n=n); return U)
+detrend(S::GphysData; n::Int64=1) = (U = deepcopy(S); detrend!(U, n=n); return U)
+detrend(C::GphysChannel; n::Int64=1) = (U = deepcopy(C); detrend!(U, n=n); return U)
 detrend(Ev::SeisEvent; n::Int64=1) = (U = deepcopy(Ev); detrend!(U.data, n=n); return U)
