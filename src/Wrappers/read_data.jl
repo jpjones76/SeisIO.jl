@@ -74,33 +74,94 @@ values with very small jobs will greatly decrease performance.
 See also: SeisIO.KW, get_data
 """ read_data!
 function read_data!(S::SeisData, fmt::String, filestr::String;
-  full::Bool=false,               # full SAC/SEGY hdr
-  cf::String="",                  # win32 channel info file
-  jst::Bool=true,                 # are sample times JST (UTC+9)?
-  nx_add::Int64=KW.nx_add,        # append nx_add to overfull channels
-  nx_new::Int64=KW.nx_new,        # new channel samples
-  swap::Bool=false,               # byte swap
-  v::Int64=KW.v                   # verbosity level
+  full    ::Bool    = false,              # full SAC/SEGY hdr
+  cf      ::String  = "",                 # win32 channel info file
+  jst     ::Bool    = true,               # are sample times JST (UTC+9)?
+  nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
+  nx_new  ::Int64   = KW.nx_new,          # new channel samples
+  swap    ::Bool    = false,              # do byte swap?
+  v       ::Int64   = KW.v                # verbosity level
   )
 
+  one_file = safe_isfile(filestr)
+
   if fmt == "sac"
-    readsac!(S, filestr, full=full)
-  elseif fmt == "segy"
-    readsegy!(S, filestr, full=full)
-  elseif fmt == "passcal"
-    readsegy!(S, filestr, passcal=true, full=full)
-  elseif fmt == "seed" || fmt == "miniseed" || fmt == "mseed"
-    readmseed!(S, filestr, nx_add=nx_add, nx_new=nx_new, swap=swap, v=v)
-  elseif fmt == "geocsv" || fmt == "geocsv.tspair"
-    readgeocsv!(S, filestr, tspair=true)
-  elseif fmt == "geocsv.slist"
-    readgeocsv!(S, filestr, tspair=false)
+    fv = getfield(BUF, :sac_fv)
+    iv = getfield(BUF, :sac_iv)
+    cv = getfield(BUF, :sac_cv)
+    checkbuf!(fv, 70)
+    checkbuf!(iv, 40)
+    checkbuf!(cv, 192)
+    if one_file
+      read_sac_file!(S, filestr, fv, iv, cv, full)
+    else
+      files = ls(filestr)
+      for fname in files
+        read_sac_file!(S, fname, fv, iv, cv, full)
+      end
+    end
+
+  elseif fmt == "segy" || fmt == "passcal"
+    passcal = fmt == "passcal"
+    buf     = getfield(BUF, :buf)
+    shorts  = getfield(BUF, :int16_buf)
+    ints    = getfield(BUF, :int32_buf)
+    checkbuf!(buf, 240)
+
+    if one_file
+      append!(S, read_segy_file(filestr, buf, shorts, ints, passcal, full))
+    else
+      files = ls(filestr)
+      for fname in files
+        append!(S, read_segy_file(fname, buf, shorts, ints, passcal, full))
+      end
+    end
+
+  elseif (fmt == "seed" || fmt == "miniseed" || fmt == "mseed")
+    setfield!(BUF, :swap, swap)
+    if one_file
+      read_seed_file!(S, filestr, v, nx_new, nx_add)
+    else
+      files = ls(fname)
+      for fname in files
+        read_seed_file!(S, fname, v, nx_new, nx_add)
+      end
+    end
+
+  elseif fmt in ("geocsv", "geocsv.tspair", "geocsv", "geocsv.slist")
+    tspair = (fmt == "geocsv" || fmt == "geocsv.tspair")
+    if one_file
+      read_geocsv_file!(S, filestr, tspair)
+    else
+      files = ls(filestr)
+      for fname in files
+        read_geocsv_file!(S, fname, tspair)
+      end
+    end
+
   elseif fmt == "lennartzascii" || fmt == "lennasc"
-    readlennasc!(S, filestr)
+    if one_file
+      read_lenn_file!(S, filestr)
+    else
+      files = ls(filestr)
+      for fname in files
+        read_lenn_file!(S, fname)
+      end
+    end
+
   elseif fmt == "uw"
-    readuw!(S, filestr, v=v, full=full)
+    if one_file
+      append!(S, uwdf(filestr, v=v, full=full))
+    else
+      files = ls(filestr)
+      for fname in files
+        append!(S, uwdf(fname, v=v))
+      end
+    end
+
   elseif fmt == "win32" || fmt =="win"
-    readwin32!(S, filestr, cf, jst=jst, v=v, nx_new=nx_new, nx_add=nx_add)
+    readwin32!(S, filestr, cf, jst=jst, nx_new=nx_new, nx_add=nx_add, v=v)
+
   else
     error("Unknown file format!")
   end
@@ -110,23 +171,24 @@ end
 
 @doc (@doc read_data!)
 function read_data(fmt::String, filestr::String;
-  full::Bool=false,               # full SAC/SEGY hdr
-  cf::String="",                  # win32 channel info file
-  jst::Bool=true,                 # are sample times JST (UTC+9)?
-  nx_add::Int64=KW.nx_add,        # append nx_add to overfull channels
-  nx_new::Int64=KW.nx_new,        # new channel samples
-  swap::Bool=false,               # byte swap
-  v::Int64=KW.v                   # verbosity level
+  full    ::Bool    = false,              # full SAC/SEGY hdr
+  cf      ::String  = "",                 # win32 channel info file
+  jst     ::Bool    = true,               # are sample times JST (UTC+9)?
+  nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
+  nx_new  ::Int64   = KW.nx_new,          # new channel samples
+  swap    ::Bool    = false,              # do byte swap?
+  v       ::Int64   = KW.v                # verbosity level
   )
+
   S = SeisData()
   read_data!(S, fmt, filestr,
-    full=full,
-    cf=cf,
-    jst=jst,
-    nx_add=nx_add,
-    nx_new=nx_new,
-    swap=swap,
-    v=v
+    full    = full,
+    cf      = cf,
+    jst     = jst,
+    nx_add  = nx_add,
+    nx_new  = nx_new,
+    swap    = swap,
+    v       = v
     )
   return S
 end
