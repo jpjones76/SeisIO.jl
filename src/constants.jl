@@ -1,24 +1,29 @@
 # Most constants are defined here
-# Exceptions: BUF, KW
+# Exceptions: BUF, KW, PhaseCat
 
-const bad_chars = Dict{String,Array{UInt8,1}}(
-  "File" => [0x22, 0x24, 0x2a, 0x2f, 0x3a, 0x3c, 0x3e, 0x3f, 0x40, 0x5c, 0x5e, 0x7c, 0x7e, 0x7f],
-  "HTML" => [0x22, 0x26, 0x27, 0x3b, 0x3c, 0x3e, 0xa9, 0x7f],
-  "Julia" => [0x24, 0x5c, 0x7f],
-  "Markdown" => [0x21, 0x23, 0x28, 0x29, 0x2a, 0x2b, 0x2d, 0x2e, 0x5b, 0x5c, 0x5d, 0x5f, 0x60, 0x7b, 0x7d],
-  "SEED" => [0x2e, 0x7f],
-  "Strict" => [0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a,
+const FloatArray = Union{Array{Float64,1}, Array{Float32,1}}
+const TimeSpec = Union{Real,DateTime,String}
+
+const bad_chars = Dict{String, Any}(
+  "File" => (0x22, 0x24, 0x2a, 0x2f, 0x3a, 0x3c, 0x3e, 0x3f, 0x40, 0x5c, 0x5e, 0x7c, 0x7e, 0x7f),
+  "HTML" => (0x22, 0x26, 0x27, 0x3b, 0x3c, 0x3e, 0xa9, 0x7f),
+  "Julia" => (0x24, 0x5c, 0x7f),
+  "Markdown" => (0x21, 0x23, 0x28, 0x29, 0x2a, 0x2b, 0x2d, 0x2e, 0x5b, 0x5c, 0x5d, 0x5f, 0x60, 0x7b, 0x7d),
+  "SEED" => (0x2e, 0x7f),
+  "Strict" => (0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a,
                0x2b, 0x2c, 0x2d, 0x2e, 0x2f, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
-               0x40, 0x5b, 0x5c, 0x5d, 0x5e, 0x60, 0x7b, 0x7c, 0x7d, 0x7e, 0x7f] )
+               0x40, 0x5b, 0x5c, 0x5d, 0x5e, 0x60, 0x7b, 0x7c, 0x7d, 0x7e, 0x7f) )
 const datafields = [:id, :name, :loc, :fs, :gain, :resp, :units, :src, :notes, :misc, :t, :x]
+const tracefields = (:n, :az, :baz, :dist, :id, :loc, :fs, :gain, :misc, :name, :notes, :pha, :resp, :src, :t, :units, :x)
 const days_per_month = Int32[31,28,31,30,31,30,31,31,30,31,30,31]
 const days_per_month_leap = Int32[31,29,31,30,31,30,31,31,30,31,30,31]
 const dtconst = 62135683200000000
-const first_start = -62167219200
-const hdrfields = [:id, :ot, :loc, :mag, :int, :mt, :np, :pax, :src, :notes, :misc]
 const id_positions = Int8[11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 const id_spacer = 0x2e
-const last_end = 253402257599
+const regex_chars = String[Sys.iswindows() ? "/" : "\\", "\$", "(", ")", "+", "?", "[", "\\0",
+"\\A", "\\B", "\\D", "\\E", "\\G", "\\N", "\\P", "\\Q", "\\S", "\\U", "\\U",
+"\\W", "\\X", "\\Z", "\\a", "\\b", "\\c", "\\d", "\\e", "\\f", "\\n", "\\n",
+"\\p", "\\r", "\\s", "\\t", "\\w", "\\x", "\\x", "\\z", "]", "^", "{", "|", "}"]
 const show_os = 8
 const sac_keys = (  String[ "delta", "depmin", "depmax", "scale", "odelta",
                             "b", "e", "o", "a", "internal1",
@@ -54,14 +59,8 @@ const seisio_file_begin = UInt8[0x53, 0x45, 0x49, 0x53, 0x49, 0x4f]
 const sep = Base.Filesystem.pathsep()
 const steim = reverse(collect(0x00000000:0x00000002:0x0000001e), dims=1)
 const sμ = 1000000.0
-const vJulia = Float32(Meta.parse(string(VERSION.major,".",VERSION.minor)))
-const vSeisIO = Float32(0.4)
+const vSeisIO = Float32(0.5)
+const unindexed_fields = (:c, :n)
 const uw_dconv = -11676096000000000
 const webhdr = Dict("UserAgent" => "Julia-SeisIO-FSDN.jl/0.2.0")
 const μs = 1.0e-6
-
-unsep = Sys.iswindows() ? "/" : "\\" # the un-separator; which of /, \ is NOT likely to show up in a glob
-const regex_chars = String[unsep, "\$", "(", ")", "+", "?", "[", "\\0",
-"\\A", "\\B", "\\D", "\\E", "\\G", "\\N", "\\P", "\\Q", "\\S", "\\U", "\\U",
-"\\W", "\\X", "\\Z", "\\a", "\\b", "\\c", "\\d", "\\e", "\\f", "\\n", "\\n",
-"\\p", "\\r", "\\s", "\\t", "\\w", "\\x", "\\x", "\\z", "]", "^", "{", "|", "}"]
