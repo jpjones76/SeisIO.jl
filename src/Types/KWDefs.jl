@@ -25,7 +25,7 @@ mutable struct KWDefs
   fmt::String
   full::Bool
   mag::Array{Float64,1}
-  nd::Int64
+  nd::Real
   nev::Int64
   nx_add::Int64
   nx_new::Int64
@@ -57,7 +57,7 @@ keyword isn't specified.
 | fmt      | "miniseed" | String             | request data format            |
 | full     | false      | Bool               | read full headers?             |
 | mag      | [6.0, 9.9] | Array{Float64,1}   | search magitude range          |
-| nd       | 1          | Int64              | number of days per subrequest  |
+| nd       | 1          | Real               | number of days per subrequest  |
 | nev      | 1          | Int64              | number of events per query     |
 | nx_add   | 360000     | Int64              | minimum length increase of an  |
 |          |            |                    |    undersized data array       |
@@ -133,7 +133,7 @@ const KW = KWDefs(
                "miniseed",  # fmt::String
                     false,  # full::Bool
         Float64[6.0, 9.9],  # mag::Array{Float64,1}
-                        1,  # nd::Int64
+                        1,  # nd::Real
                         1,  # nev::Int64
                    360000,  # nx_add::Int64
                   8640000,  # nx_new::Int64
