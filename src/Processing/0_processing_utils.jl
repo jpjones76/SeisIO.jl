@@ -19,7 +19,11 @@ end
 function nanfill!(x::Array{T,1}) where T<: Real
   J = findall(isnan.(x))
   if !isempty(J)
-    x[J] .= T(mean(findall(isnan.(x).==false)))
+    if length(J) == length(x)
+      fill!(x, zero(T))
+    else
+      x[J] .= T(mean(findall(isnan.(x).==false)))
+    end
   end
   return nothing
 end
