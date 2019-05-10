@@ -255,8 +255,8 @@ function readwin32(dfilestr::String, cfilestr::String;
     resp = PZResp()
     fci = getindex(fc, i)
     if S.units[i] == "m/s"
-      hc = getindex(hc, i)
-      p, z = fctopz(fci, hc)
+      hci = getindex(hc, i)
+      p, z = fctopz(fci, hci)
       setfield!(resp, :c, one(Float32))
       setfield!(resp, :p, p)
       setfield!(resp, :p, z)
