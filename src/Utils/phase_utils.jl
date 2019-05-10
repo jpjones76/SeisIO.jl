@@ -1,6 +1,5 @@
 # =============================================================
 # Utility functions
-sa_prune!(S::Union{Array{String,1},Array{SubString{String},1}}) = (deleteat!(S, findall(isempty, S)); return S)
 parse_pcat(pcat::Array{String,2}) = (pcat[:,3], map(Float64, [Meta.parse(i) for i in pcat[:,4]]))
 pcat_start(pcat::Array{String,2}) = findmin([Meta.parse(i) for i in pcat[:,4]])[1]
 pcat_end(pcat::Array{String,2}) = findmax([Meta.parse(i) for i in pcat[:,4]])[1]
