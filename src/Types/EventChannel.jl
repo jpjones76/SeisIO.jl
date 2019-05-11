@@ -1,72 +1,83 @@
 mutable struct EventChannel <: GphysChannel
-  az    ::Float64               # source azimuth
-  baz   ::Float64               # backazimuth
-  dist  ::Float64               # distance
   id    ::String                # id
+  name  ::String                # name
   loc   ::InstrumentPosition    # loc
   fs    ::Float64               # fs
   gain  ::Float64               # gain
-  misc  ::Dict{String,Any}      # misc
-  name  ::String                # name
-  notes ::Array{String,1}       # notes
-  pha   ::PhaseCat              # phase catalog
   resp  ::InstrumentResponse    # resp
-  src   ::String                # src
-  t     ::Array{Int64,2}        # time
   units ::String                # units
+  az    ::Float64               # source azimuth
+  baz   ::Float64               # backazimuth
+  dist  ::Float64               # distance
+  pha   ::PhaseCat              # phase catalog
+  src   ::String                # src
+  misc  ::Dict{String,Any}      # misc
+  notes ::Array{String,1}       # notes
+  t     ::Array{Int64,2}        # time
   x     ::FloatArray            # data
 
   function EventChannel(
-                        az    ::Float64,              # source azimuth
-                        baz   ::Float64,              # backazimuth
-                        dist  ::Float64,              # distance
                         id    ::String,               # id
+                        name  ::String,               # name
                         loc   ::InstrumentPosition,   # loc
                         fs    ::Float64,              # fs
                         gain  ::Float64,              # gain
-                        misc  ::Dict{String,Any},     # misc
-                        name  ::String,               # name
-                        notes ::Array{String,1},      # notes
-                        pha   ::PhaseCat,             # phase catalog
                         resp  ::InstrumentResponse,   # resp
-                        src   ::String,               # src
-                        t     ::Array{Int64,2},       # time
                         units ::String,               # units
+                        az    ::Float64,              # source azimuth
+                        baz   ::Float64,              # backazimuth
+                        dist  ::Float64,              # distance
+                        pha   ::PhaseCat,             # phase catalog
+                        src   ::String,               # src
+                        misc  ::Dict{String,Any},     # misc
+                        notes ::Array{String,1},      # notes
+                        t     ::Array{Int64,2},       # time
                         x     ::FloatArray            # data
                         )
-      return new(az, baz, dist, id, loc, fs, gain, misc, name, notes, pha, resp, src, t, units, x)
+      return new(id, name, loc, fs, gain, resp, units, az, baz, dist, pha, src, misc, notes, t, x)
     end
 end
 
 EventChannel(;
+  id    ::String                = "",
+  name  ::String                = "",
+  loc   ::InstrumentPosition    = GeoLoc(),
+  fs    ::Float64               = zero(Float64),
+  gain  ::Float64               = one(Float64),
+  resp  ::InstrumentResponse    = PZResp(),
+  units ::String                = "",
   az    ::Float64               = zero(Float64),    # source azimuth
   baz   ::Float64               = zero(Float64),    # backazimuth
   dist  ::Float64               = zero(Float64),    # distance
-  fs    ::Float64               = zero(Float64),
-  gain  ::Float64               = one(Float64),
-  id    ::String                = "",
-  loc   ::InstrumentPosition    = GeoLoc(),
-  misc  ::Dict{String,Any}      = Dict{String,Any}(),
-  name  ::String                = "",
-  notes ::Array{String,1}       = Array{String,1}(undef, 0),
   pha   ::PhaseCat              = PhaseCat(),
-  resp  ::InstrumentResponse    = PZResp(),
   src   ::String                = "",
+  misc  ::Dict{String,Any}      = Dict{String,Any}(),
+  notes ::Array{String,1}       = Array{String,1}(undef, 0),
   t     ::Array{Int64,2}        = Array{Int64,2}(undef, 0, 2),
-  units ::String                = "",
   x     ::FloatArray            = Array{Float32,1}(undef, 0)
-  ) = EventChannel(az, baz, dist, id, loc, fs, gain, misc, name, notes, pha, resp, src, t, units, x)
+  ) = EventChannel(id, name, loc, fs, gain, resp, units, az, baz, dist, pha, src, misc, notes, t, x)
 
 function getindex(S::EventTraceData, j::Int)
   C = EventChannel()
-  [setfield!(C, f, getfield(S,f)[j]) for f in datafields]
+  [setfield!(C, f, getfield(S,f)[j]) for f in tracefields]
   return C
 end
 setindex!(S::EventTraceData, C::EventChannel, j::Int) = (
-  [(getfield(S, f))[j] = getfield(C, f) for f in datafields];
+  [(getfield(S, f))[j] = getfield(C, f) for f in tracefields];
   return S)
 
-isempty(Ch::EventChannel) = minimum([isempty(getfield(Ch,f)) for f in datafields])
+function isempty(Ch::EventChannel)
+  q::Bool = Ch.gain == 1.0
+  for f in (:az, :baz, :dist, :fs)
+    q = min(q, getfield(Ch, f) == 0.0)
+    (q == false) && return q
+  end
+  for f in (:id, :loc, :misc, :name, :notes, :pha, :resp, :src, :t, :units, :x)
+    q = min(q, isempty(getfield(Ch, f)))
+    (q == false) && return q
+  end
+  return q
+end
 
 function pull(S::EventTraceData, i::Integer)
   T = deepcopy(getindex(S, i))
@@ -78,52 +89,48 @@ end
 # Conversion and push to EventTraceData
 function EventTraceData(C::EventChannel)
  S = EventTraceData(1)
- for f in datafields
+ for f in tracefields
    setindex!(getfield(S, f), getfield(C, f), 1)
  end
  return S
 end
-
-+(S::EventTraceData, C::EventChannel) = (deepcopy(S) + EventTraceData(C))
-+(C::EventChannel, S::EventTraceData) = (EventTraceData(C) + deepcopy(S))
-+(C::EventChannel, D::EventChannel) = EventTraceData(C,D)
++(C::EventChannel, D::EventChannel) = +(EventTraceData(C), EventTraceData(D))
++(S::EventTraceData, C::EventChannel) = +(S, EventTraceData(C))
++(C::EventChannel, S::EventTraceData) = +(S, EventTraceData(C))
 
 function push!(S::EventTraceData, C::EventChannel)
- for i in datafields
+ for i in tracefields
    push!(getfield(S,i), getfield(C,i))
  end
  S.n += 1
  return nothing
 end
+#
+# @doc (@doc findid)
+# findid(C::EventChannel, S::GphysData) = findid(C.id, S)
+# findid(S::GphysData, C::EventChannel) = findid(C.id, S)
 
-"""
-   findid(C::EventChannel, S::EventTraceData)
-   findid(S::EventTraceData, C::EventChannel)
-
-Get the index to the first channel `c` in S where `S.id[c]==C.id`.
-"""
-findid(C::EventChannel, S::EventTraceData) = findid(C.id, S)
-findid(S::EventTraceData, C::EventChannel) = findid(C, S)
-
-function sizeof(Ch::EventChannel)
- s = 0
- for f in (:az, :baz, :dist, :id, :loc, :fs, :gain, :misc, :name, :notes, :pha, :resp, :src, :t, :units, :x)
-   targ = getfield(Ch, f)
-   s += sizeof(targ)
-   if !isempty(targ)
-     if f == :notes
-       for i in targ
-         s += sizeof(i)
-       end
-     elseif f == :misc || f == :pha
-       for i in values(targ)
-         s += sizeof(i)
-       end
-       s += sizeof(collect(keys(targ)))
-     end
-   end
- end
- return s
+function sizeof(C::EventChannel)
+  s = 136
+  for f in tracefields
+    v = getfield(C,f)
+    s += sizeof(v)
+    if f == :notes
+      if !isempty(v)
+        s += sum([sizeof(j) for j in v])
+      end
+    elseif f == :misc || f == :pha
+      k = collect(keys(v))
+      s += sizeof(k) + 64 + sum([sizeof(j) for j in k])
+      for p in values(v)
+        s += sizeof(p)
+        if typeof(p) == Array{String,1}
+          s += sum([sizeof(j) for j in p])
+        end
+      end
+    end
+  end
+  return s
 end
 
 @doc (@doc namestrip)
