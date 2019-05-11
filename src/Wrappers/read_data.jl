@@ -122,7 +122,7 @@ function read_data!(S::SeisData, fmt::String, filestr::String;
     if one_file
       read_seed_file!(S, filestr, v, nx_new, nx_add)
     else
-      files = ls(fname)
+      files = ls(filestr)
       for fname in files
         read_seed_file!(S, fname, v, nx_new, nx_add)
       end
