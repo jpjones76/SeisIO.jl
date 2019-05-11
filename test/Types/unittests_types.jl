@@ -1,6 +1,76 @@
-# EventChannel, EventTraceData
+# Locs
+printstyled("  InstrumentPosition\n", color=:light_green)
+redirect_stdout(out) do
+  L = GenLoc{Float32}(); show(stdout, L)
+  @test isempty(L) == true
+  @test hash(L) == hash(GenLoc{Float32}())
 
-printstyled("  Event* unit tests\n", color=:light_green)
+  L = GenLoc(rand(Float64,12))
+  @test getindex(L, 10) == getindex(L.loc, 10)
+  setindex!(L, 1.0, 10)
+  @test getindex(L.loc, 10) == 1.0
+  @test isempty(L) == false
+  @test sizeof(L) > sizeof(L.loc)
+
+  L1 = GeoLoc(datum="WGS84")
+  L2 = GeoLoc(datum="Unknown")
+  show(stdout, L1)
+  @test !(L1 == L2)
+  @test sizeof(L1) > 104
+
+  L = UTMLoc()
+  show(stdout, L)
+  @test isempty(L)
+  @test hash(L) == hash(UTMLoc())
+  @test L == UTMLoc()
+  sizeof(L) > 114
+
+  L = XYLoc()
+  show(stdout, L)
+  @test isempty(L)
+  @test hash(L) == hash(XYLoc())
+  L.x = 10.0
+  L.datum = "Ye olde map of 1833"
+  @test !isempty(L)
+  @test !(L == UTMLoc())
+  @test sizeof(L) > 136
+end
+
+# Responses
+printstyled("  InstrumentResponse\n", color=:light_green)
+redirect_stdout(out) do
+  @test isempty(GenResp())
+
+  X = rand(12,2)
+  Y = rand(12,2)
+  R = GenResp("", X, Y)
+  @test R == GenResp(complex.(X,Y))
+  @test hash(R) == hash(GenResp(complex.(X,Y)))
+  @test sizeof(R) > sizeof(X)+sizeof(Y)
+  show(stdout, R)
+end
+
+# Seismic phases
+@test isempty(PhaseCat())
+
+# Seismic phase catalogs
+@test isempty(PhaseCat())
+P = PhaseCat()
+@test isequal(PhaseCat(), P)
+
+# disk i/o
+wrote_Pha = randPhaseCat()
+open("phasecat.txt", "w") do fio
+  write(fio, wrote_Pha)
+end
+fio = open("phasecat.txt", "r")
+read_Pha = read(fio, PhaseCat)
+close(fio)
+@test read_Pha == wrote_Pha
+rm("phasecat.txt")
+
+# EventChannel, EventTraceData
+printstyled("  EventChannel, EventTraceData\n", color=:light_green)
 EC1 = EventChannel()
 @test isempty(EC1)
 
@@ -25,7 +95,7 @@ EC2 = EventChannel( az = 180*rand(),
                     id = "YY.MONGO..FOO",
                     loc = UTMLoc(),
                     misc = Dict{String,Any}("Dont" => "Science While Drink"),
-                    name = "I Made This",
+                    name = "<I Made This>",
                     notes = Array{String,1}([tnote("It clipped"), tnote("It clipped again")]),
                     pha = PhaseCat("P" => SeisPha(),
                                    "S" => SeisPha(rand()*100.0,
@@ -57,3 +127,15 @@ S2 = randSeisData(12)
 S1.id[11] = "CC.VALT..BHZ"
 @test findid(EC1, S1) == 11 == findid(S1, EC1)
 @test findid(S2, EC1) == findid(EC1, S2)
+
+TD = EventTraceData(EC2, convert(EventTraceData, randSeisData()))
+EC3 = pull(TD, 1)
+@test findid(EC3, TD) == 0
+
+setindex!(TD, EC3, 2)
+@test findid(EC3, TD) == 2
+namestrip!(EC3)
+@test EC3.name == "I Made This"
+
+Ev = SeisEvent(hdr=randSeisHdr(), data=TD)
+@test sizeof(Ev) > 16
