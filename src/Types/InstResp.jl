@@ -58,14 +58,7 @@ GenResp(;
           desc::String              = "",
           resp::Array{Complex{Float64},2} = Array{Complex{Float64},2}(undef, 0, 0)
         ) = GenResp(desc, resp)
-
-# How we read from file
-GenResp(desc::String, rr::Array{Float64,2}, ri::Array{Float64,2}) =
-  GenResp(c, complex.(rr, pi))
-
-GenResp(X::Array{Complex{Float64},2}) = GenResp("", [X...])
-GenResp(X::Array{T,2}) where {T <: Real} = GenResp("", [complex(Float64.(X))...])
-# GenResp(s::String, X::Array{T,2}) where {T <: Complex} = GenResp{T}(s, [X...])
+GenResp(X::Array{Complex{Float64},2}) = GenResp(desc = "", resp = X)
 
 # How we read from file
 GenResp(s::String, X::Array{T,2}, Y::Array{T,2}) where {T <: Real} = GenResp(s, complex.(Float64.(X), Float64.(Y)))
@@ -139,14 +132,14 @@ function readGenResp(io::IO)
   s = String(read(io, nu))
   rr = read!(io, Array{T,2}(undef, nr, nc))
   ri = read!(io, Array{T,2}(undef, nr, nc))
-  return GenResp{T}(s, rr, ri)
+  return GenResp(s, rr, ri)
 end
 
 isempty(R::GenResp) = min(isempty(R.desc), isempty(R.resp))
 isequal(R1::GenResp, R2::GenResp) = min(isequal(R1.desc, R2.desc), isequal(R1.resp, R2.resp))
 ==(R1::GenResp, R2::GenResp) = isequal(R1, R2)
 
-hash(R::GenResp) = hash(R.desc, R.resp)
+hash(R::GenResp) = hash(R.desc, hash(R.resp))
 
 sizeof(R::GenResp) = 16 + sizeof(getfield(R, :desc)) + sizeof(getfield(R, :resp))
 
@@ -279,13 +272,11 @@ isempty(R::Union{PZResp,PZResp64}) = min(R.c == zero(typeof(R.c)), isempty(getfi
 
 function isequal(R1::Union{PZResp,PZResp64}, R2::Union{PZResp,PZResp64})
   q = isequal(getfield(R1, :c), getfield(R2, :c))
-  if q == false
-    return q
-  else
+  if q == true
     q = min(q, isequal(getfield(R1, :z), getfield(R2, :z)))
     q = min(q, isequal(getfield(R1, :p), getfield(R2, :p)))
-    return q
   end
+  return q
 end
 ==(R1::Union{PZResp,PZResp64}, R2::Union{PZResp,PZResp64}) = isequal(R1, R2)
 
