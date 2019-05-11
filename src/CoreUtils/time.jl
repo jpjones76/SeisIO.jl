@@ -43,17 +43,14 @@ function j2md(y::T, j::T) where T<:Integer
   m = z
   d = o
   if j > Int32(31)
-    if j > 59 && ((y % Int32(400) == z) ||
-                  (y % Int32(4)   == z &&
-                   y % Int32(100) != z))
-      D = days_per_month_leap
-    else
-      D = days_per_month
-    end
+    leapyear = ((j > 59) && ((y % Int32(400) == z) || (y % Int32(4) == z && y % Int32(100) != z)))
     while j > z
       d = j
       m += o
-      j -= D[m]
+      j -= days_per_month[m]
+      if leapyear && m == 2
+        j -= o
+      end
     end
   else
     m = o
