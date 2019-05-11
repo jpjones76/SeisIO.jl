@@ -3,63 +3,63 @@ export EventTraceData
 @doc (@doc EventTraceData)
 mutable struct EventTraceData <: GphysData
   n     ::Int64                         # number of channels
-  az    ::Array{Float64,1}              # source azimuth
-  baz   ::Array{Float64,1}              # backazimuth
-  dist  ::Array{Float64,1}              # distance
   id    ::Array{String,1}               # id
+  name  ::Array{String,1}               # name
   loc   ::Array{InstrumentPosition,1}   # loc
   fs    ::Array{Float64,1}              # fs
   gain  ::Array{Float64,1}              # gain
-  misc  ::Array{Dict{String,Any},1}     # misc
-  name  ::Array{String,1}               # name
-  notes ::Array{Array{String,1},1}      # notes
-  pha   ::Array{PhaseCat,1}             # phase catalog
   resp  ::Array{InstrumentResponse,1}   # resp
-  src   ::Array{String,1}               # src
-  t     ::Array{Array{Int64,2},1}       # time
   units ::Array{String,1}               # units
+  az    ::Array{Float64,1}              # source azimuth
+  baz   ::Array{Float64,1}              # backazimuth
+  dist  ::Array{Float64,1}              # distance
+  pha   ::Array{PhaseCat,1}             # phase catalog
+  src   ::Array{String,1}               # src
+  misc  ::Array{Dict{String,Any},1}     # misc
+  notes ::Array{Array{String,1},1}      # notes
+  t     ::Array{Array{Int64,2},1}       # time
   x     ::Array{FloatArray,1}           # data
 
   function EventTraceData()
     return new( 0,                                        # n
-                Array{Float64,1}(undef,0),                # az
-                Array{Float64,1}(undef,0),                # baz
-                Array{Float64,1}(undef,0),                # dist
                 Array{String,1}(undef,0),                 # id
+                Array{String,1}(undef,0),                 # name
                 Array{InstrumentPosition,1}(undef,0),     # loc
                 Array{Float64,1}(undef,0),                # fs
                 Array{Float64,1}(undef,0),                # gain
-                Array{Dict{String,Any},1}(undef,0),       # misc
-                Array{String,1}(undef,0),                 # name
-                Array{Array{String,1},1}(undef,0),        # notes
-                Array{PhaseCat,1}(undef,0),               # pha
                 Array{InstrumentResponse,1}(undef,0),     # resp
-                Array{String,1}(undef,0),                 # src
-                Array{Array{Int64,2},1}(undef,0),         # time
                 Array{String,1}(undef,0),                 # units
+                Array{Float64,1}(undef,0),                # az
+                Array{Float64,1}(undef,0),                # baz
+                Array{Float64,1}(undef,0),                # dist
+                Array{PhaseCat,1}(undef,0),               # pha
+                Array{String,1}(undef,0),                 # src
+                Array{Dict{String,Any},1}(undef,0),       # misc
+                Array{Array{String,1},1}(undef,0),        # notes
+                Array{Array{Int64,2},1}(undef,0),         # t
                 Array{FloatArray,1}(undef,0)              # x
                 )
   end
 
   function EventTraceData(n::UInt)
-    TD = new( n,                                        # n
-              Array{Float64,1}(undef,n),                # az
-              Array{Float64,1}(undef,n),                # baz
-              Array{Float64,1}(undef,n),                # dist
-              Array{String,1}(undef,n),                 # id
-              Array{InstrumentPosition,1}(undef,n),     # loc
-              Array{Float64,1}(undef,n),                # fs
-              Array{Float64,1}(undef,n),                # gain
-              Array{Dict{String,Any},1}(undef,n),       # misc
-              Array{String,1}(undef,n),                 # name
-              Array{Array{String,1},1}(undef,n),        # notes
-              Array{PhaseCat,1}(undef,n),               # pha
-              Array{InstrumentResponse,1}(undef,n),     # resp
-              Array{String,1}(undef,n),                 # src
-              Array{Array{Int64,2},1}(undef,n),         # time
-              Array{String,1}(undef,n),                 # units
-              Array{FloatArray,1}(undef,n)              # x
-            )
+    TD = new( n,                                          # n
+                Array{String,1}(undef,n),                 # id
+                Array{String,1}(undef,n),                 # name
+                Array{InstrumentPosition,1}(undef,n),     # loc
+                Array{Float64,1}(undef,n),                # fs
+                Array{Float64,1}(undef,n),                # gain
+                Array{InstrumentResponse,1}(undef,n),     # resp
+                Array{String,1}(undef,n),                 # units
+                Array{Float64,1}(undef,n),                # az
+                Array{Float64,1}(undef,n),                # baz
+                Array{Float64,1}(undef,n),                # dist
+                Array{PhaseCat,1}(undef,n),               # pha
+                Array{String,1}(undef,n),                 # src
+                Array{Dict{String,Any},1}(undef,n),       # misc
+                Array{Array{String,1},1}(undef,n),        # notes
+                Array{Array{Int64,2},1}(undef,n),         # t
+                Array{FloatArray,1}(undef,n)              # x
+                )
 
     # Fill these fields with something to prevent undefined reference errors
     fill!(TD.az, 0.0)                                        # az
@@ -86,22 +86,24 @@ mutable struct EventTraceData <: GphysData
 end
 
 function sizeof(TD::EventTraceData)
-  s = sizeof(TD.c) + 8
+  s = 144
   for f in tracefields
-    V = getfield(TD, f)
-    s += sizeof(V)
-    for i = 1:TD.n
-      v = getindex(V, i)
-      s += sizeof(v)
-      if f == :notes
-        if !isempty(v)
-          s += sum([sizeof(j) for j in v])
+    if (f in unindexed_fields) == false
+      V = getfield(TD, f)
+      s += sizeof(V)
+      for i = 1:TD.n
+        v = getindex(V, i)
+        s += sizeof(v)
+        if f == :notes
+          if !isempty(v)
+            s += sum([sizeof(j) for j in v])
+          end
+        elseif f == :misc || f == :pha
+          for i in values(v)
+            s += sizeof(i)
+          end
+          s += sizeof(collect(keys(v)))
         end
-      elseif f == :misc || f == :pha
-        for i in values(v)
-          s += sizeof(i)
-        end
-        s += sizeof(collect(keys(v)))
       end
     end
   end
