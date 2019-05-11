@@ -79,11 +79,6 @@ function isempty(Ch::EventChannel)
   return q
 end
 
-function pull(S::EventTraceData, i::Integer)
-  T = deepcopy(getindex(S, i))
-  deleteat!(S,i)
-  return T
-end
 
 # ============================================================================
 # Conversion and push to EventTraceData
@@ -132,6 +127,3 @@ function sizeof(C::EventChannel)
   end
   return s
 end
-
-@doc (@doc namestrip)
-namestrip!(C::EventChannel) = namestrip(getfield(C, :name))

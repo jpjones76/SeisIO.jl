@@ -41,7 +41,7 @@ findchan(r::Union{Regex,String}, S::GphysData) = findall([occursin(r, i) for i i
 
 Extract the first channel with id=`id` from `S` and return it as a new SeisChannel structure. The corresponding channel in `S` is deleted.
 
-    T = pull(S::SeisData, i::integer)
+    T = pull(S::SeisData, i::Union{Integer, UnitRange, Array{In64,1}}
 
 Extract channel `i` from `S` as a new SeisChannel struct, deleting it from `S`.
 """
@@ -60,6 +60,11 @@ function pull(S::T, J::Array{Int64,1}) where {T<:GphysData}
   U = deepcopy(getindex(S, J))
   deleteat!(S, J)
   return U
+end
+function pull(S::T, i::Integer) where {T<:GphysData}
+  C = deepcopy(getindex(S, i))
+  deleteat!(S, i)
+  return C
 end
 
 @doc """
