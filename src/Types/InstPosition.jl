@@ -403,11 +403,9 @@ function readloc!(io::IO, Loc::XYLoc)
 end
 
 function isempty(Loc::XYLoc)
-  z = zero(Float64)
   q::Bool = isempty(getfield(Loc, :datum))
-  q = min(q, getfield(Loc, :datum) == (z, z, z))
-  for f in (:x, :y, :z, :az, :inc)
-    q = min(q, getfield(Loc, f) == z)
+  for f in (:x, :y, :z, :az, :inc, :ox, :oy, :oz)
+    q = min(q, getfield(Loc, f) == 0.0)
   end
   return q
 end
