@@ -63,18 +63,12 @@ setindex!(S::SeisData, C::SeisChannel, j::Int) = (
 
 function isempty(Ch::SeisChannel)
   q::Bool = min(Ch.gain == 1.0, Ch.fs == 0.0)
-  (q == false) && return q
-  for f in (:id, :loc, :gain, :misc, :name, :notes, :resp, :src, :t, :units, :x)
-    q = min(q, isempty(getfield(Ch, f)))
-    (q == false) && return q
+  if q == true
+    for f in (:id, :loc, :misc, :name, :notes, :resp, :src, :t, :units, :x)
+      q = min(q, isempty(getfield(Ch, f)))
+    end
   end
   return q
-end
-
-function pull(S::SeisData, i::Integer)
-  T = deepcopy(getindex(S, i))
-  deleteat!(S,i)
-  return T
 end
 
 # ============================================================================
@@ -122,15 +116,3 @@ function sizeof(C::SeisChannel)
   end
   return s
 end
-
-@doc (@doc namestrip)
-namestrip!(C::SeisChannel) = namestrip(C.name)
-
-# @doc """
-#    findid(C::T, S::GphysData) where T<: GphysChannel
-#    findid(S::GphysData, C::T)
-#
-# Get the index to the first channel `c` in S where `S.id[c]==C.id`.
-# """ findid
-# findid(C::SeisChannel, S::GphysData) = findid(getfield(C, :id), S)
-# findid(S::GphysData, C::SeisChannel) = findid(getfield(C, :id), S)
