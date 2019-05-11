@@ -2,8 +2,8 @@ export SeisChannel
 
 @doc (@doc SeisData)
 mutable struct SeisChannel <: GphysChannel
-  name  ::String
   id    ::String
+  name  ::String
   loc   ::InstrumentPosition
   fs    ::Float64
   gain  ::Float64
@@ -16,8 +16,8 @@ mutable struct SeisChannel <: GphysChannel
   x     ::FloatArray
 
   function SeisChannel(
-      name  ::String,
       id    ::String,
+      name  ::String,
       loc   ::InstrumentPosition,
       fs    ::Float64,
       gain  ::Float64,
@@ -30,14 +30,14 @@ mutable struct SeisChannel <: GphysChannel
       x     ::FloatArray
       )
 
-      return new(name, id, loc, fs, gain, resp, units, src, misc, notes, t, x)
+      return new(id, name, loc, fs, gain, resp, units, src, misc, notes, t, x)
     end
 end
 
 # Are keywords type-stable now?
 SeisChannel(;
-            name  ::String              = "",
             id    ::String              = "",
+            name  ::String              = "",
             loc   ::InstrumentPosition  = GeoLoc(),
             fs    ::Float64             = zero(Float64),
             gain  ::Float64             = one(Float64),
@@ -48,7 +48,7 @@ SeisChannel(;
             notes ::Array{String,1}     = Array{String,1}(undef, 0),
             t     ::Array{Int64,2}      = Array{Int64,2}(undef, 0, 2),
             x     ::FloatArray          = Array{Float32,1}(undef, 0)
-            ) = SeisChannel(name, id, loc, fs, gain, resp, units, src, misc, notes, t, x)
+            ) = SeisChannel(id, name, loc, fs, gain, resp, units, src, misc, notes, t, x)
 
 function getindex(S::SeisData, j::Int)
   C = SeisChannel()
@@ -61,7 +61,15 @@ setindex!(S::SeisData, C::SeisChannel, j::Int) = (
   [(getfield(S, f))[j] = getfield(C, f) for f in datafields];
   return S)
 
-isempty(Ch::SeisChannel) = minimum([isempty(getfield(Ch,f)) for f in datafields])
+function isempty(Ch::SeisChannel)
+  q::Bool = min(Ch.gain == 1.0, Ch.fs == 0.0)
+  (q == false) && return q
+  for f in (:id, :loc, :gain, :misc, :name, :notes, :resp, :src, :t, :units, :x)
+    q = min(q, isempty(getfield(Ch, f)))
+    (q == false) && return q
+  end
+  return q
+end
 
 function pull(S::SeisData, i::Integer)
   T = deepcopy(getindex(S, i))
@@ -78,9 +86,9 @@ function SeisData(C::SeisChannel)
   end
   return S
 end
-+(S::SeisData, C::SeisChannel) = (deepcopy(S) + SeisData(C))
-+(C::SeisChannel, S::SeisData) = (SeisData(C) + deepcopy(S))
-+(C::SeisChannel, D::SeisChannel) = SeisData(C,D)
++(S::SeisData, C::SeisChannel) = +(S, SeisData(C))
++(C::SeisChannel, S::SeisData) = +(S, SeisData(C))
++(C::SeisChannel, D::SeisChannel) = +(SeisData(C), SeisData(D))
 
 function push!(S::SeisData, C::SeisChannel)
   for i in datafields
@@ -90,21 +98,25 @@ function push!(S::SeisData, C::SeisChannel)
   return nothing
 end
 
-function sizeof(Ch::SeisChannel)
-  s = 0
+# This intentionally undercounts exotic objects in :misc (e.g. a nested Dict)
+# because those objects aren't written to disk or created by SeisIO
+function sizeof(C::SeisChannel)
+  s = 96
   for f in datafields
-    targ = getfield(Ch, f)
-    s += sizeof(targ)
-    if !isempty(targ)
-      if f == :notes
-        for i in targ
-          s += sizeof(i)
+    v = getfield(C,f)
+    s += sizeof(v)
+    if f == :notes
+      if !isempty(v)
+        s += sum([sizeof(j) for j in v])
+      end
+    elseif f == :misc
+      k = collect(keys(v))
+      s += sizeof(k) + 64 + sum([sizeof(j) for j in k])
+      for p in values(v)
+        s += sizeof(p)
+        if typeof(p) == Array{String,1}
+          s += sum([sizeof(j) for j in p])
         end
-      elseif f == :misc
-        for i in values(targ)
-          s += sizeof(i)
-        end
-        s += sizeof(collect(keys(targ)))
       end
     end
   end
@@ -114,5 +126,11 @@ end
 @doc (@doc namestrip)
 namestrip!(C::SeisChannel) = namestrip(C.name)
 
-findid(C::SeisChannel, S::SeisData) = findid(C.id, S)
-findid(S::SeisData, C::SeisChannel) = findid(C, S)
+# @doc """
+#    findid(C::T, S::GphysData) where T<: GphysChannel
+#    findid(S::GphysData, C::T)
+#
+# Get the index to the first channel `c` in S where `S.id[c]==C.id`.
+# """ findid
+# findid(C::SeisChannel, S::GphysData) = findid(getfield(C, :id), S)
+# findid(S::GphysData, C::SeisChannel) = findid(getfield(C, :id), S)
