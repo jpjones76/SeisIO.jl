@@ -1,5 +1,3 @@
-export randSeisChannel
-
 # Things that work for both regularly and irregularly sampled data
 function pop_chan_tail!(Ch::SeisChannel)
   ((Ch.gain == 1) || isnan(Ch.gain)) && (Ch.gain = rand()*10^rand(0:10))    # gain

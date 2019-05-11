@@ -1,5 +1,3 @@
-export randSeisData
-
 # Populate a SeisData structure with random channels
 """
     randSeisData([, c=0.2, s=0.6])
