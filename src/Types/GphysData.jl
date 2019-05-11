@@ -167,10 +167,34 @@ function append!(S::T, U::T) where {T<:GphysData}
   S.n += U.n
   return nothing
 end
+
+# rewrite 2019-05-10 for commutativity
 function +(S::T, U::T) where {T<:GphysData}
-  S1 = deepcopy(S)
-  append!(S1, U)
-  return S1
+  # addition will now do a deepcopy reassign based on sorted IDs
+  ids = vcat(getfield(S, :id), getfield(U, :id))
+
+  # Indices to which object and position
+  ii = sortperm(ids)
+  n = length(ii)
+  α = ii.>S.n
+  ii[α] .-= S.n
+
+  Ω = T(n)
+  F = fieldnames(T)
+  for f in F
+    if (f in unindexed_fields) == false
+      targ = getfield(Ω, f)
+      for i = 1:n
+        k = ii[i]
+        if α[i]
+          setindex!(targ, deepcopy(getindex(getfield(U, f), k)), i)
+        else
+          setindex!(targ, deepcopy(getindex(getfield(S, f), k)), i)
+        end
+      end
+    end
+  end
+  return Ω
 end
 
 # ============================================================================
