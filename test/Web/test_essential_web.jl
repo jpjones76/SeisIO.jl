@@ -137,7 +137,7 @@ S = SeisData(3)
 S = randSeisData(3)
 track_on!(S)
 @test haskey(S.misc[1], "track")
-S += randSeisChannel()
+push!(S, randSeisChannel())
 u = track_off!(S)
 @test (u == [false, false, false, true])
 @test haskey(S.misc[1], "track") == false

@@ -12,32 +12,32 @@ units = "m/s"
 src = "test"
 t0 = 0
 
-C1() = SeisChannel( id = id, name = "Channel 1",
+mkC1() = SeisChannel( id = id, name = "Channel 1",
                   loc = loc, fs = fs, resp = PZResp64(1.0, p1, z1), units = units,
                   src = "test channel 1",
                   notes = [tnote("New channel 1.")],
                   misc = Dict{String,Any}( "P" => 6.1 ),
                   t = [1 t0; nx 0],
                   x = randn(nx) )
-C2() = SeisChannel( id = id, name = "Channel 2",
+mkC2() = SeisChannel( id = id, name = "Channel 2",
                   loc = loc, fs = fs, resp = PZResp64(1.0, p1, z1), units = units,
                   src = "test channel 2",
                   notes = [tnote("New channel 2.")],
                   misc = Dict{String,Any}( "S" => 11.0 ),
                   t = [1 t0+nx*Δ; nx 0],
                   x = randn(nx) )
-C4() = (C = C2(); C.loc = loc1;
+mkC4() = (C = mkC2(); C.loc = loc1;
                   C.name = "Channel 4";
                   C.src = "test channel 4";
                   C.notes = [tnote("New channel 4.")]; C)
-C5() = (C = C2(); C.loc = loc1;
+mkC5() = (C = mkC2(); C.loc = loc1;
                   C.name = "Channel 5";
                   C.src = "test channel 5";
                   C.notes = [tnote("New channel 5.")];
                   C.t = [1 t0+nx*2Δ; nx 0];
                   C)
-C2_ov() = (nov = 3; C = C2(); C.t = [1 t0+(nx-nov)*Δ; nx 0]; C)
-C3_ov() = (nov = 3; C = C2(); C.t = [1 t0+2*(nx-nov)*Δ; nx 0]; C)
+C2_ov() = (nov = 3; C = mkC2(); C.t = [1 t0+(nx-nov)*Δ; nx 0]; C)
+C3_ov() = (nov = 3; C = mkC2(); C.t = [1 t0+2*(nx-nov)*Δ; nx 0]; C)
 
 function mk_tcat(T::Array{Array{Int64,2},1}, fs::Float64)
   L = length(T)
@@ -87,7 +87,7 @@ sizetest(T, 1)
 # ===========================================================================
 printstyled(stdout,"    simple merges\n", color=:light_green)
 printstyled(stdout,"      three channels, two w/same params, no overlapping data\n", color=:light_green)
-S = SeisData(C1(), C2(), randSeisChannel())
+S = SeisData(mkC1(), mkC2(), randSeisChannel())
 
 # Is the group merged correctly?
 U = deepcopy(S)
@@ -107,7 +107,7 @@ i = findid(id, S)
 @test haskey(S.misc[1], "S")
 
 printstyled(stdout, "      \"zipper\" merge I: two channels, staggered time windows, no overlap\n", color=:light_green)
-S = SeisData(C1(), C2())
+S = SeisData(mkC1(), mkC2())
 W = Array{Int64,2}(undef, 8, 2);
 for i = 1:8
   W[i,:] = t0 .+ [(i-1)*nx*Δ ((i-1)*nx + nx-1)*Δ]
@@ -127,8 +127,7 @@ basic_checks(S)
 # ===========================================================================
 # (II) as (I) with another channel at a new location
 printstyled(stdout,"    channels must have identical :fs, :loc, :resp, and :units to merge \n", color=:light_green)
-S = SeisData(C1(), C2(), randSeisChannel())
-S += C4()
+S = SeisData(mkC1(), mkC2(), randSeisChannel(), mkC4())
 
 U = deepcopy(S)
 merge!(S)
@@ -151,9 +150,7 @@ for i in datafields
 end
 
 # with a second channel at the new location
-S = deepcopy(U)
-S += C5()
-
+S = SeisData(deepcopy(U), mkC5())
 U = deepcopy(S)
 merge!(S)
 @test S.n == 3
@@ -203,7 +200,7 @@ j = findfirst(S.src.=="test channel 5")
 
 # ===========================================================================
 printstyled(stdout,"    one merging channel with a time gap\n", color=:light_green)
-S = SeisData(C1(), C2(), randSeisChannel())
+S = SeisData(mkC1(), mkC2(), randSeisChannel())
 S.x[2] = rand(2*nx)
 S.t[2] = vcat(S.t[2][1:1,:], [nx 2*Δ], [2*nx 0])
 
@@ -220,7 +217,7 @@ i = findid(id, S)
 
 printstyled(stdout,"      merge window is NOT the first\n", color=:light_green)
 os = 2
-S = SeisData(C1(), C2(), randSeisChannel())
+S = SeisData(mkC1(), mkC2(), randSeisChannel())
 S.x[1] = rand(2*nx)
 S.t[1] = vcat(S.t[1][1:1,:], [nx os*Δ], [2*nx 0])
 S.t[2][1,2] += (os+nx)*Δ
@@ -236,7 +233,7 @@ basic_checks(S)
 printstyled(stdout,"    one merge group has non-duplication time overlap\n", color=:light_green)
 printstyled(stdout,"      check for averaging\n", color=:light_green)
 nov = 3
-S = SeisData(C1(), C2_ov(), randSeisChannel())
+S = SeisData(mkC1(), C2_ov(), randSeisChannel())
 
 # Is the group merged correctly?
 U = deepcopy(S)
@@ -260,7 +257,7 @@ i = findid(id, S)
 
 printstyled(stdout,"      src overlap window is NOT first\n", color=:light_green)
 os = 2
-S = SeisData(C1(), C2_ov(), randSeisChannel())
+S = SeisData(mkC1(), C2_ov(), randSeisChannel())
 S.x[1] = rand(2*nx)
 S.t[1] = vcat(S.t[1][1:1,:], [nx os*Δ], [2*nx 0])
 S.t[2][1,2] += (os+nx)*Δ
@@ -276,7 +273,7 @@ i = findid(id, S)
 
 printstyled(stdout,"      dest overlap window is NOT first\n", color=:light_green)
 nov = 3
-S = SeisData(C1(), C2_ov(), randSeisChannel())
+S = SeisData(mkC1(), C2_ov(), randSeisChannel())
 S.x[2] = rand(2*nx)
 S.t[2] = [1 t0-nx*Δ; nx+1 Δ*(nx-nov); 2*nx 0]
 
@@ -305,7 +302,7 @@ printstyled(stdout,"      data overlap one sample off of S.t\n", color=:light_gr
 
 # (a) 3_sample overlap with wrong time (C2[1:2] == C1[99:100])
 nov = 2
-S = SeisData(C1(), C2_ov())
+S = SeisData(mkC1(), C2_ov())
 S.x[2] = vcat(copy(S.x[1][nx-nov+1:nx]), rand(nx-nov))
 U = deepcopy(S)
 merge!(S)
@@ -338,7 +335,7 @@ i = findid(id, S)
 applied to the second window, rather than the first. =#
 
 printstyled(stdout,"      dest overlap window is NOT first\n", color=:light_green)
-S = SeisData(C1(), C2_ov())
+S = SeisData(mkC1(), C2_ov())
 S.t[2] = [1 t0-nx*Δ; nx+1 Δ*(nx-nov); 2*nx 0]
 S.x[2] = vcat(randn(nx), copy(S.x[1][nx-nov+1:nx]), randn(nx-nov))
 U = deepcopy(S)
@@ -359,7 +356,7 @@ breakpt_1 = nx-nov        # 97
 breakpt_2 = 2*(nx-nov)-1  # 195
 breakpt_3 = 2*(nx-nov)+2  # 198
 
-S = SeisData(C1(), C2_ov(), C3_ov(), randSeisChannel())
+S = SeisData(mkC1(), C2_ov(), C3_ov(), randSeisChannel())
 S.x[2] = vcat(copy(S.x[1][nx-nov+1:nx]), rand(nx-nov))
 U = deepcopy(S)
 merge!(S)
@@ -397,7 +394,7 @@ printstyled(stdout,"      two traces with staggered time windows, some with over
 
 # (a) One overlap in a late window should not shift back previous windows
 nov = 2
-S = SeisData(C1(), C2())
+S = SeisData(mkC1(), mkC2())
 W = Array{Int64,2}(undef, 8, 2);
 for i = 1:8
   W[i,:] = t0 .+ [(i-1)*nx*Δ ((i-1)*nx + nx-1)*Δ]
@@ -441,7 +438,7 @@ end
 printstyled(stdout,"      one overlap, late window, time mismatch\n", color=:light_green)
 nov = 3
 true_nov = 2
-S = SeisData(C1(), C2())
+S = SeisData(mkC1(), mkC2())
 W = Array{Int64,2}(undef, 8, 2);
 for i = 1:8
   W[i,:] = t0 .+ [(i-1)*nx*Δ ((i-1)*nx + nx-1)*Δ]

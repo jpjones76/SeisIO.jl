@@ -1,5 +1,6 @@
 printstyled("  time\n", color=:light_green)
 
+# Timestamp
 t0 = time()
 ts0 = String(split(string(u2d(t0)), '.')[1])
 ts1 = String(split(timestamp(t0), '.')[1])
@@ -8,29 +9,33 @@ ts3 = String(split(timestamp(string(u2d(t0))), '.')[1])
 ts4 = String(split(timestamp(DateTime(string(u2d(t0)))), '.')[1])
 @test ts1 == ts2 == ts3 == ts4 == ts0
 
-m,d = j2md(2000,1); @test m == 1 && d == 1
-m,d = j2md(2000,60); @test m == 2 && d == 29
-m,d = j2md(2013,60); @test m == 3 && d == 1
-m,d = j2md(2100,60); @test m == 3 && d == 1
-m,d = j2md(2012,366)
-@test_throws BoundsError j2md(2013,366)
+# j2md
+@test j2md(1, 1) == (1,1)
+@test j2md(2000, 1) == (1,1)
+@test j2md(2000, 60) == (2,29)
+@test j2md(2000, 366) == (12,31)
+@test_throws BoundsError j2md(2000, 367)
+@test j2md(2012, 366) == (12,31)
+@test j2md(2013, 60) == (3,1)
+@test j2md(2015, 60) == (3,1)
+@test j2md(2015, 365) == (12, 31)
+@test j2md(2016, 61) == (3,1)
+@test_throws BoundsError j2md(2013, 366)
+@test_throws BoundsError j2md(2015, 366)
+@test j2md(2100, 60) == (3,1)
 
-j = md2j(2000,1,1); @test j == 1
-j = md2j(2000,2,29); @test j == 60
-j = md2j(2013,3,1); @test j == 60
-j = md2j(2100,3,1); @test j == 60
+# md2j
+@test md2j(2000,1,1) == 1
+@test md2j(2000,2,29) == 60
+@test md2j(2013,3,1) == 60
+@test md2j(2100,3,1) == 60
+@test md2j(2001,1,1) == 1
+@test 60 == md2j(2015,3,1)
+@test 61 == md2j(2016,3,1)
+@test 365 == md2j(2015,12,31)
+@test 365 == md2j(1900,12,31)
 
-@test ≈([1,1], collect(j2md(1,1)))
-@test ≈([3,1], collect(j2md(2015, 60)))
-@test ≈([3,1], collect(j2md(2016, 61)))
-@test ≈([12,31], collect(j2md(2015, 365)))
-@test ≈([12,31], collect(j2md(2000, 366)))
-@test ≈(1, md2j(2001,1,1))
-@test ≈(60, md2j(2015,3,1))
-@test ≈(61, md2j(2016,3,1))
-@test ≈(365, md2j(2015,12,31))
-@test ≈(365, md2j(1900,12,31))
-
+# parsetimewin
 t1 = t0 + 86400.0
 dt0 = u2d(t0)
 dt1 = u2d(t1)

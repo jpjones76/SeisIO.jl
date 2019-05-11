@@ -2,12 +2,12 @@ using Compat, Dates, DSP, Logging, Printf, SeisIO, SeisIO.RandSeis, Test
 import Dates: DateTime, Hour, now
 import DelimitedFiles: readdlm
 import Random: rand, randperm, randstring
-import SeisIO: BUF, GphysData, FDSN_event_xml, FDSN_sta_xml,
+import SeisIO: BUF, EventChannel, GphysData, FDSN_event_xml, FDSN_sta_xml,
   bad_chars, checkbuf!, datafields, datareq_summ, endtime,
-  fillx_i32_be!, fillx_i32_le!, findhex, first_phase, get_HTTP_req,
+  fillx_i32_be!, fillx_i32_le!, findhex, get_HTTP_req,
   get_http_post, get_separator, get_views, getpf, int2tstr, mean, minreq!,
-  mktaper!, mktime, next_phase, parse_charr, parse_chstr, parse_sl,
-  pcat_end, pcat_start, phase_time, resp_f, safe_isdir, safe_isfile, sep, sμ, t_collapse,
+  mktaper!, mktime, parse_charr, parse_chstr, parse_sl,
+  resp_f, safe_isdir, safe_isfile, sep, sμ, t_collapse,
   t_expand, t_win, taper_seg!, tnote, tstr2int, w_time, webhdr, xtmerge!, μs
 import SeisIO.RandSeis: getyp2codes, pop_rand_dict!
 import Statistics: mean
