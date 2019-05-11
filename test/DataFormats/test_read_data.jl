@@ -38,19 +38,24 @@ if Sys.iswindows() == false
   nf = size(files,1)
   for n = 1:nf
     fname = pref * files[n,1]
+    fwild = fname[1:end-2] * "*"
     f_call = files[n,2]
     opt = files[n,3]
     printstyled(string("    ", n, "/", nf, " ", f_call, "\n"), color=:light_green)
     if opt == "pa-full"
       S = read_data("passcal", fname, full=true)
+      S = read_data("passcal", fwild, full=true)
     elseif opt == "win"
-      S = read_data(f_call, fname, cf=cfile)
+      S = read_data(f_call, fwild, cf=cfile)
     elseif opt == "slist"
       S = read_data("geocsv.slist", fname, tspair=false)
+      S = read_data("geocsv.slist", fwild, tspair=false)
     elseif opt == "lo-mem"
       S = read_data(f_call, fname, nx_new=nx_new, nx_add=nx_add)
+      S = read_data(f_call, fwild, nx_new=nx_new, nx_add=nx_add)
     elseif opt == "full"
       S = read_data(f_call, fname, full=true)
+      S = read_data(f_call, fwild, full=true)
     else
       S = read_data(f_call, fname)
     end

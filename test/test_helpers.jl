@@ -157,6 +157,10 @@ function breaking_seis()
   S.loc[3] = UTMLoc()
   S.loc[4] = XYLoc()
 
+  # Responses
+  S.resp[1] = GenResp()
+  S.resp[2] = PZResp()
+
   S.x[4] = rand(Float64,4)
   S.t[4] = vcat(S.t[4][1:1,:], [4 0])
 
