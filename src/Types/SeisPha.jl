@@ -60,14 +60,12 @@ end
 
 function isequal(S::SeisPha, U::SeisPha)
   q::Bool = isequal(getfield(S, :pol), getfield(U, :pol))
-  if q == false
-    return q
-  else
+  if q == true
     for f in (:d, :tt, :rp, :ta, :ia)
       q = min(q, getfield(S,f) == getfield(U,f))
     end
-    return q
   end
+  return q
 end
 ==(S::SeisPha, U::SeisPha) = isequal(S, U)
 sizeof(P::SeisPha) = 102
@@ -149,8 +147,8 @@ function read(io::IOStream, ::Type{PhaseCat})
     ksep = Char(read(io, UInt8))
     kstr = String(read(io, l))
     K = collect(split(kstr, ksep))
-    for (n,i) in enumerate(K)
-      PC[i] = read(io, SeisPha)
+    for k in K
+      PC[k] = read(io, SeisPha)
     end
   end
   return PC
