@@ -33,7 +33,15 @@ with no universal convention; (2) improve the user experience.
     - `c` Damping constant
     - `p` Complex poles
     - `z` Complex zeros
+* SeisHdr changes:
+  + The redundant fields `:pax` and `:np` have been consolidated into `:axes`,
+    which holds 3-Tuples of Float64s.
+  + The moment tensor field `:mt` is no longer filled in a new SeisHdr.
+  + The SeisHdr `:loc` field is now a substructure with fields for `datum`,
+    `lat`, `lon`, and `dep`.
 * Bugs/Consistency
+  + `sizeof(S)` now better gauges the true sizes of custom objects.
+  + `isempty` is now well-defined for SeisChannel and SeisHdr objects.
   + Fixed incremental subrequest behavior for long `get_data` requests.
   + Eliminated the possibility of a (very rare, but previously possible)
     duplicate sample error in long `get_data` requests.
@@ -42,8 +50,9 @@ with no universal convention; (2) improve the user experience.
   + keyword `nd` (number of days / subrequest) is now type `Real` (was: `Int`).
   + shortened keyword `xml_file` to `xf` because I'm *that* lazy about typing.
   + `writesac` stores channel IDs correctly again.
-  + `writesac` now sets begin time (SAC `b`) based on `:t`, rather than
-    truncating begin time to 0.0.
+  + `writesac` now sets begin time (SAC `b`) from SeisChannel/SeisData `:t`,
+    rather than truncating to 0.0; thus, channel times of data saved to SAC
+    should now be identical to channel times of data saved to SeisIO format.
 
 # SeisIO v0.2.0 Release
 
