@@ -48,23 +48,22 @@ See documentation (https://seisio.readthedocs.io/) for more details.
 """ SeisData
 mutable struct SeisData <: GphysData
   n::Int64
-  c::Array{TCPSocket,1}               # connections
-  name::Array{String,1}               # name
   id::Array{String,1}                 # id
+  name::Array{String,1}               # name
   loc::Array{InstrumentPosition,1}    # loc
   fs::Array{Float64,1}                # fs
   gain::Array{Float64,1}              # gain
   resp::Array{InstrumentResponse,1}   # resp
   units::Array{String,1}              # units
+  src::Array{String,1}                # src
   misc::Array{Dict{String,Any},1}     # misc
   notes::Array{Array{String,1},1}     # notes
-  src::Array{String,1}                # src
   t::Array{Array{Int64,2},1}          # time
   x::Array{FloatArray,1}              # data
+  c::Array{TCPSocket,1}               # connections
 
   function SeisData()
     return new(0,
-                Array{TCPSocket,1}(undef,0),
                 Array{String,1}(undef,0),
                 Array{String,1}(undef,0),
                 Array{InstrumentPosition,1}(undef,0),
@@ -72,30 +71,31 @@ mutable struct SeisData <: GphysData
                 Array{Float64,1}(undef,0),
                 Array{InstrumentResponse,1}(undef,0),
                 Array{String,1}(undef,0),
+                Array{String,1}(undef,0),
                 Array{Dict{String,Any},1}(undef,0),
                 Array{Array{String,1},1}(undef,0),
-                Array{String,1}(undef,0),
                 Array{Array{Int64,2},1}(undef,0),
-                Array{FloatArray,1}(undef,0)
+                Array{FloatArray,1}(undef,0),
+                Array{TCPSocket,1}(undef,0)
               )
   end
 
   function SeisData(n::UInt)
     S = new(n,
-              Array{TCPSocket,1}(undef,0),
-              Array{String,1}(undef,n),
-              Array{String,1}(undef,n),
-              Array{InstrumentPosition,1}(undef,n),
-              Array{Float64,1}(undef,n),
-              Array{Float64,1}(undef,n),
-              Array{InstrumentResponse,1}(undef,n),
-              Array{String,1}(undef,n),
-              Array{Dict{String,Any},1}(undef,n),
-              Array{Array{String,1},1}(undef,n),
-              Array{String,1}(undef,n),
-              Array{Array{Int64,2},1}(undef,n),
-              Array{FloatArray,1}(undef,n)
-            )
+                Array{String,1}(undef,n),
+                Array{String,1}(undef,n),
+                Array{InstrumentPosition,1}(undef,n),
+                Array{Float64,1}(undef,n),
+                Array{Float64,1}(undef,n),
+                Array{InstrumentResponse,1}(undef,n),
+                Array{String,1}(undef,n),
+                Array{String,1}(undef,n),
+                Array{Dict{String,Any},1}(undef,n),
+                Array{Array{String,1},1}(undef,n),
+                Array{Array{Int64,2},1}(undef,n),
+                Array{FloatArray,1}(undef,n),
+                Array{TCPSocket,1}(undef,0)
+              )
 
     # Fill these fields with something to prevent undefined reference errors
     fill!(S.id, "")                                         #  id
@@ -117,8 +117,10 @@ mutable struct SeisData <: GphysData
   SeisData(n::Int) = n > 0 ? SeisData(UInt(n)) : SeisData()
 end
 
+# This intentionally undercounts exotic objects in :misc (e.g. a nested Dict)
+# because those objects aren't written to disk or created by SeisIO
 function sizeof(S::SeisData)
-  s = sizeof(S.c) + 8
+  s = sizeof(S.c) + 120
   for f in datafields
     V = getfield(S,f)
     s += sizeof(V)
@@ -130,12 +132,18 @@ function sizeof(S::SeisData)
           s += sum([sizeof(j) for j in v])
         end
       elseif f == :misc
-        for i in values(v)
-          s += sizeof(i)
+        k = collect(keys(v))
+        s += sizeof(k) + 64 + sum([sizeof(j) for j in k])
+        for p in values(v)
+          s += sizeof(p)
+          if typeof(p) == Array{String,1}
+            s += sum([sizeof(j) for j in p])
+          end
         end
-        s += sizeof(collect(keys(v)))
       end
     end
   end
   return s
 end
+
+(:n, :c, :name, :id, :units, :misc)
