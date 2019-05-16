@@ -25,12 +25,13 @@ Other keywords:
 
 See also: chanspec, parsetimewin, seis_www, SeisIO.KW
 """ get_data!
-function get_data!(S::SeisIO.SeisData, method_in::String, C="*"::Union{String,Array{String,1},Array{String,2}};
+function get_data!(S::SeisData, method_in::String, C="*"::Union{String,Array{String,1},Array{String,2}};
            fmt::String = KW.fmt                              ,  # File format
               nd::Real = KW.nd                               ,  # Number of days per request (in long requests)
           opts::String = KW.opts                             ,  # Options string
  rad::Array{Float64,1} = KW.rad                              ,  # Query radius
  reg::Array{Float64,1} = KW.reg                              ,  # Query region
+           prune::Bool = KW.prune                            ,  # Prune empty channels after query?
            s::TimeSpec = 0                                   ,  # Start
               si::Bool = KW.si                               ,  # Fill station info?
            src::String = KW.src                              ,  # Data source
@@ -53,21 +54,21 @@ function get_data!(S::SeisIO.SeisData, method_in::String, C="*"::Union{String,Ar
       C = parse_charr(C, fdsn = true)
     end
     R = minreq(C)
-    FDSNget!(S, C,
-              fmt=fmt,
-              nd=nd,
-              opts=opts,
-              rad=rad,
-              reg=reg,
-              s=s,
-              si=si,
-              src=src,
-              t=t,
-              to=to,
-              v=v,
-              w=w,
-              xf=xf,
-              y=y)
+    parse_err = FDSNget!(S, C,
+                          fmt=fmt,
+                          nd=nd,
+                          opts=opts,
+                          rad=rad,
+                          reg=reg,
+                          s=s,
+                          si=si,
+                          src=src,
+                          t=t,
+                          to=to,
+                          v=v,
+                          w=w,
+                          xf=xf,
+                          y=y)
   elseif method_in == "IRIS"
     if isa(C, String)
       R = String[strip(String(j)) for j in split(C, ',')]
@@ -80,7 +81,7 @@ function get_data!(S::SeisIO.SeisData, method_in::String, C="*"::Union{String,Ar
     else
       R = deepcopy(C)
     end
-    IRISget!(S, R, α, ω, fmt = fmt, opts = opts, to = to, v = v, w = w)
+    parse_err = IRISget!(S, R, α, ω, fmt = fmt, opts = opts, to = to, v = v, w = w)
   end
 
   # DND DND DND
@@ -89,8 +90,18 @@ function get_data!(S::SeisIO.SeisData, method_in::String, C="*"::Union{String,Ar
   #          f = f, opts = opts, si = si, src = src, to = to, v = v, w = w)
   # DND DND DND
 
+  if prune == true
+    if parse_err == false
+      v > 0 && @info(tnote("Removing empty channels."))
+      prune!(S)
+    else
+      v > 0 && @info(tnote("Can't prune empty channels; web request wasn't fully parsed."))
+    end
+  end
+
   # Sync
   if y == true
+    v > 0 && @info(tnote("Synchronizing data."))
     sync!(S)
   end
   return nothing
@@ -101,6 +112,7 @@ function get_data(method_in::String, C="*"::Union{String,Array{String,1},Array{S
            fmt::String = KW.fmt                              ,  # File format
               nd::Real = KW.nd                               ,  # Number of days per request (in long requests)
           opts::String = KW.opts                             ,  # Options string
+           prune::Bool = KW.prune                            ,  # Prune empty channels after query?
  rad::Array{Float64,1} = KW.rad                              ,  # Query radius
  reg::Array{Float64,1} = KW.reg                              ,  # Query region
            s::TimeSpec = 0                                   ,  # Start
@@ -114,11 +126,12 @@ function get_data(method_in::String, C="*"::Union{String,Array{String,1},Array{S
                y::Bool = KW.y                                   # Sync
      )
 
-  S = SeisIO.SeisData()
+  S = SeisData()
   get_data!(S, method_in, C,
             fmt=fmt,
             nd=nd,
             opts=opts,
+            prune = prune,
             rad=rad,
             reg=reg,
             s=s,
