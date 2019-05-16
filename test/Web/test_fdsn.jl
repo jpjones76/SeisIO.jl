@@ -52,6 +52,32 @@ get_data!(S, "FDSN", ["UW.HOOD..E??", "CC.VALT..???", "UW.XNXNX.99.QQQ"], src="I
 printstyled("      string for channel spec\n", color=:light_green)
 S = get_data("FDSN", "CC.JRO..BHZ,IU.COLA.00.*", src="IRIS", s=-600, t=0)
 
+# This should return exactly 4 days of data, which we know IRIS' FDSN server has
+printstyled("      multi-day request\n", color=:light_green)
+S = get_data("FDSN","CI.ADO..BH?",s="2018-02-01T00:00:00",t="2018-02-03T00:00:00")
+i = findid(S, "CI.ADO..BHE")
+
+# Check that we have two complete days of data with no gaps
+@test (length(S.x[i]) / (86400*S.fs[i])) == 2.0
+
+# Check that these data can be written and read faithfully in SAC and SeisIO formats
+writesac(S)
+wseis("sacreq.seis", S)
+S1 = readsac("2018.032*CI.ADO..BH*SAC")
+S2 = rseis("sacreq.seis")[1]
+@test S == S2
+
+# These are the only fields preserved; :loc is preserved to Float32 precision
+for f in (:id, :fs, :gain, :t, :x)
+  @test getfield(S, f) == getfield(S1, f)
+end
+for f in (:lat, :lon, :el, :dep, :az, :inc)
+  @test isapprox(getfield(S.loc[i], f), getfield(S1.loc[i], f), atol=1.0e-3)
+end
+
+# clean this up
+rm("sacreq.seis")
+
 # A bad data format should produce a warning
 printstyled("      request an unparseable format (sac.zip)\n", color=:light_green)
 
@@ -60,7 +86,7 @@ redirect_stdout(out) do
 end
 
 # Potsdam test
-printstyled("      from GFZ\n", color=:light_green)
+printstyled("      request from GFZ\n", color=:light_green)
 R = get_data("FDSN", "GE.BKB..BH?", src="GFZ", s="2011-03-11T06:00:00", t="2011-03-11T06:05:00", v=0, y=false)
 @test (isempty(R)==false)
 

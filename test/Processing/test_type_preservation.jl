@@ -15,9 +15,11 @@ for f in String["demean!", "detrend!", "filtfilt!", "merge!", "sync!", "taper!",
     end
   end
   T = [eltype(S.x[i]) for i=1:S.n]
+  id = S.id
   getfield(SeisIO, Symbol(f))(S)
   for i = 1:S.n
-    @test T[i] == eltype(S.x[i])
+    j = findfirst(id.==S.id[i])
+    @test T[j] == eltype(S.x[i])
   end
 end
 

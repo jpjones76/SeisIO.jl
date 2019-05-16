@@ -39,6 +39,17 @@ mkC5() = (C = mkC2(); C.loc = loc1;
 C2_ov() = (nov = 3; C = mkC2(); C.t = [1 t0+(nx-nov)*Δ; nx 0]; C)
 C3_ov() = (nov = 3; C = mkC2(); C.t = [1 t0+2*(nx-nov)*Δ; nx 0]; C)
 
+function prandSC(c::Bool)
+  if c == true
+    C = randSeisChannel(c=true, nx=1000)
+  else
+    C = randSeisChannel(c=false, nx=10000)
+  end
+  C.name = randstring(20)
+  C.misc = Dict{String,Any}()
+  return C
+end
+
 function mk_tcat(T::Array{Array{Int64,2},1}, fs::Float64)
   L = length(T)
   τ = Array{Array{Int64,1},1}(undef,L)
@@ -61,7 +72,7 @@ xtmerge!(t, x, 10000)
 
 # ===========================================================================
 printstyled(stdout,"    removal of traces with no data or time info\n", color=:light_green)
-S = randSeisData(4)
+S = SeisData(prandSC(false), prandSC(false), prandSC(false), prandSC(false))
 S.x[2] = Float64[]
 S.x[3] = Float64[]
 S.t[4] = Array{Int64,2}(undef,0,0)
@@ -70,9 +81,9 @@ basic_checks(S)
 sizetest(S, 1)
 
 printstyled(stdout,"    ability to handle irregularly-sampled data\n", color=:light_green)
-C = randSeisChannel(c=true)
+C = prandSC(true)
 namestrip!(C)
-S = SeisData(C, randSeisChannel(c=true), randSeisChannel(c=true))
+S = SeisData(C, prandSC(true), prandSC(true))
 namestrip!(S)
 for i = 2:3
   S.id[i] = identity(S.id[1])
@@ -87,7 +98,7 @@ sizetest(T, 1)
 # ===========================================================================
 printstyled(stdout,"    simple merges\n", color=:light_green)
 printstyled(stdout,"      three channels, two w/same params, no overlapping data\n", color=:light_green)
-S = SeisData(mkC1(), mkC2(), randSeisChannel())
+S = SeisData(mkC1(), mkC2(), prandSC(false))
 
 # Is the group merged correctly?
 U = deepcopy(S)
@@ -99,12 +110,12 @@ i = findid(id, S)
 @test mk_tcat(U.t[1:2], fs) == S.t[i]
 
 # Do the notes log the extra source?
-@test findfirst([occursin("New channel 1", i) for i in S.notes[1]]) != nothing
-@test findfirst([occursin("+src: test channel 1", i) for i in S.notes[1]]) != nothing
+@test findfirst([occursin("New channel 1", i) for i in S.notes[i]]) != nothing
+@test findfirst([occursin("+src: test channel 1", i) for i in S.notes[i]]) != nothing
 
 # Are dictionaries merging correctly?
-@test haskey(S.misc[1], "P")
-@test haskey(S.misc[1], "S")
+@test haskey(S.misc[i], "P")
+@test haskey(S.misc[i], "S")
 
 printstyled(stdout, "      \"zipper\" merge I: two channels, staggered time windows, no overlap\n", color=:light_green)
 S = SeisData(mkC1(), mkC2())
@@ -127,7 +138,7 @@ basic_checks(S)
 # ===========================================================================
 # (II) as (I) with another channel at a new location
 printstyled(stdout,"    channels must have identical :fs, :loc, :resp, and :units to merge \n", color=:light_green)
-S = SeisData(mkC1(), mkC2(), randSeisChannel(), mkC4())
+S = SeisData(mkC1(), mkC2(), prandSC(false), mkC4())
 
 U = deepcopy(S)
 merge!(S)
@@ -146,7 +157,9 @@ i = findfirst(S.src.=="test channel 2")
 j = findfirst(S.src.=="test channel 4")
 @test S.loc[j] == loc1
 for i in datafields
-  @test getfield(U, i)[4] == getfield(S, i)[j]
+  if i != :notes
+    @test getfield(U, i)[4] == getfield(S, i)[j]
+  end
 end
 
 # with a second channel at the new location
@@ -200,7 +213,7 @@ j = findfirst(S.src.=="test channel 5")
 
 # ===========================================================================
 printstyled(stdout,"    one merging channel with a time gap\n", color=:light_green)
-S = SeisData(mkC1(), mkC2(), randSeisChannel())
+S = SeisData(mkC1(), mkC2(), prandSC(false))
 S.x[2] = rand(2*nx)
 S.t[2] = vcat(S.t[2][1:1,:], [nx 2*Δ], [2*nx 0])
 
@@ -210,14 +223,14 @@ merge!(S)
 basic_checks(S)
 @test S.n == 2
 i = findid(id, S)
-@test U.x[1] == S.x[1][1:nx]
-@test U.x[2][1:nx] == S.x[1][nx+1:2nx]
-@test U.x[2][nx+1:2nx] == S.x[1][2nx+1:3nx]
+@test U.x[1] == S.x[i][1:nx]
+@test U.x[2][1:nx] == S.x[i][nx+1:2nx]
+@test U.x[2][nx+1:2nx] == S.x[i][2nx+1:3nx]
 @test mk_tcat(U.t[1:2], fs) == S.t[i]
 
 printstyled(stdout,"      merge window is NOT the first\n", color=:light_green)
 os = 2
-S = SeisData(mkC1(), mkC2(), randSeisChannel())
+S = SeisData(mkC1(), mkC2(), prandSC(false))
 S.x[1] = rand(2*nx)
 S.t[1] = vcat(S.t[1][1:1,:], [nx os*Δ], [2*nx 0])
 S.t[2][1,2] += (os+nx)*Δ
@@ -225,15 +238,16 @@ U = deepcopy(S)
 merge!(S)
 basic_checks(S)
 @test S.n == 2
-@test U.x[1] == S.x[1][1:2nx]
-@test U.x[2] == S.x[1][2nx+1:3nx]
+i = findid(id, S)
+@test U.x[1] == S.x[i][1:2nx]
+@test U.x[2] == S.x[i][2nx+1:3nx]
 @test mk_tcat(U.t[1:2], fs) == S.t[i]
 
 # ===========================================================================
 printstyled(stdout,"    one merge group has non-duplication time overlap\n", color=:light_green)
 printstyled(stdout,"      check for averaging\n", color=:light_green)
 nov = 3
-S = SeisData(mkC1(), C2_ov(), randSeisChannel())
+S = SeisData(mkC1(), C2_ov(), prandSC(false))
 
 # Is the group merged correctly?
 U = deepcopy(S)
@@ -248,16 +262,16 @@ i = findid(id, S)
 @test S.t[i] == [1 U.t[1][1,2]; 2nx-nov 0]
 
 # Do the notes log the extra source?
-@test findfirst([occursin("New channel 1", i) for i in S.notes[1]]) != nothing
-@test findfirst([occursin("+src: test channel 1", i) for i in S.notes[1]]) != nothing
+@test findfirst([occursin("New channel 1", i) for i in S.notes[i]]) != nothing
+@test findfirst([occursin("+src: test channel 1", i) for i in S.notes[i]]) != nothing
 
 # Are dictionaries merging correctly?
-@test haskey(S.misc[1], "P")
-@test haskey(S.misc[1], "S")
+@test haskey(S.misc[i], "P")
+@test haskey(S.misc[i], "S")
 
 printstyled(stdout,"      src overlap window is NOT first\n", color=:light_green)
 os = 2
-S = SeisData(mkC1(), C2_ov(), randSeisChannel())
+S = SeisData(mkC1(), C2_ov(), prandSC(false))
 S.x[1] = rand(2*nx)
 S.t[1] = vcat(S.t[1][1:1,:], [nx os*Δ], [2*nx 0])
 S.t[2][1,2] += (os+nx)*Δ
@@ -269,11 +283,11 @@ i = findid(id, S)
 @test S.x[i][1:2nx-nov] == U.x[1][1:2nx-nov]
 @test S.x[i][2nx-nov+1:2nx] == 0.5*(U.x[1][2nx-nov+1:2nx] + U.x[2][1:nov])
 @test S.x[i][2nx+1:3nx-nov] == U.x[2][nov+1:nx]
-@test S.t[i] == vcat(U.t[1][1:2,:], [length(S.x[1]) 0])
+@test S.t[i] == vcat(U.t[1][1:2,:], [length(S.x[i]) 0])
 
 printstyled(stdout,"      dest overlap window is NOT first\n", color=:light_green)
 nov = 3
-S = SeisData(mkC1(), C2_ov(), randSeisChannel())
+S = SeisData(mkC1(), C2_ov(), prandSC(false))
 S.x[2] = rand(2*nx)
 S.t[2] = [1 t0-nx*Δ; nx+1 Δ*(nx-nov); 2*nx 0]
 
@@ -287,10 +301,6 @@ i = findid(id, S)
 @test S.x[i][2nx-nov+1:2nx] == 0.5*(U.x[1][nx-nov+1:nx] + U.x[2][nx+1:nx+nov])
 @test S.x[i][2nx+1:3nx-nov] == U.x[2][nx+nov+1:2nx]
 @test mk_tcat(U.t[1:2], fs) == S.t[i]
-
-# t1 = t_expand([1 1000000000000000; 97 0], fs); t2 = t_expand([1 999999998990000; 101 980000; 200 0], fs); tt = sort(vcat(t1,t2)); τ = t_collapse(tt, fs)
-# t1 = t_expand(U.t[1], fs); t2 = t_expand(U.t[2], fs); tt = sort(unique(vcat(t1, t2))); t = t_collapse(tt, fs)
-# t == τ
 
 # ===========================================================================
 printstyled(stdout,"    overlap with time mismatch\n", color=:light_green)
@@ -356,7 +366,7 @@ breakpt_1 = nx-nov        # 97
 breakpt_2 = 2*(nx-nov)-1  # 195
 breakpt_3 = 2*(nx-nov)+2  # 198
 
-S = SeisData(mkC1(), C2_ov(), C3_ov(), randSeisChannel())
+S = SeisData(mkC1(), C2_ov(), C3_ov(), prandSC(false))
 S.x[2] = vcat(copy(S.x[1][nx-nov+1:nx]), rand(nx-nov))
 U = deepcopy(S)
 merge!(S)
@@ -371,7 +381,7 @@ i = findid(id, S)
 @test S.t[i] == [1 U.t[1][1,2]-Δ; 3nx-2nov-1 0]
 
 # What happens when there's a gap in one trace?
-breakpt_4 = length(S.x[1])
+breakpt_4 = length(S.x[i])
 S = deepcopy(U)
 S.x[3] = rand(2*nx)
 S.t[3] = vcat(S.t[3][1:1,:], [nx 2*Δ], [2*nx 0])
@@ -484,6 +494,79 @@ end
 @test S.x[i][7nx-δi+1:end] == U.x[2][3nx+true_nov+1:end]
 
 # ============================================================================
+printstyled(stdout,"    distributivity: S1*S3 + S2*S3 == (S1+S2)*S3\n", color=:light_green)
+imax = 10
+printstyled("      trial ", color=:light_green)
+for i = 1:imax
+  if i > 1
+    print("\b\b\b\b\b")
+  end
+  printstyled(string(lpad(i, 2), "/", imax), color=:light_green)
+  S1 = randSeisData()
+  S2 = randSeisData()
+  S3 = randSeisData()
+  # M1 = (S1+S2)*S3
+  # M2 = S1*S3 + S2*S3
+  @test ((S1+S2)*S3) == (S1*S3 + S2*S3)
+  if i == imax
+    println("")
+  end
+end
+
+# ============================================================================
+printstyled(stdout,"    checking (formerly-breaking) end-member cases\n", color=:light_green)
+printstyled(stdout,"      time windows not in chronological order\n", color=:light_green)
+C1 = mkC1()
+C2 = mkC2()
+C3 = deepcopy(C1)
+C3.t = [1 0; 101 -2000000; 200 0]
+append!(C3.x, randn(100))
+S = SeisData(C3, C2, prandSC(false))
+
+# Is the group merged correctly?
+U = deepcopy(S)
+merge!(S)
+basic_checks(S)
+@test S.n == 2
+i = findid(id, S)
+@test S.t[i] == [1 -1000000; 300 0]
+@test vcat(U.x[1][101:200], U.x[1][1:100], U.x[2]) == S.x[i]
+@test mk_tcat(U.t[1:2], fs) == S.t[i]
+
+# Do the notes log the extra source?
+@test findfirst([occursin("New channel 1", j) for j in S.notes[i]]) != nothing
+@test findfirst([occursin("+src: test channel 1", j) for j in S.notes[i]]) != nothing
+
+# Are dictionaries merging correctly?
+@test haskey(S.misc[i], "P")
+@test haskey(S.misc[i], "S")
+
+printstyled(stdout,"      sequential one-sample windows\n", color=:light_green)
+C1 = mkC1()
+C2 = mkC2()
+C2.t = [1 1200000; 99 90059; 100 90210]
+C2.t = [1 1000000; 99 90059; 100 90210]
+S = SeisData(C1, C2, prandSC(false))
+
+# Is the group merged correctly?
+U = deepcopy(S)
+merge!(S)
+basic_checks(S)
+@test S.n == 2
+i = findid(id, S)
+@test S.t[i] == [1  0; 199  90059; 200  90210]
+@test vcat(U.x[1], U.x[2])==S.x[i]
+@test mk_tcat(U.t[1:2], fs) == S.t[i]
+
+# Do the notes log the extra source?
+@test findfirst([occursin("New channel 1", j) for j in S.notes[i]]) != nothing
+@test findfirst([occursin("+src: test channel 1", j) for j in S.notes[i]]) != nothing
+
+# Are dictionaries merging correctly?
+@test haskey(S.misc[i], "P")
+@test haskey(S.misc[i], "S")
+
+# ============================================================================
 printstyled(stdout,"  merge! and new/extended methods\n", color=:light_green)
 fs1 = 50.0
 Δ = round(Int64, sμ/fs1)
@@ -522,7 +605,7 @@ s2u = ungap(s2)
 @test length(s2.x) / s2.fs + μs * sum(s2.t[2:end - 1, 2]) ≈ length(s2u.x) / s2u.fs
 
 printstyled("    channel add and simple merges\n", color=:light_green)
-S += (s1 * s2)
+S = S + (s1 * s2)
 
 # Do in-place operations only change leftmost variable?
 @test length(s1.x) ≈ 100
@@ -611,8 +694,6 @@ C = (s1 * s2)[1]
 @test C.x[101:200] == s2.x[51:150]
 
 # Simple overlapping times
-# s2 = SeisChannel(fs = fs1, gain = 10.0, name = "DEAD.STA.EHZ", id = "DEAD.STA..EHZ",
-#   t = [1 t1+1000000; 150 0], x=randn(150))
 os = 50
 nx = length(s1.x)
 lx = length(s1.x)/s1.fs
@@ -653,8 +734,8 @@ ungap!(T)
 printstyled(stdout,"    SeisData * SeisChannel ==> SeisData\n", color=:light_green)
 (S,T) = mktestseis()
 merge!(S,T)
-C = randSeisChannel()
-D = randSeisChannel()
+C = prandSC(false)
+D = prandSC(false)
 U = merge(S,C)
 U = sort(U)
 V = merge(C,S)
@@ -739,11 +820,5 @@ n_targ = 7
 @test ≈(minimum([length(getfield(S,i)) for i in datafields]), n_targ)
 @test any(maximum([C.x.==i for i in S.x[1]])) == false
 
-# Ultimate merge test
-
-# Eight channels with the same ID
-# 1 & 2 are identical
-# 1 & 3 contain overlapping data with a 2 sample positive offset
-# 1 & 4 contain overlapping data with a 2 sample negative offset
-# 1 & 8 have different :loc fields, forcing 8 to use a new ID
-# 1 & 6 have different instrument responses
+# Old: (Test Passed, 1.42978256,  154864097, 0.038663895, Base.GC_Diff(154864097, 109, 0, 1845386, 4165, 0,  38663895, 7, 0))
+# New: (Test Passed, 1.263168574, 128490661, 0.108295874, Base.GC_Diff(128490661,  81, 0, 1324714, 3857, 0, 108295874, 6, 1))

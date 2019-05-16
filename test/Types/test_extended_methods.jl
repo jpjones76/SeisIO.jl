@@ -130,7 +130,7 @@ Y = sort(X)
 # added 2019-02-23
 S = SeisData(randSeisData(5), SeisChannel(), SeisChannel(),
     SeisChannel(id="UW.SEP..EHZ", name="Darth Exploded",
-    loc=GeoLoc(lat=46.1967, lon=-122.1875, el=1440.0), x=rand(1024)))
+    loc=GeoLoc(lat=46.1967, lon=-122.1875, el=1440.0), t=[0 0; 1024 0], x=rand(1024)))
 prune!(S)
 @test (S.n == 6)
 J = findchan("EHZ",S)
