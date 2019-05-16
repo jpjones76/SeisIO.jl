@@ -1,4 +1,4 @@
-export findid, findchan, prune, prune!, pull
+export GphysData, findid, findchan, prune, prune!, pull
 
 abstract type GphysData end
 
@@ -67,46 +67,6 @@ function pull(S::T, i::Integer) where {T<:GphysData}
   return C
 end
 
-@doc """
-    prune!(S::SeisData)
-
-Delete all channels from S that have no data (i.e. S.x is empty or non-existent).
-""" prune
-function prune!(S::T) where {T<:GphysData}
-  n = getfield(S, :n)
-  X = getfield(S, :x)
-  klist = Array{Int64,1}(undef, 0)
-  for i = 1:n
-    x = getindex(X, i)
-    if lastindex(x) == 0
-      push!(klist, i)
-    end
-  end
-  deleteat!(S, klist)
-  return nothing
-end
-@doc (@doc prune)
-prune(S::T) where {T<:GphysData} = prune!(deepcopy(S))
-
-# Sorting
-"""
-sort(S::SeisData, [rev=false])
-
-Sort channels in object S by `S.id`. Specify `rev=true` to reverse the sort order.
-"""
-function sort(S::T; rev=false::Bool) where {T<:GphysData}
-  j = sortperm(getfield(S, :id), rev=rev)
-  F = fieldnames(T)
-  U = T()
-  for f in F
-    if (f in unindexed_fields) == false
-      setfield!(U, f, getfield(S,f)[j])
-    end
-  end
-  setfield!(U, :n, getfield(S, :n))
-  return U
-end
-
 # ============================================================================
 # Indexing, searching, iteration, size
 # s = S[j] returns a SeisChannel struct
@@ -147,6 +107,33 @@ function setindex!(S::T, U::T, J::Array{Int,1}) where {T<:GphysData}
 end
 setindex!(S::GphysData, U::GphysData, J::UnitRange) = setindex!(S, U, collect(J))
 
+@doc """
+    sort!(S::SeisData, [rev=false])
+
+In-place sort of channels in object S by `S.id`. Specify `rev=true` to reverse the sort order.
+
+    sort(S::SeisData, [rev=false])
+
+Sort channels in object S by `S.id`. Specify `rev=true` to reverse the sort order.
+""" sort!
+function sort!(S::T; rev=false::Bool) where {T<:GphysData}
+  j = sortperm(getfield(S, :id), rev=rev)
+  F = fieldnames(T)
+  for f in F
+    if (f in unindexed_fields) == false
+      setfield!(S, f, getfield(S,f)[j])
+    end
+  end
+  return nothing
+end
+
+@doc (@doc sort!)
+function sort(S::T; rev=false::Bool) where {T<:GphysData}
+  U = deepcopy(S)
+  sort!(U, rev=rev)
+  return U
+end
+
 isempty(S::T) where {T<:GphysData} = (S.n == 0) ? true : minimum([isempty(getfield(S,f)) for f in fieldnames(T)])
 
 function isequal(S::T, U::T) where {T<:GphysData}
@@ -171,35 +158,6 @@ function append!(S::T, U::T) where {T<:GphysData}
   end
   S.n += U.n
   return nothing
-end
-
-# rewrite 2019-05-10 for commutativity
-function +(S::T, U::T) where {T<:GphysData}
-  # addition will now do a deepcopy reassign based on sorted IDs
-  ids = vcat(getfield(S, :id), getfield(U, :id))
-
-  # Indices to which object and position
-  ii = sortperm(ids)
-  n = length(ii)
-  α = ii.>S.n
-  ii[α] .-= S.n
-
-  Ω = T(n)
-  F = fieldnames(T)
-  for f in F
-    if (f in unindexed_fields) == false
-      targ = getfield(Ω, f)
-      for i = 1:n
-        k = ii[i]
-        if α[i]
-          setindex!(targ, deepcopy(getindex(getfield(U, f), k)), i)
-        else
-          setindex!(targ, deepcopy(getindex(getfield(S, f), k)), i)
-        end
-      end
-    end
-  end
-  return Ω
 end
 
 # ============================================================================
@@ -229,9 +187,35 @@ end
 
 deleteat!(S::T, K::UnitRange) where {T<:GphysData} = deleteat!(S, collect(K))
 
-# Subtraction
--(S::GphysData, i::Int)          = (U = deepcopy(S); deleteat!(U,i); return U)  # By channel #
--(S::GphysData, J::Array{Int,1}) = (U = deepcopy(S); deleteat!(U,J); return U)  # By array of channel #s
+@doc """
+    prune!(S::SeisData)
+
+Delete all channels from S that have no data (i.e. S.x is empty or non-existent).
+""" prune!
+function prune!(S::GphysData)
+  n = getfield(S, :n)
+  klist = Array{Int64,1}(undef, 0)
+  sizehint!(klist, n)
+  T = getfield(S, :t)
+  X = getfield(S, :x)
+  i = 0
+  while i < n
+    i = i+1
+
+    # non-empty X with empty T should be rare
+    if isempty(getindex(X, i))
+      push!(klist, i)
+    elseif isempty(getindex(T, i))
+      push!(klist, i)
+    end
+
+  end
+
+  deleteat!(S, klist)
+  return nothing
+end
+@doc (@doc prune!)
+prune(S::T) where {T<:GphysData} = prune!(deepcopy(S))
 # ============================================================================
 # delete!
 function delete!(S::T, s::Union{Regex,String}; exact=true::Bool) where {T<:GphysData}
