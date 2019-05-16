@@ -24,7 +24,7 @@ function pop_chan_tail!(Ch::SeisChannel)
 end
 
 # Populate a channel with irregularly-sampled (campaign-style) data
-function populate_irr!(Ch::SeisChannel)
+function populate_irr!(Ch::SeisChannel; nx::Int64=0)
   irregular_units = ["%", "(% cloud cover)", "(direction vector)", "C", "K", "None", "Pa", "T", "V", "W", "m", "m/m", "m/s", "m/s^2", "m^3/m^3", "rad", "rad/s", "rad/s^2", "tonnes SO2"]
 
   Ch.fs = 0
@@ -46,19 +46,23 @@ function populate_irr!(Ch::SeisChannel)
 
   if isempty(Ch.x) || isempty(Ch.t)
     ts = round(Int, sμ*(time()-86400+randn()))
-    L = 2^rand(6:12)
+    if nx == 0
+      L = 2^rand(6:12)
+    else
+      L = nx
+    end
     Ls = rand(1200:7200)
     Ch.x = (rand(L) .- (rand(Bool) == true ? 0.5 :  0.0)).*(10 .^ (rand(1:10, L)))
-    Ch.t = hcat(zeros(Int64, L), ts.+sort(rand(UnitRange{Int64}(1:Ls), L)))
+    Ch.t = hcat(collect(1:1:L), ts.+sort(rand(UnitRange{Int64}(1:Ls), L)))
   end
-  Ch.src = "randSeisChannel(c=true)"
+  Ch.src = string("randSeisChannel(c=true, nx=",  nx, ")")
 
   pop_chan_tail!(Ch)
   return nothing
 end
 
 # Populate a channel with regularly-sampled (time-series) data
-function populate_chan!(Ch::SeisChannel; s=false::Bool)
+function populate_chan!(Ch::SeisChannel; s::Bool=false, nx::Int64=0)
   fc_vals = Float64[1/120 1/60 1/30 0.2 1.0 1.0 1.0 2.0 4.5 15.0]
   fs_vals = Float64[0.1, 1.0, 2.0, 5.0, 10.0, 20.0, 25.0, 40.0, 50.0, 60.0, 62.5,
     80.0, 100.0, 120.0, 125.0, 250.0]
@@ -106,21 +110,43 @@ function populate_chan!(Ch::SeisChannel; s=false::Bool)
   # random noise for data, with random short time gaps; gaussian noise for a
   # time series, uniform noise with a random exponent otherwise
   if isempty(Ch.x) || isempty(Ch.t)                                         # x
-    # Change: length is always 20-120 minutes
-    Ls = rand(1200:7200)
-    Lx = ceil(Int, Ls*Ch.fs)
+
+    if nx == 0
+      # Change: length is always 20-120 minutes
+      Ls = rand(1200:7200)
+      Lx = ceil(Int, Ls*Ch.fs)
+    else
+      Lx = nx
+    end
     Ch.x = randn(rand() < 0.5 ? Float32 : Float64, Lx)
 
-    L = rand(0:9)
     ts = time()-86400+randn()                                               # t
+    L = rand(0:9)
     t = zeros(2+L, 2)
+
+    # first row is always start time
     t[1,:] = [1 round(Int64, ts/μs)]
-    t[2:L+1,:] = [rand(2:Lx, L, 1) round.(Int, rand(L,1)./μs)]
-    t[L+2,:] = [Lx 0]
+
+    # rest are random time gaps
+    gaps = unique(rand(2:Lx, L, 1))
+    while length(unique(gaps)) < L
+      gaps = unique(rand(2:Lx, L, 1))
+    end
+    t[2:L+1,1] = gaps
+    for i = 2:L+1
+      t[i,2] = round(Int64, (rand(1:100)+rand())*sμ)
+    end
+
+    # control for gap in last sample
+    if any(t[:,1].==length(Ch.x)) == true
+      t = t[1:L+1,:]
+    else
+      t[L+2,:] = [Lx 0]
+    end
     Ch.t = sortslices(t, dims=1)
   end
 
-  Ch.src = "randSeisChannel(c=false)"
+  Ch.src = string("randSeisChannel(c=false, nx=",  nx, ")")
   pop_chan_tail!(Ch)
   return nothing
 end
@@ -138,12 +164,12 @@ Generate a random channel of irregularly-sampled data.
 
 Generate a random channel of regularly-sampled seismic data.
 """
-function randSeisChannel(; c=false::Bool, s=false::Bool)
+function randSeisChannel(; c::Bool=false, s::Bool=false, nx::Int64=0)
   Ch = SeisChannel()
   if c == true
-    populate_irr!(Ch)
+    populate_irr!(Ch, nx=nx)
   else
-    populate_chan!(Ch, s=s)
+    populate_chan!(Ch, s=s, nx=nx)
   end
   return Ch
 end
