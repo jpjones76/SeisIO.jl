@@ -8,6 +8,7 @@ function irisws(cha::String, d0::String, d1::String;
                 w::Bool       = KW.w)
 
   # init
+  parse_err = false
   S = SeisData()
   Ch = SeisChannel()
   parsable = false
@@ -57,9 +58,10 @@ function irisws(cha::String, d0::String, d1::String;
       Ch.misc["data"] = R
     end
   else
+    parse_err = true
     Ch.misc["data"] = String(R)
   end
-  return Ch
+  return parse_err, Ch
 end
 
 function IRISget(C::Array{String,1}, d0::String, d1::String;
@@ -69,13 +71,16 @@ function IRISget(C::Array{String,1}, d0::String, d1::String;
                   v::Int        = KW.v,
                   w::Bool       = KW.w)
 
+  parse_err = false
   S = SeisData()
   K = size(C,1)
   v > 0 && println("IRISWS data request begins...")
   for k = 1:K
-    S += irisws(C[k], d0, d1, fmt = fmt, opts = opts, to = to, v = v, w = w)
+    (p, Ch) = irisws(C[k], d0, d1, fmt = fmt, opts = opts, to = to, v = v, w = w)
+    S += Ch
+    parse_err = max(parse_err, p)
   end
-  return S
+  return parse_err, S
 end
 
 # Programming note: if this method is the default, and S is only modified
@@ -88,9 +93,9 @@ function IRISget!(S::SeisData, C::Array{String,1}, d0::String, d1::String;
                   v::Int        = KW.v,
                   w::Bool       = KW.w)
 
-  U = IRISget(C, d0, d1, fmt = fmt, to = to, opts = opts, v = v, w = w)
-  merge!(S,U)
-  return nothing
+  (parse_err, U) = IRISget(C, d0, d1, fmt = fmt, to = to, opts = opts, v = v, w = w)
+  append!(S,U) # is merge necessary due to scoping? ugh...
+  return parse_err
 end
 
 """

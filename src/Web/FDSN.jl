@@ -252,16 +252,10 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
     ts += ti
   end
 
-  # Remove empty channels if there were no parse errors
-  if !parse_err
-    v > 0 && @info(tnote("Removing empty channels."))
-    merge!(S)
-  end
-
   append!(U,S)
   # Done!
-  v > 0 && @info(tnote("Done."))
-  return U
+  v > 0 && @info(tnote("Done FDSNget query."))
+  return parse_err
 end
 
 """
