@@ -26,14 +26,14 @@ function blk_time!(t::Array{Int32,1}, sid::IOStream, b::Bool)
 end
 
 # [100] Sample Rate Blockette (12 bytes)
-function blk_100(S::SeisIO.SeisData, sid::IO, c::Int64)
+function blk_100(S::SeisData, sid::IO, c::Int64)
   BUF.dt = Float64(BUF.swap ? ntoh(read(sid, Float32)) : read(sid, Float32))
   skip(sid, 4)
   return 0x000c
 end
 
 # [201] Murdock Event Detection Blockette (60 bytes)
-function blk_201(S::SeisIO.SeisData, sid::IO, c::Int64)
+function blk_201(S::SeisData, sid::IO, c::Int64)
   read!(sid, BUF.B201.sig)                             # amplitude, period, background estimate
   BUF.B201.flags = read(sid, UInt8)                    # detection flags
   skip(sid, 1)                                          # reserved
@@ -64,7 +64,7 @@ end
 # [310] Sine Calibration Blockette (60 bytes)
 # [320] Pseudo-random Calibration Blockette (64 bytes)
 # [390] Generic Calibration Blockette (28 bytes)
-function blk_calib(S::SeisIO.SeisData, sid::IO, c::Int64, bt::UInt16)
+function blk_calib(S::SeisData, sid::IO, c::Int64, bt::UInt16)
   p = position(sid)
   blk_time!(BUF.Calib.t, sid, BUF.swap)       # Calibration time
   skip(sid, 1)                                  # Reserved byte
@@ -138,7 +138,7 @@ function blk_calib(S::SeisIO.SeisData, sid::IO, c::Int64, bt::UInt16)
 end
 
 # [500] Timing Blockette (200 bytes)
-function blk_500(S::SeisIO.SeisData, sid::IO, c::Int64)
+function blk_500(S::SeisData, sid::IO, c::Int64)
   BUF.B500.vco_correction    = BUF.swap ? ntoh(read(sid, Float32)) : read(sid, Float32)
   blk_time!(BUF.B500.t, sid, BUF.swap)
   BUF.B500.μsec              = read(sid, Int8)
@@ -166,7 +166,7 @@ end
 # TO DO: correct S.t[c] when one of these timing blockettes is detected
 
 # [1000] Data Only SEED Blockette (8 bytes)
-function blk_1000(S::SeisIO.SeisData, sid::IO, c::Int64)
+function blk_1000(S::SeisData, sid::IO, c::Int64)
   BUF.fmt  = read(sid, UInt8)
   BUF.wo   = read(sid, UInt8)
   lx        = read(sid, UInt8)
@@ -177,7 +177,7 @@ function blk_1000(S::SeisIO.SeisData, sid::IO, c::Int64)
 end
 
 # [1001] Data Extension Blockette (8 bytes)
-function blk_1001(S::SeisIO.SeisData, sid::IO, c::Int64)
+function blk_1001(S::SeisData, sid::IO, c::Int64)
   skip(sid, 1)
   BUF.tc += read(sid, Int8)
   skip(sid, 2)
@@ -185,7 +185,7 @@ function blk_1001(S::SeisIO.SeisData, sid::IO, c::Int64)
 end
 
 # [2000] Variable Length Opaque Data Blockette
-function blk_2000(S::SeisIO.SeisData, sid::IO, c::Int64)
+function blk_2000(S::SeisData, sid::IO, c::Int64)
   # Always big-Endian? Undocumented
   BUF.B2000.NB     = BUF.swap ? ntoh(read(sid, UInt16)) : read(sid, UInt16)
   BUF.B2000.os     = BUF.swap ? ntoh(read(sid, UInt16)) : read(sid, UInt16)
