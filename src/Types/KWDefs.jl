@@ -31,6 +31,7 @@ mutable struct KWDefs
   nx_new::Int64
   opts::String
   pha::String
+  prune::Bool
   rad::Array{Float64,1}
   reg::Array{Float64,1}
   si::Bool
@@ -66,6 +67,7 @@ keyword isn't specified.
 | opts     | ""         | String             | user-specified options[^1]     |
 | pha      | "P"        | String             | phases to get (comma-separated |
 |          |            |                    |    list; use "ttall" for all)  |
+| prune    | true       | Bool               | call prune! after get_data?    |
 | rad      | []         | Array{Float64,1}   | radius search: `[center_lat,`  |
 |          |            |                    |    `center_lon, r_min, r_max]` |
 |          |            |                    |    in decimal degrees (°)      |
@@ -139,6 +141,7 @@ const KW = KWDefs(
                   8640000,  # nx_new::Int64
                         "", # opts::String
                        "P", # pha::String
+                      true, # prune::Bool
                  Float64[], # rad: Array{Float64,1}
                  Float64[], # reg: Array{Float64,1}
                       true, # si::Bool
