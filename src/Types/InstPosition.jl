@@ -1,5 +1,5 @@
 # import Base:getindex, setindex!, show, read, write, isequal, ==, isempty, sizeof, hash
-export InstrumentPosition, GenLoc, GeoLoc, UTMLoc, XYLoc
+export InstrumentPosition, EQLoc, GenLoc, GeoLoc, UTMLoc, XYLoc
 
 @doc """
 **InstrumentPosition**
@@ -11,17 +11,17 @@ Additional structures can be added for custom types.
 
 Matrix of structure fields and rough equivalencies:
 
-| **GenLoc** | **GeoLoc** | **UTMLoc** | **XYLoc** |
-|:---|:---|:---|:---|
-| datum | datum | datum | datum |
-| loc | | | |
-| | zone | orig |
-| | lon | E | x |
-| | lat | N | y |
-| | el | el | z |
-| | dep | dep | |
-| | az | az | az |
-| | inc | inc | inc |
+| **GenLoc** | **GeoLoc** | **UTMLoc** | **XYLoc** | **EQLoc** |
+|:---|:---|:---|:---|:---|
+| datum | datum | datum | datum | datum |
+| loc | | | | |
+| | zone | orig | |
+| | lon | E | x | lon |
+| | lat | N | y | lat |
+| | el | el | z | |
+| | dep | dep | | dep |
+| | az | az | az | |
+| | inc | inc | inc | |
 
 """ InstrumentPosition
 abstract type InstrumentPosition end
@@ -432,3 +432,100 @@ end
 ==(S::XYLoc, U::XYLoc) = isequal(S, U)
 
 sizeof(Loc::XYLoc) = 136 + sizeof(getfield(Loc, :datum))
+
+"""
+    EQLoc
+
+Standard earthquake location description:
+* datum::String
+* lat::Float64 (North is positive)
+* lon::Float64 (East is positive)
+* depth::Float64 (in km; down is positive)
+"""
+mutable struct EQLoc <: InstrumentPosition
+  datum::String
+  lat::Float64
+  lon::Float64
+  dep::Float64
+
+  function EQLoc(
+                  datum ::String ,
+                  lat   ::Float64,
+                  lon   ::Float64,
+                  dep   ::Float64
+                  )
+    return new(datum, lat, lon, dep)
+  end
+end
+
+EQLoc(;
+        datum ::String                    = "",
+        lat   ::Float64                   = zero(Float64),
+        lon   ::Float64                   = zero(Float64),
+        dep   ::Float64                   = zero(Float64)
+        ) = EQLoc(datum, lat, lon, dep)
+
+function show(io::IO, Loc::EQLoc)
+  if get(io, :compact, false) == false
+    println(io, "EQLoc with fields:")
+    for f in (:datum, :lat, :lon, :dep)
+      fn = lpad(String(f), 5, " ")
+      println(io, fn, ": ", getfield(Loc, f))
+    end
+  else
+    c = :compact => true
+    print(io, repr(getfield(Loc, :lat), context=c), " N, ",
+              repr(getfield(Loc, :lon), context=c), " E, ",
+              repr(getfield(Loc, :dep), context=c), " km")
+  end
+  return nothing
+end
+
+function writeloc(io::IO, Loc::EQLoc)
+  datum = codeunits(getfield(Loc, :datum))
+  L = Int64(length(datum))
+  write(io, L)
+  write(io, datum)
+  for f in (:lat, :lon, :dep)
+    write(io, getfield(Loc, f))
+  end
+  return nothing
+end
+
+function readloc!(io::IO, Loc::EQLoc)
+  L = read(io, Int64)
+  setfield!(Loc, :datum, String(read(io, L)))
+  for f in (:lat, :lon, :dep)
+    setfield!(Loc, f, read(io, Float64))
+  end
+  return nothing
+end
+
+function isempty(Loc::EQLoc)
+  q::Bool = isempty(getfield(Loc, :datum))
+  for f in (:lat, :lon, :dep)
+    q = min(q, getfield(Loc, f) == 0.0)
+  end
+  return q
+end
+
+function hash(Loc::EQLoc)
+  h = hash(getfield(Loc, :datum))
+  for f in (:lat, :lon, :dep)
+    h = hash(getfield(Loc, f), h)
+  end
+  return h
+end
+
+function isequal(S::EQLoc, U::EQLoc)
+  q::Bool = isequal(getfield(S, :datum), getfield(U, :datum))
+  if q == true
+    for f in (:lat, :lon, :dep)
+      q = min(q, getfield(S,f) == getfield(U,f))
+    end
+  end
+  return q
+end
+==(S::EQLoc, U::EQLoc) = isequal(S, U)
+
+sizeof(Loc::EQLoc) = 56 + sizeof(getfield(Loc, :datum))
