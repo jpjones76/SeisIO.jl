@@ -48,14 +48,12 @@ read(io::IO, ::Type{SeisPha}) =
 
 function isempty(Pha::SeisPha)
   q::Bool = getfield(Pha, :pol) == ' '
-  if q == false
-    return q
-  else
+  if q == true
     for f in (:d, :tt, :rp, :ta, :ia)
       q = min(q, getfield(Pha, f) == zero(Float64))
     end
-    return q
   end
+  return q
 end
 
 function isequal(S::SeisPha, U::SeisPha)
