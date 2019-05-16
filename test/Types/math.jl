@@ -60,7 +60,7 @@ C1 = convert(EventChannel,randSeisChannel())
 C2 = convert(EventChannel,randSeisChannel())
 @test C1 + C2 == C2 + C1
 
-printstyled(stdout, "      S1 + S2 - S2 == S1 (if S1 is sorted)\n", color=:light_green)
+printstyled(stdout, "      S + U - U == S (for sorted S)\n", color=:light_green)
 # SeisData + SeisData - SeisData
 (S, T) = mktestseis()
 S = sort(S)

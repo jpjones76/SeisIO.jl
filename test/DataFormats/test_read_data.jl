@@ -58,6 +58,10 @@ if Sys.iswindows() == false
       S = read_data(f_call, fwild, full=true)
     else
       S = read_data(f_call, fname)
+      if f_call == "uw"
+        fwild = fname[1:end-3]*"*"*"W"
+      end
+      S = read_data(f_call, fwild)
     end
   end
 end

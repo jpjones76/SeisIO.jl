@@ -103,7 +103,10 @@ t = [1 0; 6 980000; 8 100000; 10 0]
  # 1170000
 
 t2 = t_win(t, Δ)
- #       0    40000
+ # first      last
+ # sample     sample
+ # time       time
+ #       0    40000 ===> so that collect(w[i,1]:Δ:w[i,2]) for each window == t_expand
  # 1030000  1040000
  # 1150000  1170000
  #

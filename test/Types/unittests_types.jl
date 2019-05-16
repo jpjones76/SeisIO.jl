@@ -34,6 +34,13 @@ redirect_stdout(out) do
   @test !isempty(L)
   @test !(L == UTMLoc())
   @test sizeof(L) > 136
+
+  L = EQLoc()
+  show(stdout, L)
+  @test isempty(L)
+  @test hash(L) == hash(EQLoc())
+  @test L == EQLoc()
+  sizeof(L) > 114
 end
 
 # Responses
@@ -41,16 +48,29 @@ printstyled("  InstrumentResponse\n", color=:light_green)
 redirect_stdout(out) do
   @test isempty(GenResp())
 
-  X = rand(12,2)
-  Y = rand(12,2)
+  v = 1.0 + 1.0*im
+  X = rand(12,3)
+  Y = rand(12,3)
   R = GenResp("", X, Y)
   @test R == GenResp(complex.(X,Y))
   @test hash(R) == hash(GenResp(complex.(X,Y)))
   @test sizeof(R) > sizeof(X)+sizeof(Y)
+  @test R[10] == getindex(R.resp, 10) == getindex(R, 10)
+  @test R[11,2] == getindex(R.resp, 11, 2) == getindex(R, 11, 2)
+  R[3] = v
+  R[4,2] = 1.0
+  @test getindex(R.resp, 3) == v == getindex(R, 3, 1)
+  @test real(getindex(R.resp, 4, 2)) == 1.0
+
   show(stdout, R)
+  repr(R, context=:compact=>true)
 end
 
 # Seismic phases
+printstyled("  SeisPha\n", color=:light_green)
+@test isempty(SeisPha())
+
+printstyled("  PhaseCat\n", color=:light_green)
 @test isempty(PhaseCat())
 
 # Seismic phase catalogs
@@ -139,3 +159,6 @@ namestrip!(EC3)
 
 Ev = SeisEvent(hdr=randSeisHdr(), data=TD)
 @test sizeof(Ev) > 16
+
+# SeisHdr
+@test isempty(SeisHdr())
