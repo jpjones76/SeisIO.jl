@@ -86,13 +86,12 @@ function mkxstr(X::FloatArray)
     end
   else
     nx_str          = string(nx)
-    L               = min(10, length(nx_str)+7)-10
     for i = 1:vx-3
       X_str[i,1]    = @sprintf("%+10.3e", X[i])
     end
     X_str[vx-2,1]   = "    ..."
     X_str[vx-1,1]   = @sprintf("%+10.3e", X[nx])
-    X_str[vx,1]     = string("\b"^L, "(nx = ", nx_str, ")")
+    X_str[vx,1]     = string("(nx = ", nx_str, ")")
   end
   return X_str
 end
@@ -174,7 +173,7 @@ function show(io::IO, S::T) where {T<:GphysData}
         show_str(io, String[repr("text/plain", targ[i], context=:compact=>true) for i = 1:M], w, N)
       end
     elseif f == :c
-      print(io, lpad("C", show_os-2), ": ")
+      print(io, "\n", lpad("C", show_os-2), ": ")
       show_conn(io, S.c)
     end
   end
