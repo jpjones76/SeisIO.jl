@@ -80,9 +80,6 @@ function SeisData(C::SeisChannel)
   end
   return S
 end
-+(S::SeisData, C::SeisChannel) = +(S, SeisData(C))
-+(C::SeisChannel, S::SeisData) = +(S, SeisData(C))
-+(C::SeisChannel, D::SeisChannel) = +(SeisData(C), SeisData(D))
 
 function push!(S::SeisData, C::SeisChannel)
   for i in datafields
