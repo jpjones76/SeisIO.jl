@@ -1,28 +1,4 @@
-# Adjust times using simple differences. No t_expand.
-function combine_t_fields(T::Array{Array{Int64,2},1}, Δ::Int64)
-  n = Int64(0)
-  nx = Int64(0)
-  m = typemin(Int64)
-  deleteat!(T, isempty.(T))
-  WW = Array{Array{Int64,2},1}(undef, length(T))
-  for (i,t) in enumerate(T)
-    WW[i] = t_win(t, Δ)
-  end
-  W = vcat(WW...)
-  te = view(W, :, 2)
-  ii = sortperm(te)
-  W = W[ii,:]
-  Nw = size(W,1)
-  for n = Nw-1:-1:1
-    if W[n,2] + Δ == W[n+1,1]
-      W[n,2] = W[n+1,2]
-      W[n+1,1] = m
-    end
-  end
-  return w_time(W[setdiff(1:end, findall(W[:,1].==m)), :], Δ)
-end
-
-function check_alignment(Ti::Array{Int64,1}, Tj::Array{Int64,1}, Xi::Array{Float64,1}, Xj::Array{Float64,1}, Δ::Int64)
+function check_alignment(Ti::Array{Int64,1}, Tj::Array{Int64,1}, Xi::Array{T,1}, Xj::Array{T,1}, Δ::Int64) where {T<:AbstractFloat}
   z = zero(Int64)
 
   # Rare case, but possible: they're the same data
@@ -54,7 +30,7 @@ function check_alignment(Ti::Array{Int64,1}, Tj::Array{Int64,1}, Xi::Array{Float
   return vcat(Ti,Tj), vcat(Xi,Xj), true, z
 end
 
-function xtmerge!(t::Array{Int64,1}, x::Array{Float64,1}, d::Int64)
+function xtmerge!(t::Array{Int64,1}, x::Array{T,1}, d::Int64) where {T<:AbstractFloat}
   # Sanity check
   (length(t) == length(x)) || error(string("Badly set times (Nt=", length(t), ",Nx=", length(x), "); can't merge!"))
 
@@ -97,16 +73,21 @@ end
 
 
 # get hash of each non-empty loc, resp, units, fs ( fs should never be empty )
-function get_subgroups(S::SeisData, group::Array{Int64,1})
+function get_subgroups( LOC   ::Array{InstrumentPosition,1},
+                        FS    ::Array{Float64,1},
+                        RESP  ::Array{InstrumentResponse,1},
+                        UNITS ::Array{String,1},
+                        group ::Array{Int64,1} )
   zh = zero(UInt64)
   N_grp = length(group)
   N_grp == 1 && return([group])
+
   H = Array{UInt,2}(undef, N_grp, 4)
   for (n,g) in enumerate(group)
-    H[n,1] = hash(S.fs[g])
-    H[n,2] = isempty(S.loc[g]) ? zh : hash(S.loc[g])
-    H[n,3] = isempty(S.resp[g]) ? zh : hash(S.resp[g])
-    H[n,4] = isempty(S.units[g]) ? zh : hash(S.units[g])
+    H[n,1] = hash(getindex(FS, g))
+    H[n,2] = isempty(getindex(LOC, g)) ? zh : hash(getindex(LOC, g))
+    H[n,3] = isempty(getindex(RESP, g)) ? zh : hash(getindex(RESP, g))
+    H[n,4] = isempty(getindex(UNITS, g)) ? zh : hash(getindex(UNITS, g))
   end
 
   # If an entire column is unset, we don't care
@@ -147,57 +128,29 @@ function get_subgroups(S::SeisData, group::Array{Int64,1})
   return subgrp_inds
 end
 
-function get_time_windows(S::SeisData, grp::Array{Int64,1}, Δ::Int64; rev::Bool=true)
+function get_next_pair(W::Array{Int64,2})
+  L = size(W,1)
+  i = 1
 
-  # Initialize
-  ts = Array{Int64,1}(undef,0)
-  te = Array{Int64,1}(undef,0)
-  pa = Array{Int64,1}(undef,0)
-  pi = Array{Int64,1}(undef,0)
-  xs = Array{Int64,1}(undef,0)
-  xe = Array{Int64,1}(undef,0)
+  # dest loop
+  while i < L
+    si = getindex(W, i)
+    ei = getindex(W, i + L)
+    j = i + 1
 
-  for n in grp
-    isempty(S.t[n]) && continue
-    w = t_win(S.t[n], Δ)
-    L = size(w, 1)
-    append!(ts, w[:,1])
-    append!(te, w[:,2])
-    append!(pa, n*ones(Int64, L))
-    append!(pi, collect(1:1:L))
-    append!(xs, S.t[n][1:L,1])
-    tt = copy(S.t[n][2:L+1,1])
-    if L > 1
-      for i = 1:L-1
-        tt[i] -= 1
+    # src loop
+    while j ≤ L
+      sj = getindex(W, j)
+      ej = getindex(W, j+L)
+      if min(si ≤ ej, ei ≥ sj) == true
+        # src    # dest
+        return vcat(W[j,:], j), vcat(W[i,:], i)
       end
+      j = j + 1
     end
-    append!(xe, tt)
+    i = i + 1
   end
-
-  ☿ = sortperm(te, rev=rev)
-  ts = ts[☿]
-  te = te[☿]
-  pa = pa[☿]
-  pi = pi[☿]
-  xs = xs[☿]
-  xe = xe[☿]
-  return ts, te, pa, pi, xs, xe
-end
-
-function get_next_pair(S::SeisData, grp::Array{Int64,1}, Δ::Int64)
-  ts, te, pa, pi, xs, xe = get_time_windows(S, grp, Δ)
-  N = length(te)
-  for i = 1:N-1
-    for j = i+1:N
-      if min(ts[i] ≤ te[j], te[i] ≥ ts[j]) == true
-        src = (ts[j], te[j], pa[j], pi[j])
-        dest = (ts[i], te[i], pa[i], pi[i])
-        return (src, dest)
-      end
-    end
-  end
-  return ((0,0,0,0), (0,0,0,0))
+  return zeros(Int64, 7), zeros(Int64, 7)
 end
 
 # merges into the channel with the most recent data
@@ -206,6 +159,9 @@ function merge_non_ts!(S::SeisData, subgrp::Array{Int64,1})
   Ω = subgrp[argmax(te)]
   T = vcat(S.t[subgrp]...)[:,2]
   X = vcat(S.x[subgrp]...)
+  Z = unique(collect(zip(T,X)))
+  T = first.(Z)
+  X = last.(Z)
   ii = sortperm(T)
   S.t[Ω] = hcat(collect(1:1:length(T)), T[ii])
   S.x[Ω] = X[ii]
