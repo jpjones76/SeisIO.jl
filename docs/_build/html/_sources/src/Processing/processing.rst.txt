@@ -80,9 +80,9 @@ also remove gains of irregularly-sampled channels.
 .. _merge:
 
 
-***********************
-Merge and Synchronize
-***********************
+*****
+Merge
+*****
 
 .. function:: merge!(S::SeisData, U::SeisData)
 
@@ -94,29 +94,42 @@ half the sampling interval.
 
 "Flatten" a SeisData structure by merging data from identical channels.
 
+
 Merge Behavior
 ==============
-Two (or more) channels are merged if they have the same values for each of
-these fields:
-+ ``:id``
-+ ``:fs``
-+ ``:resp``
-+ ``:units``
-+ ``:loc``
-Unset (empty) values for ``:resp``, ``:units``, and ``:loc`` are treated as a
-match to any non-empty value in the corresponding field.
 
-How Merges Work
----------------
-* Non-overlapping data are concatenated and time gaps are adjusted as needed.
-* Redundant data are removed.
-* Data that overlap in time and have different values are averaged pairwise if
-  x\ :sub:`i`\ , x\ :sub:`j`\  : \| t\ :sub:`i`\ -t\ :sub:`j`\  \| < (0.5*S.fs). Warnings are thrown
-  when this situation is encountered.
+Which channels merge?
+---------------------
+* Channels merge if they have identical values for ``:id``, ``:fs``, ``:loc``, ``:resp``, and ``:units``.
+* An unset ``:loc``, ``:resp``, or ``:units`` field matches any set value in the corresponding field of another channel.
 
-It's best to merge only unprocessed data. Merging data segments that were
-processed independently (e.g. detrended) throws many warnings if values differ
-at overlapping times.
+
+What happens to merged fields?
+------------------------------
+* The essential properties above are preserved.
+* Other fields are combined.
+* Merged channels with different `:name` values use the name of the channel with the latest data before the merge; other names are logged to `:notes`.
+
+
+What does ``merge!`` resolve?
+-----------------------------
+
+.. csv-table::
+  :header: Issue, Resolution
+  :delim: |
+  :widths: 1, 1
+
+  Empty channels | Delete
+  Duplicated channels | Delete duplicate channels
+  Duplicated windows in channel(s)  | Delete duplicate windows
+  Multiple channels, same properties\ :sup:`(a)` | Merge to a single channel
+  Channel with out-of-order time windows | Sort in chronological order
+  Overlapping windows, identical data, time-aligned | Windows merged
+  Overlapping windows, identical data, small time offset\ :sup:`(a)` | Time offset corrected, windows merged
+  Overlapping windows, non-identical data | Samples averaged, windows merged
+
+:sup:`(a)` "Properties" here are ``:id``, ``:fs``, ``:loc``, ``:resp``, and ``:units``.
+:sup:`(b)` Data offset >4 sample intervals are treated as overlapping and non-identical.
 
 When SeisIO Won't Merge
 ------------------------
@@ -124,6 +137,14 @@ SeisIO does **not** combine data channels if **any** of the five fields above
 are non-empty and different. For example, if a SeisData object S contains two
 channels, each with id "XX.FOO..BHZ", but one has fs=100 Hz and the other fs=50 Hz,
 **merge!** does nothing.
+
+It's best to merge only unprocessed data. Data segments that were processed
+independently (e.g. detrended) will be averaged pointwise when merged, which
+can easily leave data in an unusuable state.
+
+***********
+Synchronize
+***********
 
 .. function:: sync!(S::SeisData)
 

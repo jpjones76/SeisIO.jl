@@ -103,16 +103,17 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Data Processing Functions</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#signal-processing">Signal Processing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#merge-and-synchronize">Merge and Synchronize</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#merge">Merge</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#merge-behavior">Merge Behavior</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#how-merges-work">How Merges Work</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#which-channels-merge">Which channels merge?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#what-happens-to-merged-fields">What happens to merged fields?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#what-does-merge-resolve">What does <code class="docutils literal notranslate"><span class="pre">merge!</span></code> resolve?</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#when-seisio-won-t-merge">When SeisIO Won’t Merge</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#specifying-start-time-s">Specifying start time (s)</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#specifying-end-time-t">Specifying end time (t)</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#synchronize">Synchronize</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#other-processing-functions">Other Processing Functions</a></li>
 </ul>
 </li>
@@ -305,8 +306,8 @@ filter, and fh is used in a Lowpass filter.</p>
 <p>Divide the gains from all channels <strong>i</strong> with <strong>S.fs[i] &gt; 0.0</strong>. Specify <strong>irr=true</strong> to
 also remove gains of irregularly-sampled channels.</p>
 </div>
-<div class="section" id="merge-and-synchronize">
-<span id="merge"></span><h2>Merge and Synchronize<a class="headerlink" href="#merge-and-synchronize" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="merge">
+<span id="id1"></span><h2>Merge<a class="headerlink" href="#merge" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt>
 <code class="descname">merge!(S::SeisData, U::SeisData)</code></dt>
@@ -323,27 +324,62 @@ half the sampling interval.</p>
 <p>“Flatten” a SeisData structure by merging data from identical channels.</p>
 <div class="section" id="merge-behavior">
 <h3>Merge Behavior<a class="headerlink" href="#merge-behavior" title="Permalink to this headline">¶</a></h3>
-<p>Two (or more) channels are merged if they have the same values for each of
-these fields:
-+ <code class="docutils literal notranslate"><span class="pre">:id</span></code>
-+ <code class="docutils literal notranslate"><span class="pre">:fs</span></code>
-+ <code class="docutils literal notranslate"><span class="pre">:resp</span></code>
-+ <code class="docutils literal notranslate"><span class="pre">:units</span></code>
-+ <code class="docutils literal notranslate"><span class="pre">:loc</span></code>
-Unset (empty) values for <code class="docutils literal notranslate"><span class="pre">:resp</span></code>, <code class="docutils literal notranslate"><span class="pre">:units</span></code>, and <code class="docutils literal notranslate"><span class="pre">:loc</span></code> are treated as a
-match to any non-empty value in the corresponding field.</p>
-<div class="section" id="how-merges-work">
-<h4>How Merges Work<a class="headerlink" href="#how-merges-work" title="Permalink to this headline">¶</a></h4>
+<div class="section" id="which-channels-merge">
+<h4>Which channels merge?<a class="headerlink" href="#which-channels-merge" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
-<li>Non-overlapping data are concatenated and time gaps are adjusted as needed.</li>
-<li>Redundant data are removed.</li>
-<li>Data that overlap in time and have different values are averaged pairwise if
-x<sub>i</sub>, x<sub>j</sub> : | t<sub>i</sub>-t<sub>j</sub> | &lt; (0.5*S.fs). Warnings are thrown
-when this situation is encountered.</li>
+<li>Channels merge if they have identical values for <code class="docutils literal notranslate"><span class="pre">:id</span></code>, <code class="docutils literal notranslate"><span class="pre">:fs</span></code>, <code class="docutils literal notranslate"><span class="pre">:loc</span></code>, <code class="docutils literal notranslate"><span class="pre">:resp</span></code>, and <code class="docutils literal notranslate"><span class="pre">:units</span></code>.</li>
+<li>An unset <code class="docutils literal notranslate"><span class="pre">:loc</span></code>, <code class="docutils literal notranslate"><span class="pre">:resp</span></code>, or <code class="docutils literal notranslate"><span class="pre">:units</span></code> field matches any set value in the corresponding field of another channel.</li>
 </ul>
-<p>It’s best to merge only unprocessed data. Merging data segments that were
-processed independently (e.g. detrended) throws many warnings if values differ
-at overlapping times.</p>
+</div>
+<div class="section" id="what-happens-to-merged-fields">
+<h4>What happens to merged fields?<a class="headerlink" href="#what-happens-to-merged-fields" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li>The essential properties above are preserved.</li>
+<li>Other fields are combined.</li>
+<li>Merged channels with different <cite>:name</cite> values use the name of the channel with the latest data before the merge; other names are logged to <cite>:notes</cite>.</li>
+</ul>
+</div>
+<div class="section" id="what-does-merge-resolve">
+<h4>What does <code class="docutils literal notranslate"><span class="pre">merge!</span></code> resolve?<a class="headerlink" href="#what-does-merge-resolve" title="Permalink to this headline">¶</a></h4>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Issue</th>
+<th class="head">Resolution</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Empty channels</td>
+<td>Delete</td>
+</tr>
+<tr class="row-odd"><td>Duplicated channels</td>
+<td>Delete duplicate channels</td>
+</tr>
+<tr class="row-even"><td>Duplicated windows in channel(s)</td>
+<td>Delete duplicate windows</td>
+</tr>
+<tr class="row-odd"><td>Multiple channels, same properties<sup>(a)</sup></td>
+<td>Merge to a single channel</td>
+</tr>
+<tr class="row-even"><td>Channel with out-of-order time windows</td>
+<td>Sort in chronological order</td>
+</tr>
+<tr class="row-odd"><td>Overlapping windows, identical data, time-aligned</td>
+<td>Windows merged</td>
+</tr>
+<tr class="row-even"><td>Overlapping windows, identical data, small time offset<sup>(a)</sup></td>
+<td>Time offset corrected, windows merged</td>
+</tr>
+<tr class="row-odd"><td>Overlapping windows, non-identical data</td>
+<td>Samples averaged, windows merged</td>
+</tr>
+</tbody>
+</table>
+<p><sup>(a)</sup> “Properties” here are <code class="docutils literal notranslate"><span class="pre">:id</span></code>, <code class="docutils literal notranslate"><span class="pre">:fs</span></code>, <code class="docutils literal notranslate"><span class="pre">:loc</span></code>, <code class="docutils literal notranslate"><span class="pre">:resp</span></code>, and <code class="docutils literal notranslate"><span class="pre">:units</span></code>.
+<sup>(b)</sup> Data offset &gt;4 sample intervals are treated as overlapping and non-identical.</p>
 </div>
 <div class="section" id="when-seisio-won-t-merge">
 <h4>When SeisIO Won’t Merge<a class="headerlink" href="#when-seisio-won-t-merge" title="Permalink to this headline">¶</a></h4>
@@ -351,6 +387,14 @@ at overlapping times.</p>
 are non-empty and different. For example, if a SeisData object S contains two
 channels, each with id “XX.FOO..BHZ”, but one has fs=100 Hz and the other fs=50 Hz,
 <strong>merge!</strong> does nothing.</p>
+<p>It’s best to merge only unprocessed data. Data segments that were processed
+independently (e.g. detrended) will be averaged pointwise when merged, which
+can easily leave data in an unusuable state.</p>
+</div>
+</div>
+</div>
+<div class="section" id="synchronize">
+<h2>Synchronize<a class="headerlink" href="#synchronize" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt>
 <code class="descname">sync!(S::SeisData)</code></dt>
@@ -366,9 +410,6 @@ start time in S.</p>
 <p>Synchronize all data in S to start at <cite>ST</cite> and terminate at <cite>EN</cite> with verbosity level VV.</p>
 <p>For regularly-sampled channels, gaps between the specified and true times
 are filled with the mean; this isn’t possible with irregularly-sampled data.</p>
-</div>
-<div class="section" id="specifying-start-time-s">
-<h4>Specifying start time (s)<a class="headerlink" href="#specifying-start-time-s" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li>s=”last”: (Default) sync to the last start time of any channel in <cite>S</cite>.</li>
 <li>s=”first”: sync to the first start time of any channel in <cite>S</cite>.</li>
@@ -376,9 +417,6 @@ are filled with the mean; this isn’t possible with irregularly-sampled data.</
 <li>A DateTime is treated as a DateTime. (see Dates.DateTime for details.)</li>
 <li>Any string other than “last” or “first” is parsed as a DateTime.</li>
 </ul>
-</div>
-<div class="section" id="specifying-end-time-t">
-<h4>Specifying end time (t)<a class="headerlink" href="#specifying-end-time-t" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
 <li>t=”none”: (Default) end times are not synchronized.</li>
 <li>t=”last”: synchronize all channels to end at the last end time in <cite>S</cite>.</li>
@@ -391,8 +429,6 @@ are filled with the mean; this isn’t possible with irregularly-sampled data.</
 <dd></dd></dl>
 
 <p>Merge multiple SeisData structures into S.</p>
-</div>
-</div>
 </div>
 <div class="section" id="other-processing-functions">
 <h2>Other Processing Functions<a class="headerlink" href="#other-processing-functions" title="Permalink to this headline">¶</a></h2>

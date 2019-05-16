@@ -53,7 +53,7 @@
 
 
 \title{SeisIO Documentation}
-\date{May 10, 2019}
+\date{May 16, 2019}
 \release{0.2.0}
 \author{Joshua Jones}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -1562,8 +1562,8 @@ Divide the gains from all channels \sphinxstylestrong{i} with \sphinxstylestrong
 also remove gains of irregularly-sampled channels.
 
 
-\subsection{Merge and Synchronize}
-\label{\detokenize{src/Processing/processing:merge-and-synchronize}}\label{\detokenize{src/Processing/processing:merge}}
+\subsection{Merge}
+\label{\detokenize{src/Processing/processing:merge}}\label{\detokenize{src/Processing/processing:id1}}
 
 \begin{fulllineitems}
 \pysigline{\sphinxbfcode{\sphinxupquote{merge!(S::SeisData,~U::SeisData)}}}
@@ -1585,35 +1585,91 @@ half the sampling interval.
 
 \subsubsection{Merge Behavior}
 \label{\detokenize{src/Processing/processing:merge-behavior}}
-Two (or more) channels are merged if they have the same values for each of
-these fields:
-+ \sphinxcode{\sphinxupquote{:id}}
-+ \sphinxcode{\sphinxupquote{:fs}}
-+ \sphinxcode{\sphinxupquote{:resp}}
-+ \sphinxcode{\sphinxupquote{:units}}
-+ \sphinxcode{\sphinxupquote{:loc}}
-Unset (empty) values for \sphinxcode{\sphinxupquote{:resp}}, \sphinxcode{\sphinxupquote{:units}}, and \sphinxcode{\sphinxupquote{:loc}} are treated as a
-match to any non-empty value in the corresponding field.
 
-
-\paragraph{How Merges Work}
-\label{\detokenize{src/Processing/processing:how-merges-work}}\begin{itemize}
+\paragraph{Which channels merge?}
+\label{\detokenize{src/Processing/processing:which-channels-merge}}\begin{itemize}
 \item {} 
-Non-overlapping data are concatenated and time gaps are adjusted as needed.
+Channels merge if they have identical values for \sphinxcode{\sphinxupquote{:id}}, \sphinxcode{\sphinxupquote{:fs}}, \sphinxcode{\sphinxupquote{:loc}}, \sphinxcode{\sphinxupquote{:resp}}, and \sphinxcode{\sphinxupquote{:units}}.
 
 \item {} 
-Redundant data are removed.
-
-\item {} 
-Data that overlap in time and have different values are averaged pairwise if
-x$_{\text{i}}$, x$_{\text{j}}$ : \textbar{} t$_{\text{i}}$-t$_{\text{j}}$ \textbar{} \textless{} (0.5*S.fs). Warnings are thrown
-when this situation is encountered.
+An unset \sphinxcode{\sphinxupquote{:loc}}, \sphinxcode{\sphinxupquote{:resp}}, or \sphinxcode{\sphinxupquote{:units}} field matches any set value in the corresponding field of another channel.
 
 \end{itemize}
 
-It’s best to merge only unprocessed data. Merging data segments that were
-processed independently (e.g. detrended) throws many warnings if values differ
-at overlapping times.
+
+\paragraph{What happens to merged fields?}
+\label{\detokenize{src/Processing/processing:what-happens-to-merged-fields}}\begin{itemize}
+\item {} 
+The essential properties above are preserved.
+
+\item {} 
+Other fields are combined.
+
+\item {} 
+Merged channels with different \sphinxtitleref{:name} values use the name of the channel with the latest data before the merge; other names are logged to \sphinxtitleref{:notes}.
+
+\end{itemize}
+
+
+\paragraph{What does \sphinxstyleliteralintitle{\sphinxupquote{merge!}} resolve?}
+\label{\detokenize{src/Processing/processing:what-does-merge-resolve}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{2}|\X{1}{2}|}
+\hline
+\sphinxstyletheadfamily 
+Issue
+&\sphinxstyletheadfamily 
+Resolution
+\\
+\hline
+Empty channels
+&
+Delete
+\\
+\hline
+Duplicated channels
+&
+Delete duplicate channels
+\\
+\hline
+Duplicated windows in channel(s)
+&
+Delete duplicate windows
+\\
+\hline
+Multiple channels, same properties$^{\text{(a)}}$
+&
+Merge to a single channel
+\\
+\hline
+Channel with out-of-order time windows
+&
+Sort in chronological order
+\\
+\hline
+Overlapping windows, identical data, time-aligned
+&
+Windows merged
+\\
+\hline
+Overlapping windows, identical data, small time offset$^{\text{(a)}}$
+&
+Time offset corrected, windows merged
+\\
+\hline
+Overlapping windows, non-identical data
+&
+Samples averaged, windows merged
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+$^{\text{(a)}}$ “Properties” here are \sphinxcode{\sphinxupquote{:id}}, \sphinxcode{\sphinxupquote{:fs}}, \sphinxcode{\sphinxupquote{:loc}}, \sphinxcode{\sphinxupquote{:resp}}, and \sphinxcode{\sphinxupquote{:units}}.
+$^{\text{(b)}}$ Data offset \textgreater{}4 sample intervals are treated as overlapping and non-identical.
 
 
 \paragraph{When SeisIO Won’t Merge}
@@ -1623,6 +1679,13 @@ are non-empty and different. For example, if a SeisData object S contains two
 channels, each with id “XX.FOO..BHZ”, but one has fs=100 Hz and the other fs=50 Hz,
 \sphinxstylestrong{merge!} does nothing.
 
+It’s best to merge only unprocessed data. Data segments that were processed
+independently (e.g. detrended) will be averaged pointwise when merged, which
+can easily leave data in an unusuable state.
+
+
+\subsection{Synchronize}
+\label{\detokenize{src/Processing/processing:synchronize}}
 
 \begin{fulllineitems}
 \pysigline{\sphinxbfcode{\sphinxupquote{sync!(S::SeisData)}}}
@@ -1642,10 +1705,7 @@ Synchronize all data in S to start at \sphinxtitleref{ST} and terminate at \sphi
 
 For regularly-sampled channels, gaps between the specified and true times
 are filled with the mean; this isn’t possible with irregularly-sampled data.
-
-
-\paragraph{Specifying start time (s)}
-\label{\detokenize{src/Processing/processing:specifying-start-time-s}}\begin{itemize}
+\begin{itemize}
 \item {} 
 s=”last”: (Default) sync to the last start time of any channel in \sphinxtitleref{S}.
 
@@ -1662,10 +1722,7 @@ A DateTime is treated as a DateTime. (see Dates.DateTime for details.)
 Any string other than “last” or “first” is parsed as a DateTime.
 
 \end{itemize}
-
-
-\paragraph{Specifying end time (t)}
-\label{\detokenize{src/Processing/processing:specifying-end-time-t}}\begin{itemize}
+\begin{itemize}
 \item {} 
 t=”none”: (Default) end times are not synchronized.
 
