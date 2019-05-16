@@ -32,7 +32,7 @@ end
 function convert(::Type{EventChannel}, C::SeisChannel)
   D = EventChannel()
   for f in datafields
-    setfield!(D, f, deepcopy(getfield(D, f)))
+    setfield!(D, f, deepcopy(getfield(C, f)))
   end
   return D
 end
