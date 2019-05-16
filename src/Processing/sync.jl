@@ -54,7 +54,7 @@ function sync!(S::GphysData;
                 )
 
   # Dekete empty traces
-  deleteat!(S, findall([isempty(S.x[i]) for i =1:S.n]))     # delete (zap) empty channels
+  deleteat!(S, findall([isempty(S.x[i]) for i =1:S.n]))     # delete empty channels
   S.n == 0 && return nothing                                # pointless to continue
 
   do_end = t=="none" ? false : true
