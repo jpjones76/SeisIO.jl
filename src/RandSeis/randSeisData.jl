@@ -10,7 +10,7 @@ Generate 8 to 24 channels of random seismic data as a SeisData object.
 
 Generate N channels of random seismic data as a SeisData object.
 """
-function randSeisData(N::Int; c=0.2::Float64, s=0.6::Float64)
+function randSeisData(N::Int64; c::Float64=0.2, s::Float64=0.6, nx::Int64=0)
   S = SeisData(N)
   n_seis = max(min(ceil(Int, s*S.n), S.n-1),0)
   n_irr = max(min(floor(Int, c*S.n), S.n-n_seis-1),0)
@@ -20,13 +20,13 @@ function randSeisData(N::Int; c=0.2::Float64, s=0.6::Float64)
   data_spec = shuffle!(data_spec)
   for i = 1:S.n
     if data_spec[i] == 0x01
-      S[i] = randSeisChannel(s=true)
+      S[i] = randSeisChannel(s=true, nx=nx)
     elseif data_spec[i] == 0x02
-      S[i] = randSeisChannel(c=true)
+      S[i] = randSeisChannel(c=true, nx=nx)
     else
-      S[i] = randSeisChannel()
+      S[i] = randSeisChannel(nx=nx)
     end
   end
   return S
 end
-randSeisData(; c=0.2::Float64, s=0.6::Float64) = randSeisData(rand(8:24), c=c, s=s)
+randSeisData(; c::Float64=0.2, s::Float64=0.6, nx::Int64=0) = randSeisData(rand(8:24), c=c, s=s, nx=nx)
