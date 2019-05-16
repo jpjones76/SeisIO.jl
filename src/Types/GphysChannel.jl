@@ -1,3 +1,5 @@
+export GphysChannel
+
 abstract type GphysChannel end
 
 function isequal(C::T, D::T) where {T<:GphysChannel}
@@ -21,7 +23,6 @@ Get the index to the first channel `c` in S where `S.id[c]==C.id`.
 findid(C::TC, S::TS) where {TC<:GphysChannel, TS<:GphysData} = findid(getfield(C, :id), S)
 findid(S::TS, C::TC) where {TC<:GphysChannel, TS<:GphysData} = findid(getfield(C, :id), S)
 in(s::String, C::GphysChannel) = getfield(C, :id)==s
-
 
 @doc (@doc namestrip)
 namestrip!(C::T) where {T<:GphysChannel} = setfield!(C, :name, namestrip(getfield(C, :name)))
