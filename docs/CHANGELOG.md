@@ -1,3 +1,27 @@
+### 2019-05-15
+Consistency and Performance Improvements
+* The **+** and **\*** operators on objects of type T<: GphysData now obey
+  basic properties of arithmetic:
+  - commutativity: `S1 + S2 = S2 + S1`
+  - associativity: `(S1 + S2) + S3 = S1 + (S2 + S3)`
+  - distributivity: `(S1*S3 + S2*S3) = (S1+S2)*S3`
+* `merge!`
+  - improved speed and memory efficiency
+  - duplicates of channels are now removed
+  - duplicates of windows within channels are now removed
+  - corrected handling of two (previously breaking) end-member cases:
+    + data windows within a channel not in chronological order
+    + sequential one-sample time windows in a channel
+* `purge!` added as a new function to remove empty and duplicate channels
+* `mseis!` now accepts EventTraceData and EventChannel objects
+* `get_data`
+  + now uses new keyword `KW.prune` to determine whether or not to remove empty
+    channels from partially-successful data requests
+  + now calls `prune!` instead `merge!` after new downloads
+  + no longer throws warnings if removing an empty channel because its data
+    were unavailable
+* `sort!` has been extended to objects of type T<: GphysData
+
 ### 2019-05-10
 **Typeageddon!** A number of changes have been made to SeisData object
 architectures, with two goals: (1) allow several standardized formats for fields
