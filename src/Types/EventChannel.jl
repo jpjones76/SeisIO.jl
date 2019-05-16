@@ -79,7 +79,6 @@ function isempty(Ch::EventChannel)
   return q
 end
 
-
 # ============================================================================
 # Conversion and push to EventTraceData
 function EventTraceData(C::EventChannel)
@@ -89,9 +88,6 @@ function EventTraceData(C::EventChannel)
  end
  return S
 end
-+(C::EventChannel, D::EventChannel) = +(EventTraceData(C), EventTraceData(D))
-+(S::EventTraceData, C::EventChannel) = +(S, EventTraceData(C))
-+(C::EventChannel, S::EventTraceData) = +(S, EventTraceData(C))
 
 function push!(S::EventTraceData, C::EventChannel)
  for i in tracefields
@@ -100,10 +96,6 @@ function push!(S::EventTraceData, C::EventChannel)
  S.n += 1
  return nothing
 end
-#
-# @doc (@doc findid)
-# findid(C::EventChannel, S::GphysData) = findid(C.id, S)
-# findid(S::GphysData, C::EventChannel) = findid(C.id, S)
 
 function sizeof(C::EventChannel)
   s = 136
