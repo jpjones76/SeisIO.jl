@@ -61,9 +61,11 @@ Generate a SeisEvent structure filled with random header and channel data.
 function randSeisEvent(; c=0.2::Float64, s=0.6::Float64)
   V = SeisEvent(hdr=randSeisHdr(), data=convert(EventTraceData, randSeisData(c=c, s=s)))
 
-
   for i = 1:V.data.n
     setindex!(getfield(getfield(V, :data), :pha), randPhaseCat(), i)
+    setindex!(getfield(getfield(V, :data), :az),   180*(rand()-0.5), i)
+    setindex!(getfield(getfield(V, :data), :baz),  180*(rand()-0.5), i)
+    setindex!(getfield(getfield(V, :data), :dist), 180*rand(),       i)
   end
   return V
 end
