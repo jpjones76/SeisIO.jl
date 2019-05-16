@@ -63,11 +63,11 @@ function fill_sac(S::SeisChannel, ts::Bool, leven::Bool)
   if !isempty(S.loc)
     loc = getfield(S, :loc)
     if typeof(loc) == GeoLoc
-      fv[32] = loc.lat
-      fv[33] = loc.lon
-      fv[34] = loc.el
-      fv[58] = loc.az
-      fv[59] = loc.inc
+      fv[32] = Float32(getfield(loc, :lat))
+      fv[33] = Float32(getfield(loc, :lon))
+      fv[34] = Float32(getfield(loc, :el))
+      fv[58] = Float32(getfield(loc, :az))
+      fv[59] = Float32(getfield(loc, :inc))
     end
   end
 
@@ -85,7 +85,7 @@ function fill_sac(S::SeisChannel, ts::Bool, leven::Bool)
       L = min(Ls, L_max)
       copyto!(cv, si, s, 1, L)
       if L < L_max
-        cv[si+L+1:ei] .= 0x20
+        cv[si+L:ei] .= 0x20
       end
     end
   end
