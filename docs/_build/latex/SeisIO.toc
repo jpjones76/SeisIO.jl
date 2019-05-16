@@ -1,0 +1,88 @@
+\babel@toc {english}{}
+\contentsline {chapter}{\numberline {1}Intro}{3}{chapter.1}
+\contentsline {section}{\numberline {1.1}Introduction}{3}{section.1.1}
+\contentsline {subsection}{\numberline {1.1.1}Overview}{3}{subsection.1.1.1}
+\contentsline {subsection}{\numberline {1.1.2}Installation}{3}{subsection.1.1.2}
+\contentsline {subsection}{\numberline {1.1.3}Getting Started}{4}{subsection.1.1.3}
+\contentsline {subsection}{\numberline {1.1.4}Updating}{4}{subsection.1.1.4}
+\contentsline {subsection}{\numberline {1.1.5}Getting Help}{4}{subsection.1.1.5}
+\contentsline {section}{\numberline {1.2}First Steps}{4}{section.1.2}
+\contentsline {subsection}{\numberline {1.2.1}Start Here}{4}{subsection.1.2.1}
+\contentsline {subsection}{\numberline {1.2.2}Operations on SeisData structures}{5}{subsection.1.2.2}
+\contentsline {subsubsection}{Adding channels to a SeisData structure}{5}{subsubsection*.3}
+\contentsline {subsubsection}{Search, Sort, and Prune}{6}{subsubsection*.4}
+\contentsline {subsection}{\numberline {1.2.3}Next Steps}{6}{subsection.1.2.3}
+\contentsline {section}{\numberline {1.3}Working with Data}{6}{section.1.3}
+\contentsline {subsection}{\numberline {1.3.1}Creating Data Containers}{6}{subsection.1.3.1}
+\contentsline {subsection}{\numberline {1.3.2}Acquiring Data}{7}{subsection.1.3.2}
+\contentsline {subsection}{\numberline {1.3.3}Keeping Track}{7}{subsection.1.3.3}
+\contentsline {subsubsection}{Source Logging}{8}{subsubsection*.8}
+\contentsline {subsection}{\numberline {1.3.4}Channel Maintenance}{8}{subsection.1.3.4}
+\contentsline {subsection}{\numberline {1.3.5}Taking Notes}{8}{subsection.1.3.5}
+\contentsline {chapter}{\numberline {2}Files}{11}{chapter.2}
+\contentsline {section}{\numberline {2.1}Reading Files}{11}{section.2.1}
+\contentsline {subsection}{\numberline {2.1.1}Supported File Formats}{11}{subsection.2.1.1}
+\contentsline {subsection}{\numberline {2.1.2}Supported Keywords}{12}{subsection.2.1.2}
+\contentsline {subsubsection}{Performance Tip}{12}{subsubsection*.9}
+\contentsline {paragraph}{Examples}{12}{paragraph*.10}
+\contentsline {subsection}{\numberline {2.1.3}Format Descriptions and Notes}{13}{subsection.2.1.3}
+\contentsline {subsection}{\numberline {2.1.4}Other File I/O Functions}{13}{subsection.2.1.4}
+\contentsline {chapter}{\numberline {3}Web}{15}{chapter.3}
+\contentsline {section}{\numberline {3.1}Web Requests}{15}{section.3.1}
+\contentsline {subsection}{\numberline {3.1.1}Examples}{15}{subsection.3.1.1}
+\contentsline {subsection}{\numberline {3.1.2}FDSN Queries}{16}{subsection.3.1.2}
+\contentsline {subsubsection}{Data Query}{16}{subsubsection*.20}
+\contentsline {subsubsection}{Station Query}{16}{subsubsection*.21}
+\contentsline {subsubsection}{Event Header Query}{17}{subsubsection*.22}
+\contentsline {subsubsection}{Event Header and Data Query}{17}{subsubsection*.23}
+\contentsline {subsection}{\numberline {3.1.3}IRIS Queries}{17}{subsection.3.1.3}
+\contentsline {subsubsection}{Data Query Features}{17}{subsubsection*.25}
+\contentsline {subsubsection}{Phase Onset Query}{18}{subsubsection*.26}
+\contentsline {section}{\numberline {3.2}SeedLink}{18}{section.3.2}
+\contentsline {subsection}{\numberline {3.2.1}Special Rules}{19}{subsection.3.2.1}
+\contentsline {subsection}{\numberline {3.2.2}Special Methods}{19}{subsection.3.2.2}
+\contentsline {subsubsection}{SeedLink Utilities}{19}{subsubsection*.27}
+\contentsline {chapter}{\numberline {4}Processing}{21}{chapter.4}
+\contentsline {section}{\numberline {4.1}Data Processing Functions}{21}{section.4.1}
+\contentsline {subsection}{\numberline {4.1.1}Signal Processing}{21}{subsection.4.1.1}
+\contentsline {subsection}{\numberline {4.1.2}Merge}{22}{subsection.4.1.2}
+\contentsline {subsubsection}{Merge Behavior}{22}{subsubsection*.31}
+\contentsline {paragraph}{Which channels merge?}{22}{paragraph*.32}
+\contentsline {paragraph}{What happens to merged fields?}{22}{paragraph*.33}
+\contentsline {paragraph}{What does \sphinxstyleliteralintitle {\sphinxupquote {merge!}} resolve?}{23}{paragraph*.34}
+\contentsline {paragraph}{When SeisIO Won\IeC {\textquoteright }t Merge}{23}{paragraph*.35}
+\contentsline {subsection}{\numberline {4.1.3}Synchronize}{23}{subsection.4.1.3}
+\contentsline {subsection}{\numberline {4.1.4}Other Processing Functions}{24}{subsection.4.1.4}
+\contentsline {chapter}{\numberline {5}Appendices}{25}{chapter.5}
+\contentsline {section}{\numberline {5.1}Utility Functions}{25}{section.5.1}
+\contentsline {subsection}{\numberline {5.1.1}RandSeis}{26}{subsection.5.1.1}
+\contentsline {section}{\numberline {5.2}Structure and Field Descriptions}{27}{section.5.2}
+\contentsline {subsection}{\numberline {5.2.1}SeisChannel Fields}{27}{subsection.5.2.1}
+\contentsline {subsection}{\numberline {5.2.2}SeisData Fields}{27}{subsection.5.2.2}
+\contentsline {subsubsection}{Time Convention}{28}{subsubsection*.46}
+\contentsline {subsection}{\numberline {5.2.3}SeisHdr Fields}{28}{subsection.5.2.3}
+\contentsline {subsection}{\numberline {5.2.4}SeisEvent Fields}{28}{subsection.5.2.4}
+\contentsline {section}{\numberline {5.3}SeisIO File Format}{28}{section.5.3}
+\contentsline {subsection}{\numberline {5.3.1}File header}{29}{subsection.5.3.1}
+\contentsline {subsection}{\numberline {5.3.2}SeisHdr}{29}{subsection.5.3.2}
+\contentsline {subsection}{\numberline {5.3.3}SeisData}{30}{subsection.5.3.3}
+\contentsline {subsubsection}{Channel data}{31}{subsubsection*.48}
+\contentsline {subsubsection}{Storing misc}{31}{subsubsection*.49}
+\contentsline {paragraph}{Standard Types in \sphinxstyleliteralintitle {\sphinxupquote {:misc}}}{33}{paragraph*.50}
+\contentsline {paragraph}{Unusual Types in \sphinxstyleliteralintitle {\sphinxupquote {:misc}}}{34}{paragraph*.51}
+\contentsline {subsection}{\numberline {5.3.4}SeisEvent}{34}{subsection.5.3.4}
+\contentsline {section}{\numberline {5.4}Data Requests Syntax}{35}{section.5.4}
+\contentsline {subsection}{\numberline {5.4.1}Channel ID Syntax}{35}{subsection.5.4.1}
+\contentsline {subsubsection}{Wildcards and Blanks}{35}{subsubsection*.53}
+\contentsline {subsubsection}{Channel Configuration Files}{35}{subsubsection*.54}
+\contentsline {subsubsection}{Server List}{37}{subsubsection*.55}
+\contentsline {subsection}{\numberline {5.4.2}Time Syntax}{37}{subsection.5.4.2}
+\contentsline {section}{\numberline {5.5}SeisIO Standard Keywords}{38}{section.5.5}
+\contentsline {subsection}{\numberline {5.5.1}SeedLink Keywords}{38}{subsection.5.5.1}
+\contentsline {section}{\numberline {5.6}Examples}{39}{section.5.6}
+\contentsline {subsection}{\numberline {5.6.1}FDSN data query}{39}{subsection.5.6.1}
+\contentsline {subsection}{\numberline {5.6.2}FDSN station query}{39}{subsection.5.6.2}
+\contentsline {subsection}{\numberline {5.6.3}FDSN event header/data query}{40}{subsection.5.6.3}
+\contentsline {subsection}{\numberline {5.6.4}IRISWS data query}{40}{subsection.5.6.4}
+\contentsline {subsection}{\numberline {5.6.5}SeedLink sessions}{40}{subsection.5.6.5}
+\contentsline {chapter}{Index}{43}{section*.57}
