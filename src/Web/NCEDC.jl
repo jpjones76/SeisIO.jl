@@ -1,9 +1,9 @@
-export FDSNevq, FDSNevt, FDSNsta
+export NCEDCevq, NCEDCevt, NCEDCsta
 
 # =============================================================================
 # No export
 
-function FDSN_chp(chans::Union{String,Array{String,1},Array{String,2}}; v::Int64 = KW.v)
+function NCEDC_chp(chans::Union{String,Array{String,1},Array{String,2}}; v::Int64 = KW.v)
   # Parse channel config
   if isa(chans, String)
     C = parse_chstr(chans, fdsn = true)
@@ -18,7 +18,7 @@ function FDSN_chp(chans::Union{String,Array{String,1},Array{String,2}}; v::Int64
 end
 
 """
-    S = FDSNsta(chans, KW)
+    S = NCEDCsta(chans, KW)
 
 Retrieve station/channel info for formatted parameter file (or string) `chans`
 into an empty SeisData structure.
@@ -32,7 +32,7 @@ Other keywords:
 
 See also: chanspec, parsetimewin, get_data!, SeisIO.KW
 """
-function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
+function NCEDCsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
                   rad ::Array{Float64,1}  = KW.rad,         # Search radius
                   reg ::Array{Float64,1}  = KW.reg,         # Search region
                   s   ::TimeSpec          = 0,              # Start
@@ -40,11 +40,11 @@ function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
                   t   ::TimeSpec          = (-600),         # End or Length (s)
                   to  ::Int               = KW.to,          # Read timeout (s)
                   v   ::Int64             = KW.v,           # Verbosity
-                  xf  ::String            = "FDSNsta.xml"   # XML filename
+                  xf  ::String            = "FDSN.xml"   # XML filename
                  )
 
   d0, d1 = parsetimewin(s, t)
-  v > 0 && @info(tnote("Querying FDSN stations"))
+  v > 0 && @info(tnote("Querying NCEDC stations"))
   URL = string(fdsn_uhead(src), "station/1/query")
   BODY = "level=response\nformat=xml\n"
   wc = "*"
@@ -62,13 +62,12 @@ function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
                     "minlongitude=", reg[3], "\n",
                     "maxlongitude=", reg[4], "\n" )
   end
-
   # Add channel search to BODY
   if chans == wc
     (isempty(reg) && isempty(rad)) && error("No query! Please specify a search radius, a rectangular search region, or some channels.")
     BODY *= string("* * * * ", d0, " ", d1, "\n")
   else
-    C = FDSN_chp(chans, v=v)
+    C = NCEDC_chp(chans, v=v)
     Nc = size(C,1)
     for i = 1:Nc
       str = ""
@@ -84,10 +83,13 @@ function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
     printstyled("request body: \n", color=:light_green)
     println(BODY)
   end
-  open(xf, "w") do io
-    request("POST", URL, webhdr, BODY, response_stream=io)
-  end
 
+  open(xf, "w") do io
+    #Specify request headers
+    #Wrong request headers cause server internal error (500)
+    headers = ["Host" => "service.ncedc.org", "User-Agent" => "curl/7.60.0", "Accept" => "*/*"]
+    request("POST", URL, webhdr, BODY, response_stream=io, headers=headers)
+  end
   # Build channel list
   v > 0 && @info(tnote("Building list of channels"))
   io = open(xf, "r")
@@ -95,6 +97,7 @@ function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
   close(io)
   (ID, NAME, LOC, FS, GAIN, RESP, UNITS, MISC) = FDSN_sta_xml(xsta)
   v > 2 && println(stdout, "IDs from XML = ", ID)
+
   # Transfer to a SeisData object
   S = SeisData(length(ID))
   for i = 1:S.n
@@ -110,7 +113,7 @@ function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
   return S
 end
 
-function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,2}};
+function NCEDCget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,2}};
   fmt       ::String            = KW.fmt,         # Request format
   nd        ::Real              = KW.nd,          # Number of days per request
   opts      ::String            = KW.opts,        # User-defined options
@@ -123,13 +126,13 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
   to        ::Int64             = KW.to,          # Read timeout (s)
   v         ::Int64             = KW.v,           # Verbosity
   w         ::Bool              = KW.w,           # Write to disk?
-  xf        ::String            = "FDSNsta.xml",  # XML filename
+  xf        ::String            = "FDSN.xml",  # XML filename
   y         ::Bool              = KW.y            # Sync?
   )
 
   parse_err = false
   n_badreq = 0
-  wc = "*"
+  wc = "--"
   d0, d1 = parsetimewin(s, t)
   # dt_end = DateTime(d1)
   # dt1 = deepcopy(dt_end)
@@ -137,7 +140,7 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
 
   # (1) Time-space query for station info
   if si
-    S = FDSNsta(chans,
+    S = NCEDCsta(chans,
                 rad   = rad,
                 reg   = reg,
                 s     = d0,
@@ -148,7 +151,6 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
                 xf    = xf
                 )
   end
-
   # (2) Build ID strings for data query
   ID_str = Array{String,1}(undef,S.n)
   for i = 1:S.n
@@ -166,13 +168,16 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
   # (3) Data query
   v > 0 && @info(tnote("Data query begins"))
   URL = string(fdsn_uhead(src), "dataselect/1/query")
-  BODY = "format=" * fmt * "\n"
-  if !isempty(opts)
-    OPTS = split(opts, "&")
-    for opt in OPTS
-      BODY *= string(opt, "\n")
-    end
-  end
+
+  # NCEDC POST does not need "fprmat=mseed" in BODY
+  # BODY = "format=" * fmt * "\n"
+  # if !isempty(opts)
+  #   OPTS = split(opts, "&")
+  #   for opt in OPTS
+  #     BODY *= string(opt, "\n")
+  #   end
+  # end
+  BODY = ""
 
   # Set the data source
   for i = 1:S.n
@@ -215,13 +220,15 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
                     string(m),
                     string(j),
                     replace(split(s_str, 'T')[2], ':' => '.'),
-                    "FDSNWS",
+                    "NCEDCWS",
                     src,
                     ext],
                     '.')
-
       open(fname, "w") do io
-        request("POST", URL, webhdr, QUERY, readtimeout=to, response_stream=io)
+        #Specify request headers
+        #Wrong request headers cause server internal error (500)
+        headers = ["Host" => "service.ncedc.org", "User-Agent" => "curl/7.60.0", "Accept" => "*/*"]
+        request("POST", URL, webhdr, QUERY, readtimeout=to, response_stream=io, headers=headers);
       end
       io = open(fname, "r")
       parsable = true
@@ -255,12 +262,12 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
 
   append!(U,S)
   # Done!
-  v > 0 && @info(tnote("Done FDSNget query."))
+  v > 0 && @info(tnote("Done NCEDCget query."))
   return parse_err
 end
 
 """
-    H = FDSNevq(ot)
+    H = NCEDCevq(ot)
 
 Multi-server query for the events with the closest origin time to `ot`.
 
@@ -268,7 +275,7 @@ Standard keywords: evw, rad, reg, mag, nev, src, to
 
 See also: SeisIO.KW
 """
-function FDSNevq(ot::String;
+function NCEDCevq(ot::String;
   evw::Union{Array{Real,1},Array{Float64,1},Array{Int64,1}} = KW.evw,
   rad::Array{Float64,1} = KW.rad,
   reg::Array{Float64,1} = KW.reg,
@@ -314,7 +321,7 @@ function FDSNevq(ot::String;
   d1 = string(u2d(ot2 + abs(evw[2])))
   oti = round(Int64, ot2*sμ)
 
-  # multi-server query (most FDSN servers do NOT have an event service)
+  # multi-server query (most NCEDC servers do NOT have an event service)
   if lowercase(src) == "all"
     sources = String["EMSC", "INGV", "IRIS", "LMU", "NCEDC", "NIEP", "ORFEUS", "SCEDC", "USGS", "USP"]
   else
@@ -331,14 +338,14 @@ function FDSNevq(ot::String;
                                         "&minmag=", mag[1], "&maxmag=", mag[2],
                                         "&format=xml")
     v > 0 && println(stdout, "URL = ", url)
-    req_info_str = "\nFDSN event query:"
+    req_info_str = "\nNCEDC event query:"
 
     # R = request("GET", url, webhdr(), readtimeout=to)
     (R, parsable) = get_HTTP_req(url, req_info_str, to)
     if parsable
       str_req = String(R)
       v > 1 && println(stdout, "REQUEST BODY:\n", str_req)
-      (id, ot_tmp, loc, mm, msc) = FDSN_event_xml(str_req)
+      (id, ot_tmp, loc, mm, msc) = NCEDC_event_xml(str_req)
       for i = 1:length(id)
           eh = SeisHdr(id=id[i], ot=ot_tmp[i], loc=loc[i], mag=(mm[i], msc[i]), src=url)
           push!(catalog, eh)
@@ -354,7 +361,7 @@ function FDSNevq(ot::String;
 end
 
 """
-    FDSNevt(ot::String, chans::String)
+    NCEDCevt(ot::String, chans::String)
 
 Get trace data for the event closest to origin time `ot` on channels `chans`.
 
@@ -364,9 +371,9 @@ Other keywords:
 * len::Real (120.0): desired record length in minutes
 * model::String ("iasp91"): Earth velocity model for phase calculations
 
-See also: distaz!, FDSNevq, FDSNsta, SeisKW
+See also: distaz!, NCEDCevq, NCEDCsta, SeisKW
 """
-function FDSNevt(ot::String, chans::Union{String,Array{String,1},Array{String,2}};
+function NCEDCevt(ot::String, chans::Union{String,Array{String,1},Array{String,2}};
   len::Real             = 120.0,
   evw::Union{Array{Real,1},Array{Float64,1},Array{Int64,1}} = KW.evw,
   fmt::String           = KW.fmt,
@@ -383,11 +390,11 @@ function FDSNevt(ot::String, chans::Union{String,Array{String,1},Array{String,2}
   w::Bool               = KW.w
   )
 
-  C = FDSN_chp(chans, v=v)
+  C = NCEDC_chp(chans, v=v)
 
   # Create header
   v > 0 && println(stdout, now(), ": event query begins.")
-  H = FDSNevq(ot, nev=1,
+  H = NCEDCevq(ot, nev=1,
                   rad=rad,
                   reg=reg,
                   mag=mag,
@@ -399,11 +406,11 @@ function FDSNevt(ot::String, chans::Union{String,Array{String,1},Array{String,2}
 
   # Create channel data
   v > 0 && println(stdout, now(), ": data query begins.")
-  s = H.ot                                      # Start time for FDSNsta is event origin time
+  s = H.ot                                      # Start time for NCEDCsta is event origin time
   t = u2d(d2u(s) + 60*len)                      # End time is len minutes later
   (d0, d1) = parsetimewin(s,t)
   S = SeisData()
-  FDSNget!(S, C, fmt=fmt, nd=nd, rad=rad, reg=reg, s=d0, si=true, src=src, t=d1, to=to, v=v, w=w)
+  NCEDCget!(S, C, fmt=fmt, nd=nd, rad=rad, reg=reg, s=d0, si=true, src=src, t=d1, to=to, v=v, w=w)
 
   v > 1 && println(stdout, now(), ": channels initialized.")
   v > 2 && println(stdout, S)

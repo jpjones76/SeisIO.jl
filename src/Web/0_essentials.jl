@@ -34,23 +34,47 @@ function get_HTTP_req(url::String, req_info_str::String, to::Int; status_excepti
 end
 
 function get_http_post(url::String, body::String, to::Int; status_exception::Bool=false)
-  try
-    req = request(  "POST", url, webhdr, body,
-                    readtimeout = to,
-                    status_exception = status_exception  )
-    if req.status == 200
-      return (req.body, true)
-    else
-      @warn(string( "Request failed!\nURL: ", url, "\nPOST BODY: \n", body, "\n",
-                    "RESPONSE: ", req.status, " (", statustext(req.status), ")\n" ) )
-      return (Array{UInt8,1}(string(req)), false)
-    end
+  if occursin("ncedc.org", url)
+      #NCEDC server needs request headers
+      headers = ["Host" => "service.ncedc.org", "User-Agent" => "curl/7.60.0", "Accept" => "*/*"]
+      try
+        req = request(  "POST", url, webhdr, body,
+                        readtimeout = to,
+                        status_exception = status_exception, headers=headers)
+        if req.status == 200
+          return (req.body, true)
+        else
+          @warn(string( "Request failed!\nURL: ", url, "\nPOST BODY: \n", body, "\n",
+                        "RESPONSE: ", req.status, " (", statustext(req.status), ")\n" ) )
+          return (Array{UInt8,1}(string(req)), false)
+        end
 
-  catch err
-    @warn(string( "Error thrown:\nURL: ", url, "\nPOST BODY: \n", body, "\n",
-                  "ERROR TYPE: ", typeof(err), "\n" ) )
-    msg_data::Array{UInt8,1} = Array{UInt8,1}( try; string(getfield(err, :response)); catch; try; string(getfield(err, :msg));  catch; ""; end; end )
-    return (msg_data, false)
+      catch err
+        @warn(string( "Error thrown:\nURL: ", url, "\nPOST BODY: \n", body, "\n",
+                      "ERROR TYPE: ", typeof(err), "\n" ) )
+        msg_data::Array{UInt8,1} = Array{UInt8,1}( try; string(getfield(err, :response)); catch; try; string(getfield(err, :msg));  catch; ""; end; end )
+        return (msg_data, false)
+      end
+
+  else
+      try
+        req = request(  "POST", url, webhdr, body,
+                        readtimeout = to,
+                        status_exception = status_exception  )
+        if req.status == 200
+          return (req.body, true)
+        else
+          @warn(string( "Request failed!\nURL: ", url, "\nPOST BODY: \n", body, "\n",
+                        "RESPONSE: ", req.status, " (", statustext(req.status), ")\n" ) )
+          return (Array{UInt8,1}(string(req)), false)
+        end
+
+      catch err
+        @warn(string( "Error thrown:\nURL: ", url, "\nPOST BODY: \n", body, "\n",
+                      "ERROR TYPE: ", typeof(err), "\n" ) )
+        msg_data::Array{UInt8,1} = Array{UInt8,1}( try; string(getfield(err, :response)); catch; try; string(getfield(err, :msg));  catch; ""; end; end )
+        return (msg_data, false)
+      end
   end
 end
 
@@ -182,7 +206,8 @@ seis_www = Dict("BGR" => "http://eida.bgr.de",
                 "SCEDC" => "http://service.scedc.caltech.edu",
                 "TEXNET" => "http://rtserve.beg.utexas.edu",
                 "USGS" => "http://earthquake.usgs.gov",
-                "USP" => "http://sismo.iag.usp.br")
+                "USP" => "http://sismo.iag.usp.br",
+                "NCEDC" => "http://service.ncedc.org")
 
 fdsn_uhead(src::String) = haskey(seis_www, src) ? seis_www[src] * "/fdsnws/" : src
 

@@ -69,6 +69,30 @@ function get_data!(S::SeisData, method_in::String, C="*"::Union{String,Array{Str
                           w=w,
                           xf=xf,
                           y=y)
+  elseif method_in == "NCEDC"
+      if isa(C, String)
+        C = parse_chstr(C, fdsn = true)
+      elseif isa(C, Array{String,1})
+        C = parse_charr(C, fdsn = true)
+      end
+      R = minreq(C)
+
+      parse_err = NCEDCget!(S, C,
+                            fmt=fmt,
+                            nd=nd,
+                            opts=opts,
+                            rad=rad,
+                            reg=reg,
+                            s=s,
+                            si=si,
+                            src=src,
+                            t=t,
+                            to=to,
+                            v=v,
+                            w=w,
+                            xf=xf,
+                            y=y)
+
   elseif method_in == "IRIS"
     if isa(C, String)
       R = String[strip(String(j)) for j in split(C, ',')]
