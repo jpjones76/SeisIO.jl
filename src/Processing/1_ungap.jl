@@ -40,5 +40,3 @@ end
 
 @doc (@doc ungap!)
 ungap(S::Union{GphysData,GphysChannel}; m::Bool=true, tap::Bool=false) = (T = deepcopy(S); ungap!(T, m=m, tap=tap); return T)
-ungap!(Ev::SeisEvent; m::Bool=true, tap::Bool=false) = (S = deepcopy(Ev.data); ungap!(S, m=m, tap=tap); Ev.data = deepcopy(S); return nothing)
-ungap(Ev::SeisEvent; m::Bool=true, tap::Bool=false) = (S = deepcopy(Ev.data); ungap!(S, m=m, tap=tap); return SeisEvent(hdr=deepcopy(Ev.hdr), data=S))

@@ -18,9 +18,6 @@ end
 +(S::SeisData, C::SeisChannel) = +(S, SeisData(C))
 +(C::SeisChannel, S::SeisData) = +(S, SeisData(C))
 +(C::SeisChannel, D::SeisChannel) = +(SeisData(C), SeisData(D))
-+(C::EventChannel, D::EventChannel) = +(EventTraceData(C), EventTraceData(D))
-+(S::EventTraceData, C::EventChannel) = +(S, EventTraceData(C))
-+(C::EventChannel, S::EventTraceData) = +(S, EventTraceData(C))
 
 # Subtraction
 -(S::GphysData, i::Int)          = (U = deepcopy(S); deleteat!(U,i); return U)  # By channel #

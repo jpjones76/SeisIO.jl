@@ -57,19 +57,14 @@ function demean!(C::GphysChannel)
   return nothing
 end
 
-demean!(Ev::SeisEvent) = demean!(Ev.data)
-
 @doc (@doc demean!)
 demean(S::GphysData) = (U = deepcopy(S); demean!(U); return U)
 demean(C::GphysChannel) = (U = deepcopy(C); demean!(U); return U)
-demean(Ev::SeisEvent) = (U = deepcopy(Ev); demean!(U.data); return U)
 
 @doc """
-    detrend!(S::SeisData[; n=1, irr=false]))
+    detrend!(S::SeisData[; n=1]))
 
-Remove the linear trend from all channels `i` with `S.fs[i] > 0.0`. Ignores NaNs.
-
-Specify `irr=true` to also remove the trend from irregularly sampled channels.
+Remove the linear trend from all channels `i`. Ignores NaNs.
 
 To remove a higher-order polynomial fit than a linear trend, choose n>1.
 
@@ -84,9 +79,8 @@ To remove a higher-order polynomial fit than a linear trend, choose n>1.
     detrend! does *not* check for data gaps; if this is problematic,
 call ungap!(S, m=true) first!
 """ detrend!
-function detrend!(S::GphysData; n::Int64=1, irr::Bool=false)
+function detrend!(S::GphysData; n::Int64=1)
   @inbounds for i = 1:S.n
-    (irr==false && S.fs[i]<=0.0) && continue
     L = length(S.x[i])
     T = eltype(S.x[i])
     τ = T.(t_expand(S.t[i], S.fs[i])) .- S.t[i][1,2]
@@ -123,9 +117,6 @@ function detrend!(C::GphysChannel; n::Int64=1)
   return nothing
 end
 
-detrend!(Ev::SeisEvent; n::Int64=1) = detrend!(Ev.data, n=n)
-
 @doc (@doc detrend!)
 detrend(S::GphysData; n::Int64=1) = (U = deepcopy(S); detrend!(U, n=n); return U)
 detrend(C::GphysChannel; n::Int64=1) = (U = deepcopy(C); detrend!(U, n=n); return U)
-detrend(Ev::SeisEvent; n::Int64=1) = (U = deepcopy(Ev); detrend!(U.data, n=n); return U)
