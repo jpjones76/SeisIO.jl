@@ -1,5 +1,4 @@
-# import Base.merge!
-export readsac, readsac!, sachdr, writesac
+export sachdr, writesac
 
 # ============================================================================
 # Utility functions not for export
@@ -244,57 +243,15 @@ function read_sac_file!(S::SeisData, fname::String, fv::Array{Float32,1}, iv::Ar
   q = should_bswap(fname)
   C = read_sac_stream(f, fv, iv, cv, full, q)
   setfield!(C, :src, fname)
-  note!(C, string("+src: readsac ", fname))
+  note!(C, string("+src: ", fname))
   close(f)
   push!(S,C)
   return nothing
 end
 
 # ============================================================================
-# NOTE: Leave keyword arguments, even though they aren't type-stable!
+# NOTE: Leave keyword arguments, even if some aren't type-stable!
 # Use of "optional" variables instead is a 5x **slowdown**
-
-@doc """
-    S = readsac(fpat[, full=true])
-
-Read SAC files matching file pattern `fpat` into a new SeisData object. `fpat`
-is a string pattern that can use wild cards.
-
-Specify `full=true` to read all non-empty headers into S.misc. Header names
-will be keys that contain the corresponding values.
-
-    readsac!(S, fpat)
-
-Read SAC files matching file pattern `fpat` into an existing SeisData object.
-`fpat` is a string pattern that can use wild cards.
-""" readsac
-function readsac!(S, filestr::String; full::Bool=KW.full)
-  fv = getfield(BUF, :sac_fv)
-  iv = getfield(BUF, :sac_iv)
-  cv = getfield(BUF, :sac_cv)
-  checkbuf!(fv, 70)
-  checkbuf!(iv, 40)
-  checkbuf!(cv, 192)
-
-  if safe_isfile(filestr)
-    read_sac_file!(S, filestr, fv, iv, cv, full)
-  else
-    files = ls(filestr)
-    nf = length(files)
-    for fname in files
-      read_sac_file!(S, fname, fv, iv, cv, full)
-    end
-  end
-  return nothing
-end
-
-@doc (@doc readsac)
-function readsac(filestr::String; full::Bool=KW.full)
-  S = SeisData()
-  readsac!(S, filestr, full=full)
-  return S
-end
-
 
 """
     sachdr(f)
@@ -303,7 +260,7 @@ Print formatted SAC headers from file `f` to stdout. Does not accept wildcard
 file strings.
 """
 function sachdr(fname::String)
-  S = readsac(fname, full=true)
+  S = read_data("sac", fname, full=true)
   for i = 1:S.n
     D = getindex(getfield(S, :misc), i)
     src = getindex(getfield(S, :src), i)
@@ -316,48 +273,31 @@ function sachdr(fname::String)
 end
 
 """
-    writesac(S::Union{SeisData,SeisEvent}[; ts=false, v=0])
+    writesac(S::Union{SeisData}[; ts=false, v=0])
 
-Write all data in SeisData structure `S` to auto-generated SAC files. If S is
-a SeisEvent, event header information is also written to the header of each SAC
-file.
+Write all data in SeisData structure `S` to auto-generated SAC files.
 """
-function writesac(S::Union{SeisEvent,SeisData}; ts::Bool=false, v::Int64=KW.v)
+function writesac(S::GphysData; ts::Bool=false, v::Int64=KW.v)
   if ts
     ift = Int32(4); leven = false
   else
     ift = Int32(1); leven = true
   end
   tdata = Array{Float32}(undef, 0)
-  if isa(S, SeisEvent)
-    evt_info = map(Float32, vcat(S.hdr.loc, sac_nul_f, S.hdr.mag[1]))
-    t_evt = d2u(S.hdr.ot)
-    evid  = S.hdr.id == 0 ? "-12345  " : String(S.hdr.id)
-    EvL   = length(evid)
-    N     = S.data.n
-  else
-    N     = S.n
-  end
+  N     = S.n
   for i = 1:N
-    T = isa(S, SeisEvent) ? S.data[i] : S[i]
+    T = getindex(S, i)
     b = T.t[1,2]
     dt = 1.0/T.fs
     (fv, iv, cv, fname) = fill_sac(T, ts, leven)
 
-    # Values from event header
-    if isa(S, SeisEvent)
-      fv[40:44] = evt_info
-      fv[8] = t_evt - b*μs
-      cv[9+EvL:24] = cat(1, codeunits(nn), codeunits(" "^(16-EvL)))
-    end
-
     # Data
-    x = map(Float32, T.x)
+    x = eltype(T.x) == Float32 ? getfield(T, :x) : map(Float32, T.x)
     ts && (tdata = map(Float32, μs*(t_expand(T.t, dt) .- b)))
 
     # Write to file
     write_sac_file(fname, fv, iv, cv, x, t=tdata, ts=ts)
-    v > 0  && @printf(stdout, "%s: Wrote file %s from SeisData channel %i\n", string(now()), fname, i)
+    v > 0  && @printf(stdout, "%s: Wrote file %s from channel %i\n", string(now()), fname, i)
   end
 end
 writesac(S::SeisChannel; ts=false::Bool, v::Int64=KW.v) = writesac(SeisData(S), ts=ts, v=v)
