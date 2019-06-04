@@ -1,5 +1,3 @@
-export readgeocsv, readgeocsv!
-
 function get_sep(vi::Int8, v_buf::Array{UInt8,1})
   z = zero(Int8)
   o = one(Int8)
@@ -416,49 +414,4 @@ function read_geocsv_file!(S::SeisData, fname::String, tspair::Bool)
   end
   close(io)
   return nothing
-end
-
-@doc """
-
-    readgeocsv!(S, filestr[, tspair])
-
-Read GeoCSV time-series ASCII files matching `filestr` into existing SeisData
-object `S`.
-
-    S = readgeocsv(filestr[, tspair])
-
-Read GeoCSV time-series ASCII files matching `filestr` into new SeisData object
-`S`.
-
-`tspair=true` (default) assumes data are given as time-sample pairs, with one
-pair per line. If `tspair=false`, data are assumed to be in "slist" (single-
-column) format with no time stamps.
-
-!!! note
-
-GeoCSV .zip files are **NOT** supported.
-
-!!! warning
-
-    In `tspair` mode, GeoCSV treats sample time stamps as UTC. If this yields
-wrong times, the user must manually correct `S.t`.
-""" readgeocsv
-function readgeocsv!(S::SeisData, filestr::String; tspair::Bool=true)
-  if safe_isfile(filestr)
-    read_geocsv_file!(S, filestr, tspair)
-  else
-    files = ls(filestr)
-    nf = length(files)
-    for fname in files
-      read_geocsv_file!(S, fname, tspair)
-    end
-  end
-  return nothing
-end
-
-@doc (@doc readgeocsv)
-function readgeocsv(filestr::String; tspair::Bool=true)
-  S = SeisData()
-  readgeocsv!(S, filestr, tspair=tspair)
-  return S
 end
