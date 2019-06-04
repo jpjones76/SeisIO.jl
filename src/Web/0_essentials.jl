@@ -34,10 +34,18 @@ function get_HTTP_req(url::String, req_info_str::String, to::Int; status_excepti
 end
 
 function get_http_post(url::String, body::String, to::Int; status_exception::Bool=false)
+  headers = occursin("ncedc", url) ? ["Host" => "service.ncedc.org", "User-Agent" => "curl/7.60.0", "Accept" => "*/*"] : webhdr
   try
-    req = request(  "POST", url, webhdr, body,
-                    readtimeout = to,
-                    status_exception = status_exception  )
+    if occursin("ncedc", url)
+      req = request(  "POST", url, webhdr, body,
+                      readtimeout = to,
+                      status_exception = status_exception,
+                      headers=["Host" => "service.ncedc.org", "User-Agent" => "curl/7.60.0", "Accept" => "*/*"] )
+    else
+      req = request(  "POST", url, webhdr, body,
+                      readtimeout = to,
+                      status_exception = status_exception  )
+    end
     if req.status == 200
       return (req.body, true)
     else
