@@ -55,7 +55,7 @@ taper!(C)
 
 # test on SeisEvent
 V = randSeisEvent()
-taper!(V)
+taper!(V.data)
 
 # Test for out-of-place tapering
 C = randSeisChannel()
@@ -63,4 +63,4 @@ S = randSeisData(10, c=1.0, s=0.0)[2:10]
 V = randSeisEvent()
 D = taper(C)
 T = taper(S)
-W = taper(V)
+W = taper(V.data)

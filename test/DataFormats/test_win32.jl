@@ -13,7 +13,7 @@ if safe_isfile(cfile)
   redirect_stdout(out) do
     fname = path*"/SampleFiles/Restricted/2014092709*.cnt"
     cfile = path*"/SampleFiles/Restricted/03_02_27_20140927.euc.ch"
-    S = readwin32(fname, cfile, v=3)
+    S = read_data("win32", fname, cf=cfile, v=3)
 
     # There should be 8 channels
     @test S.n==8
@@ -47,7 +47,7 @@ if safe_isfile(cfile)
 
     U = SeisData()
     for f in testfiles
-      T = readsac(f)[1]
+      T = read_data("sac", f)[1]
       push!(U, T)
     end
 
@@ -109,7 +109,7 @@ if safe_isfile(cfile)
   cfile = path*"/SampleFiles/Restricted/03_02_27_20140927*ch"
   S = SeisData()
   redirect_stdout(out) do
-    readwin32!(S, fname, cfile, v=1)
+    read_data!(S, "win32", fname, cf=cfile, v=1)
   end
   i = findid("V.ONTA.23.EHH", S)
   @test length(S.x[i]) == 60*S.fs[i]
@@ -118,7 +118,7 @@ if safe_isfile(cfile)
 
   # ...and 24-bit bigendian Int...
   fname = path*"/SampleFiles/Restricted/2014092712000302.cnt"
-  readwin32!(S, fname, cfile)
+  read_data!(S, "win32", fname, cf=cfile)
   @test length(S.x[1]) == round(Int64, 60*S.fs[1]) == S.t[1][end,1]
   ii = findlast(S.id.=="V.ONTA.23.EHH")
   @test maximum(S.x[ii]) == 14896.0
@@ -130,7 +130,7 @@ if safe_isfile(cfile)
   # ...and 32-bit bigendian Int ...
   cfile = path*"/SampleFiles/Restricted/chandata_20140927.txt"
   fname = path*"/SampleFiles/Restricted/2014092712370207VM.cnt"
-  readwin32!(S, fname, cfile)
+  read_data!(S, "win32", fname, cf=cfile)
 else
   printstyled("  win32 data format skipped. (files not found; is this Appveyor?)\n", color=:light_green)
 end

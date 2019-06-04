@@ -7,12 +7,12 @@ savfile3 = "test.evt"
 printstyled("  SeisData\n", color=:light_green)
 S = breaking_seis()
 wseis(savfile1, S)
-R = rseis(savfile1)
-@test(R[1]==S)
+R = rseis(savfile1)[1]
+@test(R==S)
 S.notes[2][1] = string(String(Char.(0x00:0x7e)), String(Char.(0x80:0xff)))
 wseis(savfile1, S)
-R = rseis(savfile1)
-@test(R[1]!==S)
+R = rseis(savfile1)[1]
+@test(R!==S)
 
 printstyled("  SeisHdr\n", color=:light_green)
 H = randSeisHdr()
@@ -24,6 +24,8 @@ printstyled("  SeisEvent\n", color=:light_green)
 EV = SeisEvent(hdr=H, data=convert(EventTraceData, S))
 EV.data.misc[1] = breaking_dict
 wseis(savfile3, EV)
+R = rseis(savfile3)[1]
+@test R == EV
 
 printstyled("  read/write of each type to same file\n", color=:light_green)
 Ch = randSeisChannel(s=true)
@@ -35,8 +37,8 @@ R = rseis(savfile3)
 @test(R[1]==EV)
 @test(R[2]==S)
 @test(R[3]==H)
-@test(R[4][1]==Ch)
-@test(S.misc[1] == R[1].data.misc[1] ==   R[2].misc[1])
+@test(R[4]==Ch)
+@test(S.misc[1] == R[1].data.misc[1] ==  R[2].misc[1])
 
 # read one file with one record number
 printstyled("  read file with integer record number\n", color=:light_green)
@@ -67,11 +69,24 @@ R = rseis("test*", c=1, v=1)
 @test R[2] == H
 @test R[3] == S
 
+
+printstyled("  test that every custom Type can be written and read faithfully\n", color=:light_green)
+
+A = Array{Any,1}(undef, 0)
+for T in SeisIO.TNames
+  if T == PhaseCat
+    push!(A, randPhaseCat())
+  else
+    push!(A, getfield(SeisIO, Symbol(T))())
+  end
+end
+wseis(savfile1, A...)
+R = rseis(savfile1, v=2)
+
+for i = 1:length(R)
+  @test R[i] == A[i]
+end
+
 rm(savfile1)
 rm(savfile2)
 rm(savfile3)
-
-# printstyled("Supported file format IO\n", color=:light_green, bold=true)
-
-# Checking for write errors
-@test_throws ErrorException get_separator(String(Char.(Array{UInt8,1}(0x00:0x01:0xff))))

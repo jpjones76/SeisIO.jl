@@ -21,7 +21,7 @@ files = String[ "99011116541W"                "uw"            "_"
                 "test_be.sac"                 "sac"           "_"
                 "FDSNWS.IRIS.geocsv"          "geocsv"        "_"      ]
 
-checkbuf!(buf, 4*(os + nx))
+checkbuf_8!(buf, 4*(os + nx))
 checkbuf!(x, os + nx)
 
 y = rand(Int32, nx)

@@ -4,21 +4,21 @@ sac_be_file = path*"/SampleFiles/test_be.sac"
 
 printstyled("  SAC\n", color=:light_green)
 printstyled("    read\n", color=:light_green)
-@test_throws ErrorException readsac(path*"/SampleFiles/99011116541W")
+@test_throws ErrorException read_data("sac", path*"/SampleFiles/99011116541W")
 
-SAC1 = readsac(sac_file)[1]
+SAC1 = read_data("sac", sac_file)[1]
 @test ≈(SAC1.fs, 100.0)
 @test ≈(length(SAC1.x), 1000)
 
-SAC2 = readsac(sac_file, full=true)[1]
+SAC2 = read_data("sac", sac_file, full=true)[1]
 @test ≈(1/SAC1.fs, SAC2.misc["delta"])
 @test ≈(length(SAC1.x), SAC2.misc["npts"])
 
 printstyled("    wildcard read\n", color=:light_green)
-SAC = readsac(path*"/SampleFiles/*.sac", full=true)
+SAC = read_data("sac", path*"/SampleFiles/*.sac", full=true)
 
 printstyled("    bigendian read\n", color=:light_green)
-SAC3 = readsac(sac_be_file, full=true)[1]
+SAC3 = read_data("sac", sac_be_file, full=true)[1]
 @test ≈(1/SAC3.fs, SAC3.misc["delta"])
 @test ≈(length(SAC3.x), SAC3.misc["npts"])
 

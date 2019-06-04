@@ -26,23 +26,6 @@ for i = 1:10
   @test isapprox(C.x, D.x)
 end
 
-S = randSeisData(24, s=1.0)
-deleteat!(S, findall(S.fs.<40.0))
-Ev = SeisEvent(hdr=randSeisHdr(), data=convert(EventTraceData, deepcopy(S)))
-U = filtfilt(S)
-filtfilt!(S)
-nanfill!(U)
-nanfill!(S)
-@test U == S
-
-get_views(S)
-
-Ev1 = filtfilt(Ev)
-filtfilt!(Ev)
-nanfill!(Ev)
-nanfill!(Ev1)
-@test Ev1 == Ev
-
 printstyled("    former breaking cases\n", color=:light_green)
 printstyled("      very short data windows\n", color=:light_green)
 n_short = 5
