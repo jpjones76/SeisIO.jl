@@ -75,36 +75,6 @@ remote station XML files by web query.
 | ``--s``: Start time
 | ``--t``: Termination (end) time
 
-Event Header Query
-******************
-.. function:: H = FDSNevq(ot)
-   :noindex:
-
-:ref:`Shared keywords<dkw>`: evw, rad, reg, mag, nev, src, to, v, w
-
-Multi-server query for the event(s) with origin time(s) closest to `ot`. Returns
-a SeisHdr.
-
-Notes:
-
-1. Specify `ot` as a string formatted YYYY-MM-DDThh:mm:ss in UTC (e.g. "2001-02-08T18:54:32"). Returns a SeisHdr array.
-2. Incomplete string queries are read to the nearest fully-specified time constraint; thus, `FDSNevq("2001-02-08")` returns the nearest event to 2001-02-08T00:00:00.
-3. If no event is found in the specified search window, FDSNevq exits with an error.
-
-| :ref:`Shared keywords<dkw>`: evw, reg, mag, nev, src, to, w
-
-Event Header and Data Query
-***************************
-.. function:: Ev = FDSNevt(ot::String, chans::String)
-
-Get trace data for the event closest to origin time `ot` on channels `chans`.
-Returns a SeisEvent.
-
-| :ref:`Shared keywords<dkw>`: fmt, mag, nd, opts, pha, rad, reg, src, to, v, w
-| Other keywords:
-| ``--len``: desired record length *in minutes*.
-
-
 IRIS Queries
 ============
 
@@ -117,20 +87,3 @@ Data Query Features
 * Stage zero gains are removed from trace data; all IRIS data will appear to have a gain of 1.0.
 * IRISWS disallows wildcards in channel IDs.
 * Channel spec *must* include the net, sta, cha fields; thus, CHA = "CC.VALT..BHZ" is OK; CHA = "CC.VALT" is not.
-
-Phase Onset Query
-*****************
-.. function: get_pha(Δ::Float64, z::Float64)
-
-Command-line interface to IRIS online travel time calculator, which calls TauP [1-2]. Returns a matrix of strings.
-
-Specify Δ in decimal degrees, z in km with + = down.
-
-| Shared keywords keywords: pha, to, v
-| Other keywords:
-| ``-model``: velocity model (defaults to "iasp91")
-
-**References**
-
-* Crotwell, H. P., Owens, T. J., & Ritsema, J. (1999). The TauP Toolkit: Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.
-* TauP manual: http://www.seis.sc.edu/downloads/TauP/taup.pdf

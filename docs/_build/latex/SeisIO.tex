@@ -53,7 +53,7 @@
 
 
 \title{SeisIO Documentation}
-\date{May 16, 2019}
+\date{Jun 04, 2019}
 \release{0.2.0}
 \author{Joshua Jones}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -903,18 +903,20 @@ programming language.
 \sphinxhref{http://wiki.seg.org/wiki/SEG\_Y}{SEG Y}: Society of Exploration Geophysicists
 data format. Common in the energy industry, developed and maintained by the SEG.
 Only SEG Y rev 0 and \sphinxhref{https://seg.org/Portals/0/SEG/News\%20and\%20Resources/Technical\%20Standards/seg\_y\_rev1.pdf}{rev 1}
-with standard headers are supported.
+with standard headers are supported. Note that IBM Float support is not yet
+implemented.
 
 \sphinxstylestrong{UW}: the University of Washington data format has no online reference and is
 no longer in use. Created by the Pacific Northwest Seismic Network for event
-archival; used through the early 2000s. A UW event is described by a pickfile
-and a corresponding data file, whose names are identical except for the last
-character; for example, the files 99062109485o and 99062109485W
-describe event 99062109485. Unlike the win32 data format, the data file is
-self-contained; the pick file is not required to use raw trace data. Only UW-2
-data files are supported by SeisIO; we have never encountered a UW-1 data file
-outside of Exabyte tapes and have no reason to suspect that any remain in
-circulation.
+archival; used from the 1970s through early 2000s. A UW event is described by a
+pickfile and corresponding data file, whose names are identical except for the
+last character; for example, files 99062109485o and 99062109485W describe event
+99062109485. Unlike the win32 data format, the data file is self-contained; the
+pick file is not required to use raw trace data. However, like the win32 data
+format, instrument locations are stored in an external human-maintained text
+file. Only UW-2 data files are supported by SeisIO; we have never encountered a
+UW-1 data file outside of Exabyte tapes and have no reason to suspect that any
+remain in circulation.
 
 \sphinxhref{http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html}{Win32}: data format developed
 by the NIED (National Research Institute for Earth Science and Disaster Prevention),
@@ -928,16 +930,7 @@ particularly gains, are known to exist.
 
 
 \subsection{Other File I/O Functions}
-\label{\detokenize{src/Formats/fileformats:other-file-i-o-functions}}\index{readuwevt() (built-in function)@\spxentry{readuwevt()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Formats/fileformats:readuwevt}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{readuwevt}}}{\emph{fpat}}{}
-\end{fulllineitems}
-
-
-Read University of Washington-format event data with file pattern stub fpat.
-fstub can be a datafile name, a pickname, or a stub.
-\index{rseis() (built-in function)@\spxentry{rseis()}\spxextra{built-in function}}
+\label{\detokenize{src/Formats/fileformats:other-file-i-o-functions}}\index{rseis() (built-in function)@\spxentry{rseis()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
 \phantomsection\label{\detokenize{src/Formats/fileformats:rseis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{rseis}}}{\emph{fname}}{}
@@ -969,22 +962,6 @@ Print headers from SEG Y file to stdout. Specify \sphinxcode{\sphinxupquote{pass
 
 
 Parse UW event data file \sphinxcode{\sphinxupquote{dfname}} into a new SeisEvent structure.
-
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{uwpf!(evt,~pfname)}}}
-\end{fulllineitems}
-
-
-Parse UW event pick file into SeisEvent structure.
-\index{uwpf() (built-in function)@\spxentry{uwpf()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Formats/fileformats:uwpf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{uwpf}}}{\emph{pfname}}{}
-\end{fulllineitems}
-
-
-Parse UW event pick file \sphinxcode{\sphinxupquote{pfname}} into a new SeisEvent structure.
 \index{writesac() (built-in function)@\spxentry{writesac()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
@@ -1126,58 +1103,6 @@ remote station XML files by web query.
 \end{DUlineblock}
 
 
-\subsubsection{Event Header Query}
-\label{\detokenize{src/Web/webclients:event-header-query}}
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{H~=~FDSNevq(ot)}}}
-\end{fulllineitems}
-
-
-{\hyperref[\detokenize{src/Appendices/keywords:dkw}]{\sphinxcrossref{\DUrole{std,std-ref}{Shared keywords}}}}: evw, rad, reg, mag, nev, src, to, v, w
-
-Multi-server query for the event(s) with origin time(s) closest to \sphinxtitleref{ot}. Returns
-a SeisHdr.
-
-Notes:
-\begin{enumerate}
-\def\theenumi{\arabic{enumi}}
-\def\labelenumi{\theenumi .}
-\makeatletter\def\p@enumii{\p@enumi \theenumi .}\makeatother
-\item {} 
-Specify \sphinxtitleref{ot} as a string formatted YYYY-MM-DDThh:mm:ss in UTC (e.g. “2001-02-08T18:54:32”). Returns a SeisHdr array.
-
-\item {} 
-Incomplete string queries are read to the nearest fully-specified time constraint; thus, \sphinxtitleref{FDSNevq(“2001-02-08”)} returns the nearest event to 2001-02-08T00:00:00.
-
-\item {} 
-If no event is found in the specified search window, FDSNevq exits with an error.
-
-\end{enumerate}
-
-\begin{DUlineblock}{0em}
-\item[] {\hyperref[\detokenize{src/Appendices/keywords:dkw}]{\sphinxcrossref{\DUrole{std,std-ref}{Shared keywords}}}}: evw, reg, mag, nev, src, to, w
-\end{DUlineblock}
-
-
-\subsubsection{Event Header and Data Query}
-\label{\detokenize{src/Web/webclients:event-header-and-data-query}}
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{Ev~=~FDSNevt(ot::String,~chans::String)}}}
-\end{fulllineitems}
-
-
-Get trace data for the event closest to origin time \sphinxtitleref{ot} on channels \sphinxtitleref{chans}.
-Returns a SeisEvent.
-
-\begin{DUlineblock}{0em}
-\item[] {\hyperref[\detokenize{src/Appendices/keywords:dkw}]{\sphinxcrossref{\DUrole{std,std-ref}{Shared keywords}}}}: fmt, mag, nd, opts, pha, rad, reg, src, to, v, w
-\item[] Other keywords:
-\item[] \sphinxcode{\sphinxupquote{-{-}len}}: desired record length \sphinxstyleemphasis{in minutes}.
-\end{DUlineblock}
-
-
 \subsection{IRIS Queries}
 \label{\detokenize{src/Web/webclients:iris-queries}}\phantomsection\label{\detokenize{src/Web/webclients:irisws}}
 Incorporated Research Institutions for Seismology \sphinxhref{http://www.iris.edu/}{(IRIS)} is a consortium of universities dedicated to the operation of science facilities for the acquisition, management, and distribution of seismological data.
@@ -1193,29 +1118,6 @@ IRISWS disallows wildcards in channel IDs.
 
 \item {} 
 Channel spec \sphinxstyleemphasis{must} include the net, sta, cha fields; thus, CHA = “CC.VALT..BHZ” is OK; CHA = “CC.VALT” is not.
-
-\end{itemize}
-
-
-\subsubsection{Phase Onset Query}
-\label{\detokenize{src/Web/webclients:phase-onset-query}}
-Command-line interface to IRIS online travel time calculator, which calls TauP {[}1-2{]}. Returns a matrix of strings.
-
-Specify \(\Delta\) in decimal degrees, z in km with + = down.
-
-\begin{DUlineblock}{0em}
-\item[] Shared keywords keywords: pha, to, v
-\item[] Other keywords:
-\item[] \sphinxcode{\sphinxupquote{-model}}: velocity model (defaults to “iasp91”)
-\end{DUlineblock}
-
-\sphinxstylestrong{References}
-\begin{itemize}
-\item {} 
-Crotwell, H. P., Owens, T. J., \& Ritsema, J. (1999). The TauP Toolkit: Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.
-
-\item {} 
-TauP manual: \sphinxurl{http://www.seis.sc.edu/downloads/TauP/taup.pdf}
 
 \end{itemize}
 
@@ -1705,7 +1607,10 @@ Synchronize all data in S to start at \sphinxtitleref{ST} and terminate at \sphi
 
 For regularly-sampled channels, gaps between the specified and true times
 are filled with the mean; this isn’t possible with irregularly-sampled data.
-\begin{itemize}
+
+
+\subsubsection{Specifying start time (s)}
+\label{\detokenize{src/Processing/processing:specifying-start-time-s}}\begin{itemize}
 \item {} 
 s=”last”: (Default) sync to the last start time of any channel in \sphinxtitleref{S}.
 
@@ -1722,7 +1627,10 @@ A DateTime is treated as a DateTime. (see Dates.DateTime for details.)
 Any string other than “last” or “first” is parsed as a DateTime.
 
 \end{itemize}
-\begin{itemize}
+
+
+\subsubsection{Specifying end time (t)}
+\label{\detokenize{src/Processing/processing:specifying-end-time-t}}\begin{itemize}
 \item {} 
 t=”none”: (Default) end times are not synchronized.
 
@@ -1767,20 +1675,410 @@ For each channel \sphinxstylestrong{i} in \sphinxstylestrong{S}, fill time gaps 
 non-NAN data in \sphinxstylestrong{S.x{[}i{]}}. If \sphinxstylestrong{m=false}, gaps are filled with NANs.
 
 
-\chapter{Appendices}
-\label{\detokenize{index:appendices}}
+\chapter{Submodules}
+\label{\detokenize{index:submodules}}
 
-\section{Utility Functions}
-\label{\detokenize{src/Appendices/function_list:utility-functions}}\label{\detokenize{src/Appendices/function_list:function-list}}\label{\detokenize{src/Appendices/function_list::doc}}
-This appendix covers utility functions that belong in no other category.
+\section{Quake}
+\label{\detokenize{src/Submodules/quake:quake}}\label{\detokenize{src/Submodules/quake::doc}}
+The Quake submodule (accessed with “using SeisIO.Quake”) was introduced in
+SeisIO v0.3.0 to isolate handling of discrete earthquake events from handling
+of continuous geophysical data. While the channel data are similar, fully
+describing an earthquake event requires many additional Types (objects) and
+more information (fields) in channel descriptors.
 
+
+\subsection{Types}
+\label{\detokenize{src/Submodules/quake:types}}
+See Type help text for field descriptions and SeisIO behavior.
+\index{EQMag() (built-in function)@\spxentry{EQMag()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/quake:EQMag}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{EQMag}}}{}{}
+\end{fulllineitems}
+
+
+Earthquake magnitude object.
+\index{EQLoc() (built-in function)@\spxentry{EQLoc()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/quake:EQLoc}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{EQLoc}}}{}{}
+\end{fulllineitems}
+
+
+Computed earthquake location.
+\index{EventChannel() (built-in function)@\spxentry{EventChannel()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/quake:EventChannel}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{EventChannel}}}{}{}
+\end{fulllineitems}
+
+
+A single channel of trace data (digital seismograms) associated with a
+discrete event (earthquake).
+\index{EventTraceData() (built-in function)@\spxentry{EventTraceData()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/quake:EventTraceData}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{EventTraceData}}}{}{}
+\end{fulllineitems}
+
+
+A custom structure designed to describe trace data (digital seismograms)
+associated with a discrete event (earthquake).
+\index{PhaseCat() (built-in function)@\spxentry{PhaseCat()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/quake:PhaseCat}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{PhaseCat}}}{}{}
+\end{fulllineitems}
+
+
+A seismic phase catalog is a dictionary with phase names for keys (e.g. “pP”, “PKP”)
+and SeisPha objects for values.
+\index{SeisEvent() (built-in function)@\spxentry{SeisEvent()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/quake:SeisEvent}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{SeisEvent}}}{}{}
+\end{fulllineitems}
+
+
+A compound Type comprising a SeisHdr (event header), SeisSrc (source process),
+and EventTraceData (digital seismograms.)
+\index{SeisHdr() (built-in function)@\spxentry{SeisHdr()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/quake:SeisHdr}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{SeisHdr}}}{}{}
+\end{fulllineitems}
+
+
+Earthquake event header object.
+\index{SeisPha() (built-in function)@\spxentry{SeisPha()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/quake:SeisPha}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{SeisPha}}}{}{}
+\end{fulllineitems}
+
+
+A description of a seismic phase measured on a data channel.
+\index{SeisSrc() (built-in function)@\spxentry{SeisSrc()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/quake:SeisSrc}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{SeisSrc}}}{}{}
+\end{fulllineitems}
+
+
+Seismic source process description.
+\index{SourceTime() (built-in function)@\spxentry{SourceTime()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/quake:SourceTime}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{SourceTime}}}{}{}
+\end{fulllineitems}
+
+
+QuakeML-compliant seismic source-time parameterization.
+
+
+\subsection{Web Queries}
+\label{\detokenize{src/Submodules/quake:web-queries}}
+
+\subsubsection{Event Header Query}
+\label{\detokenize{src/Submodules/quake:event-header-query}}
+
+\begin{fulllineitems}
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{FDSNevq}}}{\emph{ot}}{}
+\end{fulllineitems}
+
+
+{\hyperref[\detokenize{src/Appendices/keywords:dkw}]{\sphinxcrossref{\DUrole{std,std-ref}{Shared keywords}}}}: evw, rad, reg, mag, nev, src, to, v, w
+
+Multi-server query for the event(s) with origin time(s) closest to \sphinxtitleref{ot}. Returns
+a tuple consisting of an Array\{SeisHdr,1\} and an Array\{SeisSrc,1\}, so that
+the \sphinxtitleref{i{}`th entry of each array describes the header and source process of event {}`i}.
+
+Notes:
+\begin{enumerate}
+\def\theenumi{\arabic{enumi}}
+\def\labelenumi{\theenumi .}
+\makeatletter\def\p@enumii{\p@enumi \theenumi .}\makeatother
+\item {} 
+Specify \sphinxtitleref{ot} as a string formatted YYYY-MM-DDThh:mm:ss in UTC (e.g. “2001-02-08T18:54:32”). Returns a SeisHdr array.
+
+\item {} 
+Incomplete string queries are read to the nearest fully-specified time constraint; thus, \sphinxtitleref{FDSNevq(“2001-02-08”)} returns the nearest event to 2001-02-08T00:00:00.
+
+\item {} 
+If no event is found in the specified search window, FDSNevq exits with an error.
+
+\end{enumerate}
+
+\begin{DUlineblock}{0em}
+\item[] {\hyperref[\detokenize{src/Appendices/keywords:dkw}]{\sphinxcrossref{\DUrole{std,std-ref}{Shared keywords}}}}: evw, reg, mag, nev, src, to, w
+\end{DUlineblock}
+
+
+\subsubsection{Event Header and Data Query}
+\label{\detokenize{src/Submodules/quake:event-header-and-data-query}}\index{FDSNevt() (built-in function)@\spxentry{FDSNevt()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/quake:FDSNevt}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{FDSNevt}}}{\emph{ot::String}, \emph{chans::String}}{}
+\end{fulllineitems}
+
+
+Get trace data for the event closest to origin time \sphinxtitleref{ot} on channels \sphinxtitleref{chans}.
+Returns a SeisEvent.
+
+\begin{DUlineblock}{0em}
+\item[] {\hyperref[\detokenize{src/Appendices/keywords:dkw}]{\sphinxcrossref{\DUrole{std,std-ref}{Shared keywords}}}}: fmt, mag, nd, opts, pha, rad, reg, src, to, v, w
+\item[] Other keywords:
+\item[] \sphinxcode{\sphinxupquote{-{-}len}}: desired record length \sphinxstyleemphasis{in minutes}.
+\end{DUlineblock}
+
+
+\subsubsection{Phase Onset Query}
+\label{\detokenize{src/Submodules/quake:phase-onset-query}}\index{get\_pha() (built-in function)@\spxentry{get\_pha()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/quake:get_pha}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_pha}}}{\emph{\(\Delta\)::Float64}, \emph{z::Float64}}{}
+\end{fulllineitems}
+
+
+Command-line interface to IRIS online implementation of the TauP travel time
+calculator {[}1-2{]}. Returns a matrix of strings. Specify \(\Delta\) in decimal degrees
+and z in km with + = down.
+
+\begin{DUlineblock}{0em}
+\item[] Shared keywords keywords: pha, to, v
+\item[] Other keywords:
+\item[] \sphinxcode{\sphinxupquote{-model}}: velocity model (defaults to “iasp91”)
+\end{DUlineblock}
+
+\sphinxstylestrong{References}
+\begin{itemize}
+\item {} 
+Crotwell, H. P., Owens, T. J., \& Ritsema, J. (1999). The TauP Toolkit: Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.
+
+\item {} 
+TauP manual: \sphinxurl{http://www.seis.sc.edu/downloads/TauP/taup.pdf}
+
+\end{itemize}
+
+
+\subsection{QuakeML Reader}
+\label{\detokenize{src/Submodules/quake:quakeml-reader}}\index{read\_qml() (built-in function)@\spxentry{read\_qml()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/quake:read_qml}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{read\_qml}}}{\emph{fpat::String}}{}
+\end{fulllineitems}
+
+
+Read QuakeML files matching string pattern \sphinxtitleref{fpat}. Returns a tuple containing
+an array of \sphinxtitleref{SeisHdr} objects and an array of \sphinxtitleref{SeisSrc} objects, such that the
+\sphinxtitleref{i{}`th entry of each array is the preferred location (origin) and event source
+(focal mechanism or moment tensor) of event {}`i}.
+
+If multiple focal mechanisms, locations, or magnitudes are present in a single
+Event element of the XML file(s), the following rules are used to select one of
+each per event:
+
+\begin{DUlineblock}{0em}
+\item[] \sphinxstylestrong{FocalMechanism}
+\item[]
+\begin{DUlineblock}{\DUlineblockindent}
+\item[] 1. \sphinxstylestrong{preferredFocalMechanismID} if present
+\item[] 2. Solution with best-fitting moment tensor
+\item[] 3. First \sphinxstylestrong{FocalMechanism} element
+\item[] 
+\end{DUlineblock}
+\item[] \sphinxstylestrong{Magnitude}
+\item[]
+\begin{DUlineblock}{\DUlineblockindent}
+\item[] 1. \sphinxstylestrong{preferredMagnitudeID} if present
+\item[] 2. Magnitude whose ID matches \sphinxstylestrong{MomentTensor/derivedOriginID}
+\item[] 3. Last moment magnitude (lowercase scale name begins with “mw”)
+\item[] 4. First \sphinxstylestrong{Magnitude} element
+\item[] 
+\end{DUlineblock}
+\item[] \sphinxstylestrong{Origin}
+\item[]
+\begin{DUlineblock}{\DUlineblockindent}
+\item[] 1. \sphinxstylestrong{preferredOriginID} if present
+\item[] 2. \sphinxstylestrong{derivedOriginID} from the chosen \sphinxstylestrong{MomentTensor} element
+\item[] 3. First \sphinxstylestrong{Origin} element
+\end{DUlineblock}
+\end{DUlineblock}
+
+Non-essential QuakeML data are saved to \sphinxtitleref{misc} in each SeisHdr or SeisSrc object
+as appropriate.
+
+
+\subsection{File Readers}
+\label{\detokenize{src/Submodules/quake:file-readers}}\index{uwpf() (built-in function)@\spxentry{uwpf()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/quake:uwpf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{uwpf}}}{\emph{pf}\sphinxoptional{, \emph{v}}}{}
+\end{fulllineitems}
+
+
+Read UW-format seismic pick file \sphinxtitleref{pf}. Returns a tuple of (SeisHdr, SeisSrc).
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{uwpf!(W,~pf{[},~v::Int64=KW.v{]})}}}
+\end{fulllineitems}
+
+
+Read UW-format seismic pick info from pickfile \sphinxtitleref{f} into SeisEvent object \sphinxtitleref{W}.
+Overwrites W.source and W.hdr with pickfile information. Keyword \sphinxtitleref{v} controls
+verbosity.
+\index{readuwevt() (built-in function)@\spxentry{readuwevt()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/quake:readuwevt}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{readuwevt}}}{\emph{fpat}}{}
+Read University of Washington-format event data with file pattern stub fpat
+into a SeisEvent object. \sphinxcode{\sphinxupquote{fpat}} can be a datafile name, a pickfile name, or
+a stub.
+
+\end{fulllineitems}
+
+
+
+\subsection{Utility Functions}
+\label{\detokenize{src/Submodules/quake:utility-functions}}
 
 \begin{fulllineitems}
 \pysigline{\sphinxbfcode{\sphinxupquote{distaz!(Ev::SeisEvent)}}}
 \end{fulllineitems}
 
 
-Fill Ev with great-circle distance, azimuth, and back-azimuth for each channel. Writes to evt.data.misc.
+Compute distnace, azimuth, and backazimuth by the Haversine formula.
+Overwrites Ev.data.dist, Ev.data.az, and Ev.data.baz.
+\index{gcdist() (built-in function)@\spxentry{gcdist()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/quake:gcdist}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{gcdist}}}{\sphinxoptional{\emph{lat\_src}, \emph{lon\_src}}, \emph{rec}}{}
+\end{fulllineitems}
+
+
+Compute great circle distance, azimuth, and backazimuth from a single source
+with coordinates \sphinxtitleref{{[}s\_lat, s\_lon{]}} to receivers \sphinxtitleref{rec} with coordinates
+\sphinxtitleref{{[}r\_lat r\_lon{]}} in each row.
+\index{show\_phases() (built-in function)@\spxentry{show\_phases()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/quake:show_phases}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{show\_phases}}}{\emph{P::PhaseCat}}{}
+\end{fulllineitems}
+
+
+Formatted display of seismic phases in dictionary P.
+
+
+\section{RandSeis}
+\label{\detokenize{src/Submodules/randseis:randseis}}\label{\detokenize{src/Submodules/randseis::doc}}
+This submodule is used to quickly generate SeisIO objects with quasi-random
+field contents. Access it with “using SeisIO.RandSeis”
+
+The following are true of all random data objects generated by the RandSeis
+module:
+\begin{itemize}
+\item {} 
+Channels have SEED-compliant IDs, sampling frequencies, and data types.
+
+\item {} 
+Random junk fills :notes and :misc.
+
+\item {} 
+Sampling frequency (:fs) is chosen from a set of common values.
+
+\item {} 
+Channel data are randomly generated.
+
+\item {} 
+Time gaps are automatically inserted into regularly-sampled data.
+
+\end{itemize}
+\index{randPhaseCat() (built-in function)@\spxentry{randPhaseCat()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/randseis:randPhaseCat}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{randPhaseCat}}}{}{}
+\end{fulllineitems}
+
+
+Generate a random seismic phase catalog suitable for testing EventChannel,
+EventTraceData, and SeisEvent objects.
+\index{randSeisChannel() (built-in function)@\spxentry{randSeisChannel()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/randseis:randSeisChannel}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{randSeisChannel}}}{\sphinxoptional{\emph{c=false}, \emph{s=false}}}{}
+\end{fulllineitems}
+
+
+Generate a SeisChannel of random data. Specify c=true for campaign-style
+(irregularly-sampled) data (fs = 0.0); specify s=true to guarantee seismic data.
+s=true overrides c=true.
+\index{randSeisData() (built-in function)@\spxentry{randSeisData()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/randseis:randSeisData}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{randSeisData}}}{\sphinxoptional{\emph{c=0.2}, \emph{s=0.6}}}{}
+\end{fulllineitems}
+
+
+Generate 8 to 24 channels of random seismic data as a SeisData object.
+\begin{itemize}
+\item {} 
+100*c\% of channels \sphinxstyleemphasis{after the first} will have irregularly-sampled data (fs = 0.0)
+
+\item {} 
+100*s\% of channels \sphinxstyleemphasis{after the first} are guaranteed to have seismic data.
+
+\end{itemize}
+
+
+\begin{fulllineitems}
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{randSeisData}}}{\emph{N}\sphinxoptional{, \emph{c=0.2}, \emph{s=0.6}}}{}
+\end{fulllineitems}
+
+
+Generate N channels of random seismic data as a SeisData object.
+\index{randSeisEvent() (built-in function)@\spxentry{randSeisEvent()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/randseis:randSeisEvent}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{randSeisEvent}}}{\sphinxoptional{\emph{c=0.2}, \emph{s=0.6}}}{}
+\end{fulllineitems}
+
+
+Generate a SeisEvent structure filled with random values.
+* 100*c\% of channels \sphinxstyleemphasis{after the first} will have irregularly-sampled data (fs = 0.0)
+* 100*s\% of channels \sphinxstyleemphasis{after the first} are guaranteed to have seismic data.
+
+
+\begin{fulllineitems}
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{randSeisEvent}}}{\emph{N}\sphinxoptional{, \emph{c=0.2}, \emph{s=0.6}}}{}
+\end{fulllineitems}
+
+
+Generate a random SeisEvent object with N channels of data.
+\index{randSeisHdr() (built-in function)@\spxentry{randSeisHdr()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/randseis:randSeisHdr}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{randSeisHdr}}}{}{}
+\end{fulllineitems}
+
+
+Generate a SeisHdr structure filled with random values.
+\index{randSeisSrc() (built-in function)@\spxentry{randSeisSrc()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Submodules/randseis:randSeisSrc}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{randSeisSrc}}}{}{}
+\end{fulllineitems}
+
+
+Generate a SeisSrc structure filled with random values.
+
+
+\chapter{Appendices}
+\label{\detokenize{index:appendices}}
+
+\section{Utility Functions}
+\label{\detokenize{src/Appendices/function_list:utility-functions}}\label{\detokenize{src/Appendices/function_list:function-list}}\label{\detokenize{src/Appendices/function_list::doc}}
+This appendix covers utility functions that belong in no other category.
 \index{d2u() (built-in function)@\spxentry{d2u()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
@@ -1807,14 +2105,6 @@ Convert critical frequency \sphinxcode{\sphinxupquote{fc}} to a matrix of comple
 
 
 OS-agnostic equivalent to Linux \sphinxtitleref{find}. First argument is a path string, second is a Regex. File strings are postprocessed using Julia’s native PCRE Regex engine. By design, \sphinxtitleref{find\_regex} only returns file names.
-
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{(dist,~az,~baz)~=~gcdist({[}lat\_src,~lon\_src{]},~rec)}}}
-\end{fulllineitems}
-
-
-Compute great circle distance, azimuth, and backazimuth from source coordinates \sphinxcode{\sphinxupquote{{[}lat\_src, lon\_src{]}}} to receiver coordinates in \sphinxcode{\sphinxupquote{rec}} using the Haversine formula. \sphinxcode{\sphinxupquote{rec}} must be a two-column matix arranged {[}lat lon{]}. Returns a tuple of arrays.
 \index{getbandcode() (built-in function)@\spxentry{getbandcode()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
@@ -1887,497 +2177,141 @@ function:: w\_time(W::Array\{Int64,2\}, fs::Float64)
 Convert matrix W from time windows (w{[}:,1{]}:w{[}:,2{]}) in integer \(\mu\)s from the Unix epoch (1970-01-01T00:00:00) to sparse delta-encoded time representation. Specify fs in Hz.
 
 
-\subsection{RandSeis}
-\label{\detokenize{src/Appendices/function_list:randseis}}
-This submodule is used to quickly generate SeisIO structures with quasi-random
-field contents. Access it by typing “using SeisIO.RandSeis”
-\begin{itemize}
-\item {} 
-Channels have SEED-compliant IDs, sampling frequencies, and data types.
+\section{SeisIO Write Formats}
+\label{\detokenize{src/Appendices/seisio_file_format:seisio-write-formats}}\label{\detokenize{src/Appendices/seisio_file_format:seisio-file-format}}\label{\detokenize{src/Appendices/seisio_file_format::doc}}
+Files are written in little-endian byte order. Abbreviations used:
 
-\item {} 
-Channel data are randomly generated.
-
-\item {} 
-Some time gaps are automatically inserted into regularly-sampled data.
-
-\item {} 
-Instrument location parameters are randomly set.
-
-\end{itemize}
-
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{C~=~randSeisChannel({[},c=false,~s=false{]})}}}
-\end{fulllineitems}
-
-
-Generate a SeisChannel of random data. Specify c=true for campaign-style (irregularly-sampled) data (fs = 0.0); specify s=true to guarantee seismic data. s=true overrides c=true.
-
-Generate 8 to 24 channels of random seismic data as a SeisData object.
-\begin{itemize}
-\item {} 
-100*c\% of channels \sphinxstyleemphasis{after the first} will have irregularly-sampled data (fs = 0.0)
-
-\item {} 
-100*s\% of channels \sphinxstyleemphasis{after the first} are guaranteed to have seismic data.
-
-randSeisData(N{[}, c=0.2, s=0.6{]})
-
-\end{itemize}
-
-Generate N channels of random seismic data as a SeisData object.
-\index{randSeisEvent() (built-in function)@\spxentry{randSeisEvent()}\spxextra{built-in function}}
-
-\begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Appendices/function_list:randSeisEvent}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{randSeisEvent}}}{\sphinxoptional{\emph{c=0.2}, \emph{s=0.6}}}{}
-\end{fulllineitems}
-
-
-Generate a SeisEvent structure filled with random values.
-* 100*c\% of channels \sphinxstyleemphasis{after the first} will have irregularly-sampled data (fs = 0.0)
-* 100*s\% of channels \sphinxstyleemphasis{after the first} are guaranteed to have seismic data.
-
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{H~=~randSeisHdr()}}}
-\end{fulllineitems}
-
-
-Generate a SeisHdr structure filled with random values.
-
-
-\section{Structure and Field Descriptions}
-\label{\detokenize{src/Appendices/seisdata_fields:structure-and-field-descriptions}}\label{\detokenize{src/Appendices/seisdata_fields::doc}}
-
-\subsection{SeisChannel Fields}
-\label{\detokenize{src/Appendices/seisdata_fields:seischannel-fields}}\label{\detokenize{src/Appendices/seisdata_fields:sdf}}
 
 \begin{savenotes}\sphinxattablestart
 \centering
-\begin{tabulary}{\linewidth}[t]{|T|T|T|}
+\begin{tabular}[t]{|\X{3}{21}|\X{10}{21}|\X{4}{21}|\X{4}{21}|}
 \hline
 \sphinxstyletheadfamily 
-Name
-&\sphinxstyletheadfamily 
 Type
 &\sphinxstyletheadfamily 
 Meaning
-\\
-\hline
-id
-&
-String
-&
-unique channel ID formatted
-{\hyperref[\detokenize{src/Appendices/web_syntax:cid}]{\sphinxcrossref{\DUrole{std,std-ref}{net.sta.loc.cha}}}}
-\\
-\hline
-name
-&
-String
-&
-freeform channel name string
-\\
-\hline
-src
-&
-String
-&
-description of data source
-\\
-\hline
-units
-&
-String
-&
-units of dependent variable %
-\begin{footnote}[1]\sphinxAtStartFootnote
-Use \sphinxhref{http://unitsofmeasure.org/trac}{UCUM-compliant abbreviations} wherever possible.
-%
-\end{footnote}
-\\
-\hline
-fs
-&
-Float64
-&
-sampling frequency in Hz
-\\
-\hline
-gain
-&
-Float64
-&
-scalar to convert x to SI units in
-flat part of power spectrum %
-\begin{footnote}[2]\sphinxAtStartFootnote
-Gain has an identical meaning to the “Stage 0 gain” of FDSN XML.
-%
-\end{footnote}
-\\
-\hline
-loc
-&
-Array\{Float64,1\}
-&
-sensor location: {[}lat, lon, ele, az,
-inc{]} %
-\begin{footnote}[3]\sphinxAtStartFootnote
-Azimuth is measured clockwise from North; incidence of 0° = vertical; both use degrees.
-%
-\end{footnote}
-\\
-\hline
-resp
-&
-Array\{Complex
-\{Float64\},2\}
-&
-complex instrument response %
-\begin{footnote}[4]\sphinxAtStartFootnote
-Zeros in \sphinxcode{\sphinxupquote{:resp{[}i{]}{[}:,1{]}}}, poles in \sphinxcode{\sphinxupquote{:resp{[}i{]}{[}:,2{]}}}.
-%
-\end{footnote}
-\\
-\hline
-misc
-&
-Dict\{String,Any\}
-&
-miscellaneous information %
-\begin{footnote}[5]\sphinxAtStartFootnote
-Arrays in \sphinxcode{\sphinxupquote{:misc}} should each contain a single Type (e.g. Array\{Float64,1\}, never Array\{Any,1\}). See the {\hyperref[\detokenize{src/Appendices/seisdata_fileformat:smt}]{\sphinxcrossref{\DUrole{std,std-ref}{SeisIO file format description}}}} for a full list of allowed value types in :misc.
-%
-\end{footnote}
-\\
-\hline
-notes
-&
-Array\{String,1\}
-&
-timestamped notes
-\\
-\hline
-t
-&
-Array\{Int64,2\}
-&
-time gaps
-{\hyperref[\detokenize{src/Appendices/seisdata_fields:seisdata-t}]{\sphinxcrossref{\DUrole{std,std-ref}{(see below)}}}}
-\\
-\hline
-x
-&
-Array\{Float64,1\}
-&
-univariate data
-\\
-\hline
-\end{tabulary}
-\par
-\sphinxattableend\end{savenotes}
-\subsubsection*{Table Footnotes}
-
-
-\subsection{SeisData Fields}
-\label{\detokenize{src/Appendices/seisdata_fields:seisdata-fields}}
-As SeisChannel, plus
-
-
-\begin{savenotes}\sphinxattablestart
-\centering
-\begin{tabulary}{\linewidth}[t]{|T|T|T|}
-\hline
-\sphinxstyletheadfamily 
-Name
 &\sphinxstyletheadfamily 
-Type
+C
 &\sphinxstyletheadfamily 
-Meaning
+Fortran 77
 \\
 \hline
-n
-&
-Int64
-&
-number of channels
-\\
-\hline
-c
-&
-Array\{TCPSocket,1\}
-&
-array of TCP connections
-\\
-\hline
-\end{tabulary}
-\par
-\sphinxattableend\end{savenotes}
-
-
-\subsubsection{Time Convention}
-\label{\detokenize{src/Appendices/seisdata_fields:time-convention}}\phantomsection\label{\detokenize{src/Appendices/seisdata_fields:seisdata-t}}
-The units of \sphinxcode{\sphinxupquote{t}} are \sphinxstyleemphasis{integer microseconds}, measured from Unix epoch time
-(1970-01-01T00:00:00.000).
-
-For \sphinxstyleemphasis{regularly sampled} data (\sphinxcode{\sphinxupquote{fs \textgreater{} 0.0}}), each \sphinxcode{\sphinxupquote{t}} is a sparse
-delta-compressed representation of \sphinxstyleemphasis{time gaps} in the corresponding \sphinxcode{\sphinxupquote{x}}.
-The first column stores indices of gaps; the second, gap lengths.
-
-Within each time field, \sphinxcode{\sphinxupquote{t{[}1,2{]}}} stores the time of the first sample of the
-corresponding \sphinxcode{\sphinxupquote{x}}. The last row of each \sphinxcode{\sphinxupquote{t}} should always take the form {}`
-\sphinxtitleref{{[}length(x) 0{]}{}`}. Other rows take the form \sphinxcode{\sphinxupquote{{[}(starting index of gap) (length of gap){]}}}.
-
-For \sphinxstyleemphasis{irregularly sampled data} (\sphinxcode{\sphinxupquote{fs = 0}}), \sphinxcode{\sphinxupquote{t{[}:,2{]}}} is a dense
-representation of \sphinxstyleemphasis{time stamps for each sample}.
-
-
-\subsection{SeisHdr Fields}
-\label{\detokenize{src/Appendices/seisdata_fields:seishdr-fields}}
-
-\begin{savenotes}\sphinxattablestart
-\centering
-\begin{tabulary}{\linewidth}[t]{|T|T|T|}
-\hline
-\sphinxstyletheadfamily 
-Name
-&\sphinxstyletheadfamily 
-Type
-&\sphinxstyletheadfamily 
-Meaning
-\\
-\hline
-id
-&
-Int64
-&
-numeric event ID
-\\
-\hline
-ot
-&
-DateTime
-&
-origin time
-\\
-\hline
-loc
-&
-Array\{Float64, 1\}
-&
-hypocenter
-\\
-\hline
-mag
-&
-Tuple\{Float32, String\}
-&
-magnitude, scale
-\\
-\hline
-int
-&
-Tuple\{UInt8, String\}
-&
-intensity, scale
-\\
-\hline
-mt
-&
-Array\{Float64, 1\}
-&
-moment tensor: (1-6) tensor,
-(7) scalar moment, (8) \%dc
-\\
-\hline
-np
-&
-Array\{Tuple\{Float64,
-Float64, Float64\},1\}
-&
-nodal planes
-\\
-\hline
-pax
-&
-Array\{Tuple\{Float64,
-Float64, Float64\},1\}
-&
-principal axes, ordered P, T, N
-\\
-\hline
-src
-&
-String
-&
-data source (e.g. url/filename)
-\\
-\hline
-\end{tabulary}
-\par
-\sphinxattableend\end{savenotes}
-
-
-\subsection{SeisEvent Fields}
-\label{\detokenize{src/Appendices/seisdata_fields:seisevent-fields}}
-
-\begin{savenotes}\sphinxattablestart
-\centering
-\begin{tabulary}{\linewidth}[t]{|T|T|T|}
-\hline
-\sphinxstyletheadfamily 
-Name
-&\sphinxstyletheadfamily 
-Type
-&\sphinxstyletheadfamily 
-Meaning
-\\
-\hline
-hdr
-&
-SeisHdr
-&
-event header
-\\
-\hline
-data
-&
-SeisData
-&
-event data
-\\
-\hline
-\end{tabulary}
-\par
-\sphinxattableend\end{savenotes}
-
-
-\section{SeisIO File Format}
-\label{\detokenize{src/Appendices/seisdata_fileformat:seisio-file-format}}\label{\detokenize{src/Appendices/seisdata_fileformat:seisdata-file-format}}\label{\detokenize{src/Appendices/seisdata_fileformat::doc}}
-Files are written in little-endian byte order.
-
-
-\begin{savenotes}\sphinxattablestart
-\centering
-\sphinxcapstartof{table}
-\sphinxcaption{Abbreviations used in this section}\label{\detokenize{src/Appendices/seisdata_fileformat:id1}}
-\sphinxaftercaption
-\begin{tabular}[t]{|\X{3}{25}|\X{10}{25}|\X{5}{25}|\X{7}{25}|}
-\hline
-\sphinxstyletheadfamily 
-Var
-&\sphinxstyletheadfamily 
-Meaning
-&\sphinxstyletheadfamily 
-Julia
-&\sphinxstyletheadfamily 
-C \sphinxcode{\sphinxupquote{\textless{}stdint.h\textgreater{}}}
-\\
-\hline
-c
-&
-unsigned 8-bit character
-&
 Char
 &
-unsigned char
+Unicode character
+&
+wchar
+&
+CHARACTER*4
 \\
 \hline
-f32
+Float32
 &
 32-bit float
 &
-Float32
-&
 float
+&
+REAL
 \\
 \hline
-f64
+Float64
 &
 64-bit float
 &
-Float64
-&
 double
+&
+REAL*8
 \\
 \hline
-i64
+Int8
+&
+signed 8-bit int
+&
+short
+&
+INTEGER
+\\
+\hline
+Int16
+&
+signed 16-bit int
+&
+int
+&
+INTEGER*2
+\\
+\hline
+Int32
+&
+signed 32-bit int
+&
+long
+&
+INTEGER*4
+\\
+\hline
+Int64
 &
 signed 64-bit integer
 &
-Int64
+long long
 &
-int64\_t
+INTEGER*8
 \\
 \hline
-u8
+UInt8
 &
 unsigned 8-bit int
 &
-UInt8
+unsigned short
 &
-uint8\_t
+CHARACTER
 \\
 \hline
-u32
+UInt16
+&
+unsigned 16-bit int
+&
+unsigned
+&\\
+\hline
+UInt32
 &
 unsigned 32-bit int
 &
-UInt32
-&
-int32\_t
-\\
+unsigned long
+&\\
 \hline
-u64
+UInt64
 &
 unsigned 64-bit int
 &
-UInt64
-&
-uint64\_t
-\\
-\hline
-u(8)
-&
-unsigned 8-bit integer
-&
-UInt8
-&
-uint8\_t
-\\
-\hline
-i(8)
-&
-signed 8-bit integer
-&
-Int8
-&
-int8\_t
-\\
-\hline
-f(8)
-&
-8-bit float
-&
-Float8
-&
-float or double
-\\
+unsigned long long
+&\\
 \hline
 \end{tabular}
 \par
 \sphinxattableend\end{savenotes}
 
+\begin{DUlineblock}{0em}
+\item[] Special instructions:
+\item[] 
+\item[] Parentheses, “()”, denote a custom object Type.
+\item[] “\{ (condition)” denotes the start of a loop; (condition) is the control flow.
+\item[] “\}” denotes the end of a loop.
+\end{DUlineblock}
 
-\subsection{File header}
-\label{\detokenize{src/Appendices/seisdata_fileformat:file-header}}
+Note that String in Julia has no exact C equivalence. SeisIO writes each String
+in two parts: an Int64 (String length in bytes) followed by the String contents
+(as bytes, equivalent to UInt8). Unlike C/Fortran, there are no issues with
+strings that contain the null character (0x00 or \sphinxcode{\sphinxupquote{'\textbackslash{}x0'}}).
+
+
+\subsection{SeisIO File}
+\label{\detokenize{src/Appendices/seisio_file_format:seisio-file}}
 
 \begin{savenotes}\sphinxattablestart
 \centering
-\sphinxcapstartof{table}
-\sphinxcaption{File header (14 bytes + TOC)}\label{\detokenize{src/Appendices/seisdata_fileformat:id2}}
-\sphinxaftercaption
 \begin{tabular}[t]{|\X{5}{47}|\X{32}{47}|\X{5}{47}|\X{5}{47}|}
 \hline
 \sphinxstyletheadfamily 
@@ -2392,25 +2326,16 @@ N
 \hline&
 “SEISIO”
 &
-c
+UInt8
 &
 6
 \\
 \hline
 \sphinxcode{\sphinxupquote{V}}
 &
-SeisIO version
+SeisIO file format version
 &
-f32
-&
-1
-\\
-\hline
-\sphinxcode{\sphinxupquote{jv}}
-&
-Julia version
-&
-f32
+Float32
 &
 1
 \\
@@ -2419,16 +2344,16 @@ f32
 &
 \# of SeisIO objects in file
 &
-u32
+UInt32
 &
 1
 \\
 \hline
 \sphinxcode{\sphinxupquote{C}}
 &
-Character codes for each object
+{\hyperref[\detokenize{src/Appendices/seisio_file_format:object-codes}]{\sphinxcrossref{\DUrole{std,std-ref}{SeisIO object codes}}}} for each object
 &
-c
+UInt32
 &
 J
 \\
@@ -2437,302 +2362,2331 @@ J
 &
 Byte indices for each object
 &
-u64
+UInt64
 &
 J
 \\
 \hline
+\{
+&&&
+for i = 1:J
+\\
+\hline&
+(Objects)
+&
+variable
+&
+J
+\\
+\hline
+\}
+&&&\\
+\hline
+\sphinxcode{\sphinxupquote{ID}}
+&
+ID hashes
+&
+UInt64
+&
+variable
+\\
+\hline
+\sphinxcode{\sphinxupquote{TS}}
+&
+Start times
+&
+Int64
+&
+variable
+\\
+\hline
+\sphinxcode{\sphinxupquote{TE}}
+&
+End times
+&
+Int64
+&
+variable
+\\
+\hline
+\sphinxcode{\sphinxupquote{P}}
+&
+Parent object index in C and B
+&
+variable
+&\\
+\hline
+\sphinxcode{\sphinxupquote{bID}}
+&
+Byte offset of \sphinxcode{\sphinxupquote{ID}} array
+&
+Int64
+&
+1
+\\
+\hline
+\sphinxcode{\sphinxupquote{bTS}}
+&
+Byte offset of \sphinxcode{\sphinxupquote{TS}} array
+&
+Int64
+&
+1
+\\
+\hline
+\sphinxcode{\sphinxupquote{bTE}}
+&
+Byte offset of \sphinxcode{\sphinxupquote{TE}} array
+&
+Int64
+&
+1
+\\
+\hline
+\sphinxcode{\sphinxupquote{bP}}
+&
+Byte offset of \sphinxcode{\sphinxupquote{P}} array
+&
+Int64
+&
+1
+\\
+\hline
 \end{tabular}
 \par
 \sphinxattableend\end{savenotes}
 
-The Julia version stores VERSION.major.VERSION.minor as a Float32, e.g. v0.5 is stored as 0.5f0; SeisIO version is stored similarly.
+ID, TS, and TE are the ID, data start time, and data end time of each channel
+in each object. P is the index of the parent object in C and B. TS and TE are
+measured from Unix epoch time (1970-01-01T00:00:00Z) in integer microseconds.
+
+Intent: when seeking data from channel \sphinxcode{\sphinxupquote{i}} between times \sphinxcode{\sphinxupquote{s}} and \sphinxcode{\sphinxupquote{t}},
+if \sphinxcode{\sphinxupquote{hash(i)}} matches \sphinxcode{\sphinxupquote{ID{[}j{]}}} and the time windows overlap, retrieve index
+\sphinxcode{\sphinxupquote{k = P{[}j{]}}} from NP, seek to byte offset \sphinxcode{\sphinxupquote{B{[}k{]}}}, and read an object of
+type \sphinxcode{\sphinxupquote{C{[}k{]}}} from file.
+
+If an archive contains no data objects, ID, TS, TE, and P are empty;
+equivalently, \sphinxcode{\sphinxupquote{bID == bTS}}.
 
 
-\begin{savenotes}\sphinxattablestart
-\centering
-\sphinxcapstartof{table}
-\sphinxcaption{Object codes}\label{\detokenize{src/Appendices/seisdata_fileformat:id3}}
-\sphinxaftercaption
-\begin{tabular}[t]{|\X{5}{30}|\X{25}{30}|}
-\hline
-\sphinxstyletheadfamily 
-Char
-&\sphinxstyletheadfamily 
-Meaning
-\\
-\hline
-‘D’
-&
-SeisData
-\\
-\hline
-‘H’
-&
-SeisHdr
-\\
-\hline
-‘E’
-&
-SeisEvent
-\\
-\hline
-\end{tabular}
-\par
-\sphinxattableend\end{savenotes}
+\section{Simple Object Types}
+\label{\detokenize{src/Appendices/seisio_file_format:simple-object-types}}
+Fields of these objects are written in one of three ways: as “plain data” types,
+such as UInt8 or Float64; as arrays; or as strings.
+
+In a simple object, each array is stored as follows:
+1. Int64 number of dimensions (e.g. 2)
+2. Int64 array of dimensions themselves (e.g. 2, 2)
+3. Array values (e.g. 0.08250153, 0.023121119, 0.6299772, 0.79595184)
 
 
-\subsection{SeisHdr}
-\label{\detokenize{src/Appendices/seisdata_fileformat:seishdr}}
-Structural overview:
-
-\fvset{hllines={, ,}}%
-\begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n}{Int64\PYGZus{}vals}
-\PYG{p}{:}\PYG{n}{mag}\PYG{p}{[}\PYG{l+m+mi}{1}\PYG{p}{]}       \PYG{c+c1}{\PYGZsh{} Float32}
-\PYG{n}{Float64\PYGZus{}vals}
-\PYG{n}{UInt8\PYGZus{}vals}
-\PYG{p}{:}\PYG{n}{misc}
-\end{sphinxVerbatim}
-
+\subsection{EQLoc}
+\label{\detokenize{src/Appendices/seisio_file_format:eqloc}}
 
 \begin{savenotes}\sphinxattablestart
 \centering
-\sphinxcapstartof{table}
-\sphinxcaption{Int64 values}\label{\detokenize{src/Appendices/seisdata_fileformat:id4}}
-\sphinxaftercaption
-\begin{tabular}[t]{|\X{1}{5}|\X{4}{5}|}
+\begin{tabular}[t]{|\X{1}{11}|\X{1}{11}|\X{1}{11}|\X{8}{11}|}
 \hline
 \sphinxstyletheadfamily 
 Var
 &\sphinxstyletheadfamily 
-Meaning
-\\
-\hline
-id
-&
-event id
-\\
-\hline
-ot
-&
-origin time in integer \(\mu\)s from Unix epoch
-\\
-\hline
-L\_int
-&
-length of intensity scale string
-\\
-\hline
-L\_src
-&
-length of src string
-\\
-\hline
-L\_notes
-&
-length of notes string
-\\
-\hline
-\end{tabular}
-\par
-\sphinxattableend\end{savenotes}
-
-Magnitude is stored as a Float32 after the Int64 values.
-
-
-\begin{savenotes}\sphinxattablestart
-\centering
-\sphinxcapstartof{table}
-\sphinxcaption{Float64 values}\label{\detokenize{src/Appendices/seisdata_fileformat:id5}}
-\sphinxaftercaption
-\begin{tabular}[t]{|\X{1}{10}|\X{1}{10}|\X{8}{10}|}
-\hline
-\sphinxstyletheadfamily 
-Var
+Type
 &\sphinxstyletheadfamily 
 N
 &\sphinxstyletheadfamily 
 Meaning
 \\
 \hline
-loc
+lat
 &
-3
+Float64
 &
-lat, lon, dep
+1
+&
+latitude
 \\
 \hline
-mt
+lon
 &
-8
+Float64
 &
-tensor, scalar moment, \%dc
+1
+&
+longitude
 \\
 \hline
-np
+dep
 &
-6
+Float64
 &
-np (nodal planes: 1st, 2nd)
+1
+&
+depth
 \\
 \hline
-pax
+dx
 &
-9
+Float64
 &
-pax (principal axes: P, T, N)
+1
+&
+x-error
+\\
+\hline
+dy
+&
+Float64
+&
+1
+&
+y-error
+\\
+\hline
+dz
+&
+Float64
+&
+1
+&
+z-error
+\\
+\hline
+dt
+&
+Float64
+&
+1
+&
+t-error (error in origin time)
+\\
+\hline
+se
+&
+Float64
+&
+1
+&
+standard error
+\\
+\hline
+rms
+&
+Float64
+&
+1
+&
+rms pick error
+\\
+\hline
+gap
+&
+Float64
+&
+1
+&
+azimuthal gap
+\\
+\hline
+dmin
+&
+Float64
+&
+1
+&
+minimum source-receiver distance in location
+\\
+\hline
+dmax
+&
+Float64
+&
+1
+&
+maximum source-receiver distance in location
+\\
+\hline
+nst
+&
+Int64
+&
+1
+&
+number of stations used to locate earthquake
+\\
+\hline
+flags
+&
+UInt8
+&
+1
+&
+one-bit flags for special location properties
+\\
+\hline
+Ld
+&
+Int64
+&
+1
+&
+length of “datum” string in bytes
+\\
+\hline
+datum
+&
+UInt8
+&
+Ld
+&
+Datum string
+\\
+\hline
+Lt
+&
+Int64
+&
+1
+&
+length of “typ” (event type) string in bytes
+\\
+\hline
+typ
+&
+UInt8
+&
+Lt
+&
+earthquake type string
+\\
+\hline
+Li
+&
+Int64
+&
+1
+&
+length of “sig” (error significance) string in bytes
+\\
+\hline
+sig
+&
+UInt8
+&
+Li
+&
+earthquake location error significance string
+\\
+\hline
+Lr
+&
+Int64
+&
+1
+&
+length of “src” (data source) string in bytes
+\\
+\hline
+src
+&
+UInt8
+&
+Lr
+&
+data source string
 \\
 \hline
 \end{tabular}
 \par
 \sphinxattableend\end{savenotes}
 
+\begin{DUlineblock}{0em}
+\item[] flag meanings: (0x01 = true, 0x00 = false)
+\item[] 1. x fixed?
+\item[] 2. y fixed?
+\item[] 3. z fixed?
+\item[] 4. t fixed?
+\item[] In Julia, get the value of flag{[}n{]} with \sphinxcode{\sphinxupquote{\textgreater{}\textgreater{}(\textless{}\textless{}(flags, n-1), 7)}}.
+\end{DUlineblock}
+
+
+\subsection{EQMag}
+\label{\detokenize{src/Appendices/seisio_file_format:eqmag}}
 
 \begin{savenotes}\sphinxattablestart
 \centering
-\sphinxcapstartof{table}
-\sphinxcaption{UInt8 values}\label{\detokenize{src/Appendices/seisdata_fileformat:id6}}
-\sphinxaftercaption
-\begin{tabular}[t]{|\X{1}{6}|\X{1}{6}|\X{4}{6}|}
+\begin{tabular}[t]{|\X{1}{12}|\X{2}{12}|\X{1}{12}|\X{8}{12}|}
 \hline
 \sphinxstyletheadfamily 
 Var
 &\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
 N
 &\sphinxstyletheadfamily 
 Meaning
+\\
+\hline
+val
+&
+Float32
+&
+1
+&
+magnitude value
+\\
+\hline
+gap
+&
+Float64
+&
+1
+&
+largest azimuthal gap between stations in magnitude
+\\
+\hline
+nst
+&
+Int64
+&
+1
+&
+number of stations used in magnitude computation
+\\
+\hline
+Lsc
+&
+Int64
+&
+1
+&
+length of magnitude scale string
 \\
 \hline
 msc
 &
+UInt8
+&
+Lsc
+&
+magnitude scale string
+\\
+\hline
+Lr
+&
+Int64
+&
+1
+&
+length of data source string
+\\
+\hline
+src
+&
+UInt8
+&
+Lr
+&
+data source string
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsection{SeisPha}
+\label{\detokenize{src/Appendices/seisio_file_format:seispha}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{12}|\X{2}{12}|\X{1}{12}|\X{8}{12}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+F
+&
+Float64
+&
+8
+&
+amplitude, distance, incidence angle, residual,
+\\
+\hline&&&
+ray parameter, takeoff angle, travel time, uncertainty
+\\
+\hline
+C
+&
+Char
+&
 2
 &
-magnitude scale characters
+polarity, quality
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsection{SourceTime}
+\label{\detokenize{src/Appendices/seisio_file_format:sourcetime}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{12}|\X{2}{12}|\X{1}{12}|\X{8}{12}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+Ld
+&
+Int64
+&
+1
+&
+size of descriptive string in bytes
+\\
+\hline
+desc
+&
+UInt8
+&
+1
+&
+descriptive string
+\\
+\hline
+F
+&
+Float64
+&
+3
+&
+duration, rise time, decay time
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsection{StringVec}
+\label{\detokenize{src/Appendices/seisio_file_format:stringvec}}
+A vector of variable-length strings; its exact Type in Julia is Array\{String,1\}.
+
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\sphinxcapstartof{table}
+\sphinxcaption{StringVec}\label{\detokenize{src/Appendices/seisio_file_format:id17}}
+\sphinxaftercaption
+\begin{tabular}[t]{|\X{1}{11}|\X{1}{11}|\X{1}{11}|\X{8}{11}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+ee
+&
+UInt8
+&
+1
+&
+is this string vector empty? %
+\begin{footnote}[1]\sphinxAtStartFootnote
+If \sphinxcode{\sphinxupquote{ee == 0x00}}, then no values are stored for L, nb, or str.
+%
+\end{footnote}
+\\
+\hline
+L
+&
+Int64
+&
+1
+&
+number of strings to read
+\\
+\hline
+\{
+&&&
+i = 1:L
+\\
+\hline
+nb
+&
+Int64
+&
+1
+&
+length of string in bytes
+\\
+\hline
+str
+&
+UInt8
+&
+nb
+&
+string
+\\
+\hline
+\}
+&&&\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\section{Location Types}
+\label{\detokenize{src/Appendices/seisio_file_format:location-types}}
+
+\subsection{GenLoc}
+\label{\detokenize{src/Appendices/seisio_file_format:genloc}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{11}|\X{1}{11}|\X{1}{11}|\X{8}{11}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+Ld
+&
+Int64
+&
+1
+&
+length of datum string in bytes
+\\
+\hline
+datum
+&
+UInt8
+&
+Ld
+&
+datum string
+\\
+\hline
+Ll
+&
+Int64
+&
+1
+&
+length of location vector in bytes
+\\
+\hline
+loc
+&
+Float64
+&
+Ll
+&
+location vector
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsection{GeoLoc}
+\label{\detokenize{src/Appendices/seisio_file_format:geoloc}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{11}|\X{1}{11}|\X{1}{11}|\X{8}{11}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+Ld
+&
+Int64
+&
+1
+&
+length of datum string in bytes
+\\
+\hline
+datum
+&
+UInt8
+&
+Ld
+&
+datum string
+\\
+\hline
+F
+&
+Float64
+&
+6
+&
+latitude, longitude, elevation,
+\\
+\hline&&&
+depth, azimuth, incidence
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsection{UTMLoc}
+\label{\detokenize{src/Appendices/seisio_file_format:utmloc}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{11}|\X{1}{11}|\X{1}{11}|\X{8}{11}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+Ld
+&
+Int64
+&
+1
+&
+length of datum string in bytes
+\\
+\hline
+datum
+&
+UInt8
+&
+N
+&
+datum string
+\\
+\hline
+zone
+&
+Int8
+&
+1
+&
+UTM zone number
+\\
+\hline
+hemi
+&
+Char
+&
+1
+&
+hemisphere
+\\
+\hline
+E
+&
+UInt64
+&
+1
+&
+Easting
+\\
+\hline
+N
+&
+UInt64
+&
+1
+&
+Northing
+\\
+\hline
+F
+&
+Float64
+&
+4
+&
+elevation, depth, azimuth, incidence
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsection{XYLoc}
+\label{\detokenize{src/Appendices/seisio_file_format:xyloc}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{11}|\X{1}{11}|\X{1}{11}|\X{8}{11}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+Ld
+&
+Int64
+&
+1
+&
+Length of datum string in bytes
+\\
+\hline
+datum
+&
+UInt8
+&
+Ld
+&
+datum string
+\\
+\hline
+F
+&
+Float64
+&
+8
+&
+x, y, z, azimuth, incidence, origin x, origin y, origin z
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\section{Response Types}
+\label{\detokenize{src/Appendices/seisio_file_format:response-types}}
+
+\subsection{GenResp}
+\label{\detokenize{src/Appendices/seisio_file_format:genresp}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{13}|\X{3}{13}|\X{1}{13}|\X{8}{13}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+Ld
+&
+Int64
+&
+1
+&
+length of descriptive string in bytes
+\\
+\hline
+desc
+&
+UInt8
+&
+Ld
+&
+descriptive string
+\\
+\hline
+nr
+&
+Int64
+&
+1
+&
+Number of rows in complex response matrix
+\\
+\hline
+nc
+&
+Int64
+&
+1
+&
+Number of columns in complex response matrix
+\\
+\hline
+resp
+&
+Complex\{Float64,2\}
+&
+nr*nc
+&
+complex response matrix
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsection{PZResp}
+\label{\detokenize{src/Appendices/seisio_file_format:pzresp}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{13}|\X{3}{13}|\X{1}{13}|\X{8}{13}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
 \\
 \hline
 c
 &
+Float32
+&
 1
 &
-separator for notes
+damping constant
 \\
 \hline
-i
+np
+&
+Int64
+&
+1
+&
+number of complex poles
+\\
+\hline
+p
+&
+Complex\{Float32,1\}
+&
+np
+&
+complex poles vector
+\\
+\hline
+nz
+&
+Int64
+&
+1
+&
+number of complex zeros
+\\
+\hline
+z
+&
+Complex\{Float32,1\}
+&
+nz
+&
+complex zeros vector
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+PZResp64 is identical to PZResp with Float64 values for c, p, z, rather than Float32.
+
+
+\section{The Misc Dictionary}
+\label{\detokenize{src/Appendices/seisio_file_format:the-misc-dictionary}}
+Most compound objects below contain a dictionary (Dict\{String,Any\}) for
+non-essential information in a field named \sphinxcode{\sphinxupquote{:misc}}. The tables below describe
+how this field is written to disk.
+
+
+\subsection{Misc}
+\label{\detokenize{src/Appendices/seisio_file_format:misc}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{11}|\X{1}{11}|\X{1}{11}|\X{8}{11}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+N
+&
+Int64
+&
+1
+&
+number of items in dictionary %
+\begin{footnote}[2]\sphinxAtStartFootnote
+If \sphinxcode{\sphinxupquote{N == 0}}, then N is the only value present.
+%
+\end{footnote}
+\\
+\hline
+K
+&
+(StringVec)
+&
+1
+&
+dictionary keys
+\\
+\hline
+\{
+&&&
+for i = 1:N
+\\
+\hline
+c
+&
+UInt8
+&
+1
+&
+{\hyperref[\detokenize{src/Appendices/seisio_file_format:type-codes}]{\sphinxcrossref{\DUrole{std,std-ref}{Type code}}}} of object i
+\\
+\hline
+o
+&
+variable
+&
+1
+&
+object i
+\\
+\hline
+\}
+&&&\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsubsection{Dictionary Contents}
+\label{\detokenize{src/Appendices/seisio_file_format:dictionary-contents}}
+These subtables describe how to read the possible data types in a Misc dictionary.
+
+
+\subsection{String Array (c == 0x81)}
+\label{\detokenize{src/Appendices/seisio_file_format:string-array-c-0x81}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{11}|\X{1}{11}|\X{1}{11}|\X{8}{11}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+A
+&
+(StringVec)
+&
+1
+&
+string vector
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsection{Other Array (c == 0x80 or c \textgreater{} 0x81)}
+\label{\detokenize{src/Appendices/seisio_file_format:other-array-c-0x80-or-c-0x81}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{11}|\X{1}{11}|\X{1}{11}|\X{8}{11}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+nd
+&
+Int64
+&
+1
+&
+number of dimensions in array
+\\
+\hline
+dims
+&
+Int64
+&
+nd
+&
+array dimensions
+\\
+\hline
+arr
+&
+varies
+&
+prod(nd)
+&
+array
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsection{String (c == 0x01)}
+\label{\detokenize{src/Appendices/seisio_file_format:string-c-0x01}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{11}|\X{1}{11}|\X{1}{11}|\X{8}{11}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+L
+&
+Int64
+&
+1
+&
+size of string in bytes
+\\
+\hline
+str
+&
+UInt8
+&
+1
+&
+string
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsection{Bits Type (c == 0x00 or 0x01 \textless{} c \textless{} 0x7f)}
+\label{\detokenize{src/Appendices/seisio_file_format:bits-type-c-0x00-or-0x01-c-0x7f}}
+Read a single value whose Type corresponds to the UInt8 {\hyperref[\detokenize{src/Appendices/seisio_file_format:type-codes}]{\sphinxcrossref{\DUrole{std,std-ref}{Type code}}}}.
+
+
+\section{Compound Object Types}
+\label{\detokenize{src/Appendices/seisio_file_format:compound-object-types}}
+Each of these objects contains at least one of the above simple object types.
+
+
+\subsection{PhaseCat}
+\label{\detokenize{src/Appendices/seisio_file_format:phasecat}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{12}|\X{2}{12}|\X{1}{12}|\X{8}{12}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+N
+&
+Int64
+&
+1
+&
+number of SeisPha objects to read  %
+\begin{footnote}[3]\sphinxAtStartFootnote
+If \sphinxcode{\sphinxupquote{N == 0}}, then N is the only value present.
+%
+\end{footnote}
+\\
+\hline
+K, (StringVec), 1, dictionary keys
+&&&\\
+\hline
+pha, (SeisPha), N, seismic phases
+&&&\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsection{EventChannel}
+\label{\detokenize{src/Appendices/seisio_file_format:eventchannel}}
+A single channel of data related to a seismic event
+
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{11}|\X{1}{11}|\X{1}{11}|\X{8}{11}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+Ni
+&
+Int64
+&
+1
+&
+size of id string in bytes
+\\
+\hline
+id
+&
+UInt8
+&
+Ni
+&
+id string
+\\
+\hline
+Nn
+&
+Int64
+&
+1
+&
+size of name string in bytes
+\\
+\hline
+name
+&
+UInt8
+&
+Nn
+&
+name string
+\\
+\hline
+Lt
+&
+UInt8
+&
+1
+&
+{\hyperref[\detokenize{src/Appendices/seisio_file_format:loc-codes}]{\sphinxcrossref{\DUrole{std,std-ref}{location Type code}}}}
+\\
+\hline
+loc
+&
+(Loc Type)
+&
+1
+&
+instrument position
+\\
+\hline
+fs
+&
+Float64
+&
+1
+&
+sampling frequency in Hz
+\\
+\hline
+gain
+&
+Float64
+&
+1
+&
+scalar gain
+\\
+\hline
+Rt
+&
+UInt8
+&
+1
+&
+{\hyperref[\detokenize{src/Appendices/seisio_file_format:resp-codes}]{\sphinxcrossref{\DUrole{std,std-ref}{response Type code}}}}
+\\
+\hline
+resp
+&
+(Resp Type)
+&
+1
+&
+instrument response
+\\
+\hline
+Nu
+&
+Int64
+&
+1
+&
+size of units string in bytes
+\\
+\hline
+units
+&
+UInt8
+&
+Nu
+&
+units string
+\\
+\hline
+az
+&
+Float64
+&
+1
+&
+azimuth
+\\
+\hline
+baz
+&
+Float64
+&
+1
+&
+backazimuth
+\\
+\hline
+dist
+&
+Float64
+&
+1
+&
+source-receiver distance
+\\
+\hline
+pha
+&
+(PhaseCat)
+&
+1
+&
+phase catalog
+\\
+\hline
+Nr
+&
+Int64
+&
+1
+&
+size of data source string in bytes
+\\
+\hline
+src
+&
+UInt8
+&
+Nr
+&
+data source string
+\\
+\hline
+misc
+&
+(Misc)
+&
+1
+&
+dictionary for non-essential information
+\\
+\hline
+notes
+&
+(StringVec)
+&
+1
+&
+notes and automated logging
+\\
+\hline
+Nt
+&
+Int64
+&
+1
+&
+length of time gaps matrix
+\\
+\hline
+T
+&
+Int64
+&
+2*Nt
+&
+time gaps matrix
+\\
+\hline
+Xc
+&
+UInt8
+&
+1
+&
+{\hyperref[\detokenize{src/Appendices/seisio_file_format:type-codes}]{\sphinxcrossref{\DUrole{std,std-ref}{Type code}}}} of data vector
+\\
+\hline
+Nx
+&
+Int64
+&
+1
+&
+number of samples in data vector
+\\
+\hline
+X
+&
+variable
+&
+NX
+&
+data vector
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsection{SeisChannel}
+\label{\detokenize{src/Appendices/seisio_file_format:seischannel}}
+A single channel of univariate geophysical data
+\begin{quote}
+
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{11}|\X{1}{11}|\X{1}{11}|\X{8}{11}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+Ni
+&
+Int64
+&
+1
+&
+size of id string in bytes
+\\
+\hline
+id
+&
+UInt8
+&
+Ni
+&
+id string
+\\
+\hline
+Nn
+&
+Int64
+&
+1
+&
+size of name string in bytes
+\\
+\hline
+name
+&
+UInt8
+&
+Nn
+&
+name string
+\\
+\hline
+Lt
+&
+UInt8
+&
+1
+&
+{\hyperref[\detokenize{src/Appendices/seisio_file_format:loc-codes}]{\sphinxcrossref{\DUrole{std,std-ref}{location Type code}}}}
+\\
+\hline
+loc
+&
+(Loc Type)
+&
+1
+&
+instrument position
+\\
+\hline
+fs
+&
+Float64
+&
+1
+&
+sampling frequency in Hz
+\\
+\hline
+gain
+&
+Float64
+&
+1
+&
+scalar gain
+\\
+\hline
+Rt
+&
+UInt8
+&
+1
+&
+{\hyperref[\detokenize{src/Appendices/seisio_file_format:resp-codes}]{\sphinxcrossref{\DUrole{std,std-ref}{response Type code}}}}
+\\
+\hline
+resp
+&
+(Resp Type)
+&
+1
+&
+instrument response
+\\
+\hline
+Nu
+&
+Int64
+&
+1
+&
+size of units string in bytes
+\\
+\hline
+units
+&
+UInt8
+&
+Nu
+&
+units string
+\\
+\hline
+Nr
+&
+Int64
+&
+1
+&
+size of data source string in bytes
+\\
+\hline
+src
+&
+UInt8
+&
+Nr
+&
+data source string
+\\
+\hline
+misc
+&
+(Misc)
+&
+1
+&
+dictionary for non-essential information
+\\
+\hline
+notes
+&
+(StringVec)
+&
+1
+&
+notes and automated logging
+\\
+\hline
+Nt
+&
+Int64
+&
+1
+&
+length of time gaps matrix
+\\
+\hline
+T
+&
+Int64
+&
+2*Nt
+&
+time gaps matrix
+\\
+\hline
+Xc
+&
+UInt8
+&
+1
+&
+{\hyperref[\detokenize{src/Appendices/seisio_file_format:type-codes}]{\sphinxcrossref{\DUrole{std,std-ref}{Type code}}}} of data vector
+\\
+\hline
+Nx
+&
+Int64
+&
+1
+&
+number of samples in data vector
+\\
+\hline
+X
+&
+variable
+&
+NX
+&
+data vector
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+\end{quote}
+
+
+\subsection{EventTraceData}
+\label{\detokenize{src/Appendices/seisio_file_format:eventtracedata}}
+A multichannel record of time-series data related to a seismic event.
+\begin{quote}
+
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{11}|\X{1}{11}|\X{1}{11}|\X{8}{11}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+N
+&
+Int64
+&
+1
+&
+number of data channels
+\\
+\hline
+Lc
+&
+UInt8
+&
+N
+&
+{\hyperref[\detokenize{src/Appendices/seisio_file_format:loc-codes}]{\sphinxcrossref{\DUrole{std,std-ref}{location Type codes}}}} for each data channel
+\\
+\hline
+Rc
+&
+UInt8
+&
+N
+&
+{\hyperref[\detokenize{src/Appendices/seisio_file_format:resp-codes}]{\sphinxcrossref{\DUrole{std,std-ref}{response Type codes}}}} for each data channel
+\\
+\hline
+Xc
+&
+UInt8
+&
+N
+&
+data {\hyperref[\detokenize{src/Appendices/seisio_file_format:type-codes}]{\sphinxcrossref{\DUrole{std,std-ref}{Type codes}}}} for each data channel
+\\
+\hline
+cmp
+&
+UInt8
+&
+1
+&
+are data compressed? (0x01 = yes)
+\\
+\hline
+Nt
+&
+Int64
+&
+N
+&
+number of rows in time gaps matrix for each channel
+\\
+\hline
+Nx
+&
+Int64
+&
+N
+&
+length of data vector for each channel %
+\begin{footnote}[4]\sphinxAtStartFootnote
+If cmp == 0x01, each value in Nx is the number of bytes of compressed data to read; otherwise, this is the number of samples in each channel.
+%
+\end{footnote}
+\\
+\hline
+id
+&
+(StringVec)
+&
+1
+&
+channel ids
+\\
+\hline
+name
+&
+(StringVec)
+&
+1
+&
+channel names
+\\
+\hline
+loc
+&
+(Loc Type)
+&
+N
+&
+instrument positions
+\\
+\hline
+fs
+&
+Float64
+&
+N
+&
+sampling frequencies of each channel in Hz
+\\
+\hline
+gain
+&
+Float64
+&
+N
+&
+scalar gains of each channel
+\\
+\hline
+resp
+&
+(Resp Type)
+&
+N
+&
+instrument responses
+\\
+\hline
+units
+&
+(StringVec)
+&
+1
+&
+units of each channel’s data
+\\
+\hline
+az
+&
+Float64
+&
+N
+&
+event azimuth
+\\
+\hline
+baz
+&
+Float64
+&
+N
+&
+backazimuths to event
+\\
+\hline
+dist
+&
+Float64
+&
+N
+&
+source-receiver distances
+\\
+\hline
+pha
+&
+(PhaseCat)
+&
+N
+&
+phase catalogs for each channel
+\\
+\hline
+src
+&
+(StringVec)
+&
+1
+&
+data source strings for each channel
+\\
+\hline
+misc
+&
+(Misc)
+&
+N
+&
+dictionaries of non-essential information for each channel
+\\
+\hline
+notes
+&
+(StringVec)
+&
+N
+&
+notes and automated logging for each channel
+\\
+\hline
+\{
+&&&
+for i = 1:N
+\\
+\hline
+T
+&
+Int64
+&
+2*Nt{[}i{]}
+&
+Matrix of time gaps for channel i
+\\
+\hline
+\}
+&&&\\
+\hline
+\{
+&&&
+for i = 1:N
+\\
+\hline
+X
+&
+Xc{[}i{]}
+&
+Nx{[}i{]}
+&
+Data vector i %
+\begin{footnote}[5]\sphinxAtStartFootnote
+If cmp == 0x01, read Nx{[}i{]} samples of type UInt8 and pass through lz4 decompression to generate data vector i; else read Nx{[}i{]} samples of the type corresponding to code Xc{[}i{]}.
+%
+\end{footnote}
+\\
+\hline
+\}
+&&&\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+\end{quote}
+
+
+\subsection{SeisData}
+\label{\detokenize{src/Appendices/seisio_file_format:seisdata}}
+A record containing multiple channels of univariate geophysical data.
+\begin{quote}
+
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{11}|\X{1}{11}|\X{1}{11}|\X{8}{11}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+N
+&
+Int64
+&
+1
+&
+number of data channels
+\\
+\hline
+Lc
+&
+UInt8
+&
+N
+&
+{\hyperref[\detokenize{src/Appendices/seisio_file_format:loc-codes}]{\sphinxcrossref{\DUrole{std,std-ref}{location Type codes}}}} for each data channel
+\\
+\hline
+Rc
+&
+UInt8
+&
+N
+&
+{\hyperref[\detokenize{src/Appendices/seisio_file_format:resp-codes}]{\sphinxcrossref{\DUrole{std,std-ref}{response Type codes}}}} for each data channel
+\\
+\hline
+Xc
+&
+UInt8
+&
+N
+&
+data {\hyperref[\detokenize{src/Appendices/seisio_file_format:type-codes}]{\sphinxcrossref{\DUrole{std,std-ref}{Type codes}}}} for each data channel
+\\
+\hline
+cmp
+&
+UInt8
+&
+1
+&
+are data compressed? (0x01 = yes)
+\\
+\hline
+Nt
+&
+Int64
+&
+N
+&
+number of rows in time gaps matrix for each channel
+\\
+\hline
+Nx
+&
+Int64
+&
+N
+&
+length of data vector for each channel %
+\begin{footnote}[6]\sphinxAtStartFootnote
+If cmp == 0x01, each value in Nx is the number of bytes of compressed data to read; otherwise, this is the number of samples in each channel.
+%
+\end{footnote}
+\\
+\hline
+id
+&
+(StringVec)
+&
+1
+&
+channel ids
+\\
+\hline
+name
+&
+(StringVec)
+&
+1
+&
+channel names
+\\
+\hline
+loc
+&
+(Loc Type)
+&
+N
+&
+instrument positions
+\\
+\hline
+fs
+&
+Float64
+&
+N
+&
+sampling frequencies of each channel in Hz
+\\
+\hline
+gain
+&
+Float64
+&
+N
+&
+scalar gains of each channel
+\\
+\hline
+resp
+&
+(Resp Type)
+&
+N
+&
+instrument responses
+\\
+\hline
+units
+&
+(StringVec)
+&
+1
+&
+units of each channel’s data
+\\
+\hline
+src
+&
+(StringVec)
+&
+1
+&
+data source strings for each channel
+\\
+\hline
+misc
+&
+(Misc)
+&
+N
+&
+dictionaries of non-essential information for each channel
+\\
+\hline
+notes
+&
+(StringVec)
+&
+N
+&
+notes and automated logging for each channel
+\\
+\hline
+\{
+&&&
+for i = 1:N
+\\
+\hline
+T
+&
+Int64
+&
+2*Nt{[}i{]}
+&
+Matrix of time gaps for channel i
+\\
+\hline
+\}
+&&&\\
+\hline
+\{
+&&&
+for i = 1:N
+\\
+\hline
+X
+&
+Xc{[}i{]}
+&
+Nx{[}i{]}
+&
+Data vector i %
+\begin{footnote}[7]\sphinxAtStartFootnote
+If cmp == 0x01, read Nx{[}i{]} samples of type UInt8 and pass through lz4 decompression to generate data vector i; else read Nx{[}i{]} samples of the type corresponding to code Xc{[}i{]}.
+%
+\end{footnote}
+\\
+\hline
+\}
+&&&\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+\end{quote}
+
+
+\subsection{SeisHdr}
+\label{\detokenize{src/Appendices/seisio_file_format:seishdr}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{12}|\X{2}{12}|\X{1}{12}|\X{8}{12}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+Li
+&
+Int64
+&
+1
+&
+length of event ID string
+\\
+\hline
+id
+&
+UInt8
+&
+Li
+&
+event ID string
+\\
+\hline
+iv
+&
+UInt8
 &
 1
 &
 intensity value
 \\
 \hline
-i\_sc
+Ls
 &
-L\_int
+Int64
+&
+1
+&
+length of intensity scale string
+\\
+\hline
+isc
+&
+UInt8
+&
+Ls
 &
 intensity scale string
 \\
 \hline
-src
+loc
 &
-L\_src
+(EQLoc)
 &
-\sphinxcode{\sphinxupquote{:src}} as a string
+1
+&
+earthquake location
+\\
+\hline
+mag
+&
+(EQMag)
+&
+1
+&
+earthquake magnitude
+\\
+\hline
+misc
+&
+(Misc)
+&
+1
+&
+dictionary containing non-essential information
 \\
 \hline
 notes
 &
-L\_notes
+(StringVec)
 &
-\sphinxcode{\sphinxupquote{:notes}} joined a string with delimiter \sphinxcode{\sphinxupquote{c}}
-\\
-\hline
-\end{tabular}
-\par
-\sphinxattableend\end{savenotes}
-
-Entries in Misc are stored after UInt8 values. See below for details.
-
-
-\subsection{SeisData}
-\label{\detokenize{src/Appendices/seisdata_fileformat:seisdata}}
-Structural overview:
-
-\fvset{hllines={, ,}}%
-\begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n}{S}\PYG{o}{.}\PYG{n}{n}           \PYG{c+c1}{\PYGZsh{} UInt32}
-\PYG{c+c1}{\PYGZsh{} Repeated for each channel}
-\PYG{n}{Int64\PYGZus{}vals}
-\PYG{n}{Float64\PYGZus{}vals}
-\PYG{n}{UInt8\PYGZus{}vals}    \PYG{c+c1}{\PYGZsh{} including compressed S.x}
-\PYG{p}{:}\PYG{n}{misc}
-\end{sphinxVerbatim}
-
-S.x is compressed with BloscLZ before writing to disk.
-
-
-\subsubsection{Channel data}
-\label{\detokenize{src/Appendices/seisdata_fileformat:channel-data}}
-
-\begin{savenotes}\sphinxattablestart
-\centering
-\sphinxcapstartof{table}
-\sphinxcaption{Int64 values}\label{\detokenize{src/Appendices/seisdata_fileformat:id7}}
-\sphinxaftercaption
-\begin{tabular}[t]{|\X{1}{13}|\X{2}{13}|\X{10}{13}|}
-\hline
-\sphinxstyletheadfamily 
-Var
-&\sphinxstyletheadfamily 
-N
-&\sphinxstyletheadfamily 
-Meaning
-\\
-\hline
-L\_t
-&&
-length(S.t)
-\\
-\hline
-r
-&&
-length(S.resp)
-\\
-\hline
-L\_units
-&&
-length(S.units)
-\\
-\hline
-L\_src
-&&
-length(S.src)
-\\
-\hline
-L\_name
-&&
-length(S.name)
-\\
-\hline
-L\_notes
-&&
-length of notes string
-\\
-\hline
-lxc
-&&
-length of BloscLZ-compressed S.x
-\\
-\hline
-L\_x
-&&
-length(S.x)
-\\
-\hline
-t
+1
 &
-L\_t
+notes and automated logging
+\\
+\hline
+ot
 &
-S.t
+Int64
+&
+1
+&
+origin time %
+\begin{footnote}[8]\sphinxAtStartFootnote
+Measured from Unix epoch time (1970-01-01T00:00:00Z) in integer microseconds
+%
+\end{footnote}
+\\
+\hline
+Lr
+&
+Int64
+&
+1
+&
+length of data source string
+\\
+\hline
+src
+&
+UInt8
+&
+Lr
+&
+data source string
+\\
+\hline
+Lt
+&
+Int64
+&
+1
+&
+length of event type string
+\\
+\hline
+typ
+&
+UInt8
+&
+Lt
+&
+event type string
 \\
 \hline
 \end{tabular}
@@ -2740,749 +4694,201 @@ S.t
 \sphinxattableend\end{savenotes}
 
 
+\subsection{SeisSrc}
+\label{\detokenize{src/Appendices/seisio_file_format:seissrc}}
+
 \begin{savenotes}\sphinxattablestart
 \centering
-\sphinxcapstartof{table}
-\sphinxcaption{Float64 values}\label{\detokenize{src/Appendices/seisdata_fileformat:id8}}
-\sphinxaftercaption
-\begin{tabular}[t]{|\X{1}{11}|\X{2}{11}|\X{8}{11}|}
+\begin{tabular}[t]{|\X{1}{12}|\X{2}{12}|\X{1}{12}|\X{8}{12}|}
 \hline
 \sphinxstyletheadfamily 
 Var
+&\sphinxstyletheadfamily 
+Type
 &\sphinxstyletheadfamily 
 N
 &\sphinxstyletheadfamily 
 Meaning
 \\
 \hline
-fs
+Li
+&
+Int64
 &
 1
 &
-S.fs
-\\
-\hline
-gain
-&
-1
-&
-S.gain
-\\
-\hline
-loc
-&
-5
-&
-S.loc (lat, lon, dep, az, inc)
-\\
-\hline
-resp
-&
-2*r
-&
-real(S.resp{[}:{]}) followed by imag(S.resp{[}:{]})
-\\
-\hline
-\end{tabular}
-\par
-\sphinxattableend\end{savenotes}
-
-Convert resp with \sphinxcode{\sphinxupquote{resp = rr{[}1:r{]} + im*rr{[}r+1:2*r{]}}} and reshape to a two-column array with \sphinxcode{\sphinxupquote{r}} rows. The first column of the new, complex-valued \sphinxcode{\sphinxupquote{resp}} field holds zeros, the second holds poles.
-
-
-\begin{savenotes}\sphinxattablestart
-\centering
-\sphinxcapstartof{table}
-\sphinxcaption{UInt8 values}\label{\detokenize{src/Appendices/seisdata_fileformat:id9}}
-\sphinxaftercaption
-\begin{tabular}[t]{|\X{1}{6}|\X{1}{6}|\X{4}{6}|}
-\hline
-\sphinxstyletheadfamily 
-Var
-&\sphinxstyletheadfamily 
-N
-&\sphinxstyletheadfamily 
-Meaning
-\\
-\hline
-c
-&
-1
-&
-separator for notes
-\\
-\hline
-ex
-&
-1
-&
-type code for S.x
+length of source id string
 \\
 \hline
 id
 &
-15
+UInt8
 &
-S.id
+Li
+&
+id string
 \\
 \hline
-units
+Le
 &
-L\_units
+Int64
 &
-S.units
+1
+&
+length of event id string
+\\
+\hline
+eid
+&
+UInt8
+&
+Le
+&
+event id string
+\\
+\hline
+m0
+&
+Float64
+&
+1
+&
+scalar moment
+\\
+\hline
+Lm
+&
+Int64
+&
+1
+&
+length of moment tensor vector
+\\
+\hline
+mt
+&
+Float64
+&
+Lm
+&
+moment tensor vector
+\\
+\hline
+Ld
+&
+Int64
+&
+1
+&
+length of moment tensor misfit vector
+\\
+\hline
+dm
+&
+Float64
+&
+Ld
+&
+moment tensor misfit vector
+\\
+\hline
+np
+&
+Int64
+&
+1
+&
+number of polarities
+\\
+\hline
+gap
+&
+Float64
+&
+1
+&
+max. azimuthal gap
+\\
+\hline
+pad
+&
+Int64
+&
+2
+&
+dimensions of principal axes matrix
+\\
+\hline
+pax
+&
+Float64
+&
+pad{[}1{]}*pad{[}2{]}
+&
+principal axes matrix
+\\
+\hline
+pld
+&
+Int64
+&
+2
+&
+dimensions of nodal planes matrix
+\\
+\hline
+planes
+&
+Float64
+&
+pld{[}1{]}*pld{[}2{]}
+&
+nodal planes matrix
+\\
+\hline
+Lr
+&
+Int64
+&
+1
+&
+length of data source string
 \\
 \hline
 src
 &
-L\_src
+UInt8
 &
-S.src
+1
+&
+data source string
 \\
 \hline
-name
+st
 &
-L\_name
+(SourceTime)
 &
-S.name
+1
+&
+source-time description
+\\
+\hline
+misc
+&
+(Misc)
+&
+1
+&
+Dictionary containing non-essential information
 \\
 \hline
 notes
 &
-L\_notes
-&
-S.notes joined as a string with delimiter \sphinxcode{\sphinxupquote{c}}
-\\
-\hline
-xc
-&
-lxc
-&
-Blosc-compressed S.x
-\\
-\hline
-\end{tabular}
-\par
-\sphinxattableend\end{savenotes}
-
-S.misc is written last, after the compressed S.x
-
-
-\subsubsection{Storing misc}
-\label{\detokenize{src/Appendices/seisdata_fileformat:storing-misc}}
-\sphinxcode{\sphinxupquote{:misc}} is a Dict\{String,Any\} for both SeisData and SeisHdr, with limited support for key value types. Structural overview:
-
-\fvset{hllines={, ,}}%
-\begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n}{L\PYGZus{}keys}
-\PYG{n}{char\PYGZus{}separator}  \PYG{c+c1}{\PYGZsh{} for keys}
-\PYG{n}{keys}            \PYG{c+c1}{\PYGZsh{} joined as a string}
-\PYG{c+c1}{\PYGZsh{} for each key k}
-\PYG{n}{type\PYGZus{}code}       \PYG{c+c1}{\PYGZsh{} UInt8 code for misc[k]}
-\PYG{n}{value}           \PYG{c+c1}{\PYGZsh{} value of misc[k]}
-\end{sphinxVerbatim}
-
-
-\begin{savenotes}\sphinxattablestart
-\centering
-\sphinxcapstartof{table}
-\sphinxcaption{\sphinxstyleliteralintitle{\sphinxupquote{:misc}} keys}\label{\detokenize{src/Appendices/seisdata_fileformat:id10}}
-\sphinxaftercaption
-\begin{tabular}[t]{|\X{5}{47}|\X{32}{47}|\X{5}{47}|\X{5}{47}|}
-\hline
-\sphinxstyletheadfamily 
-Var
-&\sphinxstyletheadfamily 
-Meaning
-&\sphinxstyletheadfamily 
-T
-&\sphinxstyletheadfamily 
-N
-\\
-\hline
-\sphinxcode{\sphinxupquote{L}}
-&
-length of keys string
-&
-i64
+(StringVec)
 &
 1
-\\
-\hline
-\sphinxcode{\sphinxupquote{p}}
 &
-character separator
-&
-u8
-&
-1
-\\
-\hline
-\sphinxcode{\sphinxupquote{K}}
-&
-string of keys
-&
-u8
-&
-p
-\\
-\hline
-\end{tabular}
-\par
-\sphinxattableend\end{savenotes}
-
-
-\begin{savenotes}\sphinxattablestart
-\centering
-\sphinxcapstartof{table}
-\sphinxcaption{Supported \sphinxstyleliteralintitle{\sphinxupquote{:misc}} value Types}\label{\detokenize{src/Appendices/seisdata_fileformat:id11}}\label{\detokenize{src/Appendices/seisdata_fileformat:smt}}
-\sphinxaftercaption
-\begin{tabular}[t]{|\X{1}{14}|\X{6}{14}|\X{1}{14}|\X{6}{14}|}
-\hline
-\sphinxstyletheadfamily 
-code
-&\sphinxstyletheadfamily 
-value Type
-&\sphinxstyletheadfamily 
-code
-&\sphinxstyletheadfamily 
-value Type
-\\
-\hline
-0
-&
-Char
-&
-128
-&
-Array\{Char,1\}
-\\
-\hline
-1
-&
-String
-&
-129
-&
-Array\{String,1\}
-\\
-\hline
-16
-&
-UInt8
-&
-144
-&
-Array\{UInt8,1\}
-\\
-\hline
-17
-&
-UInt16
-&
-145
-&
-Array\{UInt16,1\}
-\\
-\hline
-18
-&
-UInt32
-&
-146
-&
-Array\{UInt32,1\}
-\\
-\hline
-19
-&
-UInt64
-&
-147
-&
-Array\{UInt64,1\}
-\\
-\hline
-20
-&
-UInt128
-&
-148
-&
-Array\{UInt128,1\}
-\\
-\hline
-32
-&
-Int8
-&
-160
-&
-Array\{Int8,1\}
-\\
-\hline
-33
-&
-Int16
-&
-161
-&
-Array\{Int16,1\}
-\\
-\hline
-34
-&
-Int32
-&
-162
-&
-Array\{Int32,1\}
-\\
-\hline
-35
-&
-Int64
-&
-163
-&
-Array\{Int64,1\}
-\\
-\hline
-36
-&
-Int128
-&
-164
-&
-Array\{Int128,1\}
-\\
-\hline
-48
-&
-Float16
-&
-176
-&
-Array\{Float16,1\}
-\\
-\hline
-49
-&
-Float32
-&
-177
-&
-Array\{Float32,1\}
-\\
-\hline
-50
-&
-Float64
-&
-178
-&
-Array\{Float64,1\}
-\\
-\hline
-80
-&
-Complex\{UInt8\}
-&
-208
-&
-Array\{Complex\{UInt8\},1\}
-\\
-\hline
-81
-&
-Complex\{UInt16\}
-&
-209
-&
-Array\{Complex\{UInt16\},1\}
-\\
-\hline
-82
-&
-Complex\{UInt32\}
-&
-210
-&
-Array\{Complex\{UInt32\},1\}
-\\
-\hline
-83
-&
-Complex\{UInt64\}
-&
-211
-&
-Array\{Complex\{UInt64\},1\}
-\\
-\hline
-84
-&
-Complex\{UInt128\}
-&
-212
-&
-Array\{Complex\{UInt128\},1\}
-\\
-\hline
-96
-&
-Complex\{Int8\}
-&
-224
-&
-Array\{Complex\{Int8\},1\}
-\\
-\hline
-97
-&
-Complex\{Int16\}
-&
-225
-&
-Array\{Complex\{Int16\},1\}
-\\
-\hline
-98
-&
-Complex\{Int32\}
-&
-226
-&
-Array\{Complex\{Int32\},1\}
-\\
-\hline
-99
-&
-Complex\{Int64\}
-&
-227
-&
-Array\{Complex\{Int64\},1\}
-\\
-\hline
-100
-&
-Complex\{Int128\}
-&
-228
-&
-Array\{Complex\{Int128\},1\}
-\\
-\hline
-112
-&
-Complex\{Float16\}
-&
-240
-&
-Array\{Complex\{Float16\},1\}
-\\
-\hline
-113
-&
-Complex\{Float32\}
-&
-241
-&
-Array\{Complex\{Float32\},1\}
-\\
-\hline
-114
-&
-Complex\{Float64\}
-&
-242
-&
-Array\{Complex\{Float64\},1\}
-\\
-\hline
-\end{tabular}
-\par
-\sphinxattableend\end{savenotes}
-
-Julia code for converting between data types and UInt8 type codes is given below.
-
-\fvset{hllines={, ,}}%
-\begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n}{findtype}\PYG{p}{(}\PYG{n}{c}\PYG{p}{:}\PYG{p}{:}\PYG{n}{UInt8}\PYG{p}{,} \PYG{n}{T}\PYG{p}{:}\PYG{p}{:}\PYG{n}{Array}\PYG{p}{\PYGZob{}}\PYG{n}{Type}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{\PYGZcb{}}\PYG{p}{)} \PYG{o}{=} \PYG{n}{T}\PYG{p}{[}\PYG{n}{findfirst}\PYG{p}{(}\PYG{p}{[}\PYG{n}{sizeof}\PYG{p}{(}\PYG{n}{i}\PYG{p}{)}\PYG{o}{==}\PYG{l+m+mi}{2}\PYG{o}{\PYGZca{}}\PYG{n}{c} \PYG{k}{for} \PYG{n}{i} \PYG{o+ow}{in} \PYG{n}{T}\PYG{p}{]}\PYG{p}{)}\PYG{p}{]}
-\PYG{n}{function} \PYG{n}{code2typ}\PYG{p}{(}\PYG{n}{c}\PYG{p}{:}\PYG{p}{:}\PYG{n}{UInt8}\PYG{p}{)}
-  \PYG{n}{t} \PYG{o}{=} \PYG{n}{Any}\PYG{p}{:}\PYG{p}{:}\PYG{n}{Type}
-  \PYG{k}{if} \PYG{n}{c} \PYG{o}{\PYGZgt{}}\PYG{o}{=} \PYG{l+m+mh}{0x80}
-    \PYG{n}{t} \PYG{o}{=} \PYG{n}{Array}\PYG{p}{\PYGZob{}}\PYG{n}{code2typ}\PYG{p}{(}\PYG{n}{c}\PYG{o}{\PYGZhy{}}\PYG{l+m+mh}{0x80}\PYG{p}{)}\PYG{p}{\PYGZcb{}}
-  \PYG{n}{elseif} \PYG{n}{c} \PYG{o}{\PYGZgt{}}\PYG{o}{=} \PYG{l+m+mh}{0x40}
-    \PYG{n}{t} \PYG{o}{=} \PYG{n}{Complex}\PYG{p}{\PYGZob{}}\PYG{n}{code2typ}\PYG{p}{(}\PYG{n}{c}\PYG{o}{\PYGZhy{}}\PYG{l+m+mh}{0x40}\PYG{p}{)}\PYG{p}{\PYGZcb{}}
-  \PYG{n}{elseif} \PYG{n}{c} \PYG{o}{\PYGZgt{}}\PYG{o}{=} \PYG{l+m+mh}{0x30}
-    \PYG{n}{t} \PYG{o}{=} \PYG{n}{findtype}\PYG{p}{(}\PYG{n}{c}\PYG{o}{\PYGZhy{}}\PYG{l+m+mh}{0x2f}\PYG{p}{,} \PYG{n}{Array}\PYG{p}{\PYGZob{}}\PYG{n}{Type}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{\PYGZcb{}}\PYG{p}{(}\PYG{n}{subtypes}\PYG{p}{(}\PYG{n}{AbstractFloat}\PYG{p}{)}\PYG{p}{)}\PYG{p}{)}
-  \PYG{n}{elseif} \PYG{n}{c} \PYG{o}{\PYGZgt{}}\PYG{o}{=} \PYG{l+m+mh}{0x20}
-    \PYG{n}{t} \PYG{o}{=} \PYG{n}{findtype}\PYG{p}{(}\PYG{n}{c}\PYG{o}{\PYGZhy{}}\PYG{l+m+mh}{0x20}\PYG{p}{,} \PYG{n}{Array}\PYG{p}{\PYGZob{}}\PYG{n}{Type}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{\PYGZcb{}}\PYG{p}{(}\PYG{n}{subtypes}\PYG{p}{(}\PYG{n}{Signed}\PYG{p}{)}\PYG{p}{)}\PYG{p}{)}
-  \PYG{n}{elseif} \PYG{n}{c} \PYG{o}{\PYGZgt{}}\PYG{o}{=} \PYG{l+m+mh}{0x10}
-    \PYG{n}{t} \PYG{o}{=} \PYG{n}{findtype}\PYG{p}{(}\PYG{n}{c}\PYG{o}{\PYGZhy{}}\PYG{l+m+mh}{0x10}\PYG{p}{,} \PYG{n}{Array}\PYG{p}{\PYGZob{}}\PYG{n}{Type}\PYG{p}{,}\PYG{l+m+mi}{1}\PYG{p}{\PYGZcb{}}\PYG{p}{(}\PYG{n}{subtypes}\PYG{p}{(}\PYG{n}{Unsigned}\PYG{p}{)}\PYG{p}{)}\PYG{p}{)}
-  \PYG{n}{elseif} \PYG{n}{c} \PYG{o}{==} \PYG{l+m+mh}{0x01}
-    \PYG{n}{t} \PYG{o}{=} \PYG{n}{String}
-  \PYG{n}{elseif} \PYG{n}{c} \PYG{o}{==} \PYG{l+m+mh}{0x00}
-    \PYG{n}{t} \PYG{o}{=} \PYG{n}{Char}
-  \PYG{k}{else}
-    \PYG{n}{t} \PYG{o}{=} \PYG{n}{Any}
-  \PYG{n}{end}
-  \PYG{k}{return} \PYG{n}{t}
-\PYG{n}{end}
-
-\PYG{n}{tos}\PYG{p}{(}\PYG{n}{t}\PYG{p}{:}\PYG{p}{:}\PYG{n}{Type}\PYG{p}{)} \PYG{o}{=} \PYG{n+nb}{round}\PYG{p}{(}\PYG{n}{Int64}\PYG{p}{,} \PYG{n}{log2}\PYG{p}{(}\PYG{n}{sizeof}\PYG{p}{(}\PYG{n}{t}\PYG{p}{)}\PYG{p}{)}\PYG{p}{)}
-\PYG{n}{function} \PYG{n}{typ2code}\PYG{p}{(}\PYG{n}{t}\PYG{p}{:}\PYG{p}{:}\PYG{n}{Type}\PYG{p}{)}
-  \PYG{n}{n} \PYG{o}{=} \PYG{l+m+mh}{0xff}
-  \PYG{k}{if} \PYG{n}{t} \PYG{o}{==} \PYG{n}{Char}
-    \PYG{n}{n} \PYG{o}{=} \PYG{l+m+mh}{0x00}
-  \PYG{n}{elseif} \PYG{n}{t} \PYG{o}{==} \PYG{n}{String}
-    \PYG{n}{n} \PYG{o}{=} \PYG{l+m+mh}{0x01}
-  \PYG{n}{elseif} \PYG{n}{t} \PYG{o}{\PYGZlt{}}\PYG{p}{:} \PYG{n}{Unsigned}
-    \PYG{n}{n} \PYG{o}{=} \PYG{l+m+mh}{0x10} \PYG{o}{+} \PYG{n}{tos}\PYG{p}{(}\PYG{n}{t}\PYG{p}{)}
-  \PYG{n}{elseif} \PYG{n}{t} \PYG{o}{\PYGZlt{}}\PYG{p}{:} \PYG{n}{Signed}
-    \PYG{n}{n} \PYG{o}{=} \PYG{l+m+mh}{0x20} \PYG{o}{+} \PYG{n}{tos}\PYG{p}{(}\PYG{n}{t}\PYG{p}{)}
-  \PYG{n}{elseif} \PYG{n}{t} \PYG{o}{\PYGZlt{}}\PYG{p}{:} \PYG{n}{AbstractFloat}
-    \PYG{n}{n} \PYG{o}{=} \PYG{l+m+mh}{0x30} \PYG{o}{+} \PYG{n}{tos}\PYG{p}{(}\PYG{n}{t}\PYG{p}{)}\PYG{o}{\PYGZhy{}}\PYG{l+m+mi}{1}
-  \PYG{n}{elseif} \PYG{n}{t} \PYG{o}{\PYGZlt{}}\PYG{p}{:} \PYG{n}{Complex}
-    \PYG{n}{n} \PYG{o}{=} \PYG{l+m+mh}{0x40} \PYG{o}{+} \PYG{n}{typ2code}\PYG{p}{(}\PYG{n}{real}\PYG{p}{(}\PYG{n}{t}\PYG{p}{)}\PYG{p}{)}
-  \PYG{n}{elseif} \PYG{n}{t} \PYG{o}{\PYGZlt{}}\PYG{p}{:} \PYG{n}{Array}
-    \PYG{n}{n} \PYG{o}{=} \PYG{l+m+mh}{0x80} \PYG{o}{+} \PYG{n}{typ2code}\PYG{p}{(}\PYG{n}{eltype}\PYG{p}{(}\PYG{n}{t}\PYG{p}{)}\PYG{p}{)}
-  \PYG{n}{end}
-  \PYG{k}{return} \PYG{n}{UInt8}\PYG{p}{(}\PYG{n}{n}\PYG{p}{)}
-\PYG{n}{end}
-\end{sphinxVerbatim}
-
-Type “Any” is provided as a default; it is not supported.
-
-
-\paragraph{Standard Types in \sphinxstyleliteralintitle{\sphinxupquote{:misc}}}
-\label{\detokenize{src/Appendices/seisdata_fileformat:standard-types-in-misc}}
-Most values in \sphinxcode{\sphinxupquote{:misc}} are saved as a {\hyperref[\detokenize{src/Appendices/seisdata_fileformat:smt}]{\sphinxcrossref{\DUrole{std,std-ref}{UInt8 code}}}} followed by the value itself.
-
-
-\paragraph{Unusual Types in \sphinxstyleliteralintitle{\sphinxupquote{:misc}}}
-\label{\detokenize{src/Appendices/seisdata_fileformat:unusual-types-in-misc}}
-The tables below describe how to read non-bitstype data into \sphinxcode{\sphinxupquote{:misc}}.
-
-
-\begin{savenotes}\sphinxattablestart
-\centering
-\sphinxcapstartof{table}
-\sphinxcaption{Array\{String\}}\label{\detokenize{src/Appendices/seisdata_fileformat:id12}}
-\sphinxaftercaption
-\begin{tabular}[t]{|\X{4}{44}|\X{32}{44}|\X{4}{44}|\X{4}{44}|}
-\hline
-\sphinxstyletheadfamily 
-Var
-&\sphinxstyletheadfamily 
-Meaning
-&\sphinxstyletheadfamily 
-T
-&\sphinxstyletheadfamily 
-N
-\\
-\hline
-nd
-&
-array dimensionality
-&
-u8
-&
-1
-\\
-\hline
-d
-&
-array dimensions
-&
-i64
-&
-nd
-\\
-\hline&
-if d!={[}0{]}:
-&&\\
-\hline
-sep
-&
-string separator
-&
-c
-&
-1
-\\
-\hline
-L\_S
-&
-length of char array
-&
-i64
-&
-1
-\\
-\hline
-S
-&
-string array as chars
-&
-u8
-&
-L\_S
-\\
-\hline
-\end{tabular}
-\par
-\sphinxattableend\end{savenotes}
-
-If d={[}0{]}, indicating an empty String array, set S to an empty String array and do not read sep, L\_S, or S.
-
-
-\begin{savenotes}\sphinxattablestart
-\centering
-\sphinxcapstartof{table}
-\sphinxcaption{Array\{Complex\}}\label{\detokenize{src/Appendices/seisdata_fileformat:id13}}
-\sphinxaftercaption
-\begin{tabular}[t]{|\X{4}{44}|\X{32}{44}|\X{4}{44}|\X{4}{44}|}
-\hline
-\sphinxstyletheadfamily 
-Var
-&\sphinxstyletheadfamily 
-Meaning
-&\sphinxstyletheadfamily 
-T
-&\sphinxstyletheadfamily 
-N
-\\
-\hline
-nd
-&
-array dimensionality
-&
-u8
-&
-1
-\\
-\hline
-d
-&
-array dimensions
-&
-i64
-&
-nd
-\\
-\hline
-rr
-&
-real part of array
-&
-\(\tau\)
-&
-d
-\\
-\hline
-ii
-&
-imaginary part of array
-&
-\(\tau\)
-&
-d
-\\
-\hline
-\end{tabular}
-\par
-\sphinxattableend\end{savenotes}
-
-Here, \(\tau\) denotes the type of the real part of one element of v.
-
-
-\begin{savenotes}\sphinxattablestart
-\centering
-\sphinxcapstartof{table}
-\sphinxcaption{Array\{Real\}}\label{\detokenize{src/Appendices/seisdata_fileformat:id14}}
-\sphinxaftercaption
-\begin{tabular}[t]{|\X{4}{44}|\X{32}{44}|\X{4}{44}|\X{4}{44}|}
-\hline
-\sphinxstyletheadfamily 
-Var
-&\sphinxstyletheadfamily 
-Meaning
-&\sphinxstyletheadfamily 
-T
-&\sphinxstyletheadfamily 
-N
-\\
-\hline
-nd
-&
-array dimensionality
-&
-u8
-&
-1
-\\
-\hline
-d
-&
-array dimensions
-&
-i64
-&
-nd
-\\
-\hline
-v
-&
-array values
-&
-\(\tau\)
-&
-d
-\\
-\hline
-\end{tabular}
-\par
-\sphinxattableend\end{savenotes}
-
-Here, \(\tau\) denotes the type of one element of v.
-
-
-\begin{savenotes}\sphinxattablestart
-\centering
-\sphinxcapstartof{table}
-\sphinxcaption{String}\label{\detokenize{src/Appendices/seisdata_fileformat:id15}}
-\sphinxaftercaption
-\begin{tabular}[t]{|\X{4}{44}|\X{32}{44}|\X{4}{44}|\X{4}{44}|}
-\hline
-\sphinxstyletheadfamily 
-Var
-&\sphinxstyletheadfamily 
-Meaning
-&\sphinxstyletheadfamily 
-T
-&\sphinxstyletheadfamily 
-N
-\\
-\hline
-L\_S
-&
-length of string
-&
-i64
-&
-1
-\\
-\hline
-S
-&
-string
-&
-u8
-&
-L\_S
+Notes and automated logging
 \\
 \hline
 \end{tabular}
@@ -3491,8 +4897,520 @@ L\_S
 
 
 \subsection{SeisEvent}
-\label{\detokenize{src/Appendices/seisdata_fileformat:seisevent}}
-A SeisEvent structure is stored as a SeisHdr object followed by a SeisData object. However, the combination of SeisHdr and SeisData objects that comprises a SeisEvent object counts as one object, not two, in the file TOC.
+\label{\detokenize{src/Appendices/seisio_file_format:seisevent}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{13}|\X{3}{13}|\X{1}{13}|\X{8}{13}|}
+\hline
+\sphinxstyletheadfamily 
+Var
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+N
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+hdr
+&
+(SeisHdr)
+&
+1
+&
+event header
+\\
+\hline
+source
+&
+(SeisSrc)
+&
+1
+&
+event source process
+\\
+\hline
+data
+&
+(EventTraceData)
+&
+1
+&
+event trace data
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\section{Data Type Codes}
+\label{\detokenize{src/Appendices/seisio_file_format:data-type-codes}}
+Each Type code is written to disk as a UInt8, with the important exception of
+SeisIO custom object Type codes (which use UInt32).
+
+
+\subsection{Loc Type Codes}
+\label{\detokenize{src/Appendices/seisio_file_format:loc-type-codes}}\label{\detokenize{src/Appendices/seisio_file_format:loc-codes}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{3}|\X{2}{3}|}
+\hline
+\sphinxstyletheadfamily 
+UInt8
+&\sphinxstyletheadfamily 
+Type
+\\
+\hline
+0x00
+&
+GenLoc
+\\
+\hline
+0x01
+&
+GeoLoc
+\\
+\hline
+0x02
+&
+UTMLoc
+\\
+\hline
+0x03
+&
+XYLoc
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsection{Resp Type Codes}
+\label{\detokenize{src/Appendices/seisio_file_format:resp-type-codes}}\label{\detokenize{src/Appendices/seisio_file_format:resp-codes}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{3}|\X{2}{3}|}
+\hline
+\sphinxstyletheadfamily 
+UInt8
+&\sphinxstyletheadfamily 
+Type
+\\
+\hline
+0x00
+&
+GenResp
+\\
+\hline
+0x01
+&
+PZResp
+\\
+\hline
+0x02
+&
+PZResp64
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsection{Other Type Codes}
+\label{\detokenize{src/Appendices/seisio_file_format:other-type-codes}}\label{\detokenize{src/Appendices/seisio_file_format:type-codes}}
+Only the Types below are faithfully preserved in write/read of a :misc field
+dictionary; other Types are not written to file and can cause \sphinxcode{\sphinxupquote{wseis}} to
+throw errors.
+
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{3}{9}|\X{1}{9}|\X{4}{9}|\X{1}{9}|}
+\hline
+\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+UInt8
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+UInt8
+\\
+\hline
+Char
+&
+0x00
+&
+Array\{Char,N\}
+&
+0x80
+\\
+\hline
+String
+&
+0x01
+&
+Array\{String,N\}
+&
+0x81
+\\
+\hline
+UInt8
+&
+0x10
+&
+Array\{UInt8,N\}
+&
+0x90
+\\
+\hline
+UInt16
+&
+0x11
+&
+Array\{UInt16,N\}
+&
+0x91
+\\
+\hline
+UInt32
+&
+0x12
+&
+Array\{UInt32,N\}
+&
+0x92
+\\
+\hline
+UInt64
+&
+0x13
+&
+Array\{UInt64,N\}
+&
+0x93
+\\
+\hline
+UInt128
+&
+0x14
+&
+Array\{UInt128,N\}
+&
+0x94
+\\
+\hline
+Int8
+&
+0x20
+&
+Array\{Int8,N\}
+&
+0xa0
+\\
+\hline
+Int16
+&
+0x21
+&
+Array\{Int16,N\}
+&
+0xa1
+\\
+\hline
+Int32
+&
+0x22
+&
+Array\{Int32,N\}
+&
+0xa2
+\\
+\hline
+Int64
+&
+0x23
+&
+Array\{Int64,N\}
+&
+0xa3
+\\
+\hline
+Int128
+&
+0x24
+&
+Array\{Int128,N\}
+&
+0xa4
+\\
+\hline
+Float16
+&
+0x30
+&
+Array\{Float16,N\}
+&
+0xb0
+\\
+\hline
+Float32
+&
+0x31
+&
+Array\{Float32,N\}
+&
+0xb1
+\\
+\hline
+Float64
+&
+0x32
+&
+Array\{Float64,N\}
+&
+0xb2
+\\
+\hline
+Complex\{UInt8\}
+&
+0x50
+&
+Array\{Complex\{UInt8\},N\}
+&
+0xd0
+\\
+\hline
+Complex\{UInt16\}
+&
+0x51
+&
+Array\{Complex\{UInt16\},N\}
+&
+0xd1
+\\
+\hline
+Complex\{UInt32\}
+&
+0x52
+&
+Array\{Complex\{UInt32\},N\}
+&
+0xd2
+\\
+\hline
+Complex\{UInt64\}
+&
+0x53
+&
+Array\{Complex\{UInt64\},N\}
+&
+0xd3
+\\
+\hline
+Complex\{UInt128\}
+&
+0x54
+&
+Array\{Complex\{UInt128\},N\}
+&
+0xd4
+\\
+\hline
+Complex\{Int8\}
+&
+0x60
+&
+Array\{Complex\{Int8\},N\}
+&
+0xe0
+\\
+\hline
+Complex\{Int16\}
+&
+0x61
+&
+Array\{Complex\{Int16\},N\}
+&
+0xe1
+\\
+\hline
+Complex\{Int32\}
+&
+0x62
+&
+Array\{Complex\{Int32\},N\}
+&
+0xe2
+\\
+\hline
+Complex\{Int64\}
+&
+0x63
+&
+Array\{Complex\{Int64\},N\}
+&
+0xe3
+\\
+\hline
+Complex\{Int128\}
+&
+0x64
+&
+Array\{Complex\{Int128\},N\}
+&
+0xe4
+\\
+\hline
+Complex\{Float16\}
+&
+0x70
+&
+Array\{Complex\{Float16\},N\}
+&
+0xf0
+\\
+\hline
+Complex\{Float32\}
+&
+0x71
+&
+Array\{Complex\{Float32\},N\}
+&
+0xf1
+\\
+\hline
+Complex\{Float64\}
+&
+0x72
+&
+Array\{Complex\{Float64\},N\}
+&
+0xf2
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsubsection{SeisIO Object Type codes}
+\label{\detokenize{src/Appendices/seisio_file_format:seisio-object-type-codes}}\label{\detokenize{src/Appendices/seisio_file_format:object-codes}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{2}{5}|\X{3}{5}|}
+\hline
+\sphinxstyletheadfamily 
+UInt32 Code
+&\sphinxstyletheadfamily 
+Object Type
+\\
+\hline
+0x20474330
+&
+EventChannel
+\\
+\hline
+0x20474331
+&
+SeisChannel
+\\
+\hline
+0x20474430
+&
+EventTraceData
+\\
+\hline
+0x20474431
+&
+SeisData
+\\
+\hline
+0x20495030
+&
+GenLoc
+\\
+\hline
+0x20495031
+&
+GeoLoc
+\\
+\hline
+0x20495032
+&
+UTMLoc
+\\
+\hline
+0x20495033
+&
+XYLoc
+\\
+\hline
+0x20495230
+&
+GenResp
+\\
+\hline
+0x20495231
+&
+PZResp64
+\\
+\hline
+0x20495232
+&
+PZResp
+\\
+\hline
+0x20504330
+&
+PhaseCat
+\\
+\hline
+0x20534530
+&
+SeisEvent
+\\
+\hline
+0x20534830
+&
+SeisHdr
+\\
+\hline
+0x20535030
+&
+SeisPha
+\\
+\hline
+0x20535330
+&
+SeisSrc
+\\
+\hline
+0x20535430
+&
+SourceTime
+\\
+\hline
+0x45514c30
+&
+EQLoc
+\\
+\hline
+0x45514d30
+&
+EQMag
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
 
 
 \section{Data Requests Syntax}

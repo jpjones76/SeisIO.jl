@@ -159,7 +159,7 @@ For regularly-sampled channels, gaps between the specified and true times
 are filled with the mean; this isn't possible with irregularly-sampled data.
 
 Specifying start time (s)
--------------------------
+=========================
 * s="last": (Default) sync to the last start time of any channel in `S`.
 * s="first": sync to the first start time of any channel in `S`.
 * A numeric value is treated as an epoch time (`?time` for details).
@@ -167,7 +167,7 @@ Specifying start time (s)
 * Any string other than "last" or "first" is parsed as a DateTime.
 
 Specifying end time (t)
------------------------
+=======================
 * t="none": (Default) end times are not synchronized.
 * t="last": synchronize all channels to end at the last end time in `S`.
 * t="first" synchronize to the first end time in `S`.

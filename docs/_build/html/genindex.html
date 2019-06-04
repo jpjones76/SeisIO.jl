@@ -102,11 +102,21 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="src/Processing/processing.html">Data Processing Functions</a></li>
 </ul>
+<p class="caption"><span class="caption-text">Submodules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="src/Submodules/quake.html">Quake</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Submodules/randseis.html">RandSeis</a></li>
+</ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="src/Appendices/function_list.html">Utility Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisdata_fields.html">Structure and Field Descriptions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisdata_fileformat.html">SeisIO File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html">SeisIO Write Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#simple-object-types">Simple Object Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#location-types">Location Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#response-types">Response Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#the-misc-dictionary">The Misc Dictionary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#compound-object-types">Compound Object Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#data-type-codes">Data Type Codes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="src/Appendices/web_syntax.html">Data Requests Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="src/Appendices/keywords.html">SeisIO Standard Keywords</a></li>
 <li class="toctree-l1"><a class="reference internal" href="src/Appendices/examples.html">Examples</a></li>
@@ -178,6 +188,7 @@
 <div class="genindex-jumpbox">
  <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
@@ -208,15 +219,33 @@
   </ul></td>
 </tr></table>
 
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="src/Submodules/quake.html#EQLoc">EQLoc() (built-in function)</a>
+</li>
+      <li><a href="src/Submodules/quake.html#EQMag">EQMag() (built-in function)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="src/Submodules/quake.html#EventChannel">EventChannel() (built-in function)</a>
+</li>
+      <li><a href="src/Submodules/quake.html#EventTraceData">EventTraceData() (built-in function)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="src/Appendices/function_list.html#fctopz">fctopz() (built-in function)</a>
 </li>
-      <li><a href="src/Appendices/function_list.html#find_regex">find_regex() (built-in function)</a>
+      <li><a href="src/Submodules/quake.html#FDSNevt">FDSNevt() (built-in function)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="src/Appendices/function_list.html#find_regex">find_regex() (built-in function)</a>
+</li>
       <li><a href="src/working_with_data.html#findchan">findchan() (built-in function)</a>, <a href="src/working_with_data.html#findchan">[1]</a>
 </li>
       <li><a href="src/working_with_data.html#findid">findid() (built-in function)</a>, <a href="src/working_with_data.html#findid">[1]</a>
@@ -227,6 +256,12 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="src/Submodules/quake.html#gcdist">gcdist() (built-in function)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="src/Submodules/quake.html#get_pha">get_pha() (built-in function)</a>
+</li>
       <li><a href="src/Appendices/function_list.html#getbandcode">getbandcode() (built-in function)</a>
 </li>
   </ul></td>
@@ -274,16 +309,32 @@
       <li><a href="src/Appendices/function_list.html#parsetimewin">parsetimewin() (built-in function)</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="src/Submodules/quake.html#PhaseCat">PhaseCat() (built-in function)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="src/Appendices/function_list.html#randSeisEvent">randSeisEvent() (built-in function)</a>
+      <li><a href="src/Submodules/randseis.html#randPhaseCat">randPhaseCat() (built-in function)</a>
+</li>
+      <li><a href="src/Submodules/randseis.html#randSeisChannel">randSeisChannel() (built-in function)</a>
+</li>
+      <li><a href="src/Submodules/randseis.html#randSeisData">randSeisData() (built-in function)</a>
+</li>
+      <li><a href="src/Submodules/randseis.html#randSeisEvent">randSeisEvent() (built-in function)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="src/Formats/fileformats.html#readuwevt">readuwevt() (built-in function)</a>
+      <li><a href="src/Submodules/randseis.html#randSeisHdr">randSeisHdr() (built-in function)</a>
+</li>
+      <li><a href="src/Submodules/randseis.html#randSeisSrc">randSeisSrc() (built-in function)</a>
+</li>
+      <li><a href="src/Submodules/quake.html#read_qml">read_qml() (built-in function)</a>
+</li>
+      <li><a href="src/Submodules/quake.html#readuwevt">readuwevt() (built-in function)</a>
 </li>
       <li><a href="src/Formats/fileformats.html#rseis">rseis() (built-in function)</a>
 </li>
@@ -297,11 +348,23 @@
 </li>
       <li><a href="src/Formats/fileformats.html#segyhdr">segyhdr() (built-in function)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="src/Appendices/web_syntax.html#seis_www">seis_www() (built-in function)</a>
 </li>
+      <li><a href="src/Submodules/quake.html#SeisEvent">SeisEvent() (built-in function)</a>
+</li>
+      <li><a href="src/Submodules/quake.html#SeisHdr">SeisHdr() (built-in function)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="src/Submodules/quake.html#SeisPha">SeisPha() (built-in function)</a>
+</li>
+      <li><a href="src/Submodules/quake.html#SeisSrc">SeisSrc() (built-in function)</a>
+</li>
+      <li><a href="src/Submodules/quake.html#show_phases">show_phases() (built-in function)</a>
+</li>
       <li><a href="src/Web/seedlink.html#SL_info">SL_info() (built-in function)</a>
+</li>
+      <li><a href="src/Submodules/quake.html#SourceTime">SourceTime() (built-in function)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -323,7 +386,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="src/Formats/fileformats.html#uwdf">uwdf() (built-in function)</a>
 </li>
-      <li><a href="src/Formats/fileformats.html#uwpf">uwpf() (built-in function)</a>
+      <li><a href="src/Submodules/quake.html#uwpf">uwpf() (built-in function)</a>
 </li>
   </ul></td>
 </tr></table>

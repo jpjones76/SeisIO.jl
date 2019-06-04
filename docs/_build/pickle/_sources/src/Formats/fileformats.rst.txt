@@ -119,18 +119,20 @@ programming language.
 `SEG Y\ <http://wiki.seg.org/wiki/SEG_Y>`_: Society of Exploration Geophysicists
 data format. Common in the energy industry, developed and maintained by the SEG.
 Only SEG Y rev 0 and `rev 1\ <https://seg.org/Portals/0/SEG/News%20and%20Resources/Technical%20Standards/seg_y_rev1.pdf>`_
-with standard headers are supported.
+with standard headers are supported. Note that IBM Float support is not yet
+implemented.
 
 **UW**: the University of Washington data format has no online reference and is
 no longer in use. Created by the Pacific Northwest Seismic Network for event
-archival; used through the early 2000s. A UW event is described by a pickfile
-and a corresponding data file, whose names are identical except for the last
-character; for example, the files 99062109485o and 99062109485W
-describe event 99062109485. Unlike the win32 data format, the data file is
-self-contained; the pick file is not required to use raw trace data. Only UW-2
-data files are supported by SeisIO; we have never encountered a UW-1 data file
-outside of Exabyte tapes and have no reason to suspect that any remain in
-circulation.
+archival; used from the 1970s through early 2000s. A UW event is described by a
+pickfile and corresponding data file, whose names are identical except for the
+last character; for example, files 99062109485o and 99062109485W describe event
+99062109485. Unlike the win32 data format, the data file is self-contained; the
+pick file is not required to use raw trace data. However, like the win32 data
+format, instrument locations are stored in an external human-maintained text
+file. Only UW-2 data files are supported by SeisIO; we have never encountered a
+UW-1 data file outside of Exabyte tapes and have no reason to suspect that any
+remain in circulation.
 
 `Win32\ <http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html>`_: data format developed
 by the NIED (National Research Institute for Earth Science and Disaster Prevention),
@@ -145,11 +147,6 @@ particularly gains, are known to exist.
 ************************
 Other File I/O Functions
 ************************
-
-.. function:: readuwevt(fpat)
-
-Read University of Washington-format event data with file pattern stub fpat.
-fstub can be a datafile name, a pickname, or a stub.
 
 .. function:: rseis(fname)
 
@@ -166,14 +163,6 @@ Print headers from SEG Y file to stdout. Specify ``passcal=true`` for PASSCAL SE
 .. function:: uwdf(dfname)
 
 Parse UW event data file ``dfname`` into a new SeisEvent structure.
-
-.. function:: uwpf!(evt, pfname)
-
-Parse UW event pick file into SeisEvent structure.
-
-.. function:: uwpf(pfname)
-
-Parse UW event pick file ``pfname`` into a new SeisEvent structure.
 
 .. function:: writesac(S[, ts=true])
 

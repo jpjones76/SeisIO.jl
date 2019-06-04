@@ -1,0 +1,2423 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>SeisIO Write Formats &mdash; SeisIO 0.2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Data Requests Syntax" href="web_syntax.html" />
+    <link rel="prev" title="Utility Functions" href="function_list.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> SeisIO
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">First Steps</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../working_with_data.html">Working with Data</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reading Files</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">Reading Files</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Downloading Data</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Web/webclients.html">Web Requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Web/seedlink.html">SeedLink</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Data Processing</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Processing/processing.html">Data Processing Functions</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Submodules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Submodules/quake.html">Quake</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Submodules/randseis.html">RandSeis</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Appendices</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="function_list.html">Utility Functions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">SeisIO Write Formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#seisio-file">SeisIO File</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#simple-object-types">Simple Object Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#eqloc">EQLoc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#eqmag">EQMag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#seispha">SeisPha</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sourcetime">SourceTime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#stringvec">StringVec</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#location-types">Location Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#genloc">GenLoc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#geoloc">GeoLoc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#utmloc">UTMLoc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#xyloc">XYLoc</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#response-types">Response Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#genresp">GenResp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pzresp">PZResp</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#the-misc-dictionary">The Misc Dictionary</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#misc">Misc</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dictionary-contents">Dictionary Contents</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#string-array-c-0x81">String Array (c == 0x81)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-array-c-0x80-or-c-0x81">Other Array (c == 0x80 or c &gt; 0x81)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#string-c-0x01">String (c == 0x01)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bits-type-c-0x00-or-0x01-c-0x7f">Bits Type (c == 0x00 or 0x01 &lt; c &lt; 0x7f)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#compound-object-types">Compound Object Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#phasecat">PhaseCat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#eventchannel">EventChannel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#seischannel">SeisChannel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#eventtracedata">EventTraceData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#seisdata">SeisData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#seishdr">SeisHdr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#seissrc">SeisSrc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#seisevent">SeisEvent</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#data-type-codes">Data Type Codes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#loc-type-codes">Loc Type Codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#resp-type-codes">Resp Type Codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-type-codes">Other Type Codes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#seisio-object-type-codes">SeisIO Object Type codes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="web_syntax.html">Data Requests Syntax</a></li>
+<li class="toctree-l1"><a class="reference internal" href="keywords.html">SeisIO Standard Keywords</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SeisIO</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+      <li>SeisIO Write Formats</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/src/Appendices/seisio_file_format.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="seisio-write-formats">
+<span id="seisio-file-format"></span><h1>SeisIO Write Formats<a class="headerlink" href="#seisio-write-formats" title="Permalink to this headline">¶</a></h1>
+<p>Files are written in little-endian byte order. Abbreviations used:</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="14%" />
+<col width="48%" />
+<col width="19%" />
+<col width="19%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Type</th>
+<th class="head">Meaning</th>
+<th class="head">C</th>
+<th class="head">Fortran 77</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Char</td>
+<td>Unicode character</td>
+<td>wchar</td>
+<td>CHARACTER*4</td>
+</tr>
+<tr class="row-odd"><td>Float32</td>
+<td>32-bit float</td>
+<td>float</td>
+<td>REAL</td>
+</tr>
+<tr class="row-even"><td>Float64</td>
+<td>64-bit float</td>
+<td>double</td>
+<td>REAL*8</td>
+</tr>
+<tr class="row-odd"><td>Int8</td>
+<td>signed 8-bit int</td>
+<td>short</td>
+<td>INTEGER</td>
+</tr>
+<tr class="row-even"><td>Int16</td>
+<td>signed 16-bit int</td>
+<td>int</td>
+<td>INTEGER*2</td>
+</tr>
+<tr class="row-odd"><td>Int32</td>
+<td>signed 32-bit int</td>
+<td>long</td>
+<td>INTEGER*4</td>
+</tr>
+<tr class="row-even"><td>Int64</td>
+<td>signed 64-bit integer</td>
+<td>long long</td>
+<td>INTEGER*8</td>
+</tr>
+<tr class="row-odd"><td>UInt8</td>
+<td>unsigned 8-bit int</td>
+<td>unsigned short</td>
+<td>CHARACTER</td>
+</tr>
+<tr class="row-even"><td>UInt16</td>
+<td>unsigned 16-bit int</td>
+<td>unsigned</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-odd"><td>UInt32</td>
+<td>unsigned 32-bit int</td>
+<td>unsigned long</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>UInt64</td>
+<td>unsigned 64-bit int</td>
+<td>unsigned long long</td>
+<td>&#160;</td>
+</tr>
+</tbody>
+</table>
+<div class="line-block">
+<div class="line">Special instructions:</div>
+<div class="line"><br /></div>
+<div class="line">Parentheses, “()”, denote a custom object Type.</div>
+<div class="line">“{ (condition)” denotes the start of a loop; (condition) is the control flow.</div>
+<div class="line">“}” denotes the end of a loop.</div>
+</div>
+<p>Note that String in Julia has no exact C equivalence. SeisIO writes each String
+in two parts: an Int64 (String length in bytes) followed by the String contents
+(as bytes, equivalent to UInt8). Unlike C/Fortran, there are no issues with
+strings that contain the null character (0x00 or <code class="docutils literal notranslate"><span class="pre">'\x0'</span></code>).</p>
+<div class="section" id="seisio-file">
+<h2>SeisIO File<a class="headerlink" href="#seisio-file" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="11%" />
+<col width="68%" />
+<col width="11%" />
+<col width="11%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Meaning</th>
+<th class="head">T</th>
+<th class="head">N</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>&#160;</td>
+<td>“SEISIO”</td>
+<td>UInt8</td>
+<td>6</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">V</span></code></td>
+<td>SeisIO file format version</td>
+<td>Float32</td>
+<td>1</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">J</span></code></td>
+<td># of SeisIO objects in file</td>
+<td>UInt32</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">C</span></code></td>
+<td><a class="reference internal" href="#object-codes"><span class="std std-ref">SeisIO object codes</span></a> for each object</td>
+<td>UInt32</td>
+<td>J</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">B</span></code></td>
+<td>Byte indices for each object</td>
+<td>UInt64</td>
+<td>J</td>
+</tr>
+<tr class="row-odd"><td>{</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>for i = 1:J</td>
+</tr>
+<tr class="row-even"><td>&#160;</td>
+<td>(Objects)</td>
+<td>variable</td>
+<td>J</td>
+</tr>
+<tr class="row-odd"><td>}</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">ID</span></code></td>
+<td>ID hashes</td>
+<td>UInt64</td>
+<td>variable</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">TS</span></code></td>
+<td>Start times</td>
+<td>Int64</td>
+<td>variable</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">TE</span></code></td>
+<td>End times</td>
+<td>Int64</td>
+<td>variable</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">P</span></code></td>
+<td>Parent object index in C and B</td>
+<td>variable</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">bID</span></code></td>
+<td>Byte offset of <code class="docutils literal notranslate"><span class="pre">ID</span></code> array</td>
+<td>Int64</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">bTS</span></code></td>
+<td>Byte offset of <code class="docutils literal notranslate"><span class="pre">TS</span></code> array</td>
+<td>Int64</td>
+<td>1</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">bTE</span></code></td>
+<td>Byte offset of <code class="docutils literal notranslate"><span class="pre">TE</span></code> array</td>
+<td>Int64</td>
+<td>1</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">bP</span></code></td>
+<td>Byte offset of <code class="docutils literal notranslate"><span class="pre">P</span></code> array</td>
+<td>Int64</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<p>ID, TS, and TE are the ID, data start time, and data end time of each channel
+in each object. P is the index of the parent object in C and B. TS and TE are
+measured from Unix epoch time (1970-01-01T00:00:00Z) in integer microseconds.</p>
+<p>Intent: when seeking data from channel <code class="docutils literal notranslate"><span class="pre">i</span></code> between times <code class="docutils literal notranslate"><span class="pre">s</span></code> and <code class="docutils literal notranslate"><span class="pre">t</span></code>,
+if <code class="docutils literal notranslate"><span class="pre">hash(i)</span></code> matches <code class="docutils literal notranslate"><span class="pre">ID[j]</span></code> and the time windows overlap, retrieve index
+<code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">P[j]</span></code> from NP, seek to byte offset <code class="docutils literal notranslate"><span class="pre">B[k]</span></code>, and read an object of
+type <code class="docutils literal notranslate"><span class="pre">C[k]</span></code> from file.</p>
+<p>If an archive contains no data objects, ID, TS, TE, and P are empty;
+equivalently, <code class="docutils literal notranslate"><span class="pre">bID</span> <span class="pre">==</span> <span class="pre">bTS</span></code>.</p>
+</div>
+</div>
+<div class="section" id="simple-object-types">
+<h1>Simple Object Types<a class="headerlink" href="#simple-object-types" title="Permalink to this headline">¶</a></h1>
+<p>Fields of these objects are written in one of three ways: as “plain data” types,
+such as UInt8 or Float64; as arrays; or as strings.</p>
+<p>In a simple object, each array is stored as follows:
+1. Int64 number of dimensions (e.g. 2)
+2. Int64 array of dimensions themselves (e.g. 2, 2)
+3. Array values (e.g. 0.08250153, 0.023121119, 0.6299772, 0.79595184)</p>
+<div class="section" id="eqloc">
+<h2>EQLoc<a class="headerlink" href="#eqloc" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>lat</td>
+<td>Float64</td>
+<td>1</td>
+<td>latitude</td>
+</tr>
+<tr class="row-odd"><td>lon</td>
+<td>Float64</td>
+<td>1</td>
+<td>longitude</td>
+</tr>
+<tr class="row-even"><td>dep</td>
+<td>Float64</td>
+<td>1</td>
+<td>depth</td>
+</tr>
+<tr class="row-odd"><td>dx</td>
+<td>Float64</td>
+<td>1</td>
+<td>x-error</td>
+</tr>
+<tr class="row-even"><td>dy</td>
+<td>Float64</td>
+<td>1</td>
+<td>y-error</td>
+</tr>
+<tr class="row-odd"><td>dz</td>
+<td>Float64</td>
+<td>1</td>
+<td>z-error</td>
+</tr>
+<tr class="row-even"><td>dt</td>
+<td>Float64</td>
+<td>1</td>
+<td>t-error (error in origin time)</td>
+</tr>
+<tr class="row-odd"><td>se</td>
+<td>Float64</td>
+<td>1</td>
+<td>standard error</td>
+</tr>
+<tr class="row-even"><td>rms</td>
+<td>Float64</td>
+<td>1</td>
+<td>rms pick error</td>
+</tr>
+<tr class="row-odd"><td>gap</td>
+<td>Float64</td>
+<td>1</td>
+<td>azimuthal gap</td>
+</tr>
+<tr class="row-even"><td>dmin</td>
+<td>Float64</td>
+<td>1</td>
+<td>minimum source-receiver distance in location</td>
+</tr>
+<tr class="row-odd"><td>dmax</td>
+<td>Float64</td>
+<td>1</td>
+<td>maximum source-receiver distance in location</td>
+</tr>
+<tr class="row-even"><td>nst</td>
+<td>Int64</td>
+<td>1</td>
+<td>number of stations used to locate earthquake</td>
+</tr>
+<tr class="row-odd"><td>flags</td>
+<td>UInt8</td>
+<td>1</td>
+<td>one-bit flags for special location properties</td>
+</tr>
+<tr class="row-even"><td>Ld</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of “datum” string in bytes</td>
+</tr>
+<tr class="row-odd"><td>datum</td>
+<td>UInt8</td>
+<td>Ld</td>
+<td>Datum string</td>
+</tr>
+<tr class="row-even"><td>Lt</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of “typ” (event type) string in bytes</td>
+</tr>
+<tr class="row-odd"><td>typ</td>
+<td>UInt8</td>
+<td>Lt</td>
+<td>earthquake type string</td>
+</tr>
+<tr class="row-even"><td>Li</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of “sig” (error significance) string in bytes</td>
+</tr>
+<tr class="row-odd"><td>sig</td>
+<td>UInt8</td>
+<td>Li</td>
+<td>earthquake location error significance string</td>
+</tr>
+<tr class="row-even"><td>Lr</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of “src” (data source) string in bytes</td>
+</tr>
+<tr class="row-odd"><td>src</td>
+<td>UInt8</td>
+<td>Lr</td>
+<td>data source string</td>
+</tr>
+</tbody>
+</table>
+<div class="line-block">
+<div class="line">flag meanings: (0x01 = true, 0x00 = false)</div>
+<div class="line">1. x fixed?</div>
+<div class="line">2. y fixed?</div>
+<div class="line">3. z fixed?</div>
+<div class="line">4. t fixed?</div>
+<div class="line">In Julia, get the value of flag[n] with <code class="docutils literal notranslate"><span class="pre">&gt;&gt;(&lt;&lt;(flags,</span> <span class="pre">n-1),</span> <span class="pre">7)</span></code>.</div>
+</div>
+</div>
+<div class="section" id="eqmag">
+<h2>EQMag<a class="headerlink" href="#eqmag" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="8%" />
+<col width="17%" />
+<col width="8%" />
+<col width="67%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>val</td>
+<td>Float32</td>
+<td>1</td>
+<td>magnitude value</td>
+</tr>
+<tr class="row-odd"><td>gap</td>
+<td>Float64</td>
+<td>1</td>
+<td>largest azimuthal gap between stations in magnitude</td>
+</tr>
+<tr class="row-even"><td>nst</td>
+<td>Int64</td>
+<td>1</td>
+<td>number of stations used in magnitude computation</td>
+</tr>
+<tr class="row-odd"><td>Lsc</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of magnitude scale string</td>
+</tr>
+<tr class="row-even"><td>msc</td>
+<td>UInt8</td>
+<td>Lsc</td>
+<td>magnitude scale string</td>
+</tr>
+<tr class="row-odd"><td>Lr</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of data source string</td>
+</tr>
+<tr class="row-even"><td>src</td>
+<td>UInt8</td>
+<td>Lr</td>
+<td>data source string</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="seispha">
+<h2>SeisPha<a class="headerlink" href="#seispha" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="8%" />
+<col width="17%" />
+<col width="8%" />
+<col width="67%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>F</td>
+<td>Float64</td>
+<td>8</td>
+<td>amplitude, distance, incidence angle, residual,</td>
+</tr>
+<tr class="row-odd"><td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>ray parameter, takeoff angle, travel time, uncertainty</td>
+</tr>
+<tr class="row-even"><td>C</td>
+<td>Char</td>
+<td>2</td>
+<td>polarity, quality</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="sourcetime">
+<h2>SourceTime<a class="headerlink" href="#sourcetime" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="8%" />
+<col width="17%" />
+<col width="8%" />
+<col width="67%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Ld</td>
+<td>Int64</td>
+<td>1</td>
+<td>size of descriptive string in bytes</td>
+</tr>
+<tr class="row-odd"><td>desc</td>
+<td>UInt8</td>
+<td>1</td>
+<td>descriptive string</td>
+</tr>
+<tr class="row-even"><td>F</td>
+<td>Float64</td>
+<td>3</td>
+<td>duration, rise time, decay time</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="stringvec">
+<h2>StringVec<a class="headerlink" href="#stringvec" title="Permalink to this headline">¶</a></h2>
+<p>A vector of variable-length strings; its exact Type in Julia is Array{String,1}.</p>
+<table border="1" class="colwidths-given docutils" id="id17">
+<caption><span class="caption-text">StringVec</span><a class="headerlink" href="#id17" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>ee</td>
+<td>UInt8</td>
+<td>1</td>
+<td>is this string vector empty? <a class="footnote-reference" href="#id2" id="id1">[1]</a></td>
+</tr>
+<tr class="row-odd"><td>L</td>
+<td>Int64</td>
+<td>1</td>
+<td>number of strings to read</td>
+</tr>
+<tr class="row-even"><td>{</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>i = 1:L</td>
+</tr>
+<tr class="row-odd"><td>nb</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of string in bytes</td>
+</tr>
+<tr class="row-even"><td>str</td>
+<td>UInt8</td>
+<td>nb</td>
+<td>string</td>
+</tr>
+<tr class="row-odd"><td>}</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>If <code class="docutils literal notranslate"><span class="pre">ee</span> <span class="pre">==</span> <span class="pre">0x00</span></code>, then no values are stored for L, nb, or str.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="location-types">
+<h1>Location Types<a class="headerlink" href="#location-types" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="genloc">
+<h2>GenLoc<a class="headerlink" href="#genloc" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Ld</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of datum string in bytes</td>
+</tr>
+<tr class="row-odd"><td>datum</td>
+<td>UInt8</td>
+<td>Ld</td>
+<td>datum string</td>
+</tr>
+<tr class="row-even"><td>Ll</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of location vector in bytes</td>
+</tr>
+<tr class="row-odd"><td>loc</td>
+<td>Float64</td>
+<td>Ll</td>
+<td>location vector</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="geoloc">
+<h2>GeoLoc<a class="headerlink" href="#geoloc" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Ld</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of datum string in bytes</td>
+</tr>
+<tr class="row-odd"><td>datum</td>
+<td>UInt8</td>
+<td>Ld</td>
+<td>datum string</td>
+</tr>
+<tr class="row-even"><td>F</td>
+<td>Float64</td>
+<td>6</td>
+<td>latitude, longitude, elevation,</td>
+</tr>
+<tr class="row-odd"><td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>depth, azimuth, incidence</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="utmloc">
+<h2>UTMLoc<a class="headerlink" href="#utmloc" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Ld</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of datum string in bytes</td>
+</tr>
+<tr class="row-odd"><td>datum</td>
+<td>UInt8</td>
+<td>N</td>
+<td>datum string</td>
+</tr>
+<tr class="row-even"><td>zone</td>
+<td>Int8</td>
+<td>1</td>
+<td>UTM zone number</td>
+</tr>
+<tr class="row-odd"><td>hemi</td>
+<td>Char</td>
+<td>1</td>
+<td>hemisphere</td>
+</tr>
+<tr class="row-even"><td>E</td>
+<td>UInt64</td>
+<td>1</td>
+<td>Easting</td>
+</tr>
+<tr class="row-odd"><td>N</td>
+<td>UInt64</td>
+<td>1</td>
+<td>Northing</td>
+</tr>
+<tr class="row-even"><td>F</td>
+<td>Float64</td>
+<td>4</td>
+<td>elevation, depth, azimuth, incidence</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="xyloc">
+<h2>XYLoc<a class="headerlink" href="#xyloc" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Ld</td>
+<td>Int64</td>
+<td>1</td>
+<td>Length of datum string in bytes</td>
+</tr>
+<tr class="row-odd"><td>datum</td>
+<td>UInt8</td>
+<td>Ld</td>
+<td>datum string</td>
+</tr>
+<tr class="row-even"><td>F</td>
+<td>Float64</td>
+<td>8</td>
+<td>x, y, z, azimuth, incidence, origin x, origin y, origin z</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="response-types">
+<h1>Response Types<a class="headerlink" href="#response-types" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="genresp">
+<h2>GenResp<a class="headerlink" href="#genresp" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="8%" />
+<col width="23%" />
+<col width="8%" />
+<col width="62%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Ld</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of descriptive string in bytes</td>
+</tr>
+<tr class="row-odd"><td>desc</td>
+<td>UInt8</td>
+<td>Ld</td>
+<td>descriptive string</td>
+</tr>
+<tr class="row-even"><td>nr</td>
+<td>Int64</td>
+<td>1</td>
+<td>Number of rows in complex response matrix</td>
+</tr>
+<tr class="row-odd"><td>nc</td>
+<td>Int64</td>
+<td>1</td>
+<td>Number of columns in complex response matrix</td>
+</tr>
+<tr class="row-even"><td>resp</td>
+<td>Complex{Float64,2}</td>
+<td>nr*nc</td>
+<td>complex response matrix</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="pzresp">
+<h2>PZResp<a class="headerlink" href="#pzresp" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="8%" />
+<col width="23%" />
+<col width="8%" />
+<col width="62%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>c</td>
+<td>Float32</td>
+<td>1</td>
+<td>damping constant</td>
+</tr>
+<tr class="row-odd"><td>np</td>
+<td>Int64</td>
+<td>1</td>
+<td>number of complex poles</td>
+</tr>
+<tr class="row-even"><td>p</td>
+<td>Complex{Float32,1}</td>
+<td>np</td>
+<td>complex poles vector</td>
+</tr>
+<tr class="row-odd"><td>nz</td>
+<td>Int64</td>
+<td>1</td>
+<td>number of complex zeros</td>
+</tr>
+<tr class="row-even"><td>z</td>
+<td>Complex{Float32,1}</td>
+<td>nz</td>
+<td>complex zeros vector</td>
+</tr>
+</tbody>
+</table>
+<p>PZResp64 is identical to PZResp with Float64 values for c, p, z, rather than Float32.</p>
+</div>
+</div>
+<div class="section" id="the-misc-dictionary">
+<h1>The Misc Dictionary<a class="headerlink" href="#the-misc-dictionary" title="Permalink to this headline">¶</a></h1>
+<p>Most compound objects below contain a dictionary (Dict{String,Any}) for
+non-essential information in a field named <code class="docutils literal notranslate"><span class="pre">:misc</span></code>. The tables below describe
+how this field is written to disk.</p>
+<div class="section" id="misc">
+<h2>Misc<a class="headerlink" href="#misc" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>N</td>
+<td>Int64</td>
+<td>1</td>
+<td>number of items in dictionary <a class="footnote-reference" href="#id4" id="id3">[2]</a></td>
+</tr>
+<tr class="row-odd"><td>K</td>
+<td>(StringVec)</td>
+<td>1</td>
+<td>dictionary keys</td>
+</tr>
+<tr class="row-even"><td>{</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>for i = 1:N</td>
+</tr>
+<tr class="row-odd"><td>c</td>
+<td>UInt8</td>
+<td>1</td>
+<td><a class="reference internal" href="#type-codes"><span class="std std-ref">Type code</span></a> of object i</td>
+</tr>
+<tr class="row-even"><td>o</td>
+<td>variable</td>
+<td>1</td>
+<td>object i</td>
+</tr>
+<tr class="row-odd"><td>}</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id4" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[2]</a></td><td>If <code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">==</span> <span class="pre">0</span></code>, then N is the only value present.</td></tr>
+</tbody>
+</table>
+<div class="section" id="dictionary-contents">
+<h3>Dictionary Contents<a class="headerlink" href="#dictionary-contents" title="Permalink to this headline">¶</a></h3>
+<p>These subtables describe how to read the possible data types in a Misc dictionary.</p>
+</div>
+</div>
+<div class="section" id="string-array-c-0x81">
+<h2>String Array (c == 0x81)<a class="headerlink" href="#string-array-c-0x81" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>A</td>
+<td>(StringVec)</td>
+<td>1</td>
+<td>string vector</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="other-array-c-0x80-or-c-0x81">
+<h2>Other Array (c == 0x80 or c &gt; 0x81)<a class="headerlink" href="#other-array-c-0x80-or-c-0x81" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>nd</td>
+<td>Int64</td>
+<td>1</td>
+<td>number of dimensions in array</td>
+</tr>
+<tr class="row-odd"><td>dims</td>
+<td>Int64</td>
+<td>nd</td>
+<td>array dimensions</td>
+</tr>
+<tr class="row-even"><td>arr</td>
+<td>varies</td>
+<td>prod(nd)</td>
+<td>array</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="string-c-0x01">
+<h2>String (c == 0x01)<a class="headerlink" href="#string-c-0x01" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>L</td>
+<td>Int64</td>
+<td>1</td>
+<td>size of string in bytes</td>
+</tr>
+<tr class="row-odd"><td>str</td>
+<td>UInt8</td>
+<td>1</td>
+<td>string</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="bits-type-c-0x00-or-0x01-c-0x7f">
+<h2>Bits Type (c == 0x00 or 0x01 &lt; c &lt; 0x7f)<a class="headerlink" href="#bits-type-c-0x00-or-0x01-c-0x7f" title="Permalink to this headline">¶</a></h2>
+<p>Read a single value whose Type corresponds to the UInt8 <a class="reference internal" href="#type-codes"><span class="std std-ref">Type code</span></a>.</p>
+</div>
+</div>
+<div class="section" id="compound-object-types">
+<h1>Compound Object Types<a class="headerlink" href="#compound-object-types" title="Permalink to this headline">¶</a></h1>
+<p>Each of these objects contains at least one of the above simple object types.</p>
+<div class="section" id="phasecat">
+<h2>PhaseCat<a class="headerlink" href="#phasecat" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="8%" />
+<col width="17%" />
+<col width="8%" />
+<col width="67%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>N</td>
+<td>Int64</td>
+<td>1</td>
+<td>number of SeisPha objects to read  <a class="footnote-reference" href="#id6" id="id5">[3]</a></td>
+</tr>
+<tr class="row-odd"><td>K, (StringVec), 1, dictionary keys</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>pha, (SeisPha), N, seismic phases</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id6" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id5">[3]</a></td><td>If <code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">==</span> <span class="pre">0</span></code>, then N is the only value present.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="eventchannel">
+<h2>EventChannel<a class="headerlink" href="#eventchannel" title="Permalink to this headline">¶</a></h2>
+<p>A single channel of data related to a seismic event</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Ni</td>
+<td>Int64</td>
+<td>1</td>
+<td>size of id string in bytes</td>
+</tr>
+<tr class="row-odd"><td>id</td>
+<td>UInt8</td>
+<td>Ni</td>
+<td>id string</td>
+</tr>
+<tr class="row-even"><td>Nn</td>
+<td>Int64</td>
+<td>1</td>
+<td>size of name string in bytes</td>
+</tr>
+<tr class="row-odd"><td>name</td>
+<td>UInt8</td>
+<td>Nn</td>
+<td>name string</td>
+</tr>
+<tr class="row-even"><td>Lt</td>
+<td>UInt8</td>
+<td>1</td>
+<td><a class="reference internal" href="#loc-codes"><span class="std std-ref">location Type code</span></a></td>
+</tr>
+<tr class="row-odd"><td>loc</td>
+<td>(Loc Type)</td>
+<td>1</td>
+<td>instrument position</td>
+</tr>
+<tr class="row-even"><td>fs</td>
+<td>Float64</td>
+<td>1</td>
+<td>sampling frequency in Hz</td>
+</tr>
+<tr class="row-odd"><td>gain</td>
+<td>Float64</td>
+<td>1</td>
+<td>scalar gain</td>
+</tr>
+<tr class="row-even"><td>Rt</td>
+<td>UInt8</td>
+<td>1</td>
+<td><a class="reference internal" href="#resp-codes"><span class="std std-ref">response Type code</span></a></td>
+</tr>
+<tr class="row-odd"><td>resp</td>
+<td>(Resp Type)</td>
+<td>1</td>
+<td>instrument response</td>
+</tr>
+<tr class="row-even"><td>Nu</td>
+<td>Int64</td>
+<td>1</td>
+<td>size of units string in bytes</td>
+</tr>
+<tr class="row-odd"><td>units</td>
+<td>UInt8</td>
+<td>Nu</td>
+<td>units string</td>
+</tr>
+<tr class="row-even"><td>az</td>
+<td>Float64</td>
+<td>1</td>
+<td>azimuth</td>
+</tr>
+<tr class="row-odd"><td>baz</td>
+<td>Float64</td>
+<td>1</td>
+<td>backazimuth</td>
+</tr>
+<tr class="row-even"><td>dist</td>
+<td>Float64</td>
+<td>1</td>
+<td>source-receiver distance</td>
+</tr>
+<tr class="row-odd"><td>pha</td>
+<td>(PhaseCat)</td>
+<td>1</td>
+<td>phase catalog</td>
+</tr>
+<tr class="row-even"><td>Nr</td>
+<td>Int64</td>
+<td>1</td>
+<td>size of data source string in bytes</td>
+</tr>
+<tr class="row-odd"><td>src</td>
+<td>UInt8</td>
+<td>Nr</td>
+<td>data source string</td>
+</tr>
+<tr class="row-even"><td>misc</td>
+<td>(Misc)</td>
+<td>1</td>
+<td>dictionary for non-essential information</td>
+</tr>
+<tr class="row-odd"><td>notes</td>
+<td>(StringVec)</td>
+<td>1</td>
+<td>notes and automated logging</td>
+</tr>
+<tr class="row-even"><td>Nt</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of time gaps matrix</td>
+</tr>
+<tr class="row-odd"><td>T</td>
+<td>Int64</td>
+<td>2*Nt</td>
+<td>time gaps matrix</td>
+</tr>
+<tr class="row-even"><td>Xc</td>
+<td>UInt8</td>
+<td>1</td>
+<td><a class="reference internal" href="#type-codes"><span class="std std-ref">Type code</span></a> of data vector</td>
+</tr>
+<tr class="row-odd"><td>Nx</td>
+<td>Int64</td>
+<td>1</td>
+<td>number of samples in data vector</td>
+</tr>
+<tr class="row-even"><td>X</td>
+<td>variable</td>
+<td>NX</td>
+<td>data vector</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="seischannel">
+<h2>SeisChannel<a class="headerlink" href="#seischannel" title="Permalink to this headline">¶</a></h2>
+<p>A single channel of univariate geophysical data</p>
+<blockquote>
+<div><table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Ni</td>
+<td>Int64</td>
+<td>1</td>
+<td>size of id string in bytes</td>
+</tr>
+<tr class="row-odd"><td>id</td>
+<td>UInt8</td>
+<td>Ni</td>
+<td>id string</td>
+</tr>
+<tr class="row-even"><td>Nn</td>
+<td>Int64</td>
+<td>1</td>
+<td>size of name string in bytes</td>
+</tr>
+<tr class="row-odd"><td>name</td>
+<td>UInt8</td>
+<td>Nn</td>
+<td>name string</td>
+</tr>
+<tr class="row-even"><td>Lt</td>
+<td>UInt8</td>
+<td>1</td>
+<td><a class="reference internal" href="#loc-codes"><span class="std std-ref">location Type code</span></a></td>
+</tr>
+<tr class="row-odd"><td>loc</td>
+<td>(Loc Type)</td>
+<td>1</td>
+<td>instrument position</td>
+</tr>
+<tr class="row-even"><td>fs</td>
+<td>Float64</td>
+<td>1</td>
+<td>sampling frequency in Hz</td>
+</tr>
+<tr class="row-odd"><td>gain</td>
+<td>Float64</td>
+<td>1</td>
+<td>scalar gain</td>
+</tr>
+<tr class="row-even"><td>Rt</td>
+<td>UInt8</td>
+<td>1</td>
+<td><a class="reference internal" href="#resp-codes"><span class="std std-ref">response Type code</span></a></td>
+</tr>
+<tr class="row-odd"><td>resp</td>
+<td>(Resp Type)</td>
+<td>1</td>
+<td>instrument response</td>
+</tr>
+<tr class="row-even"><td>Nu</td>
+<td>Int64</td>
+<td>1</td>
+<td>size of units string in bytes</td>
+</tr>
+<tr class="row-odd"><td>units</td>
+<td>UInt8</td>
+<td>Nu</td>
+<td>units string</td>
+</tr>
+<tr class="row-even"><td>Nr</td>
+<td>Int64</td>
+<td>1</td>
+<td>size of data source string in bytes</td>
+</tr>
+<tr class="row-odd"><td>src</td>
+<td>UInt8</td>
+<td>Nr</td>
+<td>data source string</td>
+</tr>
+<tr class="row-even"><td>misc</td>
+<td>(Misc)</td>
+<td>1</td>
+<td>dictionary for non-essential information</td>
+</tr>
+<tr class="row-odd"><td>notes</td>
+<td>(StringVec)</td>
+<td>1</td>
+<td>notes and automated logging</td>
+</tr>
+<tr class="row-even"><td>Nt</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of time gaps matrix</td>
+</tr>
+<tr class="row-odd"><td>T</td>
+<td>Int64</td>
+<td>2*Nt</td>
+<td>time gaps matrix</td>
+</tr>
+<tr class="row-even"><td>Xc</td>
+<td>UInt8</td>
+<td>1</td>
+<td><a class="reference internal" href="#type-codes"><span class="std std-ref">Type code</span></a> of data vector</td>
+</tr>
+<tr class="row-odd"><td>Nx</td>
+<td>Int64</td>
+<td>1</td>
+<td>number of samples in data vector</td>
+</tr>
+<tr class="row-even"><td>X</td>
+<td>variable</td>
+<td>NX</td>
+<td>data vector</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</div>
+<div class="section" id="eventtracedata">
+<h2>EventTraceData<a class="headerlink" href="#eventtracedata" title="Permalink to this headline">¶</a></h2>
+<p>A multichannel record of time-series data related to a seismic event.</p>
+<blockquote>
+<div><table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>N</td>
+<td>Int64</td>
+<td>1</td>
+<td>number of data channels</td>
+</tr>
+<tr class="row-odd"><td>Lc</td>
+<td>UInt8</td>
+<td>N</td>
+<td><a class="reference internal" href="#loc-codes"><span class="std std-ref">location Type codes</span></a> for each data channel</td>
+</tr>
+<tr class="row-even"><td>Rc</td>
+<td>UInt8</td>
+<td>N</td>
+<td><a class="reference internal" href="#resp-codes"><span class="std std-ref">response Type codes</span></a> for each data channel</td>
+</tr>
+<tr class="row-odd"><td>Xc</td>
+<td>UInt8</td>
+<td>N</td>
+<td>data <a class="reference internal" href="#type-codes"><span class="std std-ref">Type codes</span></a> for each data channel</td>
+</tr>
+<tr class="row-even"><td>cmp</td>
+<td>UInt8</td>
+<td>1</td>
+<td>are data compressed? (0x01 = yes)</td>
+</tr>
+<tr class="row-odd"><td>Nt</td>
+<td>Int64</td>
+<td>N</td>
+<td>number of rows in time gaps matrix for each channel</td>
+</tr>
+<tr class="row-even"><td>Nx</td>
+<td>Int64</td>
+<td>N</td>
+<td>length of data vector for each channel <a class="footnote-reference" href="#id9" id="id7">[4]</a></td>
+</tr>
+<tr class="row-odd"><td>id</td>
+<td>(StringVec)</td>
+<td>1</td>
+<td>channel ids</td>
+</tr>
+<tr class="row-even"><td>name</td>
+<td>(StringVec)</td>
+<td>1</td>
+<td>channel names</td>
+</tr>
+<tr class="row-odd"><td>loc</td>
+<td>(Loc Type)</td>
+<td>N</td>
+<td>instrument positions</td>
+</tr>
+<tr class="row-even"><td>fs</td>
+<td>Float64</td>
+<td>N</td>
+<td>sampling frequencies of each channel in Hz</td>
+</tr>
+<tr class="row-odd"><td>gain</td>
+<td>Float64</td>
+<td>N</td>
+<td>scalar gains of each channel</td>
+</tr>
+<tr class="row-even"><td>resp</td>
+<td>(Resp Type)</td>
+<td>N</td>
+<td>instrument responses</td>
+</tr>
+<tr class="row-odd"><td>units</td>
+<td>(StringVec)</td>
+<td>1</td>
+<td>units of each channel’s data</td>
+</tr>
+<tr class="row-even"><td>az</td>
+<td>Float64</td>
+<td>N</td>
+<td>event azimuth</td>
+</tr>
+<tr class="row-odd"><td>baz</td>
+<td>Float64</td>
+<td>N</td>
+<td>backazimuths to event</td>
+</tr>
+<tr class="row-even"><td>dist</td>
+<td>Float64</td>
+<td>N</td>
+<td>source-receiver distances</td>
+</tr>
+<tr class="row-odd"><td>pha</td>
+<td>(PhaseCat)</td>
+<td>N</td>
+<td>phase catalogs for each channel</td>
+</tr>
+<tr class="row-even"><td>src</td>
+<td>(StringVec)</td>
+<td>1</td>
+<td>data source strings for each channel</td>
+</tr>
+<tr class="row-odd"><td>misc</td>
+<td>(Misc)</td>
+<td>N</td>
+<td>dictionaries of non-essential information for each channel</td>
+</tr>
+<tr class="row-even"><td>notes</td>
+<td>(StringVec)</td>
+<td>N</td>
+<td>notes and automated logging for each channel</td>
+</tr>
+<tr class="row-odd"><td>{</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>for i = 1:N</td>
+</tr>
+<tr class="row-even"><td>T</td>
+<td>Int64</td>
+<td>2*Nt[i]</td>
+<td>Matrix of time gaps for channel i</td>
+</tr>
+<tr class="row-odd"><td>}</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>{</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>for i = 1:N</td>
+</tr>
+<tr class="row-odd"><td>X</td>
+<td>Xc[i]</td>
+<td>Nx[i]</td>
+<td>Data vector i <a class="footnote-reference" href="#id10" id="id8">[5]</a></td>
+</tr>
+<tr class="row-even"><td>}</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<table class="docutils footnote" frame="void" id="id9" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id7">[4]</a></td><td>If cmp == 0x01, each value in Nx is the number of bytes of compressed data to read; otherwise, this is the number of samples in each channel.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id10" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id8">[5]</a></td><td>If cmp == 0x01, read Nx[i] samples of type UInt8 and pass through lz4 decompression to generate data vector i; else read Nx[i] samples of the type corresponding to code Xc[i].</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="seisdata">
+<h2>SeisData<a class="headerlink" href="#seisdata" title="Permalink to this headline">¶</a></h2>
+<p>A record containing multiple channels of univariate geophysical data.</p>
+<blockquote>
+<div><table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="9%" />
+<col width="9%" />
+<col width="9%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>N</td>
+<td>Int64</td>
+<td>1</td>
+<td>number of data channels</td>
+</tr>
+<tr class="row-odd"><td>Lc</td>
+<td>UInt8</td>
+<td>N</td>
+<td><a class="reference internal" href="#loc-codes"><span class="std std-ref">location Type codes</span></a> for each data channel</td>
+</tr>
+<tr class="row-even"><td>Rc</td>
+<td>UInt8</td>
+<td>N</td>
+<td><a class="reference internal" href="#resp-codes"><span class="std std-ref">response Type codes</span></a> for each data channel</td>
+</tr>
+<tr class="row-odd"><td>Xc</td>
+<td>UInt8</td>
+<td>N</td>
+<td>data <a class="reference internal" href="#type-codes"><span class="std std-ref">Type codes</span></a> for each data channel</td>
+</tr>
+<tr class="row-even"><td>cmp</td>
+<td>UInt8</td>
+<td>1</td>
+<td>are data compressed? (0x01 = yes)</td>
+</tr>
+<tr class="row-odd"><td>Nt</td>
+<td>Int64</td>
+<td>N</td>
+<td>number of rows in time gaps matrix for each channel</td>
+</tr>
+<tr class="row-even"><td>Nx</td>
+<td>Int64</td>
+<td>N</td>
+<td>length of data vector for each channel <a class="footnote-reference" href="#id13" id="id11">[6]</a></td>
+</tr>
+<tr class="row-odd"><td>id</td>
+<td>(StringVec)</td>
+<td>1</td>
+<td>channel ids</td>
+</tr>
+<tr class="row-even"><td>name</td>
+<td>(StringVec)</td>
+<td>1</td>
+<td>channel names</td>
+</tr>
+<tr class="row-odd"><td>loc</td>
+<td>(Loc Type)</td>
+<td>N</td>
+<td>instrument positions</td>
+</tr>
+<tr class="row-even"><td>fs</td>
+<td>Float64</td>
+<td>N</td>
+<td>sampling frequencies of each channel in Hz</td>
+</tr>
+<tr class="row-odd"><td>gain</td>
+<td>Float64</td>
+<td>N</td>
+<td>scalar gains of each channel</td>
+</tr>
+<tr class="row-even"><td>resp</td>
+<td>(Resp Type)</td>
+<td>N</td>
+<td>instrument responses</td>
+</tr>
+<tr class="row-odd"><td>units</td>
+<td>(StringVec)</td>
+<td>1</td>
+<td>units of each channel’s data</td>
+</tr>
+<tr class="row-even"><td>src</td>
+<td>(StringVec)</td>
+<td>1</td>
+<td>data source strings for each channel</td>
+</tr>
+<tr class="row-odd"><td>misc</td>
+<td>(Misc)</td>
+<td>N</td>
+<td>dictionaries of non-essential information for each channel</td>
+</tr>
+<tr class="row-even"><td>notes</td>
+<td>(StringVec)</td>
+<td>N</td>
+<td>notes and automated logging for each channel</td>
+</tr>
+<tr class="row-odd"><td>{</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>for i = 1:N</td>
+</tr>
+<tr class="row-even"><td>T</td>
+<td>Int64</td>
+<td>2*Nt[i]</td>
+<td>Matrix of time gaps for channel i</td>
+</tr>
+<tr class="row-odd"><td>}</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+<tr class="row-even"><td>{</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>for i = 1:N</td>
+</tr>
+<tr class="row-odd"><td>X</td>
+<td>Xc[i]</td>
+<td>Nx[i]</td>
+<td>Data vector i <a class="footnote-reference" href="#id14" id="id12">[7]</a></td>
+</tr>
+<tr class="row-even"><td>}</td>
+<td>&#160;</td>
+<td>&#160;</td>
+<td>&#160;</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<table class="docutils footnote" frame="void" id="id13" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id11">[6]</a></td><td>If cmp == 0x01, each value in Nx is the number of bytes of compressed data to read; otherwise, this is the number of samples in each channel.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id14" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id12">[7]</a></td><td>If cmp == 0x01, read Nx[i] samples of type UInt8 and pass through lz4 decompression to generate data vector i; else read Nx[i] samples of the type corresponding to code Xc[i].</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="seishdr">
+<h2>SeisHdr<a class="headerlink" href="#seishdr" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="8%" />
+<col width="17%" />
+<col width="8%" />
+<col width="67%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Li</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of event ID string</td>
+</tr>
+<tr class="row-odd"><td>id</td>
+<td>UInt8</td>
+<td>Li</td>
+<td>event ID string</td>
+</tr>
+<tr class="row-even"><td>iv</td>
+<td>UInt8</td>
+<td>1</td>
+<td>intensity value</td>
+</tr>
+<tr class="row-odd"><td>Ls</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of intensity scale string</td>
+</tr>
+<tr class="row-even"><td>isc</td>
+<td>UInt8</td>
+<td>Ls</td>
+<td>intensity scale string</td>
+</tr>
+<tr class="row-odd"><td>loc</td>
+<td>(EQLoc)</td>
+<td>1</td>
+<td>earthquake location</td>
+</tr>
+<tr class="row-even"><td>mag</td>
+<td>(EQMag)</td>
+<td>1</td>
+<td>earthquake magnitude</td>
+</tr>
+<tr class="row-odd"><td>misc</td>
+<td>(Misc)</td>
+<td>1</td>
+<td>dictionary containing non-essential information</td>
+</tr>
+<tr class="row-even"><td>notes</td>
+<td>(StringVec)</td>
+<td>1</td>
+<td>notes and automated logging</td>
+</tr>
+<tr class="row-odd"><td>ot</td>
+<td>Int64</td>
+<td>1</td>
+<td>origin time <a class="footnote-reference" href="#id16" id="id15">[8]</a></td>
+</tr>
+<tr class="row-even"><td>Lr</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of data source string</td>
+</tr>
+<tr class="row-odd"><td>src</td>
+<td>UInt8</td>
+<td>Lr</td>
+<td>data source string</td>
+</tr>
+<tr class="row-even"><td>Lt</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of event type string</td>
+</tr>
+<tr class="row-odd"><td>typ</td>
+<td>UInt8</td>
+<td>Lt</td>
+<td>event type string</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id16" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id15">[8]</a></td><td>Measured from Unix epoch time (1970-01-01T00:00:00Z) in integer microseconds</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="seissrc">
+<h2>SeisSrc<a class="headerlink" href="#seissrc" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="8%" />
+<col width="17%" />
+<col width="8%" />
+<col width="67%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Li</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of source id string</td>
+</tr>
+<tr class="row-odd"><td>id</td>
+<td>UInt8</td>
+<td>Li</td>
+<td>id string</td>
+</tr>
+<tr class="row-even"><td>Le</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of event id string</td>
+</tr>
+<tr class="row-odd"><td>eid</td>
+<td>UInt8</td>
+<td>Le</td>
+<td>event id string</td>
+</tr>
+<tr class="row-even"><td>m0</td>
+<td>Float64</td>
+<td>1</td>
+<td>scalar moment</td>
+</tr>
+<tr class="row-odd"><td>Lm</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of moment tensor vector</td>
+</tr>
+<tr class="row-even"><td>mt</td>
+<td>Float64</td>
+<td>Lm</td>
+<td>moment tensor vector</td>
+</tr>
+<tr class="row-odd"><td>Ld</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of moment tensor misfit vector</td>
+</tr>
+<tr class="row-even"><td>dm</td>
+<td>Float64</td>
+<td>Ld</td>
+<td>moment tensor misfit vector</td>
+</tr>
+<tr class="row-odd"><td>np</td>
+<td>Int64</td>
+<td>1</td>
+<td>number of polarities</td>
+</tr>
+<tr class="row-even"><td>gap</td>
+<td>Float64</td>
+<td>1</td>
+<td>max. azimuthal gap</td>
+</tr>
+<tr class="row-odd"><td>pad</td>
+<td>Int64</td>
+<td>2</td>
+<td>dimensions of principal axes matrix</td>
+</tr>
+<tr class="row-even"><td>pax</td>
+<td>Float64</td>
+<td>pad[1]*pad[2]</td>
+<td>principal axes matrix</td>
+</tr>
+<tr class="row-odd"><td>pld</td>
+<td>Int64</td>
+<td>2</td>
+<td>dimensions of nodal planes matrix</td>
+</tr>
+<tr class="row-even"><td>planes</td>
+<td>Float64</td>
+<td>pld[1]*pld[2]</td>
+<td>nodal planes matrix</td>
+</tr>
+<tr class="row-odd"><td>Lr</td>
+<td>Int64</td>
+<td>1</td>
+<td>length of data source string</td>
+</tr>
+<tr class="row-even"><td>src</td>
+<td>UInt8</td>
+<td>1</td>
+<td>data source string</td>
+</tr>
+<tr class="row-odd"><td>st</td>
+<td>(SourceTime)</td>
+<td>1</td>
+<td>source-time description</td>
+</tr>
+<tr class="row-even"><td>misc</td>
+<td>(Misc)</td>
+<td>1</td>
+<td>Dictionary containing non-essential information</td>
+</tr>
+<tr class="row-odd"><td>notes</td>
+<td>(StringVec)</td>
+<td>1</td>
+<td>Notes and automated logging</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="seisevent">
+<h2>SeisEvent<a class="headerlink" href="#seisevent" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="8%" />
+<col width="23%" />
+<col width="8%" />
+<col width="62%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Var</th>
+<th class="head">Type</th>
+<th class="head">N</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>hdr</td>
+<td>(SeisHdr)</td>
+<td>1</td>
+<td>event header</td>
+</tr>
+<tr class="row-odd"><td>source</td>
+<td>(SeisSrc)</td>
+<td>1</td>
+<td>event source process</td>
+</tr>
+<tr class="row-even"><td>data</td>
+<td>(EventTraceData)</td>
+<td>1</td>
+<td>event trace data</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="data-type-codes">
+<h1>Data Type Codes<a class="headerlink" href="#data-type-codes" title="Permalink to this headline">¶</a></h1>
+<p>Each Type code is written to disk as a UInt8, with the important exception of
+SeisIO custom object Type codes (which use UInt32).</p>
+<div class="section" id="loc-type-codes">
+<span id="loc-codes"></span><h2>Loc Type Codes<a class="headerlink" href="#loc-type-codes" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="33%" />
+<col width="67%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">UInt8</th>
+<th class="head">Type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>0x00</td>
+<td>GenLoc</td>
+</tr>
+<tr class="row-odd"><td>0x01</td>
+<td>GeoLoc</td>
+</tr>
+<tr class="row-even"><td>0x02</td>
+<td>UTMLoc</td>
+</tr>
+<tr class="row-odd"><td>0x03</td>
+<td>XYLoc</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="resp-type-codes">
+<span id="resp-codes"></span><h2>Resp Type Codes<a class="headerlink" href="#resp-type-codes" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="33%" />
+<col width="67%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">UInt8</th>
+<th class="head">Type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>0x00</td>
+<td>GenResp</td>
+</tr>
+<tr class="row-odd"><td>0x01</td>
+<td>PZResp</td>
+</tr>
+<tr class="row-even"><td>0x02</td>
+<td>PZResp64</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="other-type-codes">
+<span id="type-codes"></span><h2>Other Type Codes<a class="headerlink" href="#other-type-codes" title="Permalink to this headline">¶</a></h2>
+<p>Only the Types below are faithfully preserved in write/read of a :misc field
+dictionary; other Types are not written to file and can cause <code class="docutils literal notranslate"><span class="pre">wseis</span></code> to
+throw errors.</p>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="33%" />
+<col width="11%" />
+<col width="44%" />
+<col width="11%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Type</th>
+<th class="head">UInt8</th>
+<th class="head">Type</th>
+<th class="head">UInt8</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Char</td>
+<td>0x00</td>
+<td>Array{Char,N}</td>
+<td>0x80</td>
+</tr>
+<tr class="row-odd"><td>String</td>
+<td>0x01</td>
+<td>Array{String,N}</td>
+<td>0x81</td>
+</tr>
+<tr class="row-even"><td>UInt8</td>
+<td>0x10</td>
+<td>Array{UInt8,N}</td>
+<td>0x90</td>
+</tr>
+<tr class="row-odd"><td>UInt16</td>
+<td>0x11</td>
+<td>Array{UInt16,N}</td>
+<td>0x91</td>
+</tr>
+<tr class="row-even"><td>UInt32</td>
+<td>0x12</td>
+<td>Array{UInt32,N}</td>
+<td>0x92</td>
+</tr>
+<tr class="row-odd"><td>UInt64</td>
+<td>0x13</td>
+<td>Array{UInt64,N}</td>
+<td>0x93</td>
+</tr>
+<tr class="row-even"><td>UInt128</td>
+<td>0x14</td>
+<td>Array{UInt128,N}</td>
+<td>0x94</td>
+</tr>
+<tr class="row-odd"><td>Int8</td>
+<td>0x20</td>
+<td>Array{Int8,N}</td>
+<td>0xa0</td>
+</tr>
+<tr class="row-even"><td>Int16</td>
+<td>0x21</td>
+<td>Array{Int16,N}</td>
+<td>0xa1</td>
+</tr>
+<tr class="row-odd"><td>Int32</td>
+<td>0x22</td>
+<td>Array{Int32,N}</td>
+<td>0xa2</td>
+</tr>
+<tr class="row-even"><td>Int64</td>
+<td>0x23</td>
+<td>Array{Int64,N}</td>
+<td>0xa3</td>
+</tr>
+<tr class="row-odd"><td>Int128</td>
+<td>0x24</td>
+<td>Array{Int128,N}</td>
+<td>0xa4</td>
+</tr>
+<tr class="row-even"><td>Float16</td>
+<td>0x30</td>
+<td>Array{Float16,N}</td>
+<td>0xb0</td>
+</tr>
+<tr class="row-odd"><td>Float32</td>
+<td>0x31</td>
+<td>Array{Float32,N}</td>
+<td>0xb1</td>
+</tr>
+<tr class="row-even"><td>Float64</td>
+<td>0x32</td>
+<td>Array{Float64,N}</td>
+<td>0xb2</td>
+</tr>
+<tr class="row-odd"><td>Complex{UInt8}</td>
+<td>0x50</td>
+<td>Array{Complex{UInt8},N}</td>
+<td>0xd0</td>
+</tr>
+<tr class="row-even"><td>Complex{UInt16}</td>
+<td>0x51</td>
+<td>Array{Complex{UInt16},N}</td>
+<td>0xd1</td>
+</tr>
+<tr class="row-odd"><td>Complex{UInt32}</td>
+<td>0x52</td>
+<td>Array{Complex{UInt32},N}</td>
+<td>0xd2</td>
+</tr>
+<tr class="row-even"><td>Complex{UInt64}</td>
+<td>0x53</td>
+<td>Array{Complex{UInt64},N}</td>
+<td>0xd3</td>
+</tr>
+<tr class="row-odd"><td>Complex{UInt128}</td>
+<td>0x54</td>
+<td>Array{Complex{UInt128},N}</td>
+<td>0xd4</td>
+</tr>
+<tr class="row-even"><td>Complex{Int8}</td>
+<td>0x60</td>
+<td>Array{Complex{Int8},N}</td>
+<td>0xe0</td>
+</tr>
+<tr class="row-odd"><td>Complex{Int16}</td>
+<td>0x61</td>
+<td>Array{Complex{Int16},N}</td>
+<td>0xe1</td>
+</tr>
+<tr class="row-even"><td>Complex{Int32}</td>
+<td>0x62</td>
+<td>Array{Complex{Int32},N}</td>
+<td>0xe2</td>
+</tr>
+<tr class="row-odd"><td>Complex{Int64}</td>
+<td>0x63</td>
+<td>Array{Complex{Int64},N}</td>
+<td>0xe3</td>
+</tr>
+<tr class="row-even"><td>Complex{Int128}</td>
+<td>0x64</td>
+<td>Array{Complex{Int128},N}</td>
+<td>0xe4</td>
+</tr>
+<tr class="row-odd"><td>Complex{Float16}</td>
+<td>0x70</td>
+<td>Array{Complex{Float16},N}</td>
+<td>0xf0</td>
+</tr>
+<tr class="row-even"><td>Complex{Float32}</td>
+<td>0x71</td>
+<td>Array{Complex{Float32},N}</td>
+<td>0xf1</td>
+</tr>
+<tr class="row-odd"><td>Complex{Float64}</td>
+<td>0x72</td>
+<td>Array{Complex{Float64},N}</td>
+<td>0xf2</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="seisio-object-type-codes">
+<span id="object-codes"></span><h3>SeisIO Object Type codes<a class="headerlink" href="#seisio-object-type-codes" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="colwidths-given docutils">
+<colgroup>
+<col width="40%" />
+<col width="60%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">UInt32 Code</th>
+<th class="head">Object Type</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>0x20474330</td>
+<td>EventChannel</td>
+</tr>
+<tr class="row-odd"><td>0x20474331</td>
+<td>SeisChannel</td>
+</tr>
+<tr class="row-even"><td>0x20474430</td>
+<td>EventTraceData</td>
+</tr>
+<tr class="row-odd"><td>0x20474431</td>
+<td>SeisData</td>
+</tr>
+<tr class="row-even"><td>0x20495030</td>
+<td>GenLoc</td>
+</tr>
+<tr class="row-odd"><td>0x20495031</td>
+<td>GeoLoc</td>
+</tr>
+<tr class="row-even"><td>0x20495032</td>
+<td>UTMLoc</td>
+</tr>
+<tr class="row-odd"><td>0x20495033</td>
+<td>XYLoc</td>
+</tr>
+<tr class="row-even"><td>0x20495230</td>
+<td>GenResp</td>
+</tr>
+<tr class="row-odd"><td>0x20495231</td>
+<td>PZResp64</td>
+</tr>
+<tr class="row-even"><td>0x20495232</td>
+<td>PZResp</td>
+</tr>
+<tr class="row-odd"><td>0x20504330</td>
+<td>PhaseCat</td>
+</tr>
+<tr class="row-even"><td>0x20534530</td>
+<td>SeisEvent</td>
+</tr>
+<tr class="row-odd"><td>0x20534830</td>
+<td>SeisHdr</td>
+</tr>
+<tr class="row-even"><td>0x20535030</td>
+<td>SeisPha</td>
+</tr>
+<tr class="row-odd"><td>0x20535330</td>
+<td>SeisSrc</td>
+</tr>
+<tr class="row-even"><td>0x20535430</td>
+<td>SourceTime</td>
+</tr>
+<tr class="row-odd"><td>0x45514c30</td>
+<td>EQLoc</td>
+</tr>
+<tr class="row-even"><td>0x45514d30</td>
+<td>EQMag</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="web_syntax.html" class="btn btn-neutral float-right" title="Data Requests Syntax" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="function_list.html" class="btn btn-neutral float-left" title="Utility Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016-2019, Joshua Jones, Ph.D.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
