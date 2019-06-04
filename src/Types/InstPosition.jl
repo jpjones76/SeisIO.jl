@@ -1,4 +1,3 @@
-# import Base:getindex, setindex!, show, read, write, isequal, ==, isempty, sizeof, hash
 export InstrumentPosition, EQLoc, GenLoc, GeoLoc, UTMLoc, XYLoc
 
 @doc """
@@ -37,7 +36,7 @@ function showloc_full(io::IO, Loc::T) where {T<:InstrumentPosition}
   return nothing
 end
 
-function loctype2code(Loc::InstrumentPosition)
+function loctyp2code(Loc::InstrumentPosition)
   T = typeof(Loc)
   c = UInt8(
   if T == GeoLoc
@@ -53,7 +52,7 @@ function loctype2code(Loc::InstrumentPosition)
   return c
 end
 
-function code2loctype(c::UInt8)
+function code2loctyp(c::UInt8)
   T::Type = (
   if c == 0x01
     GeoLoc
@@ -73,24 +72,18 @@ end
 
 Generic instrument location with two fields:
 * datum::String
-* loc::Array{T,1} where {T<:AbstractFloat}
+* loc::Array{Float64,1}
 """
-mutable struct GenLoc{T} <: InstrumentPosition where T<:AbstractFloat
+mutable struct GenLoc <: InstrumentPosition
   datum::String
-  loc::Array{T,1}
-  function GenLoc{T}() where {T<:AbstractFloat}
-    return new("", Array{Float64,1}(undef, 0))
-  end
-  function GenLoc{T}(S::String, X::Array{T,1}) where {T<:AbstractFloat}
-    return new(S, X)
-  end
+  loc::Array{Float64,1}
+
+  GenLoc(datum::String, loc::Array{Float64,1}) = new(datum, loc)
 end
-GenLoc() = GenLoc{Float64}("", Array{Float64,1}(undef, 0))
-GenLoc(X::Array{T,1}) where {T <: AbstractFloat} = GenLoc{T}("", [X...])
-getindex(x::GenLoc{T}, i::Int64) where {T<:AbstractFloat} =
-  getindex(getfield(x, :loc), i)
-setindex!(x::GenLoc{T}, y, i::Int64) where {T<:AbstractFloat} =
-  setindex!(getfield(x, :loc), y, i)
+GenLoc(; datum::String = "", loc::Array{Float64,1} = Float64[]) = GenLoc(datum, loc)
+GenLoc(X::Array{Float64,1}) = GenLoc("", X)
+getindex(x::GenLoc, i::Int64) = getindex(getfield(x, :loc), i)
+setindex!(x::GenLoc, y::Float64, i::Int64) = setindex!(getfield(x, :loc), y, i)
 
 function show(io::IO, Loc::GenLoc)
   if get(io, :compact, false) == false
@@ -101,27 +94,16 @@ function show(io::IO, Loc::GenLoc)
   return nothing
 end
 
-function writeloc(io::IO, Loc::GenLoc)
-  datum = codeunits(getfield(Loc, :datum))
-  loc = getfield(Loc, :loc)
-  L1 = Int64(length(datum))
-  L2 = Int64(length(loc))
-  write(io, L1)
-  write(io, L2)
-  write(io, datum)
-  write(io, loc)
+function write(io::IO, Loc::GenLoc)
+  write(io, Int64(sizeof(Loc.datum)))
+  write(io, Loc.datum)
+  write(io, Int64(length(Loc.loc)))
+  write(io, Loc.loc)
   return nothing
 end
 
-function readloc!(io::IO, Loc::GenLoc)
-  L1 = read(io, Int64)
-  L2 = read(io, Int64)
-  setfield!(Loc, :datum, String(read(io, L1)))
-  loc = Array{Float64, 1}(undef, L2)
-  read!(io, loc)
-  setfield!(Loc, :loc, loc)
-  return nothing
-end
+read(io::IO, ::Type{GenLoc}) = GenLoc(String(read(io, read(io, Int64))),
+  read!(io, Array{Float64, 1}(undef, read(io, Int64))))
 
 isempty(Loc::GenLoc) = min(isempty(Loc.datum), isempty(Loc.loc))
 hash(Loc::GenLoc) = hash(Loc.datum, hash(Loc.loc))
@@ -186,25 +168,29 @@ function show(io::IO, loc::GeoLoc)
   return nothing
 end
 
-function writeloc(io::IO, Loc::GeoLoc)
+function write(io::IO, Loc::GeoLoc)
   datum = codeunits(getfield(Loc, :datum))
   L = Int64(length(datum))
   write(io, L)
   write(io, datum)
-  for f in (:lat, :lon, :el, :dep, :az, :inc)
-    write(io, getfield(Loc, f))
-  end
+  write(io, Loc.lat)
+  write(io, Loc.lon)
+  write(io, Loc.el)
+  write(io, Loc.dep)
+  write(io, Loc.az)
+  write(io, Loc.inc)
   return nothing
 end
 
-function readloc!(io::IO, Loc::GeoLoc)
-  L = read(io, Int64)
-  setfield!(Loc, :datum, String(read(io, L)))
-  for f in (:lat, :lon, :el, :dep, :az, :inc)
-    setfield!(Loc, f, read(io, Float64))
-  end
-  return nothing
-end
+read(io::IO, ::Type{GeoLoc}) = GeoLoc(
+  String(read(io, read(io, Int64))),
+  read(io, Float64),
+  read(io, Float64),
+  read(io, Float64),
+  read(io, Float64),
+  read(io, Float64),
+  read(io, Float64)
+)
 
 function isempty(Loc::GeoLoc)
   q::Bool = isempty(getfield(Loc, :datum))
@@ -261,12 +247,29 @@ mutable struct UTMLoc <: InstrumentPosition
   dep::Float64
   az::Float64
   inc::Float64
-  function UTMLoc()
-    z = zero(Float64)
-    uz = zero(UInt64)
-    return new("", zero(Int8), ' ', uz, uz, z, z, z, z)
-  end
+
+  UTMLoc(
+          datum::String,
+          zone::Int8,
+          hemi::Char,
+          E::UInt64,
+          N::UInt64,
+          el::Float64,
+          dep::Float64,
+          az::Float64,
+          inc::Float64
+          ) = new(datum, zone, hemi, E, N, el, dep, az, inc)
 end
+UTMLoc(;  datum ::String  = "",
+          zone  ::Int8    = zero(Int8),
+          hemi  ::Char    = ' ',
+          E     ::UInt64  = zero(UInt64),
+          N     ::UInt64  = zero(UInt64),
+          el    ::Float64 = zero(Float64),
+          dep   ::Float64 = zero(Float64),
+          az    ::Float64 = zero(Float64),
+          inc   ::Float64 = zero(Float64)
+          ) = UTMLoc(datum, zone, hemi, E, N, el, dep, az, inc)
 
 function show(io::IO, loc::UTMLoc)
   if get(io, :compact, false) == false
@@ -280,29 +283,31 @@ function show(io::IO, loc::UTMLoc)
   return nothing
 end
 
-function writeloc(io::IO, Loc::UTMLoc)
-  datum = codeunits(getfield(Loc, :datum))
-  L = Int64(length(datum))
-  write(io, L)
-  write(io, datum)
-  for f in (:zone, :hemi, :E, :N, :el, :dep, :az, :inc)
-    write(io, getfield(Loc, f))
-  end
+function write(io::IO, Loc::UTMLoc)
+  write(io, sizeof(Loc.datum))
+  write(io, Loc.datum)
+  write(io, Loc.zone)
+  write(io, Loc.hemi)
+  write(io, Loc.E)
+  write(io, Loc.N)
+  write(io, Loc.el)
+  write(io, Loc.dep)
+  write(io, Loc.az)
+  write(io, Loc.inc)
   return nothing
 end
 
-function readloc!(io::IO, Loc::UTMLoc)
-  L = read(io, Int64)
-  setfield!(Loc, :datum, String(read(io, L)))
-  setfield!(Loc, :zone, read(io, Int8))
-  setfield!(Loc, :hemi, read(io, Char))
-  setfield!(Loc, :E, read(io, UInt64))
-  setfield!(Loc, :N, read(io, UInt64))
-  for f in (:el, :dep, :az, :inc)
-    setfield!(Loc, f, read(io, Float64))
-  end
-  return nothing
-end
+read(io::IO, ::Type{UTMLoc}) = UTMLoc(
+  String(read(io, read(io, Int64))),
+  read(io, Int8),
+  read(io, Char),
+  read(io, UInt64),
+  read(io, UInt64),
+  read(io, Float64),
+  read(io, Float64),
+  read(io, Float64),
+  read(io, Float64)
+  )
 
 function isempty(Loc::UTMLoc)
   q::Bool = isempty(getfield(Loc, :datum))
@@ -364,11 +369,28 @@ mutable struct XYLoc <: InstrumentPosition
   ox::Float64
   oy::Float64
   oz::Float64
-  function XYLoc()
-    z = zero(Float64)
-    return new("", z, z, z, z, z, z, z, z)
-  end
+  XYLoc(
+          datum ::String,
+          x     ::Float64,
+          y     ::Float64,
+          z     ::Float64,
+          az    ::Float64,
+          inc   ::Float64,
+          ox    ::Float64,
+          oy    ::Float64,
+          oz    ::Float64
+          ) = new(datum, x, y, z, az, inc, ox, oy, oz)
 end
+XYLoc(; datum ::String  = "",
+        x     ::Float64 = zero(Float64),
+        y     ::Float64 = zero(Float64),
+        z     ::Float64 = zero(Float64),
+        az    ::Float64 = zero(Float64),
+        inc   ::Float64 = zero(Float64),
+        ox    ::Float64 = zero(Float64),
+        oy    ::Float64 = zero(Float64),
+        oz    ::Float64 = zero(Float64)
+      ) = XYLoc(datum, x, y, z, az, inc, ox, oy, oz)
 
 function show(io::IO, loc::XYLoc)
   if get(io, :compact, false) == false
@@ -382,25 +404,31 @@ function show(io::IO, loc::XYLoc)
   return nothing
 end
 
-function writeloc(io::IO, Loc::XYLoc)
-  datum = codeunits(getfield(Loc, :datum))
-  L = Int64(length(datum))
-  write(io, L)
-  write(io, datum)
-  for f in (:x, :y, :z, :az, :inc, :ox, :oy, :oz)
-    write(io, getfield(Loc, f))
-  end
+function write(io::IO, Loc::XYLoc)
+  write(io, sizeof(Loc.datum))
+  write(io, Loc.datum)
+  write(io, Loc.x)
+  write(io, Loc.y)
+  write(io, Loc.z)
+  write(io, Loc.az)
+  write(io, Loc.inc)
+  write(io, Loc.ox)
+  write(io, Loc.oy)
+  write(io, Loc.oz)
   return nothing
 end
 
-function readloc!(io::IO, Loc::XYLoc)
-  L = read(io, Int64)
-  setfield!(Loc, :datum, String(read(io, L)))
-  for f in (:x, :y, :z, :az, :inc, :ox, :oy, :oz)
-    setfield!(Loc, f, read(io, Float64))
-  end
-  return nothing
-end
+read(io::IO, ::Type{XYLoc}) = XYLoc(
+  String(read(io, read(io, Int64))),
+  read(io, Float64),
+  read(io, Float64),
+  read(io, Float64),
+  read(io, Float64),
+  read(io, Float64),
+  read(io, Float64),
+  read(io, Float64),
+  read(io, Float64)
+  )
 
 function isempty(Loc::XYLoc)
   q::Bool = isempty(getfield(Loc, :datum))
@@ -432,100 +460,3 @@ end
 ==(S::XYLoc, U::XYLoc) = isequal(S, U)
 
 sizeof(Loc::XYLoc) = 136 + sizeof(getfield(Loc, :datum))
-
-"""
-    EQLoc
-
-Standard earthquake location description:
-* datum::String
-* lat::Float64 (North is positive)
-* lon::Float64 (East is positive)
-* depth::Float64 (in km; down is positive)
-"""
-mutable struct EQLoc <: InstrumentPosition
-  datum::String
-  lat::Float64
-  lon::Float64
-  dep::Float64
-
-  function EQLoc(
-                  datum ::String ,
-                  lat   ::Float64,
-                  lon   ::Float64,
-                  dep   ::Float64
-                  )
-    return new(datum, lat, lon, dep)
-  end
-end
-
-EQLoc(;
-        datum ::String                    = "",
-        lat   ::Float64                   = zero(Float64),
-        lon   ::Float64                   = zero(Float64),
-        dep   ::Float64                   = zero(Float64)
-        ) = EQLoc(datum, lat, lon, dep)
-
-function show(io::IO, Loc::EQLoc)
-  if get(io, :compact, false) == false
-    println(io, "EQLoc with fields:")
-    for f in (:datum, :lat, :lon, :dep)
-      fn = lpad(String(f), 5, " ")
-      println(io, fn, ": ", getfield(Loc, f))
-    end
-  else
-    c = :compact => true
-    print(io, repr(getfield(Loc, :lat), context=c), " N, ",
-              repr(getfield(Loc, :lon), context=c), " E, ",
-              repr(getfield(Loc, :dep), context=c), " km")
-  end
-  return nothing
-end
-
-function writeloc(io::IO, Loc::EQLoc)
-  datum = codeunits(getfield(Loc, :datum))
-  L = Int64(length(datum))
-  write(io, L)
-  write(io, datum)
-  for f in (:lat, :lon, :dep)
-    write(io, getfield(Loc, f))
-  end
-  return nothing
-end
-
-function readloc!(io::IO, Loc::EQLoc)
-  L = read(io, Int64)
-  setfield!(Loc, :datum, String(read(io, L)))
-  for f in (:lat, :lon, :dep)
-    setfield!(Loc, f, read(io, Float64))
-  end
-  return nothing
-end
-
-function isempty(Loc::EQLoc)
-  q::Bool = isempty(getfield(Loc, :datum))
-  for f in (:lat, :lon, :dep)
-    q = min(q, getfield(Loc, f) == 0.0)
-  end
-  return q
-end
-
-function hash(Loc::EQLoc)
-  h = hash(getfield(Loc, :datum))
-  for f in (:lat, :lon, :dep)
-    h = hash(getfield(Loc, f), h)
-  end
-  return h
-end
-
-function isequal(S::EQLoc, U::EQLoc)
-  q::Bool = isequal(getfield(S, :datum), getfield(U, :datum))
-  if q == true
-    for f in (:lat, :lon, :dep)
-      q = min(q, getfield(S,f) == getfield(U,f))
-    end
-  end
-  return q
-end
-==(S::EQLoc, U::EQLoc) = isequal(S, U)
-
-sizeof(Loc::EQLoc) = 56 + sizeof(getfield(Loc, :datum))
