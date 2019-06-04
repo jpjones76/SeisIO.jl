@@ -20,7 +20,6 @@ function unscale!(S::GphysData; irr::Bool=false)
   return nothing
 end
 unscale!(C::GphysChannel) = (rmul!(C.x, eltype(C.x)(1.0/C.gain)); C.gain = 1.0)
-unscale!(V::SeisEvent; irr::Bool=false) = unscale!(V.data, irr=irr)
 
 @doc (@doc unscale!)
 function unscale(S::GphysData; irr::Bool=false)
@@ -32,10 +31,5 @@ function unscale(C::GphysChannel; irr::Bool=false)
   U = deepcopy(C)
   rmul!(U.x, eltype(C.x)(1.0/U.gain))
   U.gain = 1.0
-  return U
-end
-function unscale(V::SeisEvent; irr::Bool=false)
-  U = deepcopy(V)
-  unscale!(U.data, irr=irr)
   return U
 end

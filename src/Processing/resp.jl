@@ -128,15 +128,6 @@ function equalize_resp(S::GphysData, R_new::Union{PZResp,PZResp64}; C::Array{Int
   return U
 end
 
-# SeisEvent methods
-equalize_resp!(V::SeisEvent, R_new::Union{PZResp,PZResp64}; C::Array{Int64,1} = Int64[]) =
-  equalize_resp!(V.data, R_new, C=C)
-function equalize_resp(V::SeisEvent, R_new::Union{PZResp,PZResp64}; C::Array{Int64,1} = Int64[])
-  U = deepcopy(V)
-  equalize_resp!(U.data, R_new, C=C)
-  return U
-end
-
 # Seischannel methods
 function equalize_resp!(Ch::GphysChannel, R_new::Union{PZResp,PZResp64})
   fs = getfield(Ch, :fs)

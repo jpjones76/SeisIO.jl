@@ -5,10 +5,6 @@ export nanfill!
   nanfill!(C::SeisChannel)
 
 Replace NaNs in `:x` with mean of non-NaN values.
-
-  nanfill!(Ev::SeisEvent)
-
-Replace NaNs in `Ev.data.x` with mean of non-NaN values.
 """
 function nanfill!(S::GphysData)
   for i = 1:S.n
@@ -20,4 +16,3 @@ function nanfill!(S::GphysData)
   return nothing
 end
 nanfill!(C::GphysChannel) = (nanfill!(C.x); note!(C, "nanfill!"))
-nanfill!(Ev::SeisEvent) = nanfill!(Ev.data)

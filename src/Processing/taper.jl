@@ -210,12 +210,6 @@ function taper!(S::GphysData; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
   end
   return nothing
 end
-taper!(V::SeisEvent;
-        t_max::Real=10.0,
-        α::Real=0.05,
-        N_min::Int64=10) = taper!(V.data, t_max = t_max, α=α, N_min=N_min)
-
-@doc (@doc taper!)
 function taper(C::GphysChannel; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
   U = deepcopy(C)
   taper!(U, t_max = t_max, α=α, N_min=N_min)
@@ -224,10 +218,5 @@ end
 function taper(S::GphysData; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
   U = deepcopy(S)
   taper!(U, t_max = t_max, α=α, N_min=N_min)
-  return U
-end
-function taper(V::SeisEvent; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
-  U = deepcopy(V)
-  taper!(U.data, t_max = t_max, α=α, N_min=N_min)
   return U
 end

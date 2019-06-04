@@ -140,10 +140,6 @@ end
 
 Apply zero-phase filter to S.x.
 
-  filtfilt!(Ev::SeisEvent[; KWs])
-
-Apply zero-phase filter to Ev.data.x.
-
   filtfilt!(C::GphysChannel[; KWs])
 
 Apply zero-phase filter to C.x
@@ -289,16 +285,6 @@ function filtfilt!(C::GphysChannel;
   return nothing
 end
 
-filtfilt!(Ev::SeisEvent;
-  fl::Float64=KW.Filt.fl,
-  fh::Float64=KW.Filt.fh,
-  np::Int=KW.Filt.np,
-  rp::Int=KW.Filt.rp,
-  rs::Int=KW.Filt.rs,
-  rt::String=KW.Filt.rt,
-  dm::String=KW.Filt.dm
-  ) = filtfilt!(Ev.data, fl=fl, fh=fh, np=np, rp=rp, rs=rs, rt=rt, dm=dm)
-
 @doc (@doc filtfilt!)
 filtfilt(S::GphysData;
   fl::Float64=KW.Filt.fl,
@@ -326,18 +312,4 @@ filtfilt(C::GphysChannel;
         D = deepcopy(C);
         filtfilt!(D, fl=fl, fh=fh, np=np, rp=rp, rs=rs, rt=rt, dm=dm);
         return D
-       )
-
-filtfilt(Ev::SeisEvent;
-  fl::Float64=KW.Filt.fl,
-  fh::Float64=KW.Filt.fh,
-  np::Int=KW.Filt.np,
-  rp::Int=KW.Filt.rp,
-  rs::Int=KW.Filt.rs,
-  rt::String=KW.Filt.rt,
-  dm::String=KW.Filt.dm
-  ) = (
-        W = deepcopy(Ev);
-        filtfilt!(W.data, fl=fl, fh=fh, np=np, rp=rp, rs=rs, rt=rt, dm=dm);
-        return W
        )

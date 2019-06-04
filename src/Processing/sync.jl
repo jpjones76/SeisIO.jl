@@ -195,11 +195,6 @@ function sync!(S::GphysData;
   return nothing
 end
 
-sync!(V::SeisEvent;
-  s="last"::Union{String,DateTime},
-  t="none"::Union{String,DateTime},
-  v::Int64=KW.v ) = sync!(V.data, s=s, t=t, v=v)
-
 function sync!(C::SeisChannel;
                 s::DateTime,
                 t="none"::Union{String,DateTime},
@@ -218,16 +213,6 @@ function sync(S::GphysData;
   T = deepcopy(S)
   sync!(T, s=s, t=t, v=v)
   return T
-end
-
-function sync(V::SeisEvent;
-                s="last"::Union{String,DateTime},
-                t="none"::Union{String,DateTime},
-                v::Int64=KW.v )
-
-  W = deepcopy(V)
-  sync!(W.data, s=s, t=t, v=v)
-  return W
 end
 
 function sync(C::SeisChannel;
