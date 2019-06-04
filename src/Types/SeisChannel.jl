@@ -113,3 +113,45 @@ function sizeof(C::SeisChannel)
   end
   return s
 end
+
+function write(io::IO, S::SeisChannel)
+  write(io, Int64(sizeof(S.id)))
+  write(io, S.id)                                                     # id
+  write(io, Int64(sizeof(S.name)))
+  write(io, S.name)                                                   # name
+  write(io, loctyp2code(S.loc))
+  write(io, S.loc)                                                    # loc
+  write(io, S.fs)                                                     # fs
+  write(io, S.gain)                                                   # gain
+  write(io, resptyp2code(S.resp))
+  write(io, S.resp)                                                   # resp
+  write(io, Int64(sizeof(S.units)))
+  write(io, S.units)                                                  # units
+  write(io, Int64(sizeof(S.src)))
+  write(io, S.src)                                                    # src
+  write_misc(io, S.misc)                                              # misc
+  write_string_vec(io, S.notes)                                       # notes
+  write(io, Int64(size(S.t,1)))
+  write(io, S.t)                                                      # t
+  write(io, typ2code(eltype(S.x)))
+  write(io, Int64(length(S.x)))
+  write(io, S.x)                                                      # x
+  return nothing
+end
+
+read(io::IO, ::Type{SeisChannel}) = SeisChannel(
+  String(read(io, read(io, Int64))),                                    # id
+  String(read(io, read(io, Int64))),                                    # name
+  read(io, code2loctyp(read(io, UInt8))),                              # loc
+  read(io, Float64),                                                    # fs
+  read(io, Float64),                                                    # gain
+  read(io, code2resptyp(read(io, UInt8))),                              # resp
+  String(read(io, read(io, Int64))),                                    # units
+  String(read(io, read(io, Int64))),                                    # src
+  read_misc(io, getfield(BUF, :buf)),                                   # misc
+  read_string_vec(io, getfield(BUF, :buf)),                             # notes
+  read!(io, Array{Int64, 2}(undef, read(io, Int64), 2)),                # t
+  read!(io, Array{code2typ(read(io,UInt8)),1}(undef, read(io, Int64))), # x
+  )
+
+convert(::Type{SeisData}, C::SeisChannel) = SeisData(C)
