@@ -1,8 +1,3 @@
-export readwin32, readwin32!
-
-# =======================================================
-# Auxiliary functions not for export
-
 function findhex(hexID::UInt16, hexIDs::Array{UInt16,1})
   k = 0
   @inbounds while k < lastindex(hexIDs)
