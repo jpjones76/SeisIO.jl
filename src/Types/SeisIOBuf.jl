@@ -1,5 +1,7 @@
+abstract type SeedBlk end
+
 # [201] Murdock Event Detection Blockette (60 bytes)
-mutable struct Blk201
+mutable struct Blk201 <: SeedBlk
   sig::Array{Float32,1}
   flags::UInt8
   t::Array{Int32,1}
@@ -13,7 +15,7 @@ mutable struct Blk201
 end
 
 #  [500] Timing Blockette (200 bytes)
-mutable struct Blk500
+mutable struct Blk500 <: SeedBlk
   vco_correction::Float32
   t::Array{Int32,1}
   μsec::Int8
@@ -33,7 +35,7 @@ mutable struct Blk500
 end
 
 # [2000] Variable Length Opaque Data Blockette
-mutable struct Blk2000
+mutable struct Blk2000 <: SeedBlk
   n::UInt32
   NB::UInt16
   os::UInt16
@@ -51,7 +53,7 @@ mutable struct Blk2000
 end
 
 # Calibration blockettes: [300], [310], [320], [390]
-mutable struct BlkCalib
+mutable struct BlkCalib <: SeedBlk
   t::Array{Int32,1}
   n::UInt8
   flags::UInt8
@@ -115,11 +117,12 @@ mutable struct SeisIOBuf
 
   # Data-related
   x::Array{Float32,1}       # Data buffer
-  u8::Array{UInt8,1}        # Flags (Stored as four UInt8s)
+  flags::Array{UInt8,1}     # Flags (Stored as four UInt8s)
   x32::Array{UInt32,1}      # Unsigned 32-bit steim-encoded data
   buf::Array{UInt8,1}       # Buffer for reading UInt8 data
   int16_buf::Array{Int16,1} # Buffer for int16s in headers
   int32_buf::Array{Int32,1} # Buffer for int16s in headers
+  int64_buf::Array{Int64,1} # Buffer for int64s; used in rseis/wseis
   sac_fv::Array{Float32,1}
   sac_iv::Array{Int32,1}
   sac_cv::Array{UInt8,1}
@@ -161,11 +164,12 @@ mutable struct SeisIOBuf
 
         # data-related arrays
         Array{Float32,1}(undef, 65536),     # x::Array{Float32,1}
-        Array{UInt8,1}(undef, 4),           # u8::Array{UInt8,1}
+        Array{UInt8,1}(undef, 4),           # flags::Array{UInt8,1}
         Array{UInt32,1}(undef, 16384),      # x32::Array{UInt32,1}
         Array{UInt8,1}(undef, 65536),       # buf::Array{UInt8,1}
         Array{Int16,1}(undef, 62),          # int16_buf::Array{Int16,1}
         Array{Int32,1}(undef, 29),          # int32_buf::Array{Int32,1}
+        Array{Int64,1}(undef, 8),           # int64_buf::Array{Int64,1}
         Array{Float32,1}(undef, 70),        # sac_fv::Array{Float32,1}
         Array{Int32,1}(undef, 40),          # sac_iv::Array{Int32,1}
         Array{UInt8,1}(undef, 192),         # sac_cv::Array{UInt8,1}
