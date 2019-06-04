@@ -1,5 +1,4 @@
-export readsegy, readsegy!, segyhdr
-
+export segyhdr
 # ============================================================================
 # Utility functions not for export
 function trid(i::Int16; fs=2000.0::Float64)
@@ -260,7 +259,7 @@ function do_trace(f::IO,
   if full == true
     setfield!(C, :misc, misc)
   end
-  note!(C, string("+src: readsegy ", src))
+  note!(C, string("+src: ", src))
   return C
 end
 
@@ -335,55 +334,17 @@ end
 
 # ============================================================================
 
-@doc """
-    S = readsegy(fname[, KWs])
-
-Read SEG Y files matching file pattern `fpat` into a new SeisData object. `fpat`
-is a string pattern; wild cards are accepted.
-
-    readsegy!(S, fname[, KWs])
-
-As above, for an existing SeisData object.
-
-### Keywords
-* `passcal=true` for PASSCAL/NMT modified SEG Y (single-channel files with no
-SEG Y file header)
-* `full=true` returns full SEG Y headers in `S.misc`.
-""" readsegy
-function readsegy(filestr::String; passcal::Bool=false, full::Bool=KW.full)
-  buf     = getfield(BUF, :buf)
-  shorts  = getfield(BUF, :int16_buf)
-  ints    = getfield(BUF, :int32_buf)
-  checkbuf!(buf, 240)
-
-  if safe_isfile(filestr)
-    S = read_segy_file(filestr, buf, shorts, ints, passcal, full)
-  else
-    S = SeisData()
-    files = ls(filestr)
-    for fname in files
-      U = read_segy_file(fname, buf, shorts, ints, passcal, full)
-      append!(S, U)
-    end
-  end
-  return S
-end
-
-@doc (@doc readsegy)
-function readsegy!(S::SeisData, filestr::String; passcal::Bool=false, full::Bool=KW.full)
-  U = readsegy(filestr, passcal=passcal, full=full)
-  append!(S, U)
-  return nothing
-end
-
-
 """
     segyhdr(f)
 
 Print formatted, sorted SEG-Y headers of file `f` to stdout. Pass keyword argument `passcal=true` for PASSCAL/NMT modified SEG-Y.
 """
 function segyhdr(fname::String; passcal::Bool=false)
-  seis = readsegy(fname::String; passcal=passcal, full=true)
+  if passcal
+    seis = read_data("passcal", fname::String, full=true)
+  else
+    seis = read_data("segy", fname::String, full=true)
+  end
   if passcal
     printstyled(stdout, @sprintf("%20s: %s\n", "PASSCAL SEG-Y FILE", realpath(fname)), color=:green, bold=true)
     D = getindex(getfield(seis, :misc),1)
