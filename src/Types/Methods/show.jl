@@ -1,5 +1,3 @@
-import Base:show, size, summary
-
 showtail(b::Bool) = b ? "…" : ""
 ngaps(t::Array{Int64,2}) = max(0, size(t,1)-2)
 
@@ -139,9 +137,15 @@ function show_conn(io::IO, C::Array{TCPSocket,1})
 end
 
 summary(S::GphysData) = string(typeof(S), " with ", S.n, " channel",  S.n == 1 ? "" : "s")
-summary(S::GphysChannel) = string(typeof(S), " with ", length(S.x), " sample", (length(S.x) == 1 ? "" : "s"), ", gaps: ", ngaps(S.t))
-summary(H::SeisHdr) = string(typeof(H), ", ", repr("text/plain", H.loc, context=:compact=>true), ", mag (int) = ", H.mag[2], " ", H.mag[1], " (", H.int[2], " ", H.int[1], ")")
-summary(V::SeisEvent) = string("Event ", V.hdr.id, ": ", typeof(V), " with ", V.data.n, " channel", V.data.n == 1 ? "" : "s")
+summary(S::GphysChannel) = string(typeof(S), " with ",
+  length(S.x), " sample", (length(S.x) == 1 ? "" : "s"), ", gaps: ", ngaps(S.t))
+# summary(H::SeisHdr) = string(typeof(H), ", ",
+#   repr("text/plain", H.loc, context=:compact=>true), ", ",
+#   repr("text/plain", H.mag, context=:compact=>true), ", ",
+#   repr("text/plain", H.mag, context=:compact=>true), ", ",
+#   H.int[2], " ", H.int[1])
+# summary(V::SeisEvent) = string("Event ", V.hdr.id, ": ", typeof(V), " with ",
+#   V.data.n, " channel", V.data.n == 1 ? "" : "s")
 
 # GphysData
 function show(io::IO, S::T) where {T<:GphysData}
@@ -214,30 +218,3 @@ function show(io::IO, C::T) where T<:GphysChannel
   return nothing
 end
 show(C::GphysChannel) = show(stdout, C)
-
-# SeisHdr
-function show(io::IO, H::SeisHdr)
-  W = max(80,displaysize(io)[2]-2)-show_os
-  println(io, "    ID: ", H.id)
-  println(io, "    OT: ", H.ot)
-  println(io, "   LOC: ", repr("text/plain", H.loc, context=:compact=>true))
-  println(io, "   MAG: ", H.mag[2], " ", H.mag[1], " (", H.int[2], " ", H.int[1], ")")
-  println(io, "    MT: ", repr("text/plain", H.mt, context=:compact=>true))
-  println(io, "  AXES: ", repr("text/plain", H.axes, context=:compact=>true))
-  println(io, "   SRC: ", String(str_trunc(H.src, W)))
-  println(io, " NOTES: ", length(H.notes), " entries")
-  println(io, "  MISC: ", length(H.misc), " items")
-  return nothing
-end
-show(S::SeisHdr) = show(stdout, S)
-
-# SeisEvent
-function show(io::IO, S::SeisEvent)
-  println(io, summary(S))
-  println(io, "\n(.hdr)")
-  show(io, S.hdr)
-  println(io, "\n(.data)")
-  println(io, "EventTraceData with ", S.data.n, " channels")
-  return nothing
-end
-show(S::SeisEvent) = show(stdout, S)
