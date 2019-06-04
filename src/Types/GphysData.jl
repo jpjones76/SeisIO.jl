@@ -271,19 +271,3 @@ function namestrip!(S::GphysData)
   end
   return nothing
 end
-
-# Create end times from t, fs, x
-function mk_end_times(S::GphysData)
-  n = length(S.fs)
-  ts = Int64[S.t[j][1,2] for j=1:n]
-  te = copy(ts)
-  @inbounds for j = 1:n
-    tt = view(S.t[j], :, 2)
-    if S.fs[j] == 0.0
-      te[j] = last(tt)
-    else
-      te[j] = sum(tt) + round(Int64, sμ*length(S.x[j])/S.fs[j])
-    end
-  end
-  return ts, te
-end
