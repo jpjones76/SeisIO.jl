@@ -3,9 +3,9 @@
 # versions of libmseed, which reads with no issues
 printstyled("  mini-SEED file read\n", color=:light_green)
 
-@test_throws ErrorException readmseed(string(path, "/SampleFiles/one_day.sac"))
+@test_throws ErrorException read_data("mseed", string(path, "/SampleFiles/one_day.sac"))
 
-S = readmseed(string(path, "/SampleFiles/test.mseed"), v=0)
+S = read_data("mseed", string(path, "/SampleFiles/test.mseed"), v=0)
 @test isequal(S.id[1], "NL.HGN.00.BHZ")
 @test ≈(S.fs[1], 40.0)
 @test ≈(S.gain[1], 1.0)
@@ -13,9 +13,9 @@ S = readmseed(string(path, "/SampleFiles/test.mseed"), v=0)
 @test ≈(S.x[1][1:5], [ 2787, 2776, 2774, 2780, 2783 ])
 
 # Test breaks if memory-resident SeisIOBuf structure SEED is not reset
-S1 = readmseed(string(path, "/SampleFiles/test.mseed"), v=0)
+S1 = read_data("mseed", string(path, "/SampleFiles/test.mseed"), v=0)
 if Sys.iswindows() == false
-  S2 = readmseed(string(path, "/SampleFiles/t*.mseed"), v=0)
+  S2 = read_data("mseed", string(path, "/SampleFiles/t*.mseed"), v=0)
   @test S == S1 == S2
 end
 
@@ -35,7 +35,7 @@ if safe_isdir(path*"/SampleFiles/Restricted")
     for f in files
       println(stdout, "attempting to read ", f)
       S = SeisData()
-      readmseed!(S, f, v=3)
+      read_data!(S, "mseed", f, v=3)
       @test isempty(S) == false
 
       # Test that our encoders return the expected values
@@ -76,7 +76,7 @@ if safe_isdir(path*"/SampleFiles/Restricted")
 
         Y = Array{DateTime,1}(undef,0)
         for f in fnames
-          seis = readsac(f)[1]
+          seis = read_data("sac", f)[1]
           push!(Y, u2d(seis.t[1,2]*1.0e-6))
         end
         #[round(u2d(i*1.0e-6), Second) for i in t]
@@ -90,5 +90,5 @@ if safe_isdir(path*"/SampleFiles/Restricted")
     end
   end
 else
-  printstyled("  extended readmseed tests skipped. (files not found; is this Appveyor?)\n", color=:green)
+  printstyled("  extended SEED tests skipped. (files not found; is this Appveyor?)\n", color=:green)
 end

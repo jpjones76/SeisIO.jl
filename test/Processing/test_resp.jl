@@ -37,8 +37,8 @@ V = randSeisEvent()
 for i = 1:V.data.n
   V.data.resp[i] = r
 end
-W = equalize_resp(V, r2)
-equalize_resp!(V, r2)
+W = SeisEvent(V.hdr, V.source, equalize_resp(V.data, r2))
+equalize_resp!(V.data, r2)
 @test V == W
 for i = 1:V.data.n
   @test V.data.x[i] != zeros(eltype(V.data.x[i]), lastindex(V.data.x[i]))

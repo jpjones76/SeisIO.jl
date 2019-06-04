@@ -63,7 +63,7 @@ i = findid(S, "CI.ADO..BHE")
 # Check that these data can be written and read faithfully in SAC and SeisIO formats
 writesac(S)
 wseis("sacreq.seis", S)
-S1 = readsac("2018.032*CI.ADO..BH*SAC")
+S1 = read_data("sac", "2018.032*CI.ADO..BH*SAC")
 S2 = rseis("sacreq.seis")[1]
 @test S == S2
 
@@ -89,28 +89,3 @@ end
 printstyled("      request from GFZ\n", color=:light_green)
 R = get_data("FDSN", "GE.BKB..BH?", src="GFZ", s="2011-03-11T06:00:00", t="2011-03-11T06:05:00", v=0, y=false)
 @test (isempty(R)==false)
-
-# FDSNevq
-printstyled("    FDSNevq\n", color=:light_green)
-printstyled("      simple one-server query\n", color=:light_green)
-S = FDSNevq("2011-03-11T05:47:00", mag=[3.0, 9.9], nev=1, src="IRIS", v=0)
-S = FDSNevq("201103110547", mag=[3.0, 9.9], nev=10, src="IRIS", v=0)
-@test length(S)==9
-
-printstyled("      multi-server query\n", color=:light_green)
-open("FDSNevq.log", "w") do out
-  redirect_stdout(out) do
-    ot = replace(split(string(now()),'.')[1], r"[-,:,A-Z,a-z]" => "")
-    S = FDSNevq(ot, mag=[3.0, 9.9], evw=[-86400.0, 0.0], src="all", nev=10, v=2)
-  end
-end
-
-printstyled("      radius search (rad=)\n", color=:light_green)
-S = FDSNevq("20190101000000", rad=rainier_rad, evw=[31536000.0, 31536000.0], mag=[0.0, 2.9], nev=100, src="IRIS", v=0)
-
-printstyled("      partly-specified region search (reg=)\n", color=:light_green)
-S = FDSNevq("20120601000000", reg=hood_reg, evw=[31536000.0, 31536000.0], mag=[0.0, 2.9], nev=100, src="IRIS", v=0)
-
-# FDSNevt
-printstyled("    FDSNevt\n", color=:light_green)
-S = FDSNevt("201103110547", "PB.B004..EH?,PB.B004..BS?,PB.B001..BS?,PB.B001..EH?", v=0)

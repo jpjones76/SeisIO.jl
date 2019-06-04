@@ -21,7 +21,7 @@ for i = 1:Ev.data.n
   inds = rand(1:L, div(L,2))
   Ev.data.x[i][inds] .= NaN
 end
-nanfill!(Ev)
+nanfill!(Ev.data)
 for i = 1:Ev.data.n
   x = getindex(getfield(getfield(Ev, :data), :x), i)
   @test isempty(findall(isnan.(x)))
@@ -61,13 +61,9 @@ for i = 1:S.n
 end
 
 # Test that ungap calls nanfill properly
-Ev2 = ungap(Ev, tap=true)
-ungap!(Ev, tap=true)
-for f in SeisIO.datafields
-  if f != :notes
-    @test getfield(Ev.data,f) == getfield(Ev2.data,f)
-  end
-end
+Ev2 = ungap(Ev.data, tap=true)
+ungap!(Ev.data, tap=true)
+@test Ev.data == Ev2
 ungap!(C, tap=true)
 ungap!(S, tap=true)
 
@@ -78,5 +74,5 @@ Ev.data.x[1] = rand(1024)
 Ev.data.t[1] = vcat(Ev.data.t[1][1:1,:], [5 2*ceil(S.fs[1])*sμ], [8 2*ceil(S.fs[1])*sμ], [1024 0])
 
 redirect_stdout(out) do
-  ungap!(Ev)
+  ungap!(Ev.data)
 end

@@ -281,7 +281,7 @@ te₆ = S.t[1][1,2] + round(Int, 1.0e6*nx/fs)
 ds₆ = u2d(ts₆*1.0e-6)
 de₆ =  u2d(te₆*1.0e-6)
 Ev = SeisEvent(hdr = randSeisHdr(), data = deepcopy(S))
-sync!(Ev, s=ds₆)
+sync!(Ev.data, s=ds₆)
 W = Ev.data
 basic_checks(W)
 ts_new, te_new = get_edge_times(W)
@@ -296,7 +296,7 @@ end
 @test findfirst(ts_new .== ts₆).== 1          # Defined start time
 
 Ev = SeisEvent(hdr = randSeisHdr(), data = deepcopy(S))
-W = sync(Ev, s=ds₆).data
+W = sync(Ev.data, s=ds₆)
 basic_checks(W)
 ts_new, te_new = get_edge_times(W)
 wx = Lx(W)

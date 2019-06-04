@@ -3,11 +3,11 @@ segy_file_2 = string(path, "/SampleFiles/Restricted/test_rev_1.segy")
 
 printstyled("  SEG Y\n", color=:light_green)
 printstyled("    PASSCAL/NMT SEG Y\n", color=:light_green)
-SEG = readsegy(segy_file_1, passcal=true, full=true)
+SEG = read_data("passcal", segy_file_1, full=true)
 
 printstyled("      header integrity\n", color=:light_green)
 
-SEG = readsegy(segy_file_1, passcal=true, full=true)
+SEG = read_data("passcal", segy_file_1, full=true)
 @test SEG.gain[1] == SEG.misc[1]["scale_fac"] == 4.80184e+08
 @test SEG.fs[1] == 100.0 == 1.0e6 / SEG.misc[1]["delta"]
 @test lastindex(SEG.x[1]) == 8640047
@@ -66,7 +66,7 @@ end
 
 printstyled("    wildcard support\n", color=:light_green)
 segfpat = joinpath(path, "SampleFiles/*PASSCAL*segy")
-SEG = readsegy(segfpat, passcal=true, full=true)
+SEG = read_data("passcal", segfpat, full=true)
 @test S.n == 1
 @test Float64(SEG.misc[1]["max"]) == maximum(SEG.x[1]) == 2047.0
 @test Float64(SEG.misc[1]["min"]) == minimum(SEG.x[1]) == -2048.0
@@ -75,7 +75,7 @@ SEG = readsegy(segfpat, passcal=true, full=true)
 
 if safe_isfile(segy_file_2)
  printstyled("    SEG Y rev 1\n", color=:light_green)
-  SEG = readsegy(segy_file_2)
+  SEG = read_data("segy", segy_file_2)
   redirect_stdout(out) do
     segyhdr(segy_file_2)
   end

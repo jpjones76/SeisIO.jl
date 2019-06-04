@@ -1,9 +1,9 @@
 # Locs
 printstyled("  InstrumentPosition\n", color=:light_green)
 redirect_stdout(out) do
-  L = GenLoc{Float32}(); show(stdout, L)
+  L = GenLoc(); show(stdout, L)
   @test isempty(L) == true
-  @test hash(L) == hash(GenLoc{Float32}())
+  @test hash(L) == hash(GenLoc())
 
   L = GenLoc(rand(Float64,12))
   @test getindex(L, 10) == getindex(L.loc, 10)
@@ -78,17 +78,6 @@ printstyled("  PhaseCat\n", color=:light_green)
 P = PhaseCat()
 @test isequal(PhaseCat(), P)
 
-# disk i/o
-wrote_Pha = randPhaseCat()
-open("phasecat.txt", "w") do fio
-  write(fio, wrote_Pha)
-end
-fio = open("phasecat.txt", "r")
-read_Pha = read(fio, PhaseCat)
-close(fio)
-@test read_Pha == wrote_Pha
-rm("phasecat.txt")
-
 # EventChannel, EventTraceData
 printstyled("  EventChannel, EventTraceData\n", color=:light_green)
 EC1 = EventChannel()
@@ -123,7 +112,10 @@ EC2 = EventChannel( az = 180*rand(),
                                                   rand()*100.0,
                                                   rand()*100.0,
                                                   rand()*100.0,
-                                                  'D')),
+                                                  rand()*100.0,
+                                                  rand()*100.0,
+                                                  rand()*100.0,
+                                                  'D', 'F')),
                     resp = GenResp(),
                     src = "foo",
                     t = Array{Int64,2}([1 1000; 2*length(EC1.x) 0]),
@@ -134,7 +126,6 @@ EC2 = EventChannel( az = 180*rand(),
 @test findid(EC1, TD1) == 2 == findid(TD1, EC1)
 @test findid(TD2, EC1) == 0 == findid(EC1, TD2)
 @test sizeof(TD1) > sizeof(EC1) > 136
-@test sizeof(TD2) > sizeof(EC1) > 136
 
 # Cross-Type Tests
 C = randSeisChannel()

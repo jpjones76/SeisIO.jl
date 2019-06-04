@@ -7,7 +7,7 @@ test_start = Dates.now()
 printstyled(stdout, string(test_start, ": tests begin, source_dir = ", path, "/\n"), color=:light_green, bold=true)
 
 # huehuehue grep "include(joinpath" runtests.jl | awk -F "(" '{print $3}' | awk -F "," {'print $1'}
-for d in ["CoreUtils", "Types", "RandSeis", "NativeIO", "DataFormats", "Processing", "Web"]
+for d in ["CoreUtils", "Types", "RandSeis", "NativeIO", "DataFormats", "Processing", "Quake", "Web"]
   printstyled(string(d, "\n"), color=:light_green, bold=true)
   for i in readdir(path*"/"*d)
     if endswith(i, ".jl")

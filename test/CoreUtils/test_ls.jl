@@ -20,18 +20,18 @@ S = [
       "CoreUtils/test_*"
     ]
 S_expect =  [
-              ["test_ls.jl", "test_time.jl"],
+              ["test_ls.jl", "test_time.jl", "test_typ2code.jl"],
               ["test_ls.jl"],
               String[],
               ["99011116541W", "99011116541o"],
               ["99011116541W", "99011116541o"],
-              ["test_ls.jl", "test_time.jl"]
+              ["test_ls.jl", "test_time.jl", "test_typ2code.jl"]
             ]
 
 # Test that ls returns the same files as `ls -1`
 for (n,v) in enumerate(S)
   files = String[splitdir(i)[2] for i in ls(v)]
-  deleteat!(files, findall([endswith(i, "cov") for i in files]))
+  # deleteat!(files, findall([endswith(i, "cov") for i in files]))
   expected = S_expect[n]
   @test files == expected
   [@test isfile(f) for f in ls(v)]
@@ -45,7 +45,7 @@ if safe_isfile(cfile)
                 "/SampleFiles/*",
                 "/SampleFiles/Restricted/2014092709*cnt"
               ]
-  T_expect =  [63, 129, 60]
+  T_expect =  [63, 130, 60]
 
   # Test that ls finds the same number of files as `ls -1`
   for (n,v) in enumerate(T)
