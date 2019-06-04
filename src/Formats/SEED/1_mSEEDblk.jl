@@ -4,7 +4,7 @@
 # [405] Beam Delay Blockette (6 bytes)
 
 # All blockette functions return a UInt16 value equal to blockette length in bytes
-function blk_time!(t::Array{Int32,1}, sid::IOStream, b::Bool)
+function blk_time!(t::Array{Int32,1}, sid::IO, b::Bool)
   yy    = read(sid, UInt16)
   jj    = read(sid, UInt16)
   t[4]  = Int32(read(sid, UInt8))
