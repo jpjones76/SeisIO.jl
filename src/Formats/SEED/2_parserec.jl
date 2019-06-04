@@ -53,7 +53,7 @@ end
 function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64, nx_add::Int64)
   # =========================================================================
   u16 = getfield(BUF, :u16)
-  u8 = getfield(BUF, :u8)
+  flags = getfield(BUF, :flags)
   xi = 0
   te = 0
 
@@ -74,7 +74,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
   BUF.n          = read(sid, UInt16)
   BUF.r1         = read(sid, Int16)
   BUF.r2         = read(sid, Int16)
-  read!(sid, u8)
+  read!(sid, flags)
   BUF.tc         = read(sid, Int32)
   u16[4]          = read(sid, UInt16)
   u16[5]          = read(sid, UInt16)
@@ -154,7 +154,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
 
   nsk = u16[4] - 0x0030
   u16[6] = u16[5] - 0x0030
-  nblk = u8[4]
+  nblk = flags[4]
   v > 2 && println(string("Blockettes to read: ", nblk))
   @inbounds for i = 0x01:0x01:nblk
 
@@ -259,7 +259,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
     # Update S.t[c]
 
     # Check for time correction
-    is_tc = u8[2] >> 1 & 0x01
+    is_tc = flags[2] >> 1 & 0x01
     tc = getfield(BUF, :tc)
     if is_tc == false && tc != zero(Int32)
       δt = Int64(tc)*100
