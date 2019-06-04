@@ -1,4 +1,4 @@
-export ls, regex_find
+export ls, regex_find, safe_isdir, safe_isfile
 
 # safe_isfile, safe_isdir adapted from https://github.com/JuliaPackaging/BinaryProvider.jl/commit/08a314a225206a68665c6f730d7c3feeda1ba615
 # Temporary hack around https://github.com/JuliaLang/julia/issues/26685
