@@ -5,10 +5,6 @@ Utility Functions
 #################
 This appendix covers utility functions that belong in no other category.
 
-.. function:: distaz!(Ev::SeisEvent)
-
-Fill Ev with great-circle distance, azimuth, and back-azimuth for each channel. Writes to evt.data.misc.
-
 .. function:: d2u(DT::DateTime)
 
 Aliased to ``Dates.datetime2unix``.
@@ -22,10 +18,6 @@ Convert critical frequency ``fc`` to a matrix of complex poles and zeros; zeros 
 .. function:: find_regex(path::String, r::Regex)
 
 OS-agnostic equivalent to Linux `find`. First argument is a path string, second is a Regex. File strings are postprocessed using Julia's native PCRE Regex engine. By design, `find_regex` only returns file names.
-
-.. function:: (dist, az, baz) = gcdist([lat_src, lon_src], rec)
-
-Compute great circle distance, azimuth, and backazimuth from source coordinates ``[lat_src, lon_src]`` to receiver coordinates in ``rec`` using the Haversine formula. ``rec`` must be a two-column matix arranged [lat lon]. Returns a tuple of arrays.
 
 .. function:: getbandcode(fs, fc=FC)
 
@@ -70,39 +62,3 @@ Alias to ``Dates.unix2datetime``.
 function:: w_time(W::Array{Int64,2}, fs::Float64)
 
 Convert matrix W from time windows (w[:,1]:w[:,2]) in integer μs from the Unix epoch (1970-01-01T00:00:00) to sparse delta-encoded time representation. Specify fs in Hz.
-
-********
-RandSeis
-********
-This submodule is used to quickly generate SeisIO structures with quasi-random
-field contents. Access it by typing "using SeisIO.RandSeis"
-
-* Channels have SEED-compliant IDs, sampling frequencies, and data types.
-* Channel data are randomly generated.
-* Some time gaps are automatically inserted into regularly-sampled data.
-* Instrument location parameters are randomly set.
-
-.. function:: C = randSeisChannel([,c=false, s=false])
-
-Generate a SeisChannel of random data. Specify c=true for campaign-style (irregularly-sampled) data (fs = 0.0); specify s=true to guarantee seismic data. s=true overrides c=true.
-
-.. function randSeisData([, c=0.2, s=0.6])
-
-Generate 8 to 24 channels of random seismic data as a SeisData object.
-
-* 100*c% of channels *after the first* will have irregularly-sampled data (fs = 0.0)
-* 100*s% of channels *after the first* are guaranteed to have seismic data.
-
-  randSeisData(N[, c=0.2, s=0.6])
-
-Generate N channels of random seismic data as a SeisData object.
-
-.. function:: randSeisEvent([, c=0.2, s=0.6])
-
-Generate a SeisEvent structure filled with random values.
-* 100*c% of channels *after the first* will have irregularly-sampled data (fs = 0.0)
-* 100*s% of channels *after the first* are guaranteed to have seismic data.
-
-.. function:: H = randSeisHdr()
-
-Generate a SeisHdr structure filled with random values.

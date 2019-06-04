@@ -115,11 +115,21 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Processing/processing.html">Data Processing Functions</a></li>
 </ul>
+<p class="caption"><span class="caption-text">Submodules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Submodules/quake.html">Quake</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Submodules/randseis.html">RandSeis</a></li>
+</ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/function_list.html">Utility Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisdata_fields.html">Structure and Field Descriptions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisdata_fileformat.html">SeisIO File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html">SeisIO Write Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#simple-object-types">Simple Object Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#location-types">Location Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#response-types">Response Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#the-misc-dictionary">The Misc Dictionary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#compound-object-types">Compound Object Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#data-type-codes">Data Type Codes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/web_syntax.html">Data Requests Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/keywords.html">SeisIO Standard Keywords</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/examples.html">Examples</a></li>
@@ -413,17 +423,19 @@ programming language.</p>
 <p><a class="reference external" href="http://wiki.seg.org/wiki/SEG_Y">SEG Y</a>: Society of Exploration Geophysicists
 data format. Common in the energy industry, developed and maintained by the SEG.
 Only SEG Y rev 0 and <a class="reference external" href="https://seg.org/Portals/0/SEG/News%20and%20Resources/Technical%20Standards/seg_y_rev1.pdf">rev 1</a>
-with standard headers are supported.</p>
+with standard headers are supported. Note that IBM Float support is not yet
+implemented.</p>
 <p><strong>UW</strong>: the University of Washington data format has no online reference and is
 no longer in use. Created by the Pacific Northwest Seismic Network for event
-archival; used through the early 2000s. A UW event is described by a pickfile
-and a corresponding data file, whose names are identical except for the last
-character; for example, the files 99062109485o and 99062109485W
-describe event 99062109485. Unlike the win32 data format, the data file is
-self-contained; the pick file is not required to use raw trace data. Only UW-2
-data files are supported by SeisIO; we have never encountered a UW-1 data file
-outside of Exabyte tapes and have no reason to suspect that any remain in
-circulation.</p>
+archival; used from the 1970s through early 2000s. A UW event is described by a
+pickfile and corresponding data file, whose names are identical except for the
+last character; for example, files 99062109485o and 99062109485W describe event
+99062109485. Unlike the win32 data format, the data file is self-contained; the
+pick file is not required to use raw trace data. However, like the win32 data
+format, instrument locations are stored in an external human-maintained text
+file. Only UW-2 data files are supported by SeisIO; we have never encountered a
+UW-1 data file outside of Exabyte tapes and have no reason to suspect that any
+remain in circulation.</p>
 <p><a class="reference external" href="http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html">Win32</a>: data format developed
 by the NIED (National Research Institute for Earth Science and Disaster Prevention),
 Japan.  Data are typically divided into files that contain a minute of continuous
@@ -436,13 +448,6 @@ particularly gains, are known to exist.</p>
 </div>
 <div class="section" id="other-file-i-o-functions">
 <h2>Other File I/O Functions<a class="headerlink" href="#other-file-i-o-functions" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt id="readuwevt">
-<code class="descname">readuwevt</code><span class="sig-paren">(</span><em>fpat</em><span class="sig-paren">)</span><a class="headerlink" href="#readuwevt" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<p>Read University of Washington-format event data with file pattern stub fpat.
-fstub can be a datafile name, a pickname, or a stub.</p>
 <dl class="function">
 <dt id="rseis">
 <code class="descname">rseis</code><span class="sig-paren">(</span><em>fname</em><span class="sig-paren">)</span><a class="headerlink" href="#rseis" title="Permalink to this definition">¶</a></dt>
@@ -467,18 +472,6 @@ fstub can be a datafile name, a pickname, or a stub.</p>
 <dd></dd></dl>
 
 <p>Parse UW event data file <code class="docutils literal notranslate"><span class="pre">dfname</span></code> into a new SeisEvent structure.</p>
-<dl class="function">
-<dt>
-<code class="descname">uwpf!(evt, pfname)</code></dt>
-<dd></dd></dl>
-
-<p>Parse UW event pick file into SeisEvent structure.</p>
-<dl class="function">
-<dt id="uwpf">
-<code class="descname">uwpf</code><span class="sig-paren">(</span><em>pfname</em><span class="sig-paren">)</span><a class="headerlink" href="#uwpf" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<p>Parse UW event pick file <code class="docutils literal notranslate"><span class="pre">pfname</span></code> into a new SeisEvent structure.</p>
 <dl class="function">
 <dt id="writesac">
 <code class="descname">writesac</code><span class="sig-paren">(</span><em>S</em><span class="optional">[</span>, <em>ts=true</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#writesac" title="Permalink to this definition">¶</a></dt>

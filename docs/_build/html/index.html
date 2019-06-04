@@ -102,11 +102,21 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="src/Processing/processing.html">Data Processing Functions</a></li>
 </ul>
+<p class="caption"><span class="caption-text">Submodules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="src/Submodules/quake.html">Quake</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Submodules/randseis.html">RandSeis</a></li>
+</ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="src/Appendices/function_list.html">Utility Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisdata_fields.html">Structure and Field Descriptions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisdata_fileformat.html">SeisIO File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html">SeisIO Write Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#simple-object-types">Simple Object Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#location-types">Location Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#response-types">Response Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#the-misc-dictionary">The Misc Dictionary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#compound-object-types">Compound Object Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#data-type-codes">Data Type Codes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="src/Appendices/web_syntax.html">Data Requests Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="src/Appendices/keywords.html">SeisIO Standard Keywords</a></li>
 <li class="toctree-l1"><a class="reference internal" href="src/Appendices/examples.html">Examples</a></li>
@@ -256,27 +266,76 @@
 </ul>
 </div>
 </div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Submodules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="src/Submodules/quake.html">Quake</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/Submodules/quake.html#types">Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Submodules/quake.html#web-queries">Web Queries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Submodules/quake.html#quakeml-reader">QuakeML Reader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Submodules/quake.html#file-readers">File Readers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Submodules/quake.html#utility-functions">Utility Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src/Submodules/randseis.html">RandSeis</a></li>
+</ul>
+</div>
+</div>
 <div class="section" id="appendices">
 <h2>Appendices<a class="headerlink" href="#appendices" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="src/Appendices/function_list.html">Utility Functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="src/Appendices/function_list.html#randseis">RandSeis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/function_list.html">Utility Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html">SeisIO Write Formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#seisio-file">SeisIO File</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisdata_fields.html">Structure and Field Descriptions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisdata_fields.html#seischannel-fields">SeisChannel Fields</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisdata_fields.html#seisdata-fields">SeisData Fields</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisdata_fields.html#seishdr-fields">SeisHdr Fields</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisdata_fields.html#seisevent-fields">SeisEvent Fields</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#simple-object-types">Simple Object Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#eqloc">EQLoc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#eqmag">EQMag</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#seispha">SeisPha</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#sourcetime">SourceTime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#stringvec">StringVec</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisdata_fileformat.html">SeisIO File Format</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisdata_fileformat.html#file-header">File header</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisdata_fileformat.html#seishdr">SeisHdr</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisdata_fileformat.html#seisdata">SeisData</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisdata_fileformat.html#seisevent">SeisEvent</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#location-types">Location Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#genloc">GenLoc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#geoloc">GeoLoc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#utmloc">UTMLoc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#xyloc">XYLoc</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#response-types">Response Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#genresp">GenResp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#pzresp">PZResp</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#the-misc-dictionary">The Misc Dictionary</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#misc">Misc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#string-array-c-0x81">String Array (c == 0x81)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#other-array-c-0x80-or-c-0x81">Other Array (c == 0x80 or c &gt; 0x81)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#string-c-0x01">String (c == 0x01)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#bits-type-c-0x00-or-0x01-c-0x7f">Bits Type (c == 0x00 or 0x01 &lt; c &lt; 0x7f)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#compound-object-types">Compound Object Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#phasecat">PhaseCat</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#eventchannel">EventChannel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#seischannel">SeisChannel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#eventtracedata">EventTraceData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#seisdata">SeisData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#seishdr">SeisHdr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#seissrc">SeisSrc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#seisevent">SeisEvent</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#data-type-codes">Data Type Codes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#loc-type-codes">Loc Type Codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#resp-type-codes">Resp Type Codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#other-type-codes">Other Type Codes</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="src/Appendices/web_syntax.html">Data Requests Syntax</a><ul>

@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Utility Functions" href="../Appendices/function_list.html" />
+    <link rel="next" title="Quake" href="../Submodules/quake.html" />
     <link rel="prev" title="SeedLink" href="../Web/seedlink.html" /> 
 </head>
 
@@ -113,16 +113,30 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#synchronize">Synchronize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#synchronize">Synchronize</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#specifying-start-time-s">Specifying start time (s)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specifying-end-time-t">Specifying end time (t)</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#other-processing-functions">Other Processing Functions</a></li>
 </ul>
 </li>
 </ul>
+<p class="caption"><span class="caption-text">Submodules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Submodules/quake.html">Quake</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Submodules/randseis.html">RandSeis</a></li>
+</ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/function_list.html">Utility Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisdata_fields.html">Structure and Field Descriptions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisdata_fileformat.html">SeisIO File Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html">SeisIO Write Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#simple-object-types">Simple Object Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#location-types">Location Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#response-types">Response Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#the-misc-dictionary">The Misc Dictionary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#compound-object-types">Compound Object Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#data-type-codes">Data Type Codes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/web_syntax.html">Data Requests Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/keywords.html">SeisIO Standard Keywords</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/examples.html">Examples</a></li>
@@ -410,6 +424,8 @@ start time in S.</p>
 <p>Synchronize all data in S to start at <cite>ST</cite> and terminate at <cite>EN</cite> with verbosity level VV.</p>
 <p>For regularly-sampled channels, gaps between the specified and true times
 are filled with the mean; this isn’t possible with irregularly-sampled data.</p>
+<div class="section" id="specifying-start-time-s">
+<h3>Specifying start time (s)<a class="headerlink" href="#specifying-start-time-s" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>s=”last”: (Default) sync to the last start time of any channel in <cite>S</cite>.</li>
 <li>s=”first”: sync to the first start time of any channel in <cite>S</cite>.</li>
@@ -417,6 +433,9 @@ are filled with the mean; this isn’t possible with irregularly-sampled data.</
 <li>A DateTime is treated as a DateTime. (see Dates.DateTime for details.)</li>
 <li>Any string other than “last” or “first” is parsed as a DateTime.</li>
 </ul>
+</div>
+<div class="section" id="specifying-end-time-t">
+<h3>Specifying end time (t)<a class="headerlink" href="#specifying-end-time-t" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>t=”none”: (Default) end times are not synchronized.</li>
 <li>t=”last”: synchronize all channels to end at the last end time in <cite>S</cite>.</li>
@@ -429,6 +448,7 @@ are filled with the mean; this isn’t possible with irregularly-sampled data.</
 <dd></dd></dl>
 
 <p>Merge multiple SeisData structures into S.</p>
+</div>
 </div>
 <div class="section" id="other-processing-functions">
 <h2>Other Processing Functions<a class="headerlink" href="#other-processing-functions" title="Permalink to this headline">¶</a></h2>
@@ -457,7 +477,7 @@ non-NAN data in <strong>S.x[i]</strong>. If <strong>m=false</strong>, gaps are f
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../Appendices/function_list.html" class="btn btn-neutral float-right" title="Utility Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../Submodules/quake.html" class="btn btn-neutral float-right" title="Quake" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="../Web/seedlink.html" class="btn btn-neutral float-left" title="SeedLink" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

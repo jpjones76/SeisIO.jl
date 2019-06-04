@@ -35,8 +35,8 @@
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Structure and Field Descriptions" href="seisdata_fields.html" />
-    <link rel="prev" title="Data Processing Functions" href="../Processing/processing.html" /> 
+    <link rel="next" title="SeisIO Write Formats" href="seisio_file_format.html" />
+    <link rel="prev" title="RandSeis" href="../Submodules/randseis.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -103,14 +103,21 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Processing/processing.html">Data Processing Functions</a></li>
 </ul>
+<p class="caption"><span class="caption-text">Submodules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../Submodules/quake.html">Quake</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Submodules/randseis.html">RandSeis</a></li>
+</ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Utility Functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#randseis">RandSeis</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="seisdata_fields.html">Structure and Field Descriptions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="seisdata_fileformat.html">SeisIO File Format</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Utility Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html">SeisIO Write Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html#simple-object-types">Simple Object Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html#location-types">Location Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html#response-types">Response Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html#the-misc-dictionary">The Misc Dictionary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html#compound-object-types">Compound Object Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html#data-type-codes">Data Type Codes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="web_syntax.html">Data Requests Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="keywords.html">SeisIO Standard Keywords</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
@@ -182,12 +189,6 @@
 <span id="function-list"></span><h1>Utility Functions<a class="headerlink" href="#utility-functions" title="Permalink to this headline">¶</a></h1>
 <p>This appendix covers utility functions that belong in no other category.</p>
 <dl class="function">
-<dt>
-<code class="descname">distaz!(Ev::SeisEvent)</code></dt>
-<dd></dd></dl>
-
-<p>Fill Ev with great-circle distance, azimuth, and back-azimuth for each channel. Writes to evt.data.misc.</p>
-<dl class="function">
 <dt id="d2u">
 <code class="descname">d2u</code><span class="sig-paren">(</span><em>DT::DateTime</em><span class="sig-paren">)</span><a class="headerlink" href="#d2u" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -206,12 +207,6 @@
 <dd></dd></dl>
 
 <p>OS-agnostic equivalent to Linux <cite>find</cite>. First argument is a path string, second is a Regex. File strings are postprocessed using Julia’s native PCRE Regex engine. By design, <cite>find_regex</cite> only returns file names.</p>
-<dl class="function">
-<dt>
-<code class="descname">(dist, az, baz) = gcdist([lat_src, lon_src], rec)</code></dt>
-<dd></dd></dl>
-
-<p>Compute great circle distance, azimuth, and backazimuth from source coordinates <code class="docutils literal notranslate"><span class="pre">[lat_src,</span> <span class="pre">lon_src]</span></code> to receiver coordinates in <code class="docutils literal notranslate"><span class="pre">rec</span></code> using the Haversine formula. <code class="docutils literal notranslate"><span class="pre">rec</span></code> must be a two-column matix arranged [lat lon]. Returns a tuple of arrays.</p>
 <dl class="function">
 <dt id="getbandcode">
 <code class="descname">getbandcode</code><span class="sig-paren">(</span><em>fs</em>, <em>fc=FC</em><span class="sig-paren">)</span><a class="headerlink" href="#getbandcode" title="Permalink to this definition">¶</a></dt>
@@ -264,46 +259,6 @@ Expected string format is “yyyy-mm-ddTHH:MM:SS.nnn”, e.g. 2016-03-23T11:17:0
 <p>Alias to <code class="docutils literal notranslate"><span class="pre">Dates.unix2datetime</span></code>.</p>
 <p>function:: w_time(W::Array{Int64,2}, fs::Float64)</p>
 <p>Convert matrix W from time windows (w[:,1]:w[:,2]) in integer μs from the Unix epoch (1970-01-01T00:00:00) to sparse delta-encoded time representation. Specify fs in Hz.</p>
-<div class="section" id="randseis">
-<h2>RandSeis<a class="headerlink" href="#randseis" title="Permalink to this headline">¶</a></h2>
-<p>This submodule is used to quickly generate SeisIO structures with quasi-random
-field contents. Access it by typing “using SeisIO.RandSeis”</p>
-<ul class="simple">
-<li>Channels have SEED-compliant IDs, sampling frequencies, and data types.</li>
-<li>Channel data are randomly generated.</li>
-<li>Some time gaps are automatically inserted into regularly-sampled data.</li>
-<li>Instrument location parameters are randomly set.</li>
-</ul>
-<dl class="function">
-<dt>
-<code class="descname">C = randSeisChannel([,c=false, s=false])</code></dt>
-<dd></dd></dl>
-
-<p>Generate a SeisChannel of random data. Specify c=true for campaign-style (irregularly-sampled) data (fs = 0.0); specify s=true to guarantee seismic data. s=true overrides c=true.</p>
-<p>Generate 8 to 24 channels of random seismic data as a SeisData object.</p>
-<ul>
-<li><p class="first">100*c% of channels <em>after the first</em> will have irregularly-sampled data (fs = 0.0)</p>
-</li>
-<li><p class="first">100*s% of channels <em>after the first</em> are guaranteed to have seismic data.</p>
-<p>randSeisData(N[, c=0.2, s=0.6])</p>
-</li>
-</ul>
-<p>Generate N channels of random seismic data as a SeisData object.</p>
-<dl class="function">
-<dt id="randSeisEvent">
-<code class="descname">randSeisEvent</code><span class="sig-paren">(</span><span class="optional">[</span><em>c=0.2</em>, <em>s=0.6</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#randSeisEvent" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<p>Generate a SeisEvent structure filled with random values.
-* 100*c% of channels <em>after the first</em> will have irregularly-sampled data (fs = 0.0)
-* 100*s% of channels <em>after the first</em> are guaranteed to have seismic data.</p>
-<dl class="function">
-<dt>
-<code class="descname">H = randSeisHdr()</code></dt>
-<dd></dd></dl>
-
-<p>Generate a SeisHdr structure filled with random values.</p>
-</div>
 </div>
 
 
@@ -314,10 +269,10 @@ field contents. Access it by typing “using SeisIO.RandSeis”</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="seisdata_fields.html" class="btn btn-neutral float-right" title="Structure and Field Descriptions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="seisio_file_format.html" class="btn btn-neutral float-right" title="SeisIO Write Formats" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../Processing/processing.html" class="btn btn-neutral float-left" title="Data Processing Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../Submodules/randseis.html" class="btn btn-neutral float-left" title="RandSeis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

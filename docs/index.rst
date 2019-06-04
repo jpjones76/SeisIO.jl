@@ -48,6 +48,16 @@ Processing
   src/Processing/processing.rst
 
 **********
+Submodules
+**********
+.. toctree::
+  :caption: Submodules
+  :maxdepth: 2
+
+  src/Submodules/quake.rst
+  src/Submodules/randseis.rst
+
+**********
 Appendices
 **********
 .. toctree::
@@ -55,8 +65,7 @@ Appendices
    :maxdepth: 2
 
    src/Appendices/function_list.rst
-   src/Appendices/seisdata_fields.rst
-   src/Appendices/seisdata_fileformat.rst
+   src/Appendices/seisio_file_format.rst
    src/Appendices/web_syntax.rst
    src/Appendices/keywords.rst
    src/Appendices/examples.rst
