@@ -31,6 +31,24 @@ function checkbuf!(buf::AbstractArray, nx::T) where {T<:Integer}
   end
 end
 
+function checkbuf_strict!(buf::AbstractArray, nx::T) where {T<:Integer}
+  if nx != lastindex(buf)
+    resize!(buf, nx)
+  end
+end
+
+# ensures length(buf) is divisible by 8
+function checkbuf_8!(buf::Array{UInt8,1}, n::Integer)
+  if div(n, 8) == 0
+    nx = n
+  else
+    nx = n + 8 - rem(n,8)
+  end
+  if nx > lastindex(buf)
+    resize!(buf, nx)
+  end
+end
+
 function fillx_i4!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::Int64)
   j = os
   i = 0
