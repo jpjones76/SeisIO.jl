@@ -1,5 +1,4 @@
 convert(::Type{EventTraceData}, C::EventChannel) = EventTraceData(C)
-convert(::Type{SeisData}, C::SeisChannel) = SeisData(C)
 
 function convert(::Type{EventTraceData}, S::SeisData)
   TD = EventTraceData(getfield(S, :n))
@@ -35,4 +34,24 @@ function convert(::Type{EventChannel}, C::SeisChannel)
     setfield!(D, f, deepcopy(getfield(C, f)))
   end
   return D
+end
+
+function unsafe_convert(::Type{SeisData}, TD::EventTraceData)
+  S = SeisData(getfield(TD, :n))
+  for f in datafields
+    if (f in unindexed_fields) == false
+      setfield!(S, f, getfield(TD, f))
+    end
+  end
+  return S
+end
+
+function unsafe_convert(::Type{EventTraceData}, S::SeisData)
+  TD = EventTraceData(getfield(S, :n))
+  for f in datafields
+    if (f in unindexed_fields) == false
+      setfield!(TD, f, getfield(S, f))
+    end
+  end
+  return TD
 end

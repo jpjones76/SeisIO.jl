@@ -1,4 +1,3 @@
-printstyled("  gcdist\n", color=:light_green)
 src = [46.8523, -121.7603]
 src2 = [48.7767, -121.8144]
 rec = [45.5135 -122.6801; 44.0442 -123.0925; 42.3265 -122.8756]
@@ -22,10 +21,12 @@ src = "IRIS"
 sta = "PB.B004..EH?,PB.B004..BS?,PB.B001..BS?,PB.B001..EH?"
 
 # First, a well-formatted string
-H = FDSNevq("2018-11-30T17:29:29.00", nev=1, src="IRIS")[1]
+(H,R) = FDSNevq("2018-11-30T17:29:29.00", nev=1, src="IRIS")
+H = H[1]
 
 # Now, not so hot
-H = FDSNevq("201103110547", mag=[3.0, 9.9], nev=1, src="IRIS")[1]
+(H,R) = FDSNevq("201103110547", mag=[3.0, 9.9], nev=1, src="IRIS")
+H = H[1]
 
 # Create channel data
 s = H.ot                                      # Start time for FDSNsta is event origin time
@@ -47,7 +48,7 @@ Ev = SeisEvent(hdr=H, data=S[1:1])
 get_pha!(Ev, pha="P,S", to=to)
 @test length(Ev.data.pha[1]) == 2
 println("")
-show(Ev.data.pha[1])
+show_phases(Ev.data.pha[1])
 println("")
 
 printstyled("    request styles that return all phases\n", color=:light_green)
@@ -100,5 +101,5 @@ for i = 1:Ev.data.n
   @test haskey(Ev.data.pha[i], "PP")
 end
 println("")
-show(Ev.data.pha[1])
+show_phases(Ev.data.pha[1])
 println("")

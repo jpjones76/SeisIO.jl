@@ -1,6 +1,7 @@
 __precompile__()
 module SeisIO
 using Blosc, Dates, DSP, LightXML, LinearAlgebra, Printf, Sockets
+using DelimitedFiles: readdlm
 using FFTW: fft, ifft
 using Glob: glob
 using HTTP: request, Messages.statustext
@@ -19,19 +20,19 @@ include("CoreUtils/ls.jl")
 include("CoreUtils/time.jl")
 include("CoreUtils/namestrip.jl")
 include("CoreUtils/type2code.jl")
+include("CoreUtils/file_io.jl")
 
 # =========================================================
 # Types and methods
 # DO NOT CHANGE ORDER OF INCLUSIONS
 
-# Back-end
+# Back-end types
 include("Types/KWDefs.jl")
 include("Types/SeisIOBuf.jl")
 
 # Prereqs for custom types
 include("Types/InstPosition.jl")
 include("Types/InstResp.jl")
-include("Types/SeisPha.jl")
 
 # Abstract types
 include("Types/GphysData.jl")
@@ -40,10 +41,6 @@ include("Types/GphysChannel.jl")
 # Custom types
 include("Types/SeisData.jl")
 include("Types/SeisChannel.jl")
-include("Types/EventTraceData.jl")
-include("Types/EventChannel.jl")
-include("Types/SeisHdr.jl")
-include("Types/SeisEvent.jl")
 
 for i in readdir(path*"/Types/Methods")
   if endswith(i, ".jl")
@@ -53,15 +50,17 @@ end
 
 # =========================================================
 # Utilities that may require SeisIO types to work
-for i in readdir(path*"/Utils")
-  include(joinpath("Utils",i))
+for i in ls(path*"/Utils/")
+  if endswith(i, ".jl")
+    include(i)
+  end
 end
 
 # =========================================================
 # Data processing operations
 for i in ls(path*"/Processing/*")
   if endswith(i, ".jl")
-    include(joinpath("Processing",i))
+    include(i)
   end
 end
 
@@ -69,28 +68,37 @@ end
 # Data formats
 for i in ls(path*"/Formats/*")
   if endswith(i, ".jl")
-    include(joinpath("Formats",i))
+    include(i)
   end
 end
 
 # =========================================================
 # Web clients
-for i in ls(path*"/Web/*")
+for i in ls(path*"/Web/")
   if endswith(i, ".jl")
-    include(joinpath("Formats",i))
+    include(i)
   end
 end
 
 # =========================================================
 # Wrappers
-for i in ls(path*"/Wrappers/*")
+for i in ls(path*"/Wrappers/")
   if endswith(i, ".jl")
-    include(joinpath("Wrappers",i))
+    include(i)
   end
 end
 
 # =========================================================
-# The RandSeis submodule
+# Submodules
+include("Quake/Quake.jl")
 include("RandSeis/RandSeis.jl")
 
+# We need these types for the native file format
+using .Quake: EQLoc, EQMag, EventChannel, EventTraceData, PhaseCat, SeisEvent, SeisHdr, SeisPha, SeisSrc, SourceTime
+
+# Last steps
+include("Last/splat.jl")
+include("Last/native_file_io.jl")
+
+# Module ends
 end
