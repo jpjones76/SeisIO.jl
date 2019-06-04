@@ -1,22 +1,32 @@
-export gcdist
-
 gc_ctr(lat::Array{Float64,1}, lon::Array{Float64,1}) =  (atan.(tan.(deg2rad.(lat)).*0.9933056), deg2rad.(lon))
 gc_unwrap!(t::Array{Float64,1}) = (t[t .< 0] .+= (2.0*Float64(π)); return t)
 
-"""
+@doc """
     G = gcdist(src, rec)
 
   Compute great circle distance, azimuth, and backazimuth from single source `s`
 with coordinates `[s_lat, s_lon]` to receivers `r` with coordinates `[r_lat r_lon].`
-Returns an Array{Float64,2} of the form
+
+  For a single source, pass `src` as a Float64 vector of the form `[s_lat, s_lon]`;
+gcdist will return an Array{Float64,2} of the form
 
     [Δ₁   θ₁   β₁
      Δ₂   θ₂   β₂
      ⋮    ⋮    ⋮
      Δn   θn   βn]
 
-for receivers 1:n.
-"""
+for receivers `1:n`.
+
+  For multiple sources, pass `src` as an Array{Float64,2} with each row
+containing one (lat, lon) pair. This returns a three-dimensional matrix where
+each two-dimensional slice takes the form
+
+      [Δᵢ₁   θᵢ₁   βᵢ₁
+       ⋮     ⋮     ⋮
+       Δᵢn   θᵢn   βᵢn]
+
+for source `i` at receivers `1:n`.
+""" gcdist
 function gcdist(src::Array{Float64,1}, rec::Array{Float64,2})
   N = size(rec, 1)
   lat_src = repeat([src[1]], N)
@@ -40,19 +50,6 @@ end
 gcdist(lat0::Float64, lon0::Float64, rec::Array{Float64,2}) = gcdist([lat0, lon0], rec)
 gcdist(lat0::Float64, lon0::Float64, lat1::Float64, lon1::Float64) = gcdist([lat0, lon0], [lat1 lon1])
 
-"""
-    G = gcdist(s, r)
-
-  Compute great circle distance, azimuth, and backazimuth from sources `s`
-with coordinates `[s_lat s_lon]` to receivers `r` with coordinates
-`[r_lat r_lon].` Each two-dimensional slice has the form
-
-    [Δᵢ₁   θᵢ₁   βᵢ₁
-     ⋮     ⋮     ⋮
-     Δᵢn   θᵢn   βᵢn]
-
-for source i at receivers 1:n.
-"""
 function gcdist(src::Array{Float64,2}, rec::Array{Float64,2})
   N_src = size(src,1)
   N_rec = size(rec,1)
