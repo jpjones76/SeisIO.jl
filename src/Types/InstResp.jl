@@ -1,4 +1,4 @@
-import Base:getindex, setindex!, show, read, write, isequal, ==, isempty, sizeof, copy, hash
+# import Base:getindex, setindex!, show, read, write, isequal, ==, isempty, sizeof, copy, hash
 export InstrumentResponse, GenResp, PZResp, PZResp64
 
 @doc """
@@ -21,9 +21,8 @@ function showresp_full(io::IO, Resp::T) where {T<:InstrumentResponse}
   return nothing
 end
 
-function resptype2code(Resp::InstrumentResponse)
+function resptyp2code(Resp::InstrumentResponse)
   T = typeof(Resp)
-  # println(T)
   c = UInt8(
   if T == PZResp
     0x01
@@ -34,6 +33,16 @@ function resptype2code(Resp::InstrumentResponse)
   end
   )
   return c
+end
+
+function code2resptyp(c::UInt8)
+  if c == 0x00
+    return GenResp
+  elseif c == 0x01
+    return PZResp
+  elseif c == 0x02
+    return PZResp64
+  end
 end
 
 copy(R::T) where {T<:InstrumentResponse} = deepcopy(R)
@@ -105,35 +114,21 @@ function show(io::IO, Resp::GenResp)
   return nothing
 end
 
-function write_resp(io::IO, R::GenResp)
-  s = codeunits(getfield(R, :desc))
-  nu = Int64(length(s))
+function write(io::IO, R::GenResp)
+  write(io, Int64(sizeof(R.desc)))
+  write(io, getfield(R, :desc))
 
-  r = getfield(R, :resp)
-  tc = typ2code(real(eltype(r)))
-  nr, nc = size(r)
-
-  write(io, tc)
-  write(io, nu)
+  nr, nc = size(R.resp)
   write(io, Int64(nr))
   write(io, Int64(nc))
-  write(io, s)
-  write(io, real(r))
-  write(io, imag(r))
+  write(io, getfield(R, :resp))
   return nothing
 end
 
-function readGenResp(io::IO)
-  T = code2typ(read(io, UInt8))
-  nu = read(io, Int64)
-  nr = read(io, Int64)
-  nc = read(io, Int64)
-
-  s = String(read(io, nu))
-  rr = read!(io, Array{T,2}(undef, nr, nc))
-  ri = read!(io, Array{T,2}(undef, nr, nc))
-  return GenResp(s, rr, ri)
-end
+read(io::IO, ::Type{GenResp}) = GenResp(
+  String(read(io, read(io, Int64))),
+  read!(io, Array{Complex{Float64},2}(undef, read(io, Int64), read(io, Int64)))
+  )
 
 isempty(R::GenResp) = min(isempty(R.desc), isempty(R.resp))
 isequal(R1::GenResp, R2::GenResp) = min(isequal(R1.desc, R2.desc), isequal(R1.resp, R2.resp))
@@ -237,38 +232,36 @@ function show(io::IO, Resp::Union{PZResp,PZResp64})
   return nothing
 end
 
-function write_resp(io::IO, R::Union{PZResp,PZResp64})
-  c = getfield(R, :c)
-  z = getfield(R, :z)
+function write(io::IO, R::Union{PZResp,PZResp64})
+  write(io, R.c)
+
   p = getfield(R, :p)
-  write(io, typ2code(typeof(c)))
   write(io, Int64(lastindex(p)))
+  write(io, p)
+
+  z = getfield(R, :z)
   write(io, Int64(lastindex(z)))
-  write(io, c)
-  write(io, real(p))
-  write(io, imag(p))
-  write(io, real(z))
-  write(io, imag(z))
+  write(io, z)
   return nothing
 end
 
-function readPZResp(io::IO)
-  T = code2typ(read(io, UInt8))
-  np = read(io, Int64)
-  nz = read(io, Int64)
-  c = read(io, T)
-  pr = read!(io, Array{T,1}(undef, np))
-  pi = read!(io, Array{T,1}(undef, np))
-  zr = read!(io, Array{T,1}(undef, nz))
-  zi = read!(io, Array{T,1}(undef, nz))
-  if T == Float64
-    return PZResp64(c, pr, pi, zr, zi)
-  else
-    return PZResp(c, pr, pi, zr, zi)
-  end
-end
+read(io::IO, ::Type{PZResp}) = PZResp(
+  read(io, Float32),
+  read!(io, Array{Complex{Float32},1}(undef, read(io, Int64))),
+  read!(io, Array{Complex{Float32},1}(undef, read(io, Int64)))
+  )
 
-isempty(R::Union{PZResp,PZResp64}) = min(R.c == zero(typeof(R.c)), isempty(getfield(R, :p)), isempty(getfield(R, :z)))
+read(io::IO, ::Type{PZResp64}) = PZResp64(
+  read(io, Float64),
+  read!(io, Array{Complex{Float64},1}(undef, read(io, Int64))),
+  read!(io, Array{Complex{Float64},1}(undef, read(io, Int64)))
+  )
+
+isempty(R::Union{PZResp,PZResp64}) = min(
+  R.c == zero(typeof(R.c)),
+  isempty(getfield(R, :p)),
+  isempty(getfield(R, :z))
+  )
 
 function isequal(R1::Union{PZResp,PZResp64}, R2::Union{PZResp,PZResp64})
   q = isequal(getfield(R1, :c), getfield(R2, :c))
