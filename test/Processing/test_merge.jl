@@ -822,3 +822,12 @@ n_targ = 7
 
 # Old: (Test Passed, 1.42978256,  154864097, 0.038663895, Base.GC_Diff(154864097, 109, 0, 1845386, 4165, 0,  38663895, 7, 0))
 # New: (Test Passed, 1.263168574, 128490661, 0.108295874, Base.GC_Diff(128490661,  81, 0, 1324714, 3857, 0, 108295874, 6, 1))
+
+printstyled(stdout,"      purge!\n", color=:light_green)
+(S,T) = mktestseis()
+S.t[5] = Array{Int64,2}(undef,0,2)
+S.x[5] = Array{Float32,1}(undef,0)
+U = purge(S)
+purge!(S)
+@test S == U
+@test S.n == 4
