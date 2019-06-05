@@ -2,7 +2,7 @@
 import SeisIO
 cd(dirname(pathof(SeisIO))*"/../test")
 include("test_helpers.jl")
-keep_log = true
+keep_log = false
 test_start = Dates.now()
 printstyled(stdout, string(test_start, ": tests begin, source_dir = ", path, "/\n"), color=:light_green, bold=true)
 

@@ -1,4 +1,4 @@
-using SeisIO
+using SeisIO, SeisIO.Quake
 import Printf
 # US FDSNget example: 5 stations, 2 networks, all channels, last 600 seconds
 println(stdout, "Beginning real \"use case\" examples...\n\n",
