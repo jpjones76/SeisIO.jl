@@ -1,6 +1,4 @@
 export rseis, wseis
-Blosc.set_compressor("lz4")
-Blosc.set_num_threads(Sys.CPU_THREADS)
 
 # SeisIO file format version changes
 # 0.6   all custom types can use write(); rseis, wseis no longer required
