@@ -6,7 +6,8 @@ using FFTW: fft, ifft
 using Glob: glob
 using HTTP: request, Messages.statustext
 using Statistics: mean
-
+Blosc.set_compressor("lz4")
+Blosc.set_num_threads(Sys.CPU_THREADS)
 path = Base.source_dir()
 
 # DO NOT CHANGE IMPORT ORDER
@@ -19,7 +20,7 @@ include("constants.jl")
 include("CoreUtils/ls.jl")
 include("CoreUtils/time.jl")
 include("CoreUtils/namestrip.jl")
-include("CoreUtils/type2code.jl")
+include("CoreUtils/typ2code.jl")
 include("CoreUtils/file_io.jl")
 
 # =========================================================

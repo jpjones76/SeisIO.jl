@@ -1,13 +1,12 @@
 module Quake
-using Dates, DSP, LightXML, LinearAlgebra, Printf, SeisIO, Sockets
-# using FFTW: fft, ifft
-# using Glob: glob
+using Blosc, Dates, DSP, LightXML, LinearAlgebra, Printf, SeisIO, Sockets
 using HTTP: request, Messages.statustext
-# using Statistics: mean
+Blosc.set_compressor("lz4")
+Blosc.set_num_threads(Sys.CPU_THREADS)
+path = Base.source_dir()
 
 const tracefields = (:az, :baz, :dist, :id, :loc, :fs, :gain, :misc, :name, :notes, :pha, :resp, :src, :t, :units, :x)
 
-path = Base.source_dir()
 
 # imports
 include("imports.jl")
