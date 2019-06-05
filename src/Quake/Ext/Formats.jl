@@ -12,22 +12,26 @@ function writesac(S::SeisEvent; ts::Bool=false, v::Int64=KW.v)
     ift = Int32(1); leven = true
   end
   tdata = Array{Float32}(undef, 0)
-  evt_info = map(Float32, vcat(S.hdr.loc, sac_nul_f, S.hdr.mag[1]))
   t_evt = d2u(S.hdr.ot)
-  evid  = S.hdr.id == 0 ? "-12345  " : String(S.hdr.id)
+  evid  = codeunits(S.hdr.id == "" ? "-12345  " : S.hdr.id)
+  evid  = evid[1:min(length(evid),16)]
   EvL   = length(evid)
   N     = S.data.n
   data  = getfield(S, :data)
   for i = 1:N
-    T = getindex(data, :i)
+    T = getindex(data, i)
     b = T.t[1,2]
     dt = 1.0/T.fs
     (fv, iv, cv, fname) = fill_sac(T, ts, leven)
 
     # Values from event header
-    fv[40:44] = evt_info
+    S.hdr.loc.lat == 0.0 || setindex!(fv, Float32(S.hdr.loc.lat), 40)
+    S.hdr.loc.lon == 0.0 || setindex!(fv, Float32(S.hdr.loc.lon), 41)
+    S.hdr.loc.dep == 0.0 || setindex!(fv, Float32(S.hdr.loc.dep), 42)
+    S.hdr.mag.val == -5.0f0 || setindex!(fv, Float32(S.hdr.mag.val), 44)
     fv[8] = t_evt - b*μs
-    cv[9+EvL:24] = cat(1, codeunits(nn), codeunits(" "^(16-EvL)))
+    cv[9:24] .= 0x20
+    cv[9:EvL+8] .= evid
 
     # Data
     x = map(Float32, T.x)
