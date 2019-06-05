@@ -770,7 +770,7 @@ i = findid(A, S)
 @test ≈(S.t[i][2,1], 1+length(A.x))
 @test ≈(S.t[i][2,2], (5-1/S.fs[i])*1.0e6)
 
-printstyled(stdout,"      common channels and \"splat\" notation\n", color=:light_green)
+printstyled(stdout,"      common channels and \"splat\" notation (mseis!)\n", color=:light_green)
 (S,T) = mktestseis()
 U = merge(S,T)
 sizetest(U, 7)
@@ -784,7 +784,9 @@ mseis!(S,T)
 
 printstyled(stdout,"      mseis! with Types from SeisIO.Quake\n", color=:light_green)
 S = randSeisData()
-mseis!(S, convert(EventChannel, randSeisChannel()),
+mseis!(S,   randSeisChannel(),
+            convert(EventChannel, randSeisChannel()),
+            rand(Float64, 23),  # should warn
             convert(EventTraceData, randSeisData()),
             randSeisEvent())
 
