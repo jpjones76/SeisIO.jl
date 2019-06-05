@@ -1,3 +1,5 @@
+# SeisIO v0.3.0 Release: 2019-06-05
+
 ### 2019-06-04
 #### Bugs, Consistency, Performance
 * writesac with SeisEvent objects works again
