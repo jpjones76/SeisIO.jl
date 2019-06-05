@@ -1,6 +1,11 @@
 printstyled("  convert\n", color=:light_green)
-TD = convert(EventTraceData, EventChannel())
+C = randSeisChannel()
+C1 = convert(EventChannel, C)
+TD = convert(EventTraceData, C1)
 @test sizeof(TD) > 136
+
+C2 = convert(SeisChannel, C)
+@test C == C2
 
 EC = convert(EventChannel, randSeisChannel())
 
