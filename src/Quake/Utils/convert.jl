@@ -55,3 +55,5 @@ function unsafe_convert(::Type{EventTraceData}, S::SeisData)
   end
   return TD
 end
+
+push!(TD::EventTraceData, C::SeisChannel) = push!(TD, convert(EventChannel, C))
