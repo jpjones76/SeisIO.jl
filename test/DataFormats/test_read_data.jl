@@ -21,9 +21,17 @@ files = String[ "99011116541W"                "uw"            "_"
                 "test_be.sac"                 "sac"           "_"
                 "FDSNWS.IRIS.geocsv"          "geocsv"        "_"      ]
 
+checkbuf_8!(buf, 65536)
 checkbuf_8!(buf, 4*(os + nx))
 checkbuf!(x, os + nx)
 
+# test fillx_i16_le!
+y = rand(Int16, nx)
+copyto!(buf, 1, reinterpret(UInt8, y), 1, 2*nx)
+fillx_i16_le!(x, buf, nx, os)
+@test x[1+os:nx+os] == y
+
+# test fillx_i32_le!
 y = rand(Int32, nx)
 copyto!(buf, 1, reinterpret(UInt8, y), 1, 4*nx)
 fillx_i32_le!(x, buf, nx, os)

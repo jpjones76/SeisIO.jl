@@ -44,6 +44,15 @@ C.fs = 100.0
 C.x = rand(Float32, nx)
 resample!(C, 50.0)
 
+C = randSeisChannel()
+C.t = [       1  1559599308051202;
+          29228          46380573;
+         194240                 0]
+C.x = randn(194240)
+C.fs = 40.0
+resample!(C, 10.0)
+@test length(C.x) == 48561 # off by one because of the gap
+
 norm_sz = Array{Float64,2}(undef,N,4)
 printstyled("      trial ", color=:light_green)
 for i = 1:N

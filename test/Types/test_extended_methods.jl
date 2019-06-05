@@ -137,28 +137,17 @@ J = findchan("EHZ",S)
 @test (6 in J)
 
 printstyled(stdout,"    show\n", color=:light_green)
-S = breaking_seis()
-T = randSeisData(1)
-
-
 redirect_stdout(out) do
+  # show
+  show(breaking_seis())
+  show(randSeisData(1))
   show(SeisChannel())
   show(SeisData())
-  show(SeisHdr())
-  show(SeisEvent())
-  show(EventTraceData())
-  show(EventChannel())
-
   show(randSeisChannel())
-  show(S)
-  show(T)
-  show(randSeisHdr())
-  show(randSeisEvent())
 
+  # summary
   summary(randSeisChannel())
   summary(randSeisData())
-  summary(randSeisEvent())
-  summary(randSeisHdr())
 
   # invoke help-only functions
   @test seed_support() == nothing
@@ -183,7 +172,3 @@ S = SeisData(Ch)
 @test findid(Ch, S) == 1
 @test sizeof(Ch) > 0
 @test lastindex(S) == 1
-
-printstyled("  convert\n", color=:light_green)
-TD = convert(EventTraceData, EventChannel())
-sz = sizeof(TD)
