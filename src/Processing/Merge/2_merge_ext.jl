@@ -28,41 +28,6 @@ merge(C::SeisChannel, S::SeisData; v::Int64=KW.v) = merge(SeisData(C), S, v=v)
 merge(C::SeisChannel, D::SeisChannel; v::Int64=KW.v) = (S = SeisData(C,D); merge!(S, v=v))
 
 """
-    mseis!(S::SeisData, U::SeisData, ...)
-
-Merge multiple SeisData structures at once.
-
-See also: merge!
-"""
-function mseis!(S...)
-  U = Union{GphysData, GphysChannel}
-  L = Int64(length(S))
-  (L < 2) && return
-  S1 = getindex(S, 1)
-  (typeof(S1) == SeisData) || error("Target must be a SeisData object!")
-  for i = 2:L
-    T = typeof(getindex(S, i))
-    if (T <: U) == false
-      @warn(string("Object of incompatible type passed to wseis at ", i+1, "; skipped!"))
-      continue
-    end
-    if T == SeisData
-      append!(S1, getindex(S, i))
-    elseif T == EventTraceData
-      append!(S1, convert(SeisData, getindex(S, i)))
-    elseif T == SeisChannel
-      append!(S1, SeisData(getindex(S, i)))
-    # elseif T == EventChannel
-    #   append!(S1, SeisData(convert(SeisChannel, getindex(S, i))))
-    # elseif T == SeisEvent
-    #   append!(S1, convert(SeisData, getfield(getindex(S, i), :data)))
-    end
-  end
-  merge!(S1)
-  return S1
-end
-
-"""
     purge!(S::SeisData)
 
 Remove empty and duplicated channels in S; alias to merge!(S, purge_only=true)
