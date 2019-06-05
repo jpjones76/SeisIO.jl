@@ -1,5 +1,5 @@
 # Merge with EventTraceData
-printstyled(stdout,"      merge! on EventTraceData\n", color=:light_green)
+printstyled(stdout,"  merge! on EventTraceData\n", color=:light_green)
 
 # Test case where we have to merge phase catalogs
 (S,T) = mktestseis()
@@ -36,7 +36,7 @@ V = purge(S)
 purge!(S)
 @test S == V
 
-printstyled(stdout,"      merge! extensions to EventTraceData, EventChannel\n", color=:light_green)
+printstyled(stdout,"  merge! extensions to EventTraceData, EventChannel\n", color=:light_green)
 S = convert(EventTraceData, randSeisData())
 T = deepcopy(S)
 merge!(S)
@@ -46,7 +46,13 @@ sort!(T)
 @test S == T
 
 C = convert(EventChannel, randSeisChannel())
+T = merge(S, C)
 merge!(S, C)
+@test S == T
+
+C = convert(EventChannel, randSeisChannel())
+S = convert(EventTraceData, randSeisData())
+@test merge(C, S) == merge(S, C)
 
 A = EventTraceData[convert(EventTraceData, randSeisData()),
 convert(EventTraceData, randSeisData()),
@@ -59,5 +65,8 @@ T = convert(EventTraceData, randSeisData())
 
 @test S*C == merge(S, EventTraceData(C))
 
+C = convert(EventChannel, randSeisChannel())
 D = convert(EventChannel, randSeisChannel())
 S = merge(C,D)
+@test typeof(S) == EventTraceData
+@test C*D == S
