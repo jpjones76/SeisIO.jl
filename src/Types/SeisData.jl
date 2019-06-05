@@ -198,7 +198,7 @@ function read(io::IO, ::Type{SeisData})
     [read_string_vec(io, Z) for i = 1:N],
     [read!(io, Array{Int64, 2}(undef, getindex(L, i), 2)) for i = 1:N],
     FloatArray[cmp ?
-      Blosc.decompress(getindex(y,i), readbytes!(io, Z, getindex(nx, i))) :
+      (readbytes!(io, Z, getindex(nx, i)); Blosc.decompress(getindex(y,i), Z)) :
       read!(io, Array{getindex(y,i), 1}(undef, getindex(nx, i)))
       for i = 1:N])
 end
@@ -266,10 +266,12 @@ function write(io::IO, S::SeisData)
     x = getindex(X, i)
     nx = lastindex(x)
     if cmp
-      while l == zero(Int64)
+      l = zero(Int64)
+      while l == 0
         l = Blosc.compress!(Z, x, level=5)
         (l > zero(Int64)) && break
         nx_max = nextpow(2, nx_max)
+        checkbuf_8!(Z, nx_max)
         @warn(string("Compression ratio > 1.0 for channel ", i, "; are data OK?"))
       end
       xc = view(Z, 1:l)
