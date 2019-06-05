@@ -4,7 +4,7 @@
 A minimalist, platform-agnostic package for univariate geophysical data.
 
 ## Installation | [Documentation](http://seisio.readthedocs.org)
-From the Julia prompt, type: `]`; `add SeisIO`; Backspace; `using SeisIO`
+From the Julia prompt, type: `] add SeisIO`; (Backspace); `using SeisIO`
 
 ## Summary | [Collaboration](docs/CONTRIBUTE.md)
 Designed for speed, efficiency, and ease of use. Includes web clients, readers for common seismic data formats, and fast file writers. Utility functions allow time synchronization, data merging, padding time gaps, and basic data processing.
