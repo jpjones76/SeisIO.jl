@@ -1,3 +1,10 @@
+### 2019-06-04
+#### Bugs, Consistency, Performance
+* writesac with SeisEvent objects works again
+* merge! has been extended to EventTraceData
+* removed hash(::SeisSrc)
+* purge, the "safe" version of purge!, is now exported
+
 ### 2019-06-01
 #### Full switch to read_data
 Readers for individual file formats (e.g. `readsac`) have been removed, with
