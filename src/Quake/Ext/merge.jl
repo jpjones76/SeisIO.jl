@@ -2,7 +2,7 @@
 
 # Home of all extended merge! methods
 merge(S::EventTraceData; v::Int64=KW.v) = (U = deepcopy(S); merge!(U, v=v); return U)
-merge!(S::EventTraceData, U::EventTraceData; v::Int64=KW.v) = ([append!(getfield(S, f), getfield(U, f)) for f in SeisIO.datafields]; S.n += U.n; merge!(S; v=v))
+merge!(S::EventTraceData, U::EventTraceData; v::Int64=KW.v) = ([append!(getfield(S, f), getfield(U, f)) for f in tracefields]; S.n += U.n; merge!(S; v=v))
 merge!(S::EventTraceData, C::EventChannel; v::Int64=KW.v) = merge!(S, EventTraceData(C), v=v)
 
 function merge(A::Array{EventTraceData,1}; v::Int64=KW.v)
