@@ -207,10 +207,6 @@ function readwin32(dfilestr::String, cfilestr::String;
             push!(gapStart[k], ii + 1)
             push!(gapEnd[k], ii + P)
             ii += P
-            if v > 2
-              println(gapStart)
-              println(gapEnd)
-            end
           end
 
           y = getindex(getfield(S, :x), k)
