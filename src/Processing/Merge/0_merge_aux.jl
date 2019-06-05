@@ -154,7 +154,7 @@ function get_next_pair(W::Array{Int64,2})
 end
 
 # merges into the channel with the most recent data
-function merge_non_ts!(S::SeisData, subgrp::Array{Int64,1})
+function merge_non_ts!(S::GphysData, subgrp::Array{Int64,1})
   te = [maximum(t[:,2]) for t in S.t[subgrp]]
   Ω = subgrp[argmax(te)]
   T = vcat(S.t[subgrp]...)[:,2]
