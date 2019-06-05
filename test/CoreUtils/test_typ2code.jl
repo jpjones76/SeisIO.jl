@@ -9,3 +9,5 @@ for c = 0x00:0xfe
     @test c == d
   end
 end
+
+@test_throws UndefVarError code2typ(0x02)

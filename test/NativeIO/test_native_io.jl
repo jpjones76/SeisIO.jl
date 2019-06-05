@@ -69,23 +69,47 @@ R = rseis("test*", c=1, v=1)
 @test R[2] == H
 @test R[3] == S
 
-
 printstyled("  test that every custom Type can be written and read faithfully\n", color=:light_green)
-
-A = Array{Any,1}(undef, 0)
-for T in SeisIO.TNames
-  if T == PhaseCat
-    push!(A, randPhaseCat())
-  else
-    push!(A, getfield(SeisIO, Symbol(T))())
+redirect_stdout(out) do
+  A = Array{Any,1}(undef, 0)
+  for T in SeisIO.TNames
+    if T == PhaseCat
+      push!(A, randPhaseCat())
+    else
+      push!(A, getfield(SeisIO, Symbol(T))())
+    end
   end
-end
-wseis(savfile1, A...)
-R = rseis(savfile1, v=2)
+  wseis(savfile1, A...)
+  R = rseis(savfile1, v=2)
 
-for i = 1:length(R)
-  @test R[i] == A[i]
+  for i = 1:length(R)
+    @test R[i] == A[i]
+  end
+
+  # add an incompatible type; should throw a warning
+  push!(A, rand(Float64,3))
+  wseis(savfile1, A...)
 end
+
+printstyled("  test read/write with data compression\n", color=:light_green)
+SeisIO.KW.comp = 0x02
+S = randSeisData()
+wseis(savfile1, S)
+R = rseis(savfile1, v=2)[1]
+@test R == S
+
+SeisIO.KW.comp = 0x01
+S = randSeisEvent()
+C = SeisChannel()
+nx = SeisIO.KW.n_zip*2
+C.t = [1 0; nx 0]
+C.x = randn(nx)
+n = S.data.n
+push!(S.data, C)
+@test S.data.n == n+1
+wseis(savfile1, S)
+R = rseis(savfile1, v=2)[1]
+@test R == S
 
 rm(savfile1)
 rm(savfile2)

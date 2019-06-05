@@ -109,7 +109,7 @@ if safe_isfile(cfile)
   cfile = path*"/SampleFiles/Restricted/03_02_27_20140927*ch"
   S = SeisData()
   redirect_stdout(out) do
-    read_data!(S, "win32", fname, cf=cfile, v=1)
+    read_data!(S, "win32", fname, cf=cfile, v=3)
   end
   i = findid("V.ONTA.23.EHH", S)
   @test length(S.x[i]) == 60*S.fs[i]

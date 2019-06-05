@@ -67,3 +67,6 @@ printstyled("    pick file with nonnumeric error info\n", color=:light_green)
 redirect_stdout(out) do
   W = readuwevt(uwf5, v=2)
 end
+
+printstyled("  writesac from SeisEvent\n", color=:light_green)
+writesac(randSeisEvent())
