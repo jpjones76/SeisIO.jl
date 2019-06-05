@@ -36,12 +36,6 @@ V = purge(S)
 purge!(S)
 @test S == V
 
-printstyled(stdout,"      mseis! with Types from SeisIO.Quake\n", color=:light_green)
-S = randSeisData()
-mseis!(S, convert(EventChannel, randSeisChannel()),
-            convert(EventTraceData, randSeisData()),
-            randSeisEvent())
-
 printstyled(stdout,"      merge! extensions to EventTraceData, EventChannel\n", color=:light_green)
 S = convert(EventTraceData, randSeisData())
 T = deepcopy(S)

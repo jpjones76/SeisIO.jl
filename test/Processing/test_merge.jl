@@ -782,6 +782,12 @@ merge!(V)
 mseis!(S,T)
 @test S == V
 
+printstyled(stdout,"      mseis! with Types from SeisIO.Quake\n", color=:light_green)
+S = randSeisData()
+mseis!(S, convert(EventChannel, randSeisChannel()),
+            convert(EventTraceData, randSeisData()),
+            randSeisEvent())
+
 printstyled(stdout,"      two independent channels ==> same as \"+\"\n", color=:light_green)
 (S,T) = mktestseis()
 U = S[1] * T[2]

@@ -18,34 +18,6 @@ merge(S::EventTraceData, C::EventChannel; v::Int64=KW.v) = merge(S, EventTraceDa
 merge(C::EventChannel, S::EventTraceData; v::Int64=KW.v) = merge(EventTraceData(C), S, v=v)
 merge(C::EventChannel, D::EventChannel; v::Int64=KW.v) = (S = EventTraceData(C,D); merge!(S, v=v))
 
-function mseis!(S...)
-  U = Union{SeisData, SeisChannel, SeisEvent, EventTraceData, EventChannel}
-  L = Int64(length(S))
-  (L < 2) && return
-  S1 = getindex(S, 1)
-  (typeof(S1) == SeisData) || error("Target must be type SeisData!")
-  for i = 2:L
-    T = typeof(getindex(S, i))
-    if (T <: U) == false
-      @warn(string("Object of incompatible type passed to wseis at ", i+1, "; skipped!"))
-      continue
-    end
-    if T == SeisData
-      append!(S1, getindex(S, i))
-    elseif T == EventTraceData
-      append!(S1, convert(SeisData, getindex(S, i)))
-    elseif T == SeisChannel
-      append!(S1, SeisData(getindex(S, i)))
-    elseif T == EventChannel
-      append!(S1, SeisData(convert(SeisChannel, getindex(S, i))))
-    elseif T == SeisEvent
-      append!(S1, convert(SeisData, getfield(getindex(S, i), :data)))
-    end
-  end
-  merge!(S1)
-  return S1
-end
-
 +(S::EventTraceData, C::EventChannel) = +(S, EventTraceData(C))
 +(C::EventChannel, S::EventTraceData) = +(S, EventTraceData(C))
 +(C::EventChannel, D::EventChannel) = +(EventTraceData(C), EventTraceData(D))
