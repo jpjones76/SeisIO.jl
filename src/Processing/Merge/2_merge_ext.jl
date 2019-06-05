@@ -1,4 +1,4 @@
-export mseis!, purge!
+export mseis!, purge!, purge
 
 # Home of all extended merge! methods
 @doc (@doc merge)
