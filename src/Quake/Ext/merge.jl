@@ -16,7 +16,7 @@ end
 merge(S::EventTraceData, U::EventTraceData; v::Int64=KW.v) = merge(Array{EventTraceData,1}([S,U]), v=v)
 merge(S::EventTraceData, C::EventChannel; v::Int64=KW.v) = merge(S, EventTraceData(C), v=v)
 merge(C::EventChannel, S::EventTraceData; v::Int64=KW.v) = merge(EventTraceData(C), S, v=v)
-merge(C::EventChannel, D::EventChannel; v::Int64=KW.v) = (S = EventTraceData(C,D); merge!(S, v=v))
+merge(C::EventChannel, D::EventChannel; v::Int64=KW.v) = (S = EventTraceData(C,D); merge!(S, v=v); return S)
 
 +(S::EventTraceData, C::EventChannel) = +(S, EventTraceData(C))
 +(C::EventChannel, S::EventTraceData) = +(S, EventTraceData(C))

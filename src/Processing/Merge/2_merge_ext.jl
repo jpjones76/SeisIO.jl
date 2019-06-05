@@ -25,7 +25,7 @@ end
 merge(S::SeisData, U::SeisData; v::Int64=KW.v) = merge(Array{SeisData,1}([S,U]), v=v)
 merge(S::SeisData, C::SeisChannel; v::Int64=KW.v) = merge(S, SeisData(C), v=v)
 merge(C::SeisChannel, S::SeisData; v::Int64=KW.v) = merge(SeisData(C), S, v=v)
-merge(C::SeisChannel, D::SeisChannel; v::Int64=KW.v) = (S = SeisData(C,D); merge!(S, v=v))
+merge(C::SeisChannel, D::SeisChannel; v::Int64=KW.v) = (S = SeisData(C,D); merge!(S, v=v); return S)
 
 """
     purge!(S::SeisData)
