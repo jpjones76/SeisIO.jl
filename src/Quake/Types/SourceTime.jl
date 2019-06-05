@@ -42,8 +42,8 @@ isempty(ST::SourceTime) = min(getfield(ST, :dur) == zero(Float64),
                               isempty(getfield(ST, :desc)))
 
 function hash(ST::SourceTime)
-  h = hash(getfield(ST, :desc))
-  for f in (:dur, :rise, :decay)
+  h = hash(zero(UInt64))
+  for f in fieldnames(SourceTime)
     h = hash(getfield(ST, f), h)
   end
   return h
