@@ -35,7 +35,7 @@ function write_sac_file(fname::String, fv::Array{Float32,1}, iv::Array{Int32,1},
   return
 end
 
-function fill_sac(S::SeisChannel, ts::Bool, leven::Bool)
+function fill_sac(S::GphysChannel, ts::Bool, leven::Bool)
   fv = sac_nul_f.*ones(Float32, 70)
   iv = sac_nul_i.*ones(Int32, 40)
   cv = repeat(vcat(sac_nul_Int8, sac_nul_start, 0x20, 0x20), 24)
