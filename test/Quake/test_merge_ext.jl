@@ -13,22 +13,29 @@ S = randSeisData()
 mseis!(S, convert(EventChannel, randSeisChannel()),
             convert(EventTraceData, randSeisData()),
             randSeisEvent())
-# 
-# printstyled(stdout,"    distributivity: S1*S3 + S2*S3 == (S1+S2)*S3\n", color=:light_green)
-# imax = 10
-# printstyled("      trial ", color=:light_green)
-# for i = 1:imax
-#   if i > 1
-#     print("\b\b\b\b\b")
-#   end
-#   printstyled(string(lpad(i, 2), "/", imax), color=:light_green)
-#   S1 = randSeisData()
-#   S2 = randSeisData()
-#   S3 = randSeisData()
-#   # M1 = (S1+S2)*S3
-#   # M2 = S1*S3 + S2*S3
-#   @test ((S1+S2)*S3) == (S1*S3 + S2*S3)
-#   if i == imax
-#     println("")
-#   end
-# end
+
+printstyled(stdout,"      merge! extensions to EventTraceData, EventChannel\n", color=:light_green)
+S = convert(EventTraceData, randSeisData())
+T = deepcopy(S)
+merge!(S)
+@test merge(T) == S
+merge!(S,T)
+sort!(T)
+@test S == T
+
+C = convert(EventChannel, randSeisChannel())
+merge!(S, C)
+
+A = EventTraceData[convert(EventTraceData, randSeisData()),
+convert(EventTraceData, randSeisData()),
+convert(EventTraceData, randSeisData())]
+merge(A)
+
+S = convert(EventTraceData, randSeisData())
+T = convert(EventTraceData, randSeisData())
+@test S*T == T*S
+
+@test S*C == merge(S, EventTraceData(C))
+
+D = convert(EventChannel, randSeisChannel())
+S = merge(C,D)
