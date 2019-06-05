@@ -83,14 +83,6 @@ function isempty(S::SeisSrc)
   return q
 end
 
-function hash(S::SeisSrc)
-  h = hash(getfield(S, :id))
-  for f in (:eid, :m0, :mt, :dm, :npol, :gap, :pax, :planes, :src, :st, :misc, :notes)
-    h = hash(getfield(S, f), h)
-  end
-  return h
-end
-
 function isequal(S::SeisSrc, U::SeisSrc)
   q::Bool = true
   for f in fieldnames(SeisSrc)
