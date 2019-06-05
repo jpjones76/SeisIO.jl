@@ -19,27 +19,27 @@ function fctopz(f::T, c::T) where T <: AbstractFloat
   return p, z
 end
 
-function translate_resp!( X::Array{T,1},
-                          fs::T,
-                          z_old::Array{Complex{T},1},
-                          p_old::Array{Complex{T},1},
-                          c_old::T,
-                          z_new::Array{Complex{T},1},
-                          p_new::Array{Complex{T},1},
-                          c_new::T) where T <: Real
-
-  Nx = length(X)
-  N2 = nextpow(2, Nx)
-  f = T[collect(0.0:1.0:N2/2.0); collect(-N2/2.0+1.0:1.0:-1.0)]           # Frequencies
-  f[1] = eps(T)
-  rmul!(f, T(fs/N2))
-  F0 =  resp_f(z_old, p_old, c_old, one(T), f, fs)                        # Old resp
-  F1 =  resp_f(z_new, p_new, c_new, one(T), f, fs)                        # New resp
-  xf = fft([X; zeros(T, N2-Nx)])                                          # FFT
-  rf = map(Complex{T}, (F1.*conj(F0) ./ (F0.*conj(F0).+eps(T))))
-  X[:] = real(ifft(xf.*rf))[1:Nx]
-  return nothing
-end
+# function translate_resp!( X::Array{T,1},
+#                           fs::T,
+#                           z_old::Array{Complex{T},1},
+#                           p_old::Array{Complex{T},1},
+#                           c_old::T,
+#                           z_new::Array{Complex{T},1},
+#                           p_new::Array{Complex{T},1},
+#                           c_new::T) where T <: Real
+#
+#   Nx = length(X)
+#   N2 = nextpow(2, Nx)
+#   f = T[collect(0.0:1.0:N2/2.0); collect(-N2/2.0+1.0:1.0:-1.0)]           # Frequencies
+#   f[1] = eps(T)
+#   rmul!(f, T(fs/N2))
+#   F0 =  resp_f(z_old, p_old, c_old, one(T), f, fs)                        # Old resp
+#   F1 =  resp_f(z_new, p_new, c_new, one(T), f, fs)                        # New resp
+#   xf = fft([X; zeros(T, N2-Nx)])                                          # FFT
+#   rf = map(Complex{T}, (F1.*conj(F0) ./ (F0.*conj(F0).+eps(T))))
+#   X[:] = real(ifft(xf.*rf))[1:Nx]
+#   return nothing
+# end
 
 function translate_resp!( X::Array{T,1},
                           fs::T,
