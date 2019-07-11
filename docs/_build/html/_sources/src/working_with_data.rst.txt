@@ -76,7 +76,7 @@ string (default is "File"):
 
 .. function:: timestamp()
 
-Return current UTC time formatted yyyy-mm-ddTHH:MM:SS.μμμ.
+Return current UTC time formatted yyyy-mm-ddTHH:MM:SS.uuu.
 
 .. function:: track_off!(S)
 

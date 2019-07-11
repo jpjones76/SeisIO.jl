@@ -13,18 +13,15 @@ Channel ID Syntax
 
 The table below specifies valid types and expected syntax for channel lists.
 
-+-----------------+---------------------+-----------------------------------------+
-| Type            | Description         | Example                                 |
-+=================+=====================+=========================================+
-| String          | Comma-delineated    | "PB.B004.01.BS1,PB.B002.01.BS1"         |
-|                 | list of IDs         |                                         |
-+-----------------+---------------------+-----------------------------------------+
-| Array{String,1} | String array, one   | ["PB.B004.01.BS1","PB.B002.01.BS1"]     |
-|                 | ID string per entry |                                         |
-+-----------------+---------------------+-----------------------------------------+
-| Array{String,2} | String array, one   | ["PB" "B004" "01" "BS1";                |
-|                 | ID string per row   |  "PB" "B002" "01" "BS1"]                |
-+-----------------+---------------------+-----------------------------------------+
+.. csv-table::
+  :header: Type, Description, Example
+  :widths: 4, 8, 8
+  :delim: |
+
+  String          | Comma-delineated list of IDs          | \"PB.B004.01.BS1, PB.B002.01.BS1\"
+  Array{String,1} | String array, one ID string per entry | [\"PB.B004.01.BS1\", \"PB.B002.01.BS1\"]
+  Array{String,2} | String array, one set of IDs per row  | [\"PB\" \"B004\" \"01\" \"BS1\";
+  | | \"PB\" \"B002\" \"01\" \"BS1\"]
 
 The expected component order is always network, station, location, channel; thus, "UW.TDH..EHZ" is OK, but "UW.TDH.EHZ" fails.
 

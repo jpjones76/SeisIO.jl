@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2019.5.10)  4 JUN 2019 01:12
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2019.5.10)  10 JUL 2019 23:35
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -7,7 +7,7 @@ entering extended mode
 LaTeX2e <2017-04-15>
 Babel <3.18> and hyphenation patterns for 84 language(s) loaded.
 (./sphinxmanual.cls
-Document Class: sphinxmanual 2018/09/18 v1.8.1 Document class (Sphinx manual)
+Document Class: sphinxmanual 2018/12/23 v2.0 Document class (Sphinx manual)
 (/usr/share/texlive/texmf-dist/tex/latex/base/report.cls
 Document Class: report 2014/09/29 v1.4h Standard LaTeX document class
 (/usr/share/texlive/texmf-dist/tex/latex/base/size11.clo
@@ -465,7 +465,7 @@ Package: fncychap 2007/07/30 v1.34 LaTeX package (Revised chapters)
 \c@AlphaCnt=\count102
 \c@AlphaDecCnt=\count103
 ) (./sphinx.sty
-Package: sphinx 2018/11/06 v1.8.2 LaTeX package (Sphinx markup)
+Package: sphinx 2019/01/12 v1.8.4 LaTeX package (Sphinx markup)
 
 (/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
 Package: ltxcmds 2016/05/16 v1.23 LaTeX kernel commands for general use (HO)
@@ -830,11 +830,12 @@ Package etexcmds Info: Could not find \expanded.
 \sphinxshadowsize=\dimen140
 \sphinxshadowrule=\dimen141
 \spx@notice@border=\dimen142
-\spx@image@box=\box39
+\spx@image@maxheight=\dimen143
+\spx@image@box=\dimen144
 \c@literalblock=\count116
-\sphinxcontinuationbox=\box40
-\sphinxvisiblespacebox=\box41
-\sphinxVerbatim@TitleBox=\box42
+\sphinxcontinuationbox=\box39
+\sphinxvisiblespacebox=\box40
+\sphinxVerbatim@TitleBox=\box41
 \py@argswidth=\skip71
 \lineblockindentation=\skip72
 \DUlineblockindent=\skip73
@@ -855,14 +856,14 @@ Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
 \Gm@cnth=\count117
 \Gm@cntv=\count118
 \c@Gm@tempcnt=\count119
-\Gm@bindingoffset=\dimen143
-\Gm@wd@mp=\dimen144
-\Gm@odd@mp=\dimen145
-\Gm@even@mp=\dimen146
-\Gm@layoutwidth=\dimen147
-\Gm@layoutheight=\dimen148
-\Gm@layouthoffset=\dimen149
-\Gm@layoutvoffset=\dimen150
+\Gm@bindingoffset=\dimen145
+\Gm@wd@mp=\dimen146
+\Gm@odd@mp=\dimen147
+\Gm@even@mp=\dimen148
+\Gm@layoutwidth=\dimen149
+\Gm@layoutheight=\dimen150
+\Gm@layouthoffset=\dimen151
+\Gm@layoutvoffset=\dimen152
 \Gm@dimlist=\toks28
 )
 (/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref.sty
@@ -909,7 +910,7 @@ Package: hycolor 2016/05/16 v1.8 Color options for hyperref/bookmark (HO)
 (/usr/share/texlive/texmf-dist/tex/latex/oberdiek/auxhook.sty
 Package: auxhook 2016/05/16 v1.4 Hooks for auxiliary files (HO)
 )
-\@linkdim=\dimen151
+\@linkdim=\dimen153
 \Hy@linkcounter=\count120
 \Hy@pagecounter=\count121
 
@@ -946,10 +947,10 @@ Package hyperref Info: Bookmarks ON on input line 4762.
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
 LaTeX Info: Redefining \url on input line 5115.
-\XeTeXLinkMargin=\dimen152
+\XeTeXLinkMargin=\dimen154
 \Fld@menulength=\count124
-\Field@Width=\dimen153
-\Fld@charsize=\dimen154
+\Field@Width=\dimen155
+\Fld@charsize=\dimen156
 Package hyperref Info: Hyper figures OFF on input line 6369.
 Package hyperref Info: Link nesting OFF on input line 6374.
 Package hyperref Info: Hyper index ON on input line 6377.
@@ -980,6 +981,9 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 (/usr/share/texlive/texmf-dist/tex/latex/oberdiek/hypcap.sty
 Package: hypcap 2016/05/16 v1.12 Adjusting the anchors of captions (HO)
 )
+(./sphinxmessages.sty
+Package: sphinxmessages 2019/01/04 v2.0 Localized LaTeX macros (Sphinx team)
+)
 \@indexfile=\write4
 \openout4 = `SeisIO.idx'.
 
@@ -988,29 +992,29 @@ Writing index file SeisIO.idx
 (./SeisIO.aux)
 \openout1 = `SeisIO.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 62.
-LaTeX Font Info:    ... okay on input line 62.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 62.
-LaTeX Font Info:    ... okay on input line 62.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 62.
-LaTeX Font Info:    ... okay on input line 62.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 62.
-LaTeX Font Info:    ... okay on input line 62.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 62.
-LaTeX Font Info:    ... okay on input line 62.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 62.
-LaTeX Font Info:    ... okay on input line 62.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 62.
-LaTeX Font Info:    Try loading font information for TS1+cmr on input line 62.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 81.
+LaTeX Font Info:    Try loading font information for TS1+cmr on input line 81.
  (/usr/share/texlive/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 62.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 62.
-LaTeX Font Info:    ... okay on input line 62.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 62.
-LaTeX Font Info:    ... okay on input line 62.
-LaTeX Font Info:    Try loading font information for T1+ptm on input line 62.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Try loading font information for T1+ptm on input line 81.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1ptm.fd
 File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
@@ -1018,13 +1022,13 @@ File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
 (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count130
-\scratchdimen=\dimen155
-\scratchbox=\box43
+\scratchdimen=\dimen157
+\scratchbox=\box42
 \nofMPsegments=\count131
 \nofMParguments=\count132
 \everyMPshowfont=\toks29
 \MPscratchCnt=\count133
-\MPscratchDim=\dimen156
+\MPscratchDim=\dimen158
 \MPnumerator=\count134
 \makeMPintoPDFobject=\count135
 \everyMPtoPDFconversion=\toks30
@@ -1079,8 +1083,8 @@ e
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-\AtBeginShipoutBox=\box44
-Package hyperref Info: Link coloring ON on input line 62.
+\AtBeginShipoutBox=\box43
+Package hyperref Info: Link coloring ON on input line 81.
 (/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2016/05/21 v2.44 Cross-referencing by name of section
 
@@ -1089,54 +1093,55 @@ Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 )
 \c@section@level=\count136
 )
-LaTeX Info: Redefining \ref on input line 62.
-LaTeX Info: Redefining \pageref on input line 62.
-LaTeX Info: Redefining \nameref on input line 62.
+LaTeX Info: Redefining \ref on input line 81.
+LaTeX Info: Redefining \pageref on input line 81.
+LaTeX Info: Redefining \nameref on input line 81.
 
 (./SeisIO.out) (./SeisIO.out)
 \@outlinefile=\write5
 \openout5 = `SeisIO.out'.
 
-Package hyperref Info: Option `pageanchor' set `false' on input line 66.
-LaTeX Font Info:    Try loading font information for T1+phv on input line 66.
+Package hyperref Info: Option `pageanchor' set `false' on input line 84.
+LaTeX Font Info:    Try loading font information for T1+phv on input line 84.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1phv.fd
 File: t1phv.fd 2001/06/04 scalable font definitions for T1/phv.
 )
 LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <10.95> not available
-(Font)              Font shape `T1/phv/b/n' tried instead on input line 66.
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 84.
 LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <24.88> not available
-(Font)              Font shape `T1/phv/b/n' tried instead on input line 66.
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 84.
 LaTeX Font Info:    Font shape `T1/phv/bx/it' in size <10.95> not available
-(Font)              Font shape `T1/phv/b/it' tried instead on input line 66.
+(Font)              Font shape `T1/phv/b/it' tried instead on input line 84.
 LaTeX Font Info:    Font shape `T1/phv/b/it' in size <10.95> not available
-(Font)              Font shape `T1/phv/b/sl' tried instead on input line 66.
+(Font)              Font shape `T1/phv/b/sl' tried instead on input line 84.
 LaTeX Font Info:    Font shape `T1/phv/bx/it' in size <17.28> not available
-(Font)              Font shape `T1/phv/b/it' tried instead on input line 66.
+(Font)              Font shape `T1/phv/b/it' tried instead on input line 84.
 LaTeX Font Info:    Font shape `T1/phv/b/it' in size <17.28> not available
-(Font)              Font shape `T1/phv/b/sl' tried instead on input line 66.
+(Font)              Font shape `T1/phv/b/sl' tried instead on input line 84.
 LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <17.28> not available
-(Font)              Font shape `T1/phv/b/n' tried instead on input line 66.
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 84.
 <<ot1.cmap>><<oml.cmap>><<oms.cmap>><<omx.cmap>>
-LaTeX Font Info:    Try loading font information for U+msa on input line 66.
+LaTeX Font Info:    Try loading font information for U+msa on input line 84.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 66.
+LaTeX Font Info:    Try loading font information for U+msb on input line 84.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <12> not available
-(Font)              Font shape `T1/phv/b/n' tried instead on input line 66.
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 84.
  [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2
 
+
 ]
 LaTeX Font Info:    Font shape `T1/phv/bx/n' in size <14.4> not available
-(Font)              Font shape `T1/phv/b/n' tried instead on input line 67.
+(Font)              Font shape `T1/phv/b/n' tried instead on input line 86.
  (./SeisIO.toc
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <10.95> not available
 (Font)              Font shape `T1/ptm/b/n' tried instead on input line 2.
@@ -1159,28 +1164,29 @@ Package Fancyhdr Warning: \headheight is too small (12.0pt):
 
 ]
 Chapter 1.
-LaTeX Font Info:    Try loading font information for TS1+ptm on input line 83.
+LaTeX Font Info:    Try loading font information for TS1+ptm on input line 102.
+
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 )
-LaTeX Font Info:    Try loading font information for T1+pcr on input line 101.
+LaTeX Font Info:    Try loading font information for T1+pcr on input line 120.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 ) [3]
 LaTeX Font Info:    Font shape `T1/pcr/bx/n' in size <10.95> not available
-(Font)              Font shape `T1/pcr/b/n' tried instead on input line 191.
+(Font)              Font shape `T1/pcr/b/n' tried instead on input line 206.
  [4]
 LaTeX Font Info:    Font shape `T1/pcr/m/it' in size <10> not available
-(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 276.
+(Font)              Font shape `T1/pcr/m/sl' tried instead on input line 287.
  [5]
-Overfull \hbox (7.39111pt too wide) in paragraph at lines 357--358
+Overfull \hbox (7.39111pt too wide) in paragraph at lines 366--367
 []|\T1/ptm/m/n/10.95 SeisChannel()| 
  []
 
 [6]
 LaTeX Font Info:    Font shape `T1/phv/m/it' in size <10.95> not available
-(Font)              Font shape `T1/phv/m/sl' tried instead on input line 484.
+(Font)              Font shape `T1/phv/m/sl' tried instead on input line 493.
 LaTeX Font Info:    Try loading font information for TS1+pcr on input line 1.
  (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ts1pcr.fd
 File: ts1pcr.fd 2001/06/04 font definitions for TS1/pcr.
@@ -1190,25 +1196,25 @@ File: ts1pcr.fd 2001/06/04 font definitions for TS1/pcr.
 ]
 Chapter 2.
 [11]
-Overfull \hbox (36.13448pt too wide) in paragraph at lines 863--863
+Overfull \hbox (36.13448pt too wide) in paragraph at lines 871--871
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 863--863
+Underfull \hbox (badness 10000) in paragraph at lines 871--871
 
  []
 
 [12] [13] [14]
 Chapter 3.
 
-Underfull \hbox (badness 10000) in paragraph at lines 1035--1036
+Underfull \hbox (badness 10000) in paragraph at lines 1043--1044
 []\T1/pcr/m/n/10.95 get_data!(S, "FDSN", "UW.SEP..EHZ,UW.SHW..EHZ,UW.HSR..EHZ",
  "IRIS",
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1038--1039
+Underfull \hbox (badness 10000) in paragraph at lines 1046--1047
 []\T1/pcr/m/n/10.95 get_data!(S, "IRIS", "CC.PALM..EHN", "IRIS", t=(-120), f="s
 acbl")\T1/ptm/m/n/10.95 :
  []
@@ -1216,23 +1222,23 @@ acbl")\T1/ptm/m/n/10.95 :
 [15
 
 ]
-Overfull \hbox (10.9495pt too wide) in paragraph at lines 1044--1045
+Overfull \hbox (10.9495pt too wide) in paragraph at lines 1052--1053
 []\T1/pcr/m/n/10.95 S = get_data("FDSN", "HV.MOKD..HHZ", "IRIS", s="2012-01-01T
 00:00:00",
  []
 
 [16] [17]
-Overfull \hbox (31.58516pt too wide) in paragraph at lines 1197--1197
+Overfull \hbox (31.58516pt too wide) in paragraph at lines 1205--1205
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1197--1197
+Underfull \hbox (badness 10000) in paragraph at lines 1205--1205
 
  []
 
 [18]
-Underfull \hbox (badness 10000) in paragraph at lines 1273--1277
+Underfull \hbox (badness 10000) in paragraph at lines 1281--1285
 []\T1/ptm/m/n/10.95 Check that streams with re-cent data ex-ist at url \T1/ptm/
 m/it/10.95 u \T1/ptm/m/n/10.95 for chan-nel spec \T1/ptm/m/it/10.95 cha\T1/ptm/
 m/n/10.95 , for-mat-ted
@@ -1247,7 +1253,7 @@ Chapter 5.
 [25
 
 ]
-Underfull \hbox (badness 5388) in paragraph at lines 1805--1806
+Underfull \hbox (badness 5388) in paragraph at lines 1813--1814
 []\T1/ptm/m/n/10.95 Incomplete string queries are read to the near-est fully-sp
 ecified time con-straint; thus,
  []
@@ -1257,448 +1263,202 @@ ecified time con-straint; thus,
 ]
 Chapter 6.
 [31]
-Underfull \hbox (badness 10000) in paragraph at lines 2289--2290
+Underfull \hbox (badness 10000) in paragraph at lines 2303--2304
 []|\T1/ptm/m/n/10.95 unsigned long
  []
 
 [32]
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2502--2503
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2516--2517
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2511--2512
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2525--2526
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2520--2521
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2534--2535
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2529--2530
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2543--2544
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2538--2539
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2552--2553
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2547--2548
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2561--2562
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2556--2557
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2570--2571
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2565--2566
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2579--2580
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2574--2575
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2588--2589
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2583--2584
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2597--2598
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2592--2593
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2606--2607
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2601--2602
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2615--2616
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 [33] [34]
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 3013--3014
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 3028--3029
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 [35]
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 3062--3063
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 3077--3078
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (0.75247pt too wide) in paragraph at lines 3132--3133
+Overfull \hbox (0.75247pt too wide) in paragraph at lines 3147--3148
 []|\T1/ptm/m/n/10.95 UInt64| 
  []
 
 
-Overfull \hbox (0.75247pt too wide) in paragraph at lines 3141--3142
+Overfull \hbox (0.75247pt too wide) in paragraph at lines 3156--3157
 []|\T1/ptm/m/n/10.95 UInt64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 3150--3151
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 3165--3166
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 3199--3200
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 3214--3215
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (1.22876pt too wide) in paragraph at lines 3271--3272
+Overfull \hbox (1.22876pt too wide) in paragraph at lines 3286--3287
 []|\T1/ptm/m/n/10.95 nr*nc| 
  []
 
-[36]
-Overfull \hbox (20.21019pt too wide) in paragraph at lines 3389--3390
-[]|\T1/ptm/m/n/10.95 (StringVec)| 
+[36] [37] [38]
+Overfull \hbox (1.567pt too wide) in paragraph at lines 3926--3927
+[]|\T1/ptm/m/n/10.95 name| 
  []
 
 
-Overfull \hbox (4.72704pt too wide) in paragraph at lines 3412--3413
-[]|\T1/ptm/m/n/10.95 variable| 
- []
-
-[37]
-Overfull \hbox (20.21019pt too wide) in paragraph at lines 3451--3452
-[]|\T1/ptm/m/n/10.95 (StringVec)| 
- []
-
-
-Overfull \hbox (8.04521pt too wide) in paragraph at lines 3502--3503
-[]|\T1/ptm/m/n/10.95 prod(nd)| 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 3592--3593
-[]|\T1/ptm/m/n/10.95 K,
- []
-
-
-Overfull \hbox (26.5034pt too wide) in paragraph at lines 3592--3593
-\T1/ptm/m/n/10.95 (StringVec),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 3592--3593
-\T1/ptm/m/n/10.95 1,
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 3592--3593
-\T1/ptm/m/n/10.95 dic-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 3592--3593
-\T1/ptm/m/n/10.95 tio-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 3592--3593
-\T1/ptm/m/n/10.95 nary
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 3595--3596
-[]|\T1/ptm/m/n/10.95 pha,
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 3595--3596
-\T1/ptm/m/n/10.95 (Seis-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 3595--3596
-\T1/ptm/m/n/10.95 Pha),
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 3595--3596
-\T1/ptm/m/n/10.95 N,
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 3595--3596
-\T1/ptm/m/n/10.95 seis-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 3595--3596
-\T1/ptm/m/n/10.95 mic
- []
-
-
-Overfull \hbox (2.47937pt too wide) in paragraph at lines 3595--3596
-\T1/ptm/m/n/10.95 phases| 
- []
-
-[38]
-Underfull \hbox (badness 10000) in paragraph at lines 3669--3670
-[]|\T1/ptm/m/n/10.95 (Loc
- []
-
-
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 3678--3679
-[]|\T1/ptm/m/n/10.95 Float64| 
- []
-
-
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 3687--3688
-[]|\T1/ptm/m/n/10.95 Float64| 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 3705--3706
-[]|\T1/ptm/m/n/10.95 (Resp
- []
-
-
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 3732--3733
-[]|\T1/ptm/m/n/10.95 Float64| 
- []
-
-
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 3741--3742
-[]|\T1/ptm/m/n/10.95 Float64| 
- []
-
-
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 3750--3751
-[]|\T1/ptm/m/n/10.95 Float64| 
- []
-
-
-Overfull \hbox (17.77922pt too wide) in paragraph at lines 3759--3760
-[]|\T1/ptm/m/n/10.95 (PhaseCat)| 
- []
-
-
-Overfull \hbox (20.21019pt too wide) in paragraph at lines 3795--3796
-[]|\T1/ptm/m/n/10.95 (StringVec)| 
- []
-
-
-Overfull \hbox (4.72704pt too wide) in paragraph at lines 3840--3841
-[]|\T1/ptm/m/n/10.95 variable| 
+Overfull \hbox (0.9647pt too wide) in paragraph at lines 4034--4035
+[]|\T1/ptm/m/n/10.95 notes| 
  []
 
 [39]
-Underfull \hbox (badness 10000) in paragraph at lines 3919--3920
-[]|\T1/ptm/m/n/10.95 (Loc
+Overfull \hbox (1.567pt too wide) in paragraph at lines 4190--4191
+[]|\T1/ptm/m/n/10.95 name| 
  []
 
 
-Overfull \hbox (8.17143pt too wide) in paragraph at lines 3928--3929
-[]|\T1/ptm/m/n/10.95 Float64| 
+Overfull \hbox (0.9647pt too wide) in paragraph at lines 4298--4299
+[]|\T1/ptm/m/n/10.95 notes| 
  []
 
 
-Overfull \hbox (8.17143pt too wide) in paragraph at lines 3937--3938
-[]|\T1/ptm/m/n/10.95 Float64| 
+Overfull \hbox (4.61101pt too wide) in paragraph at lines 4316--4317
+[]|\T1/ptm/m/n/10.95 2Nt[i]| 
  []
 
 
-Overfull \hbox (3.90082pt too wide) in paragraph at lines 4000--4001
-[]|\T1/ptm/m/n/10.95 (Misc)| 
- []
-
-
-Overfull \hbox (25.18747pt too wide) in paragraph at lines 4009--4010
-[]|\T1/ptm/m/n/10.95 (StringVec)| 
- []
-
-
-Overfull \hbox (9.70432pt too wide) in paragraph at lines 4054--4055
-[]|\T1/ptm/m/n/10.95 variable| 
+Overfull \hbox (1.56702pt too wide) in paragraph at lines 4333--4334
+[]|\T1/ptm/m/n/10.95 Nx[i]| 
  []
 
 [40]
-Overfull \hbox (25.18747pt too wide) in paragraph at lines 4156--4157
-[]|\T1/ptm/m/n/10.95 (StringVec)| 
+Overfull \hbox (1.567pt too wide) in paragraph at lines 4447--4448
+[]|\T1/ptm/m/n/10.95 name| 
  []
 
 
-Overfull \hbox (25.18747pt too wide) in paragraph at lines 4165--4166
-[]|\T1/ptm/m/n/10.95 (StringVec)| 
+Overfull \hbox (0.9647pt too wide) in paragraph at lines 4519--4520
+[]|\T1/ptm/m/n/10.95 notes| 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 4174--4175
-[]|\T1/ptm/m/n/10.95 (Loc
+Overfull \hbox (4.61101pt too wide) in paragraph at lines 4537--4538
+[]|\T1/ptm/m/n/10.95 2Nt[i]| 
  []
 
 
-Overfull \hbox (8.17143pt too wide) in paragraph at lines 4183--4184
-[]|\T1/ptm/m/n/10.95 Float64| 
+Overfull \hbox (1.56702pt too wide) in paragraph at lines 4554--4555
+[]|\T1/ptm/m/n/10.95 Nx[i]| 
  []
 
-
-Overfull \hbox (8.17143pt too wide) in paragraph at lines 4192--4193
-[]|\T1/ptm/m/n/10.95 Float64| 
- []
-
-
-Overfull \hbox (25.18747pt too wide) in paragraph at lines 4210--4211
-[]|\T1/ptm/m/n/10.95 (StringVec)| 
- []
-
-
-Overfull \hbox (8.17143pt too wide) in paragraph at lines 4219--4220
-[]|\T1/ptm/m/n/10.95 Float64| 
- []
-
-
-Overfull \hbox (8.17143pt too wide) in paragraph at lines 4228--4229
-[]|\T1/ptm/m/n/10.95 Float64| 
- []
-
-
-Overfull \hbox (8.17143pt too wide) in paragraph at lines 4237--4238
-[]|\T1/ptm/m/n/10.95 Float64| 
- []
-
-
-Overfull \hbox (22.7565pt too wide) in paragraph at lines 4246--4247
-[]|\T1/ptm/m/n/10.95 (PhaseCat)| 
- []
-
-
-Overfull \hbox (25.18747pt too wide) in paragraph at lines 4255--4256
-[]|\T1/ptm/m/n/10.95 (StringVec)| 
- []
-
-
-Overfull \hbox (3.90082pt too wide) in paragraph at lines 4264--4265
-[]|\T1/ptm/m/n/10.95 (Misc)| 
- []
-
-
-Overfull \hbox (25.18747pt too wide) in paragraph at lines 4273--4274
-[]|\T1/ptm/m/n/10.95 (StringVec)| 
- []
-
-
-Overfull \hbox (6.94505pt too wide) in paragraph at lines 4289--4290
-[]|\T1/ptm/m/n/10.95 2*Nt[i]| 
- []
-
-[41]
-Overfull \hbox (25.18747pt too wide) in paragraph at lines 4413--4414
-[]|\T1/ptm/m/n/10.95 (StringVec)| 
- []
-
-
-Overfull \hbox (25.18747pt too wide) in paragraph at lines 4422--4423
-[]|\T1/ptm/m/n/10.95 (StringVec)| 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 4431--4432
-[]|\T1/ptm/m/n/10.95 (Loc
- []
-
-
-Overfull \hbox (8.17143pt too wide) in paragraph at lines 4440--4441
-[]|\T1/ptm/m/n/10.95 Float64| 
- []
-
-
-Overfull \hbox (8.17143pt too wide) in paragraph at lines 4449--4450
-[]|\T1/ptm/m/n/10.95 Float64| 
- []
-
-
-Overfull \hbox (25.18747pt too wide) in paragraph at lines 4467--4468
-[]|\T1/ptm/m/n/10.95 (StringVec)| 
- []
-
-
-Overfull \hbox (25.18747pt too wide) in paragraph at lines 4476--4477
-[]|\T1/ptm/m/n/10.95 (StringVec)| 
- []
-
-
-Overfull \hbox (3.90082pt too wide) in paragraph at lines 4485--4486
-[]|\T1/ptm/m/n/10.95 (Misc)| 
- []
-
-
-Overfull \hbox (25.18747pt too wide) in paragraph at lines 4494--4495
-[]|\T1/ptm/m/n/10.95 (StringVec)| 
- []
-
-
-Overfull \hbox (6.94505pt too wide) in paragraph at lines 4510--4511
-[]|\T1/ptm/m/n/10.95 2*Nt[i]| 
- []
-
-[42] [43]
-Overfull \hbox (35.92067pt too wide) in paragraph at lines 4826--4827
+[41] [42]
+Overfull \hbox (2.82512pt too wide) in paragraph at lines 4853--4854
 []|\T1/ptm/m/n/10.95 pad[1]*pad[2]| 
  []
 
 
-Overfull \hbox (1.26393pt too wide) in paragraph at lines 4840--4841
+Overfull \hbox (4.27261pt too wide) in paragraph at lines 4867--4868
 []|\T1/ptm/m/n/10.95 planes| 
  []
 
 
-Overfull \hbox (32.2852pt too wide) in paragraph at lines 4844--4845
-[]|\T1/ptm/m/n/10.95 pld[1]*pld[2]| 
+Overfull \hbox (0.62387pt too wide) in paragraph at lines 4896--4897
+[]|\T1/ptm/m/n/10.95 (SourceTime)| 
  []
 
 
-Overfull \hbox (4.87492pt too wide) in paragraph at lines 4925--4926
+Overfull \hbox (4.87492pt too wide) in paragraph at lines 4952--4953
 []|\T1/ptm/m/n/10.95 source| 
  []
 
-[44] [45] [46]
-Overfull \hbox (18.7079pt too wide) in paragraph at lines 5445--5447
-[]|\T1/ptm/m/n/10.95 ^^PPB.B004.01.BS1,PB.B002.01.BS1^^Q| 
+[43] [44] [45]
+Underfull \hbox (badness 10000) in paragraph at lines 5478--5480
+[]|\T1/ptm/m/n/10.95 [^^PPB.B004.01.BS1^^Q,
  []
 
-
-Overfull \hbox (34.9575pt too wide) in paragraph at lines 5453--5455
-[]|\T1/ptm/m/n/10.95 [^^PPB.B004.01.BS1^^Q,^^QPB.B002.01.BS1^^Q]| 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 5461--5463
-[]
- []
-
-[47] [48] [49]
+[46] [47] [48]
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <9> not available
-(Font)              Font shape `T1/ptm/b/n' tried instead on input line 5933.
- [50] [51] [52] (./SeisIO.ind [53] [54
+(Font)              Font shape `T1/ptm/b/n' tried instead on input line 5956.
+ [49] [50] [51] (./SeisIO.ind [52] [53
 
-] [55
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 6191.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 6191.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 6201.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 6201.
  (./SeisIO.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 6191.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 6191.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 6201.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 6201.
 
 Package rerunfilecheck Info: File `SeisIO.out' has not changed.
 (rerunfilecheck)             Checksum: B7BEAC2E72AE0FA73D6ADB762EA24E38;3225.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 6191.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 6201.
  ) 
 Here is how much of TeX's memory you used:
- 14178 strings out of 492982
- 200026 string characters out of 6134896
- 314638 words of memory out of 5000000
- 17132 multiletter control sequences out of 15000+600000
+ 14203 strings out of 492982
+ 200547 string characters out of 6134896
+ 314994 words of memory out of 5000000
+ 17155 multiletter control sequences out of 15000+600000
  73589 words of font info for 109 fonts, out of 8000000 for 9000
  1142 hyphenation exceptions out of 8191
  37i,16n,49p,513b,543s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1716,10 +1476,10 @@ nts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/ur
 w/helvetic/uhvro8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utm
 b8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/s
 hare/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on SeisIO.pdf (59 pages, 297936 bytes).
+Output written on SeisIO.pdf (57 pages, 297819 bytes).
 PDF statistics:
- 864 PDF objects out of 1000 (max. 8388607)
- 748 compressed objects within 8 object streams
- 262 named destinations out of 1000 (max. 500000)
+ 856 PDF objects out of 1000 (max. 8388607)
+ 742 compressed objects within 8 object streams
+ 260 named destinations out of 1000 (max. 500000)
  237 words of extra memory for PDF output out of 10000 (max. 10000000)
 
