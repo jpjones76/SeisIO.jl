@@ -355,7 +355,6 @@ function event_xml!(EvCat::Array{SeisHdr,1}, EvSrc::Array{SeisSrc, 1}, xdoc::XML
 
     end
   end
-  free(xdoc)
   return nothing
 end
 
@@ -375,6 +374,7 @@ function read_qml(fpat::String)
   for file in files
     xdoc  = parse_file(file)
     event_xml!(EvCat, EvSrc, xdoc)
+    free(xdoc)
   end
   return EvCat, EvSrc
 end
