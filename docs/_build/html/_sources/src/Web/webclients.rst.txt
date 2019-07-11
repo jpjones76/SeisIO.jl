@@ -14,7 +14,7 @@ real-time streaming, see :ref:`SeedLink<seedlink-section>`.
 |
 | **method**
 | **"IRIS"**: :ref:`IRISWS<IRISWS>`.
-| **"FDSN"**: :ref:`FDSNWS dataselect<FDSNWS>`. Change FDSN servers with keyword ``--src`` using the :ref:`server list<servers>` (also available by typing ``?seis_www``).
+| **"FDSN"**: :ref:`FDSNWS dataselect<FDSNWS>`. Change FDSN servers with keyword ``src`` using the :ref:`server list<servers>` (also available by typing ``?seis_www``).
 |
 | **channels**
 | Channels to retrieve; can be passed as a :ref:`string, string array, or parameter file<cid>`. Type ``?chanspec`` at the Julia prompt for more info.
@@ -23,8 +23,8 @@ real-time streaming, see :ref:`SeedLink<seedlink-section>`.
 | Keyword arguments; see also :ref:`SeisIO standard KWs<dkw>` or type ``?SeisIO.KW``.
 | Standard keywords: fmt, nd, opts, rad, reg, si, to, v, w, y
 | Other keywords:
-| ``--s``: Start time
-| ``--t``: Termination (end) time
+| ``s``: Start time
+| ``t``: Termination (end) time
 
 Examples
 ========
@@ -56,8 +56,8 @@ FDSN data query with get_data! wrapper.
 
 | :ref:`Shared keywords<dkw>`: fmt, nd, opts, rad, reg, s, si, t, to, v, w, y
 | Other keywords:
-| ``--s``: Start time
-| ``--t``: Termination (end) time
+| ``s``: Start time
+| ``t``: Termination (end) time
 | ``xf``: Name of XML file to save station metadata
 
 Station Query
@@ -72,8 +72,8 @@ remote station XML files by web query.
 
 | :ref:`Shared keywords<dkw>`: src, to, v
 | Other keywords:
-| ``--s``: Start time
-| ``--t``: Termination (end) time
+| ``s``: Start time
+| ``t``: Termination (end) time
 
 IRIS Queries
 ============

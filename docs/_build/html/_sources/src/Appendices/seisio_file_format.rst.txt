@@ -37,7 +37,7 @@ SeisIO File
 
 .. csv-table::
   :header: Var, Meaning, T, N
-  :widths: 5, 32, 5, 5
+  :widths: 4, 32, 8, 8
 
   ,\"SEISIO\",UInt8,6
   ``V``,SeisIO file format version,Float32,1
@@ -264,7 +264,7 @@ Misc
 ====
 .. csv-table::
   :header: Var, Type, N, Meaning
-  :widths: 1, 1, 1, 8
+  :widths: 1, 2, 1, 8
 
   N, Int64, 1, number of items in dictionary [#]_
   K, (StringVec), 1, dictionary keys
@@ -283,7 +283,7 @@ String Array (c == 0x81)
 ========================
 .. csv-table::
   :header: Var, Type, N, Meaning
-  :widths: 1, 1, 1, 8
+  :widths: 1, 2, 1, 8
 
   A, (StringVec), 1, string vector
 
@@ -291,7 +291,7 @@ Other Array (c == 0x80 or c > 0x81)
 ===================================
 .. csv-table::
   :header: Var, Type, N, Meaning
-  :widths: 1, 1, 1, 8
+  :widths: 1, 1, 2, 8
 
   nd, Int64, 1, number of dimensions in array
   dims, Int64, nd, array dimensions
@@ -323,8 +323,8 @@ PhaseCat
   :delim: |
 
   N | Int64 | 1 | number of SeisPha objects to read  [#]_
-  K, (StringVec), 1, dictionary keys
-  pha, (SeisPha), N, seismic phases
+  K | (StringVec) | 1 | dictionary keys
+  pha | (SeisPha) | N | seismic phases
 
 .. [#] If ``N == 0``, then N is the only value present.
 
@@ -334,7 +334,7 @@ A single channel of data related to a seismic event
 
 .. csv-table::
   :header: Var, Type, N, Meaning
-  :widths: 1, 1, 1, 8
+  :widths: 1, 2, 1, 8
 
   Ni, Int64, 1, size of id string in bytes
   id, UInt8, Ni, id string
@@ -357,7 +357,7 @@ A single channel of data related to a seismic event
   misc, (Misc), 1, dictionary for non-essential information
   notes, (StringVec), 1, notes and automated logging
   Nt, Int64, 1, length of time gaps matrix
-  T, Int64, 2*Nt, time gaps matrix
+  T, Int64, 2Nt, time gaps matrix
   Xc, UInt8, 1, :ref:`Type code <type_codes>` of data vector
   Nx, Int64, 1, number of samples in data vector
   X, variable, NX, data vector
@@ -368,7 +368,7 @@ A single channel of univariate geophysical data
 
   .. csv-table::
     :header: Var, Type, N, Meaning
-    :widths: 1, 1, 1, 8
+    :widths: 1, 2, 1, 8
 
     Ni, Int64, 1, size of id string in bytes
     id, UInt8, Ni, id string
@@ -387,7 +387,7 @@ A single channel of univariate geophysical data
     misc, (Misc), 1, dictionary for non-essential information
     notes, (StringVec), 1, notes and automated logging
     Nt, Int64, 1, length of time gaps matrix
-    T, Int64, 2*Nt, time gaps matrix
+    T, Int64, 2Nt, time gaps matrix
     Xc, UInt8, 1, :ref:`Type code <type_codes>` of data vector
     Nx, Int64, 1, number of samples in data vector
     X, variable, NX, data vector
@@ -398,7 +398,7 @@ A multichannel record of time-series data related to a seismic event.
 
   .. csv-table::
     :header: Var, Type, N, Meaning
-    :widths: 1, 1, 1, 8
+    :widths: 1, 2, 1, 8
 
     N, Int64, 1, number of data channels
     Lc, UInt8, N, :ref:`location Type codes<loc_codes>` for each data channel
@@ -422,7 +422,7 @@ A multichannel record of time-series data related to a seismic event.
     misc, (Misc), N, dictionaries of non-essential information for each channel
     notes, (StringVec), N, notes and automated logging for each channel
     { , , , for i = 1:N
-    T, Int64, 2*Nt[i], Matrix of time gaps for channel i
+    T, Int64, 2Nt[i], Matrix of time gaps for channel i
     } , , ,
     { , , , for i = 1:N
     X, Xc[i], Nx[i], Data vector i [#]_
@@ -437,7 +437,7 @@ A record containing multiple channels of univariate geophysical data.
 
   .. csv-table::
     :header: Var, Type, N, Meaning
-    :widths: 1, 1, 1, 8
+    :widths: 1, 2, 1, 8
 
     N, Int64, 1, number of data channels
     Lc, UInt8, N, :ref:`location Type codes<loc_codes>` for each data channel
@@ -457,7 +457,7 @@ A record containing multiple channels of univariate geophysical data.
     misc, (Misc), N, dictionaries of non-essential information for each channel
     notes, (StringVec), N, notes and automated logging for each channel
     { , , , for i = 1:N
-    T, Int64, 2*Nt[i], Matrix of time gaps for channel i
+    T, Int64, 2Nt[i], Matrix of time gaps for channel i
     } , , ,
     { , , , for i = 1:N
     X, Xc[i], Nx[i], Data vector i [#]_
@@ -494,7 +494,7 @@ SeisSrc
 =======
 .. csv-table::
   :header: Var, Type, N, Meaning
-  :widths: 1, 2, 1, 8
+  :widths: 1, 2, 2, 8
   :delim: |
 
   Li | Int64 | 1 | length of source id string

@@ -90,14 +90,14 @@ Returns a SeisEvent.
 
 | :ref:`Shared keywords<dkw>`: fmt, mag, nd, opts, pha, rad, reg, src, to, v, w
 | Other keywords:
-| ``--len``: desired record length *in minutes*.
+| ``len``: desired record length *in minutes*.
 
 Phase Onset Query
 *****************
-.. function:: get_pha(Δ::Float64, z::Float64)
+.. function:: get_pha(:math:`\Delta`::Float64, z::Float64)
 
 Command-line interface to IRIS online implementation of the TauP travel time
-calculator [1-2]. Returns a matrix of strings. Specify Δ in decimal degrees
+calculator [1-2]. Returns a matrix of strings. Specify :math:`\Delta` in decimal degrees
 and z in km with + = down.
 
 | Shared keywords keywords: pha, to, v

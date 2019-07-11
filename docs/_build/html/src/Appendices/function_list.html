@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Utility Functions &mdash; SeisIO 0.2.0 documentation</title>
+  <title>Utility Functions &mdash; SeisIO 0.3.0 documentation</title>
   
 
   
@@ -24,7 +24,8 @@
         <script type="text/javascript" src="../../_static/jquery.js"></script>
         <script type="text/javascript" src="../../_static/underscore.js"></script>
         <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -60,7 +61,7 @@
             
             
               <div class="version">
-                0.2.0
+                0.3.0
               </div>
             
           
@@ -247,7 +248,7 @@
 <code class="descname">parsetimewin</code><span class="sig-paren">(</span><em>s</em>, <em>t</em><span class="sig-paren">)</span><a class="headerlink" href="#parsetimewin" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<p>Convert times <strong>s</strong> and <strong>t</strong> to strings α, ω sorted α &lt; ω.
+<p>Convert times <strong>s</strong> and <strong>t</strong> to strings <span class="math notranslate nohighlight">\(\alpha, \omega\)</span> sorted <span class="math notranslate nohighlight">\(\alpha &lt; \omega\)</span>.
 <strong>s</strong> and <strong>t</strong> can be real numbers, DateTime objects, or ASCII strings.
 Expected string format is “yyyy-mm-ddTHH:MM:SS.nnn”, e.g. 2016-03-23T11:17:00.333.</p>
 <p>“Safe” synchronize of start and end times of all trace data in SeisData structure <code class="docutils literal notranslate"><span class="pre">S</span></code> to a new structure <code class="docutils literal notranslate"><span class="pre">U</span></code>.</p>
@@ -258,7 +259,7 @@ Expected string format is “yyyy-mm-ddTHH:MM:SS.nnn”, e.g. 2016-03-23T11:17:0
 
 <p>Alias to <code class="docutils literal notranslate"><span class="pre">Dates.unix2datetime</span></code>.</p>
 <p>function:: w_time(W::Array{Int64,2}, fs::Float64)</p>
-<p>Convert matrix W from time windows (w[:,1]:w[:,2]) in integer μs from the Unix epoch (1970-01-01T00:00:00) to sparse delta-encoded time representation. Specify fs in Hz.</p>
+<p>Convert matrix W from time windows (w[:,1]:w[:,2]) in integer <span class="math notranslate nohighlight">\(\mu s\)</span> from the Unix epoch (1970-01-01T00:00:00) to sparse delta-encoded time representation. Specify fs in Hz.</p>
 </div>
 
 

@@ -40,6 +40,7 @@ Generate N channels of random seismic data as a SeisData object.
 .. function:: randSeisEvent([, c=0.2, s=0.6])
 
 Generate a SeisEvent structure filled with random values.
+
 * 100*c% of channels *after the first* will have irregularly-sampled data (fs = 0.0)
 * 100*s% of channels *after the first* are guaranteed to have seismic data.
 

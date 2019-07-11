@@ -49,7 +49,7 @@ Remove unwanted characters from S.
 
 .. function:: parsetimewin(s, t)
 
-Convert times **s** and **t** to strings α, ω sorted α < ω.
+Convert times **s** and **t** to strings :math:`\alpha, \omega` sorted :math:`\alpha < \omega`.
 **s** and **t** can be real numbers, DateTime objects, or ASCII strings.
 Expected string format is "yyyy-mm-ddTHH:MM:SS.nnn", e.g. 2016-03-23T11:17:00.333.
 
@@ -61,4 +61,4 @@ Alias to ``Dates.unix2datetime``.
 
 function:: w_time(W::Array{Int64,2}, fs::Float64)
 
-Convert matrix W from time windows (w[:,1]:w[:,2]) in integer μs from the Unix epoch (1970-01-01T00:00:00) to sparse delta-encoded time representation. Specify fs in Hz.
+Convert matrix W from time windows (w[:,1]:w[:,2]) in integer :math:`\mu s` from the Unix epoch (1970-01-01T00:00:00) to sparse delta-encoded time representation. Specify fs in Hz.

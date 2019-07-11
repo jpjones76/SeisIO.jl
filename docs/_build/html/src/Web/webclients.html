@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Web Requests &mdash; SeisIO 0.2.0 documentation</title>
+  <title>Web Requests &mdash; SeisIO 0.3.0 documentation</title>
   
 
   
@@ -24,7 +24,8 @@
         <script type="text/javascript" src="../../_static/jquery.js"></script>
         <script type="text/javascript" src="../../_static/underscore.js"></script>
         <script type="text/javascript" src="../../_static/doctools.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -60,7 +61,7 @@
             
             
               <div class="version">
-                0.2.0
+                0.3.0
               </div>
             
           
@@ -216,7 +217,7 @@ real-time streaming, see <a class="reference internal" href="seedlink.html#seedl
 <div class="line"><br /></div>
 <div class="line"><strong>method</strong></div>
 <div class="line"><strong>“IRIS”</strong>: <a class="reference internal" href="#irisws"><span class="std std-ref">IRISWS</span></a>.</div>
-<div class="line"><strong>“FDSN”</strong>: <a class="reference internal" href="#fdsnws"><span class="std std-ref">FDSNWS dataselect</span></a>. Change FDSN servers with keyword <code class="docutils literal notranslate"><span class="pre">--src</span></code> using the <a class="reference internal" href="../Appendices/web_syntax.html#servers"><span class="std std-ref">server list</span></a> (also available by typing <code class="docutils literal notranslate"><span class="pre">?seis_www</span></code>).</div>
+<div class="line"><strong>“FDSN”</strong>: <a class="reference internal" href="#fdsnws"><span class="std std-ref">FDSNWS dataselect</span></a>. Change FDSN servers with keyword <code class="docutils literal notranslate"><span class="pre">src</span></code> using the <a class="reference internal" href="../Appendices/web_syntax.html#servers"><span class="std std-ref">server list</span></a> (also available by typing <code class="docutils literal notranslate"><span class="pre">?seis_www</span></code>).</div>
 <div class="line"><br /></div>
 <div class="line"><strong>channels</strong></div>
 <div class="line">Channels to retrieve; can be passed as a <a class="reference internal" href="../Appendices/web_syntax.html#cid"><span class="std std-ref">string, string array, or parameter file</span></a>. Type <code class="docutils literal notranslate"><span class="pre">?chanspec</span></code> at the Julia prompt for more info.</div>
@@ -225,16 +226,16 @@ real-time streaming, see <a class="reference internal" href="seedlink.html#seedl
 <div class="line">Keyword arguments; see also <a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">SeisIO standard KWs</span></a> or type <code class="docutils literal notranslate"><span class="pre">?SeisIO.KW</span></code>.</div>
 <div class="line">Standard keywords: fmt, nd, opts, rad, reg, si, to, v, w, y</div>
 <div class="line">Other keywords:</div>
-<div class="line"><code class="docutils literal notranslate"><span class="pre">--s</span></code>: Start time</div>
-<div class="line"><code class="docutils literal notranslate"><span class="pre">--t</span></code>: Termination (end) time</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">s</span></code>: Start time</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">t</span></code>: Termination (end) time</div>
 </div>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
-<li><code class="docutils literal notranslate"><span class="pre">get_data!(S,</span> <span class="pre">&quot;FDSN&quot;,</span> <span class="pre">&quot;UW.SEP..EHZ,UW.SHW..EHZ,UW.HSR..EHZ&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">t=(-600))</span></code>: using FDSNWS, get the last 10 minutes of data from three short-period vertical-component channels at Mt. St. Helens, USA.</li>
-<li><code class="docutils literal notranslate"><span class="pre">get_data!(S,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">&quot;CC.PALM..EHN&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">t=(-120),</span> <span class="pre">f=&quot;sacbl&quot;)</span></code>: using IRISWS, fetch the last two minutes of data from component EHN, station PALM (Palmer Lift (Mt. Hood), OR, USA,), network CC (USGS Cascade Volcano Observatory, Vancouver, WA, USA), in bigendian SAC format, and merge into SeisData structure <cite>S</cite>.</li>
-<li><code class="docutils literal notranslate"><span class="pre">get_data!(S,</span> <span class="pre">&quot;FDSN&quot;,</span> <span class="pre">&quot;CC.TIMB..EHZ&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">t=(-600),</span> <span class="pre">w=true)</span></code>: using FDSNWS, get the last 10 minutes of data from channel EHZ, station TIMB (Timberline Lodge, OR, USA), save the data directly to disk, and add it to SeisData structure <cite>S</cite>.</li>
-<li><code class="docutils literal notranslate"><span class="pre">S</span> <span class="pre">=</span> <span class="pre">get_data(&quot;FDSN&quot;,</span> <span class="pre">&quot;HV.MOKD..HHZ&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">s=&quot;2012-01-01T00:00:00&quot;,</span> <span class="pre">t=(-3600))</span></code>: using FDSNWS, fill a new SeisData structure <cite>S</cite> with an hour of data ending at 2012-01-01, 00:00:00 UTC, from HV.MOKD..HHZ (USGS Hawai’i Volcano Observatory).</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_data!(S,</span> <span class="pre">&quot;FDSN&quot;,</span> <span class="pre">&quot;UW.SEP..EHZ,UW.SHW..EHZ,UW.HSR..EHZ&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">t=(-600))</span></code>: using FDSNWS, get the last 10 minutes of data from three short-period vertical-component channels at Mt. St. Helens, USA.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_data!(S,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">&quot;CC.PALM..EHN&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">t=(-120),</span> <span class="pre">f=&quot;sacbl&quot;)</span></code>: using IRISWS, fetch the last two minutes of data from component EHN, station PALM (Palmer Lift (Mt. Hood), OR, USA,), network CC (USGS Cascade Volcano Observatory, Vancouver, WA, USA), in bigendian SAC format, and merge into SeisData structure <cite>S</cite>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_data!(S,</span> <span class="pre">&quot;FDSN&quot;,</span> <span class="pre">&quot;CC.TIMB..EHZ&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">t=(-600),</span> <span class="pre">w=true)</span></code>: using FDSNWS, get the last 10 minutes of data from channel EHZ, station TIMB (Timberline Lodge, OR, USA), save the data directly to disk, and add it to SeisData structure <cite>S</cite>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">S</span> <span class="pre">=</span> <span class="pre">get_data(&quot;FDSN&quot;,</span> <span class="pre">&quot;HV.MOKD..HHZ&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">s=&quot;2012-01-01T00:00:00&quot;,</span> <span class="pre">t=(-3600))</span></code>: using FDSNWS, fill a new SeisData structure <cite>S</cite> with an hour of data ending at 2012-01-01, 00:00:00 UTC, from HV.MOKD..HHZ (USGS Hawai’i Volcano Observatory).</p></li>
 </ol>
 </div>
 <div class="section" id="fdsn-queries">
@@ -257,8 +258,8 @@ real-time streaming, see <a class="reference internal" href="seedlink.html#seedl
 <div class="line-block">
 <div class="line"><a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">Shared keywords</span></a>: fmt, nd, opts, rad, reg, s, si, t, to, v, w, y</div>
 <div class="line">Other keywords:</div>
-<div class="line"><code class="docutils literal notranslate"><span class="pre">--s</span></code>: Start time</div>
-<div class="line"><code class="docutils literal notranslate"><span class="pre">--t</span></code>: Termination (end) time</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">s</span></code>: Start time</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">t</span></code>: Termination (end) time</div>
 <div class="line"><code class="docutils literal notranslate"><span class="pre">xf</span></code>: Name of XML file to save station metadata</div>
 </div>
 </div>
@@ -279,8 +280,8 @@ remote station XML files by web query.</p>
 <div class="line-block">
 <div class="line"><a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">Shared keywords</span></a>: src, to, v</div>
 <div class="line">Other keywords:</div>
-<div class="line"><code class="docutils literal notranslate"><span class="pre">--s</span></code>: Start time</div>
-<div class="line"><code class="docutils literal notranslate"><span class="pre">--t</span></code>: Termination (end) time</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">s</span></code>: Start time</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">t</span></code>: Termination (end) time</div>
 </div>
 </div>
 </div>
@@ -290,9 +291,9 @@ remote station XML files by web query.</p>
 <div class="section" id="data-query-features">
 <h3>Data Query Features<a class="headerlink" href="#data-query-features" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Stage zero gains are removed from trace data; all IRIS data will appear to have a gain of 1.0.</li>
-<li>IRISWS disallows wildcards in channel IDs.</li>
-<li>Channel spec <em>must</em> include the net, sta, cha fields; thus, CHA = “CC.VALT..BHZ” is OK; CHA = “CC.VALT” is not.</li>
+<li><p>Stage zero gains are removed from trace data; all IRIS data will appear to have a gain of 1.0.</p></li>
+<li><p>IRISWS disallows wildcards in channel IDs.</p></li>
+<li><p>Channel spec <em>must</em> include the net, sta, cha fields; thus, CHA = “CC.VALT..BHZ” is OK; CHA = “CC.VALT” is not.</p></li>
 </ul>
 </div>
 </div>

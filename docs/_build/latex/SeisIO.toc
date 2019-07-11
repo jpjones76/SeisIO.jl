@@ -89,31 +89,31 @@
 \contentsline {subsection}{\numberline {6.6.4}String (c == 0x01)}{38}{subsection.6.6.4}
 \contentsline {subsection}{\numberline {6.6.5}Bits Type (c == 0x00 or 0x01 \textless {} c \textless {} 0x7f)}{38}{subsection.6.6.5}
 \contentsline {section}{\numberline {6.7}Compound Object Types}{38}{section.6.7}
-\contentsline {subsection}{\numberline {6.7.1}PhaseCat}{39}{subsection.6.7.1}
+\contentsline {subsection}{\numberline {6.7.1}PhaseCat}{38}{subsection.6.7.1}
 \contentsline {subsection}{\numberline {6.7.2}EventChannel}{39}{subsection.6.7.2}
-\contentsline {subsection}{\numberline {6.7.3}SeisChannel}{40}{subsection.6.7.3}
-\contentsline {subsection}{\numberline {6.7.4}EventTraceData}{41}{subsection.6.7.4}
-\contentsline {subsection}{\numberline {6.7.5}SeisData}{42}{subsection.6.7.5}
-\contentsline {subsection}{\numberline {6.7.6}SeisHdr}{44}{subsection.6.7.6}
-\contentsline {subsection}{\numberline {6.7.7}SeisSrc}{44}{subsection.6.7.7}
-\contentsline {subsection}{\numberline {6.7.8}SeisEvent}{45}{subsection.6.7.8}
-\contentsline {section}{\numberline {6.8}Data Type Codes}{45}{section.6.8}
-\contentsline {subsection}{\numberline {6.8.1}Loc Type Codes}{45}{subsection.6.8.1}
-\contentsline {subsection}{\numberline {6.8.2}Resp Type Codes}{45}{subsection.6.8.2}
-\contentsline {subsection}{\numberline {6.8.3}Other Type Codes}{45}{subsection.6.8.3}
-\contentsline {subsubsection}{SeisIO Object Type codes}{47}{subsubsection*.69}
-\contentsline {section}{\numberline {6.9}Data Requests Syntax}{47}{section.6.9}
-\contentsline {subsection}{\numberline {6.9.1}Channel ID Syntax}{47}{subsection.6.9.1}
-\contentsline {subsubsection}{Wildcards and Blanks}{48}{subsubsection*.71}
-\contentsline {subsubsection}{Channel Configuration Files}{48}{subsubsection*.72}
-\contentsline {subsubsection}{Server List}{49}{subsubsection*.73}
-\contentsline {subsection}{\numberline {6.9.2}Time Syntax}{49}{subsection.6.9.2}
-\contentsline {section}{\numberline {6.10}SeisIO Standard Keywords}{50}{section.6.10}
-\contentsline {subsection}{\numberline {6.10.1}SeedLink Keywords}{51}{subsection.6.10.1}
-\contentsline {section}{\numberline {6.11}Examples}{51}{section.6.11}
-\contentsline {subsection}{\numberline {6.11.1}FDSN data query}{51}{subsection.6.11.1}
-\contentsline {subsection}{\numberline {6.11.2}FDSN station query}{51}{subsection.6.11.2}
-\contentsline {subsection}{\numberline {6.11.3}FDSN event header/data query}{52}{subsection.6.11.3}
-\contentsline {subsection}{\numberline {6.11.4}IRISWS data query}{52}{subsection.6.11.4}
-\contentsline {subsection}{\numberline {6.11.5}SeedLink sessions}{53}{subsection.6.11.5}
-\contentsline {chapter}{Index}{55}{section*.75}
+\contentsline {subsection}{\numberline {6.7.3}SeisChannel}{39}{subsection.6.7.3}
+\contentsline {subsection}{\numberline {6.7.4}EventTraceData}{40}{subsection.6.7.4}
+\contentsline {subsection}{\numberline {6.7.5}SeisData}{41}{subsection.6.7.5}
+\contentsline {subsection}{\numberline {6.7.6}SeisHdr}{43}{subsection.6.7.6}
+\contentsline {subsection}{\numberline {6.7.7}SeisSrc}{43}{subsection.6.7.7}
+\contentsline {subsection}{\numberline {6.7.8}SeisEvent}{44}{subsection.6.7.8}
+\contentsline {section}{\numberline {6.8}Data Type Codes}{44}{section.6.8}
+\contentsline {subsection}{\numberline {6.8.1}Loc Type Codes}{44}{subsection.6.8.1}
+\contentsline {subsection}{\numberline {6.8.2}Resp Type Codes}{44}{subsection.6.8.2}
+\contentsline {subsection}{\numberline {6.8.3}Other Type Codes}{44}{subsection.6.8.3}
+\contentsline {subsubsection}{SeisIO Object Type codes}{46}{subsubsection*.69}
+\contentsline {section}{\numberline {6.9}Data Requests Syntax}{46}{section.6.9}
+\contentsline {subsection}{\numberline {6.9.1}Channel ID Syntax}{46}{subsection.6.9.1}
+\contentsline {subsubsection}{Wildcards and Blanks}{47}{subsubsection*.71}
+\contentsline {subsubsection}{Channel Configuration Files}{47}{subsubsection*.72}
+\contentsline {subsubsection}{Server List}{48}{subsubsection*.73}
+\contentsline {subsection}{\numberline {6.9.2}Time Syntax}{48}{subsection.6.9.2}
+\contentsline {section}{\numberline {6.10}SeisIO Standard Keywords}{49}{section.6.10}
+\contentsline {subsection}{\numberline {6.10.1}SeedLink Keywords}{50}{subsection.6.10.1}
+\contentsline {section}{\numberline {6.11}Examples}{50}{section.6.11}
+\contentsline {subsection}{\numberline {6.11.1}FDSN data query}{50}{subsection.6.11.1}
+\contentsline {subsection}{\numberline {6.11.2}FDSN station query}{50}{subsection.6.11.2}
+\contentsline {subsection}{\numberline {6.11.3}FDSN event header/data query}{51}{subsection.6.11.3}
+\contentsline {subsection}{\numberline {6.11.4}IRISWS data query}{51}{subsection.6.11.4}
+\contentsline {subsection}{\numberline {6.11.5}SeedLink sessions}{52}{subsection.6.11.5}
+\contentsline {chapter}{Index}{53}{section*.75}
