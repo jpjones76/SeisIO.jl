@@ -186,12 +186,12 @@ end
 
 # PZResp default
 PZResp( ;
-        c::Float32                    = 0.0f0,
+        c::Float32                    = 1.0f0,
         p::Array{Complex{Float32},1}  = Array{Complex{Float32},1}(undef, 0),
         z::Array{Complex{Float32},1}  = Array{Complex{Float32},1}(undef, 0)
         ) = PZResp(c, p, z)
 PZResp64( ;
-          c::Float64                    = 0.0,
+          c::Float64                    = 1.0,
           p::Array{Complex{Float64},1}  = Array{Complex{Float64},1}(undef, 0),
           z::Array{Complex{Float64},1}  = Array{Complex{Float64},1}(undef, 0)
           ) = PZResp64(c, p, z)
@@ -258,7 +258,7 @@ read(io::IO, ::Type{PZResp64}) = PZResp64(
   )
 
 isempty(R::Union{PZResp,PZResp64}) = min(
-  R.c == zero(typeof(R.c)),
+  R.c == one(typeof(R.c)),
   isempty(getfield(R, :p)),
   isempty(getfield(R, :z))
   )
