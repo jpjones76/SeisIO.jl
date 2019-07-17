@@ -1,11 +1,13 @@
 export FDSNevq, FDSNevt
 
 """
-    H = FDSNevq(ot)
+    (H,R) = FDSNevq(ot)
 
 Multi-server query for the events with the closest origin time to `ot`.
+Returns an Array{SeisHdr,1} in H with event headers and an Array{SeisSrc,1}
+in R in H with corresponding source process info.
 
-Standard keywords: evw, rad, reg, mag, nev, src, to
+Keywords: evw, rad, reg, mag, nev, src, to
 
 See also: SeisIO.KW
 """
@@ -86,19 +88,23 @@ function FDSNevq(ot::String;
     end
   end
 
-  # Sort based on earliest origin time
-  # sort!(EvCat, by = H -> abs(round(Int64, d2u(getfield(H, :ot))*sμ) - oti))
-  for H in EvCat
-    # push!(origin_times, round(Int64, d2u(getfield(H, :ot))*sμ))
-    push!(origin_times, abs(round(Int64, d2u(getfield(H, :ot))*sμ) - oti))
-  end
-  # k = sortperm(abs.(origin_times.-oti))
-  k = sortperm(origin_times)
+  if nev > 0
+    # Sort based on earliest origin time
+    # sort!(EvCat, by = H -> abs(round(Int64, d2u(getfield(H, :ot))*sμ) - oti))
+    for H in EvCat
+      # push!(origin_times, round(Int64, d2u(getfield(H, :ot))*sμ))
+      push!(origin_times, abs(round(Int64, d2u(getfield(H, :ot))*sμ) - oti))
+    end
+    # k = sortperm(abs.(origin_times.-oti))
+    k = sortperm(origin_times)
 
-  n0 = min(length(EvCat), nev)
-  n0 < nev && @warn(string("Catalog only contains ", n0, " events (original request was ", nev,")"))
-  return EvCat[k[1:n0]], EvSrc[k[1:n0]]
-  # return EvCat[1:n0], EvSrc[1:n0]
+    n0 = min(length(EvCat), nev)
+    n0 < nev && @warn(string("Catalog only contains ", n0, " events (original request was ", nev,")"))
+    return EvCat[k[1:n0]], EvSrc[k[1:n0]]
+    # return EvCat[1:n0], EvSrc[1:n0]
+  else
+    return EvCat, EvSrc
+  end
 end
 
 """

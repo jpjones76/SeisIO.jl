@@ -10,6 +10,10 @@ printstyled("    single-server query\n", color=:light_green)
 (H,R) = FDSNevq("201103110547", mag=[3.0, 9.9], nev=10, src="IRIS", v=0)
 @test length(H)==9
 
+printstyled("    single-server query without nev specified\n", color=:light_green)
+(H,R) = FDSNevq("2018-06-01",reg=[32.0,38.0,-120.0,-115.0,-50.0,50.0],mag=[2.0,8.0],evw=[0.,375243600.0]);
+@test length(H) == length(R) == 5240
+
 printstyled("    multi-server query\n", color=:light_green)
 open("FDSNevq.log", "w") do out
   redirect_stdout(out) do
