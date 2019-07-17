@@ -22,7 +22,9 @@ function should_bswap(file::String)
   end
 end
 
-function write_sac_file(fname::String, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Array{UInt8,1}, x::Array{Float32,1}; t=[Float32(0)]::Array{Float32,1}, ts=true::Bool)
+function write_sac_file(fname::String, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Array{UInt8,1}, x::Array{Float32,1};
+                        t::Array{Float32,1}=Float32[],
+                        ts::Bool=true)
   f = open(fname, "w")
   write(f, fv)
   write(f, iv)
@@ -283,7 +285,7 @@ function writesac(S::GphysData; ts::Bool=false, v::Int64=KW.v)
   else
     ift = Int32(1); leven = true
   end
-  tdata = Array{Float32}(undef, 0)
+  tdata = Array{Float32,1}(undef, 0)
   N     = S.n
   for i = 1:N
     T = getindex(S, i)
@@ -299,5 +301,46 @@ function writesac(S::GphysData; ts::Bool=false, v::Int64=KW.v)
     write_sac_file(fname, fv, iv, cv, x, t=tdata, ts=ts)
     v > 0  && @printf(stdout, "%s: Wrote file %s from channel %i\n", string(now()), fname, i)
   end
+  return nothing
 end
-writesac(S::SeisChannel; ts=false::Bool, v::Int64=KW.v) = writesac(SeisData(S), ts=ts, v=v)
+
+function writesac(S::GphysChannel;
+  fname::String="",
+  ts::Bool=false,
+  v::Int64=KW.v)
+
+  b = S.t[1,2]
+  dt = 1.0/S.fs
+  if ts
+    ift = Int32(4)
+    leven = false
+    tdata = Float32.(μs*(t_expand(S.t, dt) .- b))
+  else
+    ift = Int32(1)
+    leven = true
+    tdata = Array{Float32,1}(undef, 0)
+  end
+  (fv, iv, cv, fn) = fill_sac(S, ts, leven)
+
+  # Data
+  x = getfield(S, :x)
+  if eltype(x) != Float32
+    x = Float32.(x)
+  end
+
+  # Write to file
+  fstr = String(
+    if fname == ""
+      fn
+    else
+      if endswith(lowercase(fname), ".sac")
+        fname
+      else
+        fname * ".sac"
+      end
+    end
+    )
+  write_sac_file(fstr, fv, iv, cv, x, t=tdata, ts=ts)
+  v > 0  && println(stdout, timestamp(), ": Wrote file ", fstr)
+  return nothing
+end
