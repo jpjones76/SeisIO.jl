@@ -120,7 +120,7 @@ Standard instrument location description:
 * lat::Float64 (North is positive)
 * lon::Float64 (East is positive)
 * el::Float64 (above sea level is positive)
-* depth::Float64
+* dep::Float64
 * az::Float64 (clockwise from north)
 * inc::Float64 (downward from +z = 0°)
 """
