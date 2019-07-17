@@ -89,7 +89,7 @@ keyword isn't specified.
 | KW       | Default    | Allowed Data Types | Meaning                        |
 |----------|:-----------|:-------------------|:-------------------------------|
 | evw      | [600,      | Array{Real,1}      | search for events in window    |
-|          |  600]      |                    |   (ot-|t1|, ot+|t2|)           |
+|          |  600]      |                    |   [ot-abs(t1), ot+abs(t2)]     |
 | mag      | [6.0, 9.9] | Array{Float64,1}   | search magitude range          |
 | nev      | 0          | Int64              | number of events per query     |
 |          |            |                    | (if nev=0, return all matches) |
@@ -147,7 +147,7 @@ const KW = KWDefs(
                     false,  # full::Bool
         Float64[6.0, 9.9],  # mag::Array{Float64,1}
                         1,  # nd::Real
-                        1,  # nev::Int64
+                        0,  # nev::Int64
                    100000,  # n_zip::Int64
                    360000,  # nx_add::Int64
                   8640000,  # nx_new::Int64
