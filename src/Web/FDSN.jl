@@ -98,20 +98,7 @@ function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
   io = open(xf, "r")
   xsta = read(io, String)
   close(io)
-  (ID, NAME, LOC, FS, GAIN, RESP, UNITS, MISC) = FDSN_sta_xml(xsta)
-  v > 2 && println(stdout, "IDs from XML = ", ID)
-  # Transfer to a SeisData object
-  S = SeisData(length(ID))
-  for i = 1:S.n
-    S.id[i]     = ID[i]
-    S.name[i]   = NAME[i]
-    S.loc[i]    = LOC[i]
-    S.fs[i]     = FS[i]
-    S.gain[i]   = GAIN[i]
-    S.resp[i]   = RESP[i]
-    S.units[i]  = UNITS[i]
-    merge!(S.misc[i], MISC[i])
-  end
+  S = FDSN_sta_xml(xsta)
   return S
 end
 

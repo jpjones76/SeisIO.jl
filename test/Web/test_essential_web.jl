@@ -51,10 +51,7 @@ true_ot = DateTime("2011-03-11T05:46:23.200")
 true_loc = Float64[2.2376 38.2963; 93.0144 142.498; 26.3 19.7]
 true_mag = Float32[8.6, 9.1, 8.8, 8.5, 8.6, 9.0, 8.5]
 true_msc = String["MW", "MW", "MW", "MW", "MW", "MW", ""]
-r1 = PZResp(Complex{Float32}.([ 0.0+0.0im -981.0+1009.0im
-                                0.0+0.0im -981.0-1009.0im
-                                0.0+0.0im -3290.0+1263.0im
-                                0.0+0.0im -3290.0-1263.0im]), rev=true)
+r1 = PZResp(p = ComplexF32[-981.0+1009.0im, -981.0-1009.0im, -3290.0+1263.0im, -3290.0-1263.0im])
 r2 = PZResp(Complex{Float32}.([   0.0+0.0im       -0.037-0.037im
                                   0.0+0.0im       -0.037+0.037im
                                   -15.15+0.0im    -15.64+0.0im
@@ -66,6 +63,7 @@ r2 = PZResp(Complex{Float32}.([   0.0+0.0im       -0.037-0.037im
                                   0.0+0.0im       -10530.0+10050.0im
                                   0.0+0.0im       -13300.0+0.0im
                                   0.0+0.0im       -255.097+0.0im ]),rev=true)
+r2.z = r2.z[1:6]
 
 printstyled("    QuakeML test 1\n", color=:light_green)
 (EC,RR) = read_qml(xml_evfile1)
@@ -124,7 +122,16 @@ io = open(xml_stfile, "r")
 xsta = read(io, String)
 close(io)
 
-(ID, NAME, LOC, FS, GAIN, RESP, UNITS, MISC) = FDSN_sta_xml(xsta)
+# (ID, NAME, LOC, FS, GAIN, RESP, UNITS, MISC) = FDSN_sta_xml(xsta)
+S = FDSN_sta_xml(xsta)
+ID = S.id
+NAME = S.name
+LOC = S.loc
+FS = S.fs
+GAIN = S.gain
+RESP = S.resp
+UNITS = S.units
+MISC = S.misc
 
 @assert(ID[1]=="AK.ATKA..BNE", id_err)
 @assert(ID[2]=="AK.ATKA..BNN", id_err)
@@ -147,10 +154,8 @@ end
 @test ≈(GAIN[2], 284298.0)
 @test ≈(GAIN[end-1], 8.38861E9)
 @test ≈(GAIN[end], 8.38861E9)
-@test ==(RESP[1], r1)
-@test ==(RESP[2], r1)
-@test ==(RESP[end-1], r2)
-@test ==(RESP[end], r2)
+@test RESP[1] == RESP[2] == r1
+@test RESP[end-1] == RESP[end] == r2
 
 chanspec()
 chanspec()
