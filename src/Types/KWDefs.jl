@@ -51,26 +51,20 @@ An immutable structure containing default keyword argument values in SeisIO.
 Arguments that accept keywords in SeisIO.KW use the default values when a
 keyword isn't specified.
 
-### Keywords
+### Main Module Keywords
 
 | KW       | Default    | Allowed Data Types | Meaning                        |
 |----------|:-----------|:-------------------|:-------------------------------|
 | comp     | 0x00       | UInt8              | compress data on write?[^1]    |
-| evw      | [600,      | Array{Real,1}      | search for events in window    |
-|          |  600]      |                    |   (ot-|t1|, ot+|t2|)           |
 | fmt      | "miniseed" | String             | request data format            |
 | full     | false      | Bool               | read full headers?             |
-| mag      | [6.0, 9.9] | Array{Float64,1}   | search magitude range          |
 | nd       | 1          | Real               | number of days per subrequest  |
-| nev      | 1          | Int64              | number of events per query     |
 | n_zip    | 100000     | Int64              | compress if length(x) > n_zip  |
 | nx_add   | 360000     | Int64              | minimum length increase of an  |
 |          |            |                    |  undersized data array         |
 | nx_new   | 8640000    | Int64              | number of samples allocated    |
 |          |            |                    |   for a new data channel       |
 | opts     | ""         | String             | user-specified options[^2]     |
-| pha      | "P"        | String             | phases to get (comma-separated |
-|          |            |                    |   list; use "ttall" for all)   |
 | prune    | true       | Bool               | call prune! after get_data?    |
 | rad      | []         | Array{Float64,1}   | radius search: `[center_lat,`  |
 |          |            |                    |   `center_lon, r_min, r_max]`  |
@@ -89,6 +83,18 @@ keyword isn't specified.
 
 [^1]: If `comp == 0x00`, never compress data; if `comp == 0x01`, only compress channel `i` if `length(S.x[i]) > KW.n_zip`; if `comp == 0x02`, always compress data.
 [^2]: Format as for an http request request URL, e.g. "szsrecs=true&repo=realtime" for FDSN (note: string should not begin with an ampersand).
+
+### Quake Submodule Keywords
+
+| KW       | Default    | Allowed Data Types | Meaning                        |
+|----------|:-----------|:-------------------|:-------------------------------|
+| evw      | [600,      | Array{Real,1}      | search for events in window    |
+|          |  600]      |                    |   (ot-|t1|, ot+|t2|)           |
+| mag      | [6.0, 9.9] | Array{Float64,1}   | search magitude range          |
+| nev      | 0          | Int64              | number of events per query     |
+|          |            |                    | (if nev=0, return all matches) |
+| pha      | "P"        | String             | phases to get (comma-separated |
+|          |            |                    |   list; use "ttall" for all)   |
 
 ### Substructures
 
