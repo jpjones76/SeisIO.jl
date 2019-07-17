@@ -1,3 +1,21 @@
+The current set of updates, leading to v0.4.0, will focus on:
+1. more detailed instrument responses
+2. expanded file format support
+3. expanded data acquisition options
+
+### 2019-07-16
+#### Bugs, Consistency, Performance
+* Station XML handling has been rewritten, yielding 97% reduced memory use, 5.1x
+speedup, and a workaround for the GeoNet server-side StationXML error (issue #15)
+* FDSNEvq now returns full event catalogs by default (issue #16)
+* Documentation updated (fixes issue #17)
+* `writesac()` with a GphysChannel object now accepts keyword `fname` to set
+the file name (issue #18)
+  + When specifying `fname=FSTR`, if FSTR doesn't end with (case-insensitive)
+  ".sac", the suffix ".sac" is appended to FSTR automatically.
+* New PZResp and PZResp64 objects should now always have :c = 1.0, regardless of
+initialization method
+
 # SeisIO v0.3.0 Release: 2019-06-05
 
 ### 2019-06-04
