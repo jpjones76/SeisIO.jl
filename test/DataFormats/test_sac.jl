@@ -28,7 +28,7 @@ redirect_stdout(out) do
 end
 
 printstyled("    write\n", color=:light_green)
-writesac(SAC2)
+writesac(SeisData(SAC2)) # change 2019-07-15 to cover writesac on GphysData
 @test safe_isfile("1981.088.10.38.14.009..CDV...R.SAC")
 rm("1981.088.10.38.14.009..CDV...R.SAC")
 
@@ -36,6 +36,16 @@ SAC1.id = "VU.CDV..NUL"
 SAC1.name = "VU.CDV..NUL"
 writesac(SAC1)
 @test safe_isfile("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")
+
+# testing custom naming formats
+writesac(SAC1, fname="test_write_1.sac")
+@test safe_isfile("test_write_1.sac")
+rm("test_write_1.sac")
+
+# testing that appending ".sac" to a file string works
+writesac(SAC1, fname="test_write_2", v=1)
+@test safe_isfile("test_write_2.sac")
+rm("test_write_2.sac")
 
 redirect_stdout(out) do
   writesac(SAC1, ts=true, v=1)
