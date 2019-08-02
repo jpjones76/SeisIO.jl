@@ -10,9 +10,9 @@ function randResp(n::Int64=0)
   zstub = zeros(T, 2*i)
   pstub = 10 .*rand(T, i)
   if T == Float32
-    resp = PZResp(0.0f0, complex.(zstub), vcat(pstub .+ pstub.*im, pstub .- pstub*im))    # resp
+    resp = PZResp(1.0f0, 1.0f0, complex.(zstub), vcat(pstub .+ pstub.*im, pstub .- pstub*im))    # resp
   else
-    resp = PZResp64(0.0, complex.(zstub), vcat(pstub .+ pstub.*im, pstub .- pstub*im))    # resp
+    resp = PZResp64(1.0, 1.0, complex.(zstub), vcat(pstub .+ pstub.*im, pstub .- pstub*im))    # resp
   end
   return resp
 end
@@ -40,7 +40,7 @@ function rand_t(Lx::Int64, n::Int64=0)
       (length(gaps) == L) && break
     end
     L = length(gaps)
-    
+
     t[2:L+1,1] = gaps
     for i = 2:L+1
       t[i,2] = round(Int64, (rand(1:100)+rand())*sμ)
@@ -87,7 +87,7 @@ end
 
 # Populate a channel with irregularly-sampled (campaign-style) data
 function populate_irr!(Ch::SeisChannel; nx::Int64=0)
-  irregular_units = ["%", "(% cloud cover)", "(direction vector)", "C", "K", "None", "Pa", "T", "V", "W", "m", "m/m", "m/s", "m/s^2", "m^3/m^3", "rad", "rad/s", "rad/s^2", "tonnes SO2"]
+  irregular_units = ["%", "(% cloud cover)", "(direction vector)", "C", "K", "None", "Pa", "T", "V", "W", "m", "m/m", "m/s", "m/s2", "m3/m3", "rad", "rad/s", "rad/s2", "tonnes SO2"]
 
   chan = "OY"*randstring('A':'Z',1)
   net = ur2()
@@ -114,8 +114,7 @@ end
 
 # Populate a channel with regularly-sampled (time-series) data
 function populate_chan!(Ch::SeisChannel; s::Bool=false, nx::Int64=0)
-  fc_vals = Float64[1.0/120.0 1.0/60.0 1.0/30.0 0.2 1.0 1.0 1.0 2.0 4.5 15.0]
-  fs_vals = Float64[0.1, 1.0, 2.0, 5.0, 10.0, 20.0, 25.0, 40.0, 50.0, 60.0, 62.5, 80.0, 100.0, 120.0, 125.0, 250.0]
+
   bcodes  = Char['V', 'L', 'M', 'M', 'B', 'S', 'S', 'S', 'S', 'S', 'S', 'H', 'S', 'E', 'E', 'C']
 
   # Ch.fs
