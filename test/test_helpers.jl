@@ -7,7 +7,7 @@ import SeisIO: BUF, FDSN_sta_xml,
   fillx_i16_le!, fillx_i32_be!, fillx_i32_le!, findhex, get_HTTP_req,
   get_http_post, get_views, int2tstr, mean, minreq!,
   mktaper!, mktime, parse_charr, parse_chstr, parse_sl,
-  resp_f, safe_isdir, safe_isfile, sep, sμ, t_collapse,
+  safe_isdir, safe_isfile, sep, sμ, t_collapse,
   t_expand, t_win, taper_seg!, tnote, tstr2int, w_time, webhdr,
   xtmerge!, μs
 import SeisIO.RandSeis: getyp2codes, pop_rand_dict!

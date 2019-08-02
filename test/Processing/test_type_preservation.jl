@@ -23,16 +23,16 @@ for f in String["demean!", "detrend!", "filtfilt!", "merge!", "sync!", "taper!",
   end
 end
 
-printstyled(string("    equalize_resp!\n"), color=:light_green)
-(p,z) = fctopz(1.0, 1.0/sqrt(2.0)); r = PZResp64(1.0, p, z)
-(p, z) = fctopz(0.0333, 1.0/sqrt(2.0)); r2 = PZResp64(1.0, p, z)
+printstyled(string("    remove_resp!\n"), color=:light_green)
+r = fctoresp(1.0, 1.0/sqrt(2.0))
+r2 = fctoresp(0.0333, 1.0/sqrt(2.0))
 S = randSeisData(3, s=1.0)
 S.resp[1] = r
-S.resp[2] = r
+S.resp[2] = deepcopy(r)
 S.resp[3] = r2
 S.x[1] = randn(Float32, S.t[1][end,1])
 T = [eltype(S.x[i]) for i=1:S.n]
-equalize_resp!(S, r)
+remove_resp!(S)
 for i=1:S.n
   @test T[i] == eltype(S.x[i])
 end
