@@ -25,14 +25,6 @@ remove the mean from irregularly sampled channels. Ignores NaNs.
 Remove the polynomial trend of degree n from every regularly-sampled channel i
 in S using a least-squares polynomial fit. Ignores NaNs.
 
-.. function:: equalize_resp!(S, resp_new::Array[, hc_new=HC, C=CH])
-
-Translate all data in SeisData structure **S** to instrument response **resp_new**.
-Expected structure of **resp_new** is a complex Float64 2d array with zeros in
-**resp[:,1]**, poles in **resp[:,2]**. If channel **i** has key **S.misc[i]["hc"]**,
-the corresponding value is used as the critical damping constant; otherwise a
-value of 1.0 is assumed.
-
 .. function:: filtfilt!(S::SeisData[; KWs])
 
 Apply a zero-phase filter to data in **S.x**.
@@ -177,6 +169,57 @@ Specifying end time (t)
 .. function:: mseis!(S::SeisData, U::SeisData, ...)
 
 Merge multiple SeisData structures into S.
+
+****************************
+Seismic Instrument Responses
+****************************
+
+.. function:: translate_resp!(S, resp_new[, C=chans, wl=g])
+.. function:: translate_resp!(Ch, resp_new[, wl=g])
+
+Translate the instrument response of seismic data channels to **resp_new**.
+Replaces field **:resp** with **resp_new** for all affected channels.
+
+Channels to translate can be specified with keyword **C=chans**; however, only
+seismic data channels (with units "m", "m/s", or "m/s2") will be translated.
+
+SeisChannel objects whose units are not "m", "m/s", or "m/s2" are returned with
+no response translation done.
+
+.. function:: remove_resp!(S, C=cha, wl=g])
+.. function:: remove_resp!(Ch, wl=g])
+
+Remove (flatten to DC) the instrument response of seismic data channels **cha**
+in **S** or **Ch**. Replaces **:resp** with the appropriate (all-pass) response.
+
+Response Keywords
+=================
+* **C=cha** restricts response translation for SeisData object **S** to channel(s) **cha**. Accepts an Integer, UnitRange, or Array{Int64,1} argument; does *not* accept string IDs. By default, all seismic data channels in **S** have their responses translated to **resp_new**.
+* **wl=g** sets the waterlevel to g (default: g = eps(Float32) ~ 1.1f-7). The waterlevel is the minimum magnitude (absolute value) of the normalized old frequency response; in other words, if the old frequency response has a maximum magnitude of 1.0, then no response coefficient can be lower than g. This is useful to prevent "divide by zero" errors, but setting it too high will cause errors.
+
+
+Precision and Memory Optimization
+----------------------------------
+To optimize speed and memory use, instrument response translation maps data to
+Complex{Float32} before translation; thus, with Float64 data, there can be
+minor rounding errors.
+
+Instrument responses are also memory-intensive. The minimum memory consumption
+to translate the response of a gapless Float32 SeisChannel object is ~7x the
+size of the object itself.
+
+More precisely, for an object **S** (of Type <: GphysData or GphysChannel),
+translation requires memory ~ 2 kB + the greater of (7x the size of the longest
+Float32 segment, or 3.5x the size of the longest Float64 segment). Translation
+uses four vectors -- three complex and one real -- that are updated and
+dynamically resized as the algorithm loops over each segment:
+
+* Old response container: Array{Complex{Float32,1}}(undef, Nx)
+* New response container: Array{Complex{Float32,1}}(undef, Nx)
+* Complex data container: Array{Complex{Float32,1}}(undef, Nx)
+* Real frequencies for FFT: Array{Float32,1}(undef, Nx)
+
+...where **Nx** is the number of samples in the longest segment in **S**.
 
 **************************
 Other Processing Functions

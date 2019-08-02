@@ -3,6 +3,28 @@ The current set of updates, leading to v0.4.0, will focus on:
 2. expanded file format support
 3. expanded data acquisition options
 
+### 2019-08-01
+#### Respocalypse Part I
+* Instrument response Types Resp and Resp64 have changed in two minor ways:
+  + Field `:c` renamed to `:a0` for consistency with FDSN and SEED
+  + Field `:f0` added for the frequency at which `:a0` is applied
+#### New, Changed, Deprecated
+* `fctoresp`: generate a new instrument response from lower corner frequency `f` and damping constant `c`. If no damping constant is specified, assumes c = 1/sqrt(2).
+* `remove_resp!` remove (flatten to DC) the frequency responses of seismic channels in a SeisData object.
+  + Currently only known to work for velocity sensors; accelerometers and displacement sensors are NYI
+* `resptofc`: guess damping constant of geophone from poles and zeros of a PZResp or PZResp64 object.
+* `translate_resp!`: translate response of seismic data channels in a SeisData object.
+  + Currently working for velocity sensors, maybe accelerometers; displacement NYI
+  + Uses around 1% of the memory of the old `equalize_resp!` function
+* Removed `equalize_resp!`
+* Removed `fctopz`
+* Removed `SeisIO.resp_f`
+#### Bugs, Consistency, Performance
+* Normalization frequency is now saved to `S.resp[i].f0` instead of `S.misc[i]["normfreq"]`.
+* **Warning**: Code coverage may drop below 97% for a few days.
+* **Warning**: Official documentation for instrument response functions will
+be outdated until next week; the help text for individual functions is correct.
+
 ### 2019-07-16
 #### Bugs, Consistency, Performance
 * Station XML handling has been rewritten, yielding 97% reduced memory use, 5.1x
