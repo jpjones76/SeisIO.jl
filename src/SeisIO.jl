@@ -2,7 +2,7 @@ __precompile__()
 module SeisIO
 using Blosc, Dates, DSP, LightXML, LinearAlgebra, Printf, Sockets
 using DelimitedFiles: readdlm
-using FFTW: fft, ifft
+using FFTW: fft, ifft, fft!, ifft!
 using Glob: glob
 using HTTP: request, Messages.statustext
 using Statistics: mean
@@ -22,6 +22,7 @@ include("CoreUtils/time.jl")
 include("CoreUtils/namestrip.jl")
 include("CoreUtils/typ2code.jl")
 include("CoreUtils/file_io.jl")
+include("CoreUtils/poly.jl")
 
 # =========================================================
 # Types and methods
