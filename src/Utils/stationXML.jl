@@ -131,7 +131,7 @@ function FDSN_sta_xml(xmlf::String;
                                 # normfreq
                                 c_normfreq = parse(Float64, content(y))
                               elseif name(y) == "InputUnits"
-                                # calibrationunits
+                                # calibrationunits: this converts "m/s**2" to the UCUM-compliant m/s2
                                 c_units = replace(content(get_elements_by_tagname(y, "Name")[1]), "**" => "")
                               end
                             end
@@ -192,6 +192,11 @@ function FDSN_sta_xml(xmlf::String;
                         @warn(string("Redundant channel ", c_id, ": overwriting with latest channel info."))
                       end
                     end
+
+                    # instrument response
+                    c_resp.f0 = c_normfreq
+                    resp_a0!(c_resp)
+
                     # channel location
                     c_loc = GeoLoc( lat = c_lat,
                                     lon = c_lon,
@@ -208,7 +213,7 @@ function FDSN_sta_xml(xmlf::String;
                                     loc   = c_loc,
                                     units = c_units,
                                     resp  = c_resp )
-                    C.misc["normfreq"] = c_normfreq
+                    # C.misc["normfreq"] = c_normfreq
                     C.misc["ClockDrift"] = c_drift
                     push!(S, C)
 
