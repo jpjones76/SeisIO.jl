@@ -6,21 +6,21 @@ fs = 100.0
 id = "VV.STA1.00.EHZ"
 loc = GeoLoc(lat=46.8523, lon=121.7603, el=4392.0)
 loc1 = GeoLoc(lat=rand(), lon=rand(), el=rand())
-(p1, z1) = fctopz(0.2, 1.0)
-(p2, z2) = fctopz(2.0, 1.0)
+resp1 = fctoresp(0.2, 1.0)
+resp2 = fctoresp(2.0, 1.0)
 units = "m/s"
 src = "test"
 t0 = 0
 
 mkC1() = SeisChannel( id = id, name = "Channel 1",
-                  loc = loc, fs = fs, resp = PZResp64(1.0, p1, z1), units = units,
+                  loc = loc, fs = fs, resp = deepcopy(resp1), units = units,
                   src = "test channel 1",
                   notes = [tnote("New channel 1.")],
                   misc = Dict{String,Any}( "P" => 6.1 ),
                   t = [1 t0; nx 0],
                   x = randn(nx) )
 mkC2() = SeisChannel( id = id, name = "Channel 2",
-                  loc = loc, fs = fs, resp = PZResp64(1.0, p1, z1), units = units,
+                  loc = loc, fs = fs, resp = deepcopy(resp1), units = units,
                   src = "test channel 2",
                   notes = [tnote("New channel 2.")],
                   misc = Dict{String,Any}( "S" => 11.0 ),
@@ -188,8 +188,8 @@ j = findfirst(S.src.=="test channel 5")
 S = deepcopy(U)
 S.loc[4] = deepcopy(loc)
 S.loc[5] = deepcopy(loc)
-S.resp[4] = PZResp64(1.0, p2, z2)
-S.resp[5] = PZResp64(1.0, p2, z2)
+S.resp[4] = deepcopy(resp2)
+S.resp[5] = deepcopy(resp2)
 
 U = deepcopy(S)
 merge!(S)
@@ -207,7 +207,7 @@ i = findfirst(S.src.=="test channel 2")
 
 # Is the second subgroup merged correctly?
 j = findfirst(S.src.=="test channel 5")
-@test S.resp[j] == PZResp64(1.0, p2, z2)
+@test S.resp[j] == resp2
 @test mk_tcat(U.t[4:5], fs) == S.t[j]
 @test vcat(U.x[4], U.x[5]) == S.x[j]
 

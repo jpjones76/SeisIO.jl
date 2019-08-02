@@ -20,12 +20,12 @@ S = [
       "CoreUtils/test_*"
     ]
 S_expect =  [
-              ["test_ls.jl", "test_time.jl", "test_typ2code.jl"],
+              ["test_ls.jl", "test_poly.jl", "test_time.jl", "test_typ2code.jl"],
               ["test_ls.jl"],
               String[],
               ["99011116541W", "99011116541o"],
               ["99011116541W", "99011116541o"],
-              ["test_ls.jl", "test_time.jl", "test_typ2code.jl"]
+              ["test_ls.jl", "test_poly.jl", "test_time.jl", "test_typ2code.jl"]
             ]
 
 # Test that ls returns the same files as `ls -1`
