@@ -243,15 +243,9 @@ function readwin32(dfilestr::String, cfilestr::String;
     lastindex(χ) == getindex(xi, i) || resize!(χ, xi[i])
 
     # Get resp for passive velocity sensors
-    resp = PZResp()
     fci = getindex(fc, i)
-    if S.units[i] == "m/s"
-      hci = getindex(hc, i)
-      p, z = fctopz(fci, hci)
-      setfield!(resp, :c, one(Float32))
-      setfield!(resp, :p, p)
-      setfield!(resp, :p, z)
-    end
+    hci = getindex(hc, i)
+    resp = fctoresp(fci, hci)
     setindex!(getfield(S, :resp), resp, i)
 
     # There will be issues here. Japanese files use NIED or local station

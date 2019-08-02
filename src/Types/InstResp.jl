@@ -139,68 +139,93 @@ hash(R::GenResp) = hash(R.desc, hash(R.resp))
 sizeof(R::GenResp) = 16 + sizeof(getfield(R, :desc)) + sizeof(getfield(R, :resp))
 
 @doc """
-    PZResp
+    PZResp([c = c, p = p, z = z])
 
-Instrument response with three fields:
+Instrument response with three fields. Optionally, fields can be set with keywords at creation.
 
-|:---|:---|:---- |
-| c  | Float32  | damping constant         |
-| p  | Array{Complex{Float32},1} | poles                    |
-| z  | Array{Complex{Float32},1} | zeroes                   |
+| F   | Type                      | Meaning
+|:--- |:---                       |:----                                      |
+| a0  | Float32                   | normalization constant. Equivalencies:    |
+|     |                           |  = DSP.jl Type `ZeroPoleGain`, field `:k` |
+|     |                           |  = SEED RESP "A0 normalization factor:"   |
+|     |                           |  = SEED v2.4 Blockette [53], field 7      |
+|     |                           |  != FDSN station XML v1.1                 |
+|     |                           |      <Response>                           |
+|     |                           |       <InstrumentSensitivity>             |
+|     |                           |        <Value>                            |
+| f0  | Float32                   | frequency of normalization by a0; NOT     |
+|     |                           |   always geophone corner frequency        |
+| p   | Array{Complex{Float32},1} | Complex poles of transfer function        |
+| z   | Array{Complex{Float32},1} | Complex zeroes of transfer function       |
 
-    PZResp64
+    PZResp64([c = c, p = p, z = z])
 
-As PZResp, but all fields use Float64.
+As PZResp, but fields use Float64 precision.
 
     PZResp(X::Array{Complex{T},2} [, rev=true])
 
-Convert X to a PZResp64 (if `T == Float64`) or PZResp32 object. Assumes poles are
-in X[:,1] and zeros in X[:,2]; specify `rev=true` to reverse the sense of the
-column assignments.
+Convert X to a PZResp64 (if `T == Float64`) or PZResp (default) object. Assumes
+format X = [p z], i.e., poles are in X[:,1] and zeros in X[:,2]; specify `rev=true`
+if the column assignments are X = [z p].
+
+### See Also
+resp_a0!, update_resp_a0!, DSP.ZeroPoleGain
+
+### External References
+Seed v2.4 manual, http://www.fdsn.org/pdf/SEEDManual_V2.4.pdf
+IRIS Resp format, https://ds.iris.edu/ds/nodes/dmc/data/formats/resp/
+Julia DSP filter Types, https://juliadsp.github.io/DSP.jl/stable/filters/
 """ PZResp
 mutable struct PZResp <: InstrumentResponse
-  c::Float32
+  a0::Float32
+  f0::Float32
   p::Array{Complex{Float32},1}
   z::Array{Complex{Float32},1}
 
-  function PZResp(  c::Float32,
+  function PZResp(  a0::Float32,
+                    f0::Float32,
                     p::Array{Complex{Float32},1},
                     z::Array{Complex{Float32},1} )
-    return new(c, p, z)
+    return new(a0, f0, p, z)
   end
 end
 
 @doc (@doc PZResp)
 mutable struct PZResp64 <: InstrumentResponse
-  c::Float64
+  a0::Float64
+  f0::Float64
   p::Array{Complex{Float64},1}
   z::Array{Complex{Float64},1}
 
-  function PZResp64( c::Float64,
+
+  function PZResp64(a0::Float64,
+                    f0::Float64,
                     p::Array{Complex{Float64},1},
                     z::Array{Complex{Float64},1} )
-    return new(c, p, z)
+    return new(a0, f0, p, z)
   end
 
 end
 
 # PZResp default
 PZResp( ;
-        c::Float32                    = 1.0f0,
+        a0::Float32                    = 1.0f0,
+        f0::Float32                    = 1.0f0,
         p::Array{Complex{Float32},1}  = Array{Complex{Float32},1}(undef, 0),
         z::Array{Complex{Float32},1}  = Array{Complex{Float32},1}(undef, 0)
-        ) = PZResp(c, p, z)
+        ) = PZResp(a0, f0, p, z)
 PZResp64( ;
-          c::Float64                    = 1.0,
+          a0::Float64                   = 1.0,
+          f0::Float64                   = 1.0,
           p::Array{Complex{Float64},1}  = Array{Complex{Float64},1}(undef, 0),
           z::Array{Complex{Float64},1}  = Array{Complex{Float64},1}(undef, 0)
-          ) = PZResp64(c, p, z)
+          ) = PZResp64(a0, f0, p, z)
 
 # How we read from file
-PZResp(c::Float32, pr::Array{Float32,1}, pi::Array{Float32,1},
-  zr::Array{Float32,1}, zi::Array{Float32,1}) = PZResp(c, complex.(pr, pi), complex.(zr, zi))
-PZResp64(c::Float64, pr::Array{Float64,1}, pi::Array{Float64,1},
-    zr::Array{Float64,1}, zi::Array{Float64,1}) = PZResp64(c, complex.(pr, pi), complex.(zr, zi))
+PZResp(a0::Float32, f0::Float32, pr::Array{Float32,1}, pi::Array{Float32,1},
+  zr::Array{Float32,1}, zi::Array{Float32,1}) = PZResp(a0, f0, complex.(pr, pi), complex.(zr, zi))
+PZResp64(a0::Float64, f0::Float64, pr::Array{Float64,1}, pi::Array{Float64,1},
+    zr::Array{Float64,1}, zi::Array{Float64,1}) = PZResp64(a0, f0, complex.(pr, pi), complex.(zr, zi))
 
 
 # Convert from a 2-column complex response
@@ -214,9 +239,9 @@ function PZResp(X::Array{Complex{T},2}; rev::Bool=false) where {T <: AbstractFlo
     z = X[:,2]
   end
   if T == Float64
-    return PZResp64(1.0, p, z)
+    return PZResp64(1.0, 1.0, p, z)
   else
-    return PZResp(1.0f0, p, z)
+    return PZResp(1.0f0, 1.0f0, p, z)
   end
 end
 
@@ -225,7 +250,7 @@ function show(io::IO, Resp::Union{PZResp,PZResp64})
     showresp_full(io, Resp)
   else
     c = :compact => true
-    print(io, "c = ", repr(getfield(Resp, :c), context=c), ", ",
+    print(io, "a0 = ", repr(getfield(Resp, :a0), context=c), ", ",
               length(getfield(Resp, :z)), " zeros, ",
               length(getfield(Resp, :p)), " poles")
   end
@@ -233,7 +258,8 @@ function show(io::IO, Resp::Union{PZResp,PZResp64})
 end
 
 function write(io::IO, R::Union{PZResp,PZResp64})
-  write(io, R.c)
+  write(io, R.a0)
+  write(io, R.f0)
 
   p = getfield(R, :p)
   write(io, Int64(lastindex(p)))
@@ -247,25 +273,29 @@ end
 
 read(io::IO, ::Type{PZResp}) = PZResp(
   read(io, Float32),
+  read(io, Float32),
   read!(io, Array{Complex{Float32},1}(undef, read(io, Int64))),
   read!(io, Array{Complex{Float32},1}(undef, read(io, Int64)))
   )
 
 read(io::IO, ::Type{PZResp64}) = PZResp64(
   read(io, Float64),
+  read(io, Float64),
   read!(io, Array{Complex{Float64},1}(undef, read(io, Int64))),
   read!(io, Array{Complex{Float64},1}(undef, read(io, Int64)))
   )
 
 isempty(R::Union{PZResp,PZResp64}) = min(
-  R.c == one(typeof(R.c)),
+  R.a0 == one(typeof(R.a0)),
+  R.f0 == one(typeof(R.f0)),
   isempty(getfield(R, :p)),
   isempty(getfield(R, :z))
   )
 
 function isequal(R1::Union{PZResp,PZResp64}, R2::Union{PZResp,PZResp64})
-  q = isequal(getfield(R1, :c), getfield(R2, :c))
+  q = isequal(getfield(R1, :a0), getfield(R2, :a0))
   if q == true
+    q = min(q, isequal(getfield(R1, :f0), getfield(R2, :f0)))
     q = min(q, isequal(getfield(R1, :z), getfield(R2, :z)))
     q = min(q, isequal(getfield(R1, :p), getfield(R2, :p)))
   end
@@ -274,9 +304,12 @@ end
 ==(R1::Union{PZResp,PZResp64}, R2::Union{PZResp,PZResp64}) = isequal(R1, R2)
 
 function hash(R::Union{PZResp,PZResp64})
-  h = hash(R.c)
+  h = hash(R.a0)
+  h = hash(R.f0, h)
   h = hash(R.p, h)
   return hash(R.z, h)
 end
 
-sizeof(R::Union{PZResp,PZResp64}) = 24 + sizeof(getfield(R, :c)) + sizeof(getfield(R, :z)) + sizeof(getfield(R, :p))
+sizeof(R::Union{PZResp,PZResp64}) = 32 + 2*sizeof(getfield(R, :a0)) + sizeof(getfield(R, :z)) + sizeof(getfield(R, :p))
+
+const flat_resp = PZResp(p = Complex{Float32}[complex(1.0, 1.0)], z = Complex{Float32}[2.0/Complex(1.0, -1.0)])
