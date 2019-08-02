@@ -57,7 +57,7 @@ function getyp2codes(b::Char, s=false::Bool)
     if Base.in(i, ['H','L'])
       u = rand(["m", "m/s"])
     else
-      u = "m/s^2"
+      u = "m/s2"
     end
   else
     i = rand(['A','B','D','F','G','I','J','K','M','O','P','Q','R','S','T','U','V','W','Z'])
@@ -77,7 +77,7 @@ function getyp2codes(b::Char, s=false::Bool)
       u = "T"
     elseif i == 'G' # tiltmeter
         c = rand(['A','B','C','1','2','3','U','V','W'])
-        u = "m/s^2"
+        u = "m/s2"
     elseif i == 'I' # humidity
       c = rand(['O','I','D'])
       u = "%"
@@ -95,7 +95,7 @@ function getyp2codes(b::Char, s=false::Bool)
       u = "m/s"
     elseif i == 'P' # very short-period geophone
       c = rand(['Z','N','E'])
-      u = rand(["m", "m/s", "m/s^2"])
+      u = rand(["m", "m/s", "m/s2"])
     elseif i == 'Q' # voltmeter
       c = '_'
       u = "V"
@@ -122,7 +122,7 @@ function getyp2codes(b::Char, s=false::Bool)
 
     elseif i == 'Z' # synthesized beam or stack
       c = rand(['I','C','F','O'])
-      u = rand(["m", "m/s", "m/s^2"])
+      u = rand(["m", "m/s", "m/s2"])
     end
   end
   return i,c,u
