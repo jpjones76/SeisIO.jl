@@ -202,28 +202,28 @@
 <div class="section" id="creating-data-containers">
 <h2>Creating Data Containers<a class="headerlink" href="#creating-data-containers" title="Permalink to this headline">¶</a></h2>
 <p>Create a new, empty object using any of the following commands:</p>
-<table class="colwidths-given docutils align-center">
+<table border="1" class="colwidths-given docutils">
 <colgroup>
-<col style="width: 14%" />
-<col style="width: 86%" />
+<col width="14%" />
+<col width="86%" />
 </colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Object</p></th>
-<th class="head"><p>Purpose</p></th>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Object</th>
+<th class="head">Purpose</th>
 </tr>
 </thead>
-<tbody>
-<tr class="row-even"><td><p>SeisChannel()</p></td>
-<td><p>A single channel of univariate (usually time-series) data</p></td>
+<tbody valign="top">
+<tr class="row-even"><td>SeisChannel()</td>
+<td>A single channel of univariate (usually time-series) data</td>
 </tr>
-<tr class="row-odd"><td><p>SeisData()</p></td>
-<td><p>Multichannel univariate (usually time-series) data</p></td>
+<tr class="row-odd"><td>SeisData()</td>
+<td>Multichannel univariate (usually time-series) data</td>
 </tr>
-<tr class="row-even"><td><p>SeisHdr()</p></td>
-<td><p>Header structure for discrete seismic events</p></td>
+<tr class="row-even"><td>SeisHdr()</td>
+<td>Header structure for discrete seismic events</td>
 </tr>
-<tr class="row-odd"><td><p>SeisEvent()</p></td>
-<td><p>Discrete seismic events; includes SeisHdr and SeisData objects</p></td>
+<tr class="row-odd"><td>SeisEvent()</td>
+<td>Discrete seismic events; includes SeisHdr and SeisData objects</td>
 </tr>
 </tbody>
 </table>
@@ -231,9 +231,9 @@
 <div class="section" id="acquiring-data">
 <h2>Acquiring Data<a class="headerlink" href="#acquiring-data" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p>Read files with <a class="reference internal" href="Formats/fileformats.html#readdata"><span class="std std-ref">read_data</span></a></p></li>
-<li><p>Make web requets with <a class="reference internal" href="Web/webclients.html#getdata"><span class="std std-ref">get_data</span></a></p></li>
-<li><p>Initiate real-time streaming sessions to SeisData objects with <a class="reference internal" href="Web/seedlink.html#seedlink-section"><span class="std std-ref">SeedLink!</span></a></p></li>
+<li>Read files with <a class="reference internal" href="Formats/fileformats.html#readdata"><span class="std std-ref">read_data</span></a></li>
+<li>Make web requets with <a class="reference internal" href="Web/webclients.html#getdata"><span class="std std-ref">get_data</span></a></li>
+<li>Initiate real-time streaming sessions to SeisData objects with <a class="reference internal" href="Web/seedlink.html#seedlink-section"><span class="std std-ref">SeedLink!</span></a></li>
 </ul>
 </div>
 <div class="section" id="keeping-track">
@@ -273,34 +273,34 @@ ids.</p>
 
 <p>Remove bad characters from the :name fields of <strong>S</strong>. Specify convention as a
 string (default is “File”):</p>
-<table class="docutils align-center">
+<table border="1" class="docutils">
 <colgroup>
-<col style="width: 24%" />
-<col style="width: 76%" />
+<col width="24%" />
+<col width="76%" />
 </colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Convention</p></th>
-<th class="head"><p>Characters Removed:sup:<cite>(a)</cite></p></th>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Convention</th>
+<th class="head">Characters Removed:sup:<cite>(a)</cite></th>
 </tr>
 </thead>
-<tbody>
-<tr class="row-even"><td><p>“File”</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">&quot;$*/:&lt;&gt;?&#64;\^|~DEL</span></code></p></td>
+<tbody valign="top">
+<tr class="row-even"><td>“File”</td>
+<td><code class="docutils literal notranslate"><span class="pre">&quot;$*/:&lt;&gt;?&#64;\^|~DEL</span></code></td>
 </tr>
-<tr class="row-odd"><td><p>“HTML”</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">&quot;&amp;';&lt;&gt;©DEL</span></code></p></td>
+<tr class="row-odd"><td>“HTML”</td>
+<td><code class="docutils literal notranslate"><span class="pre">&quot;&amp;';&lt;&gt;©DEL</span></code></td>
 </tr>
-<tr class="row-even"><td><p>“Julia”</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">$\DEL</span></code></p></td>
+<tr class="row-even"><td>“Julia”</td>
+<td><code class="docutils literal notranslate"><span class="pre">$\DEL</span></code></td>
 </tr>
-<tr class="row-odd"><td><p>“Markdown”</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">!#()*+-.[\]_`{}</span></code></p></td>
+<tr class="row-odd"><td>“Markdown”</td>
+<td><code class="docutils literal notranslate"><span class="pre">!#()*+-.[\]_`{}</span></code></td>
 </tr>
-<tr class="row-even"><td><p>“SEED”</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">.DEL</span></code></p></td>
+<tr class="row-even"><td>“SEED”</td>
+<td><code class="docutils literal notranslate"><span class="pre">.DEL</span></code></td>
 </tr>
-<tr class="row-odd"><td><p>“Strict”</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">!&quot;#$%&amp;'()*+,-./:;&lt;=&gt;?&#64;[\]^`{|}~DEL</span></code></p></td>
+<tr class="row-odd"><td>“Strict”</td>
+<td><code class="docutils literal notranslate"><span class="pre">!&quot;#$%&amp;'()*+,-./:;&lt;=&gt;?&#64;[\]^`{|}~DEL</span></code></td>
 </tr>
 </tbody>
 </table>

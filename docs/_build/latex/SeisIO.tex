@@ -9,49 +9,19 @@
 \usepackage[utf8]{inputenc}
 \ifdefined\DeclareUnicodeCharacter
 % support both utf8 and utf8x syntaxes
-  \ifdefined\DeclareUnicodeCharacterAsOptional
-    \def\sphinxDUC#1{\DeclareUnicodeCharacter{"#1}}
-  \else
-    \let\sphinxDUC\DeclareUnicodeCharacter
-  \fi
-  \sphinxDUC{00A0}{\nobreakspace}
-  \sphinxDUC{2500}{\sphinxunichar{2500}}
-  \sphinxDUC{2502}{\sphinxunichar{2502}}
-  \sphinxDUC{2514}{\sphinxunichar{2514}}
-  \sphinxDUC{251C}{\sphinxunichar{251C}}
-  \sphinxDUC{2572}{\textbackslash}
+\edef\sphinxdqmaybe{\ifdefined\DeclareUnicodeCharacterAsOptional\string"\fi}
+  \DeclareUnicodeCharacter{\sphinxdqmaybe00A0}{\nobreakspace}
+  \DeclareUnicodeCharacter{\sphinxdqmaybe2500}{\sphinxunichar{2500}}
+  \DeclareUnicodeCharacter{\sphinxdqmaybe2502}{\sphinxunichar{2502}}
+  \DeclareUnicodeCharacter{\sphinxdqmaybe2514}{\sphinxunichar{2514}}
+  \DeclareUnicodeCharacter{\sphinxdqmaybe251C}{\sphinxunichar{251C}}
+  \DeclareUnicodeCharacter{\sphinxdqmaybe2572}{\textbackslash}
 \fi
 \usepackage{cmap}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb,amstext}
 \usepackage{babel}
-
-
-
 \usepackage{times}
-\expandafter\ifx\csname T@LGR\endcsname\relax
-\else
-% LGR was declared as font encoding
-  \substitutefont{LGR}{\rmdefault}{cmr}
-  \substitutefont{LGR}{\sfdefault}{cmss}
-  \substitutefont{LGR}{\ttdefault}{cmtt}
-\fi
-\expandafter\ifx\csname T@X2\endcsname\relax
-  \expandafter\ifx\csname T@T2A\endcsname\relax
-  \else
-  % T2A was declared as font encoding
-    \substitutefont{T2A}{\rmdefault}{cmr}
-    \substitutefont{T2A}{\sfdefault}{cmss}
-    \substitutefont{T2A}{\ttdefault}{cmtt}
-  \fi
-\else
-% X2 was declared as font encoding
-  \substitutefont{X2}{\rmdefault}{cmr}
-  \substitutefont{X2}{\sfdefault}{cmss}
-  \substitutefont{X2}{\ttdefault}{cmtt}
-\fi
-
-
 \usepackage[Bjarne]{fncychap}
 \usepackage{sphinx}
 
@@ -66,13 +36,30 @@
 \urlstyle{same}
 \addto\captionsenglish{\renewcommand{\contentsname}{Introduction}}
 
-\usepackage{sphinxmessages}
+\addto\captionsenglish{\renewcommand{\figurename}{Fig.\@ }}
+\makeatletter
+\def\fnum@figure{\figurename\thefigure{}}
+\makeatother
+\addto\captionsenglish{\renewcommand{\tablename}{Table }}
+\makeatletter
+\def\fnum@table{\tablename\thetable{}}
+\makeatother
+\addto\captionsenglish{\renewcommand{\literalblockname}{Listing}}
+
+\addto\captionsenglish{\renewcommand{\literalblockcontinuedname}{continued from previous page}}
+\addto\captionsenglish{\renewcommand{\literalblockcontinuesname}{continues on next page}}
+\addto\captionsenglish{\renewcommand{\sphinxnonalphabeticalgroupname}{Non-alphabetical}}
+\addto\captionsenglish{\renewcommand{\sphinxsymbolsname}{Symbols}}
+\addto\captionsenglish{\renewcommand{\sphinxnumbersname}{Numbers}}
+
+\addto\extrasenglish{\def\pageautorefname{page}}
+
 \setcounter{tocdepth}{1}
 
 
 
 \title{SeisIO Documentation}
-\date{Jul 10, 2019}
+\date{Aug 02, 2019}
 \release{0.3.0}
 \author{Joshua Jones}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -1328,18 +1315,6 @@ in S using a least-squares polynomial fit. Ignores NaNs.
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{equalize\_resp!(S,~resp\_new::Array{[},~hc\_new=HC,~C=CH{]})}}}
-\end{fulllineitems}
-
-
-Translate all data in SeisData structure \sphinxstylestrong{S} to instrument response \sphinxstylestrong{resp\_new}.
-Expected structure of \sphinxstylestrong{resp\_new} is a complex Float64 2d array with zeros in
-\sphinxstylestrong{resp{[}:,1{]}}, poles in \sphinxstylestrong{resp{[}:,2{]}}. If channel \sphinxstylestrong{i} has key \sphinxstylestrong{S.misc{[}i{]}{[}“hc”{]}},
-the corresponding value is used as the critical damping constant; otherwise a
-value of 1.0 is assumed.
-
-
-\begin{fulllineitems}
 \pysigline{\sphinxbfcode{\sphinxupquote{filtfilt!(S::SeisData{[};~KWs{]})}}}
 \end{fulllineitems}
 
@@ -1660,6 +1635,89 @@ numeric, datetime, and non-reserved strings are treated as for \sphinxtitleref{-
 
 
 Merge multiple SeisData structures into S.
+
+
+\subsection{Seismic Instrument Responses}
+\label{\detokenize{src/Processing/processing:seismic-instrument-responses}}
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{translate\_resp!(S,~resp\_new{[},~C=chans,~wl=g{]})}}}
+\end{fulllineitems}
+
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{translate\_resp!(Ch,~resp\_new{[},~wl=g{]})}}}
+\end{fulllineitems}
+
+
+Translate the instrument response of seismic data channels to \sphinxstylestrong{resp\_new}.
+Replaces field \sphinxstylestrong{:resp} with \sphinxstylestrong{resp\_new} for all affected channels.
+
+Channels to translate can be specified with keyword \sphinxstylestrong{C=chans}; however, only
+seismic data channels (with units “m”, “m/s”, or “m/s2”) will be translated.
+
+SeisChannel objects whose units are not “m”, “m/s”, or “m/s2” are returned with
+no response translation done.
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{remove\_resp!(S,~C=cha,~wl=g{]})}}}
+\end{fulllineitems}
+
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{remove\_resp!(Ch,~wl=g{]})}}}
+\end{fulllineitems}
+
+
+Remove (flatten to DC) the instrument response of seismic data channels \sphinxstylestrong{cha}
+in \sphinxstylestrong{S} or \sphinxstylestrong{Ch}. Replaces \sphinxstylestrong{:resp} with the appropriate (all-pass) response.
+
+
+\subsubsection{Response Keywords}
+\label{\detokenize{src/Processing/processing:response-keywords}}\begin{itemize}
+\item {} 
+\sphinxstylestrong{C=cha} restricts response translation for SeisData object \sphinxstylestrong{S} to channel(s) \sphinxstylestrong{cha}. Accepts an Integer, UnitRange, or Array\{Int64,1\} argument; does \sphinxstyleemphasis{not} accept string IDs. By default, all seismic data channels in \sphinxstylestrong{S} have their responses translated to \sphinxstylestrong{resp\_new}.
+
+\item {} 
+\sphinxstylestrong{wl=g} sets the waterlevel to g (default: g = eps(Float32) \textasciitilde{} 1.1f-7). The waterlevel is the minimum magnitude (absolute value) of the normalized old frequency response; in other words, if the old frequency response has a maximum magnitude of 1.0, then no response coefficient can be lower than g. This is useful to prevent “divide by zero” errors, but setting it too high will cause errors.
+
+\end{itemize}
+
+
+\paragraph{Precision and Memory Optimization}
+\label{\detokenize{src/Processing/processing:precision-and-memory-optimization}}
+To optimize speed and memory use, instrument response translation maps data to
+Complex\{Float32\} before translation; thus, with Float64 data, there can be
+minor rounding errors.
+
+Instrument responses are also memory-intensive. The minimum memory consumption
+to translate the response of a gapless Float32 SeisChannel object is \textasciitilde{}7x the
+size of the object itself.
+
+More precisely, for an object \sphinxstylestrong{S} (of Type \textless{}: GphysData or GphysChannel),
+translation requires memory \textasciitilde{} 2 kB + the greater of (7x the size of the longest
+Float32 segment, or 3.5x the size of the longest Float64 segment). Translation
+uses four vectors \textendash{} three complex and one real \textendash{} that are updated and
+dynamically resized as the algorithm loops over each segment:
+\begin{itemize}
+\item {} 
+Old response container: Array\{Complex\{Float32,1\}\}(undef, Nx)
+
+\item {} 
+New response container: Array\{Complex\{Float32,1\}\}(undef, Nx)
+
+\item {} 
+Complex data container: Array\{Complex\{Float32,1\}\}(undef, Nx)
+
+\item {} 
+Real frequencies for FFT: Array\{Float32,1\}(undef, Nx)
+
+\end{itemize}
+
+…where \sphinxstylestrong{Nx} is the number of samples in the longest segment in \sphinxstylestrong{S}.
 
 
 \subsection{Other Processing Functions}

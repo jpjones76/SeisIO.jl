@@ -240,21 +240,23 @@ provided that each connection’s streams feed unique channels.</p>
 <div class="section" id="special-rules">
 <h2>Special Rules<a class="headerlink" href="#special-rules" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
-<li><dl class="simple">
-<dt>SeedLink follows unusual rules for wild cards in <code class="docutils literal notranslate"><span class="pre">sta</span></code> and <code class="docutils literal notranslate"><span class="pre">patts</span></code>:</dt><dd><ol class="loweralpha simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">*</span></code> is not a valid SeedLink wild card.</p></li>
-<li><p>The LOC and CHA fields can be left blank in <code class="docutils literal notranslate"><span class="pre">sta</span></code> to select all locations and channels.</p></li>
+<li><dl class="first docutils">
+<dt>SeedLink follows unusual rules for wild cards in <code class="docutils literal notranslate"><span class="pre">sta</span></code> and <code class="docutils literal notranslate"><span class="pre">patts</span></code>:</dt>
+<dd><ol class="first last loweralpha">
+<li><code class="docutils literal notranslate"><span class="pre">*</span></code> is not a valid SeedLink wild card.</li>
+<li>The LOC and CHA fields can be left blank in <code class="docutils literal notranslate"><span class="pre">sta</span></code> to select all locations and channels.</li>
 </ol>
 </dd>
 </dl>
 </li>
-<li><dl class="simple">
-<dt>DO NOT feed one data channel with multiple SeedLink streams. This can have severe consequences:</dt><dd><ol class="loweralpha simple">
-<li><p>A channel fed by multiple live streams will have many small time sequences out of order. <code class="docutils literal notranslate"><span class="pre">merge!</span></code> is not guaranteed to fix it.</p></li>
-<li><p>SeedLink will almost certainly crash.</p></li>
-<li><p>Your data may be corrupted.</p></li>
-<li><p>The Julia interpreter can freeze, requiring <code class="docutils literal notranslate"><span class="pre">kill</span> <span class="pre">-9</span></code> on the process.</p></li>
-<li><p>This is not an “issue”. There will never be a workaround. It’s what happens when one intentionally causes TCP congestion on one’s own machine while writing to open data streams in memory. Hint: don’t do this.</p></li>
+<li><dl class="first docutils">
+<dt>DO NOT feed one data channel with multiple SeedLink streams. This can have severe consequences:</dt>
+<dd><ol class="first last loweralpha">
+<li>A channel fed by multiple live streams will have many small time sequences out of order. <code class="docutils literal notranslate"><span class="pre">merge!</span></code> is not guaranteed to fix it.</li>
+<li>SeedLink will almost certainly crash.</li>
+<li>Your data may be corrupted.</li>
+<li>The Julia interpreter can freeze, requiring <code class="docutils literal notranslate"><span class="pre">kill</span> <span class="pre">-9</span></code> on the process.</li>
+<li>This is not an “issue”. There will never be a workaround. It’s what happens when one intentionally causes TCP congestion on one’s own machine while writing to open data streams in memory. Hint: don’t do this.</li>
 </ol>
 </dd>
 </dl>
@@ -264,8 +266,8 @@ provided that each connection’s streams feed unique channels.</p>
 <div class="section" id="special-methods">
 <h2>Special Methods<a class="headerlink" href="#special-methods" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">close(S.c[i])</span></code> ends SeedLink connection <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">!deleteat(S.c,</span> <span class="pre">i)</span></code> removes a handle to closed SeedLink connection <code class="docutils literal notranslate"><span class="pre">i</span></code>.</p></li>
+<li><code class="docutils literal notranslate"><span class="pre">close(S.c[i])</span></code> ends SeedLink connection <code class="docutils literal notranslate"><span class="pre">i</span></code>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">!deleteat(S.c,</span> <span class="pre">i)</span></code> removes a handle to closed SeedLink connection <code class="docutils literal notranslate"><span class="pre">i</span></code>.</li>
 </ul>
 <div class="section" id="seedlink-utilities">
 <h3>SeedLink Utilities<a class="headerlink" href="#seedlink-utilities" title="Permalink to this headline">¶</a></h3>
