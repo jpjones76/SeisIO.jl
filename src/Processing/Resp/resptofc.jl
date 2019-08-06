@@ -12,7 +12,7 @@ fctoresp, PZResp
 """
 
 function resptofc(R::Union{PZResp, PZResp64})
-  T = typeof(R.c)
+  T = typeof(R.a0)
   P = R.p
   i = argmin(abs.([real(P[j])-imag(P[j]) for j = 1:length(P)]))
   return T(rationalize(abs(P[i]) / 2pi, tol=eps(Float32)))
