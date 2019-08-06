@@ -6,7 +6,7 @@ export getbandcode
 Get SEED-compliant one-character band code corresponding to instrument sample
 rate `fs` and corner frequency `FC`. If unset, `FC` is assumed to be 1 Hz.
 """
-function getbandcode(fs::Real; fc = 1.0::Real)
+function getbandcode(fs::Real; fc::Real = 1.0)
   fs ≥ 1000.0 && return fc ≥ 0.1 ? 'G' : 'F'
   fs ≥ 250.0 && return fc ≥ 0.1 ? 'C' : 'D'
   fs ≥ 80.0 && return fc ≥ 0.1 ? 'E' : 'H'
