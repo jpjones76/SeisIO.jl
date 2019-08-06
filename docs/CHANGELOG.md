@@ -3,18 +3,56 @@ The current set of updates, leading to v0.4.0, will focus on:
 2. expanded file format support
 3. expanded data acquisition options
 
+### 2019-08-05
+#### New, Changed, Deprecated
+* Most processing functions now accept a numeric channel list using keyword
+`chans=` to restrict processing to certain channels. Affects:
+  + demean!, demean
+  + detrend!, detrend
+  + filtfilt!, filtfilt
+  + resample!
+  + taper!, taper
+  + unscale!, unscale
+* The only current exceptions to the above are `nanfill!` and `sync!`, as we
+cannot imagine use cases where channel restriction is useful.
+* New utility functions efficiently retrieve instrument codes:
+  + `inst_codes(S)` returns the instrument code of every channel in `S`.
+  + `inst_code(S,i)` returns the instrument code of channel `i`.
+  + `inst_code(C)` returns the instrument code of GphysChannel object `C`.
+* `get_seis_channels(S)` returns numeric indices of channels in `S` whose
+instrument codes indicate seismic data.
+* `get_data` can now process requests after download by specifying keywords:
+demean, detrend, rr (remove instrument response), taper, ungap, unscale.
+  + There is not (and may never be) options in `get_data` to filter data
+  or translate seismometer responses to a non-flat curve; too many additional
+  keywords.
+
+#### Bugs, Consistency, Performance
+* Functions that accept a numeric channel list as a keyword now use keyword
+`chans` for this; `chans` can be an Integer, UnitRange, or Array{Int64, 1}.
+Affects:
+  + remove_resp
+  + translate_resp
+* Added `resample` as a "safe" (out-of-place) version of `resample!`
+
 ### 2019-08-01
 #### Respocalypse Part I
 * Instrument response Types Resp and Resp64 have changed in two minor ways:
   + Field `:c` renamed to `:a0` for consistency with FDSN and SEED
   + Field `:f0` added for the frequency at which `:a0` is applied
 #### New, Changed, Deprecated
-* `fctoresp`: generate a new instrument response from lower corner frequency `f` and damping constant `c`. If no damping constant is specified, assumes c = 1/sqrt(2).
-* `remove_resp!` remove (flatten to DC) the frequency responses of seismic channels in a SeisData object.
-  + Currently only known to work for velocity sensors; accelerometers and displacement sensors are NYI
-* `resptofc`: guess damping constant of geophone from poles and zeros of a PZResp or PZResp64 object.
-* `translate_resp!`: translate response of seismic data channels in a SeisData object.
-  + Currently working for velocity sensors, maybe accelerometers; displacement NYI
+* `fctoresp`: generate a new instrument response from lower corner frequency `f`
+and damping constant `c`. If no damping constant is specified, assumes c = 1/sqrt(2).
+* `remove_resp!` remove (flatten to DC) the frequency responses of seismic
+channels in a SeisData object.
+  + Currently only known to work for velocity sensors; accelerometers and
+    displacement sensors are NYI
+* `resptofc`: guess damping constant of geophone from poles and zeros of a
+  PZResp or PZResp64 object.
+* `translate_resp!`: translate response of seismic data channels in a SeisData
+  object.
+  + Currently working for velocity sensors, maybe accelerometers; displacement
+    NYI
   + Uses around 1% of the memory of the old `equalize_resp!` function
 * Removed `equalize_resp!`
 * Removed `fctopz`

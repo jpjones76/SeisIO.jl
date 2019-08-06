@@ -9,19 +9,49 @@
 \usepackage[utf8]{inputenc}
 \ifdefined\DeclareUnicodeCharacter
 % support both utf8 and utf8x syntaxes
-\edef\sphinxdqmaybe{\ifdefined\DeclareUnicodeCharacterAsOptional\string"\fi}
-  \DeclareUnicodeCharacter{\sphinxdqmaybe00A0}{\nobreakspace}
-  \DeclareUnicodeCharacter{\sphinxdqmaybe2500}{\sphinxunichar{2500}}
-  \DeclareUnicodeCharacter{\sphinxdqmaybe2502}{\sphinxunichar{2502}}
-  \DeclareUnicodeCharacter{\sphinxdqmaybe2514}{\sphinxunichar{2514}}
-  \DeclareUnicodeCharacter{\sphinxdqmaybe251C}{\sphinxunichar{251C}}
-  \DeclareUnicodeCharacter{\sphinxdqmaybe2572}{\textbackslash}
+  \ifdefined\DeclareUnicodeCharacterAsOptional
+    \def\sphinxDUC#1{\DeclareUnicodeCharacter{"#1}}
+  \else
+    \let\sphinxDUC\DeclareUnicodeCharacter
+  \fi
+  \sphinxDUC{00A0}{\nobreakspace}
+  \sphinxDUC{2500}{\sphinxunichar{2500}}
+  \sphinxDUC{2502}{\sphinxunichar{2502}}
+  \sphinxDUC{2514}{\sphinxunichar{2514}}
+  \sphinxDUC{251C}{\sphinxunichar{251C}}
+  \sphinxDUC{2572}{\textbackslash}
 \fi
 \usepackage{cmap}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb,amstext}
 \usepackage{babel}
+
+
+
 \usepackage{times}
+\expandafter\ifx\csname T@LGR\endcsname\relax
+\else
+% LGR was declared as font encoding
+  \substitutefont{LGR}{\rmdefault}{cmr}
+  \substitutefont{LGR}{\sfdefault}{cmss}
+  \substitutefont{LGR}{\ttdefault}{cmtt}
+\fi
+\expandafter\ifx\csname T@X2\endcsname\relax
+  \expandafter\ifx\csname T@T2A\endcsname\relax
+  \else
+  % T2A was declared as font encoding
+    \substitutefont{T2A}{\rmdefault}{cmr}
+    \substitutefont{T2A}{\sfdefault}{cmss}
+    \substitutefont{T2A}{\ttdefault}{cmtt}
+  \fi
+\else
+% X2 was declared as font encoding
+  \substitutefont{X2}{\rmdefault}{cmr}
+  \substitutefont{X2}{\sfdefault}{cmss}
+  \substitutefont{X2}{\ttdefault}{cmtt}
+\fi
+
+
 \usepackage[Bjarne]{fncychap}
 \usepackage{sphinx}
 
@@ -36,30 +66,13 @@
 \urlstyle{same}
 \addto\captionsenglish{\renewcommand{\contentsname}{Introduction}}
 
-\addto\captionsenglish{\renewcommand{\figurename}{Fig.\@ }}
-\makeatletter
-\def\fnum@figure{\figurename\thefigure{}}
-\makeatother
-\addto\captionsenglish{\renewcommand{\tablename}{Table }}
-\makeatletter
-\def\fnum@table{\tablename\thetable{}}
-\makeatother
-\addto\captionsenglish{\renewcommand{\literalblockname}{Listing}}
-
-\addto\captionsenglish{\renewcommand{\literalblockcontinuedname}{continued from previous page}}
-\addto\captionsenglish{\renewcommand{\literalblockcontinuesname}{continues on next page}}
-\addto\captionsenglish{\renewcommand{\sphinxnonalphabeticalgroupname}{Non-alphabetical}}
-\addto\captionsenglish{\renewcommand{\sphinxsymbolsname}{Symbols}}
-\addto\captionsenglish{\renewcommand{\sphinxnumbersname}{Numbers}}
-
-\addto\extrasenglish{\def\pageautorefname{page}}
-
+\usepackage{sphinxmessages}
 \setcounter{tocdepth}{1}
 
 
 
 \title{SeisIO Documentation}
-\date{Aug 02, 2019}
+\date{Aug 06, 2019}
 \release{0.3.0}
 \author{Joshua Jones}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -1308,26 +1321,22 @@ object by applying itself to the SeisData object in the \sphinxcode{\sphinxupquo
 \subsection{Signal Processing}
 \label{\detokenize{src/Processing/processing:signal-processing}}
 Remove the mean from all channels i with S.fs{[}i{]} \textgreater{} 0.0. Specify irr=true to also
-remove the mean from irregularly sampled channels. Ignores NaNs.
+remove the mean from irregularly sampled channels. Specify chans=CC to restrict
+to channel number(s) CC. Ignores NaNs.
 
-Remove the polynomial trend of degree n from every regularly-sampled channel i
-in S using a least-squares polynomial fit. Ignores NaNs.
+Remove the polynomial trend of degree n from every regularly-sampled channel
+in S using a least-squares polynomial fit. Specify chans=CC to restrict
+to channel number(s) CC. Ignores NaNs.
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{filtfilt!(S::SeisData{[};~KWs{]})}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{filtfilt!(S::GphysData{[};~KWs{]})}}}
 \end{fulllineitems}
 
 
 Apply a zero-phase filter to data in \sphinxstylestrong{S.x}.
 
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{filtfilt!(Ev::SeisEvent{[};~KWs{]})}}}
-\end{fulllineitems}
-
-
-Apply zero-phase filter to \sphinxstylestrong{Ev.data.x}.
+Irregularly-sampled data are never affected by filtfilt!.
 
 
 \begin{fulllineitems}
@@ -1335,13 +1344,12 @@ Apply zero-phase filter to \sphinxstylestrong{Ev.data.x}.
 \end{fulllineitems}
 
 
-Apply zero-phase filter to \sphinxstylestrong{C.x}
+Apply zero-phase filter to \sphinxstylestrong{C.x}. Filtering is applied to each contiguous data
+segment in C separately.
 
-Filtering is applied to each contiguous data segment of each channel separately.
-
-\#\#\# Keywords
-Keywords control filtering behavior; specify e.g. filtfilt!(S, fl=0.1, np=2, rt=”Lowpass”).
-Default values can be changed by adjustin the {\hyperref[\detokenize{src/Appendices/keywords:dkw}]{\sphinxcrossref{\DUrole{std,std-ref}{shared keywords}}}}, e.g.,
+\#\#\# Filtering Keywords
+Keywords control filtering behavior; specify e.g. filtfilt!(S, fl=0.1, np=2).
+Default values can be changed by adjusting the {\hyperref[\detokenize{src/Appendices/keywords:dkw}]{\sphinxcrossref{\DUrole{std,std-ref}{shared keywords}}}}, e.g.,
 SeisIO.KW.Filt.np = 2 changes the default number of poles to 2.
 
 
@@ -1359,13 +1367,22 @@ Type
 Description
 \\
 \hline
+chans
+&
+{[}{]}
+&
+$^{\text{(a)}}$
+&
+channel numbers to filter
+\\
+\hline
 fl
 &
 1.0
 &
 Float64
 &
-lower corner frequency {[}Hz{]} $^{\text{(a)}}$
+lower corner frequency {[}Hz{]} $^{\text{(b)}}$
 \\
 \hline
 fh
@@ -1374,7 +1391,7 @@ fh
 &
 Float64
 &
-upper corner frequency {[}Hz{]} $^{\text{(a)}}$
+upper corner frequency {[}Hz{]} $^{\text{(b)}}$
 \\
 \hline
 np
@@ -1426,46 +1443,89 @@ design mode (name of filter)
 \par
 \sphinxattableend\end{savenotes}
 
-$^{\text{(a)}}$  By convention, the lower corner frequency (fl) is used in a Highpass
+$^{\text{(a)}}$  Allowed types are Integer, UnitRange, and Array\{Int64, 1\}.
+$^{\text{(b)}}$  By convention, the lower corner frequency (fl) is used in a Highpass
 filter, and fh is used in a Lowpass filter.
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{taper!(S)}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{resample!(S::GphysData~{[},~chans=CC,~fs=FS{]})}}}
 \end{fulllineitems}
 
-
-Cosine taper each channel in S around time gaps.
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{unscale!(S{[},~irr=false{]})}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{resample!(C::SeisChannel,~fs::Float64)}}}
 \end{fulllineitems}
 
 
-Divide the gains from all channels \sphinxstylestrong{i} with \sphinxstylestrong{S.fs{[}i{]} \textgreater{} 0.0}. Specify \sphinxstylestrong{irr=true} to
-also remove gains of irregularly-sampled channels.
+Resample data in S to FS Hz. If keyword \sphinxstylestrong{fs} is not specified, data are
+resampled to the lowest non-zero value in \sphinxstylestrong{S.fs{[}CC{]}}. Note that a poor choice
+of fs can lead to upsampling and other bad behaviors.
+
+Use keyword \sphinxstylestrong{chans=CC} to only resample channel numbers \sphinxstylestrong{CC}. By default,
+all channels \sphinxstylestrong{i} with \sphinxstylestrong{S.fs{[}i{]} \textgreater{} 0.0} are resampled.
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{taper!(S{[},~chans=CC,~t\_max::Real=10.0,~:math:{}`alpha{}`::Real=0.05,~N\_min::Int64=10{]})}}}
+\end{fulllineitems}
+
+
+Cosine taper each channel in S around time gaps. Specify chans=CC to restrict
+to channel number(s) CC. Does not modify irregularly-sampled data channels.
+
+taper!(C{[}, t\_max::Real=10.0, \(\alpha\)::Real=0.05, N\_min::Int64=10{]})
+
+Cosine taper each segment of time-series data in GphysChannel object C that
+contains at least \sphinxtitleref{N\_min} total samples. Returns if C is irregularly sampled.
+
+Keywords:
+\begin{itemize}
+\item {} 
+chans: Only taper the specified channels.
+
+\item {} 
+N\_min: Data segments with N \textless{} N\_min total samples are not tapered.
+
+\item {} 
+t\_max: Maximum taper edge in seconds.
+
+\item {} 
+\(\alpha\): Taper edge area; as for a Tukey window, the first and last 100*:math:\sphinxtitleref{alpha{}`\% of samples in each window are tapered, up to {}`t\_max} seconds of data.
+
+\end{itemize}
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{unscale!(S{[},~chans=CC,~irr=false{]})}}}
+\end{fulllineitems}
+
+
+Divide the gains from all channels \sphinxstylestrong{i} with \sphinxstylestrong{S.fs{[}i{]} \textgreater{} 0.0}. Specify
+chans=CC to restrict to channel number(s) CC. Specify \sphinxstylestrong{irr=true} to also
+remove gains of irregularly-sampled channels.
 
 
 \subsection{Merge}
 \label{\detokenize{src/Processing/processing:merge}}\label{\detokenize{src/Processing/processing:id1}}
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{merge!(S::SeisData,~U::SeisData)}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{merge!(S::GphysData,~U::GphysData)}}}
 \end{fulllineitems}
 
 
-Merge two SeisData structures. For timeseries data, a single-pass merge-and-prune
+Merge two GphysData structures. For timeseries data, a single-pass merge-and-prune
 operation is applied to value pairs whose sample times are separated by less than
 half the sampling interval.
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{merge!(S::SeisData)}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{merge!(S::GphysData)}}}
 \end{fulllineitems}
 
 
-“Flatten” a SeisData structure by merging data from identical channels.
+“Flatten” a GphysData structure by merging data from identical channels.
 
 
 \subsubsection{Merge Behavior}
@@ -1560,7 +1620,7 @@ $^{\text{(b)}}$ Data offset \textgreater{}4 sample intervals are treated as over
 \paragraph{When SeisIO Won’t Merge}
 \label{\detokenize{src/Processing/processing:when-seisio-won-t-merge}}
 SeisIO does \sphinxstylestrong{not} combine data channels if \sphinxstylestrong{any} of the five fields above
-are non-empty and different. For example, if a SeisData object S contains two
+are non-empty and different. For example, if a GphysData object S contains two
 channels, each with id “XX.FOO..BHZ”, but one has fs=100 Hz and the other fs=50 Hz,
 \sphinxstylestrong{merge!} does nothing.
 
@@ -1573,7 +1633,7 @@ can easily leave data in an unusuable state.
 \label{\detokenize{src/Processing/processing:synchronize}}
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{sync!(S::SeisData)}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{sync!(S::GphysData)}}}
 \end{fulllineitems}
 
 
@@ -1582,7 +1642,7 @@ start time in S.
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{sync!(S::SeisData{[},~s=ST,~t=EN,~v=VV{]})}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{sync!(S::GphysData{[},~s=ST,~t=EN,~v=VV{]})}}}
 \end{fulllineitems}
 
 
@@ -1630,18 +1690,18 @@ numeric, datetime, and non-reserved strings are treated as for \sphinxtitleref{-
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{mseis!(S::SeisData,~U::SeisData,~...)}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{mseis!(S::GphysData,~U::GphysData,~...)}}}
 \end{fulllineitems}
 
 
-Merge multiple SeisData structures into S.
+Merge multiple GphysData structures into S.
 
 
 \subsection{Seismic Instrument Responses}
 \label{\detokenize{src/Processing/processing:seismic-instrument-responses}}
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{translate\_resp!(S,~resp\_new{[},~C=chans,~wl=g{]})}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{translate\_resp!(S,~resp\_new{[},~chans=CC,~wl=g{]})}}}
 \end{fulllineitems}
 
 
@@ -1654,15 +1714,9 @@ Merge multiple SeisData structures into S.
 Translate the instrument response of seismic data channels to \sphinxstylestrong{resp\_new}.
 Replaces field \sphinxstylestrong{:resp} with \sphinxstylestrong{resp\_new} for all affected channels.
 
-Channels to translate can be specified with keyword \sphinxstylestrong{C=chans}; however, only
-seismic data channels (with units “m”, “m/s”, or “m/s2”) will be translated.
-
-SeisChannel objects whose units are not “m”, “m/s”, or “m/s2” are returned with
-no response translation done.
-
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{remove\_resp!(S,~C=cha,~wl=g{]})}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{remove\_resp!(S,~chans=CC,~wl=g{]})}}}
 \end{fulllineitems}
 
 
@@ -1672,14 +1726,15 @@ no response translation done.
 \end{fulllineitems}
 
 
-Remove (flatten to DC) the instrument response of seismic data channels \sphinxstylestrong{cha}
-in \sphinxstylestrong{S} or \sphinxstylestrong{Ch}. Replaces \sphinxstylestrong{:resp} with the appropriate (all-pass) response.
+Remove (flatten to DC) the instrument response of \sphinxstylestrong{Ch}, or of seismic data
+channels \sphinxstylestrong{CC} in \sphinxstylestrong{S}. Replaces \sphinxstylestrong{:resp} with the appropriate (all-pass)
+response.
 
 
 \subsubsection{Response Keywords}
 \label{\detokenize{src/Processing/processing:response-keywords}}\begin{itemize}
 \item {} 
-\sphinxstylestrong{C=cha} restricts response translation for SeisData object \sphinxstylestrong{S} to channel(s) \sphinxstylestrong{cha}. Accepts an Integer, UnitRange, or Array\{Int64,1\} argument; does \sphinxstyleemphasis{not} accept string IDs. By default, all seismic data channels in \sphinxstylestrong{S} have their responses translated to \sphinxstylestrong{resp\_new}.
+\sphinxstylestrong{C=cha} restricts response translation for GphysData object \sphinxstylestrong{S} to channel(s) \sphinxstylestrong{cha}. Accepts an Integer, UnitRange, or Array\{Int64,1\} argument; does \sphinxstyleemphasis{not} accept string IDs. By default, all seismic data channels in \sphinxstylestrong{S} have their responses translated to \sphinxstylestrong{resp\_new}.
 
 \item {} 
 \sphinxstylestrong{wl=g} sets the waterlevel to g (default: g = eps(Float32) \textasciitilde{} 1.1f-7). The waterlevel is the minimum magnitude (absolute value) of the normalized old frequency response; in other words, if the old frequency response has a maximum magnitude of 1.0, then no response coefficient can be lower than g. This is useful to prevent “divide by zero” errors, but setting it too high will cause errors.
@@ -1733,12 +1788,30 @@ of non-NaN values.
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{ungap!(S{[},~m=true{]})}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{ungap!(S{[},~chans=CC,~m=true,~tap=false{]})}}}
 \end{fulllineitems}
 
 
-For each channel \sphinxstylestrong{i} in \sphinxstylestrong{S}, fill time gaps in \sphinxstylestrong{S.t{[}i{]}} with the mean of
-non-NAN data in \sphinxstylestrong{S.x{[}i{]}}. If \sphinxstylestrong{m=false}, gaps are filled with NANs.
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{ungap!(C{[},~m=true,~tap=false{]})}}}
+\end{fulllineitems}
+
+
+Fill time gaps in each channel with the mean of the channel data.
+
+Keywords:
+\begin{itemize}
+\item {} 
+chans=CC: only ungap channels CC.
+
+\item {} 
+m=false: this flag fills gaps with NaNs instead of the mean.
+
+\item {} 
+tap=true: taper data before filling gaps.
+
+\end{itemize}
 
 
 \chapter{Submodules}
