@@ -43,16 +43,16 @@
 \contentsline {section}{\numberline {4.1}Data Processing Functions}{21}{section.4.1}
 \contentsline {subsection}{\numberline {4.1.1}Signal Processing}{21}{subsection.4.1.1}
 \contentsline {subsection}{\numberline {4.1.2}Merge}{22}{subsection.4.1.2}
-\contentsline {subsubsection}{Merge Behavior}{22}{subsubsection*.26}
-\contentsline {paragraph}{Which channels merge?}{22}{paragraph*.27}
-\contentsline {paragraph}{What happens to merged fields?}{22}{paragraph*.28}
+\contentsline {subsubsection}{Merge Behavior}{23}{subsubsection*.26}
+\contentsline {paragraph}{Which channels merge?}{23}{paragraph*.27}
+\contentsline {paragraph}{What happens to merged fields?}{23}{paragraph*.28}
 \contentsline {paragraph}{What does \sphinxstyleliteralintitle {\sphinxupquote {merge!}} resolve?}{23}{paragraph*.29}
 \contentsline {paragraph}{When SeisIO Won\IeC {\textquoteright }t Merge}{23}{paragraph*.30}
-\contentsline {subsection}{\numberline {4.1.3}Synchronize}{23}{subsection.4.1.3}
-\contentsline {subsubsection}{Specifying start time (s)}{23}{subsubsection*.31}
+\contentsline {subsection}{\numberline {4.1.3}Synchronize}{24}{subsection.4.1.3}
+\contentsline {subsubsection}{Specifying start time (s)}{24}{subsubsection*.31}
 \contentsline {subsubsection}{Specifying end time (t)}{24}{subsubsection*.32}
 \contentsline {subsection}{\numberline {4.1.4}Seismic Instrument Responses}{24}{subsection.4.1.4}
-\contentsline {subsubsection}{Response Keywords}{24}{subsubsection*.33}
+\contentsline {subsubsection}{Response Keywords}{25}{subsubsection*.33}
 \contentsline {paragraph}{Precision and Memory Optimization}{25}{paragraph*.34}
 \contentsline {subsection}{\numberline {4.1.5}Other Processing Functions}{25}{subsection.4.1.5}
 \contentsline {chapter}{\numberline {5}Submodules}{27}{chapter.5}

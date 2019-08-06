@@ -232,10 +232,10 @@ real-time streaming, see <a class="reference internal" href="seedlink.html#seedl
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
-<li><code class="docutils literal notranslate"><span class="pre">get_data!(S,</span> <span class="pre">&quot;FDSN&quot;,</span> <span class="pre">&quot;UW.SEP..EHZ,UW.SHW..EHZ,UW.HSR..EHZ&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">t=(-600))</span></code>: using FDSNWS, get the last 10 minutes of data from three short-period vertical-component channels at Mt. St. Helens, USA.</li>
-<li><code class="docutils literal notranslate"><span class="pre">get_data!(S,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">&quot;CC.PALM..EHN&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">t=(-120),</span> <span class="pre">f=&quot;sacbl&quot;)</span></code>: using IRISWS, fetch the last two minutes of data from component EHN, station PALM (Palmer Lift (Mt. Hood), OR, USA,), network CC (USGS Cascade Volcano Observatory, Vancouver, WA, USA), in bigendian SAC format, and merge into SeisData structure <cite>S</cite>.</li>
-<li><code class="docutils literal notranslate"><span class="pre">get_data!(S,</span> <span class="pre">&quot;FDSN&quot;,</span> <span class="pre">&quot;CC.TIMB..EHZ&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">t=(-600),</span> <span class="pre">w=true)</span></code>: using FDSNWS, get the last 10 minutes of data from channel EHZ, station TIMB (Timberline Lodge, OR, USA), save the data directly to disk, and add it to SeisData structure <cite>S</cite>.</li>
-<li><code class="docutils literal notranslate"><span class="pre">S</span> <span class="pre">=</span> <span class="pre">get_data(&quot;FDSN&quot;,</span> <span class="pre">&quot;HV.MOKD..HHZ&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">s=&quot;2012-01-01T00:00:00&quot;,</span> <span class="pre">t=(-3600))</span></code>: using FDSNWS, fill a new SeisData structure <cite>S</cite> with an hour of data ending at 2012-01-01, 00:00:00 UTC, from HV.MOKD..HHZ (USGS Hawai’i Volcano Observatory).</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_data!(S,</span> <span class="pre">&quot;FDSN&quot;,</span> <span class="pre">&quot;UW.SEP..EHZ,UW.SHW..EHZ,UW.HSR..EHZ&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">t=(-600))</span></code>: using FDSNWS, get the last 10 minutes of data from three short-period vertical-component channels at Mt. St. Helens, USA.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_data!(S,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">&quot;CC.PALM..EHN&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">t=(-120),</span> <span class="pre">f=&quot;sacbl&quot;)</span></code>: using IRISWS, fetch the last two minutes of data from component EHN, station PALM (Palmer Lift (Mt. Hood), OR, USA,), network CC (USGS Cascade Volcano Observatory, Vancouver, WA, USA), in bigendian SAC format, and merge into SeisData structure <cite>S</cite>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_data!(S,</span> <span class="pre">&quot;FDSN&quot;,</span> <span class="pre">&quot;CC.TIMB..EHZ&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">t=(-600),</span> <span class="pre">w=true)</span></code>: using FDSNWS, get the last 10 minutes of data from channel EHZ, station TIMB (Timberline Lodge, OR, USA), save the data directly to disk, and add it to SeisData structure <cite>S</cite>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">S</span> <span class="pre">=</span> <span class="pre">get_data(&quot;FDSN&quot;,</span> <span class="pre">&quot;HV.MOKD..HHZ&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">s=&quot;2012-01-01T00:00:00&quot;,</span> <span class="pre">t=(-3600))</span></code>: using FDSNWS, fill a new SeisData structure <cite>S</cite> with an hour of data ending at 2012-01-01, 00:00:00 UTC, from HV.MOKD..HHZ (USGS Hawai’i Volcano Observatory).</p></li>
 </ol>
 </div>
 <div class="section" id="fdsn-queries">
@@ -291,9 +291,9 @@ remote station XML files by web query.</p>
 <div class="section" id="data-query-features">
 <h3>Data Query Features<a class="headerlink" href="#data-query-features" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Stage zero gains are removed from trace data; all IRIS data will appear to have a gain of 1.0.</li>
-<li>IRISWS disallows wildcards in channel IDs.</li>
-<li>Channel spec <em>must</em> include the net, sta, cha fields; thus, CHA = “CC.VALT..BHZ” is OK; CHA = “CC.VALT” is not.</li>
+<li><p>Stage zero gains are removed from trace data; all IRIS data will appear to have a gain of 1.0.</p></li>
+<li><p>IRISWS disallows wildcards in channel IDs.</p></li>
+<li><p>Channel spec <em>must</em> include the net, sta, cha fields; thus, CHA = “CC.VALT..BHZ” is OK; CHA = “CC.VALT” is not.</p></li>
 </ul>
 </div>
 </div>
