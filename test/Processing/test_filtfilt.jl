@@ -14,6 +14,35 @@ D = filtfilt(C)
 filtfilt!(C)
 @test C == D
 
+# test for channel ranges
+S = randSeisData(24, s=1.0)
+deleteat!(S, findall(S.fs.<40.0))
+while S.n < 4
+  S = randSeisData(24, s=1.0)
+  deleteat!(S, findall(S.fs.<40.0))
+end
+for i in (1, S.n)
+  S.fs[i] = fs
+  S.t[i] = [1 0; nx 0]
+  S.x[i] = randn(Float32, nx)
+end
+U = deepcopy(S)
+filtfilt!(S)
+S1 = filtfilt(U)
+kill = Int64[]
+for i = 1:S.n
+  if any(isnan.(S.x[i])) || any(isnan.(S1.x[i]))
+    push!(kill, i)
+  end
+end
+deleteat!(S, kill)
+deleteat!(S1, kill)
+if S.n > 0
+  @test S == S1
+else
+  warn("All channels deleted; can't test equality.")
+end
+
 printstyled("    equivalence with DSP.filtfilt\n", color=:light_green)
 for i = 1:10
   C = randSeisChannel(s=true)

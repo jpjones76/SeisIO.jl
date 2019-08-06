@@ -27,7 +27,7 @@ translate_resp!(S, r)
 
 printstyled("    remove_resp (SeisData)\n", color=:light_green)
 remove_resp!(S)
-translate_resp!(T, non_resp)
+T = translate_resp(T, non_resp)
 for i = 1:S.n
   if isempty(findall(isnan.(S.x[i]))) && isempty(findall(isnan.(T.x[i])))
     @test isapprox(S.x[i], T.x[i])
@@ -37,6 +37,14 @@ for i = 1:S.n
   @test S.resp[i] == non_resp
   @test T.resp[i] == non_resp
 end
+
+# unit tests
+S = deepcopy(U)
+update_resp_a0!(S)
+fc = resptofc(S.resp[1])
+@test isapprox(fc, 0.2f0)
+fc = resptofc(S.resp[3])
+@test isapprox(fc, 2.0f0)
 
 # test for channel ranges
 S = deepcopy(U)
@@ -60,7 +68,8 @@ translate_resp!(C, r)
 translate_resp!(C, r)
 
 C = randSeisChannel(s=true)
-ungap!(C)
 taper!(C)
+D = deepcopy(C)
 remove_resp!(C)
+D = remove_resp(D)
 @test C.resp == non_resp
