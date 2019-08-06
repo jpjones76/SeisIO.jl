@@ -13,7 +13,7 @@ function naive_resample!(S::SeisData; fs::Float64=0.0)
       ei            = S.t[i][k+1,1] - (k == n_seg ? 0 : 1)
       nx_old        = ei-si+1
       nx            = round(Int, nx_old*rate)
-      x = T.(resample(S.x[i][si:ei], rate)[1:nx])
+      x = T.(DSP.resample(S.x[i][si:ei], rate)[1:nx])
       copyto!(S.x[i], si, x, 1, nx)
       deleteat!(S.x[i], si+nx:ei)
       gap_inds[k+1]  = ceil(Int, ei*rate)

@@ -90,3 +90,18 @@ S = randSeisData()
 D = unscale(C)
 T = unscale(S)
 # W = unscale(V)
+
+# tests for channel ranges
+S = randSeisData(10, s=1.0)
+U = deepcopy(S)
+demean!(S, chans=1:5)
+for i = 1:S.n
+  @test (S[i] == U[i]) == (i < 6 ? false : true)
+end
+
+S = randSeisData(10, s=1.0)
+U = deepcopy(S)
+detrend!(S, chans=1:5)
+for i = 1:S.n
+  @test (S[i] == U[i]) == (i < 6 ? false : true)
+end
