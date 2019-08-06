@@ -35,8 +35,17 @@ deleteat!(S, findall(S.fs.<25.0))
 filtfilt!(S, fl=0.01, fh=10.0)
 
 # Ensure station headers are set
-j = findid(S, "UW.HOOD..ENE")
-@test ≈(S.fs[j], 100.0)
+ids = ["UW.HOOD..ENE", "CC.VALT..BHZ", "UW.TDH..EHZ", "UW.VLL.EHZ"]
+fss = [100.0, 50.0, 100.0, 100.0]
+codes = ['N', 'H', 'H', 'H']
+for i = 1:4
+  j = findid(S, ids[i])
+  if j > 0
+    @test ≈(S.fs[j], fss[i])
+    @test inst_code(S, j) == codes[i]
+    break
+  end
+end
 
 # Ensure we got data
 L = [length(x) for x in S.x]
