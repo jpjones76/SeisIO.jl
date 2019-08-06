@@ -38,6 +38,13 @@ for i = 1:S.n
   @test T.resp[i] == non_resp
 end
 
+# test for channel ranges
+S = deepcopy(U)
+remove_resp!(S, chans=1:3)
+for i = 1:S.n
+  @test (S[i] == U[i]) == (i < 4 ? false : true)
+end
+
 # SeisChannel method extension
 printstyled("    translate_resp (SeisChannel)\n", color=:light_green)
 C = randSeisChannel(s=true)

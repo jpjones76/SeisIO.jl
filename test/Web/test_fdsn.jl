@@ -50,7 +50,13 @@ get_data!(S, "FDSN", ["UW.HOOD..E??", "CC.VALT..???", "UW.XNXNX.99.QQQ"], src="I
 
 # Try a single string
 printstyled("      string for channel spec\n", color=:light_green)
-S = get_data("FDSN", "CC.JRO..BHZ,IU.COLA.00.*", src="IRIS", s=-600, t=0)
+S = get_data("FDSN", "CC.JRO..BHZ,IU.COLA.00.*", src="IRIS", s=-600, t=0,
+  demean=true,
+  detrend=true,
+  rr=true,
+  taper=true,
+  ungap=true,
+  unscale=true)
 
 # This should return exactly 4 days of data, which we know IRIS' FDSN server has
 printstyled("      multi-day request\n", color=:light_green)

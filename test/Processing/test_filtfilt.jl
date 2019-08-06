@@ -56,6 +56,29 @@ end
 filtfilt!(S)
 GC.gc()
 
+# test for channel ranges
+S = randSeisData(24, s=1.0)
+deleteat!(S, findall(S.fs.<40.0))
+while S.n < 4
+  S = randSeisData(24, s=1.0)
+  deleteat!(S, findall(S.fs.<40.0))
+end
+for i in (1, S.n)
+  S.fs[i] = fs
+  S.t[i] = [1 0; n_rep 0]
+  S.x[i] = randn(Float32, n_rep)
+end
+U = deepcopy(S)
+filtfilt!(S, chans=1:3)
+for i = 1:S.n
+  if i < 4
+    @test S[i] != U[i]
+  else
+    @test S[i] == U[i]
+  end
+end
+GC.gc()
+
 printstyled("    checking that all filters work\n", color=:light_green)
 for dm in String["Butterworth", "Chebyshev1", "Chebyshev2", "Elliptic"]
   for rt in String["Bandpass", "Bandstop", "Lowpass", "Highpass"]
