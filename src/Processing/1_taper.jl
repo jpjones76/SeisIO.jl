@@ -33,17 +33,18 @@ end
 Cosine taper all time-series data in C. Tapers each segment of each channel
 that contains at least `N_min` total samples.
 
-    taper!(S[; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10])
+    taper!(S[; chans=CC, t_max::Real=10.0, α::Real=0.05, N_min::Int64=10])
 
-Cosine taper all time-series data in S. Tapers each segment of each channel
-that contains at least `N_min` total samples.
+Cosine taper each segment of time-series data in GphysChannel object C that
+contains at least `N_min` total samples.
 
 Does not modify irregularly-sampled data channels.
 
 Keywords:
+* `chans`: Only taper the specified channels.
 * `N_min`: Data segments with N < N_min total samples are not tapered.
 * `t_max`: Maximum taper edge in seconds.
-* `α``: Taper edge area; as for a Tukey window, the first and last 100*α% of
+* `α`: Taper edge area; as for a Tukey window, the first and last 100*α% of
 samples in each window are tapered, up to `t_max` seconds of data.
 
 See also: DSP.Windows.tukey
@@ -123,9 +124,18 @@ end
 # I could probably clean it up by creating one master taper
 # and passing/editing views into the taper.
 
-function taper!(S::GphysData; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
+function taper!(S::GphysData;
+  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  t_max::Real=10.0,
+  α::Real=0.05,
+  N_min::Int64=10)
+
   if !any(getfield(S, :fs) .> 0.0)
     return nothing
+  end
+
+  if chans == Int64[]
+    chans = 1:S.n
   end
 
   α = min(α, 0.5)
@@ -148,29 +158,31 @@ function taper!(S::GphysData; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
 
   # Loop over channels, pushing views to the appropriate view array for eltype(S.x[i])
   for i = 1:S.n
-    S.fs[i] <= 0.0 && continue
-    j = findfirst(T.==eltype(S.x[i]))
+    if i in chans
+      S.fs[i] <= 0.0 && continue
+      j = findfirst(T.==eltype(S.x[i]))
 
-    # Compute length
-    window_lengths = diff(S.t[i][:,1])
-    window_lengths[end] += 1
-    n_seg = length(window_lengths)
+      # Compute length
+      window_lengths = diff(S.t[i][:,1])
+      window_lengths[end] += 1
+      n_seg = length(window_lengths)
 
-    # Get taper lengths and segment indices
-    L_max = round(Int, t_max*S.fs[i])
-    L_seg = min.(L_max, round.(Int, window_lengths*α))
-    si = copy(S.t[i][1:n_seg, 1])
-    ei = copy(S.t[i][2:n_seg, 1]).-1
-    push!(ei, S.t[i][end,1])
-    μ = T[j](mean(S.x[i]))
+      # Get taper lengths and segment indices
+      L_max = round(Int, t_max*S.fs[i])
+      L_seg = min.(L_max, round.(Int, window_lengths*α))
+      si = copy(S.t[i][1:n_seg, 1])
+      ei = copy(S.t[i][2:n_seg, 1]).-1
+      push!(ei, S.t[i][end,1])
+      μ = T[j](mean(S.x[i]))
 
-    for k = 1:length(L_seg)
-      push!(Xl[j], view(S.x[i], si[k]:si[k]+L_seg[k]-1))
-      push!(Xr[j], view(S.x[i], ei[k]-L_seg[k]+1:ei[k]))
-      push!(means[j], μ)
-      N_max[j] = max(N_max[j], L_seg[k])
+      for k = 1:length(L_seg)
+        push!(Xl[j], view(S.x[i], si[k]:si[k]+L_seg[k]-1))
+        push!(Xr[j], view(S.x[i], ei[k]-L_seg[k]+1:ei[k]))
+        push!(means[j], μ)
+        N_max[j] = max(N_max[j], L_seg[k])
+      end
+      append!(L_taps[j], L_seg)
     end
-    append!(L_taps[j], L_seg)
   end
 
   # Loop over data type
@@ -202,11 +214,13 @@ function taper!(S::GphysData; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
 
   # Annotate
   for i = 1:S.n
-    S.fs[i] == 0.0 && continue
-    note!(S, i, string( "taper!, ",
-                        "t_max = ", t_max, ", ",
-                        "α = ", α,  ", ",
-                        "N_min = ", N_min ) )
+    if i in chans
+      S.fs[i] == 0.0 && continue
+      note!(S, i, string( "taper!, ",
+                          "t_max = ", t_max, ", ",
+                          "α = ", α,  ", ",
+                          "N_min = ", N_min ) )
+    end
   end
   return nothing
 end
@@ -215,8 +229,13 @@ function taper(C::GphysChannel; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10
   taper!(U, t_max = t_max, α=α, N_min=N_min)
   return U
 end
-function taper(S::GphysData; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
+function taper(S::GphysData;
+  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  t_max::Real=10.0,
+  α::Real=0.05,
+  N_min::Int64=10)
+
   U = deepcopy(S)
-  taper!(U, t_max = t_max, α=α, N_min=N_min)
+  taper!(U, chans=chans, t_max=t_max, α=α, N_min=N_min)
   return U
 end
