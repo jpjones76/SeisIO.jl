@@ -59,13 +59,11 @@ end
 
 @doc (@doc inst_codes)
 function inst_code(C::GphysChannel)
-  N = S.n
-  id = S.id[i]
-  L = length(id)
+  L = length(C.id)
   for j = L:-1:1
-    if id[j] == '.'
+    if C.id[j] == '.'
       j > L-2 && break
-      return id[j+2]
+      return C.id[j+2]
     end
   end
   return '\0'

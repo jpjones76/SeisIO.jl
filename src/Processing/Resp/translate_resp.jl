@@ -79,6 +79,7 @@ function translate_resp!(S::GphysData,
     deleteat!(grp, kill)
     isempty(grp) && continue
     j = grp[1]
+    uu = lowercase(S.units[j])
 
     # onward
     resp_old = deepcopy(S.resp[j])
@@ -156,7 +157,10 @@ function translate_resp!(C::GphysChannel,
   # first ensure that there is something to do
   uu = lowercase(C.units)
   fs = Float32(C.fs)
-  if ((C.resp == resp_new) || ((uu in ("m/s", "m/s2", "m")) == false) || (fs ≤ 0.0f0))
+  if any([C.resp == resp_new,
+          uu in ("m/s", "m/s2", "m") == false,
+          fs ≤ 0.0f0,
+          inst_code(C) in seis_inst_codes == false])
     @info(string(timestamp(), ": nothing done (no valid responses to translate)."))
     return nothing
   end
