@@ -1,4 +1,5 @@
-export resample!
+import DSP.resample
+export resample, resample!
 
 function mkresample(rate::T) where T<:Real
   r = rationalize(rate)
@@ -10,25 +11,34 @@ function mkresample(rate::T) where T<:Real
 end
 
 @doc """
-    resample!(S::SeisData [, fs=FS])
+    resample!(S::SeisData [, chans=CC, fs=FS])
+    resample(S::SeisData [, chans=CC, fs=FS])
 
-Resample data in S to `FS`. Note that a poor choice of `FS` can lead to
-upsampling and other bad behaviors.
+Resample data in S to `FS`. If keyword `fs` is not specified, data are resampled
+to the lowest non-zero value in `S.fs[CC]`.Note that a poor choice of `FS` can
+lead to upsampling and other undesirable behavior.
 
-If fs is not specified, data are resampled to the lowest non-zero sampling
-frequency in S.
+Use keyword `chans=CC` to only resample channel numbers `CC`. By default, all
+channels `i` with `S.fs[i] > 0.0` are resampled.
 
-resample!(C::SeisChannel, fs::Float64)
+    resample!(C::SeisChannel, fs::Float64)
+    resample(C::SeisChannel, fs::Float64)
 
-Resample C.x to `fs`. Both input arguments are required for this method.
-
+Resample `C.x` to `fs`. 
 """ resample!
-function resample!(S::GphysData; fs::Float64=0.0)
-  f0 = fs == 0.0 ? minimum(S.fs[S.fs .> 0.0]) : fs
+function resample!(S::GphysData;
+  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  fs::Float64=0.0)
+
+  if chans == Int64[]
+    chans = 1:S.n
+  end
+
+  f0 = fs == 0.0 ? minimum(S.fs[chans[S.fs[chans] .> 0.0]]) : fs
 
   # This setup is very similar to filtfilt!
   N = nx_max(S)
-  T = unique([eltype(i) for i in S.x])
+  T = unique([eltype(i) for i in S.x[chans]])
   nT = length(T)
 
   sz = 0
@@ -44,7 +54,7 @@ function resample!(S::GphysData; fs::Float64=0.0)
   Z = similar(Y)
 
   # Get groups
-  GRPS = get_unique(S, ["fs", "eltype"])
+  GRPS = get_unique(S, ["fs", "eltype"], chans=chans)
   i = GRPS[1][1]
   ty = eltype(S.x[i])
   fs = ty(S.fs[i])
@@ -174,4 +184,20 @@ function resample!(C::GphysChannel, f0::Float64)
   setfield!(C, :fs, f0)
   note!(C, string("resample!, fs=", repr("text/plain", f0, context=:compact=>true)))
   return nothing
+end
+
+@doc (@doc resample!)
+function resample(S::GphysData;
+  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  fs::Float64=0.0)
+
+  U = deepcopy(S)
+  resample!(U, chans=chans, fs=fs)
+  return U
+end
+
+function resample(C::GphysChannel, f0::Float64)
+  U = deepcopy(C)
+  resample!(U, f0)
+  return U
 end
