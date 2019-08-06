@@ -3,14 +3,14 @@ export translate_resp!, translate_resp, remove_resp!, remove_resp
 # =====================================================================
 
 @doc """
-    translate_resp!(S, resp_new[, C=cha, wl=γ])
-    translate_resp(S, resp_new[, C=cha, wl=γ])
+    translate_resp!(S, resp_new[, chans=CC, wl=γ])
+    translate_resp(S, resp_new[, chans=CC, wl=γ])
 
-Translate the instrument response of seismic data channels `cha` in `S` to
+Translate the instrument response of seismic data channels `CC` in `S` to
 `resp_new`. Replaces field `:resp` with `resp_new` for all affected channels.
 
-    remove_resp!(S, C=cha, wl=γ])
-    remove_resp(S, C=cha, wl=γ])
+    remove_resp!(S, chans=CC, wl=γ])
+    remove_resp(S, chans=CC, wl=γ])
 
 Remove (flatten to DC) the instrument response of seismic data channels `cha`
 in `S`. Replaces field `:resp` with the appropriate (all-pass) response.
@@ -28,48 +28,57 @@ Remove (flatten to DC) the instrument response of seismic data in `Ch`.
 Replaces field `:resp` with the appropriate (all-pass) response.
 
 Keywords:
-* **C=cha** restricts response translation to channel(s) `cha`. C can be an
-Integer, UnitRange, or Array{Int64,1}. By default, all seismic data channels
+* **chans=CC** restricts response translation to channel(s) `CC`. `chans` can be
+an Integer, UnitRange, or Array{Int64,1}. By default, all seismic data channels
 have their responses translated to `resp_new`.
 * **wl=γ** sets the waterlevel to γ (default: `γ` = eps(Float32) ≈ ~1f-7)
 """ translate_resp!
 function translate_resp!(S::GphysData,
                     resp_new::Union{PZResp, PZResp64};
-                    C::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+                    chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
                     wl::Float32=eps(Float32))
 
   # first ensure that there is something to do
-  if C == Int64[]
-    C = 1:S.n
+  if chans == Int64[]
+    chans = 1:S.n
   end
-  @inbounds for i in C
+  @inbounds for i in chans
     if S.resp[i] != resp_new
       break
     end
-    if i == last(C)
+    if i == last(chans)
       @info(string(timestamp(), ": nothing done (no valid responses to translate)."))
       return nothing
     end
   end
 
   # initialize complex "work" vectors to the largest size we need
-  Nx      = nx_max(S, C)
+  Nx      = nx_max(S, chans)
   N2      = nextpow(2, Nx)
   Xw      = Array{Complex{Float32},1}(undef, N2)
   ff_old  = Array{Complex{Float32},1}(undef, N2)
   ff_new  = Array{Complex{Float32},1}(undef, N2)
   f       = Array{Float32,1}(undef, N2)
 
-  GRPS = get_unique(S, ["fs", "resp", "units"], chans=C)
+  GRPS = get_unique(S, ["fs", "resp", "units"], chans=chans)
   for grp in GRPS
 
     # get fs, resp
     j = grp[1]
 
     # no translating instrument responses unless we're dealing with seismometers
-    uu = lowercase(S.units[j])
-    uu in ("m/s", "m/s2", "m") || continue
-    # TO DO: add control to prevent erroneous response tranlsation of GPS data
+    codes = inst_codes(S)
+    kill = falses(length(grp))
+    for i = 1:length(grp)
+      if codes[i] in seis_inst_codes
+        continue
+      else
+        kill[i] = true
+      end
+    end
+    deleteat!(grp, kill)
+    isempty(grp) && continue
+    j = grp[1]
 
     # onward
     resp_old = deepcopy(S.resp[j])
@@ -131,11 +140,11 @@ end
 @doc (@doc translate_resp!)
 function translate_resp( S::GphysData,
                     resp_new::Union{PZResp, PZResp64};
-                    C::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+                    chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
                     wl::Float32=eps(Float32))
 
   U = deepcopy(S)
-  translate_resp!(U, resp_new, C=C, wl=wl)
+  translate_resp!(U, resp_new, chans=chans, wl=wl)
   return U
 end
 
@@ -232,13 +241,13 @@ end
 
 @doc (@doc translate_resp!)
 remove_resp!(S::GphysData;
-             C::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
-             wl::Float32=eps(Float32)) = translate_resp!(S, flat_resp, C=C, wl=wl)
+             chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+             wl::Float32=eps(Float32)) = translate_resp!(S, flat_resp, chans=chans, wl=wl)
 
 @doc (@doc translate_resp!)
 remove_resp(S::GphysData;
-            C::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
-            wl::Float32=eps(Float32)) = translate_resp(S, flat_resp, C=C, wl=wl)
+            chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+            wl::Float32=eps(Float32)) = translate_resp(S, flat_resp, chans=chans, wl=wl)
 
 @doc (@doc translate_resp!)
 remove_resp!(Ch::GphysChannel;
