@@ -48,23 +48,27 @@ function inst_code(S::GphysData, i::Integer)
   N = S.n
   id = S.id[i]
   L = length(id)
+  c = '\0'
   for j = L:-1:1
     if id[j] == '.'
       j > L-2 && break
-      return id[j+2]
+      c = id[j+2]
+      break
     end
   end
-  return '\0'
+  return c
 end
 
 @doc (@doc inst_codes)
 function inst_code(C::GphysChannel)
   L = length(C.id)
+  c = '\0'
   for j = L:-1:1
     if C.id[j] == '.'
       j > L-2 && break
-      return C.id[j+2]
+      c = C.id[j+2]
+      break
     end
   end
-  return '\0'
+  return c
 end
