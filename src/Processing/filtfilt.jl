@@ -1,4 +1,4 @@
-# import DSP:filtfilt
+import DSP:filtfilt
 export filtfilt, filtfilt!
 
 #=  Regenerate filter; largely identical to DSP.Filters.filt_stepstate with
@@ -150,20 +150,23 @@ Keywords control filtering behavior; specify as e.g. filtfilt!(S, fl=0.1, np=2, 
 
 | Name  | Default       | Type    | Description                         |
 |:------|:--------------|:--------|:------------------------------------|
-| fl    | 1.0           | Float64 | lower corner frequency [Hz] [^1]    |
-| fh    | 15.0          | Float64 | upper corner frequency [Hz] [^1]    |
+| chans | (all)         | [^1]    | channel numbers to filter           |
+| fl    | 1.0           | Float64 | lower corner frequency [Hz] [^2]    |
+| fh    | 15.0          | Float64 | upper corner frequency [Hz] [^2]    |
 | np    | 4             | Int64   | number of poles                     |
 | rp    | 10            | Int64   | pass-band ripple (dB)               |
 | rs    | 30            | Int64   | stop-band ripple (dB)               |
 | rt    | "Bandpass"    | String  | response type (type of filter)      |
 | dm    | "Butterworth" | String  | design mode (name of filter)        |
 
-[^1]: By convention, the lower corner frequency (fl) is used in a Highpass
+[^1]: Allowed types are Integer, UnitRange, and Array{Int64, 1}.
+[^2]: By convention, the lower corner frequency (fl) is used in a Highpass
 filter, and fh is used in a Lowpass filter.
 
 See also: DSP.jl documentation
 """ filtfilt!
 function filtfilt!(S::GphysData;
+    chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
     fl::Float64=KW.Filt.fl,
     fh::Float64=KW.Filt.fh,
     np::Int=KW.Filt.np,
@@ -173,7 +176,11 @@ function filtfilt!(S::GphysData;
     dm::String=KW.Filt.dm
     )
 
-  N = nx_max(S)
+  if chans == Int64[]
+    chans = 1:S.n
+  end
+
+  N = nx_max(S, chans)
 
   # Determine array structures
   T = unique([eltype(i) for i in S.x])
@@ -192,7 +199,7 @@ function filtfilt!(S::GphysData;
   Y = Array{yy,1}(undef, max(N, 6*p) + 2*p) # right value for Butterworth
 
   # Get groups
-  GRPS = get_unique(S, ["fs", "eltype"])
+  GRPS = get_unique(S, ["fs", "eltype"], chans=chans)
 
   for grp in GRPS
 
