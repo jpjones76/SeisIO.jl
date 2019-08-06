@@ -84,15 +84,3 @@ function update_resp_vecs!( Xw::Array{Complex{Float32},1},
   xre = view(xfl, 1:2:2*N2-1)
   return xfl, xre
 end
-
-function update_resp_vecs!( Xw::Array{Complex{Float32},1},
-                            f::Array{Float32,1},
-                            ff::Array{Complex{Float32},1},
-                            N2::Int64 )
-  resize!(Xw, N2)
-  resize!(f, N2)
-  resize!(ff, N2)
-  xfl = reinterpret(Float32, Xw)
-  xre = view(xfl, 1:2:2*N2-1)
-  return xfl, xre
-end
