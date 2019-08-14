@@ -87,8 +87,6 @@ end
 
 # Populate a channel with irregularly-sampled (campaign-style) data
 function populate_irr!(Ch::SeisChannel; nx::Int64=0)
-  irregular_units = ["%", "(% cloud cover)", "(direction vector)", "C", "K", "None", "Pa", "T", "V", "W", "m", "m/m", "m/s", "m/s²", "m³/m³", "rad", "rad/s", "rad/s²", "tonnes SO2"]
-
   chan = "OY"*randstring('A':'Z',1)
   net = ur2()
   sta = uppercase(randstring('A':'Z', rand(1:5)))

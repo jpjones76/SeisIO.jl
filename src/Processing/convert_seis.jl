@@ -6,13 +6,13 @@ export convert_seis, convert_seis!
     convert_seis!(C[, units_out=UU, v=V])
     convert_seis(CC, units_out=UU, v=V)
 
-    or integrating as needed. Integration is rectangular via. Neumaier's algorithm[^1].
-Convert all seismic data channels in `S` to velocity seismograms, differentiating
+    Converts all seismic data channels in `S` to velocity seismograms,
+differentiating or integrating as needed.
 
 ### Keywords
 * `units_out=UU` specifies output units.
   + Default: "m/s".
-  + Allowed: "m", "m/s", or "m/s²". (SeisIO uses Unicode (UTF-8) SI units.)
+  + Allowed: "m", "m/s", or "m/s2". (SeisIO uses Unicode (UTF-8) UCUM units.)
 * `v=V` sets verbosity.
 * `chans=CC` restricts seismogram conversion to seismic data channels within `CC`.
   + `chans` can be an Integer, UnitRange, or Array{Int64,1}.
@@ -36,8 +36,8 @@ function convert_seis!(S::GphysData;
   v::Int64=KW.v)
 
   # sanity check
-  if units_out in ("m", "m/s", "m/s²") == false
-    error("units_out must be in (\"m\", \"m/s\", \"m/s²\")!")
+  if units_out in ("m", "m/s", "m/s2") == false
+    error("units_out must be in (\"m\", \"m/s\", \"m/s2\")!")
   end
 
   # get seismic data channels
@@ -46,6 +46,8 @@ function convert_seis!(S::GphysData;
 
   # now loop over all seismic channels
   for i in chans
+    S.fs[i] == 0.0 && (@warn(string("Irregularly-sampled seismic data in channel ", i, "; skipped!")); continue)
+
     if v > 2
       println(stdout, "Begin channel ", i)
     end
@@ -76,7 +78,7 @@ function convert_seis!(S::GphysData;
           t[j,2] -= d2
         end
 
-      # integrate from m/s² to m/s
+      # integrate from m/s2 to m/s
       else
         int_x!(S.x[i], t[:,1], δ)
         for j = 1:Nt
@@ -89,13 +91,13 @@ function convert_seis!(S::GphysData;
       for j = 1:Nt
         t[j,2] -= d2
       end
-      if units_in == "m/s²"
+      if units_in == "m/s2"
         int_x!(S.x[i], t[:,1], δ)
         for j = 1:Nt
           t[j,2] -= d2
         end
       end
-    else # units == "m/s²"
+    else # units == "m/s2"
       diff_x!(S.x[i], t[:,1], fs)
       for j = 1:Nt
         t[j,2] += d2
@@ -127,8 +129,8 @@ function convert_seis!(C::GphysChannel;
   v::Int64=KW.v)
 
   # sanity check
-  if units_out in ("m", "m/s", "m/s²") == false
-    error("units_out must be in (\"m\", \"m/s\", \"m/s²\")!")
+  if units_out in ("m", "m/s", "m/s2") == false
+    error("units_out must be in (\"m\", \"m/s\", \"m/s2\")!")
   end
 
   units_in = lowercase(C.units)
@@ -156,7 +158,7 @@ function convert_seis!(C::GphysChannel;
         t[j,2] -= d2
       end
 
-    # integrate from m/s² to m/s
+    # integrate from m/s2 to m/s
     else
       int_x!(C.x, t[:,1], δ)
       for j = 1:Nt
@@ -169,13 +171,13 @@ function convert_seis!(C::GphysChannel;
     for j = 1:Nt
       t[j,2] -= d2
     end
-    if units_in == "m/s²"
+    if units_in == "m/s2"
       int_x!(C.x, t[:,1], δ)
       for j = 1:Nt
         t[j,2] -= d2
       end
     end
-  else # units == "m/s²"
+  else # units == "m/s2"
     diff_x!(C.x, t[:,1], fs)
     for j = 1:Nt
       t[j,2] += d2

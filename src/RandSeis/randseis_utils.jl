@@ -57,7 +57,7 @@ function getyp2codes(b::Char, s=false::Bool)
     if Base.in(i, ['H','L'])
       u = rand(["m", "m/s"])
     else
-      u = "m/s²"
+      u = "m/s2"
     end
   else
     i = rand(['A','B','D','F','G','I','J','K','M','O','P','Q','R','S','T','U','V','W','Z'])
@@ -77,16 +77,16 @@ function getyp2codes(b::Char, s=false::Bool)
       u = "T"
     elseif i == 'G' # tiltmeter
         c = rand(['A','B','C','1','2','3','U','V','W'])
-        u = "m/s²"
+        u = "m/s2"
     elseif i == 'I' # humidity
       c = rand(['O','I','D'])
       u = "%"
     elseif i == 'J' # rotational seismometer
       c = rand(['Z','N','E','A','B','C','T','R','1','2','3','U','V','W'])
-      u = rand(["rad", "rad/s", "rad/s^2"])
+      u = rand(["rad", "rad/s", "rad/s2"])
     elseif i == 'K' # thermal (thermometer or radiometer)
       c = rand(['O', 'I', 'D'])
-      u = rand(["C","K"])
+      u = rand(["Cel","K"])
     elseif i == 'M' # mass position sensor
         c = rand(['A','B','C','1','2','3','U','V','W'])
         u = "m"
@@ -95,7 +95,7 @@ function getyp2codes(b::Char, s=false::Bool)
       u = "m/s"
     elseif i == 'P' # very short-period geophone
       c = rand(['Z','N','E'])
-      u = rand(["m", "m/s", "m/s²"])
+      u = rand(["m", "m/s", "m/s2"])
     elseif i == 'Q' # voltmeter
       c = '_'
       u = "V"
@@ -110,19 +110,19 @@ function getyp2codes(b::Char, s=false::Bool)
       u = "m"
     elseif i == 'U' # bolometer
       c = '_'
-      u = "(% cloud cover)"
+      u = "%{cloud_cover}"
     elseif i == 'V' # volumetric strainmeter
       c = '_'
-      u = "m^3/m^3"
+      u = "m3/m3"
     elseif i == 'W' # wind speed ('S') or direction ('D')
       c = rand(['S','D'])
-      u = c == 'S' ? "m/s" : "(direction vector)"
+      u = c == 'S' ? "m/s" : "{direction_vector}"
 
     # X, Y are instrument-specific...excluded
 
     elseif i == 'Z' # synthesized beam or stack
       c = rand(['I','C','F','O'])
-      u = rand(["m", "m/s", "m/s²"])
+      u = rand(["m", "m/s", "m/s2"])
     end
   end
   return i,c,u
