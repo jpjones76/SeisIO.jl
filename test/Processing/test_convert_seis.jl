@@ -1,7 +1,7 @@
 redirect_stdout(out) do
   convert_file = path*"/SampleFiles/2019_M7.1_Ridgecrest.seis"
   S = randSeisData(3, s=1.0)
-  S.units = ["m/s²", "m", "m/s"]
+  S.units = ["m/s2", "m", "m/s"]
   U = deepcopy(S)
   S1 = deepcopy(S)
 
@@ -11,9 +11,9 @@ redirect_stdout(out) do
   @test S.units[1] == S.units[2] == S.units[3] == "m/s"
   @test S.x[3] == U.x[3]
 
-  println("\nconversion to m/s²\n")
-  convert_seis!(S, v=2, units_out="m/s²")
-  @test S.units[1] == S.units[2] == S.units[3] == "m/s²"
+  println("\nconversion to m/s2\n")
+  convert_seis!(S, v=2, units_out="m/s2")
+  @test S.units[1] == S.units[2] == S.units[3] == "m/s2"
   @test isapprox(S.x[1], U.x[1])
 
   println("\nconversion to m\n")
@@ -21,7 +21,7 @@ redirect_stdout(out) do
   @test S1.units[1] == S1.units[2] == S1.units[3] == "m"
   @test isapprox(S1.x[2], U.x[2])
 
-  println("\ntest conversion from m to m/s² and back to m\n")
+  println("\ntest conversion from m to m/s2 and back to m\n")
   for j = 1:100
     S = randSeisData(3, s=1.0)
     S.units = ["m", "m", "m"]
@@ -33,8 +33,8 @@ redirect_stdout(out) do
     end
     U = deepcopy(S)
 
-    convert_seis!(S, units_out="m/s²")
-    @test S.units[1] == S.units[2] == S.units[3] == "m/s²"
+    convert_seis!(S, units_out="m/s2")
+    @test S.units[1] == S.units[2] == S.units[3] == "m/s2"
     convert_seis!(S, units_out="m")
     @test S.units[1] == S.units[2] == S.units[3] == "m"
 
@@ -46,7 +46,7 @@ redirect_stdout(out) do
   println("\n testing at Float32 precision... \n")
   S = rseis(convert_file)[1]
   U = deepcopy(S)
-  convert_seis!(S, units_out="m/s²")
+  convert_seis!(S, units_out="m/s2")
   convert_seis!(S)
   for i = 1:16
     @test isapprox(S.x[i], U.x[i])
@@ -60,7 +60,7 @@ redirect_stdout(out) do
   detrend!(S)
 
   U = deepcopy(S)
-  convert_seis!(S, units_out="m/s²")
+  convert_seis!(S, units_out="m/s2")
   for i = 17:19
      @test S.x[i] == U.x[i]
   end
@@ -73,7 +73,7 @@ redirect_stdout(out) do
   convert_seis!(S, units_out="m")
   convert_seis!(S, units_out="m/s")
   convert_seis!(S, units_out="m")
-  convert_seis!(S, units_out="m/s²")
+  convert_seis!(S, units_out="m/s2")
   convert_seis!(S, units_out="m")
 
   # Test on a SeisChannel
@@ -81,6 +81,6 @@ redirect_stdout(out) do
   convert_seis!(C, units_out="m")
   convert_seis!(C, units_out="m/s")
   convert_seis!(C, units_out="m")
-  convert_seis!(C, units_out="m/s²")
+  convert_seis!(C, units_out="m/s2")
   convert_seis!(C, units_out="m")
 end

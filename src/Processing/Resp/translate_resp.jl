@@ -92,7 +92,7 @@ function translate_resp!(S::GphysData,
         "(a0=", resp_old.a0, ", f0=", resp_old.f0, ", p=", resp_old.p, ", z=", resp_old.z, ")")
 
       # for accelerometers, working *in* acceleration units, we check: are there any poles below the nyquist?
-      if uu == "m/s²"
+      if uu == "m/s2"
         P = resp_old.p
         k = trues(length(P))
         for (i,p) in enumerate(P)
@@ -166,7 +166,7 @@ function translate_resp!(C::GphysChannel,
   uu = lowercase(C.units)
   fs = Float32(C.fs)
   if any([C.resp == resp_new,
-          uu in ("m/s", "m/s²", "m") == false,
+          uu in ("m/s", "m/s2", "m") == false,
           fs ≤ 0.0f0,
           inst_code(C) in seis_inst_codes == false])
     @info(string(timestamp(), ": nothing done (no valid responses to translate)."))
@@ -182,7 +182,7 @@ function translate_resp!(C::GphysChannel,
   f       = Array{Float32,1}(undef, N2)
 
   # for accelerometers, working *in* acceleration units, we check: are there any poles below the nyquist?
-  if uu == "m/s²"
+  if uu == "m/s2"
     P = C.resp.p
     k = trues(length(P))
     for (i,p) in enumerate(P)

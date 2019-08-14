@@ -5,17 +5,17 @@ The current set of updates, leading to v0.4.0, will focus on:
 
 ### 2019-08-13
 #### New, Changed, Deprecated
+* Added `vucum(str)` and `validate_units(S)` to validate strings for `:units`.
+
+### Bugs, Consistency, Performance
 * `detrend!`
   + `detrend!(..., n=N)` now allows degree n=0, equivalent to `demean!`.
   + slightly reduced memory consumption.
-  + greatly increased accuracy at Float32 precision.
+  + greatly increased accuracy at single precision.
+* `get_data`
+  + now correctly defaults to `unscale=false` and `ungap=false`.
 * `convert_seis!` converts seismograms in `S` to other units (m, m/s, m/s²) by
 differentiation or integration.
-* added `filt_seis_chans!`
-
-#### Bugs, Consistency, Performance
-* `get_data` now correctly defaults to `unscale=false` and `ungap=false`.
-* `translate_resp` is now correctly logged to `:notes`.
 
 ### 2019-08-05
 #### New, Changed, Deprecated
