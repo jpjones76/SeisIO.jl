@@ -98,22 +98,22 @@ function detrend!(S::GphysData;
     chans = 1:S.n
   end
 
-  @inbounds for i = 1:S.n
-    if i in chans
-      L = length(S.x[i])
-      T = eltype(S.x[i])
-      τ = T.(t_expand(S.t[i], S.fs[i])) .- S.t[i][1,2]
-      j = findall((isnan.(S.x[i])).==false)
-      if L == length(j)
-        p = polyfit(τ, S.x[i], n)
-        broadcast!(-, S.x[i], S.x[i], polyval(p, τ))
-      else
-        x = S.x[i][j]
-        p = polyfit(τ[j], x, n)
-        broadcast!(-, x, x, polyval(p, τ[j]))
-        S.x[i][j] = x
-      end
-      note!(S, i, string("detrend!, n = ", n))
+  @inbounds for i in chans
+    L = length(S.x[i])
+    T = eltype(S.x[i])
+    t = tx_float(S.t[i], S.fs[i], T)
+    j = findall((isnan.(S.x[i])).==false)
+    if L == length(j)
+      p = polyfit(t, S.x[i], n)
+      pv = polyval(p, t)
+      broadcast!(-, S.x[i], S.x[i], pv)
+      note!(S, i, string("detrend!, n = ", n, ", polyfit result = ", p))
+    else
+      x = S.x[i][j]
+      p = polyfit(t[j], x, n)
+      broadcast!(-, x, x, polyval(p, t[j]))
+      S.x[i][j] = x
+      note!(S, i, string("detrend!, n = ", n, ", polyfit result = ", p))
     end
   end
   return nothing
@@ -122,15 +122,15 @@ end
 function detrend!(C::GphysChannel; n::Int64=1)
   L = length(C.x)
   T = eltype(C.x)
-  τ = T.(t_expand(C.t, C.fs)) .- C.t[1,2]
+  t = tx_float(C.t, C.fs, T)
   j = findall((isnan.(C.x)).==false)
   if L == length(j)
-    p = polyfit(τ, C.x, n)
-    broadcast!(-, C.x, C.x, polyval(p, τ))
+    p = polyfit(t, C.x, n)
+    broadcast!(-, C.x, C.x, polyval(p, t))
   else
     x = C.x[j]
-    p = polyfit(τ[j], x, n)
-    broadcast!(-, x, x, polyval(p, τ[j]))
+    p = polyfit(t[j], x, n)
+    broadcast!(-, x, x, polyval(p, t[j]))
     C.x[j] = x
   end
   note!(C, string("detrend!, n = ", n))
