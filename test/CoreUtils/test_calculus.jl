@@ -1,3 +1,5 @@
+printstyled("  diff_x!, int_x!\n", color=:light_green)
+
 # Check that double-integration and double-differentiation are reversible
 T = Float64
 for i = 1:100

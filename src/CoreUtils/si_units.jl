@@ -1,4 +1,5 @@
-using Test
+export si_units
+
 function to_superscript(u::Array{UInt32,1}, i::Int64)
   (i ≥ length(u)) && error("bad units String!")
   j = i
@@ -127,16 +128,3 @@ function si_units(str::String)
   deleteat!(u, k)
   return String(Char.(u))
 end
-
-
-# Tests
-@test si_units("m") == "m"
-@test si_units("Pa") == "Pa"
-@test si_units("m/s") == "m/s"
-@test si_units("nm/s") == "nm/s"
-@test si_units("m/s**2") == "m/s²"
-@test si_units("s^43/s**3") == "s⁴³/s³"
-@test si_units("s**10/m^4") == "s¹⁰/m⁴"
-@test si_units("s^43 m**-3") == "s⁴³/m³"
-@test si_units("s^43 cm^-3") == "s⁴³/cm³"
-@test si_units("s^43 cm^-3 V^-4") == "s⁴³/cm³ V⁴"
