@@ -1,19 +1,17 @@
-#########################
-Data Processing Functions
-#########################
-Supported processing operations are described below. Functions are organized
-categorically.
+Supported processing operations are described below.
 
 In most cases, a "safe" version of each function can be invoked to create a
-new SeisData object with the processed output.
+new object with the processed output.
 
-Any function that can logically operate on a SeisChannel object will do so. Any
-function that operates on a SeisData object will also operate on a SeisEvent
-object by applying itself to the SeisData object in the ``:data`` field.
+Any function that can logically operate on a single-channel object will do so. Any
+function that operates on a SeisData object can be applied to the :data field of a
+SeisEvent object.
 
-*****************
-Signal Processing
-*****************
+###############
+Basic Functions
+###############
+
+These functions have no keywords that fundamentally change their behavior.
 
 .. function: demean!(S::GphysData[, chans=CC, irr=false])
 
@@ -21,45 +19,16 @@ Remove the mean from all channels i with S.fs[i] > 0.0. Specify irr=true to also
 remove the mean from irregularly sampled channels. Specify chans=CC to restrict
 to channel number(s) CC. Ignores NaNs.
 
-.. function: detrend!(S::GphysData[, n=1, irr=false])
+.. function: detrend!(S::GphysData[, n=1, chans=CC, irr=false])
 
 Remove the polynomial trend of degree n from every regularly-sampled channel
 in S using a least-squares polynomial fit. Specify chans=CC to restrict
 to channel number(s) CC. Ignores NaNs.
 
-.. function:: filtfilt!(S::GphysData[; KWs])
+.. function:: nanfill!(S)
 
-Apply a zero-phase filter to data in **S.x**.
-
-Irregularly-sampled data are never affected by filtfilt!.
-
-.. function:: filtfilt!(C::SeisChannel[; KWs])
-
-Apply zero-phase filter to **C.x**. Filtering is applied to each contiguous data
-segment in C separately.
-
-### Filtering Keywords
-Keywords control filtering behavior; specify e.g. filtfilt!(S, fl=0.1, np=2).
-Default values can be changed by adjusting the :ref:`shared keywords<dkw>`, e.g.,
-SeisIO.KW.Filt.np = 2 changes the default number of poles to 2.
-
-.. csv-table::
-  :header: KW, Default, Type, Description
-  :delim: |
-  :widths: 1, 2, 1, 4
-
-  chans | []          | :sup:`(a)` | channel numbers to filter
-  fl  | 1.0           | Float64 | lower corner frequency [Hz] \ :sup:`(b)`
-  fh  | 15.0          | Float64 | upper corner frequency [Hz] \ :sup:`(b)`
-  np  | 4             | Int64   | number of poles
-  rp  | 10            | Int64   | pass-band ripple (dB)
-  rs  | 30            | Int64   | stop-band ripple (dB)
-  rt  | \"Bandpass\"    | String  | response type (type of filter)
-  dm  | \"Butterworth\" | String  | design mode (name of filter)
-
-:sup:`(a)`  Allowed types are Integer, UnitRange, and Array{Int64, 1}.
-:sup:`(b)`  By convention, the lower corner frequency (fl) is used in a Highpass
-filter, and fh is used in a Lowpass filter.
+For each channel **i** in **S**, replace all NaNs in **S.x[i]** with the mean
+of non-NaN values.
 
 .. function:: resample!(S::GphysData [, chans=CC, fs=FS])
 .. function:: resample!(C::SeisChannel, fs::Float64)
@@ -71,29 +40,69 @@ of fs can lead to upsampling and other bad behaviors.
 Use keyword **chans=CC** to only resample channel numbers **CC**. By default,
 all channels **i** with **S.fs[i] > 0.0** are resampled.
 
-.. function:: taper!(S[, chans=CC, t_max::Real=10.0, :math:`\alpha`::Real=0.05, N_min::Int64=10])
-
-Cosine taper each channel in S around time gaps. Specify chans=CC to restrict
-to channel number(s) CC. Does not modify irregularly-sampled data channels.
-
-taper!(C[, t_max::Real=10.0, :math:`\alpha`::Real=0.05, N_min::Int64=10])
-
-Cosine taper each segment of time-series data in GphysChannel object C that
-contains at least `N_min` total samples. Returns if C is irregularly sampled.
-
-Keywords:
-
-* chans: Only taper the specified channels.
-* N_min: Data segments with N < N_min total samples are not tapered.
-* t_max: Maximum taper edge in seconds.
-* :math:`\alpha`: Taper edge area; as for a Tukey window, the first and last 100*:math:`\alpha`% of samples in each window are tapered, up to `t_max` seconds of data.
-
-
 .. function:: unscale!(S[, chans=CC, irr=false])
 
 Divide the gains from all channels **i** with **S.fs[i] > 0.0**. Specify
 chans=CC to restrict to channel number(s) CC. Specify **irr=true** to also
 remove gains of irregularly-sampled channels.
+
+######################
+Customizable Functions
+######################
+
+*******************
+Convert Seismograms
+*******************
+
+Seismograms can be converted to or from displacement, velocity, or acceleration
+using convert_seis:
+
+.. function:: convert_seis!(S[, chans=CC, units_out=UU, v=V])
+.. function:: convert_seis!(C[, units_out=UU, v=V])
+
+Converts all seismic data channels in `S` to velocity seismograms,
+differentiating or integrating as needed.
+
+Keywords
+========
+* units_out=UU: specify output units: "m", "m/s" (default), or "m/s²"
+* chans=CC: restrict seismogram conversion to seismic data channels in CC
+* v=V: verbosity
+
+Behavior and Usage Warnings
+---------------------------
+
+**Long Seismograms**: convert_seis becomes less reversible as seismograms lengthen,
+especially at Float32 precision, due to `loss of significance
+<https://en.wikipedia.org/wiki/Floating-point_arithmetic#Accuracy_problems>`_.
+At single (Float32) precision, seismograms with N ~ 10^6 samples are
+reconstructable after one conversion (e.g. "m" ==> "m/s" can be reversed, with
+output approximately equal to the original data). After multiple conversions
+(i.e., "m" ==> "m/s²" or "m/s²" ==> "m"), Float32 data cannot be perfectly
+reconstructed in this way, though reconstruction errors are typically small.
+
+**Rectangular Integration**: integration is always rectangular; irregularly-spaced
+seismic data are not processed by convert_seis. Summation uses an in-place
+variant of `Kahan-Babuška-Neumaier summation <https://github.com/JuliaMath/KahanSummation.jl>`_.
+
+.....
+
+*********
+Fill Gaps
+*********
+
+.. function:: ungap!(S[, chans=CC, m=true, tap=false])
+.. function:: ungap!(C[, m=true, tap=false])
+
+Fill time gaps in each channel with the mean of the channel data.
+
+Keywords
+========
+* chans=CC: only ungap channels CC.
+* m=false: this flag fills gaps with NaNs instead of the mean.
+* tap=true: taper data before filling gaps.
+
+.....
 
 .. _merge:
 
@@ -160,6 +169,60 @@ It's best to merge only unprocessed data. Data segments that were processed
 independently (e.g. detrended) will be averaged pointwise when merged, which
 can easily leave data in an unusuable state.
 
+.. function:: mseis!(S::GphysData, U::GphysData, ...)
+
+Merge multiple GphysData structures into S.
+
+.....
+
+***************************
+Seismic Instrument Response
+***************************
+
+.. function:: translate_resp!(S, resp_new[, chans=CC, wl=g])
+.. function:: translate_resp!(Ch, resp_new[, wl=g])
+
+Translate the instrument response of seismic data channels to **resp_new**.
+Replaces field **:resp** with **resp_new** for all affected channels.
+
+.. function:: remove_resp!(S, chans=CC, wl=g])
+.. function:: remove_resp!(Ch, wl=g])
+
+Remove (flatten to DC) the instrument response of **Ch**, or of seismic data
+channels **CC** in **S**. Replaces **:resp** with the appropriate (all-pass)
+response.
+
+Keywords
+========
+* **C=cha** restricts response translation for GphysData object **S** to channel(s) **cha**. Accepts an Integer, UnitRange, or Array{Int64,1} argument; does *not* accept string IDs. By default, all seismic data channels in **S** have their responses translated to **resp_new**.
+* **wl=g** sets the waterlevel to g (default: g = eps(Float32) ~ 1.1f-7). The waterlevel is the minimum magnitude (absolute value) of the normalized old frequency response; in other words, if the old frequency response has a maximum magnitude of 1.0, then no response coefficient can be lower than g. This is useful to prevent "divide by zero" errors, but setting it too high will cause errors.
+
+
+Precision and Memory Optimization
+=================================
+To optimize speed and memory use, instrument response translation maps data to
+Complex{Float32} before translation; thus, with Float64 data, there can be
+minor rounding errors.
+
+Instrument responses are also memory-intensive. The minimum memory consumption
+to translate the response of a gapless Float32 SeisChannel object is ~7x the
+size of the object itself.
+
+More precisely, for an object **S** (of Type <: GphysData or GphysChannel),
+translation requires memory ~ 2 kB + the greater of (7x the size of the longest
+Float32 segment, or 3.5x the size of the longest Float64 segment). Translation
+uses four vectors -- three complex and one real -- that are updated and
+dynamically resized as the algorithm loops over each segment:
+
+* Old response container: Array{Complex{Float32,1}}(undef, Nx)
+* New response container: Array{Complex{Float32,1}}(undef, Nx)
+* Complex data container: Array{Complex{Float32,1}}(undef, Nx)
+* Real frequencies for FFT: Array{Float32,1}(undef, Nx)
+
+...where **Nx** is the number of samples in the longest segment in **S**.
+
+.....
+
 ***********
 Synchronize
 ***********
@@ -191,73 +254,63 @@ Specifying end time (t)
 * t="first" synchronize to the first end time in `S`.
 * numeric, datetime, and non-reserved strings are treated as for `-s`.
 
+.....
 
-.. function:: mseis!(S::GphysData, U::GphysData, ...)
+*****
+Taper
+*****
 
-Merge multiple GphysData structures into S.
+.. function:: taper!(S[, chans=CC, t_max::Real=10.0, :math:`\alpha`::Real=0.05, N_min::Int64=10])
 
-****************************
-Seismic Instrument Responses
-****************************
+Cosine taper each channel in S around time gaps. Specify chans=CC to restrict
+to channel number(s) CC. Does not modify irregularly-sampled data channels.
 
-.. function:: translate_resp!(S, resp_new[, chans=CC, wl=g])
-.. function:: translate_resp!(Ch, resp_new[, wl=g])
+taper!(C[, t_max::Real=10.0, :math:`\alpha`::Real=0.05, N_min::Int64=10])
 
-Translate the instrument response of seismic data channels to **resp_new**.
-Replaces field **:resp** with **resp_new** for all affected channels.
+Cosine taper each segment of time-series data in GphysChannel object C that
+contains at least `N_min` total samples. Returns if C is irregularly sampled.
 
-.. function:: remove_resp!(S, chans=CC, wl=g])
-.. function:: remove_resp!(Ch, wl=g])
+Keywords
+========
+* chans: Only taper the specified channels.
+* N_min: Data segments with N < N_min total samples are not tapered.
+* t_max: Maximum taper edge in seconds.
+* :math:`\alpha`: Taper edge area; as for a Tukey window, the first and last 100*:math:`\alpha`% of samples in each window are tapered, up to `t_max` seconds of data.
 
-Remove (flatten to DC) the instrument response of **Ch**, or of seismic data
-channels **CC** in **S**. Replaces **:resp** with the appropriate (all-pass)
-response.
+.....
 
-Response Keywords
-=================
-* **C=cha** restricts response translation for GphysData object **S** to channel(s) **cha**. Accepts an Integer, UnitRange, or Array{Int64,1} argument; does *not* accept string IDs. By default, all seismic data channels in **S** have their responses translated to **resp_new**.
-* **wl=g** sets the waterlevel to g (default: g = eps(Float32) ~ 1.1f-7). The waterlevel is the minimum magnitude (absolute value) of the normalized old frequency response; in other words, if the old frequency response has a maximum magnitude of 1.0, then no response coefficient can be lower than g. This is useful to prevent "divide by zero" errors, but setting it too high will cause errors.
+*****************
+Zero-Phase Filter
+*****************
 
+.. function:: filtfilt!(S::GphysData[; KWs])
 
-Precision and Memory Optimization
-----------------------------------
-To optimize speed and memory use, instrument response translation maps data to
-Complex{Float32} before translation; thus, with Float64 data, there can be
-minor rounding errors.
+Apply a zero-phase filter to regularly-sampled data in **S**. Irregularly-sampled data are never processed by filtfilt!.
 
-Instrument responses are also memory-intensive. The minimum memory consumption
-to translate the response of a gapless Float32 SeisChannel object is ~7x the
-size of the object itself.
+.. function:: filtfilt!(C::SeisChannel[; KWs])
 
-More precisely, for an object **S** (of Type <: GphysData or GphysChannel),
-translation requires memory ~ 2 kB + the greater of (7x the size of the longest
-Float32 segment, or 3.5x the size of the longest Float64 segment). Translation
-uses four vectors -- three complex and one real -- that are updated and
-dynamically resized as the algorithm loops over each segment:
+Apply zero-phase filter to **C.x**. Filtering is applied to each contiguous data
+segment in C separately.
 
-* Old response container: Array{Complex{Float32,1}}(undef, Nx)
-* New response container: Array{Complex{Float32,1}}(undef, Nx)
-* Complex data container: Array{Complex{Float32,1}}(undef, Nx)
-* Real frequencies for FFT: Array{Float32,1}(undef, Nx)
+Keywords
+========
+.. csv-table::
+  :header: KW, Default, Type, Description
+  :delim: |
+  :widths: 1, 2, 1, 4
 
-...where **Nx** is the number of samples in the longest segment in **S**.
+  chans | []          | :sup:`(a)` | channel numbers to filter
+  fl  | 1.0           | Float64 | lower corner frequency [Hz] \ :sup:`(b)`
+  fh  | 15.0          | Float64 | upper corner frequency [Hz] \ :sup:`(b)`
+  np  | 4             | Int64   | number of poles
+  rp  | 10            | Int64   | pass-band ripple (dB)
+  rs  | 30            | Int64   | stop-band ripple (dB)
+  rt  | \"Bandpass\"    | String  | response type (type of filter)
+  dm  | \"Butterworth\" | String  | design mode (name of filter)
 
-**************************
-Other Processing Functions
-**************************
+:sup:`(a)`  Allowed types are Integer, UnitRange, and Array{Int64, 1}.
+:sup:`(b)`  By convention, the lower corner frequency (fl) is used in a Highpass
+filter, and fh is used in a Lowpass filter.
 
-.. function:: nanfill!(S)
-
-For each channel **i** in **S**, replace all NaNs in **S.x[i]** with the mean
-of non-NaN values.
-
-.. function:: ungap!(S[, chans=CC, m=true, tap=false])
-.. function:: ungap!(C[, m=true, tap=false])
-
-Fill time gaps in each channel with the mean of the channel data.
-
-Keywords:
-
-* chans=CC: only ungap channels CC.
-* m=false: this flag fills gaps with NaNs instead of the mean.
-* tap=true: taper data before filling gaps.
+Default filtering KW values can be changed by adjusting the :ref:`shared keywords<dkw>`,
+e.g., SeisIO.KW.Filt.np = 2 changes the default number of poles to 2.

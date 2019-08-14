@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Data Processing Functions &mdash; SeisIO 0.3.0 documentation</title>
+  <title>Basic Functions &mdash; SeisIO 0.3.0 documentation</title>
   
 
   
@@ -102,8 +102,19 @@
 </ul>
 <p class="caption"><span class="caption-text">Data Processing</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Processing Functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#signal-processing">Signal Processing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Basic Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#customizable-functions">Customizable Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#convert-seismograms">Convert Seismograms</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#keywords">Keywords</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#behavior-and-usage-warnings">Behavior and Usage Warnings</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#fill-gaps">Fill Gaps</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Keywords</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#merge">Merge</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#merge-behavior">Merge Behavior</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#which-channels-merge">Which channels merge?</a></li>
@@ -114,19 +125,24 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#seismic-instrument-response">Seismic Instrument Response</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Keywords</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#precision-and-memory-optimization">Precision and Memory Optimization</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#synchronize">Synchronize</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#specifying-start-time-s">Specifying start time (s)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#specifying-end-time-t">Specifying end time (t)</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#seismic-instrument-responses">Seismic Instrument Responses</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#response-keywords">Response Keywords</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#precision-and-memory-optimization">Precision and Memory Optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#taper">Taper</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Keywords</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#zero-phase-filter">Zero-Phase Filter</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Keywords</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#other-processing-functions">Other Processing Functions</a></li>
 </ul>
 </li>
 </ul>
@@ -193,7 +209,7 @@
     
       <li><a href="../../index.html">Docs</a> &raquo;</li>
         
-      <li>Data Processing Functions</li>
+      <li>Basic Functions</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -212,17 +228,15 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="data-processing-functions">
-<h1>Data Processing Functions<a class="headerlink" href="#data-processing-functions" title="Permalink to this headline">¶</a></h1>
-<p>Supported processing operations are described below. Functions are organized
-categorically.</p>
+  <p>Supported processing operations are described below.</p>
 <p>In most cases, a “safe” version of each function can be invoked to create a
-new SeisData object with the processed output.</p>
-<p>Any function that can logically operate on a SeisChannel object will do so. Any
-function that operates on a SeisData object will also operate on a SeisEvent
-object by applying itself to the SeisData object in the <code class="docutils literal notranslate"><span class="pre">:data</span></code> field.</p>
-<div class="section" id="signal-processing">
-<h2>Signal Processing<a class="headerlink" href="#signal-processing" title="Permalink to this headline">¶</a></h2>
+new object with the processed output.</p>
+<p>Any function that can logically operate on a single-channel object will do so. Any
+function that operates on a SeisData object can be applied to the :data field of a
+SeisEvent object.</p>
+<div class="section" id="basic-functions">
+<h1>Basic Functions<a class="headerlink" href="#basic-functions" title="Permalink to this headline">¶</a></h1>
+<p>These functions have no keywords that fundamentally change their behavior.</p>
 <p>Remove the mean from all channels i with S.fs[i] &gt; 0.0. Specify irr=true to also
 remove the mean from irregularly sampled channels. Specify chans=CC to restrict
 to channel number(s) CC. Ignores NaNs.</p>
@@ -231,82 +245,11 @@ in S using a least-squares polynomial fit. Specify chans=CC to restrict
 to channel number(s) CC. Ignores NaNs.</p>
 <dl class="function">
 <dt>
-<code class="descname">filtfilt!(S::GphysData[; KWs])</code></dt>
+<code class="descname">nanfill!(S)</code></dt>
 <dd></dd></dl>
 
-<p>Apply a zero-phase filter to data in <strong>S.x</strong>.</p>
-<p>Irregularly-sampled data are never affected by filtfilt!.</p>
-<dl class="function">
-<dt>
-<code class="descname">filtfilt!(C::SeisChannel[; KWs])</code></dt>
-<dd></dd></dl>
-
-<p>Apply zero-phase filter to <strong>C.x</strong>. Filtering is applied to each contiguous data
-segment in C separately.</p>
-<p>### Filtering Keywords
-Keywords control filtering behavior; specify e.g. filtfilt!(S, fl=0.1, np=2).
-Default values can be changed by adjusting the <a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">shared keywords</span></a>, e.g.,
-SeisIO.KW.Filt.np = 2 changes the default number of poles to 2.</p>
-<table class="colwidths-given docutils align-center">
-<colgroup>
-<col style="width: 13%" />
-<col style="width: 25%" />
-<col style="width: 13%" />
-<col style="width: 50%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>KW</p></th>
-<th class="head"><p>Default</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>chans</p></td>
-<td><p>[]</p></td>
-<td><p><sup>(a)</sup></p></td>
-<td><p>channel numbers to filter</p></td>
-</tr>
-<tr class="row-odd"><td><p>fl</p></td>
-<td><p>1.0</p></td>
-<td><p>Float64</p></td>
-<td><p>lower corner frequency [Hz] <sup>(b)</sup></p></td>
-</tr>
-<tr class="row-even"><td><p>fh</p></td>
-<td><p>15.0</p></td>
-<td><p>Float64</p></td>
-<td><p>upper corner frequency [Hz] <sup>(b)</sup></p></td>
-</tr>
-<tr class="row-odd"><td><p>np</p></td>
-<td><p>4</p></td>
-<td><p>Int64</p></td>
-<td><p>number of poles</p></td>
-</tr>
-<tr class="row-even"><td><p>rp</p></td>
-<td><p>10</p></td>
-<td><p>Int64</p></td>
-<td><p>pass-band ripple (dB)</p></td>
-</tr>
-<tr class="row-odd"><td><p>rs</p></td>
-<td><p>30</p></td>
-<td><p>Int64</p></td>
-<td><p>stop-band ripple (dB)</p></td>
-</tr>
-<tr class="row-even"><td><p>rt</p></td>
-<td><p>“Bandpass”</p></td>
-<td><p>String</p></td>
-<td><p>response type (type of filter)</p></td>
-</tr>
-<tr class="row-odd"><td><p>dm</p></td>
-<td><p>“Butterworth”</p></td>
-<td><p>String</p></td>
-<td><p>design mode (name of filter)</p></td>
-</tr>
-</tbody>
-</table>
-<p><sup>(a)</sup>  Allowed types are Integer, UnitRange, and Array{Int64, 1}.
-<sup>(b)</sup>  By convention, the lower corner frequency (fl) is used in a Highpass
-filter, and fh is used in a Lowpass filter.</p>
+<p>For each channel <strong>i</strong> in <strong>S</strong>, replace all NaNs in <strong>S.x[i]</strong> with the mean
+of non-NaN values.</p>
 <dl class="function">
 <dt>
 <code class="descname">resample!(S::GphysData [, chans=CC, fs=FS])</code></dt>
@@ -324,23 +267,6 @@ of fs can lead to upsampling and other bad behaviors.</p>
 all channels <strong>i</strong> with <strong>S.fs[i] &gt; 0.0</strong> are resampled.</p>
 <dl class="function">
 <dt>
-<code class="descname">taper!(S[, chans=CC, t_max::Real=10.0, :math:`alpha`::Real=0.05, N_min::Int64=10])</code></dt>
-<dd></dd></dl>
-
-<p>Cosine taper each channel in S around time gaps. Specify chans=CC to restrict
-to channel number(s) CC. Does not modify irregularly-sampled data channels.</p>
-<p>taper!(C[, t_max::Real=10.0, <span class="math notranslate nohighlight">\(\alpha\)</span>::Real=0.05, N_min::Int64=10])</p>
-<p>Cosine taper each segment of time-series data in GphysChannel object C that
-contains at least <cite>N_min</cite> total samples. Returns if C is irregularly sampled.</p>
-<p>Keywords:</p>
-<ul class="simple">
-<li><p>chans: Only taper the specified channels.</p></li>
-<li><p>N_min: Data segments with N &lt; N_min total samples are not tapered.</p></li>
-<li><p>t_max: Maximum taper edge in seconds.</p></li>
-<li><p><span class="math notranslate nohighlight">\(\alpha\)</span>: Taper edge area; as for a Tukey window, the first and last 100*:math:<cite>alpha`% of samples in each window are tapered, up to `t_max</cite> seconds of data.</p></li>
-</ul>
-<dl class="function">
-<dt>
 <code class="descname">unscale!(S[, chans=CC, irr=false])</code></dt>
 <dd></dd></dl>
 
@@ -348,8 +274,72 @@ contains at least <cite>N_min</cite> total samples. Returns if C is irregularly 
 chans=CC to restrict to channel number(s) CC. Specify <strong>irr=true</strong> to also
 remove gains of irregularly-sampled channels.</p>
 </div>
+<div class="section" id="customizable-functions">
+<h1>Customizable Functions<a class="headerlink" href="#customizable-functions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="convert-seismograms">
+<h2>Convert Seismograms<a class="headerlink" href="#convert-seismograms" title="Permalink to this headline">¶</a></h2>
+<p>Seismograms can be converted to or from displacement, velocity, or acceleration
+using convert_seis:</p>
+<dl class="function">
+<dt>
+<code class="descname">convert_seis!(S[, chans=CC, units_out=UU, v=V])</code></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt>
+<code class="descname">convert_seis!(C[, units_out=UU, v=V])</code></dt>
+<dd></dd></dl>
+
+<p>Converts all seismic data channels in <cite>S</cite> to velocity seismograms,
+differentiating or integrating as needed.</p>
+<div class="section" id="keywords">
+<h3>Keywords<a class="headerlink" href="#keywords" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>units_out=UU: specify output units: “m”, “m/s” (default), or “m/s²”</p></li>
+<li><p>chans=CC: restrict seismogram conversion to seismic data channels in CC</p></li>
+<li><p>v=V: verbosity</p></li>
+</ul>
+<div class="section" id="behavior-and-usage-warnings">
+<h4>Behavior and Usage Warnings<a class="headerlink" href="#behavior-and-usage-warnings" title="Permalink to this headline">¶</a></h4>
+<p><strong>Long Seismograms</strong>: convert_seis becomes less reversible as seismograms lengthen,
+especially at Float32 precision, due to <a class="reference external" href="https://en.wikipedia.org/wiki/Floating-point_arithmetic#Accuracy_problems">loss of significance</a>.
+At single (Float32) precision, seismograms with N ~ 10^6 samples are
+reconstructable after one conversion (e.g. “m” ==&gt; “m/s” can be reversed, with
+output approximately equal to the original data). After multiple conversions
+(i.e., “m” ==&gt; “m/s²” or “m/s²” ==&gt; “m”), Float32 data cannot be perfectly
+reconstructed in this way, though reconstruction errors are typically small.</p>
+<p><strong>Rectangular Integration</strong>: integration is always rectangular; irregularly-spaced
+seismic data are not processed by convert_seis. Summation uses an in-place
+variant of <a class="reference external" href="https://github.com/JuliaMath/KahanSummation.jl">Kahan-Babuška-Neumaier summation</a>.</p>
+</div>
+</div>
+</div>
+<hr class="docutils" />
+<div class="section" id="fill-gaps">
+<h2>Fill Gaps<a class="headerlink" href="#fill-gaps" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descname">ungap!(S[, chans=CC, m=true, tap=false])</code></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt>
+<code class="descname">ungap!(C[, m=true, tap=false])</code></dt>
+<dd></dd></dl>
+
+<p>Fill time gaps in each channel with the mean of the channel data.</p>
+<div class="section" id="id1">
+<h3>Keywords<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>chans=CC: only ungap channels CC.</p></li>
+<li><p>m=false: this flag fills gaps with NaNs instead of the mean.</p></li>
+<li><p>tap=true: taper data before filling gaps.</p></li>
+</ul>
+<hr class="docutils" />
+</div>
+</div>
 <div class="section" id="merge">
-<span id="id1"></span><h2>Merge<a class="headerlink" href="#merge" title="Permalink to this headline">¶</a></h2>
+<span id="id2"></span><h2>Merge<a class="headerlink" href="#merge" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt>
 <code class="descname">merge!(S::GphysData, U::GphysData)</code></dt>
@@ -432,9 +422,73 @@ channels, each with id “XX.FOO..BHZ”, but one has fs=100 Hz and the other fs
 <p>It’s best to merge only unprocessed data. Data segments that were processed
 independently (e.g. detrended) will be averaged pointwise when merged, which
 can easily leave data in an unusuable state.</p>
+<dl class="function">
+<dt>
+<code class="descname">mseis!(S::GphysData, U::GphysData, ...)</code></dt>
+<dd></dd></dl>
+
+<p>Merge multiple GphysData structures into S.</p>
 </div>
 </div>
 </div>
+<hr class="docutils" />
+<div class="section" id="seismic-instrument-response">
+<h2>Seismic Instrument Response<a class="headerlink" href="#seismic-instrument-response" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descname">translate_resp!(S, resp_new[, chans=CC, wl=g])</code></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt>
+<code class="descname">translate_resp!(Ch, resp_new[, wl=g])</code></dt>
+<dd></dd></dl>
+
+<p>Translate the instrument response of seismic data channels to <strong>resp_new</strong>.
+Replaces field <strong>:resp</strong> with <strong>resp_new</strong> for all affected channels.</p>
+<dl class="function">
+<dt>
+<code class="descname">remove_resp!(S, chans=CC, wl=g])</code></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt>
+<code class="descname">remove_resp!(Ch, wl=g])</code></dt>
+<dd></dd></dl>
+
+<p>Remove (flatten to DC) the instrument response of <strong>Ch</strong>, or of seismic data
+channels <strong>CC</strong> in <strong>S</strong>. Replaces <strong>:resp</strong> with the appropriate (all-pass)
+response.</p>
+<div class="section" id="id3">
+<h3>Keywords<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><strong>C=cha</strong> restricts response translation for GphysData object <strong>S</strong> to channel(s) <strong>cha</strong>. Accepts an Integer, UnitRange, or Array{Int64,1} argument; does <em>not</em> accept string IDs. By default, all seismic data channels in <strong>S</strong> have their responses translated to <strong>resp_new</strong>.</p></li>
+<li><p><strong>wl=g</strong> sets the waterlevel to g (default: g = eps(Float32) ~ 1.1f-7). The waterlevel is the minimum magnitude (absolute value) of the normalized old frequency response; in other words, if the old frequency response has a maximum magnitude of 1.0, then no response coefficient can be lower than g. This is useful to prevent “divide by zero” errors, but setting it too high will cause errors.</p></li>
+</ul>
+</div>
+<div class="section" id="precision-and-memory-optimization">
+<h3>Precision and Memory Optimization<a class="headerlink" href="#precision-and-memory-optimization" title="Permalink to this headline">¶</a></h3>
+<p>To optimize speed and memory use, instrument response translation maps data to
+Complex{Float32} before translation; thus, with Float64 data, there can be
+minor rounding errors.</p>
+<p>Instrument responses are also memory-intensive. The minimum memory consumption
+to translate the response of a gapless Float32 SeisChannel object is ~7x the
+size of the object itself.</p>
+<p>More precisely, for an object <strong>S</strong> (of Type &lt;: GphysData or GphysChannel),
+translation requires memory ~ 2 kB + the greater of (7x the size of the longest
+Float32 segment, or 3.5x the size of the longest Float64 segment). Translation
+uses four vectors – three complex and one real – that are updated and
+dynamically resized as the algorithm loops over each segment:</p>
+<ul class="simple">
+<li><p>Old response container: Array{Complex{Float32,1}}(undef, Nx)</p></li>
+<li><p>New response container: Array{Complex{Float32,1}}(undef, Nx)</p></li>
+<li><p>Complex data container: Array{Complex{Float32,1}}(undef, Nx)</p></li>
+<li><p>Real frequencies for FFT: Array{Float32,1}(undef, Nx)</p></li>
+</ul>
+<p>…where <strong>Nx</strong> is the number of samples in the longest segment in <strong>S</strong>.</p>
+</div>
+</div>
+<hr class="docutils" />
 <div class="section" id="synchronize">
 <h2>Synchronize<a class="headerlink" href="#synchronize" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
@@ -470,96 +524,112 @@ are filled with the mean; this isn’t possible with irregularly-sampled data.</
 <li><p>t=”first” synchronize to the first end time in <cite>S</cite>.</p></li>
 <li><p>numeric, datetime, and non-reserved strings are treated as for <cite>-s</cite>.</p></li>
 </ul>
-<dl class="function">
-<dt>
-<code class="descname">mseis!(S::GphysData, U::GphysData, ...)</code></dt>
-<dd></dd></dl>
-
-<p>Merge multiple GphysData structures into S.</p>
 </div>
 </div>
-<div class="section" id="seismic-instrument-responses">
-<h2>Seismic Instrument Responses<a class="headerlink" href="#seismic-instrument-responses" title="Permalink to this headline">¶</a></h2>
+<hr class="docutils" />
+<div class="section" id="taper">
+<h2>Taper<a class="headerlink" href="#taper" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt>
-<code class="descname">translate_resp!(S, resp_new[, chans=CC, wl=g])</code></dt>
+<code class="descname">taper!(S[, chans=CC, t_max::Real=10.0, :math:`alpha`::Real=0.05, N_min::Int64=10])</code></dt>
 <dd></dd></dl>
 
-<dl class="function">
-<dt>
-<code class="descname">translate_resp!(Ch, resp_new[, wl=g])</code></dt>
-<dd></dd></dl>
-
-<p>Translate the instrument response of seismic data channels to <strong>resp_new</strong>.
-Replaces field <strong>:resp</strong> with <strong>resp_new</strong> for all affected channels.</p>
-<dl class="function">
-<dt>
-<code class="descname">remove_resp!(S, chans=CC, wl=g])</code></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt>
-<code class="descname">remove_resp!(Ch, wl=g])</code></dt>
-<dd></dd></dl>
-
-<p>Remove (flatten to DC) the instrument response of <strong>Ch</strong>, or of seismic data
-channels <strong>CC</strong> in <strong>S</strong>. Replaces <strong>:resp</strong> with the appropriate (all-pass)
-response.</p>
-<div class="section" id="response-keywords">
-<h3>Response Keywords<a class="headerlink" href="#response-keywords" title="Permalink to this headline">¶</a></h3>
+<p>Cosine taper each channel in S around time gaps. Specify chans=CC to restrict
+to channel number(s) CC. Does not modify irregularly-sampled data channels.</p>
+<p>taper!(C[, t_max::Real=10.0, <span class="math notranslate nohighlight">\(\alpha\)</span>::Real=0.05, N_min::Int64=10])</p>
+<p>Cosine taper each segment of time-series data in GphysChannel object C that
+contains at least <cite>N_min</cite> total samples. Returns if C is irregularly sampled.</p>
+<div class="section" id="id4">
+<h3>Keywords<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li><p><strong>C=cha</strong> restricts response translation for GphysData object <strong>S</strong> to channel(s) <strong>cha</strong>. Accepts an Integer, UnitRange, or Array{Int64,1} argument; does <em>not</em> accept string IDs. By default, all seismic data channels in <strong>S</strong> have their responses translated to <strong>resp_new</strong>.</p></li>
-<li><p><strong>wl=g</strong> sets the waterlevel to g (default: g = eps(Float32) ~ 1.1f-7). The waterlevel is the minimum magnitude (absolute value) of the normalized old frequency response; in other words, if the old frequency response has a maximum magnitude of 1.0, then no response coefficient can be lower than g. This is useful to prevent “divide by zero” errors, but setting it too high will cause errors.</p></li>
+<li><p>chans: Only taper the specified channels.</p></li>
+<li><p>N_min: Data segments with N &lt; N_min total samples are not tapered.</p></li>
+<li><p>t_max: Maximum taper edge in seconds.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\alpha\)</span>: Taper edge area; as for a Tukey window, the first and last 100*:math:<cite>alpha`% of samples in each window are tapered, up to `t_max</cite> seconds of data.</p></li>
 </ul>
-<div class="section" id="precision-and-memory-optimization">
-<h4>Precision and Memory Optimization<a class="headerlink" href="#precision-and-memory-optimization" title="Permalink to this headline">¶</a></h4>
-<p>To optimize speed and memory use, instrument response translation maps data to
-Complex{Float32} before translation; thus, with Float64 data, there can be
-minor rounding errors.</p>
-<p>Instrument responses are also memory-intensive. The minimum memory consumption
-to translate the response of a gapless Float32 SeisChannel object is ~7x the
-size of the object itself.</p>
-<p>More precisely, for an object <strong>S</strong> (of Type &lt;: GphysData or GphysChannel),
-translation requires memory ~ 2 kB + the greater of (7x the size of the longest
-Float32 segment, or 3.5x the size of the longest Float64 segment). Translation
-uses four vectors – three complex and one real – that are updated and
-dynamically resized as the algorithm loops over each segment:</p>
-<ul class="simple">
-<li><p>Old response container: Array{Complex{Float32,1}}(undef, Nx)</p></li>
-<li><p>New response container: Array{Complex{Float32,1}}(undef, Nx)</p></li>
-<li><p>Complex data container: Array{Complex{Float32,1}}(undef, Nx)</p></li>
-<li><p>Real frequencies for FFT: Array{Float32,1}(undef, Nx)</p></li>
-</ul>
-<p>…where <strong>Nx</strong> is the number of samples in the longest segment in <strong>S</strong>.</p>
 </div>
 </div>
+<hr class="docutils" />
+<div class="section" id="zero-phase-filter">
+<h2>Zero-Phase Filter<a class="headerlink" href="#zero-phase-filter" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt>
+<code class="descname">filtfilt!(S::GphysData[; KWs])</code></dt>
+<dd></dd></dl>
+
+<p>Apply a zero-phase filter to regularly-sampled data in <strong>S</strong>. Irregularly-sampled data are never processed by filtfilt!.</p>
+<dl class="function">
+<dt>
+<code class="descname">filtfilt!(C::SeisChannel[; KWs])</code></dt>
+<dd></dd></dl>
+
+<p>Apply zero-phase filter to <strong>C.x</strong>. Filtering is applied to each contiguous data
+segment in C separately.</p>
+<div class="section" id="id5">
+<h3>Keywords<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<table class="colwidths-given docutils align-center">
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 25%" />
+<col style="width: 13%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>KW</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>chans</p></td>
+<td><p>[]</p></td>
+<td><p><sup>(a)</sup></p></td>
+<td><p>channel numbers to filter</p></td>
+</tr>
+<tr class="row-odd"><td><p>fl</p></td>
+<td><p>1.0</p></td>
+<td><p>Float64</p></td>
+<td><p>lower corner frequency [Hz] <sup>(b)</sup></p></td>
+</tr>
+<tr class="row-even"><td><p>fh</p></td>
+<td><p>15.0</p></td>
+<td><p>Float64</p></td>
+<td><p>upper corner frequency [Hz] <sup>(b)</sup></p></td>
+</tr>
+<tr class="row-odd"><td><p>np</p></td>
+<td><p>4</p></td>
+<td><p>Int64</p></td>
+<td><p>number of poles</p></td>
+</tr>
+<tr class="row-even"><td><p>rp</p></td>
+<td><p>10</p></td>
+<td><p>Int64</p></td>
+<td><p>pass-band ripple (dB)</p></td>
+</tr>
+<tr class="row-odd"><td><p>rs</p></td>
+<td><p>30</p></td>
+<td><p>Int64</p></td>
+<td><p>stop-band ripple (dB)</p></td>
+</tr>
+<tr class="row-even"><td><p>rt</p></td>
+<td><p>“Bandpass”</p></td>
+<td><p>String</p></td>
+<td><p>response type (type of filter)</p></td>
+</tr>
+<tr class="row-odd"><td><p>dm</p></td>
+<td><p>“Butterworth”</p></td>
+<td><p>String</p></td>
+<td><p>design mode (name of filter)</p></td>
+</tr>
+</tbody>
+</table>
+<p><sup>(a)</sup>  Allowed types are Integer, UnitRange, and Array{Int64, 1}.
+<sup>(b)</sup>  By convention, the lower corner frequency (fl) is used in a Highpass
+filter, and fh is used in a Lowpass filter.</p>
+<p>Default filtering KW values can be changed by adjusting the <a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">shared keywords</span></a>,
+e.g., SeisIO.KW.Filt.np = 2 changes the default number of poles to 2.</p>
 </div>
-<div class="section" id="other-processing-functions">
-<h2>Other Processing Functions<a class="headerlink" href="#other-processing-functions" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
-<dt>
-<code class="descname">nanfill!(S)</code></dt>
-<dd></dd></dl>
-
-<p>For each channel <strong>i</strong> in <strong>S</strong>, replace all NaNs in <strong>S.x[i]</strong> with the mean
-of non-NaN values.</p>
-<dl class="function">
-<dt>
-<code class="descname">ungap!(S[, chans=CC, m=true, tap=false])</code></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt>
-<code class="descname">ungap!(C[, m=true, tap=false])</code></dt>
-<dd></dd></dl>
-
-<p>Fill time gaps in each channel with the mean of the channel data.</p>
-<p>Keywords:</p>
-<ul class="simple">
-<li><p>chans=CC: only ungap channels CC.</p></li>
-<li><p>m=false: this flag fills gaps with NaNs instead of the mean.</p></li>
-<li><p>tap=true: taper data before filling gaps.</p></li>
-</ul>
 </div>
 </div>
 
