@@ -20,12 +20,12 @@ S = [
       "CoreUtils/test_*"
     ]
 S_expect =  [
-              ["test_ls.jl", "test_poly.jl", "test_time.jl", "test_typ2code.jl"],
+              ["test_calculus.jl", "test_ls.jl", "test_poly.jl", "test_time.jl", "test_typ2code.jl"],
               ["test_ls.jl"],
               String[],
               ["99011116541W", "99011116541o"],
               ["99011116541W", "99011116541o"],
-              ["test_ls.jl", "test_poly.jl", "test_time.jl", "test_typ2code.jl"]
+              ["test_calculus.jl", "test_ls.jl", "test_poly.jl", "test_time.jl", "test_typ2code.jl"]
             ]
 
 # Test that ls returns the same files as `ls -1`
@@ -45,7 +45,7 @@ if safe_isfile(cfile)
                 "/SampleFiles/*",
                 "/SampleFiles/Restricted/2014092709*cnt"
               ]
-  T_expect =  [63, 130, 60]
+  T_expect =  [63, 131, 60]
 
   # Test that ls finds the same number of files as `ls -1`
   for (n,v) in enumerate(T)
