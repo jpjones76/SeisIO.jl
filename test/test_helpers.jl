@@ -9,7 +9,9 @@ import SeisIO: BUF, FDSN_sta_xml,
   mktaper!, mktime, parse_charr, parse_chstr, parse_sl,
   safe_isdir, safe_isfile, sep, sμ, t_collapse,
   t_expand, t_win, taper_seg!, tnote, tstr2int, w_time, webhdr,
-  xtmerge!, μs
+  xtmerge!, μs,
+  diff_x!, int_x!,
+  poly, polyval, polyfit
 import SeisIO.RandSeis: getyp2codes, pop_rand_dict!
 import SeisIO.Quake: unsafe_convert
 import Statistics: mean
