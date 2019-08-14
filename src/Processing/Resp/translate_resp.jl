@@ -85,24 +85,29 @@ function translate_resp!(S::GphysData,
     resp_old = deepcopy(S.resp[j])
     fs = Float32(S.fs[j])
 
-    # for accelerometers, working *in* acceleration units, we check: are there any poles below the nyquist?
-    if uu == "m/s2"
-      P = resp_old.p
-      k = trues(length(P))
-      for (i,p) in enumerate(P)
-        if abs(p)/pi ≤ fs # equivalent to abs(p)/2pi ≤ fn/2 which is the true condition
-          k[i] = false
+    if fs > 0.0f0 && resp_old != resp_new
+
+      # we'll need this for logging
+      resp_str = string("translate_resp!, wl = ", wl, ", resp_old = ", typeof(resp_old),
+        "(a0=", resp_old.a0, ", f0=", resp_old.f0, ", p=", resp_old.p, ", z=", resp_old.z, ")")
+
+      # for accelerometers, working *in* acceleration units, we check: are there any poles below the nyquist?
+      if uu == "m/s²"
+        P = resp_old.p
+        k = trues(length(P))
+        for (i,p) in enumerate(P)
+          if abs(p)/pi ≤ fs # equivalent to abs(p)/2pi ≤ fn/2 which is the true condition
+            k[i] = false
+          end
+        end
+        deleteat!(P, k)
+
+        # Most accelerometers have two complex zeros at the origin, but many XML resp files don't show it.
+        if isempty(resp_old.z)
+          resp_old.z = map(eltype(resp_old.z), [0.0 + 0.0im, 0.0 - 0.0im])
         end
       end
-      deleteat!(P, k)
 
-      # Most accelerometers have two complex zeros at the origin, but many XML resp files don't show it.
-      if isempty(resp_old.z)
-        resp_old.z = map(eltype(resp_old.z), [0.0 + 0.0im, 0.0 - 0.0im])
-      end
-    end
-
-    if fs > 0.0f0 && resp_old != resp_new
       # get views to segments from each target channel
       (L,X) = get_views(S, grp)
 
@@ -130,8 +135,11 @@ function translate_resp!(S::GphysData,
         ifft!(Xw)
         copyto!(X[j], 1, xre, 1, Nx)
       end
+
+      # post-processing: set resp and log to :notes
       for k in grp
         setindex!(S.resp, deepcopy(resp_new), k)
+        note!(S, k, resp_str)
       end
     end
   end
@@ -158,7 +166,7 @@ function translate_resp!(C::GphysChannel,
   uu = lowercase(C.units)
   fs = Float32(C.fs)
   if any([C.resp == resp_new,
-          uu in ("m/s", "m/s2", "m") == false,
+          uu in ("m/s", "m/s²", "m") == false,
           fs ≤ 0.0f0,
           inst_code(C) in seis_inst_codes == false])
     @info(string(timestamp(), ": nothing done (no valid responses to translate)."))
@@ -174,7 +182,7 @@ function translate_resp!(C::GphysChannel,
   f       = Array{Float32,1}(undef, N2)
 
   # for accelerometers, working *in* acceleration units, we check: are there any poles below the nyquist?
-  if uu == "m/s2"
+  if uu == "m/s²"
     P = C.resp.p
     k = trues(length(P))
     for (i,p) in enumerate(P)
