@@ -210,7 +210,8 @@ function t_expand(t::Array{Int64,2}, fs::Float64)
   for i = 1:size(t,1)
     tt[t[i,1]] += t[i,2]
   end
-  return cumsum(tt)
+  cumsum!(tt, tt)
+  return tt
 end
 
 function t_collapse(tt::Array{Int64,1}, fs::Float64)
@@ -280,4 +281,18 @@ function datehex2μs!(a::Array{Int64,1}, datehex::Array{UInt8,1})
   a[5] = unpack_u8(getindex(datehex, 7))
   a[6] = unpack_u8(getindex(datehex, 8))
   return a[1] + a[2]*86400000000 + a[3]*3600000000 + a[4]*60000000 + a[5]*1000000 + a[6]*10000
+end
+
+function tx_float(t::Array{Int64,2}, fs::Float64, T::Type)
+  fs == 0.0 && return map(T, t[:,2])
+  t[end,1] == 1 && return T[t[1,2]]
+  Nt = t[end,1]
+  dt = one(T)/T(fs)
+  tt = dt.*ones(T, Nt)
+  tt[1] -= dt
+  for i = 2:size(t,1)
+    tt[t[i,1]] += t[i,2]
+  end
+  cumsum!(tt, tt)
+  return tt
 end
