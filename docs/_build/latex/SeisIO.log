@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2019.5.10)  6 AUG 2019 01:05
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2019.5.10)  14 AUG 2019 15:07
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1248,220 +1248,220 @@ m/n/10.95 , for-mat-ted
 
 ]
 Chapter 4.
-[21]
+[21] [22] [23] [24]
 LaTeX Font Info:    Font shape `TS1/pcr/bx/n' in size <10.95> not available
 (Font)              Font shape `TS1/pcr/b/n' tried instead on input line 1.
- [22] [23] [24] [25] [26]
-Chapter 5.
-[27
+ [25] [26] [27] [28
 
 ]
-Underfull \hbox (badness 5388) in paragraph at lines 1944--1945
+Chapter 5.
+[29]
+Underfull \hbox (badness 5388) in paragraph at lines 2026--2027
 []\T1/ptm/m/n/10.95 Incomplete string queries are read to the near-est fully-sp
 ecified time con-straint; thus,
  []
 
-[28] [29] [30] [31] [32
+[30] [31] [32] [33] [34
 
 ]
 Chapter 6.
-[33]
-Underfull \hbox (badness 10000) in paragraph at lines 2434--2435
+[35]
+Underfull \hbox (badness 10000) in paragraph at lines 2516--2517
 []|\T1/ptm/m/n/10.95 unsigned long
  []
 
-[34]
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2647--2648
+[36]
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2729--2730
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2656--2657
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2738--2739
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2665--2666
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2747--2748
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2674--2675
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2756--2757
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2683--2684
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2765--2766
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2692--2693
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2774--2775
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2701--2702
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2783--2784
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2710--2711
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2792--2793
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2719--2720
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2801--2802
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2728--2729
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2810--2811
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2737--2738
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2819--2820
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 2746--2747
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 2828--2829
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
-[35] [36]
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 3159--3160
+[37] [38]
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 3241--3242
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
-[37]
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 3208--3209
+[39]
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 3290--3291
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (0.75247pt too wide) in paragraph at lines 3278--3279
+Overfull \hbox (0.75247pt too wide) in paragraph at lines 3360--3361
 []|\T1/ptm/m/n/10.95 UInt64| 
  []
 
 
-Overfull \hbox (0.75247pt too wide) in paragraph at lines 3287--3288
+Overfull \hbox (0.75247pt too wide) in paragraph at lines 3369--3370
 []|\T1/ptm/m/n/10.95 UInt64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 3296--3297
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 3378--3379
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (3.19415pt too wide) in paragraph at lines 3345--3346
+Overfull \hbox (3.19415pt too wide) in paragraph at lines 3427--3428
 []|\T1/ptm/m/n/10.95 Float64| 
  []
 
 
-Overfull \hbox (1.22876pt too wide) in paragraph at lines 3417--3418
+Overfull \hbox (1.22876pt too wide) in paragraph at lines 3499--3500
 []|\T1/ptm/m/n/10.95 nr*nc| 
  []
 
-[38] [39] [40]
-Overfull \hbox (1.567pt too wide) in paragraph at lines 4057--4058
+[40] [41] [42]
+Overfull \hbox (1.567pt too wide) in paragraph at lines 4139--4140
 []|\T1/ptm/m/n/10.95 name| 
  []
 
 
-Overfull \hbox (0.9647pt too wide) in paragraph at lines 4165--4166
+Overfull \hbox (0.9647pt too wide) in paragraph at lines 4247--4248
 []|\T1/ptm/m/n/10.95 notes| 
  []
 
-[41]
-Overfull \hbox (1.567pt too wide) in paragraph at lines 4321--4322
+[43]
+Overfull \hbox (1.567pt too wide) in paragraph at lines 4403--4404
 []|\T1/ptm/m/n/10.95 name| 
  []
 
 
-Overfull \hbox (0.9647pt too wide) in paragraph at lines 4429--4430
+Overfull \hbox (0.9647pt too wide) in paragraph at lines 4511--4512
 []|\T1/ptm/m/n/10.95 notes| 
  []
 
 
-Overfull \hbox (4.61101pt too wide) in paragraph at lines 4447--4448
+Overfull \hbox (4.61101pt too wide) in paragraph at lines 4529--4530
 []|\T1/ptm/m/n/10.95 2Nt[i]| 
  []
 
 
-Overfull \hbox (1.56702pt too wide) in paragraph at lines 4464--4465
+Overfull \hbox (1.56702pt too wide) in paragraph at lines 4546--4547
 []|\T1/ptm/m/n/10.95 Nx[i]| 
  []
 
-[42]
-Overfull \hbox (1.567pt too wide) in paragraph at lines 4578--4579
+[44]
+Overfull \hbox (1.567pt too wide) in paragraph at lines 4660--4661
 []|\T1/ptm/m/n/10.95 name| 
  []
 
 
-Overfull \hbox (0.9647pt too wide) in paragraph at lines 4650--4651
+Overfull \hbox (0.9647pt too wide) in paragraph at lines 4732--4733
 []|\T1/ptm/m/n/10.95 notes| 
  []
 
 
-Overfull \hbox (4.61101pt too wide) in paragraph at lines 4668--4669
+Overfull \hbox (4.61101pt too wide) in paragraph at lines 4750--4751
 []|\T1/ptm/m/n/10.95 2Nt[i]| 
  []
 
 
-Overfull \hbox (1.56702pt too wide) in paragraph at lines 4685--4686
+Overfull \hbox (1.56702pt too wide) in paragraph at lines 4767--4768
 []|\T1/ptm/m/n/10.95 Nx[i]| 
  []
 
-[43] [44]
-Overfull \hbox (2.82512pt too wide) in paragraph at lines 4984--4985
+[45] [46]
+Overfull \hbox (2.82512pt too wide) in paragraph at lines 5066--5067
 []|\T1/ptm/m/n/10.95 pad[1]*pad[2]| 
  []
 
 
-Overfull \hbox (4.27261pt too wide) in paragraph at lines 4998--4999
+Overfull \hbox (4.27261pt too wide) in paragraph at lines 5080--5081
 []|\T1/ptm/m/n/10.95 planes| 
  []
 
 
-Overfull \hbox (0.62387pt too wide) in paragraph at lines 5027--5028
+Overfull \hbox (0.62387pt too wide) in paragraph at lines 5109--5110
 []|\T1/ptm/m/n/10.95 (SourceTime)| 
  []
 
 
-Overfull \hbox (4.87492pt too wide) in paragraph at lines 5083--5084
+Overfull \hbox (4.87492pt too wide) in paragraph at lines 5165--5166
 []|\T1/ptm/m/n/10.95 source| 
  []
 
-[45] [46] [47]
-Underfull \hbox (badness 10000) in paragraph at lines 5609--5611
+[47] [48] [49]
+Underfull \hbox (badness 10000) in paragraph at lines 5691--5693
 []|\T1/ptm/m/n/10.95 [^^PPB.B004.01.BS1^^Q,
  []
 
-[48] [49] [50]
+[50] [51] [52]
 LaTeX Font Info:    Font shape `T1/ptm/bx/n' in size <9> not available
-(Font)              Font shape `T1/ptm/b/n' tried instead on input line 6087.
- [51] [52] [53] (./SeisIO.ind [54] [55
+(Font)              Font shape `T1/ptm/b/n' tried instead on input line 6169.
+ [53] [54] [55] (./SeisIO.ind [56] [57
 
 
 ])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 6332.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 6332.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 6414.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 6414.
  (./SeisIO.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 6332.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 6332.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 6414.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 6414.
 
 Package rerunfilecheck Info: File `SeisIO.out' has not changed.
-(rerunfilecheck)             Checksum: 693BC3F5481D44B2496E18BB3E9136AC;3225.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 6332.
+(rerunfilecheck)             Checksum: 4FB97ACB534C966FF75329D831C557E0;3340.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 6414.
  ) 
 Here is how much of TeX's memory you used:
- 14214 strings out of 492982
- 200810 string characters out of 6134896
- 315175 words of memory out of 5000000
- 17160 multiletter control sequences out of 15000+600000
+ 14233 strings out of 492982
+ 201237 string characters out of 6134896
+ 315511 words of memory out of 5000000
+ 17169 multiletter control sequences out of 15000+600000
  73882 words of font info for 110 fonts, out of 8000000 for 9000
  1142 hyphenation exceptions out of 8191
  37i,16n,49p,513b,543s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1479,10 +1479,10 @@ nts/type1/urw/helvetic/uhvr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/ur
 w/helvetic/uhvro8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utm
 b8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/s
 hare/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on SeisIO.pdf (59 pages, 302433 bytes).
+Output written on SeisIO.pdf (61 pages, 305220 bytes).
 PDF statistics:
- 868 PDF objects out of 1000 (max. 8388607)
- 752 compressed objects within 8 object streams
- 265 named destinations out of 1000 (max. 500000)
- 237 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 892 PDF objects out of 1000 (max. 8388607)
+ 774 compressed objects within 8 object streams
+ 275 named destinations out of 1000 (max. 500000)
+ 245 words of extra memory for PDF output out of 10000 (max. 10000000)
 

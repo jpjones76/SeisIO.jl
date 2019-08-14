@@ -72,7 +72,7 @@
 
 
 \title{SeisIO Documentation}
-\date{Aug 06, 2019}
+\date{Aug 14, 2019}
 \release{0.3.0}
 \author{Joshua Jones}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -1304,22 +1304,20 @@ patterns (formatted LLCCC.D, e.g. {[}“??EHZ.D”, “??BH?.?”{]}).
 
 \chapter{Processing}
 \label{\detokenize{index:processing}}
-
-\section{Data Processing Functions}
-\label{\detokenize{src/Processing/processing:data-processing-functions}}\label{\detokenize{src/Processing/processing::doc}}
-Supported processing operations are described below. Functions are organized
-categorically.
+Supported processing operations are described below.
 
 In most cases, a “safe” version of each function can be invoked to create a
-new SeisData object with the processed output.
+new object with the processed output.
 
-Any function that can logically operate on a SeisChannel object will do so. Any
-function that operates on a SeisData object will also operate on a SeisEvent
-object by applying itself to the SeisData object in the \sphinxcode{\sphinxupquote{:data}} field.
+Any function that can logically operate on a single-channel object will do so. Any
+function that operates on a SeisData object can be applied to the :data field of a
+SeisEvent object.
 
 
-\subsection{Signal Processing}
-\label{\detokenize{src/Processing/processing:signal-processing}}
+\section{Basic Functions}
+\label{\detokenize{src/Processing/processing:basic-functions}}\label{\detokenize{src/Processing/processing::doc}}
+These functions have no keywords that fundamentally change their behavior.
+
 Remove the mean from all channels i with S.fs{[}i{]} \textgreater{} 0.0. Specify irr=true to also
 remove the mean from irregularly sampled channels. Specify chans=CC to restrict
 to channel number(s) CC. Ignores NaNs.
@@ -1330,122 +1328,12 @@ to channel number(s) CC. Ignores NaNs.
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{filtfilt!(S::GphysData{[};~KWs{]})}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{nanfill!(S)}}}
 \end{fulllineitems}
 
 
-Apply a zero-phase filter to data in \sphinxstylestrong{S.x}.
-
-Irregularly-sampled data are never affected by filtfilt!.
-
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{filtfilt!(C::SeisChannel{[};~KWs{]})}}}
-\end{fulllineitems}
-
-
-Apply zero-phase filter to \sphinxstylestrong{C.x}. Filtering is applied to each contiguous data
-segment in C separately.
-
-\#\#\# Filtering Keywords
-Keywords control filtering behavior; specify e.g. filtfilt!(S, fl=0.1, np=2).
-Default values can be changed by adjusting the {\hyperref[\detokenize{src/Appendices/keywords:dkw}]{\sphinxcrossref{\DUrole{std,std-ref}{shared keywords}}}}, e.g.,
-SeisIO.KW.Filt.np = 2 changes the default number of poles to 2.
-
-
-\begin{savenotes}\sphinxattablestart
-\centering
-\begin{tabular}[t]{|\X{1}{8}|\X{2}{8}|\X{1}{8}|\X{4}{8}|}
-\hline
-\sphinxstyletheadfamily 
-KW
-&\sphinxstyletheadfamily 
-Default
-&\sphinxstyletheadfamily 
-Type
-&\sphinxstyletheadfamily 
-Description
-\\
-\hline
-chans
-&
-{[}{]}
-&
-$^{\text{(a)}}$
-&
-channel numbers to filter
-\\
-\hline
-fl
-&
-1.0
-&
-Float64
-&
-lower corner frequency {[}Hz{]} $^{\text{(b)}}$
-\\
-\hline
-fh
-&
-15.0
-&
-Float64
-&
-upper corner frequency {[}Hz{]} $^{\text{(b)}}$
-\\
-\hline
-np
-&
-4
-&
-Int64
-&
-number of poles
-\\
-\hline
-rp
-&
-10
-&
-Int64
-&
-pass-band ripple (dB)
-\\
-\hline
-rs
-&
-30
-&
-Int64
-&
-stop-band ripple (dB)
-\\
-\hline
-rt
-&
-“Bandpass”
-&
-String
-&
-response type (type of filter)
-\\
-\hline
-dm
-&
-“Butterworth”
-&
-String
-&
-design mode (name of filter)
-\\
-\hline
-\end{tabular}
-\par
-\sphinxattableend\end{savenotes}
-
-$^{\text{(a)}}$  Allowed types are Integer, UnitRange, and Array\{Int64, 1\}.
-$^{\text{(b)}}$  By convention, the lower corner frequency (fl) is used in a Highpass
-filter, and fh is used in a Lowpass filter.
+For each channel \sphinxstylestrong{i} in \sphinxstylestrong{S}, replace all NaNs in \sphinxstylestrong{S.x{[}i{]}} with the mean
+of non-NaN values.
 
 
 \begin{fulllineitems}
@@ -1468,36 +1356,6 @@ all channels \sphinxstylestrong{i} with \sphinxstylestrong{S.fs{[}i{]} \textgrea
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{taper!(S{[},~chans=CC,~t\_max::Real=10.0,~:math:{}`alpha{}`::Real=0.05,~N\_min::Int64=10{]})}}}
-\end{fulllineitems}
-
-
-Cosine taper each channel in S around time gaps. Specify chans=CC to restrict
-to channel number(s) CC. Does not modify irregularly-sampled data channels.
-
-taper!(C{[}, t\_max::Real=10.0, \(\alpha\)::Real=0.05, N\_min::Int64=10{]})
-
-Cosine taper each segment of time-series data in GphysChannel object C that
-contains at least \sphinxtitleref{N\_min} total samples. Returns if C is irregularly sampled.
-
-Keywords:
-\begin{itemize}
-\item {} 
-chans: Only taper the specified channels.
-
-\item {} 
-N\_min: Data segments with N \textless{} N\_min total samples are not tapered.
-
-\item {} 
-t\_max: Maximum taper edge in seconds.
-
-\item {} 
-\(\alpha\): Taper edge area; as for a Tukey window, the first and last 100*:math:\sphinxtitleref{alpha{}`\% of samples in each window are tapered, up to {}`t\_max} seconds of data.
-
-\end{itemize}
-
-
-\begin{fulllineitems}
 \pysigline{\sphinxbfcode{\sphinxupquote{unscale!(S{[},~chans=CC,~irr=false{]})}}}
 \end{fulllineitems}
 
@@ -1507,8 +1365,100 @@ chans=CC to restrict to channel number(s) CC. Specify \sphinxstylestrong{irr=tru
 remove gains of irregularly-sampled channels.
 
 
+\section{Customizable Functions}
+\label{\detokenize{src/Processing/processing:customizable-functions}}
+
+\subsection{Convert Seismograms}
+\label{\detokenize{src/Processing/processing:convert-seismograms}}
+Seismograms can be converted to or from displacement, velocity, or acceleration
+using convert\_seis:
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{convert\_seis!(S{[},~chans=CC,~units\_out=UU,~v=V{]})}}}
+\end{fulllineitems}
+
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{convert\_seis!(C{[},~units\_out=UU,~v=V{]})}}}
+\end{fulllineitems}
+
+
+Converts all seismic data channels in \sphinxtitleref{S} to velocity seismograms,
+differentiating or integrating as needed.
+
+
+\subsubsection{Keywords}
+\label{\detokenize{src/Processing/processing:keywords}}\begin{itemize}
+\item {} 
+units\_out=UU: specify output units: “m”, “m/s” (default), or “m/s\(\sp{\text{2}}\)”
+
+\item {} 
+chans=CC: restrict seismogram conversion to seismic data channels in CC
+
+\item {} 
+v=V: verbosity
+
+\end{itemize}
+
+
+\paragraph{Behavior and Usage Warnings}
+\label{\detokenize{src/Processing/processing:behavior-and-usage-warnings}}
+\sphinxstylestrong{Long Seismograms}: convert\_seis becomes less reversible as seismograms lengthen,
+especially at Float32 precision, due to \sphinxhref{https://en.wikipedia.org/wiki/Floating-point\_arithmetic\#Accuracy\_problems}{loss of significance}.
+At single (Float32) precision, seismograms with N \textasciitilde{} 10\textasciicircum{}6 samples are
+reconstructable after one conversion (e.g. “m” ==\textgreater{} “m/s” can be reversed, with
+output approximately equal to the original data). After multiple conversions
+(i.e., “m” ==\textgreater{} “m/s\(\sp{\text{2}}\)” or “m/s\(\sp{\text{2}}\)” ==\textgreater{} “m”), Float32 data cannot be perfectly
+reconstructed in this way, though reconstruction errors are typically small.
+
+\sphinxstylestrong{Rectangular Integration}: integration is always rectangular; irregularly-spaced
+seismic data are not processed by convert\_seis. Summation uses an in-place
+variant of \sphinxhref{https://github.com/JuliaMath/KahanSummation.jl}{Kahan-Babuška-Neumaier summation}.
+
+
+\bigskip\hrule\bigskip
+
+
+
+\subsection{Fill Gaps}
+\label{\detokenize{src/Processing/processing:fill-gaps}}
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{ungap!(S{[},~chans=CC,~m=true,~tap=false{]})}}}
+\end{fulllineitems}
+
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{ungap!(C{[},~m=true,~tap=false{]})}}}
+\end{fulllineitems}
+
+
+Fill time gaps in each channel with the mean of the channel data.
+
+
+\subsubsection{Keywords}
+\label{\detokenize{src/Processing/processing:id1}}\begin{itemize}
+\item {} 
+chans=CC: only ungap channels CC.
+
+\item {} 
+m=false: this flag fills gaps with NaNs instead of the mean.
+
+\item {} 
+tap=true: taper data before filling gaps.
+
+\end{itemize}
+
+
+\bigskip\hrule\bigskip
+
+
+
 \subsection{Merge}
-\label{\detokenize{src/Processing/processing:merge}}\label{\detokenize{src/Processing/processing:id1}}
+\label{\detokenize{src/Processing/processing:merge}}\label{\detokenize{src/Processing/processing:id2}}
 
 \begin{fulllineitems}
 \pysigline{\sphinxbfcode{\sphinxupquote{merge!(S::GphysData,~U::GphysData)}}}
@@ -1629,6 +1579,100 @@ independently (e.g. detrended) will be averaged pointwise when merged, which
 can easily leave data in an unusuable state.
 
 
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{mseis!(S::GphysData,~U::GphysData,~...)}}}
+\end{fulllineitems}
+
+
+Merge multiple GphysData structures into S.
+
+
+\bigskip\hrule\bigskip
+
+
+
+\subsection{Seismic Instrument Response}
+\label{\detokenize{src/Processing/processing:seismic-instrument-response}}
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{translate\_resp!(S,~resp\_new{[},~chans=CC,~wl=g{]})}}}
+\end{fulllineitems}
+
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{translate\_resp!(Ch,~resp\_new{[},~wl=g{]})}}}
+\end{fulllineitems}
+
+
+Translate the instrument response of seismic data channels to \sphinxstylestrong{resp\_new}.
+Replaces field \sphinxstylestrong{:resp} with \sphinxstylestrong{resp\_new} for all affected channels.
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{remove\_resp!(S,~chans=CC,~wl=g{]})}}}
+\end{fulllineitems}
+
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{remove\_resp!(Ch,~wl=g{]})}}}
+\end{fulllineitems}
+
+
+Remove (flatten to DC) the instrument response of \sphinxstylestrong{Ch}, or of seismic data
+channels \sphinxstylestrong{CC} in \sphinxstylestrong{S}. Replaces \sphinxstylestrong{:resp} with the appropriate (all-pass)
+response.
+
+
+\subsubsection{Keywords}
+\label{\detokenize{src/Processing/processing:id3}}\begin{itemize}
+\item {} 
+\sphinxstylestrong{C=cha} restricts response translation for GphysData object \sphinxstylestrong{S} to channel(s) \sphinxstylestrong{cha}. Accepts an Integer, UnitRange, or Array\{Int64,1\} argument; does \sphinxstyleemphasis{not} accept string IDs. By default, all seismic data channels in \sphinxstylestrong{S} have their responses translated to \sphinxstylestrong{resp\_new}.
+
+\item {} 
+\sphinxstylestrong{wl=g} sets the waterlevel to g (default: g = eps(Float32) \textasciitilde{} 1.1f-7). The waterlevel is the minimum magnitude (absolute value) of the normalized old frequency response; in other words, if the old frequency response has a maximum magnitude of 1.0, then no response coefficient can be lower than g. This is useful to prevent “divide by zero” errors, but setting it too high will cause errors.
+
+\end{itemize}
+
+
+\subsubsection{Precision and Memory Optimization}
+\label{\detokenize{src/Processing/processing:precision-and-memory-optimization}}
+To optimize speed and memory use, instrument response translation maps data to
+Complex\{Float32\} before translation; thus, with Float64 data, there can be
+minor rounding errors.
+
+Instrument responses are also memory-intensive. The minimum memory consumption
+to translate the response of a gapless Float32 SeisChannel object is \textasciitilde{}7x the
+size of the object itself.
+
+More precisely, for an object \sphinxstylestrong{S} (of Type \textless{}: GphysData or GphysChannel),
+translation requires memory \textasciitilde{} 2 kB + the greater of (7x the size of the longest
+Float32 segment, or 3.5x the size of the longest Float64 segment). Translation
+uses four vectors \textendash{} three complex and one real \textendash{} that are updated and
+dynamically resized as the algorithm loops over each segment:
+\begin{itemize}
+\item {} 
+Old response container: Array\{Complex\{Float32,1\}\}(undef, Nx)
+
+\item {} 
+New response container: Array\{Complex\{Float32,1\}\}(undef, Nx)
+
+\item {} 
+Complex data container: Array\{Complex\{Float32,1\}\}(undef, Nx)
+
+\item {} 
+Real frequencies for FFT: Array\{Float32,1\}(undef, Nx)
+
+\end{itemize}
+
+…where \sphinxstylestrong{Nx} is the number of samples in the longest segment in \sphinxstylestrong{S}.
+
+
+\bigskip\hrule\bigskip
+
+
+
 \subsection{Synchronize}
 \label{\detokenize{src/Processing/processing:synchronize}}
 
@@ -1689,129 +1733,167 @@ numeric, datetime, and non-reserved strings are treated as for \sphinxtitleref{-
 \end{itemize}
 
 
+\bigskip\hrule\bigskip
+
+
+
+\subsection{Taper}
+\label{\detokenize{src/Processing/processing:taper}}
+
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{mseis!(S::GphysData,~U::GphysData,~...)}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{taper!(S{[},~chans=CC,~t\_max::Real=10.0,~:math:{}`alpha{}`::Real=0.05,~N\_min::Int64=10{]})}}}
 \end{fulllineitems}
 
 
-Merge multiple GphysData structures into S.
+Cosine taper each channel in S around time gaps. Specify chans=CC to restrict
+to channel number(s) CC. Does not modify irregularly-sampled data channels.
+
+taper!(C{[}, t\_max::Real=10.0, \(\alpha\)::Real=0.05, N\_min::Int64=10{]})
+
+Cosine taper each segment of time-series data in GphysChannel object C that
+contains at least \sphinxtitleref{N\_min} total samples. Returns if C is irregularly sampled.
 
 
-\subsection{Seismic Instrument Responses}
-\label{\detokenize{src/Processing/processing:seismic-instrument-responses}}
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{translate\_resp!(S,~resp\_new{[},~chans=CC,~wl=g{]})}}}
-\end{fulllineitems}
-
-
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{translate\_resp!(Ch,~resp\_new{[},~wl=g{]})}}}
-\end{fulllineitems}
-
-
-Translate the instrument response of seismic data channels to \sphinxstylestrong{resp\_new}.
-Replaces field \sphinxstylestrong{:resp} with \sphinxstylestrong{resp\_new} for all affected channels.
-
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{remove\_resp!(S,~chans=CC,~wl=g{]})}}}
-\end{fulllineitems}
-
-
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{remove\_resp!(Ch,~wl=g{]})}}}
-\end{fulllineitems}
-
-
-Remove (flatten to DC) the instrument response of \sphinxstylestrong{Ch}, or of seismic data
-channels \sphinxstylestrong{CC} in \sphinxstylestrong{S}. Replaces \sphinxstylestrong{:resp} with the appropriate (all-pass)
-response.
-
-
-\subsubsection{Response Keywords}
-\label{\detokenize{src/Processing/processing:response-keywords}}\begin{itemize}
+\subsubsection{Keywords}
+\label{\detokenize{src/Processing/processing:id4}}\begin{itemize}
 \item {} 
-\sphinxstylestrong{C=cha} restricts response translation for GphysData object \sphinxstylestrong{S} to channel(s) \sphinxstylestrong{cha}. Accepts an Integer, UnitRange, or Array\{Int64,1\} argument; does \sphinxstyleemphasis{not} accept string IDs. By default, all seismic data channels in \sphinxstylestrong{S} have their responses translated to \sphinxstylestrong{resp\_new}.
+chans: Only taper the specified channels.
 
 \item {} 
-\sphinxstylestrong{wl=g} sets the waterlevel to g (default: g = eps(Float32) \textasciitilde{} 1.1f-7). The waterlevel is the minimum magnitude (absolute value) of the normalized old frequency response; in other words, if the old frequency response has a maximum magnitude of 1.0, then no response coefficient can be lower than g. This is useful to prevent “divide by zero” errors, but setting it too high will cause errors.
+N\_min: Data segments with N \textless{} N\_min total samples are not tapered.
+
+\item {} 
+t\_max: Maximum taper edge in seconds.
+
+\item {} 
+\(\alpha\): Taper edge area; as for a Tukey window, the first and last 100*:math:\sphinxtitleref{alpha{}`\% of samples in each window are tapered, up to {}`t\_max} seconds of data.
 
 \end{itemize}
 
 
-\paragraph{Precision and Memory Optimization}
-\label{\detokenize{src/Processing/processing:precision-and-memory-optimization}}
-To optimize speed and memory use, instrument response translation maps data to
-Complex\{Float32\} before translation; thus, with Float64 data, there can be
-minor rounding errors.
-
-Instrument responses are also memory-intensive. The minimum memory consumption
-to translate the response of a gapless Float32 SeisChannel object is \textasciitilde{}7x the
-size of the object itself.
-
-More precisely, for an object \sphinxstylestrong{S} (of Type \textless{}: GphysData or GphysChannel),
-translation requires memory \textasciitilde{} 2 kB + the greater of (7x the size of the longest
-Float32 segment, or 3.5x the size of the longest Float64 segment). Translation
-uses four vectors \textendash{} three complex and one real \textendash{} that are updated and
-dynamically resized as the algorithm loops over each segment:
-\begin{itemize}
-\item {} 
-Old response container: Array\{Complex\{Float32,1\}\}(undef, Nx)
-
-\item {} 
-New response container: Array\{Complex\{Float32,1\}\}(undef, Nx)
-
-\item {} 
-Complex data container: Array\{Complex\{Float32,1\}\}(undef, Nx)
-
-\item {} 
-Real frequencies for FFT: Array\{Float32,1\}(undef, Nx)
-
-\end{itemize}
-
-…where \sphinxstylestrong{Nx} is the number of samples in the longest segment in \sphinxstylestrong{S}.
+\bigskip\hrule\bigskip
 
 
-\subsection{Other Processing Functions}
-\label{\detokenize{src/Processing/processing:other-processing-functions}}
+
+\subsection{Zero-Phase Filter}
+\label{\detokenize{src/Processing/processing:zero-phase-filter}}
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{nanfill!(S)}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{filtfilt!(S::GphysData{[};~KWs{]})}}}
 \end{fulllineitems}
 
 
-For each channel \sphinxstylestrong{i} in \sphinxstylestrong{S}, replace all NaNs in \sphinxstylestrong{S.x{[}i{]}} with the mean
-of non-NaN values.
+Apply a zero-phase filter to regularly-sampled data in \sphinxstylestrong{S}. Irregularly-sampled data are never processed by filtfilt!.
 
 
 \begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{ungap!(S{[},~chans=CC,~m=true,~tap=false{]})}}}
+\pysigline{\sphinxbfcode{\sphinxupquote{filtfilt!(C::SeisChannel{[};~KWs{]})}}}
 \end{fulllineitems}
 
 
-
-\begin{fulllineitems}
-\pysigline{\sphinxbfcode{\sphinxupquote{ungap!(C{[},~m=true,~tap=false{]})}}}
-\end{fulllineitems}
+Apply zero-phase filter to \sphinxstylestrong{C.x}. Filtering is applied to each contiguous data
+segment in C separately.
 
 
-Fill time gaps in each channel with the mean of the channel data.
+\subsubsection{Keywords}
+\label{\detokenize{src/Processing/processing:id5}}
 
-Keywords:
-\begin{itemize}
-\item {} 
-chans=CC: only ungap channels CC.
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{8}|\X{2}{8}|\X{1}{8}|\X{4}{8}|}
+\hline
+\sphinxstyletheadfamily 
+KW
+&\sphinxstyletheadfamily 
+Default
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+Description
+\\
+\hline
+chans
+&
+{[}{]}
+&
+$^{\text{(a)}}$
+&
+channel numbers to filter
+\\
+\hline
+fl
+&
+1.0
+&
+Float64
+&
+lower corner frequency {[}Hz{]} $^{\text{(b)}}$
+\\
+\hline
+fh
+&
+15.0
+&
+Float64
+&
+upper corner frequency {[}Hz{]} $^{\text{(b)}}$
+\\
+\hline
+np
+&
+4
+&
+Int64
+&
+number of poles
+\\
+\hline
+rp
+&
+10
+&
+Int64
+&
+pass-band ripple (dB)
+\\
+\hline
+rs
+&
+30
+&
+Int64
+&
+stop-band ripple (dB)
+\\
+\hline
+rt
+&
+“Bandpass”
+&
+String
+&
+response type (type of filter)
+\\
+\hline
+dm
+&
+“Butterworth”
+&
+String
+&
+design mode (name of filter)
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
 
-\item {} 
-m=false: this flag fills gaps with NaNs instead of the mean.
+$^{\text{(a)}}$  Allowed types are Integer, UnitRange, and Array\{Int64, 1\}.
+$^{\text{(b)}}$  By convention, the lower corner frequency (fl) is used in a Highpass
+filter, and fh is used in a Lowpass filter.
 
-\item {} 
-tap=true: taper data before filling gaps.
-
-\end{itemize}
+Default filtering KW values can be changed by adjusting the {\hyperref[\detokenize{src/Appendices/keywords:dkw}]{\sphinxcrossref{\DUrole{std,std-ref}{shared keywords}}}},
+e.g., SeisIO.KW.Filt.np = 2 changes the default number of poles to 2.
 
 
 \chapter{Submodules}
