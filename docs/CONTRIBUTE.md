@@ -79,7 +79,6 @@ In an object that contains data from more than one instrument type, finding the 
 1. Get the single-character "channel instrument code" for channel `i` (`get_inst_codes` does this efficiently). Compare to [standard SEED instrument codes](https://ds.iris.edu/ds/nodes/dmc/data/formats/seed-channel-naming/) and build a channel list, as `get_seis_channels` does.
   - This method can break on instruments whose IDs don't follow the SEED standard.
   - Channel code `Y` is ambiguous; beware of matching on it.
-2. Check `:units`. This is usually safe, but can be problematic in two situations:
-  - Some sources report units in "counts" (e.g., "counts/s", "counts/s2"), because the "stage zero" gain is a unit conversion.
-  - Some units are ambiguous; for example, displacement seismometers and GPS displacement both use units of distance.
-  - Beware that SeisIO uses UCUM units, so use e.g., "m/s2" instead of "m/s^2" or "m/s**2".
+2. Check `:units`. See the [units mini-API](./API/units.md). This is usually safe, but can be problematic in two situations:
+  - Some sources report units in "counts" (e.g., "counts/s", "counts/s²"), because the "stage zero" gain is a unit conversion.
+  - Some units are ambiguous; for example, displacement seismometers and displacement GPS both use distance (typically "m").

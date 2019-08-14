@@ -23,6 +23,8 @@ include("CoreUtils/namestrip.jl")
 include("CoreUtils/typ2code.jl")
 include("CoreUtils/file_io.jl")
 include("CoreUtils/poly.jl")
+include("CoreUtils/calculus.jl")
+include("CoreUtils/mkchans.jl")
 
 # =========================================================
 # Types and methods

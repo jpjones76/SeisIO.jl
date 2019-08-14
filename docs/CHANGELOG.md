@@ -3,6 +3,20 @@ The current set of updates, leading to v0.4.0, will focus on:
 2. expanded file format support
 3. expanded data acquisition options
 
+### 2019-08-13
+#### New, Changed, Deprecated
+* `detrend!`
+  + `detrend!(..., n=N)` now allows degree n=0, equivalent to `demean!`.
+  + slightly reduced memory consumption.
+  + greatly increased accuracy at Float32 precision.
+* `convert_seis!` converts seismograms in `S` to other units (m, m/s, m/s²) by
+differentiation or integration.
+* added `filt_seis_chans!`
+
+#### Bugs, Consistency, Performance
+* `get_data` now correctly defaults to `unscale=false` and `ungap=false`.
+* `translate_resp` is now correctly logged to `:notes`.
+
 ### 2019-08-05
 #### New, Changed, Deprecated
 * Most processing functions now accept a numeric channel list using keyword
