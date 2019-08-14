@@ -131,8 +131,8 @@ function FDSN_sta_xml(xmlf::String;
                                 # normfreq
                                 c_normfreq = parse(Float64, content(y))
                               elseif name(y) == "InputUnits"
-                                # calibrationunits: this converts "m/s**2" to the UCUM-compliant m/s2
-                                c_units = replace(content(get_elements_by_tagname(y, "Name")[1]), "**" => "")
+                                # calibrationunits: this converts "m/s**2" to the SI m/s²
+                                c_units = replace(content(get_elements_by_tagname(y, "Name")[1]), "**" => "²")
                               end
                             end
 
