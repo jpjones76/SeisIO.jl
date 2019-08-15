@@ -145,11 +145,11 @@ MISC = S.misc
 @test ≈(LOC[3].lon, LOC[1].lon)
 @test ≈(LOC[3].dep, LOC[1].dep)
 for i = 1:length(UNITS)
-    if UNITS[i] == "M/S**2"
+    if UNITS[i] == "m/s2"
         @assert(in(split(ID[i],'.')[4][2],['G', 'L', 'M', 'N'])==true, unit_err)
-    elseif UNITS[i] in ["M/S", "M"]
+    elseif UNITS[i] in ["m/s", "m"]
         @assert(in(split(ID[i],'.')[4][2],['L', 'H'])==true, unit_err)
-    elseif UNITS[i] == "V"
+    elseif UNITS[i] == "v"
         @assert(split(ID[i],'.')[4][2]=='C', unit_err)
     end
 end
