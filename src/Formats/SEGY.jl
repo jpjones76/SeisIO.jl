@@ -39,6 +39,7 @@ function do_trace(f::IO,
                   passcal::Bool,
                   full::Bool,
                   src::String,
+                  swap::Bool,
                   fh::Array{Int16,1}
                   )
 
@@ -71,6 +72,13 @@ function do_trace(f::IO,
     copyto!(shorts, 54, shortbuf, 13, 8)
     setindex!(ints, intbuf[6], 20)
 
+    if swap
+      shorts     .= ntoh.(shorts)
+      ints       .= ntoh.(ints)
+      scale_fac   = bswap(scale_fac)
+      inst_no     = bswap(inst_no)
+    end
+
     chars = buf[1:18]
     dt    = getindex(ints,20)
     n     = getindex(shorts, 20)
@@ -85,8 +93,14 @@ function do_trace(f::IO,
     # trace processing
     y = reinterpret(T, buf)
     x = Array{Float32,1}(undef, nx)
-    copyto!(x, 1, y, 1, nx)
-    # faster than reprocessing with fillx_ for long files
+    if swap
+      for i = 1:nx
+        x[i] = bswap(y[i])
+      end
+    else
+      copyto!(x, 1, y, 1, nx)
+      # faster than reprocessing with fillx_ for long files
+    end
 
     z = getindex(shorts, 5)
     δ = getindex(shorts, 21)
@@ -171,12 +185,13 @@ function do_trace(f::IO,
       error("Trace data Type unsupported!")
     end
 
-    # not sure about this; where did this formula come from...?
     shorts  .= ntoh.(shorts)
     ints    .= ntoh.(ints)
     z       = getindex(shorts, 5)
     δ       = getindex(shorts, 21)
     fs      = 1.0e6 / Float64(δ)
+
+    # not sure about this; where did this formula come from...?
     gain    = Float64(ints[25]) * 10.0^(Float64(shorts[53] +
                                                 shorts[23] +
                                                 shorts[24])/10.0) # *2.0^shorts[47]
@@ -268,11 +283,12 @@ function read_segy_file(fname::String,
                         shorts::Array{Int16,1},
                         ints::Array{Int32,1},
                         passcal::Bool,
+                        swap::Bool,
                         full::Bool)
   f = open(fname, "r")
   trace_fh = Array{Int16,1}(undef,3)
   if passcal == true
-    S = SeisData(do_trace(f, buf, shorts, ints, true, full, fname, trace_fh))
+    S = SeisData(do_trace(f, buf, shorts, ints, true, full, fname, swap, trace_fh))
   else
     shorts  = getfield(BUF, :int16_buf)
     checkbuf!(shorts, 62)
@@ -322,7 +338,8 @@ function read_segy_file(fname::String,
     # Channel headers
     nt = shorts[1]
     for i = 1:nt
-      push!(S, do_trace(f, buf, shorts, ints, false, full, fname, trace_fh))
+      # "swap" is not used here
+      push!(S, do_trace(f, buf, shorts, ints, false, full, fname, true, trace_fh))
       if full == true
         merge!(S.misc[i], fhd)
       end
@@ -335,13 +352,15 @@ end
 # ============================================================================
 
 """
-    segyhdr(f)
+    segyhdr(f[; passcal=false, swap=false])
 
-Print formatted, sorted SEG-Y headers of file `f` to stdout. Pass keyword argument `passcal=true` for PASSCAL/NMT modified SEG-Y.
+Print formatted, sorted SEG-Y headers of file `f` to stdout. Use keyword
+`passcal=true` for PASSCAL/NMT modified SEG Y; use `swap=true` for big-endian
+PASSCAL.
 """
-function segyhdr(fname::String; passcal::Bool=false)
+function segyhdr(fname::String; passcal::Bool=false, swap::Bool=false)
   if passcal
-    seis = read_data("passcal", fname::String, full=true)
+    seis = read_data("passcal", fname::String, full=true, swap=swap)
   else
     seis = read_data("segy", fname::String, full=true)
   end

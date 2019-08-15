@@ -3,6 +3,9 @@ The current set of updates, leading to v0.4.0, will focus on:
 2. expanded file format support
 3. expanded data acquisition options
 
+### 2019-08-14
+* `read_data("passcal", ..., swap=true)` now reads big-endian PASSCAL SEG Y.
+
 ### 2019-08-13
 #### New, Changed, Deprecated
 * Added `vucum(str)` and `validate_units(S)` to validate strings for `:units`.
