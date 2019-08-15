@@ -78,6 +78,7 @@ function FDSN_sta_xml(xmlf::String;
                     c_id = "...."
                     c_name = identity(s_name)
                     c_units = ""
+                    c_sensor = ""
 
                     # location defaults
                     c_lat = s_lat
@@ -117,6 +118,15 @@ function FDSN_sta_xml(xmlf::String;
                       elseif name(i) == "ClockDrift"
                         c_drift = parse(Float64, content(i))
 
+                      # sensor type
+                      elseif name(i) == "Sensor"
+                        rx = child_elements(i)
+                        for r in rx
+                          if name(r) == "Description"
+                            c_sensor = content(r)
+                          end
+                        end
+
                       # response
                       elseif name(i) == "Response"
                         rx = child_elements(i)
@@ -131,8 +141,8 @@ function FDSN_sta_xml(xmlf::String;
                                 # normfreq
                                 c_normfreq = parse(Float64, content(y))
                               elseif name(y) == "InputUnits"
-                                # calibrationunits: this converts "m/s**2" to the SI m/s2
-                                c_units = units2ucum(content(get_elements_by_tagname(y, "Name")[1]))
+                                # calibrationunits
+                                c_units = units2ucum(lowercase(content(get_elements_by_tagname(y, "Name")[1])))
                               end
                             end
 
@@ -213,8 +223,10 @@ function FDSN_sta_xml(xmlf::String;
                                     loc   = c_loc,
                                     units = c_units,
                                     resp  = c_resp )
-                    # C.misc["normfreq"] = c_normfreq
                     C.misc["ClockDrift"] = c_drift
+                    if !isempty(c_sensor)
+                      C.misc["SensorDescription"] = c_sensor
+                    end
                     push!(S, C)
 
                   end
