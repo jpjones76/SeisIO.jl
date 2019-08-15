@@ -109,11 +109,11 @@ function read_data!(S::SeisData, fmt::String, filestr::String;
     checkbuf!(buf, 240)
 
     if one_file
-      append!(S, read_segy_file(filestr, buf, shorts, ints, passcal, full))
+      append!(S, read_segy_file(filestr, buf, shorts, ints, passcal, swap, full))
     else
       files = ls(filestr)
       for fname in files
-        append!(S, read_segy_file(fname, buf, shorts, ints, passcal, full))
+        append!(S, read_segy_file(fname, buf, shorts, ints, passcal, swap, full))
       end
     end
 

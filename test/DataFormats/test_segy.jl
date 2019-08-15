@@ -59,15 +59,22 @@ printstyled("      data integrity\n", color=:light_green)
 @test ≈(SEG.x[1][1:10], [47.0, 46.0, 45.0, 44.0, 51.0, 52.0, 57.0, 59.0, 40.0, 34.0])
 @test length(SEG.x[1]) == SEG.misc[1]["num_samps"] == 8640047
 
-
 redirect_stdout(out) do
   segyhdr(segy_file_1, passcal=true)
 end
 
+printstyled("      big-endian support\n", color=:light_green)
+segfpat = joinpath(path, "SampleFiles/02.104.00.00.08.7107.2")
+SEG = read_data("passcal", segfpat, full=true, swap=true)
+@test SEG.n == 1
+@test SEG.id ==  ["...spn"] # lol, WHY BOB
+@test isapprox(SEG.gain[1], 5.92346875e-8, atol=eps(Float32))
+@test SEG.misc[1]["trigyear"] == SEG.misc[1]["year"] == 2002
+
 printstyled("    wildcard support\n", color=:light_green)
 segfpat = joinpath(path, "SampleFiles/*PASSCAL*segy")
 SEG = read_data("passcal", segfpat, full=true)
-@test S.n == 1
+@test SEG.n == 1
 @test Float64(SEG.misc[1]["max"]) == maximum(SEG.x[1]) == 2047.0
 @test Float64(SEG.misc[1]["min"]) == minimum(SEG.x[1]) == -2048.0
 @test ≈(SEG.x[1][1:10], [47.0, 46.0, 45.0, 44.0, 51.0, 52.0, 57.0, 59.0, 40.0, 34.0])
