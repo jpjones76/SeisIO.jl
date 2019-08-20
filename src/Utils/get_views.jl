@@ -2,8 +2,6 @@
 function get_views(S::GphysData, inds::Array{Int64,1})
   L = Array{Int64,1}(undef,0)
   X = Array{SubArray,1}(undef,0)
-  si::Int = 0
-  ei::Int = 0
   for i in inds
     n_seg = size(S.t[i],1)-1
     for k = 1:n_seg
@@ -24,8 +22,6 @@ get_views(S::GphysData) = get_views(S, collect(1:S.n))
 function get_views(C::GphysChannel)
   L = Array{Int64,1}(undef,0)
   X = Array{SubArray,1}(undef,0)
-  si::Int = 0
-  ei::Int = 0
   n_seg = size(C.t,1)-1
   for k = 1:n_seg
     si = C.t[k,1]
