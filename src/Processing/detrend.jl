@@ -73,6 +73,46 @@ demean(S::GphysData,
   irr::Bool=false) = (U = deepcopy(S); demean!(U, chans=chans, irr=irr); return U)
 demean(C::GphysChannel) = (U = deepcopy(C); demean!(U); return U)
 
+function dtr!(x::Array{T,1}, ti::Array{Int64,2}, fs::Float64, n::Int64) where T <: AbstractFloat
+  L = length(x)
+
+  # check for nans
+  nf = false
+  for i = 1:length(x)
+    if isnan(x[i])
+      nf = true
+      break
+    end
+  end
+
+  if nf
+    t = tx_float(ti, fs)
+    j = findall((isnan.(x)).==false)
+    x1 = x[j]
+    t1 = t[j]
+    p = n == 1 ? linreg(t1, x1) : polyfit(t1, x1, n)
+  else
+    if n == 1 && size(ti,1) == 2 && fs > 0.0
+      dt = 1.0/fs
+      p = linreg(x, dt)
+      v = zero(T)
+      for i = 1:length(x)
+        v = polyval(p, dt*i)
+        x[i] -= v
+      end
+    else
+      t = tx_float(ti, fs)
+      p = n == 1 ? linreg(t, x) : polyfit(t, x, n)
+      v = zero(T)
+      for i = 1:length(x)
+        v = polyval(p, t[i])
+        x[i] -= v
+      end
+    end
+  end
+  return p
+end
+
 @doc """
     detrend!(S::SeisData[; chans=CC, n=1]))
 
@@ -99,41 +139,15 @@ function detrend!(S::GphysData;
   end
 
   @inbounds for i in chans
-    L = length(S.x[i])
-    T = eltype(S.x[i])
-    t = tx_float(S.t[i], S.fs[i], T)
-    j = findall((isnan.(S.x[i])).==false)
-    if L == length(j)
-      p = polyfit(t, S.x[i], n)
-      pv = polyval(p, t)
-      broadcast!(-, S.x[i], S.x[i], pv)
-      note!(S, i, string("detrend!, n = ", n, ", polyfit result = ", p))
-    else
-      x = S.x[i][j]
-      p = polyfit(t[j], x, n)
-      broadcast!(-, x, x, polyval(p, t[j]))
-      S.x[i][j] = x
-      note!(S, i, string("detrend!, n = ", n, ", polyfit result = ", p))
-    end
+    p = dtr!(S.x[i], S.t[i], S.fs[i], n)
+    note!(S, i, string("detrend!, n = ", n, ", polyfit result = ", p))
   end
   return nothing
 end
 
 function detrend!(C::GphysChannel; n::Int64=1)
-  L = length(C.x)
-  T = eltype(C.x)
-  t = tx_float(C.t, C.fs, T)
-  j = findall((isnan.(C.x)).==false)
-  if L == length(j)
-    p = polyfit(t, C.x, n)
-    broadcast!(-, C.x, C.x, polyval(p, t))
-  else
-    x = C.x[j]
-    p = polyfit(t[j], x, n)
-    broadcast!(-, x, x, polyval(p, t[j]))
-    C.x[j] = x
-  end
-  note!(C, string("detrend!, n = ", n))
+  p = dtr!(C.x, C.t, C.fs, n)
+  note!(C, string("detrend!, n = ", n, ", polyfit result = ", p))
   return nothing
 end
 
