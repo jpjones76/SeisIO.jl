@@ -2,7 +2,7 @@
 function randResp(n::Int64=0)
   if n > 0
     T = Float64
-    i = n
+    i = max(1, div(n,2))
   else
     T = rand() < 0.5 ? Float32 : Float64
     i = rand(2:2:8)
