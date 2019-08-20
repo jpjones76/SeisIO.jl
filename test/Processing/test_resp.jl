@@ -27,6 +27,8 @@ translate_resp!(S, r)
 
 printstyled("    remove_resp (SeisData)\n", color=:light_green)
 remove_resp!(S)
+@test_logs (:info, Regex("nothing done")) remove_resp!(S)
+
 T = translate_resp(T, non_resp)
 for i = 1:S.n
   if isempty(findall(isnan.(S.x[i]))) && isempty(findall(isnan.(T.x[i])))
@@ -48,9 +50,9 @@ fc = resptofc(S.resp[3])
 
 # test for channel ranges
 S = deepcopy(U)
-remove_resp!(S, chans=1:3)
-for i = 1:S.n
-  @test (S[i] == U[i]) == (i < 4 ? false : true)
+S1 = remove_resp(S, chans=1:3)
+for i = 1:S1.n
+  @test (S1[i] == U[i]) == (i < 4 ? false : true)
 end
 
 # SeisChannel method extension

@@ -46,7 +46,7 @@ redirect_stdout(out) do
   println("\n testing at Float32 precision... \n")
   S = rseis(convert_file)[1]
   U = deepcopy(S)
-  convert_seis!(S, units_out="m/s2")
+  convert_seis!(S, units_out="m/s2", v=2)
   convert_seis!(S)
   for i = 1:16
     @test isapprox(S.x[i], U.x[i])
@@ -74,13 +74,13 @@ redirect_stdout(out) do
   convert_seis!(S, units_out="m/s")
   convert_seis!(S, units_out="m")
   convert_seis!(S, units_out="m/s2")
-  convert_seis!(S, units_out="m")
+  T = convert_seis(S, units_out="m")
 
   # Test on a SeisChannel
   C = deepcopy(U[1])
   convert_seis!(C, units_out="m")
   convert_seis!(C, units_out="m/s")
-  convert_seis!(C, units_out="m")
   convert_seis!(C, units_out="m/s2")
-  convert_seis!(C, units_out="m")
+  convert_seis!(C, units_out="m/s")
+  D = convert_seis(C, units_out="m")
 end
