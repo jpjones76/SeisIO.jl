@@ -13,11 +13,10 @@ function get_unique(S::T, A::Array{String,1}; chans::Union{Integer, UnitRange, A
   H = Array{UInt64,1}(undef, length(chans))
   fields = fieldnames(T)
   h = Array{UInt64,1}(undef, J)
-  cmd = Array{String,1}(undef, J)
   @inbounds for (c,i) in enumerate(chans)
     for (j, str) in enumerate(A)
       sym = Symbol(str)
-      if any(fields.==sym)
+      if sym in fields
         h[j] = hash(getfield(S, sym)[i])
       else
         h[j] = hash(getfield(Main, sym)(getfield(S, :x)[i]))
