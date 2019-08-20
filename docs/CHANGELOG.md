@@ -3,6 +3,14 @@ The current set of updates, leading to v0.4.0, will focus on:
 2. expanded file format support
 3. expanded data acquisition options
 
+### 2019-08-19
+* `tx_float` now always uses Float64 precision; Float32 lacks the resolution
+to handle long time series.
+* `detrend!` now uses linear regression on gapless channels with `:fs > 0.0`
+when `n=1`, yielding a 12x speedup and >99% less memory use.
+* added `env!` to efficiently compute the signal envelope by segment within
+each (regularly-sampled) channel.
+
 ### 2019-08-14
 * `read_data("passcal", ..., swap=true)` now reads big-endian PASSCAL SEG Y.
 
