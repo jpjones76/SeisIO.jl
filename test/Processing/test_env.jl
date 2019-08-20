@@ -3,10 +3,11 @@ printstyled("  env!\n", color=:light_green)
 # GphysChannel, gaps
 printstyled("    on SeisChannel\n", color=:light_green)
 C = randSeisChannel(s=true)
-while size(C.t, 1) < 3
-  println("rerolling")
-  C = randSeisChannel(s=true)
-end
+C.t = [ 1 0;
+        2 500;
+        1959 69420;
+        90250 0]
+C.x = randn(C.t[end,1])
 env!(C)
 
 # GphysChannel, no gaps
