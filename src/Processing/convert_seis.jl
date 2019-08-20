@@ -209,3 +209,12 @@ function convert_seis(S::GphysData;
   convert_seis!(U, chans=chans, units_out=units_out, v=v)
   return U
 end
+
+function convert_seis(C::GphysChannel;
+  units_out::String="m/s",
+  v::Int64=KW.v)
+
+  U = deepcopy(C)
+  convert_seis!(U, units_out=units_out, v=v)
+  return U
+end
