@@ -30,7 +30,7 @@ function compare_resamp()
   deleteat!(S, findall(S.fs.<20.0))
   U = deepcopy(S)
   sz = sizeof(S)
-  (xx, ta, aa, xx, xx) = @timed resample!(S, fs=10.0)
+  (xx, ta, aa, xx, xx) = @timed resample(S, fs=10.0)
   (xx, tb, ab, xx, xx) = @timed naive_resample!(U, fs=10.0)
   return [aa/sz ab/sz ta tb]
 end
@@ -78,6 +78,7 @@ S.t = [1 0; nx 0]
 S.fs = 100.0
 S.x = rand(Float32, nx)
 U = SeisData(deepcopy(S))
+C = resample(S, 50.0)
 sz = sizeof(S)
 
 (xx, ta, aa, xx, xx) = @timed resample!(S, 50.0)

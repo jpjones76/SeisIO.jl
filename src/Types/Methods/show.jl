@@ -17,14 +17,14 @@ function show_str(io::IO, S::Array{String,1}, w::Int, N::Int64)
   println(io, showtail(N<length(S)))
   return nothing
 end
-
-function show_float(io::IO, X::FloatArray, w::Int, N::Int64)
-  for i = 1:N
-     print(io, rpad(@sprintf("%+10.3e", X[i]), w))
-  end
-  println(io, showtail(N<length(S)))
-  return nothing
-end
+# 
+# function show_float(io::IO, X::FloatArray, w::Int, N::Int64)
+#   for i = 1:N
+#      print(io, rpad(@sprintf("%+10.3e", X[i]), w))
+#   end
+#   println(io, showtail(N<length(S)))
+#   return nothing
+# end
 
 function show_t(io::IO, T::Array{Array{Int64,2},1}, w::Int, N::Int64)
   for i = 1:N

@@ -14,6 +14,11 @@ for f in datafields
   @test length(getfield(TD, f)) == 10
 end
 
+S = unsafe_convert(SeisData, randSeisEvent(10).data)
+for f in datafields
+  @test length(getfield(S, f)) == 10
+end
+
 printstyled("  show\n", color=:light_green)
 redirect_stdout(out) do
   show(SeisHdr())

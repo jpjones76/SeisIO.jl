@@ -784,10 +784,15 @@ mseis!(S,T)
 
 printstyled(stdout,"      mseis! with Types from SeisIO.Quake\n", color=:light_green)
 S = randSeisData()
+Ev = randSeisEvent(1)
+Ev.data.az[1] = 0.0
+Ev.data.baz[1] = 0.0
+Ev.data.dist[1] = 0.0
 mseis!(S,   randSeisChannel(),
             convert(EventChannel, randSeisChannel()),
             rand(Float64, 23),  # should warn
             convert(EventTraceData, randSeisData()),
+            Ev,
             randSeisEvent())
 
 printstyled(stdout,"      two independent channels ==> same as \"+\"\n", color=:light_green)

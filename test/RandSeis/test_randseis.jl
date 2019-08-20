@@ -23,6 +23,9 @@ for i = 1:100
   @test isa(u, String)
 end
 
+R = RandSeis.randResp(8)
+@test length(R.z) == length(R.p) == 8
+
 for i = 1:10000
   i,c,u = RandSeis.getyp2codes('s', false)
   @test isa(i, Char)
