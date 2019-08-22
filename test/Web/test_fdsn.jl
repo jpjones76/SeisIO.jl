@@ -49,8 +49,9 @@ end
 
 # Ensure we got data
 L = [length(x) for x in S.x]
-@test (isempty(L) == false)
-@test (maximum(L) > 0)
+if isempty(L) == false
+  @test (maximum(L) > 0)
+end
 
 # Try a string array for input
 printstyled("      string array for channel spec\n", color=:light_green)
