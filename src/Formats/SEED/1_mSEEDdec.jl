@@ -1,4 +1,4 @@
-SEED_Char(io::IO, BUF::SeisIOBuf, nb::UInt16) = replace(String(read(io, nb, all=false)),
+SEED_Char(io::IO, BUF::SeisIOBuf, nb::UInt16) = replace(String(read(io, nb)),
                                             ['\r', '\0'] =>"")
 
 # This gets special handling as Float64 arrays are assumed in S.x[c]
