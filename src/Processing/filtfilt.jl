@@ -176,6 +176,7 @@ function filtfilt!(S::GphysData;
     dm::String=KW.Filt.dm
     )
 
+  isempty(S) && return nothing
   if chans == Int64[]
     chans = 1:S.n
   end
