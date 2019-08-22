@@ -34,12 +34,12 @@ end
 
 # [201] Murdock Event Detection Blockette (60 bytes)
 function blk_201(S::SeisData, sid::IO, c::Int64)
-  read!(sid, BUF.B201.sig)                             # amplitude, period, background estimate
-  BUF.B201.flags = read(sid, UInt8)                    # detection flags
+  read!(sid, BUF.B201.sig)                              # amplitude, period, background estimate
+  BUF.B201.flags = read(sid, UInt8)                     # detection flags
   skip(sid, 1)                                          # reserved
-  blk_time!(BUF.B201.t, sid, BUF.swap)                # onset time
-  read!(sid, BUF.B201.snr)                             # snr, lookback, pick algorithm
-  BUF.B201.det  = String(read(sid, 24, all=false))     # detector name
+  blk_time!(BUF.B201.t, sid, BUF.swap)                  # onset time
+  read!(sid, BUF.B201.snr)                              # snr, lookback, pick algorithm
+  BUF.B201.det  = String(read(sid, 24))                 # detector name
 
   # will store as a string: t_evt, :sig (3 vals), bittsring(:flags), :snr, :lb, :p)
   # Store event detections in S.misc
@@ -79,16 +79,16 @@ function blk_calib(S::SeisData, sid::IO, c::Int64, bt::UInt16)
     BUF.Calib.period   = read(sid, Float32)    # Period of signal (seconds)
   end
   BUF.Calib.amplitude  = read(sid, Float32)    # Peak-to-peak amplitude
-  BUF.Calib.channel    = read(sid, 3, all=false)
+  BUF.Calib.channel    = read(sid, 3)
   skip(sid, 1)                                  # Reserved byte
   BUF.Calib.ref        = read(sid, UInt32)     # Reference amplitude
 
   # String arrays
   if bt < 0x0186
-    BUF.Calib.coupling = read(sid, 12, all=false)
-    BUF.Calib.rolloff  = read(sid, 12, all=false)
+    BUF.Calib.coupling = read(sid, 12)
+    BUF.Calib.rolloff  = read(sid, 12)
     if bt == 0x0140
-      BUF.Calib.noise  = read(sid, 8, all=false)
+      BUF.Calib.noise  = read(sid, 8)
     end
   else
     BUF.Calib.coupling = Array{UInt8,1}(undef,0)
@@ -144,9 +144,9 @@ function blk_500(S::SeisData, sid::IO, c::Int64)
   BUF.B500.μsec              = read(sid, Int8)
   BUF.B500.reception_quality = read(sid, UInt8)
   BUF.B500.exception_count   = BUF.swap ? ntoh(read(sid, UInt32)) : read(sid, UInt32)
-  BUF.B500.exception_type    = strip(String(read(sid, 16, all=false)), ['\0',' '])
-  BUF.B500.clock_model       = strip(String(read(sid, 32, all=false)), ['\0',' '])
-  BUF.B500.clock_status      = strip(String(read(sid, 128, all=false)), ['\0',' '])
+  BUF.B500.exception_type    = strip(String(read(sid, 16)), ['\0',' '])
+  BUF.B500.clock_model       = strip(String(read(sid, 32)), ['\0',' '])
+  BUF.B500.clock_status      = strip(String(read(sid, 128)), ['\0',' '])
 
   # TO DO: something with this
   if !haskey(S.misc[c], "seed_timing")
@@ -193,8 +193,8 @@ function blk_2000(S::SeisData, sid::IO, c::Int64)
   wo                = read(sid, UInt8)
   nf                = read(sid, UInt8)
   flag              = read(sid, UInt8)
-  BUF.B2000.hdr    = read(sid, Int(BUF.B2000.os)-15, all=false)
-  BUF.B2000.data   = read(sid, BUF.B2000.NB-BUF.B2000.os, all=false)
+  BUF.B2000.hdr    = read(sid, Int(BUF.B2000.os)-15)
+  BUF.B2000.data   = read(sid, BUF.B2000.NB-BUF.B2000.os)
 
   # Store to S.misc[i]
   r = "seed_opaque_" * string(n)
