@@ -3,6 +3,25 @@ The current set of updates, leading to v0.4.0, will focus on:
 2. expanded file format support
 3. expanded data acquisition options
 
+### 2019-08-23
+* Added read support for PC-SUDS data format. Syntax:
+  + `read_data("suds", ...)` reads waveform data
+  + `SUDS.sudsevt` reads data and possible headers into a SeisEvent
+  + `SUDS.suds_support()` lists current SUDS support
+  + SeisIO PC-SUDS readers are optimized for multiplexed data (PC-SUDS struct
+  code 6); memory overhead for traces (PC-SUDS code 7) is significantly worse.
+* Submodules are now in {SeisIO}/src/Submodules/{name}, e.g., SeisIO.Quake is
+now in {SeisIO}/src/Submodules/Quake.
+* UW file format support has been moved to submodule `UW`.
+  + Access individual commands with e.g., `using SeisIO.UW; ?UW.uwpf`.
+  + This does not change the syntax `read_data("uw", ...)`
+* In general, complicated file formats designed for discrete event handling
+will be added as submodules; however, SEED will remain in SeisIO core because
+it's the *de facto* FDSN standard.
+
+### 2019-08-22
+* Fixed issue #19
+
 ### 2019-08-19
 * `tx_float` now always uses Float64 precision; Float32 lacks the resolution
 to handle long time series.
