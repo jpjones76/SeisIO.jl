@@ -218,6 +218,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
 
   # debug output
   if v > 2
+    printstyled(string("Position = ", position(sid), "\n"), color=:light_green)
     println(stdout, "To parse: nx = ", n, " sample blockette, ",
     "compressed size = ", nb, " bytes, fmt = ", fmt)
   end
@@ -305,6 +306,8 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
         setindex!(t, xi+n, nt)
       end
     end
+
+    v > 2 && printstyled(string("Position = ", position(sid), "\n"), color=:light_green)
   end
   return nothing
 end
