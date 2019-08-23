@@ -145,7 +145,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
     if xi + n > L
       resize!(x, xi + max(n, nx_add))
       (v > 1) && println(stdout, id, ": resized from length ", L,
-                                      " to length ", nx_new)
+                                      " to length ", length(x))
     end
   end
 
@@ -295,7 +295,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
       # Time gap defined as more than half a sample
       if τ > div(Δ, 2)
         v > 1 && println(stdout, id, ": gap = ", τ, " μs (old end = ",
-                                 te, ", New start = ", τ + te + Δ)
+                                 te, ", new start = ", τ + te + Δ, ")")
         setindex!(t, getindex(t, nt)+1, nt)
         setindex!(t, getindex(t, 2*nt)+τ, 2*nt)
         setindex!(getfield(S, :t), vcat(t, [xi+n zero(Int64)]), c)
