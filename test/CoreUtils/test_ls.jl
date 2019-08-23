@@ -33,8 +33,8 @@ for (n,v) in enumerate(S)
   files = String[splitdir(i)[2] for i in ls(v)]
   if Sys.iswindows() == false
     expected = S_expect[n]
+    @test files == expected
   end
-  @test files == expected
   [@test isfile(f) for f in ls(v)]
 end
 # Test that ls invokes find_regex under the right circumstances
