@@ -57,7 +57,7 @@ function blk_201(S::SeisData, sid::IO, c::Int64)
                                     flag * "," *
                                     join(BUF.B201.snr, ',') * "," *
                                     strip(BUF.B201.det) )
-  return 0x000c
+  return 0x003c
 end
 
 # [300] Step Calibration Blockette (60 bytes)

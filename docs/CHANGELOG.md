@@ -4,6 +4,7 @@ The current set of updates, leading to v0.4.0, will focus on:
 3. expanded data acquisition options
 
 ### 2019-08-23
+* Fixed issue #20
 * Added read support for PC-SUDS data format. Syntax:
   + `read_data("suds", ...)` reads waveform data
   + `SUDS.sudsevt` reads data and possible headers into a SeisEvent
