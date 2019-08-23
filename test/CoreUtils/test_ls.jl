@@ -31,8 +31,9 @@ S_expect =  [
 # Test that ls returns the same files as `ls -1`
 for (n,v) in enumerate(S)
   files = String[splitdir(i)[2] for i in ls(v)]
-  # deleteat!(files, findall([endswith(i, "cov") for i in files]))
-  expected = S_expect[n]
+  if Sys.iswindows() == false
+    expected = S_expect[n]
+  end
   @test files == expected
   [@test isfile(f) for f in ls(v)]
 end
