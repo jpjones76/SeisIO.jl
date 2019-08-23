@@ -22,6 +22,7 @@ SeisData object `S`.
 | Lennartz ASCII            | lenartzascii    |
 | Mini-SEED                 | mseed           |
 | PASSCAL SEG Y             | passcal         |
+| PC-SUDS                   | suds            |
 | SAC                       | sac             |
 | SEG Y (rev 0 or rev 1)    | segy            |
 | UW                        | uw              |
@@ -32,12 +33,14 @@ SeisData object `S`.
 |cf      | win32    | String  | ""        | win32 channel info filestr      |
 |full    | sac      | Bool    | false     | read full header into `:misc`?  |
 |        | segy     |         |           |                                 |
+|        | suds     |         |           |                                 |
 |        | uw       |         |           |                                 |
-|nx_add  | mseed    | Int64   | 360000    | minimum increase when resizing `:x`|
+|nx_add  | mseed    | Int64   | 360000    | min. increase when resizing `:x`|
 |nx_new  | mseed    | Int64   | 86400000  | `length(C.x)` for new channels  |
 |jst     | win32    | Bool    | true      | are sample times JST (UTC+9)?   |
 |swap    | seed     | Bool    | true      | byte swap?                      |
 |v       | mseed    | Int64   | 0         | verbosity                       |
+|        | suds     |         |           |                                 |
 |        | uw       |         |           |                                 |
 |        | win32    |         |           |                                 |
 
@@ -151,16 +154,26 @@ function read_data!(S::SeisData, fmt::String, filestr::String;
 
   elseif fmt == "uw"
     if one_file
-      append!(S, uwdf(filestr, v=v, full=full))
+      append!(S, UW.uwdf(filestr, v=v, full=full))
     else
       files = ls(filestr)
       for fname in files
-        append!(S, uwdf(fname, v=v))
+        append!(S, UW.uwdf(fname, v=v))
       end
     end
 
   elseif fmt == "win32" || fmt =="win"
     readwin32!(S, filestr, cf, jst=jst, nx_new=nx_new, nx_add=nx_add, v=v)
+
+  elseif fmt == "suds"
+    if one_file
+      append!(S, SUDS.read_suds(filestr, full=full, v=v))
+    else
+      files = ls(filestr)
+      for fname in files
+        append!(S, SUDS.read_suds(fname, full=full, v=v))
+      end
+    end
 
   else
     error("Unknown file format!")
