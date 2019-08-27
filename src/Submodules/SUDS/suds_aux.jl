@@ -60,22 +60,7 @@ function flush_suds!(S::GphysData,
       if isempty(S.t[i])
         S.t[i] = Int64[1 t0; nz 0]
       else
-        # check for gaps
-        Δ = round(Int64, sμ / getindex(getfield(S, :fs), i))
-        t = getindex(getfield(S, :t), i)
-        nt = size(t,1)
-        lxi = t[nt,1]
-        te = endtime(t, Δ)
-        τ = t0 - te - Δ
-        if τ > div(Δ, 2)
-          v > 1 && println(stdout, S.id[i], ": gap = ", τ, " μs (old end = ",
-          te, ", New start = ", τ + te + Δ)
-          setindex!(t, getindex(t, nt)+1, nt)
-          setindex!(t, getindex(t, 2*nt)+τ, 2*nt)
-          setindex!(getfield(S, :t), vcat(t, [lxi+nz zero(Int64)]), i)
-        else
-          setindex!(t, lxi+nz, nt)
-        end
+        check_for_gap!(S, i, t0, nz, v)
       end
     end
   end
