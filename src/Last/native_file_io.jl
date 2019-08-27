@@ -1,18 +1,20 @@
 export rseis, wseis
 
 # SeisIO file format version changes
-# 0.6   all custom types can use write(); rseis, wseis no longer required
+# 0.51  PZResp, PZResp64 changed 08-01-2019
+# 0.50  all custom types can use write(); rseis, wseis no longer required
 #       String arrays and :misc are written in a completely different way
 #       Type codes for :misc changed
 #       deprecated BigFloat/BigInt support in :misc
 #       :n is no longer stored as a UInt32
 #       :x compression no longer automatic and changed from Blosc to lz4
-# 0.5   :loc, :resp are now custom types with their own io subroutines
+# 0.41  :loc, :resp are now custom types with their own io subroutines
 #       Julia version is no longer written to file
-# 0.4   SeisData.id[i] no longer needs to be a length ≤ 15 ASCII string
-#       seis files have a new file TOC field: number of channels in each record
-# 0.3   SeisData.loc[i] no longer is assumed to be length 5
-# 0.2   First reliable file format
+#       (likely misidentified in file header as 0.50)
+# 0.40  SeisData.id[i] no longer needs to be a length ≤ 15 ASCII string
+#       files have a new file TOC field: number of channels in each record
+# 0.30  SeisData.loc[i] no longer is assumed to be length 5
+# 0.20  First reliable file format
 
 const TNames = Type[  EventChannel,
                       SeisChannel,
@@ -74,7 +76,11 @@ function read_rec(io::IO, ver::Float32, c::UInt32, b::UInt64)
   while i < length(TCodes)
     i = i + 1
     if c == getindex(TCodes, i)
-      return read(io, getindex(TNames, i))
+      if ver < 0.51f0 && (c == 0x20474431)
+        return read_legacy(io, ver)
+      else
+        return read(io, getindex(TNames, i))
+      end
     end
   end
   @warn("Non-SeisIO data at byte ", position(io), "; skipped.")
@@ -116,7 +122,6 @@ function rseis(patts::Union{String,Array{String,1}};
   c::Union{Int64,Array{Int64,1}}  = Int64[],
   v::Int64                        = KW.v)
 
-  # GC.enable(false)
   A     = []
   files = build_file_list(patts)
   sbuf  = Array{UInt8, 1}(undef, 65535)
@@ -173,8 +178,6 @@ function rseis(patts::Union{String,Array{String,1}};
     close(io)
   end
   (v > 0) && println("Processed ", nf, " files.")
-  # GC.enable(true)
-  # GC.gc()
   return A
 end
 
