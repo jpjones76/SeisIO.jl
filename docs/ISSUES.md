@@ -7,6 +7,7 @@ include a text dump with the error message.
 sometimes appears to close connections immediately without returning data.
 * `FDSNevq` makes no checks for redundant events; using keyword `src="all"` is
 likely to yield duplicates.
+* SEG Y data in IBM-Float format does not read correctly. (Note, IBM-Float != IEEE-Float. SEG Y is one of the last file formats in the world that can use IBM-Float)
 
 ## External to SeisIO
 1. Some data channels IDs in SeedLink are not unique, or are duplicates with
