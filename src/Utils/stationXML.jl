@@ -142,7 +142,10 @@ function FDSN_sta_xml(xmlf::String;
                                 c_normfreq = parse(Float64, content(y))
                               elseif name(y) == "InputUnits"
                                 # calibrationunits
-                                c_units = units2ucum(lowercase(content(get_elements_by_tagname(y, "Name")[1])))
+                                c_units = units2ucum(
+                                  fix_units(
+                                    lowercase(content(get_elements_by_tagname(y, "Name")[1])))
+                                    )
                               end
                             end
 
