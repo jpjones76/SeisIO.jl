@@ -17,9 +17,12 @@ SeisData object `S`.
 
 | Format                    | String          |
 | :---                      | :---            |
+| AH-1                      | ah1             |
+| AH-2                      | ah2             |
+| Bottle                    | bottle          |
 | GeoCSV, time-sample pair  | geocsv          |
 | GeoCSV, sample list       | geocsv.slist    |
-| Lennartz ASCII            | lenartzascii    |
+| Lennartz ASCII            | lennartzascii   |
 | Mini-SEED                 | mseed           |
 | PASSCAL SEG Y             | passcal         |
 | PC-SUDS                   | suds            |
@@ -35,22 +38,29 @@ SeisData object `S`.
 |        | segy     |         |           |                                 |
 |        | suds     |         |           |                                 |
 |        | uw       |         |           |                                 |
+|        | ah       |         |           |                                 |
 |nx_add  | mseed    | Int64   | 360000    | min. increase when resizing `:x`|
+|        | bottle   |         |           |                                 |
+|        | win32    |         |           |                                 |
 |nx_new  | mseed    | Int64   | 86400000  | `length(C.x)` for new channels  |
+|        | bottle   |         |           |                                 |
+|        | win32    |         |           |                                 |
 |jst     | win32    | Bool    | true      | are sample times JST (UTC+9)?   |
 |swap    | seed     | Bool    | true      | byte swap?                      |
 |v       | mseed    | Int64   | 0         | verbosity                       |
 |        | suds     |         |           |                                 |
 |        | uw       |         |           |                                 |
 |        | win32    |         |           |                                 |
+|        | ah       |         |           |                                 |
+|        | bottle   |         |           |                                 |
 
 Most keywords are identical to those used by reader functions; the exception,
 "cf" (channel file) is a workaround to win32's dependence on two file string
 patterns.
 
 ### Performance Tip
-With mseed or win32 data, adjust `nx_new` and `nx_add` based on the sizes of
-the data vectors that you expect to read. If the largest has `Nmax` samples,
+With mseed, win32, and bottle data, adjust `nx_new` and `nx_add` based on the
+expected lengths of the data vectors. If the largest has `Nmax` samples,
 and the smallest has `Nmin`, we recommend `nx_new=Nmin` and `nx_add=Nmax-Nmin`.
 
 Default values can be changed in SeisIO keywords, e.g.,
@@ -92,9 +102,9 @@ function read_data!(S::SeisData, fmt::String, filestr::String;
     fv = getfield(BUF, :sac_fv)
     iv = getfield(BUF, :sac_iv)
     cv = getfield(BUF, :sac_cv)
-    checkbuf!(fv, 70)
-    checkbuf!(iv, 40)
-    checkbuf!(cv, 192)
+    checkbuf_strict!(fv, 70)
+    checkbuf_strict!(iv, 40)
+    checkbuf_strict!(cv, 192)
     if one_file
       read_sac_file!(S, filestr, fv, iv, cv, full)
     else
@@ -130,6 +140,32 @@ function read_data!(S::SeisData, fmt::String, filestr::String;
         read_seed_file!(S, fname, v, nx_new, nx_add)
       end
     end
+
+# ============================================================================
+# Data formats that aren't SAC, SEED, or SEG Y begin here and are alphabetical
+
+  elseif fmt == "ah1"
+    if one_file
+      append!(S, read_ah1(filestr, v=v, full=full))
+    else
+      files = ls(filestr)
+      for fname in files
+        append!(S, read_ah1(fname, v=v, full=full))
+      end
+    end
+
+  elseif fmt == "ah2"
+    if one_file
+      append!(S, read_ah2(filestr, v=v, full=full))
+    else
+      files = ls(filestr)
+      for fname in files
+        append!(S, read_ah2(fname, v=v, full=full))
+      end
+    end
+
+  elseif fmt == "bottle"
+    read_bottle!(S, filestr, v, nx_new, nx_add)
 
   elseif fmt in ("geocsv", "geocsv.tspair", "geocsv", "geocsv.slist")
     tspair = (fmt == "geocsv" || fmt == "geocsv.tspair")
