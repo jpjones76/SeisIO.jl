@@ -1,7 +1,7 @@
 # resp
 printstyled("  Type preservation after processing\n", color=:light_green)
 
-for f in String["convert_seis!", "demean!", "detrend!", "env!", "filtfilt!", "merge!", "sync!", "taper!", "ungap!", "unscale!"]
+for f in String["convert_seis!", "demean!", "detrend!", "filtfilt!", "merge!", "sync!", "taper!", "ungap!", "unscale!"]
   printstyled(string("    ", f, "\n"), color=:light_green)
   S = randSeisData(s=1.0)
   if f == "filtfilt!"
