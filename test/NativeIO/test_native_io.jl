@@ -114,3 +114,14 @@ R = rseis(savfile1, v=2)[1]
 rm(savfile1)
 rm(savfile2)
 rm(savfile3)
+
+# Legacy file read
+legf = path * "/SampleFiles/2011.314.7D.J34A..HH1.seis"
+set_file_ver(legf, 0.4)
+@test get_file_ver(legf) == 0.4f0
+@test_throws ErrorException rseis(legf)
+@test_throws ErrorException get_file_ver(path * "/SampleFiles/02062915175o")
+set_file_ver(legf, 0.50)
+S = rseis(legf)[1]
+@test S.n == 3
+@test S.id == ["7D.J34A..HH1", "7D.J34A..HH2", "7D.J34A..HHZ"]
