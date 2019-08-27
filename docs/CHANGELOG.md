@@ -3,6 +3,23 @@ The current set of updates, leading to v0.4.0, will focus on:
 2. expanded file format support
 3. expanded data acquisition options
 
+### 2019-08-26
+* Added readers for the following formats:
+  - Ad Hoc (AH) 1.0: `read_data("ah1", ...)`
+  - Ad Hoc (AH) 2.0: `read_data("ah2", ...)`
+  - UNAVCO Bottle: `read_data("bottle", ...)`
+* Added a constant dictionary `"formats"` with information on supported
+file formats. Type `formats["list"]` to see a list of options.
+
+#### SeisIO Native File Format
+* Incremented SeisIO file format version to 0.51.
+  - Legacy support for SeisIO file version 0.50 will assume PZResp, PZResp64 have field `:c` but not fields `:a0, :f0`.
+  - For SeisIO files created *after* the addition of `:a0, :f0` to PZResp and
+  PZResp64, set the file version to 0.51 with `set_file_ver(file, 0.51)`.
+  - Workaround for issue #21
+* Added `get_file_ver` and `set_file_ver` for SeisIO native file format.
+* If you have problems reading files recently created with `wseis`, call `set_file_ver(file, 0.51)` on each file.
+
 ### 2019-08-23
 * Fixed issue #20
 * Added read support for PC-SUDS data format. Syntax:
