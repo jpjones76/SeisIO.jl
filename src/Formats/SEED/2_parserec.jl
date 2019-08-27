@@ -278,33 +278,22 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
         Int64(mm)*60000000 +
         Int64(ss)*1000000 +
         Int64(u16[3])*100 +
-        δt -
-        te -
-        Δ
+        δt# -
+        # te -
+        # Δ
 
     # New channel
     if te == 0
       t = Array{Int64, 2}(undef, 2, 2)
       setindex!(t, one(Int64), 1)
       setindex!(t, n, 2)
-      setindex!(t, τ + Δ, 3)
+      setindex!(t, τ, 3)
       setindex!(t, zero(Int64), 4)
       setindex!(getfield(S, :t), t, c)
 
     # Existing channel
     else
-      # Time gap defined as more than half a sample
-      if τ > div(Δ, 2)
-        v > 1 && println(stdout, id, ": gap = ", τ, " μs (old end = ",
-                                 te, ", new start = ", τ + te + Δ, ")")
-        setindex!(t, getindex(t, nt)+1, nt)
-        setindex!(t, getindex(t, 2*nt)+τ, 2*nt)
-        setindex!(getfield(S, :t), vcat(t, [xi+n zero(Int64)]), c)
-
-      # No gap
-      else
-        setindex!(t, xi+n, nt)
-      end
+      check_for_gap!(S, c, τ, n, v)
     end
 
     v > 2 && printstyled(string("Position = ", position(sid), "\n"), color=:light_green)
