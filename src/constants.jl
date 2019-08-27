@@ -62,7 +62,7 @@ const seisio_file_begin = UInt8[0x53, 0x45, 0x49, 0x53, 0x49, 0x4f]
 const sep = Base.Filesystem.pathsep()
 const steim = reverse(collect(0x00000000:0x00000002:0x0000001e), dims=1)
 const sμ = 1000000.0
-const vSeisIO = Float32(0.5)
+const vSeisIO = Float32(0.51)
 const unindexed_fields = (:c, :n)
 const webhdr = Dict("UserAgent" => "Julia-SeisIO-FSDN.jl/0.3.0")
 const μs = 1.0e-6
