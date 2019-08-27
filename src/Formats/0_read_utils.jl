@@ -1,5 +1,11 @@
 is_u8_digit(u::UInt8) = u > 0x2f && u < 0x3a
 
+# id = targ vector
+# cv = char vector
+# i = starting index in cv
+# imax = max index in cv
+# j = starting index in id
+# jmax = max index in id
 function fill_id!(id::Array{UInt8,1}, cv::Array{UInt8,1}, i::T, i_max::T, j::T, j_max::T) where T<:Integer
   o = one(T)
   while true
