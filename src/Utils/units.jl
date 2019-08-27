@@ -1,4 +1,19 @@
 export units2ucum, validate_units, vucum
+# Units issues
+# (1) UCUM has not standardized the abbreviations of units used in information technology. For now, use "By" for Bytes and "bit" for bits, cf. https://hl7.org/fhir/2017Jan/valueset-ucum-units.html ; but neither appears in the most recent HL7 UCUM value set.
+
+# Fixing a few common units mistakes that I keep seeing
+const units_table = Dict{String,String}(
+  "bits/sec" => "bit/s",
+  "pascals" => "Pa",
+  "degrees" => "deg",
+  "reboots" => "{reboots}",
+  "percent" => "%",
+  "gaps" => "{gaps}",
+  "bytes" => "By",
+  "cycles" => "{cycles}"
+  )
+fix_units(s::AbstractString) = get(units_table, s, s)
 
 function strip_exp!(k::Array{Int64,1}, u::Array{UInt32,1}, j::Int64)
   (j == length(u)) && return j
