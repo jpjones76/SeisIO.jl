@@ -170,7 +170,7 @@ end
 function read_bottle(fstr::String, v::Int64, nx_new::Int64, nx_add::Int64)
 
   S = SeisData()
-  read_bottle!(S, file, v=v, nx_new=nx_new, nx_add=nx_add)
+  read_bottle!(S, fstr, v, nx_new, nx_add)
   return S
 end
 
