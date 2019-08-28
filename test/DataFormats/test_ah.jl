@@ -3,7 +3,11 @@ ahc_file = path*"/SampleFiles/lhz.ah"
 ah_resp = path*"/SampleFiles/BRV.TSG.DS.lE21.resp"
 ah2_file = path*"/SampleFiles/ah2.f"
 
+printstyled("  AH (Ad Hoc)\n", color=:light_green)
+
+printstyled("    v1\n", color=:light_green)
 redirect_stdout(out) do
+S = read_data("ah1", ah1_file)
 S = read_data("ah1", ah1_file, full=true)
 @test S.n == 4
 @test S.fs[1] == 4.0
@@ -62,6 +66,8 @@ C = read_data("ah1", ah_resp, full=true)[1]
 @test any([occursin("modhead",s) for s in C.notes])
 @test any([occursin("ahtedit",s) for s in C.notes])
 
+printstyled("    v2\n", color=:light_green)
+S = read_data("ah2", ah2_file, v=3)
 S = read_data("ah2", ah2_file, v=3, full=true)
 @test S.n == 4
 @test S.fs[1] == 4.0
