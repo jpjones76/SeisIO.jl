@@ -24,7 +24,7 @@ env!(S, v=2)
 T = env(U, v=2)
 printstyled("    testing that env! == DSP.hilbert\n", color=:light_green)
 for i = 1:S.n
-  if S.fs[i] > 0.0
+  if S.fs[i] > 0.0 && length(S.x[i]) > 256
     ex1 = S.x[i]
     ex2 = abs.(DSP.hilbert(U.x[i]))
     @test isapprox(ex1, ex2)

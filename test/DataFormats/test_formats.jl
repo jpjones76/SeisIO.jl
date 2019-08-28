@@ -15,8 +15,19 @@ Fake_fmt = FormatDesc(
   ["https://lmgtfy.com/?q=goatse"],
   0xff
   )
-Fake_fmt.ver = [ FmtVer("1.0", "1999-01-01", false) ]
+Fake_fmt.ver = [ FmtVer("1.0", "1999-01-01", false); FmtVer() ]
 formats["Fake"] = Fake_fmt
 @test formats["Fake"].docs ==  ["https://lmgtfy.com/?q=goatse"]
 @test formats["Fake"].status ==  0xff
 delete!(formats, "Fake")
+
+Fake_fmt_2 = FormatDesc()
+formats["Fake2"] = Fake_fmt_2
+@test formats["Fake2"].docs ==  []
+@test formats["Fake2"].status ==  0x00
+delete!(formats, "Fake2")
+
+redirect_stdout(out) do
+  show(formats["AH"])
+  show(formats["SAC"])
+end
