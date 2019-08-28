@@ -16,6 +16,7 @@ julia:
 - nightly
 matrix:
   allow_failures:
+  - os: windows
   - julia: nightly
 after_success:
 - julia -e 'VERSION >= v"0.7.0-DEV.5183" && using Pkg; VERSION >= v"0.7.0-DEV.5183"
