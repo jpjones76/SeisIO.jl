@@ -360,11 +360,13 @@ const mag_scale = ("coda", "tau", "xmag", "ml", "mb", "ms", "mw")
 # )
 
 const loc_prog = Dict{Char, String}(
-'7' => "hypo71, Lee",
-'e' => "hypoellipse, Lahr",
-'i' => "hypoinverse, Klein",
+'7' => "Hypo-71",
+'l' => "HypoLayer",
+'e' => "HypoEllipse",
+'i' => "HypoInverse", # Also given as 'h' in SAC readsuds documentation
 'r' => "relp",
 'u' => "Uhrhammer",
-'c' => "centroid",
-'h' => "hypo71"
+'c' => "Centroid",
+'h' => "HypoInverse",
+'v' => "Velest"
 )
