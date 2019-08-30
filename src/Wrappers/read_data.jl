@@ -10,10 +10,21 @@ Generic wrapper for reading file data.
 Read data in file format `fmt` matching file pattern `filestr` into a new
 SeisData object `S`.
 
+    S = read_data(filestr [, keywords])
+
+Read from files matching file pattern `filestr` into a new SeisData object `S`.
+Calls `guess(filestr)` to identify the file type based on the first file
+matching pattern `filestr`. Much slower than manually specifying file type.
+
     read_data!(S, fmt, filestr [, keywords])
 
 Read data in file format `fmt` matching file pattern `filestr` into an existing
 SeisData object `S`.
+
+    read_data!(S, filestr [, keywords])
+
+As above, but calls `guess(filestr)` to set the format based on the first file
+matching pattern `filestr`.
 
 | Format                    | String          |
 | :---                      | :---            |
@@ -84,9 +95,9 @@ values with very small jobs will greatly decrease performance.
     + Use ASCII channel information filenames that match pattern `20140927*ch`
     + Assign new channels an initial size of `nx_new` samples
 
-See also: SeisIO.KW, get_data
+See also: SeisIO.KW, get_data, guess
 """ read_data!
-function read_data!(S::SeisData, fmt::String, filestr::String;
+function read_data!(S::GphysData, fmt::String, filestr::String;
   full    ::Bool    = false,              # full SAC/SEGY hdr
   cf      ::String  = "",                 # win32 channel info file
   jst     ::Bool    = true,               # are sample times JST (UTC+9)?
@@ -237,6 +248,62 @@ function read_data(fmt::String, filestr::String;
     nx_add  = nx_add,
     nx_new  = nx_new,
     swap    = swap,
+    v       = v
+    )
+  return S
+end
+
+function read_data(filestr::String;
+  full    ::Bool    = false,              # full SAC/SEGY hdr
+  cf      ::String  = "",                 # win32 channel info file
+  jst     ::Bool    = true,               # are sample times JST (UTC+9)?
+  nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
+  nx_new  ::Int64   = KW.nx_new,          # new channel samples
+  v       ::Int64   = KW.v                # verbosity level
+  )
+
+  if safe_isfile(filestr)
+    g = guess(filestr)
+  else
+    files = ls(filestr)
+    g = guess(files[1])
+  end
+  S = SeisData()
+  read_data!(S, g[2], filestr,
+    full    = full,
+    cf      = cf,
+    jst     = jst,
+    nx_add  = nx_add,
+    nx_new  = nx_new,
+    swap    = g[1],
+    v       = v
+    )
+  return S
+end
+
+function read_data!(S::GphysData, filestr::String;
+  full    ::Bool    = false,              # full SAC/SEGY hdr
+  cf      ::String  = "",                 # win32 channel info file
+  jst     ::Bool    = true,               # are sample times JST (UTC+9)?
+  nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
+  nx_new  ::Int64   = KW.nx_new,          # new channel samples
+  v       ::Int64   = KW.v                # verbosity level
+  )
+
+  if safe_isfile(filestr)
+    g = guess(filestr)
+  else
+    files = ls(filestr)
+    g = guess(files[1])
+  end
+
+  read_data!(S, g[2], filestr,
+    full    = full,
+    cf      = cf,
+    jst     = jst,
+    nx_add  = nx_add,
+    nx_new  = nx_new,
+    swap    = g[1],
     v       = v
     )
   return S
