@@ -4,22 +4,23 @@ export sachdr, writesac
 # Utility functions not for export
 
 # Bytes 305:308 as a littleendian Int32 should read 0x06 0x00 0x00 0x00; compare each end to 0x0a to allow older SAC versions (if version in same place?)
-function should_bswap(file::String)
-  q::Bool = open(file, "r") do io
-    skip(io, 304)
-    u = read(io, UInt8)
-    skip(io, 2)
-    v = read(io, UInt8)
+function should_bswap(io::IO)
+  skip(io, 304)
+  u = read(io, UInt8)
+  skip(io, 2)
+  v = read(io, UInt8)
+  q::Bool = (
     # Least significant byte in u
     if 0x00 < u < 0x0a && v == 0x00
-      return false
+      false
     # Most significant byte in u
     elseif u == 0x00 && 0x00 < v < 0x0a
-      return true
+      true
     else
       error("Invalid SAC file.")
     end
-  end
+    )
+  return q
 end
 
 function write_sac_file(fname::String, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Array{UInt8,1}, x::Array{Float32,1};
@@ -242,7 +243,8 @@ end
 
 function read_sac_file!(S::SeisData, fname::String, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Array{UInt8,1}, full::Bool)
   f = open(fname, "r")
-  q = should_bswap(fname)
+  q = should_bswap(f)
+  seekstart(f)
   C = read_sac_stream(f, fv, iv, cv, full, q)
   setfield!(C, :src, fname)
   note!(C, string("+src: ", fname))
