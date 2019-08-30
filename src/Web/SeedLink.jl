@@ -2,6 +2,23 @@ export SeedLink, SeedLink!, SL_info, has_sta, has_stream
 
 # ========================================================================
 # Utility functions not for export
+function timed_wait!(conn::TCPSocket, to::Real, b::Bool)
+  n = bytesavailable(conn)
+  m = copy(n)
+  ts = time()
+  te = copy(ts)
+  while (te-ts) < to && m == n
+    sleep(1.0)
+    b = eof(conn)
+    te = time()
+    n = bytesavailable(conn)
+  end
+  if m == bytesavailable(conn)
+    close(conn)
+    error("Connection timed out.")
+  end
+  return nothing
+end
 
 # This was deprecated in Julia 0.6; hard-copied here, still works
 function sync_add(r::Task)
@@ -101,30 +118,64 @@ Returns formatted XML. `LEVEL` must be one of "ID", "CAPABILITIES",
 
 """
 function SL_info(level::String;                                 # verbosity
+                to::Int64     = KW.to,                          # Timeout (s)
                  u::String    = "rtserve.iris.washington.edu",  # url
                  port::Int64  = KW.SL.port                      # port
                  )
-  conn = connect(TCPSocket(),u,port)
+  conn = connect(TCPSocket(), u, port)
   write(conn, string("INFO ", level, "\r"))
-  eof(conn)
-  # B = takebuf_array(conn.buffer)
-  B = take!(conn.buffer) # This is really counterintuitive syntax, if it even works...
-  N = length(B)
-  while (Char(B[end]) != '\0' || rem(N,520) > 0)
-    eof(conn)
-    append!(B, take!(conn.buffer)) # This is really counterintuitive syntax, if it even works...
-    N = length(B)
+  b = false
+  timed_wait!(conn, to, b)
+  buf = BUF.buf
+  if (bytesavailable(conn) == 0) || (isopen(conn) == false)
+    @warn(("Connection sent no data after ", to, " seconds; closing."))
+    (isopen(conn)) && close(conn)
+    x = Array{UInt8, 1}(undef, 0)
+  else
+    eflg = false
+    x = Array{UInt8, 1}(undef, 1048576)
+    i = 0x0000000000000001
+    c = 0x01
+    k = 0x0000
+    while true
+      N = conn.buffer.size
+      checkbuf!(buf, N)
+
+      # buffer to :buf from conn
+      unsafe_read(conn.buffer, pointer(buf), N)
+      conn.buffer.ptr = 1
+      conn.buffer.size = 0
+
+      # copy to x after filtering out 0x00 and first 64 vals of each 520-byte packet
+      j = 0x0000000000000000
+      while j < N
+        j += 0x0000000000000001
+        k += 0x0001
+        if i + 0x00000000000001c8 > length(x)
+          resize!(x, length(x) + 524288)
+        end
+        if k >= 0x0040
+          c = getindex(buf, j)
+          if c != 0x00
+            setindex!(x, c, i)
+            i += 0x0000000000000001
+          end
+        end
+        if k == 0x0208
+          if buf[j] == 0x00
+            eflg = true
+            break
+          end
+          k = 0x0000
+        end
+      end
+      eflg && break
+      timed_wait!(conn, to, b)
+    end
+    close(conn)
+    deleteat!(x, i:length(x))
   end
-  close(conn)
-  buf = IOBuffer(read=true, write=true, maxsize=N)
-  write(buf, B)
-  seekstart(buf)
-  xml_str = ""
-  while !eof(buf)
-    skip(buf, 64)
-    xml_str *= join(map(x -> Char(x), read!(buf, Array{UInt8, 1}(undef, 456))))
-  end
-  return replace(String(xml_str),"\0" => "")
+  return String(x)
 end
 
 """
@@ -188,6 +239,7 @@ SeedLink keywords: gap, port
 """
 function has_stream(sta::Array{String,1}, pat::Array{String,1};
   u::String   = "rtserve.iris.washington.edu",
+  to::Int64   = KW.to                               ,  # Timeout (s)
   port::Int64 = KW.SL.port,
   gap::Real   = KW.SL.gap,
   d::Char     = ' '
@@ -200,28 +252,31 @@ function has_stream(sta::Array{String,1}, pat::Array{String,1};
     c = split(pat[i], '.')
     cha[i] = join([s[1], s[2], c[1][1:2], c[1][3:5], c[2]], '.')
   end
-  return check_stream_exists(cha, SL_info("STREAMS", u=u, port=port), gap=gap)
+  return check_stream_exists(cha, SL_info("STREAMS", u=u, port=port), gap=gap, to=to)
 end
 
 has_stream(sta::String;
-  u::String   = "rtserve.iris.washington.edu",
-  port::Int64 = KW.SL.port,
-  gap::Real   = KW.SL.gap,
-  d::Char     = ','
-  ) = check_stream_exists(String.(split(sta, d)), SL_info("STREAMS", u=u, port=port), gap=gap)
+u::String   = "rtserve.iris.washington.edu",
+to::Int64   = KW.to                               ,  # Timeout (s)
+port::Int64 = KW.SL.port,
+gap::Real   = KW.SL.gap,
+d::Char     = ' '
+) = check_stream_exists(String.(split(sta, d)), SL_info("STREAMS", u=u, port=port), gap=gap, to=to)
 
 has_stream(sta::Array{String,1};
   u::String   = "rtserve.iris.washington.edu",
+  to::Int64   = KW.to                               ,  # Timeout (s)
   port::Int64 = KW.SL.port,
   gap::Real   = KW.SL.gap
-  ) = check_stream_exists(sta, SL_info("STREAMS", u=u, port=port), gap=gap)
+  ) = check_stream_exists(sta, SL_info("STREAMS", u=u, port=port), gap=gap, to=to)
 
 has_stream(sta::Array{String,2};
   u::String   = "rtserve.iris.washington.edu",
+  to::Int64   = KW.to                               ,  # Timeout (s)
   port::Int64 = KW.SL.port,
   gap::Real   = KW.SL.gap
   ) = check_stream_exists([join(sta[i,:], '.') for i=1:size(sta,1)],
-                          SL_info("STREAMS", u=u, port=port), gap=gap)
+                          SL_info("STREAMS", u=u, port=port), gap=gap, to=to)
 
 @doc """
     SeedLink!(S, sta)
