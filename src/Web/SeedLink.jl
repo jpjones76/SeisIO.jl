@@ -65,7 +65,8 @@ function check_sta_exists(sta::Array{String,1}, xstr::String)
 end
 
 function check_stream_exists(S::Array{String,1}, xstr::String;
-                             gap::Real=KW.SL.gap
+                             gap::Real=KW.SL.gap,
+                             to::Int=KW.to
                              )
 
   a = ["seedname","location","type"]
@@ -260,7 +261,7 @@ u::String   = "rtserve.iris.washington.edu",
 to::Int64   = KW.to                               ,  # Timeout (s)
 port::Int64 = KW.SL.port,
 gap::Real   = KW.SL.gap,
-d::Char     = ' '
+d::Char     = ','
 ) = check_stream_exists(String.(split(sta, d)), SL_info("STREAMS", u=u, port=port), gap=gap, to=to)
 
 has_stream(sta::Array{String,1};

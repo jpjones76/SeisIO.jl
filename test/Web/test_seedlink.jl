@@ -10,15 +10,11 @@ printstyled("  (SeedLink tests require 4-6 minutes)\n", color=:green)
 
 # has_stream
 printstyled("    has_stream\n", color=:light_green)
-try
-  tf1 = has_stream(sta, u="rtserve.iris.washington.edu")[2]
-  tf2 = has_stream(sta, pat, u="rtserve.iris.washington.edu", d='.')[2]
-  tf3 = has_stream(join(sta, ','), u="rtserve.iris.washington.edu")[2]
-  tf4 = has_stream(sta_matrix, u="rtserve.iris.washington.edu")[1]
-  @test tf1 == tf2 == tf3 == tf4
-catch
-  @warn("rtserve.iris.washington.edu not responding; has_stream test skipped.")
-end
+tf1 = has_stream(sta, u="rtserve.iris.washington.edu")[2]
+tf2 = has_stream(sta, pat, u="rtserve.iris.washington.edu", d='.')[2]
+tf3 = has_stream(join(sta, ','), u="rtserve.iris.washington.edu")[2]
+tf4 = has_stream(sta_matrix, u="rtserve.iris.washington.edu")[1]
+@test tf1 == tf2 == tf3 == tf4
 
 # has_stream
 printstyled("    has_sta\n", color=:light_green)
