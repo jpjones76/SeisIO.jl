@@ -1,7 +1,9 @@
 ah1_file = path*"/SampleFiles/ah1.f"
+ah1_fstr = path*"/SampleFiles/ah1.*"
 ahc_file = path*"/SampleFiles/lhz.ah"
 ah_resp = path*"/SampleFiles/BRV.TSG.DS.lE21.resp"
 ah2_file = path*"/SampleFiles/ah2.f"
+ah2_fstr = path*"/SampleFiles/ah2.*"
 
 printstyled("  AH (Ad Hoc)\n", color=:light_green)
 
@@ -9,6 +11,7 @@ printstyled("    v1\n", color=:light_green)
 redirect_stdout(out) do
 S = read_data("ah1", ah1_file)
 S = read_data("ah1", ah1_file, full=true)
+S = read_data("ah1", ah1_fstr, full=true)
 @test S.n == 4
 @test S.fs[1] == 4.0
 @test isapprox(S.gain[1], 64200.121094)
@@ -69,6 +72,7 @@ C = read_data("ah1", ah_resp, full=true)[1]
 printstyled("    v2\n", color=:light_green)
 S = read_data("ah2", ah2_file, v=3)
 S = read_data("ah2", ah2_file, v=3, full=true)
+S = read_data("ah2", ah2_fstr, v=3, full=true)
 @test S.n == 4
 @test S.fs[1] == 4.0
 @test isapprox(S.gain[1], 64200.121094)
