@@ -1,4 +1,4 @@
-export filt_seis_chans!, filt_seis_chans, get_seis_channels
+export filt_seis_chans!, get_seis_channels
 
 """
     get_seis_channels(S::GphysData)
@@ -89,10 +89,10 @@ function filt_seis_chans!(chans::Union{Integer, UnitRange, Array{Int64,1}}, S::G
   end
   return nothing
 end
-
-@doc (@doc filt_seis_chans!)
-function filt_seis_chans(chans::Union{Integer, UnitRange, Array{Int64,1}}, S::GphysData)
-  CC = deepcopy(chans)
-  filt_seis_channels!(CC, S)
-  return CC
-end
+#
+# @doc (@doc filt_seis_chans!)
+# function filt_seis_chans(chans::Union{Integer, UnitRange, Array{Int64,1}}, S::GphysData)
+#   CC = deepcopy(chans)
+#   filt_seis_channels!(CC, S)
+#   return CC
+# end
