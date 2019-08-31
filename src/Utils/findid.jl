@@ -9,7 +9,7 @@ function findid(id::String, ID::Array{String,1})
   return c
 end
 
-function findid(id::Array{UInt8,1}, ID::Array{String,1})
+function findid(id::DenseArray{UInt8,1}, ID::Array{String,1})
   c = 0
   for i = 1:length(ID)
     if codeunits(ID[i]) == id
