@@ -18,26 +18,26 @@ geocsv2 = path*"/SampleFiles/geocsv_slist.csv"
 lennf = path*"/SampleFiles/0215162000.c00"
 
 redirect_stdout(out) do
-  @test guess(ah1f, v=3) == (true, "ah1")
+  @test guess(ah1f, v=3) == ("ah1", true)
 end
-@test guess(ah2f) == (true, "ah2")
-[@test guess(i) == (false, "bottle") for i in ls(path*"/SampleFiles/Bottle/*")]
-@test guess(pasf) == (false, "passcal")
-[@test guess(i) == (false, "mseed") for i in ls(path*"/SampleFiles/*seed")]
-[@test guess(i) == (false, "sac") for i in sac]
-[@test guess(i) == (false, "sac") for i in ls(path*"/SampleFiles/SUDS/*sac")]
-@test guess(sudsf) == (false, "suds")
-[@test guess(i) == (true, "uw") for i in uw]
-@test guess(geocsv1) == (false, "geocsv")
-@test guess(geocsv2) == (false, "geocsv.slist")
-@test guess(lennf) == (false, "lennasc")
+@test guess(ah2f) == ("ah2", true)
+[@test guess(i) == ("bottle", false) for i in ls(path*"/SampleFiles/Bottle/*")]
+@test guess(pasf) == ("passcal", false)
+[@test guess(i) == ("mseed", false) for i in ls(path*"/SampleFiles/*seed")]
+[@test guess(i) == ("sac", false) for i in sac]
+[@test guess(i) == ("sac", false) for i in ls(path*"/SampleFiles/SUDS/*sac")]
+@test guess(sudsf) == ("suds", false)
+[@test guess(i) == ("uw", true) for i in uw]
+@test guess(geocsv1) == ("geocsv", false)
+@test guess(geocsv2) == ("geocsv.slist", false)
+@test guess(lennf) == ("lennasc", false)
 
 # Restricted files
 if safe_isdir(path*"/SampleFiles/Restricted")
   path2 = (path*"/SampleFiles/Restricted/")
-  [@test guess(i) == (false, "mseed") for i in ls(path2*"*seed")]
-  [@test guess(i) == (true, "win32") for i in ls(path2*"*cnt")]
-  @test guess(path2*"test_rev_1.segy") == (true, "segy")
+  [@test guess(i) == ("mseed", false) for i in ls(path2*"*seed")]
+  [@test guess(i) == ("win32", true) for i in ls(path2*"*cnt")]
+  @test guess(path2*"test_rev_1.segy") == ("segy", true)
 end
 
 # Does the method for read_data with guess actually work?
@@ -89,3 +89,7 @@ z = get(Sg.misc[1], "rec_ele", 0.0)
 @test Float64(Sg.misc[1]["min"]) == minimum(Sg.x[1]) == -2048.0
 @test ≈(Sg.x[1][1:10], [47.0, 46.0, 45.0, 44.0, 51.0, 52.0, 57.0, 59.0, 40.0, 34.0])
 @test length(Sg.x[1]) == Sg.misc[1]["num_samps"] == 8640047
+
+St = SeisData()
+read_data!(St, segy_file_1, full=true)
+@test Sg == St

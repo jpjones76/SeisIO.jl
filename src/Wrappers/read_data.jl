@@ -269,13 +269,13 @@ function read_data(filestr::String;
     g = guess(files[1])
   end
   S = SeisData()
-  read_data!(S, g[2], filestr,
+  read_data!(S, g[1], filestr,
     full    = full,
     cf      = cf,
     jst     = jst,
     nx_add  = nx_add,
     nx_new  = nx_new,
-    swap    = g[1],
+    swap    = g[2],
     v       = v
     )
   return S
@@ -297,13 +297,13 @@ function read_data!(S::GphysData, filestr::String;
     g = guess(files[1])
   end
 
-  read_data!(S, g[2], filestr,
+  read_data!(S, g[1], filestr,
     full    = full,
     cf      = cf,
     jst     = jst,
     nx_add  = nx_add,
     nx_new  = nx_new,
-    swap    = g[1],
+    swap    = g[2],
     v       = v
     )
   return S

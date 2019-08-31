@@ -232,7 +232,7 @@ end
 Try to guess the file type of file `fname`. Keyword `v` controls verbosity.
 Only recognizes file formats supported by SeisIO.read_data.
 
-Returns a tuple: (swap::Bool, ftype::String):
+Returns a tuple: (ftype::String, swap::Bool)
 * `ftype` is the file type string to pass to `read_data`, except in these cases:
   + if ftype == "unknown", guess couldn't identify the file type.
   + if ftype begins with "!" and contains a comma-separated list, the file type
@@ -275,5 +275,5 @@ function guess(file::String; v::Int64=KW.v)
     end
   end
   fstr = length(ftype) > 1 ? "!"*join(ftype, ",") : ftype[1]
-  return (swap, fstr)
+  return (fstr, swap)
 end
