@@ -3,6 +3,17 @@ The current set of updates, leading to v0.4.0, will focus on:
 2. expanded file format support
 3. expanded data acquisition options
 
+### 2019-08-30
+* Added function `guess` to guess data file format and endianness.
+* `read_data` methods have been extended to take either one or two Strings as
+  arguments.
+  - If a single String is passed to `read_data`, the string is assumed to be
+  a file pattern; `guess` is called to determine the file format.
+  - `read_data` is *much* faster when a file format String is supplied. `guess`
+  can't be optimized because so many try/catch statements are required.
+* Rewrote `SL_info`; performance should be greatly improved and it should no
+longer cause timeout errors in automated tests.
+
 ### 2019-08-26
 * Added readers for the following formats:
   - Ad Hoc (AH) 1.0: `read_data("ah1", ...)`
