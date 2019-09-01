@@ -1,4 +1,4 @@
-export sachdr, writesac
+export sachdr, writesac, read_sacpz!, read_sacpz, write_sacpz
 
 # ============================================================================
 # Utility functions not for export
@@ -344,5 +344,256 @@ function writesac(S::GphysChannel;
     )
   write_sac_file(fstr, fv, iv, cv, x, t=tdata, ts=ts)
   v > 0  && println(stdout, timestamp(), ": Wrote file ", fstr)
+  return nothing
+end
+
+function add_pzchan!(S::GphysData, D::Dict{String, Any}, file::String)
+  id  = D["NETWORK   (KNETWK)"] * "." *
+        D["STATION    (KSTNM)"] * "." *
+        D["LOCATION   (KHOLE)"] * "." *
+        D["CHANNEL   (KCMPNM)"]
+  i = findid(id, S)
+  loc   = GeoLoc( lat = parse(Float64, D["LATITUDE"]),
+                  lon = parse(Float64, D["LONGITUDE"]),
+                  el  = parse(Float64, D["ELEVATION"]),
+                  dep = parse(Float64, D["DEPTH"]),
+                  az  = parse(Float64, D["AZIMUTH"]),
+                  inc = parse(Float64, D["DIP"])-90.0
+                )
+  resp = PZResp64(parse(Float64, D["A0"]),
+                  0.0,
+                  get(D, "P", ComplexF64[]),
+                  get(D, "Z", ComplexF64[])
+                  )
+  fs    = parse(Float64, D["SAMPLE RATE"])
+
+  # gain, units; note, not "INSTGAIN", that's just a scalar multipler
+  gu    = split(D["SENSITIVITY"], limit=2, keepempty=false)
+  gain  = parse(Float64, gu[1])
+  units = lowercase(String(gu[2]))
+  if startswith(units, "(")
+    units = units[2:end]
+  end
+  if endswith(units, ")")
+    units = units[1:end-1]
+  end
+  units = SeisIO.fix_units(units2ucum(units))
+
+  if i == 0
+    # resp
+    C = SeisChannel()
+    setfield!(C, :id, id)
+    setfield!(C, :name, D["DESCRIPTION"])
+    setfield!(C, :loc, loc)
+    setfield!(C, :fs, fs)
+    setfield!(C, :gain, gain)
+    setfield!(C, :resp, resp)
+    setfield!(C, :units, units)
+    setfield!(C, :src, file)
+    setfield!(C, :misc, D)
+    note!(C, "+src : read_sacpz " * file * ")")
+    push!(S, C)
+  else
+    ts = Dates.DateTime(get(D, "START", "1970-01-01T00:00:00")).instant.periods.value*1000 - dtconst
+    te = Dates.DateTime(get(D, "END", "2599-12-31T23:59:59")).instant.periods.value*1000 - dtconst
+    t0 = isempty(S.t[i]) ? ts : S.t[i][1,2]
+    if ts ≤ t0 ≤ te
+      if S.fs[i] == 0.0
+        S.fs[i] = fs
+      end
+
+      if isempty(S.units[i])
+        S.units[i] = units
+      end
+
+      if S.gain[i] == 1.0
+        S.gain[i] = gain
+      end
+
+      if typeof(S.resp[i]) == GenResp || isempty(S.resp[i])
+        S.resp[i] = resp
+      end
+
+      if isempty(S.name[i])
+        S.name[i] = D["DESCRIPTION"]
+      end
+
+      if isempty(S.loc[i])
+        S.loc[i]  = loc
+      end
+
+      S.misc[i] = merge(D, S.misc[i])
+    end
+  end
+  return nothing
+end
+
+@doc """
+    read_sacpz!(S::GphysData, pzfile::String)
+
+Read sacpz file `pzfile` into SeisIO struct `S`.
+
+If an ID in the pz file matches channel `i` at times in `S.t[i]`:
+* Fields :fs, :gain, :loc, :name, :resp, :units are overwritten if empty/unset
+* Information from the pz file is merged into :misc if the corresponding keys
+aren't in use.
+""" read_sacpz!
+function read_sacpz!(S::GphysData, file::String)
+  io = open(file, "r")
+  read_state = 0x00
+  D = Dict{String, Any}()
+  kv = Array{String, 1}(undef, 2)
+
+  # Do this for each channel
+  while true
+
+    # EOF
+    if eof(io)
+      add_pzchan!(S, D, file)
+      break
+    end
+
+    line = readline(io)
+
+    # Header section
+    if startswith(line, "*")
+      if endswith(strip(line), "**")
+        read_state += 0x01
+        if read_state == 0x03
+          add_pzchan!(S, D, file)
+          read_state = 0x01
+          D = Dict{String, Any}()
+        end
+      else
+        kv .= strip.(split(line[2:end], ":", limit=2, keepempty=false))
+        D[kv[1]] = kv[2]
+      end
+
+    # Zeros section
+    elseif startswith(line, "ZEROS")
+      N = parse(Int64, split(line, limit=2, keepempty=false)[2])
+      D["Z"] = Array{Complex{Float64},1}(undef, N)
+      for i = 1:N
+        try
+          mark(io)
+          zc = split(readline(io), limit=2, keepempty=false)
+          D["Z"][i] = complex(parse(Float64, zc[1]), parse(Float64, zc[2]))
+        catch
+          "not enough zeroes, resetting"
+          D["Z"][i:N] .= zero(ComplexF64)
+          reset(io)
+        end
+      end
+
+    # Poles section
+    elseif startswith(line, "POLES")
+      N = parse(Int64, split(line, limit=2, keepempty=false)[2])
+      D["P"] = Array{Complex{Float64},1}(undef, N)
+      for i = 1:N
+        pc = split(readline(io), limit=2, keepempty=false)
+        D["P"][i] = complex(parse(Float64, pc[1]), parse(Float64, pc[2]))
+      end
+
+    # Constant section
+    elseif startswith(line, "CONSTANT")
+      D["CONSTANT"] = String(split(line, limit=2, keepempty=false)[2])
+    end
+  end
+  close(io)
+  return S
+end
+
+@doc (@doc read_sacpz)
+function read_sacpz(file::String)
+  S = SeisData()
+  read_sacpz!(S, file)
+  return S
+end
+
+@doc """
+    write_sacpz!(S::GphysData, pzfile::String)
+
+Write fields from SeisIO struct `S` into sacpz file `pzfile`. Uses information
+from fields :fs, :gain, :loc, :misc, :name, :resp, :units.
+""" write_sacpz!
+function write_sacpz(S::GphysData, file::String)
+  io = open(file, "w")
+  for i in 1:S.n
+    id = split(S.id[i], ".")
+    created   = get(S.misc[i], "CREATED", string(u2d(time())))
+    ts_str    = isempty(S.t[i]) ? "1970-01-01T00:00:00" : string(u2d(S.t[i][1,2]*1.0e-6))
+    t_start   = get(S.misc[i], "START", ts_str)
+    t_end     = get(S.misc[i], "END", "2599-12-31T23:59:59")
+    unit_in   = get(S.misc[i], "INPUT UNIT", "?")
+    unit_out  = get(S.misc[i], "OUTPUT UNIT", "?")
+
+    write(io, 0x2a)
+    write(io, 0x20)
+    write(io, fill!(zeros(UInt8, 34), 0x2a))
+    write(io, 0x0a)
+
+    write(io, "* NETWORK   (KNETWK): ", id[1], 0x0a)
+    write(io, "* STATION    (KSTNM): ", id[2], 0x0a)
+    write(io, "* LOCATION   (KHOLE): ", isempty(id[3]) ? "  " : id[3], 0x0a)
+    write(io, "* CHANNEL   (KCMPNM): ", id[4], 0x0a)
+
+    write(io, "* CREATED           : ", created, 0x0a)
+    write(io, "* START             : ", t_start, 0x0a)
+    write(io, "* END               : ", t_end, 0x0a)
+    write(io, "* DESCRIPTION       : ", S.name[i], 0x0a)
+    write(io, "* LATITUDE          : ", @sprintf("%0.6f", S.loc[i].lat), 0x0a)
+    write(io, "* LONGITUDE         : ", @sprintf("%0.6f", S.loc[i].lon), 0x0a)
+    write(io, "* ELEVATION         : ", string(S.loc[i].el), 0x0a)
+    write(io, "* DEPTH             : ", string(S.loc[i].dep), 0x0a)
+    write(io, "* DIP               : ", string(S.loc[i].inc+90.0), 0x0a)
+    write(io, "* AZIMUTH           : ", string(S.loc[i].az), 0x0a)
+    write(io, "* SAMPLE RATE       : ", string(S.fs[i]), 0x0a)
+
+    for j in ("INPUT UNIT", "OUTPUT UNIT", "INSTTYPE", "INSTGAIN", "COMMENT")
+      write(io, 0x2a, 0x20)
+      write(io, rpad(j, 18))
+      write(io, 0x3a, 0x20)
+      v = get(S.misc[i], j, "")
+      write(io, v)
+      if j == "INSTGAIN" && v == ""
+        write(io, "1.0E+00 (", S.units[i], ")")
+      end
+      write(io, 0x0a)
+    end
+
+    write(io, "* SENSITIVITY       : ", @sprintf("%12.6e", S.gain[i]), 0x20, 0x28, uppercase(S.units[i]), 0x29, 0x0a)
+    if typeof(S.resp[i]) == GenResp
+      a0 = 1.0
+      P = S.resp[i][:,1]
+      Z = S.resp[i][:,2]
+    else
+      a0 = getfield(S.resp[i], :a0)
+      P = getfield(S.resp[i], :p)
+      Z = getfield(S.resp[i], :z)
+    end
+    NZ = length(Z)
+    NP = length(P)
+    write(io, "* A0                : ", @sprintf("%12.6e", a0), 0x0a)
+    CONST = get(S.misc[i], "CONSTANT", string(a0*S.gain[i]))
+
+    write(io, 0x2a)
+    write(io, 0x20)
+    write(io, fill!(zeros(UInt8, 34), 0x2a))
+    write(io, 0x0a)
+
+    write(io, "ZEROS\t", string(NZ), 0x0a)
+    for i = 1:NZ
+      write(io, 0x09, @sprintf("%+12.6e", real(Z[i])), 0x09, @sprintf("%+12.6e", imag(Z[i])), 0x09, 0x0a)
+    end
+
+    write(io, "POLES\t", string(NP), 0x0a)
+    for i = 1:NP
+      write(io, 0x09, @sprintf("%+12.6e", real(P[i])), 0x09, @sprintf("%+12.6e", imag(P[i])), 0x09, 0x0a)
+    end
+
+    write(io, "CONSTANT\t", CONST, 0x0a)
+    write(io, 0x0a, 0x0a)
+  end
+  close(io)
   return nothing
 end
