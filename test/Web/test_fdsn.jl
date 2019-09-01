@@ -1,6 +1,7 @@
 fname = path*"/SampleFiles/fdsn.conf"
 hood_reg = Float64[44.8, 46.0, -122.4, -121.0]
 rainier_rad = Float64[46.852886, -121.760374, 0.0, 0.1]
+sac_pz_file = path*"/SampleFiles/test_sac.pz"
 
 printstyled("  FDSN web requests\n", color=:light_green)
 
@@ -45,6 +46,19 @@ for i = 1:4
     @test inst_code(S, j) == codes[i]
     break
   end
+end
+
+# Check that headers with PZResp info
+Nc = S.n
+read_sacpz!(S, sac_pz_file)
+@test S.n > Nc
+i = findid("CC.VALT..BHZ", S)
+if i > 0
+  @test S.misc[i]["OUTPUT UNIT"] == "COUNTS"
+end
+i = findid("UW.HOOD..ENE", S)
+if i > 0
+  @test S.misc[i]["INSTTYPE"] == "ES-T-3339=Q330S+-6410"
 end
 
 # Ensure we got data

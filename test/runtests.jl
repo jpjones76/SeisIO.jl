@@ -19,6 +19,7 @@ for d in ["CoreUtils", "Types", "RandSeis", "Utils", "NativeIO", "DataFormats", 
 end
 
 # Done. Clean up.
+printstyled("Tests complete. Cleaning up...\n", color=:light_green)
 flush(out)
 close(out)
 files = ls("*.mseed")
