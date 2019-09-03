@@ -29,6 +29,7 @@ pressure sensors). The relevant keywords and order of operations is as follows:
 None of these keywords are mutually exclusive. Hey, it's your CPU time.
 
 ### Other keywords
+* msr: Get multi-stage response? (FDSN only)
 * s: Start time
 * t: Termination (end) time
 * xf: Name of XML file to save station metadata
@@ -45,6 +46,7 @@ function get_data(method_in::String, C="*"::Union{String,Array{String,1},Array{S
           demean::Bool = false                               ,  # Demean data after download?
          detrend::Bool = false                               ,  # Detrend data after download?
            fmt::String = KW.fmt                              ,  # File format
+             msr::Bool = false                               ,  # Get multi-stage response?
               nd::Real = KW.nd                               ,  # Number of days per request (in long requests)
           opts::String = KW.opts                             ,  # Options string
  rad::Array{Float64,1} = KW.rad                              ,  # Query radius
@@ -81,6 +83,7 @@ function get_data(method_in::String, C="*"::Union{String,Array{String,1},Array{S
     R = minreq(C)
     parse_err = FDSNget!(S, C,
                           fmt=fmt,
+                          msr=msr,
                           nd=nd,
                           opts=opts,
                           rad=rad,
@@ -184,6 +187,7 @@ function get_data!(S::SeisData, method_in::String, C="*"::Union{String,Array{Str
           demean::Bool = false                               ,  # Demean data after download?
          detrend::Bool = false                               ,  # Detrend data after download?
            fmt::String = KW.fmt                              ,  # File format
+             msr::Bool = false                               ,  # Get multi-stage response?
               nd::Real = KW.nd                               ,  # Number of days per request (in long requests)
           opts::String = KW.opts                             ,  # Options string
  rad::Array{Float64,1} = KW.rad                              ,  # Query radius
@@ -208,6 +212,7 @@ function get_data!(S::SeisData, method_in::String, C="*"::Union{String,Array{Str
                 demean=demean,
                 detrend=detrend,
                 fmt=fmt,
+                msr=msr,
                 nd=nd,
                 opts=opts,
                 prune=prune,

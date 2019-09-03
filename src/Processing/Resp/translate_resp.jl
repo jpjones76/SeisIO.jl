@@ -32,16 +32,28 @@ Keywords:
 an Integer, UnitRange, or Array{Int64,1}. By default, all seismic data channels
 have their responses translated to `resp_new`.
 * **wl=γ** sets the waterlevel to γ (default: `γ` = eps(Float32) ≈ ~1f-7)
+
+### Interaction with the :resp field
+
+    `translate_resp` and `remove_resp` only work on a channel `i` that satisfies
+`S.resp[i] <: PZResp, PZResp64, MultiStageResp`. In the last case,
+`S.resp[i].stage[1]` must be a PZResp or PZResp64, only the first stage of
+the response is changed, and the stage gain is ignored; instead, the
+sensitivity `S.resp[i].stage[1].a0` is used.
+
+### Poles and zeros should be rad/s
+
+    Always check when loading from an unsupported data format. Responses read
+from station XML are corrected to rad/s automatically (most use rad/s);
+responses read from a SACPZ or SEED RESP file already use rad/s.
 """ translate_resp!
 function translate_resp!(S::GphysData,
-                    resp_new::Union{PZResp, PZResp64};
-                    chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
-                    wl::Float32=eps(Float32))
+                         resp_new::Union{PZResp, PZResp64};
+                         chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+                         wl::Float32=eps(Float32))
 
   # first ensure that there is something to do
-  if chans == Int64[]
-    chans = 1:S.n
-  end
+  chans = mkchans(chans, S.n)
   @inbounds for i in chans
     if S.resp[i] != resp_new
       break
@@ -51,6 +63,15 @@ function translate_resp!(S::GphysData,
       return nothing
     end
   end
+
+  # remove channels with inappropriate response types
+  k = Int64[]
+  for (n,i) in enumerate(chans)
+    if (typeof(S.resp[i]) <: Union{PZResp, PZResp64, MultiStageResp}) == false
+      push!(k,n)
+    end
+  end
+  deleteat!(chans, k)
 
   # initialize complex "work" vectors to the largest size we need
   Nx      = nx_max(S, chans)
@@ -65,6 +86,7 @@ function translate_resp!(S::GphysData,
 
     # get fs, resp
     j = grp[1]
+    RT = typeof(getindex(getfield(S, :resp), j))
 
     # no translating instrument responses unless we're dealing with seismometers
     codes = inst_codes(S)
@@ -82,7 +104,7 @@ function translate_resp!(S::GphysData,
     uu = lowercase(S.units[j])
 
     # onward
-    resp_old = deepcopy(S.resp[j])
+    resp_old = RT == MultiStageResp ? deepcopy(S.resp[j].stage[1]) : deepcopy(S.resp[j])
     fs = Float32(S.fs[j])
 
     if fs > 0.0f0 && resp_old != resp_new
@@ -138,7 +160,11 @@ function translate_resp!(S::GphysData,
 
       # post-processing: set resp and log to :notes
       for k in grp
-        setindex!(S.resp, deepcopy(resp_new), k)
+        if RT == MultiStageResp
+          S.resp[k].stage[1] = deepcopy(resp_new)
+        else
+          setindex!(S.resp, deepcopy(resp_new), k)
+        end
         note!(S, k, resp_str)
       end
     end

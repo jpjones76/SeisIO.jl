@@ -11,7 +11,8 @@ const units_table = Dict{String,String}(
   "percent" => "%",
   "gaps" => "{gaps}",
   "bytes" => "By",
-  "cycles" => "{cycles}"
+  "cycles" => "{cycles}",
+  "counts" => "{counts}"
   )
 fix_units(s::AbstractString) = get(units_table, s, s)
 

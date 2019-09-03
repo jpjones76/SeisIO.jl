@@ -1,5 +1,5 @@
 # import Base:getindex, setindex!, show, read, write, isequal, ==, isempty, sizeof, copy, hash
-export InstrumentResponse, GenResp, PZResp, PZResp64
+export CoeffResp, InstrumentResponse, GenResp, MultiStageResp, PZResp, PZResp64
 
 @doc """
 **InstrumentResponse**
@@ -28,6 +28,10 @@ function resptyp2code(Resp::InstrumentResponse)
     0x01
   elseif T == PZResp64
     0x02
+  elseif T == CoeffResp
+    0x03
+  elseif T == MultiStageResp
+    0x04
   else
     0x00
   end
@@ -42,6 +46,10 @@ function code2resptyp(c::UInt8)
     return PZResp
   elseif c == 0x02
     return PZResp64
+  elseif c == 0x03
+    return CoeffResp
+  elseif c == 0x04
+    return MultiStageResp
   end
 end
 
@@ -313,3 +321,253 @@ end
 sizeof(R::Union{PZResp,PZResp64}) = 32 + 2*sizeof(getfield(R, :a0)) + sizeof(getfield(R, :z)) + sizeof(getfield(R, :p))
 
 const flat_resp = PZResp(p = Complex{Float32}[complex(1.0, 1.0)], z = Complex{Float32}[2.0/Complex(1.0, -1.0)])
+
+# Multi-Stage Instrument Responses
+@doc """
+    CoeffResp
+
+Coefficient response object; a response is expressed as the coefficients of the
+numerator `:b` and denominator `:a`.
+
+| F       | Type    | Meaning                   |
+|:---     |:---     |:----                      |
+| i       | String  | Input units               |
+| o       | String  | Output units              |
+| b       | String  | Numerator coefficients    |
+| a       | String  | Denominator coefficients  |
+
+!!! warning
+
+    translate_resp does not work on CoeffResp
+
+""" CoeffResp
+mutable struct CoeffResp <: InstrumentResponse
+  i::String                  # UnitsIn
+  o::String                 # UnitsOut
+  b::Array{Float64,1}       # Numerator coeffs
+  a::Array{Float64,1}       # Denominator coeffs
+
+  function CoeffResp( i::String,
+                      o::String,
+                      b::Array{Float64,1},
+                      a::Array{Float64,1} )
+    return new(i, o, b, a)
+  end
+end
+
+# CoeffResp default
+CoeffResp( ;
+        i::String                   = "",
+        o::String                   = "",
+        b::Array{Float64,1}         = Float64[],
+        a::Array{Float64,1}         = Float64[],
+        ) = CoeffResp(i, o, b, a)
+
+function show(io::IO, Resp::CoeffResp)
+  if get(io, :compact, false) == false
+    showresp_full(io, Resp)
+  else
+    c = :compact => true
+    print(io, "in = ", Resp.i, ", out = ", Resp.o)
+  end
+  return nothing
+end
+
+function write(io::IO, R::CoeffResp)
+  write(io, Int64(sizeof(R.i)))
+  write(io, R.i)
+  write(io, Int64(sizeof(R.o)))
+  write(io, R.o)
+
+  b = getfield(R, :b)
+  write(io, Int64(lastindex(b)))
+  write(io, b)
+
+  a = getfield(R, :a)
+  write(io, Int64(lastindex(a)))
+  write(io, a)
+  return nothing
+end
+
+read(io::IO, ::Type{CoeffResp}) = CoeffResp(
+  String(read(io, read(io, Int64))),
+  String(read(io, read(io, Int64))),
+  read!(io, Array{Float64,1}(undef, read(io, Int64))),
+  read!(io, Array{Float64,1}(undef, read(io, Int64)))
+  )
+
+isempty(R::CoeffResp) = min(
+  isempty(getfield(R, :i)),
+  isempty(getfield(R, :o)),
+  isempty(getfield(R, :b)),
+  isempty(getfield(R, :a))
+  )
+
+function isequal(R1::CoeffResp, R2::CoeffResp)
+  q = isequal(getfield(R1, :i), getfield(R2, :i))
+  if q == true
+    q = min(q, isequal(getfield(R1, :o), getfield(R2, :o)))
+    q = min(q, isequal(getfield(R1, :b), getfield(R2, :b)))
+    q = min(q, isequal(getfield(R1, :a), getfield(R2, :a)))
+  end
+  return q
+end
+==(R1::CoeffResp, R2::CoeffResp) = isequal(R1, R2)
+
+function hash(R::CoeffResp)
+  h = hash(R.i)
+  h = hash(R.o, h)
+  h = hash(R.b, h)
+  return hash(R.a, h)
+end
+
+sizeof(R::CoeffResp) = 32 + sizeof(getfield(R, :i)) + sizeof(getfield(R, :o)) + sizeof(getfield(R, :b)) + sizeof(getfield(R, :a))
+
+"""
+    MultiStageResp
+
+Multi-stage instrument response including digitization and decimation; contains
+the level of detail that only German-speaking Swiss care about. Each stage
+(subfield `:stage`) is another InstrumentResponse subtype with the following
+optional information indexed within each field by stage number:
+
+| F       | Type    | Meaning                 | Units
+|:---     |:---     |:----                    | :---
+| fs      | Float64 | input sample rate       | Hz
+| gain    | Float64 | stage gain              |
+| fg      | Float64 | frequency of gain       | Hz
+| delay   | Float64 | stage delay             | s
+| corr    | Float64 | correction applied      | s
+| factor  | Int64   | decimation factor       |
+| offset  | Int64   | decimation offset       |
+
+
+!!! warning
+
+    translate_resp only modifies the first stage of a MultiStageResp.
+
+"""
+mutable struct MultiStageResp <: InstrumentResponse
+  stage::Array{Union{CoeffResp, PZResp, PZResp64, GenResp},1}
+  fs::Array{Float64,1}
+  gain::Array{Float64,1}
+  fg::Array{Float64,1}
+  delay::Array{Float64,1}
+  corr::Array{Float64,1}
+  factor::Array{Int64,1}
+  offset::Array{Int64,1}
+
+  function MultiStageResp(stage::Array{Union{CoeffResp, PZResp, PZResp64, GenResp},1},
+                          fs::Array{Float64,1},
+                          gain::Array{Float64,1},
+                          fg::Array{Float64,1},
+                          delay::Array{Float64,1},
+                          corr::Array{Float64,1},
+                          factor::Array{Int64,1},
+                          offset::Array{Int64,1})
+    return new(stage, fs, gain, fg, delay, corr, factor, offset)
+  end
+
+  function MultiStageResp()
+    return new(
+        Array{Union{CoeffResp, PZResp, PZResp64, GenResp},1}(undef, 0),
+        Array{Float64,1}(undef, 0),
+        Array{Float64,1}(undef, 0),
+        Array{Float64,1}(undef, 0),
+        Array{Float64,1}(undef, 0),
+        Array{Float64,1}(undef, 0),
+        Array{Int64,1}(undef, 0),
+        Array{Int64,1}(undef, 0)
+      )
+  end
+
+  function MultiStageResp(n::UInt)
+    Resp = new(Array{Union{CoeffResp, PZResp, PZResp64, GenResp},1}(undef,n),
+    zeros(Float64,n),
+    zeros(Float64,n),
+    zeros(Float64,n),
+    zeros(Float64,n),
+    zeros(Float64,n),
+    zeros(Int64,n),
+    zeros(Int64,n))
+
+    # Fill these fields with something to prevent undefined reference errors
+    Resp.stage[1]  = PZResp()
+    for i = 2:n
+      Resp.stage[i]  = CoeffResp()
+    end
+    return Resp
+  end
+end
+
+MultiStageResp(n::Int) = n > 0 ? MultiStageResp(UInt(n)) : MultiStageResp()
+
+
+function show(io::IO, Resp::MultiStageResp)
+  if get(io, :compact, false) == false
+    showresp_full(io, Resp)
+  else
+    print(io, length(Resp.stage), " stages")
+  end
+  return nothing
+end
+
+function write(io::IO, R::MultiStageResp)
+  N = length(R.stage)
+  write(io, N)
+  codes = zeros(UInt8, N)
+  for i in 1:N
+    codes[i] = resptyp2code(R.stage[i])
+  end
+  write(io, codes)
+  for i in 1:N
+    write(io, R.stage[i])
+  end
+  for f in (:fs, :gain, :fg, :delay, :corr, :factor, :offset)
+    write(io, getfield(R, f))
+  end
+  return nothing
+end
+
+function read(io::IO, ::Type{MultiStageResp})
+  N = read(io, Int64)
+  codes   = read(io, N)
+  fs      = zeros(Float64, N)
+  gain    = zeros(Float64, N)
+  fg      = zeros(Float64, N)
+  delay   = zeros(Float64, N)
+  corr    = zeros(Float64, N)
+  factor  = zeros(Int64, N)
+  offset  = zeros(Int64, N)
+  A       = Array{Union{CoeffResp, PZResp, PZResp64, GenResp},1}(undef, 0)
+  for i = 1:N
+    push!(A, read(io, code2resptyp(codes[i])))
+  end
+  return MultiStageResp(A,
+    read!(io, fs), read!(io, gain), read!(io, fg), read!(io, delay), read!(io, corr),
+    read!(io, factor), read!(io, offset))
+end
+
+isempty(R::MultiStageResp) = isempty(R.stage)
+isequal(A::MultiStageResp, R::MultiStageResp) =
+minimum([isequal(getfield(A, f), getfield(R,f)) for f in fieldnames(MultiStageResp)])
+==(A::MultiStageResp, R::MultiStageResp) = isequal(A::MultiStageResp, R::MultiStageResp)
+
+function hash(R::MultiStageResp)
+  N = length(R.stage)
+  h = hash(R.fs)
+  h = hash(R.gain, h)
+  h = hash(R.fg, h)
+  h = hash(R.delay, h)
+  h = hash(R.corr, h)
+  h = hash(R.factor, h)
+  h = hash(R.offset, h)
+  for i = 1:N
+    h = hash(R.stage[i], h)
+  end
+  return h
+end
+
+sizeof(R::MultiStageResp) = 64 +
+  sum([sizeof(getfield(R, f)) for f in (:fs, :gain, :fg, :delay, :corr, :factor, :offset)]) +
+  sum([sizeof(i) for i in R.stage])

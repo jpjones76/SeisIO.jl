@@ -27,6 +27,8 @@ const TNames = Type[  EventChannel,
                       GenResp,
                       PZResp64,
                       PZResp,
+                      CoeffResp,
+                      MultiStageResp,
                       PhaseCat,
                       SeisEvent,
                       SeisHdr,
@@ -47,6 +49,8 @@ const TCodes = UInt32[ 0x20474330, # " GC0"  EventChannel
                        0x20495230, # " IR0"  GenResp
                        0x20495231, # " IR1"  PZResp64
                        0x20495232, # " IR2"  PZResp
+                       0x20495233, # " IR3"  CoeffResp
+                       0x20495234, # " IR4"  MultiStageResp
                        0x20504330, # " PC0"  PhaseCat = Dict{String, SeisPha}
                        0x20534530, # " SE0"  SeisEvent
                        0x20534830, # " SH0"  SeisHdr
