@@ -169,6 +169,8 @@ function breaking_seis()
   # Responses
   S.resp[1] = GenResp()
   S.resp[2] = PZResp()
+  R = MultiStageResp(6)
+  S.resp[3]
 
   S.x[4] = rand(Float64,4)
   S.t[4] = vcat(S.t[4][1:1,:], [4 0])

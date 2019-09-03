@@ -126,39 +126,39 @@ xsta = read(io, String)
 close(io)
 
 # (ID, NAME, LOC, FS, GAIN, RESP, UNITS, MISC) = FDSN_sta_xml(xsta)
-S = FDSN_sta_xml(xsta)
-ID = S.id
-NAME = S.name
-LOC = S.loc
-FS = S.fs
-GAIN = S.gain
-RESP = S.resp
-UNITS = S.units
-MISC = S.misc
-
-@assert(ID[1]=="AK.ATKA..BNE", id_err)
-@assert(ID[2]=="AK.ATKA..BNN", id_err)
-@assert(ID[end-1]=="IU.MIDW.01.BHN", id_err)
-@assert(ID[end]=="IU.MIDW.01.BHZ", id_err)
-@test ==(LOC[1], GeoLoc(lat=52.2016, lon=-174.1975, el=55.0, az=90.0, inc=-90.0))
-@test ≈(LOC[3].lat, LOC[1].lat)
-@test ≈(LOC[3].lon, LOC[1].lon)
-@test ≈(LOC[3].dep, LOC[1].dep)
-for i = 1:length(UNITS)
-    if UNITS[i] == "m/s2"
-        @assert(in(split(ID[i],'.')[4][2],['G', 'L', 'M', 'N'])==true, unit_err)
-    elseif UNITS[i] in ["m/s", "m"]
-        @assert(in(split(ID[i],'.')[4][2],['L', 'H'])==true, unit_err)
-    elseif UNITS[i] == "v"
-        @assert(split(ID[i],'.')[4][2]=='C', unit_err)
-    end
-end
-@test ≈(GAIN[1], 283255.0)
-@test ≈(GAIN[2], 284298.0)
-@test ≈(GAIN[end-1], 8.38861E9)
-@test ≈(GAIN[end], 8.38861E9)
-@test RESP[1] == RESP[2] == r1
-@test RESP[end-1] == RESP[end] == r2
+# S = FDSN_sta_xml(xsta)
+# ID = S.id
+# NAME = S.name
+# LOC = S.loc
+# FS = S.fs
+# GAIN = S.gain
+# RESP = S.resp
+# UNITS = S.units
+# MISC = S.misc
+#
+# @assert(ID[1]=="AK.ATKA..BNE", id_err)
+# @assert(ID[2]=="AK.ATKA..BNN", id_err)
+# @assert(ID[end-1]=="IU.MIDW.01.BHN", id_err)
+# @assert(ID[end]=="IU.MIDW.01.BHZ", id_err)
+# @test ==(LOC[1], GeoLoc(lat=52.2016, lon=-174.1975, el=55.0, az=90.0, inc=-90.0))
+# @test ≈(LOC[3].lat, LOC[1].lat)
+# @test ≈(LOC[3].lon, LOC[1].lon)
+# @test ≈(LOC[3].dep, LOC[1].dep)
+# for i = 1:length(UNITS)
+#     if UNITS[i] == "m/s2"
+#         @assert(in(split(ID[i],'.')[4][2],['G', 'L', 'M', 'N'])==true, unit_err)
+#     elseif UNITS[i] in ["m/s", "m"]
+#         @assert(in(split(ID[i],'.')[4][2],['L', 'H'])==true, unit_err)
+#     elseif UNITS[i] == "v"
+#         @assert(split(ID[i],'.')[4][2]=='C', unit_err)
+#     end
+# end
+# @test ≈(GAIN[1], 283255.0)
+# @test ≈(GAIN[2], 284298.0)
+# @test ≈(GAIN[end-1], 8.38861E9)
+# @test ≈(GAIN[end], 8.38861E9)
+# @test RESP[1] == RESP[2] == r1
+# @test RESP[end-1] == RESP[end] == r2
 
 chanspec()
 chanspec()
