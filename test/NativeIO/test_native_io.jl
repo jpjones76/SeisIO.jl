@@ -73,8 +73,11 @@ printstyled("  test that every custom Type can be written and read faithfully\n"
 redirect_stdout(out) do
   A = Array{Any,1}(undef, 0)
   for T in SeisIO.TNames
+    println("testing ", T)
     if T == PhaseCat
       push!(A, randPhaseCat())
+    elseif T == MultiStageResp
+      push!(A, MultiStageResp(6))
     else
       push!(A, getfield(SeisIO, Symbol(T))())
     end

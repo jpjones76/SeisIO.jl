@@ -12,6 +12,9 @@ S = FDSNsta("CC.VALT..,PB.B001..BS?,PB.B001..E??")
 @test (findid(S, "PB.B001..EHZ")>0)
 @test (findid(S, "CC.VALT..BHZ")>0)
 
+# FDSNsta with MultiStageResp
+S = FDSNsta("CC.VALT..,PB.B001..BS?,PB.B001..E??", msr=true)
+
 printstyled("      radius search (rad=)\n", color=:light_green)
 rad = Float64[45.373514, -121.695919, 0.0, 0.1]
 S = FDSNsta(rad=rainier_rad)
@@ -48,7 +51,7 @@ for i = 1:4
   end
 end
 
-# Check that headers with PZResp info
+# Check that headers get overwritten with SACPZ info when we use read_sacpz
 Nc = S.n
 read_sacpz!(S, sac_pz_file)
 @test S.n > Nc
@@ -65,6 +68,13 @@ end
 L = [length(x) for x in S.x]
 if isempty(L) == false
   @test (maximum(L) > 0)
+end
+
+# Check that msr=true works
+S = SeisData()
+get_data!(S, "FDSN", fname, src="IRIS", msr=true, s=-600, t=0)
+for i in 1:S.n
+  @test typeof(S.resp[i]) == MultiStageResp
 end
 
 # Try a string array for input

@@ -92,6 +92,8 @@ z = get(Sg.misc[1], "rec_ele", 0.0)
 
 St = SeisData()
 read_data!(St, segy_file_1, full=true)
-Su = SeisData()
-read_data!(Su, path * "/SampleFiles/test_PASSCAL.seg*", full=true)
-@test Sg == St == Su
+if Sys.iswindows() == false
+  Su = SeisData()
+  read_data!(Su, path * "/SampleFiles/test_PASSCAL.seg*", full=true)
+  @test Sg == St == Su
+end
