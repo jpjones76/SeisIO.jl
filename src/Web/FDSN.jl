@@ -27,6 +27,7 @@ into an empty SeisData structure.
 Standard keywords: rad, reg, src, to, v
 
 Other keywords:
+* msr: get MultiStage (full) responses?
 * s: Start time
 * t: Termination (end) time
 * xf: Name of XML file to save station metadata
@@ -34,6 +35,7 @@ Other keywords:
 See also: chanspec, parsetimewin, get_data!, SeisIO.KW
 """
 function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
+                  msr ::Bool              = false,          # MultiStageResp
                   rad ::Array{Float64,1}  = KW.rad,         # Search radius
                   reg ::Array{Float64,1}  = KW.reg,         # Search region
                   s   ::TimeSpec          = 0,              # Start
@@ -98,12 +100,13 @@ function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
   io = open(xf, "r")
   xsta = read(io, String)
   close(io)
-  S = FDSN_sta_xml(xsta)
+  S = FDSN_sta_xml(xsta, msr=msr)
   return S
 end
 
 function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,2}};
   fmt       ::String            = KW.fmt,         # Request format
+  msr       ::Bool              = false,          # MultiStageResp
   nd        ::Real              = KW.nd,          # Number of days per request
   opts      ::String            = KW.opts,        # User-defined options
   rad       ::Array{Float64,1}  = KW.rad,         # Search radius
@@ -127,6 +130,7 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
   # (1) Time-space query for station info
   if si
     S = FDSNsta(chans,
+                msr   = msr,
                 rad   = rad,
                 reg   = reg,
                 s     = d0,
