@@ -81,7 +81,7 @@ function translate_resp!(S::GphysData,
   ff_new  = Array{Complex{Float32},1}(undef, N2)
   f       = Array{Float32,1}(undef, N2)
 
-  GRPS = get_unique(S, ["fs", "resp", "units"], chans=chans)
+  GRPS = get_unique(S, ["fs", "resp", "units"], chans)
   for grp in GRPS
 
     # get fs, resp

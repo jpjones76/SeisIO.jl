@@ -54,7 +54,7 @@ function resample!(S::GphysData;
   Z = similar(Y)
 
   # Get groups
-  GRPS = get_unique(S, ["fs", "eltype"], chans=chans)
+  GRPS = get_unique(S, ["fs", "eltype"], chans)
   i = GRPS[1][1]
   ty = eltype(S.x[i])
   fs = ty(S.fs[i])

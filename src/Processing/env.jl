@@ -26,7 +26,7 @@ function env!(S::GphysData;
   deleteat!(chans, k)
 
   # Get groups
-  GRPS = get_unique(S, ["eltype"], chans=chans)
+  GRPS = get_unique(S, ["eltype"], chans)
 
   # Initialize Y
   Y = Array{Float64,1}(undef, 2*nx_max(S))
