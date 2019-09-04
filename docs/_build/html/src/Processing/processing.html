@@ -93,7 +93,8 @@
 </ul>
 <p class="caption"><span class="caption-text">Reading Files</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">Reading Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">Geophysical Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/xml.html">XML Meta-Data</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Downloading Data</span></p>
 <ul>
@@ -295,9 +296,9 @@ differentiating or integrating as needed.</p>
 <div class="section" id="keywords">
 <h3>Keywords<a class="headerlink" href="#keywords" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li><p>units_out=UU: specify output units: “m”, “m/s” (default), or “m/s²”</p></li>
-<li><p>chans=CC: restrict seismogram conversion to seismic data channels in CC</p></li>
-<li><p>v=V: verbosity</p></li>
+<li>units_out=UU: specify output units: “m”, “m/s” (default), or “m/s²”</li>
+<li>chans=CC: restrict seismogram conversion to seismic data channels in CC</li>
+<li>v=V: verbosity</li>
 </ul>
 <div class="section" id="behavior-and-usage-warnings">
 <h4>Behavior and Usage Warnings<a class="headerlink" href="#behavior-and-usage-warnings" title="Permalink to this headline">¶</a></h4>
@@ -331,9 +332,9 @@ variant of <a class="reference external" href="https://github.com/JuliaMath/Kaha
 <div class="section" id="id1">
 <h3>Keywords<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li><p>chans=CC: only ungap channels CC.</p></li>
-<li><p>m=false: this flag fills gaps with NaNs instead of the mean.</p></li>
-<li><p>tap=true: taper data before filling gaps.</p></li>
+<li>chans=CC: only ungap channels CC.</li>
+<li>m=false: this flag fills gaps with NaNs instead of the mean.</li>
+<li>tap=true: taper data before filling gaps.</li>
 </ul>
 <hr class="docutils" />
 </div>
@@ -359,54 +360,54 @@ half the sampling interval.</p>
 <div class="section" id="which-channels-merge">
 <h4>Which channels merge?<a class="headerlink" href="#which-channels-merge" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
-<li><p>Channels merge if they have identical values for <code class="docutils literal notranslate"><span class="pre">:id</span></code>, <code class="docutils literal notranslate"><span class="pre">:fs</span></code>, <code class="docutils literal notranslate"><span class="pre">:loc</span></code>, <code class="docutils literal notranslate"><span class="pre">:resp</span></code>, and <code class="docutils literal notranslate"><span class="pre">:units</span></code>.</p></li>
-<li><p>An unset <code class="docutils literal notranslate"><span class="pre">:loc</span></code>, <code class="docutils literal notranslate"><span class="pre">:resp</span></code>, or <code class="docutils literal notranslate"><span class="pre">:units</span></code> field matches any set value in the corresponding field of another channel.</p></li>
+<li>Channels merge if they have identical values for <code class="docutils literal notranslate"><span class="pre">:id</span></code>, <code class="docutils literal notranslate"><span class="pre">:fs</span></code>, <code class="docutils literal notranslate"><span class="pre">:loc</span></code>, <code class="docutils literal notranslate"><span class="pre">:resp</span></code>, and <code class="docutils literal notranslate"><span class="pre">:units</span></code>.</li>
+<li>An unset <code class="docutils literal notranslate"><span class="pre">:loc</span></code>, <code class="docutils literal notranslate"><span class="pre">:resp</span></code>, or <code class="docutils literal notranslate"><span class="pre">:units</span></code> field matches any set value in the corresponding field of another channel.</li>
 </ul>
 </div>
 <div class="section" id="what-happens-to-merged-fields">
 <h4>What happens to merged fields?<a class="headerlink" href="#what-happens-to-merged-fields" title="Permalink to this headline">¶</a></h4>
 <ul class="simple">
-<li><p>The essential properties above are preserved.</p></li>
-<li><p>Other fields are combined.</p></li>
-<li><p>Merged channels with different <cite>:name</cite> values use the name of the channel with the latest data before the merge; other names are logged to <cite>:notes</cite>.</p></li>
+<li>The essential properties above are preserved.</li>
+<li>Other fields are combined.</li>
+<li>Merged channels with different <cite>:name</cite> values use the name of the channel with the latest data before the merge; other names are logged to <cite>:notes</cite>.</li>
 </ul>
 </div>
 <div class="section" id="what-does-merge-resolve">
 <h4>What does <code class="docutils literal notranslate"><span class="pre">merge!</span></code> resolve?<a class="headerlink" href="#what-does-merge-resolve" title="Permalink to this headline">¶</a></h4>
-<table class="colwidths-given docutils align-center">
+<table border="1" class="colwidths-given docutils">
 <colgroup>
-<col style="width: 50%" />
-<col style="width: 50%" />
+<col width="50%" />
+<col width="50%" />
 </colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Issue</p></th>
-<th class="head"><p>Resolution</p></th>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Issue</th>
+<th class="head">Resolution</th>
 </tr>
 </thead>
-<tbody>
-<tr class="row-even"><td><p>Empty channels</p></td>
-<td><p>Delete</p></td>
+<tbody valign="top">
+<tr class="row-even"><td>Empty channels</td>
+<td>Delete</td>
 </tr>
-<tr class="row-odd"><td><p>Duplicated channels</p></td>
-<td><p>Delete duplicate channels</p></td>
+<tr class="row-odd"><td>Duplicated channels</td>
+<td>Delete duplicate channels</td>
 </tr>
-<tr class="row-even"><td><p>Duplicated windows in channel(s)</p></td>
-<td><p>Delete duplicate windows</p></td>
+<tr class="row-even"><td>Duplicated windows in channel(s)</td>
+<td>Delete duplicate windows</td>
 </tr>
-<tr class="row-odd"><td><p>Multiple channels, same properties<sup>(a)</sup></p></td>
-<td><p>Merge to a single channel</p></td>
+<tr class="row-odd"><td>Multiple channels, same properties<sup>(a)</sup></td>
+<td>Merge to a single channel</td>
 </tr>
-<tr class="row-even"><td><p>Channel with out-of-order time windows</p></td>
-<td><p>Sort in chronological order</p></td>
+<tr class="row-even"><td>Channel with out-of-order time windows</td>
+<td>Sort in chronological order</td>
 </tr>
-<tr class="row-odd"><td><p>Overlapping windows, identical data, time-aligned</p></td>
-<td><p>Windows merged</p></td>
+<tr class="row-odd"><td>Overlapping windows, identical data, time-aligned</td>
+<td>Windows merged</td>
 </tr>
-<tr class="row-even"><td><p>Overlapping windows, identical data, small time offset<sup>(a)</sup></p></td>
-<td><p>Time offset corrected, windows merged</p></td>
+<tr class="row-even"><td>Overlapping windows, identical data, small time offset<sup>(a)</sup></td>
+<td>Time offset corrected, windows merged</td>
 </tr>
-<tr class="row-odd"><td><p>Overlapping windows, non-identical data</p></td>
-<td><p>Samples averaged, windows merged</p></td>
+<tr class="row-odd"><td>Overlapping windows, non-identical data</td>
+<td>Samples averaged, windows merged</td>
 </tr>
 </tbody>
 </table>
@@ -462,8 +463,8 @@ response.</p>
 <div class="section" id="id3">
 <h3>Keywords<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li><p><strong>C=cha</strong> restricts response translation for GphysData object <strong>S</strong> to channel(s) <strong>cha</strong>. Accepts an Integer, UnitRange, or Array{Int64,1} argument; does <em>not</em> accept string IDs. By default, all seismic data channels in <strong>S</strong> have their responses translated to <strong>resp_new</strong>.</p></li>
-<li><p><strong>wl=g</strong> sets the waterlevel to g (default: g = eps(Float32) ~ 1.1f-7). The waterlevel is the minimum magnitude (absolute value) of the normalized old frequency response; in other words, if the old frequency response has a maximum magnitude of 1.0, then no response coefficient can be lower than g. This is useful to prevent “divide by zero” errors, but setting it too high will cause errors.</p></li>
+<li><strong>C=cha</strong> restricts response translation for GphysData object <strong>S</strong> to channel(s) <strong>cha</strong>. Accepts an Integer, UnitRange, or Array{Int64,1} argument; does <em>not</em> accept string IDs. By default, all seismic data channels in <strong>S</strong> have their responses translated to <strong>resp_new</strong>.</li>
+<li><strong>wl=g</strong> sets the waterlevel to g (default: g = eps(Float32) ~ 1.1f-7). The waterlevel is the minimum magnitude (absolute value) of the normalized old frequency response; in other words, if the old frequency response has a maximum magnitude of 1.0, then no response coefficient can be lower than g. This is useful to prevent “divide by zero” errors, but setting it too high will cause errors.</li>
 </ul>
 </div>
 <div class="section" id="precision-and-memory-optimization">
@@ -480,10 +481,10 @@ Float32 segment, or 3.5x the size of the longest Float64 segment). Translation
 uses four vectors – three complex and one real – that are updated and
 dynamically resized as the algorithm loops over each segment:</p>
 <ul class="simple">
-<li><p>Old response container: Array{Complex{Float32,1}}(undef, Nx)</p></li>
-<li><p>New response container: Array{Complex{Float32,1}}(undef, Nx)</p></li>
-<li><p>Complex data container: Array{Complex{Float32,1}}(undef, Nx)</p></li>
-<li><p>Real frequencies for FFT: Array{Float32,1}(undef, Nx)</p></li>
+<li>Old response container: Array{Complex{Float32,1}}(undef, Nx)</li>
+<li>New response container: Array{Complex{Float32,1}}(undef, Nx)</li>
+<li>Complex data container: Array{Complex{Float32,1}}(undef, Nx)</li>
+<li>Real frequencies for FFT: Array{Float32,1}(undef, Nx)</li>
 </ul>
 <p>…where <strong>Nx</strong> is the number of samples in the longest segment in <strong>S</strong>.</p>
 </div>
@@ -509,20 +510,20 @@ are filled with the mean; this isn’t possible with irregularly-sampled data.</
 <div class="section" id="specifying-start-time-s">
 <h3>Specifying start time (s)<a class="headerlink" href="#specifying-start-time-s" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li><p>s=”last”: (Default) sync to the last start time of any channel in <cite>S</cite>.</p></li>
-<li><p>s=”first”: sync to the first start time of any channel in <cite>S</cite>.</p></li>
-<li><p>A numeric value is treated as an epoch time (<cite>?time</cite> for details).</p></li>
-<li><p>A DateTime is treated as a DateTime. (see Dates.DateTime for details.)</p></li>
-<li><p>Any string other than “last” or “first” is parsed as a DateTime.</p></li>
+<li>s=”last”: (Default) sync to the last start time of any channel in <cite>S</cite>.</li>
+<li>s=”first”: sync to the first start time of any channel in <cite>S</cite>.</li>
+<li>A numeric value is treated as an epoch time (<cite>?time</cite> for details).</li>
+<li>A DateTime is treated as a DateTime. (see Dates.DateTime for details.)</li>
+<li>Any string other than “last” or “first” is parsed as a DateTime.</li>
 </ul>
 </div>
 <div class="section" id="specifying-end-time-t">
 <h3>Specifying end time (t)<a class="headerlink" href="#specifying-end-time-t" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li><p>t=”none”: (Default) end times are not synchronized.</p></li>
-<li><p>t=”last”: synchronize all channels to end at the last end time in <cite>S</cite>.</p></li>
-<li><p>t=”first” synchronize to the first end time in <cite>S</cite>.</p></li>
-<li><p>numeric, datetime, and non-reserved strings are treated as for <cite>-s</cite>.</p></li>
+<li>t=”none”: (Default) end times are not synchronized.</li>
+<li>t=”last”: synchronize all channels to end at the last end time in <cite>S</cite>.</li>
+<li>t=”first” synchronize to the first end time in <cite>S</cite>.</li>
+<li>numeric, datetime, and non-reserved strings are treated as for <cite>-s</cite>.</li>
 </ul>
 </div>
 </div>
@@ -542,10 +543,10 @@ contains at least <cite>N_min</cite> total samples. Returns if C is irregularly 
 <div class="section" id="id4">
 <h3>Keywords<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li><p>chans: Only taper the specified channels.</p></li>
-<li><p>N_min: Data segments with N &lt; N_min total samples are not tapered.</p></li>
-<li><p>t_max: Maximum taper edge in seconds.</p></li>
-<li><p><span class="math notranslate nohighlight">\(\alpha\)</span>: Taper edge area; as for a Tukey window, the first and last 100*:math:<cite>alpha`% of samples in each window are tapered, up to `t_max</cite> seconds of data.</p></li>
+<li>chans: Only taper the specified channels.</li>
+<li>N_min: Data segments with N &lt; N_min total samples are not tapered.</li>
+<li>t_max: Maximum taper edge in seconds.</li>
+<li><span class="math notranslate nohighlight">\(\alpha\)</span>: Taper edge area; as for a Tukey window, the first and last 100*:math:<cite>alpha`% of samples in each window are tapered, up to `t_max</cite> seconds of data.</li>
 </ul>
 </div>
 </div>
@@ -567,60 +568,60 @@ contains at least <cite>N_min</cite> total samples. Returns if C is irregularly 
 segment in C separately.</p>
 <div class="section" id="id5">
 <h3>Keywords<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
-<table class="colwidths-given docutils align-center">
+<table border="1" class="colwidths-given docutils">
 <colgroup>
-<col style="width: 13%" />
-<col style="width: 25%" />
-<col style="width: 13%" />
-<col style="width: 50%" />
+<col width="13%" />
+<col width="25%" />
+<col width="13%" />
+<col width="50%" />
 </colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>KW</p></th>
-<th class="head"><p>Default</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Description</p></th>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">KW</th>
+<th class="head">Default</th>
+<th class="head">Type</th>
+<th class="head">Description</th>
 </tr>
 </thead>
-<tbody>
-<tr class="row-even"><td><p>chans</p></td>
-<td><p>[]</p></td>
-<td><p><sup>(a)</sup></p></td>
-<td><p>channel numbers to filter</p></td>
+<tbody valign="top">
+<tr class="row-even"><td>chans</td>
+<td>[]</td>
+<td><sup>(a)</sup></td>
+<td>channel numbers to filter</td>
 </tr>
-<tr class="row-odd"><td><p>fl</p></td>
-<td><p>1.0</p></td>
-<td><p>Float64</p></td>
-<td><p>lower corner frequency [Hz] <sup>(b)</sup></p></td>
+<tr class="row-odd"><td>fl</td>
+<td>1.0</td>
+<td>Float64</td>
+<td>lower corner frequency [Hz] <sup>(b)</sup></td>
 </tr>
-<tr class="row-even"><td><p>fh</p></td>
-<td><p>15.0</p></td>
-<td><p>Float64</p></td>
-<td><p>upper corner frequency [Hz] <sup>(b)</sup></p></td>
+<tr class="row-even"><td>fh</td>
+<td>15.0</td>
+<td>Float64</td>
+<td>upper corner frequency [Hz] <sup>(b)</sup></td>
 </tr>
-<tr class="row-odd"><td><p>np</p></td>
-<td><p>4</p></td>
-<td><p>Int64</p></td>
-<td><p>number of poles</p></td>
+<tr class="row-odd"><td>np</td>
+<td>4</td>
+<td>Int64</td>
+<td>number of poles</td>
 </tr>
-<tr class="row-even"><td><p>rp</p></td>
-<td><p>10</p></td>
-<td><p>Int64</p></td>
-<td><p>pass-band ripple (dB)</p></td>
+<tr class="row-even"><td>rp</td>
+<td>10</td>
+<td>Int64</td>
+<td>pass-band ripple (dB)</td>
 </tr>
-<tr class="row-odd"><td><p>rs</p></td>
-<td><p>30</p></td>
-<td><p>Int64</p></td>
-<td><p>stop-band ripple (dB)</p></td>
+<tr class="row-odd"><td>rs</td>
+<td>30</td>
+<td>Int64</td>
+<td>stop-band ripple (dB)</td>
 </tr>
-<tr class="row-even"><td><p>rt</p></td>
-<td><p>“Bandpass”</p></td>
-<td><p>String</p></td>
-<td><p>response type (type of filter)</p></td>
+<tr class="row-even"><td>rt</td>
+<td>“Bandpass”</td>
+<td>String</td>
+<td>response type (type of filter)</td>
 </tr>
-<tr class="row-odd"><td><p>dm</p></td>
-<td><p>“Butterworth”</p></td>
-<td><p>String</p></td>
-<td><p>design mode (name of filter)</p></td>
+<tr class="row-odd"><td>dm</td>
+<td>“Butterworth”</td>
+<td>String</td>
+<td>design mode (name of filter)</td>
 </tr>
 </tbody>
 </table>

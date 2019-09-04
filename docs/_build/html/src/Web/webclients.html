@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="SeedLink" href="seedlink.html" />
-    <link rel="prev" title="Reading Files" href="../Formats/fileformats.html" /> 
+    <link rel="prev" title="XML Meta-Data" href="../Formats/xml.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -93,7 +93,8 @@
 </ul>
 <p class="caption"><span class="caption-text">Reading Files</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">Reading Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">Geophysical Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/xml.html">XML Meta-Data</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Downloading Data</span></p>
 <ul class="current">
@@ -227,16 +228,18 @@ real-time streaming, see <a class="reference internal" href="seedlink.html#seedl
 <div class="line">Keyword arguments; see also <a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">SeisIO standard KWs</span></a> or type <code class="docutils literal notranslate"><span class="pre">?SeisIO.KW</span></code>.</div>
 <div class="line">Standard keywords: fmt, nd, opts, rad, reg, si, to, v, w, y</div>
 <div class="line">Other keywords:</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">msr</span></code>: get instrument responses as MultiStageResonse? (FDSN only)</div>
 <div class="line"><code class="docutils literal notranslate"><span class="pre">s</span></code>: Start time</div>
 <div class="line"><code class="docutils literal notranslate"><span class="pre">t</span></code>: Termination (end) time</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">xf</span></code>: XML file name for station XML</div>
 </div>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">get_data!(S,</span> <span class="pre">&quot;FDSN&quot;,</span> <span class="pre">&quot;UW.SEP..EHZ,UW.SHW..EHZ,UW.HSR..EHZ&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">t=(-600))</span></code>: using FDSNWS, get the last 10 minutes of data from three short-period vertical-component channels at Mt. St. Helens, USA.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">get_data!(S,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">&quot;CC.PALM..EHN&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">t=(-120),</span> <span class="pre">f=&quot;sacbl&quot;)</span></code>: using IRISWS, fetch the last two minutes of data from component EHN, station PALM (Palmer Lift (Mt. Hood), OR, USA,), network CC (USGS Cascade Volcano Observatory, Vancouver, WA, USA), in bigendian SAC format, and merge into SeisData structure <cite>S</cite>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">get_data!(S,</span> <span class="pre">&quot;FDSN&quot;,</span> <span class="pre">&quot;CC.TIMB..EHZ&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">t=(-600),</span> <span class="pre">w=true)</span></code>: using FDSNWS, get the last 10 minutes of data from channel EHZ, station TIMB (Timberline Lodge, OR, USA), save the data directly to disk, and add it to SeisData structure <cite>S</cite>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">S</span> <span class="pre">=</span> <span class="pre">get_data(&quot;FDSN&quot;,</span> <span class="pre">&quot;HV.MOKD..HHZ&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">s=&quot;2012-01-01T00:00:00&quot;,</span> <span class="pre">t=(-3600))</span></code>: using FDSNWS, fill a new SeisData structure <cite>S</cite> with an hour of data ending at 2012-01-01, 00:00:00 UTC, from HV.MOKD..HHZ (USGS Hawai’i Volcano Observatory).</p></li>
+<li><code class="docutils literal notranslate"><span class="pre">get_data!(S,</span> <span class="pre">&quot;FDSN&quot;,</span> <span class="pre">&quot;UW.SEP..EHZ,UW.SHW..EHZ,UW.HSR..EHZ&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">t=(-600))</span></code>: using FDSNWS, get the last 10 minutes of data from three short-period vertical-component channels at Mt. St. Helens, USA.</li>
+<li><code class="docutils literal notranslate"><span class="pre">get_data!(S,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">&quot;CC.PALM..EHN&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">t=(-120),</span> <span class="pre">f=&quot;sacbl&quot;)</span></code>: using IRISWS, fetch the last two minutes of data from component EHN, station PALM (Palmer Lift (Mt. Hood), OR, USA,), network CC (USGS Cascade Volcano Observatory, Vancouver, WA, USA), in bigendian SAC format, and merge into SeisData structure <cite>S</cite>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">get_data!(S,</span> <span class="pre">&quot;FDSN&quot;,</span> <span class="pre">&quot;CC.TIMB..EHZ&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">t=(-600),</span> <span class="pre">w=true)</span></code>: using FDSNWS, get the last 10 minutes of data from channel EHZ, station TIMB (Timberline Lodge, OR, USA), save the data directly to disk, and add it to SeisData structure <cite>S</cite>.</li>
+<li><code class="docutils literal notranslate"><span class="pre">S</span> <span class="pre">=</span> <span class="pre">get_data(&quot;FDSN&quot;,</span> <span class="pre">&quot;HV.MOKD..HHZ&quot;,</span> <span class="pre">&quot;IRIS&quot;,</span> <span class="pre">s=&quot;2012-01-01T00:00:00&quot;,</span> <span class="pre">t=(-3600))</span></code>: using FDSNWS, fill a new SeisData structure <cite>S</cite> with an hour of data ending at 2012-01-01, 00:00:00 UTC, from HV.MOKD..HHZ (USGS Hawai’i Volcano Observatory).</li>
 </ol>
 </div>
 <div class="section" id="fdsn-queries">
@@ -292,9 +295,9 @@ remote station XML files by web query.</p>
 <div class="section" id="data-query-features">
 <h3>Data Query Features<a class="headerlink" href="#data-query-features" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li><p>Stage zero gains are removed from trace data; all IRIS data will appear to have a gain of 1.0.</p></li>
-<li><p>IRISWS disallows wildcards in channel IDs.</p></li>
-<li><p>Channel spec <em>must</em> include the net, sta, cha fields; thus, CHA = “CC.VALT..BHZ” is OK; CHA = “CC.VALT” is not.</p></li>
+<li>Stage zero gains are removed from trace data; all IRIS data will appear to have a gain of 1.0.</li>
+<li>IRISWS disallows wildcards in channel IDs.</li>
+<li>Channel spec <em>must</em> include the net, sta, cha fields; thus, CHA = “CC.VALT..BHZ” is OK; CHA = “CC.VALT” is not.</li>
 </ul>
 </div>
 </div>
@@ -311,7 +314,7 @@ remote station XML files by web query.</p>
         <a href="seedlink.html" class="btn btn-neutral float-right" title="SeedLink" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../Formats/fileformats.html" class="btn btn-neutral float-left" title="Reading Files" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../Formats/xml.html" class="btn btn-neutral float-left" title="XML Meta-Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

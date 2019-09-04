@@ -1,0 +1,13 @@
+SeedLink documentation: https://www.seiscomp3.org/doc/applications/seedlink.html
+
+ERRATA
+* Commands should be followed by '\r', not '\n'. This information appears
+nowhere in the documentation.
+* Mode FETCH is very poorly documented. Missing information:
+  + differences between FETCH and DATA
+  + does FETCH work starting at a later time?
+  + does FETCH work for past data? If so, do the buffers extend as far back as
+  for DATA? They certainly didn't appear to in my tests!
+* SeedLink appears to assign a bogus location code to streams from a channel
+with no location code. Thus, the FDSN and SeedLink identifiers of a data
+channel may differ.

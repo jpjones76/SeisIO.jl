@@ -1,0 +1,23 @@
+SEEDManual_V2.4.pdf is from http://www.fdsn.org/pdf/SEEDManual_V2.4.pdf, last accessed 2019-09-03.
+
+SEED Manual Errors and Inconsistencies
+
+APPENDIX B
+* This is grossly incomplete. Most decoders are not described and the
+description of Steim is totally incoherent.
+
+APPENDIX C
+* The Z-transform representation in equation (3) is the usual Z-transform
+of mathematicians, but many geophysics texts take the Z-transform as a power
+series in Z rather than Z^-1. A famous example is E. R. Kanasewich (1981),
+Time Sequence Analysis in Geophysics, which is the standard data analysis text
+of most Geophysics graduate programs worldwide.
+
+* The instructions for scaling on page 161 are about as clear as mud:
+Scale the coefficients b n so that | Hc (zs) | = 1.0 where z s = e2 π i fs Δt ,
+f s is specified in Blockette [58]. It is unclear whether coefficients
+must be unscaled after being read in.
+
+APPENDIX G
+* Mini-SEED records acquired from seismic data centers are still <= 4096 Bytes
+long because they are extracted without modification from full SEED archives.

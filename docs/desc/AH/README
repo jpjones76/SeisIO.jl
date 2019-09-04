@@ -1,0 +1,3 @@
+AH readers were created based on the ObsPy AH module and C/Fortrain librarires
+contained therein. The source URL for AH has never worked in the history of
+SeisIO.

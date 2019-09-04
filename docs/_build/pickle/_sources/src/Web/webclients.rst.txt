@@ -23,8 +23,10 @@ real-time streaming, see :ref:`SeedLink<seedlink-section>`.
 | Keyword arguments; see also :ref:`SeisIO standard KWs<dkw>` or type ``?SeisIO.KW``.
 | Standard keywords: fmt, nd, opts, rad, reg, si, to, v, w, y
 | Other keywords:
+| ``msr``: get instrument responses as MultiStageResonse? (FDSN only)
 | ``s``: Start time
 | ``t``: Termination (end) time
+| ``xf``: XML file name for station XML
 
 Examples
 ========

@@ -93,7 +93,8 @@
 </ul>
 <p class="caption"><span class="caption-text">Reading Files</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">Reading Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">Geophysical Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/xml.html">XML Meta-Data</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Downloading Data</span></p>
 <ul>
@@ -289,9 +290,9 @@ a tuple consisting of an Array{SeisHdr,1} and an Array{SeisSrc,1}, so that
 the <cite>i`th entry of each array describes the header and source process of event `i</cite>.</p>
 <p>Notes:</p>
 <ol class="arabic simple">
-<li><p>Specify <cite>ot</cite> as a string formatted YYYY-MM-DDThh:mm:ss in UTC (e.g. “2001-02-08T18:54:32”). Returns a SeisHdr array.</p></li>
-<li><p>Incomplete string queries are read to the nearest fully-specified time constraint; thus, <cite>FDSNevq(“2001-02-08”)</cite> returns the nearest event to 2001-02-08T00:00:00.</p></li>
-<li><p>If no event is found in the specified search window, FDSNevq exits with an error.</p></li>
+<li>Specify <cite>ot</cite> as a string formatted YYYY-MM-DDThh:mm:ss in UTC (e.g. “2001-02-08T18:54:32”). Returns a SeisHdr array.</li>
+<li>Incomplete string queries are read to the nearest fully-specified time constraint; thus, <cite>FDSNevq(“2001-02-08”)</cite> returns the nearest event to 2001-02-08T00:00:00.</li>
+<li>If no event is found in the specified search window, FDSNevq exits with an error.</li>
 </ol>
 <div class="line-block">
 <div class="line"><a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">Shared keywords</span></a>: evw, reg, mag, nev, src, to, w</div>
@@ -329,8 +330,8 @@ and z in km with + = down.</p>
 </div>
 <p><strong>References</strong></p>
 <ul class="simple">
-<li><p>Crotwell, H. P., Owens, T. J., &amp; Ritsema, J. (1999). The TauP Toolkit: Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.</p></li>
-<li><p>TauP manual: <a class="reference external" href="http://www.seis.sc.edu/downloads/TauP/taup.pdf">http://www.seis.sc.edu/downloads/TauP/taup.pdf</a></p></li>
+<li>Crotwell, H. P., Owens, T. J., &amp; Ritsema, J. (1999). The TauP Toolkit: Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.</li>
+<li>TauP manual: <a class="reference external" href="http://www.seis.sc.edu/downloads/TauP/taup.pdf">http://www.seis.sc.edu/downloads/TauP/taup.pdf</a></li>
 </ul>
 </div>
 </div>
@@ -341,10 +342,10 @@ and z in km with + = down.</p>
 <code class="descname">read_qml</code><span class="sig-paren">(</span><em>fpat::String</em><span class="sig-paren">)</span><a class="headerlink" href="#read_qml" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<p>Read QuakeML files matching string pattern <cite>fpat</cite>. Returns a tuple containing
-an array of <cite>SeisHdr</cite> objects and an array of <cite>SeisSrc</cite> objects, such that the
-<cite>i`th entry of each array is the preferred location (origin) and event source
-(focal mechanism or moment tensor) of event `i</cite>.</p>
+<p>Read QuakeML files matching string pattern <strong>fpat</strong>. Returns a tuple containing
+an array of <strong>SeisHdr</strong> objects <strong>H</strong> and an array of <strong>SeisSrc</strong> objects <strong>R</strong>.
+Each pair (H[i], R[i]) describes the preferred location (origin, SeisHdr) and
+event source (focal mechanism or moment tensor, SeisSrc) of event <strong>i</strong>.</p>
 <p>If multiple focal mechanisms, locations, or magnitudes are present in a single
 Event element of the XML file(s), the following rules are used to select one of
 each per event:</p>

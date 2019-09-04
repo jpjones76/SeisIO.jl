@@ -27,6 +27,7 @@ Files
    :maxdepth: 2
 
    src/Formats/fileformats.rst
+   src/Formats/xml.rst
 
 ***
 Web

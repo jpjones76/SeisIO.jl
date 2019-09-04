@@ -9,49 +9,19 @@
 \usepackage[utf8]{inputenc}
 \ifdefined\DeclareUnicodeCharacter
 % support both utf8 and utf8x syntaxes
-  \ifdefined\DeclareUnicodeCharacterAsOptional
-    \def\sphinxDUC#1{\DeclareUnicodeCharacter{"#1}}
-  \else
-    \let\sphinxDUC\DeclareUnicodeCharacter
-  \fi
-  \sphinxDUC{00A0}{\nobreakspace}
-  \sphinxDUC{2500}{\sphinxunichar{2500}}
-  \sphinxDUC{2502}{\sphinxunichar{2502}}
-  \sphinxDUC{2514}{\sphinxunichar{2514}}
-  \sphinxDUC{251C}{\sphinxunichar{251C}}
-  \sphinxDUC{2572}{\textbackslash}
+\edef\sphinxdqmaybe{\ifdefined\DeclareUnicodeCharacterAsOptional\string"\fi}
+  \DeclareUnicodeCharacter{\sphinxdqmaybe00A0}{\nobreakspace}
+  \DeclareUnicodeCharacter{\sphinxdqmaybe2500}{\sphinxunichar{2500}}
+  \DeclareUnicodeCharacter{\sphinxdqmaybe2502}{\sphinxunichar{2502}}
+  \DeclareUnicodeCharacter{\sphinxdqmaybe2514}{\sphinxunichar{2514}}
+  \DeclareUnicodeCharacter{\sphinxdqmaybe251C}{\sphinxunichar{251C}}
+  \DeclareUnicodeCharacter{\sphinxdqmaybe2572}{\textbackslash}
 \fi
 \usepackage{cmap}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb,amstext}
 \usepackage{babel}
-
-
-
 \usepackage{times}
-\expandafter\ifx\csname T@LGR\endcsname\relax
-\else
-% LGR was declared as font encoding
-  \substitutefont{LGR}{\rmdefault}{cmr}
-  \substitutefont{LGR}{\sfdefault}{cmss}
-  \substitutefont{LGR}{\ttdefault}{cmtt}
-\fi
-\expandafter\ifx\csname T@X2\endcsname\relax
-  \expandafter\ifx\csname T@T2A\endcsname\relax
-  \else
-  % T2A was declared as font encoding
-    \substitutefont{T2A}{\rmdefault}{cmr}
-    \substitutefont{T2A}{\sfdefault}{cmss}
-    \substitutefont{T2A}{\ttdefault}{cmtt}
-  \fi
-\else
-% X2 was declared as font encoding
-  \substitutefont{X2}{\rmdefault}{cmr}
-  \substitutefont{X2}{\sfdefault}{cmss}
-  \substitutefont{X2}{\ttdefault}{cmtt}
-\fi
-
-
 \usepackage[Bjarne]{fncychap}
 \usepackage{sphinx}
 
@@ -66,13 +36,30 @@
 \urlstyle{same}
 \addto\captionsenglish{\renewcommand{\contentsname}{Introduction}}
 
-\usepackage{sphinxmessages}
+\addto\captionsenglish{\renewcommand{\figurename}{Fig.\@ }}
+\makeatletter
+\def\fnum@figure{\figurename\thefigure{}}
+\makeatother
+\addto\captionsenglish{\renewcommand{\tablename}{Table }}
+\makeatletter
+\def\fnum@table{\tablename\thetable{}}
+\makeatother
+\addto\captionsenglish{\renewcommand{\literalblockname}{Listing}}
+
+\addto\captionsenglish{\renewcommand{\literalblockcontinuedname}{continued from previous page}}
+\addto\captionsenglish{\renewcommand{\literalblockcontinuesname}{continues on next page}}
+\addto\captionsenglish{\renewcommand{\sphinxnonalphabeticalgroupname}{Non-alphabetical}}
+\addto\captionsenglish{\renewcommand{\sphinxsymbolsname}{Symbols}}
+\addto\captionsenglish{\renewcommand{\sphinxnumbersname}{Numbers}}
+
+\addto\extrasenglish{\def\pageautorefname{page}}
+
 \setcounter{tocdepth}{1}
 
 
 
 \title{SeisIO Documentation}
-\date{Aug 14, 2019}
+\date{Sep 03, 2019}
 \release{0.3.0}
 \author{Joshua Jones}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -612,8 +599,8 @@ Clear all notes from every channel in \sphinxcode{\sphinxupquote{S}}.
 \chapter{Files}
 \label{\detokenize{index:files}}
 
-\section{Reading Files}
-\label{\detokenize{src/Formats/fileformats:reading-files}}\label{\detokenize{src/Formats/fileformats:readdata}}\label{\detokenize{src/Formats/fileformats::doc}}
+\section{Geophysical Data}
+\label{\detokenize{src/Formats/fileformats:geophysical-data}}\label{\detokenize{src/Formats/fileformats:readdata}}\label{\detokenize{src/Formats/fileformats::doc}}
 
 \begin{fulllineitems}
 \pysigline{\sphinxbfcode{\sphinxupquote{read\_data!(S,~fmt::String,~filepat~{[},~KWs{]})}}}
@@ -655,6 +642,16 @@ File Format
 String
 \\
 \hline
+AH-1
+&
+ah1
+\\
+\hline
+AH-2
+&
+ah2
+\\
+\hline
 GeoCSV, time-sample pair
 &
 geocsv
@@ -688,6 +685,11 @@ sac
 SEG Y (rev 0 or rev 1)
 &
 segy
+\\
+\hline
+SUDS
+&
+suds
 \\
 \hline
 UW
@@ -740,7 +742,7 @@ win32 channel info filestr
 \hline
 full
 &
-sac
+ah1, ah2
 &
 Bool
 &
@@ -748,6 +750,9 @@ false
 &
 read full header into \sphinxstylestrong{:misc}?
 \\
+\hline&
+sac
+&&&\\
 \hline&
 segy
 &&&\\
@@ -801,7 +806,7 @@ byte swap?
 \hline
 v
 &
-mseed
+ah
 &
 Int64
 &
@@ -809,6 +814,9 @@ Int64
 &
 verbosity
 \\
+\hline&
+mseed
+&&&\\
 \hline&
 uw
 &&&\\
@@ -887,21 +895,22 @@ Assign new channels an initial size of \sphinxcode{\sphinxupquote{nx\_new}} samp
 
 \subsection{Format Descriptions and Notes}
 \label{\detokenize{src/Formats/fileformats:format-descriptions-and-notes}}
-\sphinxhref{http://geows.ds.iris.edu/documents/GeoCSV.pdf}{GeoCSV}: an extension of “human-readable”, tabular file format Comma-
-Separated Values (CSV).
+\sphinxstylestrong{AH} (Ad-Hoc) was developed as a machine-independent seismic data format
+based on External Data Representation (XDR).
+
+\sphinxhref{http://geows.ds.iris.edu/documents/GeoCSV.pdf}{GeoCSV}: an extension of
+“human-readable”, tabular file format Comma-Separated Values (CSV).
 
 \sphinxstylestrong{Lennartz ASCII}: ASCII output of Lennartz portable digitizers.
 
-\sphinxhref{https://www.passcal.nmt.edu/content/seg-y-what-it-is}{PASSCAL}: A single-channel variant SEG Y format developed by PASSCAL/New
-Mexico Tech and commonly used with PASSCAL field equipment. PASSCAL differs from
-SEG Y in that PASSCAL format uses neither file headers nor extended textural
-headers, and the number of samples per trace can exceed 32767.
+\sphinxhref{https://www.passcal.nmt.edu/content/seg-y-what-it-is}{PASSCAL}: A single-
+channel variant of SEG Y with no file header, developed by PASSCAL/New Mexico
+Tech and used with PASSCAL field equipment through the late 2000s.
 
 \sphinxhref{https://www.fdsn.org/seed\_manual/SEEDManual\_V2.4.pdf}{SEED}: SEED stands for
 Standard for the Exchange of Earthquake Data; used by the International
 Federation of Digital Seismograph Networks (FDSN) as an omnibus seismic data
-standard. mini-SEED is a data-only variant that uses only data blockettes
-and allows longer data records.
+standard. mini-SEED is a data-only variant that uses only data blockettes.
 
 \sphinxhref{https://ds.iris.edu/files/sac-manual/manual/file\_format.html}{SAC}: the
 Seismic Analysis Code data format, originally developed for the eponymous
@@ -911,30 +920,29 @@ programming language.
 \sphinxhref{http://wiki.seg.org/wiki/SEG\_Y}{SEG Y}: Society of Exploration Geophysicists
 data format. Common in the energy industry, developed and maintained by the SEG.
 Only SEG Y rev 0 and \sphinxhref{https://seg.org/Portals/0/SEG/News\%20and\%20Resources/Technical\%20Standards/seg\_y\_rev1.pdf}{rev 1}
-with standard headers are supported. Note that IBM Float support is not yet
-implemented.
+with standard headers are supported.
 
 \sphinxstylestrong{UW}: the University of Washington data format has no online reference and is
 no longer in use. Created by the Pacific Northwest Seismic Network for event
 archival; used from the 1970s through early 2000s. A UW event is described by a
 pickfile and corresponding data file, whose names are identical except for the
-last character; for example, files 99062109485o and 99062109485W describe event
-99062109485. Unlike the win32 data format, the data file is self-contained; the
-pick file is not required to use raw trace data. However, like the win32 data
-format, instrument locations are stored in an external human-maintained text
-file. Only UW-2 data files are supported by SeisIO; we have never encountered a
-UW-1 data file outside of Exabyte tapes and have no reason to suspect that any
-remain in circulation.
+last character; for example, files 99062109485o and 99062109485W together
+describe event 99062109485. Unlike the win32 data format, the data file is
+self-contained; the pick file is not required to use raw trace data. However,
+like the win32 data format, instrument locations are stored in an external
+human-maintained text file. Only UW-2 data files are supported by SeisIO; we
+have never encountered a UW-1 data file outside of Exabyte tapes and have no
+reason to suspect that any remain in circulation.
 
 \sphinxhref{http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html}{Win32}: data format developed
-by the NIED (National Research Institute for Earth Science and Disaster Prevention),
-Japan.  Data are typically divided into files that contain a minute of continuous
+by the Earthquake Research Institute (ERI), University of Tokyo, Japan. Data
+are typically divided into files that contain a minute of continuous
 data from several channels. Data within each file are stored by channel in
 one-second segments as variable-precision delta-encoded integers. Channel
 information is retrieved from an external channel information file. Although
-accurate channel files are needed to use win32 data, these files are not strictly
-controlled by any central authority and inconsistencies in channel parameters,
-particularly gains, are known to exist.
+accurate channel files are needed to use win32 data, these files are not
+strictly controlled by any central authority. Inconsistencies in channel
+parameters, particularly gains, are known to exist.
 
 
 \subsection{Other File I/O Functions}
@@ -995,6 +1003,93 @@ time stamps; this will flag the file as generic x-y data in the SAC interpreter.
 Write SeisIO data to fname. Multiple objects can be written at once.
 
 
+\section{XML Meta-Data}
+\label{\detokenize{src/Formats/xml:xml-meta-data}}\label{\detokenize{src/Formats/xml:xml}}\label{\detokenize{src/Formats/xml::doc}}
+SeisIO can parse the following XML metadata formats:
+* QuakeML Version 1.2 (Quake submodule)
+* StationXML Version 1.1
+
+
+\subsection{StationXML}
+\label{\detokenize{src/Formats/xml:stationxml}}\index{read\_sxml() (built-in function)@\spxentry{read\_sxml()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Formats/xml:read_sxml}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{read\_sxml}}}{\emph{fpat}\sphinxoptional{, \emph{KWs}}}{}
+\end{fulllineitems}
+
+
+Read FDSN StationXML files matching string pattern \sphinxstylestrong{fpat} into a new SeisData
+object.
+
+\begin{DUlineblock}{0em}
+\item[] Keywords:
+\item[] \sphinxcode{\sphinxupquote{s}}: start time. Format “YYYY-MM-DDThh:mm:ss”, e.g., “0001-01-01T00:00:00”.
+\item[] \sphinxcode{\sphinxupquote{t}}: termination (end) time. Format “YYYY-MM-DDThh:mm:ss”.
+\item[] \sphinxcode{\sphinxupquote{msr}}: (Bool) read instrument response info as MultiStageResp?
+\end{DUlineblock}
+
+\begin{DUlineblock}{0em}
+\item[] \sphinxstylestrong{How often is MultiStageResp needed?}
+\item[] Virtually never.
+\end{DUlineblock}
+
+By default, the \sphinxstylestrong{:resp} field of each channel contains a simple instrument
+response with poles, zeros, sensitivity (\sphinxstylestrong{:a0}), and sensitivity frequency
+(\sphinxstylestrong{:f0}). Very few use cases require more detail than this.
+
+The option \sphinxstylestrong{msr=true} processes XML files to give full response information
+at every documented stage of the acquisition process: sampling, digitization,
+FIR filtering, decimation, etc.
+
+
+\subsection{QuakeML}
+\label{\detokenize{src/Formats/xml:quakeml}}
+
+\begin{fulllineitems}
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{read\_qml}}}{\emph{fpat}}{}
+\end{fulllineitems}
+
+
+Read QuakeML files matching string pattern \sphinxstylestrong{fpat}. Returns a tuple containing
+an array of \sphinxstylestrong{SeisHdr} objects \sphinxstylestrong{H} and an array of \sphinxstylestrong{SeisSrc} objects \sphinxstylestrong{R}.
+Each pair (H{[}i{]}, R{[}i{]}) describes the preferred location (origin, SeisHdr) and
+event source (focal mechanism or moment tensor, SeisSrc) of event \sphinxstylestrong{i}.
+
+If multiple focal mechanisms, locations, or magnitudes are present in a single
+Event element of the XML file(s), the following rules are used to select one of
+each per event:
+
+\begin{DUlineblock}{0em}
+\item[] \sphinxstylestrong{FocalMechanism}
+\item[]
+\begin{DUlineblock}{\DUlineblockindent}
+\item[] 1. \sphinxstylestrong{preferredFocalMechanismID} if present
+\item[] 2. Solution with best-fitting moment tensor
+\item[] 3. First \sphinxstylestrong{FocalMechanism} element
+\item[] 
+\end{DUlineblock}
+\item[] \sphinxstylestrong{Magnitude}
+\item[]
+\begin{DUlineblock}{\DUlineblockindent}
+\item[] 1. \sphinxstylestrong{preferredMagnitudeID} if present
+\item[] 2. Magnitude whose ID matches \sphinxstylestrong{MomentTensor/derivedOriginID}
+\item[] 3. Last moment magnitude (lowercase scale name begins with “mw”)
+\item[] 4. First \sphinxstylestrong{Magnitude} element
+\item[] 
+\end{DUlineblock}
+\item[] \sphinxstylestrong{Origin}
+\item[]
+\begin{DUlineblock}{\DUlineblockindent}
+\item[] 1. \sphinxstylestrong{preferredOriginID} if present
+\item[] 2. \sphinxstylestrong{derivedOriginID} from the chosen \sphinxstylestrong{MomentTensor} element
+\item[] 3. First \sphinxstylestrong{Origin} element
+\end{DUlineblock}
+\end{DUlineblock}
+
+Non-essential QuakeML data are saved to \sphinxtitleref{misc} in each SeisHdr or SeisSrc object
+as appropriate.
+
+
 \chapter{Web}
 \label{\detokenize{index:web}}
 
@@ -1029,8 +1124,10 @@ real-time streaming, see {\hyperref[\detokenize{src/Web/seedlink:seedlink-sectio
 \item[] Keyword arguments; see also {\hyperref[\detokenize{src/Appendices/keywords:dkw}]{\sphinxcrossref{\DUrole{std,std-ref}{SeisIO standard KWs}}}} or type \sphinxcode{\sphinxupquote{?SeisIO.KW}}.
 \item[] Standard keywords: fmt, nd, opts, rad, reg, si, to, v, w, y
 \item[] Other keywords:
+\item[] \sphinxcode{\sphinxupquote{msr}}: get instrument responses as MultiStageResonse? (FDSN only)
 \item[] \sphinxcode{\sphinxupquote{s}}: Start time
 \item[] \sphinxcode{\sphinxupquote{t}}: Termination (end) time
+\item[] \sphinxcode{\sphinxupquote{xf}}: XML file name for station XML
 \end{DUlineblock}
 
 
@@ -2090,10 +2187,10 @@ TauP manual: \sphinxurl{http://www.seis.sc.edu/downloads/TauP/taup.pdf}
 \end{fulllineitems}
 
 
-Read QuakeML files matching string pattern \sphinxtitleref{fpat}. Returns a tuple containing
-an array of \sphinxtitleref{SeisHdr} objects and an array of \sphinxtitleref{SeisSrc} objects, such that the
-\sphinxtitleref{i{}`th entry of each array is the preferred location (origin) and event source
-(focal mechanism or moment tensor) of event {}`i}.
+Read QuakeML files matching string pattern \sphinxstylestrong{fpat}. Returns a tuple containing
+an array of \sphinxstylestrong{SeisHdr} objects \sphinxstylestrong{H} and an array of \sphinxstylestrong{SeisSrc} objects \sphinxstylestrong{R}.
+Each pair (H{[}i{]}, R{[}i{]}) describes the preferred location (origin, SeisHdr) and
+event source (focal mechanism or moment tensor, SeisSrc) of event \sphinxstylestrong{i}.
 
 If multiple focal mechanisms, locations, or magnitudes are present in a single
 Event element of the XML file(s), the following rules are used to select one of
