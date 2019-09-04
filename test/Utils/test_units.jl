@@ -6,6 +6,12 @@ for u in SeisIO.RandSeis.irregular_units
   @test(vucum(u))
   @test units2ucum(u) == u
 end
+S = randSeisData()
+isv = validate_units(S)
+@test isv == trues(S.n)
+
+C = S[1]
+@test validate_units(C)
 @test_logs (:warn, "Error thrown for unit string: meters per second") SeisIO.vucum("meters per second")
 @test vucum("m/s^2") == false
 

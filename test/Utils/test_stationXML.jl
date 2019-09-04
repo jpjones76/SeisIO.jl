@@ -82,6 +82,7 @@ end
 @test r.stage[9].a == []
 
 printstyled("  station XML with read_sxml\n", color=:light_green)
+S = read_sxml(xml_stfile)
 T = read_sxml(xml_stpat)
 @assert T.n > S.n
 @test findid(T.id[S.n+1], S.id) == 0

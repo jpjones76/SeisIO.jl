@@ -74,6 +74,17 @@ for i = 1:5
   T = pull(S,r)
   @test isa(T, SeisChannel)
   @test(U == S)
+
+  S = randSeisData(5)
+  C = S[1]
+  @test firstindex(S) == 1
+  @test S[firstindex(S)] == S[1] == C
+
+  push!(S, SeisChannel())
+  T = prune(S)
+  prune!(S)
+  @test S == T
+  @test S.n == T.n == 5
 end
 
 H = randSeisHdr()
@@ -136,26 +147,6 @@ prune!(S)
 J = findchan("EHZ",S)
 @test (6 in J)
 
-printstyled(stdout,"    show\n", color=:light_green)
-redirect_stdout(out) do
-  # show
-  show(breaking_seis())
-  show(randSeisData(1))
-  show(SeisChannel())
-  show(SeisData())
-  show(randSeisChannel())
-
-  # summary
-  summary(randSeisChannel())
-  summary(randSeisData())
-
-  # invoke help-only functions
-  @test seed_support() == nothing
-  @test chanspec() == nothing
-  @test mseed_support() == nothing
-  @test timespec() == nothing
-end
-
 printstyled("  SeisChannel methods\n", color=:light_green)
 
 id = "UW.SEP..EHZ"
@@ -172,3 +163,7 @@ S = SeisData(Ch)
 @test findid(Ch, S) == 1
 @test sizeof(Ch) > 0
 @test lastindex(S) == 1
+
+Ch.gain = 1.0
+Ch.fs = 0.0
+@test isempty(Ch) == false

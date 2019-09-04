@@ -29,6 +29,7 @@ sta_matrix = vcat(["UW" "LON" "" "BHZ"],["UW" "LON" "" "BHE"])
 test_sta = deepcopy(sta_matrix)
 redirect_stdout(out) do
   T = get_data("IRIS", sta_matrix, s=-600, t=0, v=2, fmt="audio")
+  T = get_data("IRIS", sta_matrix, s=-600, t=0, v=2, fmt="ascii")
 end
 
 @test sta_matrix == test_sta
