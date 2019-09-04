@@ -57,7 +57,7 @@ end
 # p = linreg(x, fs)
 function linreg(x::AbstractArray{T,1}, dt::Float64) where T
   n = length(x)
-  t = dt:dt:n*dt
+  t = (1:n)*dt
   st = sum(t)
   sx = sum(x)
   stt = dot(t,t)
@@ -78,4 +78,6 @@ corrected to be consistent with other routines
 * polyfit now allows order n=0 and takes any Integer for n; n=0 returns the mean
 2019-08-19
 * added linreg for low-memory linear regression; identical to SAC detrend
+2019-09-03
+* bug fix for rare situation where float precision led to length(t) != length(x)
 =#
