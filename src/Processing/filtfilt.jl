@@ -200,7 +200,7 @@ function filtfilt!(S::GphysData;
   Y = Array{yy,1}(undef, max(N, 6*p) + 2*p) # right value for Butterworth
 
   # Get groups
-  GRPS = get_unique(S, ["fs", "eltype"], chans=chans)
+  GRPS = get_unique(S, ["fs", "eltype"], chans)
 
   for grp in GRPS
 
