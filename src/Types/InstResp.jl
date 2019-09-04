@@ -570,4 +570,4 @@ end
 
 sizeof(R::MultiStageResp) = 64 +
   sum([sizeof(getfield(R, f)) for f in (:fs, :gain, :fg, :delay, :corr, :factor, :offset)]) +
-  sum([sizeof(i) for i in R.stage])
+  sum([sizeof(R.stage[i]) for i = 1:length(R.stage)])
