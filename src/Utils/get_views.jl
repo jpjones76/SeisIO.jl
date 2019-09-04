@@ -17,7 +17,6 @@ function get_views(S::GphysData, inds::Array{Int64,1})
   L = L[ii]
   return L,X
 end
-get_views(S::GphysData) = get_views(S, collect(1:S.n))
 
 function get_views(C::GphysChannel)
   L = Array{Int64,1}(undef,0)
