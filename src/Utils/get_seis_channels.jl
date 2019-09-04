@@ -35,7 +35,7 @@ function get_seis_channels(S::GphysData;
     for j = L:-1:1
       if id[j] == '.'
         j > L-2 && break
-        if id[j+2] in seis_inst_codes
+        if (id[j+2] in seis_inst_codes)
           keep[n] = true
           break
         end
@@ -64,13 +64,7 @@ like detrend! and taper! are sane) include D, G, H, J, L, M, N, P, Z.
 ### See Also
 get_inst_codes
 """ filt_seis_chans!
-function filt_seis_chans!(chans::Union{Integer, UnitRange, Array{Int64,1}}, S::GphysData)
-
-  if typeof(chans) == UnitRange
-    chans = Int64.(collect(chans))
-  elseif typeof(chans) <: Integer
-    chans = [Int64(chans)]
-  end
+function filt_seis_chans!(chans::Array{Int64,1}, S::GphysData)
 
   @inbounds for n = length(chans):-1:1
     id = S.id[chans[n]]
@@ -78,7 +72,7 @@ function filt_seis_chans!(chans::Union{Integer, UnitRange, Array{Int64,1}}, S::G
     for j = L:-1:1
       if id[j] == '.'
         j > L-2 && deleteat!(chans, n)
-        if id[j+2] in seis_inst_codes == false
+        if (id[j+2] in seis_inst_codes) == false
             deleteat!(chans, n)
         end
         break
@@ -89,10 +83,3 @@ function filt_seis_chans!(chans::Union{Integer, UnitRange, Array{Int64,1}}, S::G
   end
   return nothing
 end
-#
-# @doc (@doc filt_seis_chans!)
-# function filt_seis_chans(chans::Union{Integer, UnitRange, Array{Int64,1}}, S::GphysData)
-#   CC = deepcopy(chans)
-#   filt_seis_channels!(CC, S)
-#   return CC
-# end
