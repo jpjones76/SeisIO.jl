@@ -1,6 +1,5 @@
-xml_evfile1 = path*"/SampleFiles/fdsnws-event_2017-01-12T03-18-55Z.xml"
-xml_evfile2 = path*"/SampleFiles/ISC_2011-tohoku-oki.xml"
 xml_stfile = path*"/SampleFiles/fdsnws-station_2017-01-12T03-17-42Z.xml"
+xml_stpat = path*"/SampleFiles/fdsnws-station*"
 id_err = "error in Station ID creation!"
 unit_err = "units don't match instrument code!"
 true_id = String["3337497", "3279407", "2844986", "2559759", "2092067", "1916079", "2413"]
@@ -81,3 +80,8 @@ end
 @test r.corr[6] == 7.5E-4
 @test r.stage[9].b[6:9] == [-0.0000000298023, -0.0000000298023, -0.0000000298023, 0.0]
 @test r.stage[9].a == []
+
+printstyled("  station XML with read_sxml\n", color=:light_green)
+T = read_sxml(xml_stpat)
+@assert T.n > S.n
+@test findid(T.id[S.n+1], S.id) == 0
