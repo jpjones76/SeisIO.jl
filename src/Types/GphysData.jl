@@ -75,7 +75,7 @@ end
 
 lastindex(S::T) where {T<:GphysData} = getfield(S, :n)
 firstindex(S::T) where {T<:GphysData} = 1
-size(S::T) where {T<:GphysData} = (getfield(S, :n),)
+length(S::T) where {T<:GphysData} = (getfield(S, :n),)
 in(s::String, S::GphysData) = in(s, getfield(S, :id))
 
 function getindex(S::T, J::Array{Int,1}) where {T<:GphysData}
@@ -215,7 +215,7 @@ function prune!(S::GphysData)
   return nothing
 end
 @doc (@doc prune!)
-prune(S::T) where {T<:GphysData} = prune!(deepcopy(S))
+prune(S::T) where {T<:GphysData} = (U = deepcopy(S); prune!(U); return U)
 # ============================================================================
 # delete!
 function delete!(S::T, s::Union{Regex,String}; exact=true::Bool) where {T<:GphysData}
