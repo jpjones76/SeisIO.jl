@@ -64,7 +64,7 @@ redirect_stdout(out) do
   @test getindex(R.resp, 3) == v == getindex(R, 3, 1)
   @test real(getindex(R.resp, 4, 2)) == 1.0
 
-  for T in subtypes(InstrumentResponse)
+  for T in InteractiveUtils.subtypes(InstrumentResponse)
     R = T()
     @test isempty(R) == true
     show(stdout, R)
