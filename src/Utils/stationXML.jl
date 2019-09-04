@@ -1,3 +1,5 @@
+export read_sxml
+
 function full_resp(xe::XMLElement)
   resp = MultiStageResp()
   ns = 0
@@ -383,5 +385,47 @@ function FDSN_sta_xml(xmlf::String;
     # end network level
   end
   free(xdoc)
+  return S
+end
+
+"""
+    S = read_sxml(xml_file [, KWs ])
+
+Read FDSN StationXML file `xml_file` into SeisData object S.
+
+### Keywords
+* `s`::String: start time. Format "YYYY-MM-DDThh:mm:ss", e.g., "0001-01-01T00:00:00".
+* `t`::String: termination (end) time. Format "YYYY-MM-DDThh:mm:ss".
+* `msr`::Bool: read instrument response info as MultiStageResp? (Default: false)
+"""
+function read_sxml(fpat::String;
+                   s::String="0001-01-01T00:00:00",
+                   t::String="9999-12-31T23:59:59",
+                   msr::Bool=false)
+
+
+
+  if safe_isfile(fpat)
+    io = open(fpat, "r")
+    xsta = read(io, String)
+    close(io)
+    S = FDSN_sta_xml(xsta, s=s, t=t, msr=msr)
+  else
+    files = ls(fpat)
+    if length(files) > 0
+      io = open(files[1], "r")
+      xsta = read(io, String)
+      close(io)
+      S = FDSN_sta_xml(xsta, s=s, t=t, msr=msr)
+      if length(files) > 1
+        for i = 2:length(files)
+          io = open(files[i], "r")
+          xsta = read(io, String)
+          close(io)
+          append!(S, FDSN_sta_xml(xsta, s=s, t=t, msr=msr))
+        end
+      end
+    end
+  end
   return S
 end
