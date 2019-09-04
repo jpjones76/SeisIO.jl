@@ -1,0 +1,15 @@
+README
+* UW_data_format.pdf was found in a tarball for the UW file interface, assembled
+by Prof. Steve Malone (steve@ess.washington.edu) on request from Dr. Joshua
+Jones (jpjones.gphys@gmail.com), created 2016-03-03.
+
+* uwdfif.pdf is the Unix manual page (manpage) for uwdfif, converted from
+{tarball_root}/Utils/Uwdfif/Doc/temp.ps, created 1996-06-25.
+
+
+Addendum
+I'm unable to ask questions about this data format: neither Steve Malone nor
+Bob Crosson responds to my emails anymore. I'll provide the source tarball sent
+to me 2016-03-03 by Steve Malone upon request.
+
+-J. Jones, 2019-09-03

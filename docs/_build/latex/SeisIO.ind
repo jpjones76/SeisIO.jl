@@ -5,79 +5,80 @@
 \let\spxextra \sphinxstyleindexextra
 
   \bigletter C
-  \item \spxentry{chanspec()}\spxextra{built-in function}, \hyperpage{51}
+  \item \spxentry{chanspec()}\spxextra{built-in function}, \hyperpage{53}
 
   \indexspace
   \bigletter D
-  \item \spxentry{d2u()}\spxextra{built-in function}, \hyperpage{35}
+  \item \spxentry{d2u()}\spxextra{built-in function}, \hyperpage{37}
 
   \indexspace
   \bigletter E
-  \item \spxentry{EQLoc()}\spxextra{built-in function}, \hyperpage{29}
-  \item \spxentry{EQMag()}\spxextra{built-in function}, \hyperpage{29}
-  \item \spxentry{EventChannel()}\spxextra{built-in function}, \hyperpage{29}
-  \item \spxentry{EventTraceData()}\spxextra{built-in function}, \hyperpage{29}
+  \item \spxentry{EQLoc()}\spxextra{built-in function}, \hyperpage{31}
+  \item \spxentry{EQMag()}\spxextra{built-in function}, \hyperpage{31}
+  \item \spxentry{EventChannel()}\spxextra{built-in function}, \hyperpage{31}
+  \item \spxentry{EventTraceData()}\spxextra{built-in function}, \hyperpage{31}
 
   \indexspace
   \bigletter F
-  \item \spxentry{fctopz()}\spxextra{built-in function}, \hyperpage{35}
-  \item \spxentry{FDSNevt()}\spxextra{built-in function}, \hyperpage{30}
-  \item \spxentry{find\_regex()}\spxextra{built-in function}, \hyperpage{35}
+  \item \spxentry{fctopz()}\spxextra{built-in function}, \hyperpage{37}
+  \item \spxentry{FDSNevt()}\spxextra{built-in function}, \hyperpage{32}
+  \item \spxentry{find\_regex()}\spxextra{built-in function}, \hyperpage{37}
   \item \spxentry{findchan()}\spxextra{built-in function}, \hyperpage{7}
   \item \spxentry{findid()}\spxextra{built-in function}, \hyperpage{7}
 
   \indexspace
   \bigletter G
-  \item \spxentry{gcdist()}\spxextra{built-in function}, \hyperpage{32}
-  \item \spxentry{get\_pha()}\spxextra{built-in function}, \hyperpage{31}
-  \item \spxentry{getbandcode()}\spxextra{built-in function}, \hyperpage{35}
+  \item \spxentry{gcdist()}\spxextra{built-in function}, \hyperpage{34}
+  \item \spxentry{get\_pha()}\spxextra{built-in function}, \hyperpage{33}
+  \item \spxentry{getbandcode()}\spxextra{built-in function}, \hyperpage{37}
 
   \indexspace
   \bigletter H
-  \item \spxentry{has\_sta()}\spxextra{built-in function}, \hyperpage{18}
-  \item \spxentry{has\_stream()}\spxextra{built-in function}, \hyperpage{19}
+  \item \spxentry{has\_sta()}\spxextra{built-in function}, \hyperpage{21}
+  \item \spxentry{has\_stream()}\spxextra{built-in function}, \hyperpage{21}
 
   \indexspace
   \bigletter J
-  \item \spxentry{j2md()}\spxextra{built-in function}, \hyperpage{35}
+  \item \spxentry{j2md()}\spxextra{built-in function}, \hyperpage{37}
 
   \indexspace
   \bigletter L
-  \item \spxentry{ls()}\spxextra{built-in function}, \hyperpage{35}
+  \item \spxentry{ls()}\spxextra{built-in function}, \hyperpage{37}
 
   \indexspace
   \bigletter M
-  \item \spxentry{md2j()}\spxextra{built-in function}, \hyperpage{35}
+  \item \spxentry{md2j()}\spxextra{built-in function}, \hyperpage{37}
 
   \indexspace
   \bigletter P
-  \item \spxentry{parsetimewin()}\spxextra{built-in function}, \hyperpage{36}
-  \item \spxentry{PhaseCat()}\spxextra{built-in function}, \hyperpage{29}
+  \item \spxentry{parsetimewin()}\spxextra{built-in function}, \hyperpage{38}
+  \item \spxentry{PhaseCat()}\spxextra{built-in function}, \hyperpage{31}
 
   \indexspace
   \bigletter R
-  \item \spxentry{randPhaseCat()}\spxextra{built-in function}, \hyperpage{32}
-  \item \spxentry{randSeisChannel()}\spxextra{built-in function}, \hyperpage{33}
-  \item \spxentry{randSeisData()}\spxextra{built-in function}, \hyperpage{33}
-  \item \spxentry{randSeisEvent()}\spxextra{built-in function}, \hyperpage{33}
-  \item \spxentry{randSeisHdr()}\spxextra{built-in function}, \hyperpage{33}
-  \item \spxentry{randSeisSrc()}\spxextra{built-in function}, \hyperpage{33}
-  \item \spxentry{read\_qml()}\spxextra{built-in function}, \hyperpage{31}
-  \item \spxentry{readuwevt()}\spxextra{built-in function}, \hyperpage{32}
-  \item \spxentry{rseis()}\spxextra{built-in function}, \hyperpage{13}
+  \item \spxentry{randPhaseCat()}\spxextra{built-in function}, \hyperpage{34}
+  \item \spxentry{randSeisChannel()}\spxextra{built-in function}, \hyperpage{35}
+  \item \spxentry{randSeisData()}\spxextra{built-in function}, \hyperpage{35}
+  \item \spxentry{randSeisEvent()}\spxextra{built-in function}, \hyperpage{35}
+  \item \spxentry{randSeisHdr()}\spxextra{built-in function}, \hyperpage{35}
+  \item \spxentry{randSeisSrc()}\spxextra{built-in function}, \hyperpage{35}
+  \item \spxentry{read\_qml()}\spxextra{built-in function}, \hyperpage{33}
+  \item \spxentry{read\_sxml()}\spxextra{built-in function}, \hyperpage{14}
+  \item \spxentry{readuwevt()}\spxextra{built-in function}, \hyperpage{34}
+  \item \spxentry{rseis()}\spxextra{built-in function}, \hyperpage{14}
 
   \indexspace
   \bigletter S
-  \item \spxentry{sachdr()}\spxextra{built-in function}, \hyperpage{13}
-  \item \spxentry{segyhdr()}\spxextra{built-in function}, \hyperpage{13}
-  \item \spxentry{seis\_www()}\spxextra{built-in function}, \hyperpage{52}
-  \item \spxentry{SeisEvent()}\spxextra{built-in function}, \hyperpage{29}
-  \item \spxentry{SeisHdr()}\spxextra{built-in function}, \hyperpage{29}
-  \item \spxentry{SeisPha()}\spxextra{built-in function}, \hyperpage{29}
-  \item \spxentry{SeisSrc()}\spxextra{built-in function}, \hyperpage{30}
-  \item \spxentry{show\_phases()}\spxextra{built-in function}, \hyperpage{32}
-  \item \spxentry{SL\_info()}\spxextra{built-in function}, \hyperpage{18}
-  \item \spxentry{SourceTime()}\spxextra{built-in function}, \hyperpage{30}
+  \item \spxentry{sachdr()}\spxextra{built-in function}, \hyperpage{14}
+  \item \spxentry{segyhdr()}\spxextra{built-in function}, \hyperpage{14}
+  \item \spxentry{seis\_www()}\spxextra{built-in function}, \hyperpage{54}
+  \item \spxentry{SeisEvent()}\spxextra{built-in function}, \hyperpage{31}
+  \item \spxentry{SeisHdr()}\spxextra{built-in function}, \hyperpage{31}
+  \item \spxentry{SeisPha()}\spxextra{built-in function}, \hyperpage{31}
+  \item \spxentry{SeisSrc()}\spxextra{built-in function}, \hyperpage{32}
+  \item \spxentry{show\_phases()}\spxextra{built-in function}, \hyperpage{34}
+  \item \spxentry{SL\_info()}\spxextra{built-in function}, \hyperpage{20}
+  \item \spxentry{SourceTime()}\spxextra{built-in function}, \hyperpage{32}
 
   \indexspace
   \bigletter T
@@ -85,9 +86,9 @@
 
   \indexspace
   \bigletter U
-  \item \spxentry{u2d()}\spxextra{built-in function}, \hyperpage{36}
+  \item \spxentry{u2d()}\spxextra{built-in function}, \hyperpage{38}
   \item \spxentry{uwdf()}\spxextra{built-in function}, \hyperpage{14}
-  \item \spxentry{uwpf()}\spxextra{built-in function}, \hyperpage{32}
+  \item \spxentry{uwpf()}\spxextra{built-in function}, \hyperpage{34}
 
   \indexspace
   \bigletter W

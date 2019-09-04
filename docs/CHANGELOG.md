@@ -3,6 +3,23 @@ The current set of updates, leading to v0.4.0, will focus on:
 2. expanded file format support
 3. expanded data acquisition options
 
+### 2019-09-03
+* Added two new Instrument Response (`:resp`) types: `CoeffResp` and
+`MultiStageResp`. These allow full descriptions of multi-stage instrument
+responses in FDSN XML files.
+  + Full multi-stage instrument responses can be requested in `get_data` and
+  `FDSNsta` by passing keyword `msr=true`.
+  + `translate_resp` works on channels with `MultiStageResp` responses, but
+  only modifies the *first* listed stage in the response, and only if the first
+  stage is of Type `PZResp` or `PZResp64`.
+* Added `read_sxml` to read Station XML files; this functionality has existed
+since 2016 but was never exported in a way that could parse files with one 
+command.
+* Public documentation on low-level file formats has been copied into docs/desc
+
+### 2019-08-31
+* Added read/write support for SACPZ files.
+
 ### 2019-08-30
 * Added function `guess` to guess data file format and endianness.
 * `read_data` methods have been extended to take either one or two Strings as

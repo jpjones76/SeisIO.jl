@@ -115,10 +115,10 @@ QuakeML Reader
 
 .. function:: read_qml(fpat::String)
 
-Read QuakeML files matching string pattern `fpat`. Returns a tuple containing
-an array of `SeisHdr` objects and an array of `SeisSrc` objects, such that the
-`i`th entry of each array is the preferred location (origin) and event source
-(focal mechanism or moment tensor) of event `i`.
+Read QuakeML files matching string pattern **fpat**. Returns a tuple containing
+an array of **SeisHdr** objects **H** and an array of **SeisSrc** objects **R**.
+Each pair (H[i], R[i]) describes the preferred location (origin, SeisHdr) and
+event source (focal mechanism or moment tensor, SeisSrc) of event **i**.
 
 If multiple focal mechanisms, locations, or magnitudes are present in a single
 Event element of the XML file(s), the following rules are used to select one of

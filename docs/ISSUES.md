@@ -7,7 +7,16 @@ include a text dump with the error message.
 sometimes appears to close connections immediately without returning data.
 * `FDSNevq` makes no checks for redundant events; using keyword `src="all"` is
 likely to yield duplicates.
-* SEG Y data in IBM-Float format does not read correctly. (Note, IBM-Float != IEEE-Float. SEG Y is one of the last file formats in the world that can use IBM-Float)
+
+## Unsupported or Incomplete
+* SEG Y
+  + IBM Float data encoding (note: IBM Float != IEEE Float)
+  + SEG Y rev 2
+* SUDS
+  + We cannot support additional header types unless example files containing
+those types are provided, along with expected values for tests. Due to the
+*many* errors in this format's documentation, there is no more reliable way to
+determine whether or not our readers are coded correctly.
 
 ## External to SeisIO
 1. Some data channels IDs in SeedLink are not unique, or are duplicates with
@@ -31,3 +40,6 @@ issues.
     to 28 Hz.
     + As of 2019-08-14, we have not tested whether the OMNI-X-LT response
     curve (i.e., with fc = 15.0 Hz) is a better fit to the data.
+3. SEG Y files with header variables in places that don't match the SEG standard
+will not read. This is not a bug with SeisIO; this is a problem with industry
+storing headers in nonstandard locations as a crude means of data protection.

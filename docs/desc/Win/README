@@ -1,0 +1,21 @@
+The provenance of file win32-Japanese_seismic_data_format.pdf is unknown; it is
+hard to Google search for a data format named "win32". Issues with the format
+description are below.
+
+LOW-LEVEL DESCRIPTION OMISSIONS AND ERRORS
+All integers in the file header are unsigned except as noted.
+
+FIELD   FIELD NAME      ERROR/OMISSION
+10      Sampling size   (1) OMITTED: This is a 4-bit code.
+                        (2) OMITTED: All data types represented by these codes
+                            are two's-complement signed integers.
+                        (3) ERROR: The codes given in the PDF are incorrect.
+                            The correct code-data correspondence is:
+                            0 = 4-bit integer
+                            1 = 8-bit integer
+                            2 = 16-bit integer
+                            3 = 32-bit integer packed to 24 bits
+                            4 = 32-bit integer
+11      Number of       OMITTED: if sampling size code = 0, then this value
+        samples         must be incremented by one to account for the half-byte
+                        padding described in PDF note 2)
