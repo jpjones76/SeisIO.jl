@@ -100,7 +100,7 @@ function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
   io = open(xf, "r")
   xsta = read(io, String)
   close(io)
-  S = FDSN_sta_xml(xsta, msr=msr)
+  S = FDSN_sta_xml(xsta, msr=msr, v=v)
   return S
 end
 

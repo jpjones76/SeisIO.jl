@@ -138,6 +138,7 @@ end
 function FDSN_sta_xml(xmlf::String;
                        s::String="0001-01-01T00:00:00",
                        t::String="9999-12-31T23:59:59",
+                       v::Int64=KW.v,
                        msr::Bool=false)
 
   # if length(xmlf) < 256
@@ -338,7 +339,7 @@ function FDSN_sta_xml(xmlf::String;
 
                       # channel id
                       c_id = join([nn, ss, ll, cc], ".")
-                      if findid(c_id, S) > 0
+                      if findid(c_id, S) > 0 && (v > 0)
                         @warn(string("Redundant channel ", c_id, ": overwriting with latest channel info."))
                       end
                     end
@@ -401,7 +402,8 @@ Read FDSN StationXML file `xml_file` into SeisData object S.
 function read_sxml(fpat::String;
                    s::String="0001-01-01T00:00:00",
                    t::String="9999-12-31T23:59:59",
-                   msr::Bool=false)
+                   msr::Bool=false,
+                   v::Int64=KW.v)
 
 
 
@@ -409,20 +411,20 @@ function read_sxml(fpat::String;
     io = open(fpat, "r")
     xsta = read(io, String)
     close(io)
-    S = FDSN_sta_xml(xsta, s=s, t=t, msr=msr)
+    S = FDSN_sta_xml(xsta, s=s, t=t, msr=msr, v=v)
   else
     files = ls(fpat)
     if length(files) > 0
       io = open(files[1], "r")
       xsta = read(io, String)
       close(io)
-      S = FDSN_sta_xml(xsta, s=s, t=t, msr=msr)
+      S = FDSN_sta_xml(xsta, s=s, t=t, msr=msr, v=v)
       if length(files) > 1
         for i = 2:length(files)
           io = open(files[i], "r")
           xsta = read(io, String)
           close(io)
-          append!(S, FDSN_sta_xml(xsta, s=s, t=t, msr=msr))
+          append!(S, FDSN_sta_xml(xsta, s=s, t=t, msr=msr, v=v))
         end
       end
     end
