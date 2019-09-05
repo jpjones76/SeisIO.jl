@@ -75,7 +75,7 @@ end
 
 lastindex(S::T) where {T<:GphysData} = getfield(S, :n)
 firstindex(S::T) where {T<:GphysData} = 1
-length(S::T) where {T<:GphysData} = (getfield(S, :n),)
+length(S::T) where {T<:GphysData} = S.n
 in(s::String, S::GphysData) = in(s, getfield(S, :id))
 
 function getindex(S::T, J::Array{Int,1}) where {T<:GphysData}
