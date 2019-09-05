@@ -63,6 +63,7 @@ redirect_stdout(out) do
   R[4,2] = 1.0
   @test getindex(R.resp, 3) == v == getindex(R, 3, 1)
   @test real(getindex(R.resp, 4, 2)) == 1.0
+  show(stdout, R)
 
   for T in (CoeffResp, GenResp, MultiStageResp, PZResp, PZResp64)
     R = T()
