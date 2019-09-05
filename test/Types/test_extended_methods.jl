@@ -79,6 +79,7 @@ for i = 1:5
   C = S[1]
   @test firstindex(S) == 1
   @test S[firstindex(S)] == S[1] == C
+  @test length(S) == S.n == lastindex(S)
 
   push!(S, SeisChannel())
   T = prune(S)
