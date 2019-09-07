@@ -79,7 +79,7 @@ function close_resp_channel!(S::SeisData, C::SeisChannel, ts::Int64, te::Int64, 
 end
 
 function add_stage!(C::SeisChannel, n::Int64, tfc::UInt8)
-  if isnothing(C.resp.stage[n])
+  if C.resp.stage[n] == nothing
     C.resp.stage[n] =
       if tfc == 0x41
         PZResp64()
