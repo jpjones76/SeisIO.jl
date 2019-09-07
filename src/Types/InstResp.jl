@@ -32,6 +32,8 @@ function resptyp2code(Resp::InstrumentResponse)
     0x03
   elseif T == MultiStageResp
     0x04
+  elseif T == Nothing
+    0xff
   else
     0x00
   end
@@ -50,6 +52,8 @@ function code2resptyp(c::UInt8)
     return CoeffResp
   elseif c == 0x04
     return MultiStageResp
+  elseif c == 0xff
+    return Nothing
   end
 end
 
@@ -422,7 +426,7 @@ function hash(R::CoeffResp)
 end
 
 sizeof(R::CoeffResp) = 32 + sizeof(getfield(R, :i)) + sizeof(getfield(R, :o)) + sizeof(getfield(R, :b)) + sizeof(getfield(R, :a))
-
+const RespStage = Union{CoeffResp, PZResp, PZResp64, GenResp, Nothing}
 """
     MultiStageResp
 
@@ -448,7 +452,7 @@ optional information indexed within each field by stage number:
 
 """
 mutable struct MultiStageResp <: InstrumentResponse
-  stage::Array{Union{CoeffResp, PZResp, PZResp64, GenResp},1}
+  stage::Array{RespStage,1}
   fs::Array{Float64,1}
   gain::Array{Float64,1}
   fg::Array{Float64,1}
@@ -457,7 +461,7 @@ mutable struct MultiStageResp <: InstrumentResponse
   factor::Array{Int64,1}
   offset::Array{Int64,1}
 
-  function MultiStageResp(stage::Array{Union{CoeffResp, PZResp, PZResp64, GenResp},1},
+  function MultiStageResp(stage::Array{RespStage,1},
                           fs::Array{Float64,1},
                           gain::Array{Float64,1},
                           fg::Array{Float64,1},
@@ -470,7 +474,7 @@ mutable struct MultiStageResp <: InstrumentResponse
 
   function MultiStageResp()
     return new(
-        Array{Union{CoeffResp, PZResp, PZResp64, GenResp},1}(undef, 0),
+        Array{RespStage,1}(undef, 0),
         Array{Float64,1}(undef, 0),
         Array{Float64,1}(undef, 0),
         Array{Float64,1}(undef, 0),
@@ -482,7 +486,7 @@ mutable struct MultiStageResp <: InstrumentResponse
   end
 
   function MultiStageResp(n::UInt)
-    Resp = new(Array{Union{CoeffResp, PZResp, PZResp64, GenResp},1}(undef,n),
+    Resp = new(Array{RespStage,1}(undef,n),
     zeros(Float64,n),
     zeros(Float64,n),
     zeros(Float64,n),
@@ -521,7 +525,9 @@ function write(io::IO, R::MultiStageResp)
   end
   write(io, codes)
   for i in 1:N
-    write(io, R.stage[i])
+    if codes[i] != 0xff
+      write(io, R.stage[i])
+    end
   end
   for f in (:fs, :gain, :fg, :delay, :corr, :factor, :offset)
     write(io, getfield(R, f))
@@ -539,9 +545,11 @@ function read(io::IO, ::Type{MultiStageResp})
   corr    = zeros(Float64, N)
   factor  = zeros(Int64, N)
   offset  = zeros(Int64, N)
-  A       = Array{Union{CoeffResp, PZResp, PZResp64, GenResp},1}(undef, 0)
+  A       = Array{RespStage,1}(undef, 0)
   for i = 1:N
-    push!(A, read(io, code2resptyp(codes[i])))
+    if codes[i] != 0xff
+      push!(A, read(io, code2resptyp(codes[i])))
+    end
   end
   return MultiStageResp(A,
     read!(io, fs), read!(io, gain), read!(io, fg), read!(io, delay), read!(io, corr),
