@@ -1,6 +1,6 @@
 AH_fmt = FormatDesc(
   "AH (Ad Hoc)",
-  "\"ah1\" (for AH-1), \"ah2\" (for AH-2)",
+  "\"ah1\" (AH-1), \"ah2\" (AH-2)",
   "Columbia University, New York, United States of America",
   "ftp://www.orfeus-eu.org/pub/software/mirror/ldeo.columbia/ (defunct)",
   "unknown",
@@ -66,6 +66,23 @@ Lennartz_fmt = FormatDesc(
 Lennartz_fmt.ver = [ FmtVer("", "", false) ]
 formats["Lennartz"] = Lennartz_fmt
 
+RESP_fmt = FormatDesc(
+  "SEED RESP (instrument response) file",
+  "\"resp\"",
+  "Incorporated Research Institutions for Seismology (IRIS), Washington, DC, United States of America",
+  "(no known source code)",
+  "info@iris.edu",
+  HistVec(),
+  ["ASCII instrument responses in a format compatible with SEED blockettes",
+   "extremely self-incompatible and easy to break, even compared to SEED",
+   "no low-level ASCII file format description or API is known to exist"
+  ],
+  ["people who like making extra work for themselves"],
+  ["https://ds.iris.edu/ds/nodes/dmc/data/formats/resp/"],
+  0x01
+  )
+formats["RESP"] = RESP_fmt
+
 SAC_fmt = FormatDesc(
   "SAC (Seismic Analysis Code)",
   "\"sac\"",
@@ -87,9 +104,29 @@ SAC_fmt = FormatDesc(
 SAC_fmt.ver = [ FmtVer("101.6a", Date("2012-01-01"), true) ]
 formats["SAC"] = SAC_fmt
 
+SACPZ_fmt = FormatDesc(
+  "SACPZ (Seismic Analysis Code Poles and Zeros file)",
+  "\"sacpz\"",
+  "Lawrence Livermore National Laboratory (LLNL), Livermore, California, United States of America",
+  "(no source code)",
+  "Brian Savage, University of Rhode Island (URI) / Arthur Snoke, Department of Geosciences at Virginia Tech (VT)",
+  HistVec(),
+  ["ASCII pole-zero file format intended to describe seismic instrument response",
+  ],
+  [ "US Geological Survey (USGS), United States of America",
+    "Incorporated Research Institutions for Seismology (IRIS), Washington, DC, United States of America",
+    "widely used in North America, South America, and Japan"
+    ],
+  ["https://service.iris.edu/irisws/sacpz/docs/1/help/" ,
+  ],
+  0x01
+  )
+SACPZ_fmt.ver = [ FmtVer("101.6a", Date("2012-01-01"), true) ]
+formats["SACPZ"] = SACPZ_fmt
+
 SEED_fmt = FormatDesc(
   "SEED (Standard for the Exchange of Earthquake Data)",
-  "\"mseed\" (mini-SEED)",
+  "\"mseed\"",
   "International Federation of Digital Seismograph Networks (FDSN)",
   "(no source code)",
   "webmaster@fdsn.org",
@@ -137,6 +174,22 @@ SEGY_fmt.ver = [ FmtVer("rev 2", Date("2017-03-01"), nothing),
                 FmtVer(1.0, Date("1974-04-01"), false),
                 ]
 formats["SEGY"] = SEGY_fmt
+
+SXML_fmt = FormatDesc(
+  "FDSN Station XML",
+  "\"sxml\"",
+  "International Federation of Digital Seismograph Networks (FDSN)",
+  "(no source code)",
+  "webmaster@fdsn.org",
+  HistVec(),
+  ["XML representation of important common structures in SEED 2.4 metadata."],
+  ["FDSN data standard; used worldwide"],
+  ["http://www.fdsn.org/xml/station/",
+  "http://www.fdsn.org/xml/station/fdsn-station-1.1.xsd",
+  "http://www.fdsn.org/pdf/SEEDManual_V2.4.pdf"],
+  0x01
+  )
+formats["SXML"] = SXML_fmt
 
 WIN_fmt = FormatDesc(
   "WIN",

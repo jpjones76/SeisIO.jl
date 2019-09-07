@@ -1,4 +1,4 @@
-export sachdr, writesac, read_sacpz!, read_sacpz, write_sacpz
+export sachdr, writesac, writesacpz
 
 # ============================================================================
 # Utility functions not for export
@@ -479,7 +479,6 @@ function read_sacpz!(S::GphysData, file::String)
           zc = split(readline(io), limit=2, keepempty=false)
           D["Z"][i] = complex(parse(Float64, zc[1]), parse(Float64, zc[2]))
         catch
-          "not enough zeroes, resetting"
           D["Z"][i:N] .= zero(ComplexF64)
           reset(io)
         end
@@ -511,12 +510,12 @@ function read_sacpz(file::String)
 end
 
 @doc """
-    write_sacpz!(S::GphysData, pzfile::String)
+    writesacpz(S::GphysData, pzfile::String)
 
 Write fields from SeisIO struct `S` into sacpz file `pzfile`. Uses information
 from fields :fs, :gain, :loc, :misc, :name, :resp, :units.
-""" write_sacpz!
-function write_sacpz(S::GphysData, file::String)
+""" writesacpz
+function writesacpz(S::GphysData, file::String)
   io = open(file, "w")
   for i in 1:S.n
     id = split(S.id[i], ".")

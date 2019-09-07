@@ -141,15 +141,6 @@ function FDSN_sta_xml(xmlf::String;
                        v::Int64=KW.v,
                        msr::Bool=false)
 
-  # if length(xmlf) < 256
-  #   if isfile(xmlf)
-  #     xdoc = LightXML.parse_file(xmlf)
-  #   else
-  #     xdoc = LightXML.parse_string(xmlf)
-  #   end
-  # else
-  #   xdoc = LightXML.parse_string(xmlf)
-  # end
   xdoc = LightXML.parse_string(xmlf)
   xroot = LightXML.root(xdoc)
   xnet = child_elements(xroot)
@@ -367,6 +358,8 @@ function FDSN_sta_xml(xmlf::String;
                                     units = c_units,
                                     resp  = c_resp )
                     C.misc["ClockDrift"] = c_drift
+                    C.misc["startDate"] = Dates.DateTime(cha_s).instant.periods.value*1000 - dtconst
+                    C.misc["endDate"] = Dates.DateTime(cha_s).instant.periods.value*1000 - dtconst
                     if !isempty(c_sensor)
                       C.misc["SensorDescription"] = c_sensor
                     end
@@ -398,14 +391,13 @@ Read FDSN StationXML file `xml_file` into SeisData object S.
 * `s`::String: start time. Format "YYYY-MM-DDThh:mm:ss", e.g., "0001-01-01T00:00:00".
 * `t`::String: termination (end) time. Format "YYYY-MM-DDThh:mm:ss".
 * `msr`::Bool: read instrument response info as MultiStageResp? (Default: false)
+* `v`::Int64: verbosity.
 """
 function read_sxml(fpat::String;
                    s::String="0001-01-01T00:00:00",
                    t::String="9999-12-31T23:59:59",
                    msr::Bool=false,
                    v::Int64=KW.v)
-
-
 
   if safe_isfile(fpat)
     io = open(fpat, "r")
@@ -430,4 +422,34 @@ function read_sxml(fpat::String;
     end
   end
   return S
+end
+
+
+function read_station_xml!(S::GphysData, file::String;
+                           v::Int64=KW.v)
+
+  io = open(file, "r")
+  xsta = read(io, String)
+  close(io)
+  T = FDSN_sta_xml(xsta, msr=false, v=v)
+  k = Int64[]
+  for i = 1:length(T)
+    j = findid(T.id[i], S)
+    if j != 0
+      ts = get(T.misc[i], "startDate", typemin(Int64))
+      te = get(T.misc[i], "endDate", typemax(Int64))
+      t0 = isempty(S.t[j]) ? ts : S.t[j][1,2]
+      if ts ≤ t0 ≤ te
+        for f in (:name, :loc, :fs, :gain, :resp, :units)
+          setindex!(getfield(S, f), getindex(getfield(T, f), i), j)
+        end
+        note!(S, j, string("read_station_xml!,", file, ", overwrote (:name, :loc, :fs, :gain, :resp, :units)"))
+        S.misc[j] = merge(T.misc[i], S.misc[j])
+        push!(k, j)
+      end
+    end
+  end
+  deleteat!(T, k)
+  append!(S, T)
+  return nothing
 end

@@ -16,6 +16,9 @@ Read from files matching file pattern `filestr` into a new SeisData object `S`.
 Calls `guess(filestr)` to identify the file type based on the first file
 matching pattern `filestr`. Much slower than manually specifying file type.
 
+This single-string syntax will not work with SACPZ or SEED RESP files; `guess`
+cannot detect them.
+
     read_data!(S, fmt, filestr [, keywords])
 
 Read data in file format `fmt` matching file pattern `filestr` into an existing
@@ -31,6 +34,7 @@ matching pattern `filestr`.
 | AH-1                      | ah1             |
 | AH-2                      | ah2             |
 | Bottle                    | bottle          |
+| FDSN Station XML          | sxml            |
 | GeoCSV, time-sample pair  | geocsv          |
 | GeoCSV, sample list       | geocsv.slist    |
 | Lennartz ASCII            | lennartzascii   |
@@ -38,6 +42,8 @@ matching pattern `filestr`.
 | PASSCAL SEG Y             | passcal         |
 | PC-SUDS                   | suds            |
 | SAC                       | sac             |
+| SACPZ                     | sacpz           |
+| SEED RESP                 | resp            |
 | SEG Y (rev 0 or rev 1)    | segy            |
 | UW                        | uw              |
 | Win32                     | win32           |
@@ -58,16 +64,8 @@ matching pattern `filestr`.
 |        | win32    |         |           |                                 |
 |jst     | win32    | Bool    | true      | are sample times JST (UTC+9)?   |
 |swap    | seed     | Bool    | true      | byte swap?                      |
-|v       | mseed    | Int64   | 0         | verbosity                       |
-|        | suds     |         |           |                                 |
-|        | uw       |         |           |                                 |
-|        | win32    |         |           |                                 |
-|        | ah       |         |           |                                 |
-|        | bottle   |         |           |                                 |
-
-Most keywords are identical to those used by reader functions; the exception,
-"cf" (channel file) is a workaround to win32's dependence on two file string
-patterns.
+|units   | resp     | Bool    | false     | fill in CoeffResp units?        |
+|v       | all      | Int64   | 0         | verbosity                       |
 
 ### Performance Tip
 With mseed, win32, and bottle data, adjust `nx_new` and `nx_add` based on the
@@ -104,6 +102,7 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
   swap    ::Bool    = false,              # do byte swap?
+  units   ::Bool    = false,              # fill in units of CoeffResp stages?
   v       ::Int64   = KW.v                # verbosity level
   )
 
@@ -199,6 +198,39 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
       end
     end
 
+  elseif fmt == "resp"
+    read_seed_resp!(S, filestr, units=units)
+
+  elseif fmt == "sacpz"
+    if one_file
+      read_sacpz!(S, filestr)
+    else
+      files = ls(filestr)
+      for fname in files
+        read_sacpz!(S, fname)
+      end
+    end
+
+  elseif fmt == "suds"
+    if one_file
+      append!(S, SUDS.read_suds(filestr, full=full, v=v))
+    else
+      files = ls(filestr)
+      for fname in files
+        append!(S, SUDS.read_suds(fname, full=full, v=v))
+      end
+    end
+
+  elseif fmt == "sxml"
+    if one_file
+      read_station_xml!(S, filestr, v=v)
+    else
+      files = ls(filestr)
+      for fname in files
+        read_station_xml!(S, fname, v=v)
+      end
+    end
+
   elseif fmt == "uw"
     if one_file
       append!(S, UW.uwdf(filestr, v=v, full=full))
@@ -211,16 +243,6 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
 
   elseif fmt == "win32" || fmt =="win"
     readwin32!(S, filestr, cf, jst=jst, nx_new=nx_new, nx_add=nx_add, v=v)
-
-  elseif fmt == "suds"
-    if one_file
-      append!(S, SUDS.read_suds(filestr, full=full, v=v))
-    else
-      files = ls(filestr)
-      for fname in files
-        append!(S, SUDS.read_suds(fname, full=full, v=v))
-      end
-    end
 
   else
     error("Unknown file format!")
@@ -237,6 +259,7 @@ function read_data(fmt::String, filestr::String;
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
   swap    ::Bool    = false,              # do byte swap?
+  units   ::Bool    = false,              # fill in units of CoeffResp stages?
   v       ::Int64   = KW.v                # verbosity level
   )
 
@@ -248,6 +271,7 @@ function read_data(fmt::String, filestr::String;
     nx_add  = nx_add,
     nx_new  = nx_new,
     swap    = swap,
+    units   = units,
     v       = v
     )
   return S
