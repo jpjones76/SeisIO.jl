@@ -1,5 +1,25 @@
 is_u8_digit(u::UInt8) = u > 0x2f && u < 0x3a
 
+function u8_to_int(buf::Array{UInt8,1}, L::Int64)
+  c = 10^(L-1)
+  n = zero(Int64)
+  for i = 1:L
+    n += c*(buf[i]-0x30)
+    c = div(c, 10)
+  end
+  return n
+end
+
+function u8_to_int(buf::Array{UInt8,1}, i::Int64, j::Int64)
+  c = Int16(10)^Int16(i-j)
+  n = zero(Int16)
+  for p = j:i
+    n += c * Int16(buf[p]-0x30)
+    c = div(c, Int16(10))
+  end
+  return n
+end
+
 # id = targ vector
 # cv = char vector
 # i = starting index in cv
@@ -269,4 +289,134 @@ function mkfloat(io::IO, c::UInt8)
     v3 = one(Float32)
   end
   return mant_sgn * (v1 + v2) * v3
+end
+
+# Factor of two faster than parse(Float64, str) for a string
+# Order of magnitude faster than parse(Float64, String[uu]) for a u8 array
+function mkdbl(buf::Array{UInt8,1}, L::Int64)
+  read_state = 0x00
+  mant_sgn = 1.0e0
+  exp_sgn = 1.0e0
+
+  j = one(Int64)
+  zz = zero(Int64)
+  z = zero(Int8)
+  o = one(Int8)
+  i = z
+  imax = Int8(16)
+  p0 = Int64(10)^Int64(imax)
+  p = p0
+  t = Int64(10)
+  d = zz
+  m = zz
+  q = zz
+  v = zz
+  x = zz
+  while j ≤ L
+    c = buf[j]
+    if read_state == 0x00
+      if is_u8_digit(c) && (i < imax)
+        p = div(p,t)
+        i += o
+        v += Int64(c-0x30)*p
+        m = p
+      elseif c == 0x2d # '-'
+        mant_sgn = -1.0e0
+      elseif c == 0x2b # '+'
+        mant_sgn = 1.0e0
+      elseif c == 0x2e # '.'
+        # transition to state 1
+        read_state = 0x01
+        i = z
+        p = p0
+      elseif c in (0x45, 0x46, 0x65, 0x66) # 'E', 'F', 'e', 'f'
+        # transition to state 2 (no decimal)
+        read_state = 0x02
+        i = z
+        p = p0
+      end
+    elseif read_state == 0x01
+      if is_u8_digit(c) && i < imax
+        p = div(p,t)
+        i += o
+        d += Int64(c-0x30)*p
+      elseif c in (0x45, 0x46, 0x65, 0x66)
+        # transition to state 2
+        read_state = 0x02
+        i = z
+        p = p0
+      end
+    else
+      if is_u8_digit(c) && (i < imax)
+        p = div(p,t)
+        i += o
+        x += Int64(c-0x30)*p
+        q = p
+      elseif c == 0x2d # '-'
+        exp_sgn = -1.0e0
+      elseif c == 0x2b # '+'
+        exp_sgn = 1.0e0
+      else
+        break
+      end
+    end
+    j += 1
+  end
+  v1 = Float64(div(v, m))
+  v2 = Float64(d) / Float64(p0)
+  if q > zz
+    v3 = 10.0e0^(exp_sgn * Float64(div(x,q)))
+  else
+    v3 = one(Float64)
+  end
+  return mant_sgn * (v1 + v2) * v3
+end
+
+function store_int!(X::Array{Int64,1}, buf::Array{UInt8,1}, i::Int64, n::Int64)
+  n == 0 && return
+  nx = length(X)
+  if n > 0
+    if n > nx
+      append!(X, zeros(Int64, n-nx))
+    end
+    X[n] = u8_to_int(buf, i)
+  end
+  return nothing
+end
+
+function store_dbl!(X::Array{Float64,1}, buf::Array{UInt8,1}, i::Int64, n::Int64)
+  n == 0 && return
+  nx = length(X)
+  if n > 0
+    if n > nx
+      append!(X, zeros(Float64, n-nx))
+    end
+    X[n] = mkdbl(buf, i)
+  end
+  return nothing
+end
+
+function get_coeff_n(io::IO, c::UInt8, buf::Array{UInt8,1})
+  i = 1
+  while c != 0x20
+    buf[i] = c
+    i += 1
+    c = read(io, UInt8)
+  end
+  return u8_to_int(buf, i-1)+1
+end
+
+function to_newline(io::IO, c::UInt8)
+  while c != 0x0a
+    c = read(io, UInt8)
+  end
+  return c
+end
+
+function skip_whitespace(io::IO, c::UInt8)
+  c = read(io, UInt8)
+  while c == 0x20
+    c = read(io, UInt8)
+  end
+  return c
 end
