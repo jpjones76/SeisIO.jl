@@ -3,6 +3,7 @@
 # KW            src/Types/KWDefs.jl
 # PhaseCat      src/Types/Quake/PhaseCat.jl
 # flat_resp     src/Types/InstResp.jl
+# RespStage     src/Types/InstResp.jl
 # type_codes    src/Types/Methods/0_type_codes.jl
 
 # Type aliases
