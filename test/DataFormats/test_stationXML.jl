@@ -86,3 +86,9 @@ S = read_sxml(xml_stfile)
 T = read_sxml(xml_stpat)
 @assert T.n > S.n
 @test findid(T.id[S.n+1], S.id) == 0
+
+printstyled("  station XML with read_data\n", color=:light_green)
+S = read_data("sxml", xml_stfile)
+T = read_data("sxml", xml_stpat)
+@assert T.n > S.n
+@test findid(T.id[S.n+1], S.id) == 0

@@ -56,9 +56,9 @@ rm("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")
 
 # SACPZ
 printstyled("    SACPZ\n", color=:light_green)
-S = read_sacpz(sac_pz_file)
-write_sacpz(S, "local_sac.pz")
-T = read_sacpz("local_sac.pz")
+S = read_data("sacpz", sac_pz_file)
+writesacpz(S, "local_sac.pz")
+T = read_data("sacpz", "local_sac.pz")
 for f in (:id, :name, :loc, :fs, :gain, :resp, :units)
   @test isequal(getfield(S, f), getfield(T, f))
 end

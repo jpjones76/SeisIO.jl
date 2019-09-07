@@ -24,6 +24,8 @@ U = deepcopy(S)
 T = translate_resp(S, r)
 @test typeof(T.x[1]) == Array{Float32,1}
 translate_resp!(S, r)
+nanfill!(S)
+nanfill!(T)
 @test S==T
 
 printstyled("    remove_resp (SeisData)\n", color=:light_green)
