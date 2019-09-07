@@ -97,7 +97,7 @@ end
 printstyled("  test read/write with data compression\n", color=:light_green)
 SeisIO.KW.comp = 0x02
 S = randSeisData()
-S.t[1] = [0 0; 8 0]
+S.t[1] = [1 0; 8 0]
 S.x[1] = randn(eltype(S.x[1]), 8)
 wseis(savfile1, S)
 R = rseis(savfile1, v=2)[1]
