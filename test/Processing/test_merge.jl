@@ -784,10 +784,15 @@ mseis!(S,T)
 
 printstyled(stdout,"      mseis! with Types from SeisIO.Quake\n", color=:light_green)
 S = randSeisData()
-Ev = randSeisEvent(1)
-Ev.data.az[1] = 0.0
-Ev.data.baz[1] = 0.0
-Ev.data.dist[1] = 0.0
+Ev = randSeisEvent(2)
+C = ungap(deepcopy(EV.data[1]))
+Ev.data[1] = deepcopy(C)
+C.t[1,2] += 1000000
+C.x = randn(eltype(C.x), length(C.x))
+C.az = 0.0
+C.baz = 0.0
+C.dist = 0.0
+Ev.data[2] = deepcopy(C)
 mseis!(S,   randSeisChannel(),
             convert(EventChannel, randSeisChannel()),
             rand(Float64, 23),  # should warn
