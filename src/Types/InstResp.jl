@@ -21,7 +21,7 @@ function showresp_full(io::IO, Resp::T) where {T<:InstrumentResponse}
   return nothing
 end
 
-function resptyp2code(Resp::InstrumentResponse)
+function resptyp2code(Resp::Union{InstrumentResponse, Nothing})
   T = typeof(Resp)
   c = UInt8(
   if T == PZResp
@@ -234,10 +234,10 @@ PZResp64( ;
           ) = PZResp64(a0, f0, p, z)
 
 # How we read from file
-PZResp(a0::Float32, f0::Float32, pr::Array{Float32,1}, pi::Array{Float32,1},
-  zr::Array{Float32,1}, zi::Array{Float32,1}) = PZResp(a0, f0, complex.(pr, pi), complex.(zr, zi))
-PZResp64(a0::Float64, f0::Float64, pr::Array{Float64,1}, pi::Array{Float64,1},
-    zr::Array{Float64,1}, zi::Array{Float64,1}) = PZResp64(a0, f0, complex.(pr, pi), complex.(zr, zi))
+# PZResp(a0::Float32, f0::Float32, pr::Array{Float32,1}, pi::Array{Float32,1},
+#   zr::Array{Float32,1}, zi::Array{Float32,1}) = PZResp(a0, f0, complex.(pr, pi), complex.(zr, zi))
+# PZResp64(a0::Float64, f0::Float64, pr::Array{Float64,1}, pi::Array{Float64,1},
+#     zr::Array{Float64,1}, zi::Array{Float64,1}) = PZResp64(a0, f0, complex.(pr, pi), complex.(zr, zi))
 
 
 # Convert from a 2-column complex response
