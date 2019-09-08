@@ -29,7 +29,7 @@ function env!(S::GphysData;
   GRPS = get_unique(S, ["eltype"], chans)
 
   # Initialize Y
-  Y = Array{Float64,1}(undef, 2*nx_max(S))
+  Y = Array{Float64,1}(undef, 2*max(nx_max(S), 128))
 
   # Arrays to hold data and windows
   @inbounds for grp in GRPS
@@ -105,12 +105,12 @@ function env!(C::GphysChannel;
   C.fs == 0.0 && return
 
   # Arrays to hold data and windows
-  if size(C.t, 1) == 1
+  if size(C.t, 1) == 2
     C.x .= abs.(DSP.hilbert(C.x))
   else
     # Initialize R
     T = eltype(C.x)
-    R = Array{Complex{T}, 1}(undef, nx_max(C))
+    R = Array{Complex{T}, 1}(undef, max(nx_max(C), 128))
 
     # Get views and window lengths of each segment
     c2 = T(2)
@@ -133,13 +133,13 @@ function env!(C::GphysChannel;
       # determine whether to update P, YS
       too_short = false
       # update P, nx, YS
-      if nx < 24 || nx != nx_last
+      if nx < 128 || nx != nx_last
         # very short segments
-        if nx < 24
-          y = copyto!(zeros(eltype(x), 24), x)
+        if nx < 128
+          y = copyto!(zeros(eltype(x), 128), x)
           X₀ = y
           nx₀ = nx
-          nx = 24
+          nx = 128
           x = view(y, :)
           too_short = true
         end
