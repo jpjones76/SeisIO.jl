@@ -54,3 +54,14 @@ for k = 1:4
   end
 
 end
+
+printstyled("    testing on very short data segments\n", color=:light_green)
+S = randSeisData(5)
+N = 2 .^ collect(1:1:5)
+for i = 1:S.n
+  nx = N[i]
+  S.fs[i] = 100.0
+  S.t[i] = [1 0; nx 0]
+  S.x[i] = rand(nx)
+end
+env!(S)

@@ -92,3 +92,12 @@ S = read_data("sxml", xml_stfile)
 T = read_data("sxml", xml_stpat)
 @assert T.n > S.n
 @test findid(T.id[S.n+1], S.id) == 0
+
+printstyled("  overwrite of channel headers at matching times\n", color=:light_green)
+redirect_stdout(out) do
+  xml_stfile = path*"/SampleFiles/fdsnws-station_2017-01-12T03-17-42Z.xml"
+  S = read_data("sxml", xml_stfile, v=3)
+  n = S.n
+  read_data!(S, "sxml", xml_stfile, v=3)
+  @test S.n == n
+end

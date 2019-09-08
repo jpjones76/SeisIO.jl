@@ -2,6 +2,7 @@
 sac_file = path*"/SampleFiles/test_le.sac"
 sac_be_file = path*"/SampleFiles/test_be.sac"
 sac_pz_file = path*"/SampleFiles/test_sac.pz"
+sac_pz_wc = path*"/SampleFiles/test_sac.*"
 
 printstyled("  SAC\n", color=:light_green)
 printstyled("    read\n", color=:light_green)
@@ -63,3 +64,6 @@ for f in (:id, :name, :loc, :fs, :gain, :resp, :units)
   @test isequal(getfield(S, f), getfield(T, f))
 end
 rm("local_sac.pz")
+
+# For the H^HCoverage!
+S = read_data("sacpz", sac_pz_wc)

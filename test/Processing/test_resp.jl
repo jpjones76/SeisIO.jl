@@ -18,6 +18,8 @@ S.x[1] = randn(Float32, S.t[1][end,1])
 for i = 1:3
   S.units[i] = rand(["m", "m/s", "m/s2"])
 end
+S.resp[3].z = ComplexF32[]
+C_a = deepcopy(S[3])
 detrend!(S)
 taper!(S)
 U = deepcopy(S)
@@ -95,6 +97,9 @@ translate_resp!(C, r)
 
 # Here, we expect nothing to happen
 translate_resp!(C, r)
+
+# Test accelerometer response with empty zeros
+remove_resp!(C_a)
 
 C = randSeisChannel(s=true)
 taper!(C)

@@ -81,6 +81,6 @@ redirect_stdout(out) do
   convert_seis!(C, units_out="m")
   convert_seis!(C, units_out="m/s")
   convert_seis!(C, units_out="m/s2")
-  convert_seis!(C, units_out="m/s")
-  D = convert_seis(C, units_out="m")
+  convert_seis!(C, units_out="m")
+  D = convert_seis(C, units_out="m/s2")
 end
