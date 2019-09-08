@@ -322,17 +322,16 @@ function FDSN_sta_xml(xmlf::String;
                               end
                             end
                             # end stages
-
                           end
                         end
                       end
                       # end response
+                    end
 
-                      # channel id
-                      c_id = join([nn, ss, ll, cc], ".")
-                      if findid(c_id, S) > 0 && (v > 0)
-                        @warn(string("Redundant channel ", c_id, ": overwriting with latest channel info."))
-                      end
+                    # channel id
+                    c_id = join([nn, ss, ll, cc], ".")
+                    if findid(c_id, S) > 0 && (v > 0)
+                      @warn(string("Channel ", c_id, " has multiple sets of parameters in time range ", s, " - ", t))
                     end
 
                     # instrument response
@@ -359,7 +358,7 @@ function FDSN_sta_xml(xmlf::String;
                                     resp  = c_resp )
                     C.misc["ClockDrift"] = c_drift
                     C.misc["startDate"] = Dates.DateTime(cha_s).instant.periods.value*1000 - dtconst
-                    C.misc["endDate"] = Dates.DateTime(cha_s).instant.periods.value*1000 - dtconst
+                    C.misc["endDate"] = Dates.DateTime(cha_t).instant.periods.value*1000 - dtconst
                     if !isempty(c_sensor)
                       C.misc["SensorDescription"] = c_sensor
                     end
@@ -434,22 +433,50 @@ function read_station_xml!(S::GphysData, file::String;
   T = FDSN_sta_xml(xsta, msr=false, v=v)
   k = Int64[]
   for i = 1:length(T)
-    j = findid(T.id[i], S)
-    if j != 0
-      ts = get(T.misc[i], "startDate", typemin(Int64))
-      te = get(T.misc[i], "endDate", typemax(Int64))
-      t0 = isempty(S.t[j]) ? ts : S.t[j][1,2]
-      if ts ≤ t0 ≤ te
-        for f in (:name, :loc, :fs, :gain, :resp, :units)
-          setindex!(getfield(S, f), getindex(getfield(T, f), i), j)
+
+    # Match on ID, si, ei
+    si = isempty(T.t[i]) ? get(T.misc[i], "startDate", typemin(Int64)) : T.t[i][1,2]
+    ei = isempty(T.t[i]) ? get(T.misc[i], "endDate", typemax(Int64)) : endtime(T.t[i], T.fs[i])
+    id = T.id[i]
+    c = 0
+    for j = 1:length(S.id)
+      if S.id[j] == id
+        sj = isempty(S.t[j]) ? get(S.misc[j], "startDate", si) : S.t[j][1,2]
+        ej = isempty(S.t[j]) ? get(S.misc[j], "endDate", ei) : endtime(S.t[j], S.fs[j])
+        if min(si ≤ ej, ei ≥ sj) == true
+          c = i
+          break
         end
-        note!(S, j, string("read_station_xml!,", file, ", overwrote (:name, :loc, :fs, :gain, :resp, :units)"))
-        S.misc[j] = merge(T.misc[i], S.misc[j])
-        push!(k, j)
       end
     end
+
+    # Overwrite S[j] headers on match
+    if c != 0
+      (v > 2) && println("id/time match! id = ", S.id[c], ". Overwriting S[", c, "] headers from T[", i, "]")
+      for f in (:name, :loc, :fs, :gain, :resp, :units)
+        setindex!(getfield(S, f), getindex(getfield(T, f), i), c)
+      end
+      note!(S, c, string("read_station_xml!,", file, ", overwrote (:name, :loc, :fs, :gain, :resp, :units)"))
+      S.misc[c] = merge(T.misc[i], S.misc[c])
+      if i in k
+        @warn(string("Already used ID = ", T.id[i], " to overwrite a channel header!"))
+      end
+
+      # Flag k for delete from T
+      push!(k, i)
+    end
   end
-  deleteat!(T, k)
-  append!(S, T)
+
+  # Delete channels that were already used to overwrite headers in S
+  if isempty(k) == false
+    deleteat!(T, k)
+  end
+
+  # Append remainder of T
+  (v > 1) && println("remaining entries in T = ", T.n)
+  if isempty(T) == false
+    append!(S, T)
+  end
+
   return nothing
 end
