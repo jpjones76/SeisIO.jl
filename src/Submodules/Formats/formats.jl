@@ -34,6 +34,29 @@ Bottle_fmt = FormatDesc(
 Bottle_fmt.ver = [ FmtVer("1", "Unknown", false) ]
 formats["Bottle"] = Bottle_fmt
 
+DATALESS_fmt = FormatDesc(
+  "Dataless SEED (instrument metadata) file",
+  "\"dataless\"",
+  "International Federation of Digital Seismograph Networks (FDSN)",
+  "(none)",
+  "webmaster@fdsn.org",
+  HistVec(),
+  ["contains Volume, Abbreviation, and Station Control Headers.",
+  "no Time Span Control Headers or data records.",
+  "blockettes are completely non-unique; all info can appear in at least 4 blockettes, because SEED wasn't confusing and bloated enough.",
+  "documentation is terrible as usual, many critical caveats in notes and margins.",
+  "the SEED manual makes less sense than bathroom stall graffiti."
+  ],
+  ["FDSN data standard; used worldwide"],
+  ["http://www.fdsn.org/pdf/SEEDManual_V2.4.pdf"],
+  0x01
+  )
+DATALESS_fmt.ver = [ FmtVer("2.4", Date("2012-08-01"), false),
+                      FmtVer("2.3", Date("1992-12-31"), false),
+                      FmtVer("2.2", Date("1991-08-31"), false),
+                      ]
+formats["DATALESS"] = DATALESS_fmt
+
 GeoCSV_fmt = FormatDesc(
   "GeoCSV",
   "\"geocsv\" (time-sample pairs), \"geocsv.slist\" (sample list)",
@@ -124,7 +147,7 @@ SACPZ_fmt = FormatDesc(
 SACPZ_fmt.ver = [ FmtVer("101.6a", Date("2012-01-01"), true) ]
 formats["SACPZ"] = SACPZ_fmt
 
-SEED_fmt = FormatDesc(
+mSEED_fmt = FormatDesc(
   "SEED (Standard for the Exchange of Earthquake Data)",
   "\"mseed\"",
   "International Federation of Digital Seismograph Networks (FDSN)",
@@ -142,8 +165,8 @@ SEED_fmt = FormatDesc(
   ["http://www.fdsn.org/pdf/SEEDManual_V2.4.pdf"],
   0x01
   )
-SEED_fmt.ver = [ FmtVer("2.4", Date("2012-08-01"), false) ]
-formats["SEED"] = SEED_fmt
+mSEED_fmt.ver = [ FmtVer("2.4", Date("2012-08-01"), false) ]
+formats["SEED"] = mSEED_fmt
 
 SEGY_fmt = FormatDesc(
   "SEG Y",
