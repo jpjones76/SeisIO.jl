@@ -1,8 +1,9 @@
 export read_sxml
 
 function full_resp(xe::XMLElement)
-  resp = MultiStageResp()
+  resp = MultiStageResp(12)
   ns = 0
+  nmax = 0
   gain = one(Float64)
   f0 = zero(Float64)
   xr = child_elements(xe)
@@ -17,26 +18,21 @@ function full_resp(xe::XMLElement)
         elseif nii == "Frequency"
           f0 = parse(Float64, content(ii))
         elseif nii == "InputUnits"
-          units = units2ucum(
-            fix_units(
-              lowercase(
-                content(get_elements_by_tagname(ii, "Name")[1])
-                )
-              )
-            )
+          units = units2ucum(fix_units(content(get_elements_by_tagname(ii, "Name")[1])))
         end
       end
 
     # stages
     elseif name(r) == "Stage"
-      ns += 1
-      resp_code = 0x00
-      for f in (:fs, :gain, :fg, :delay, :corr)
-        push!(getfield(resp, f), zero(Float64))
+      ns = parse(Int64, attribute(r, "number"))
+      nmax = max(ns, nmax)
+      if ns > length(resp.fs)
+        append!(resp, MultiStageResp(6))
       end
-      push!(resp.factor, zero(Int64))
-      push!(resp.offset, zero(Int64))
+      resp_code = 0x00
       c = 1.0
+      a0 = 0.0
+      f0 = 0.0
       p = Array{Complex{Float64},1}(undef, 0)
       z = Array{Complex{Float64},1}(undef, 0)
       num = Array{Float64,1}(undef, 0)
@@ -64,15 +60,20 @@ function full_resp(xe::XMLElement)
               else
                 push!(p, pzv)
               end
+
+            elseif niii == "InputUnits"
+              resp.i[ns] = fix_units(content(get_elements_by_tagname(iii, "Name")[1]))
+
+            elseif niii == "OutputUnits"
+              resp.o[ns] = fix_units(content(get_elements_by_tagname(iii, "Name")[1]))
+
+            elseif niii == "NormalizationFactor"
+              a0 = parse(Float64, content(iii))
+
+            elseif niii == "NormalizationFrequency"
+              f0 = parse(Float64, content(iii))
             end
 
-            # These are redundant to "stage 0" values
-            # elseif niii == "NormalizationFactor"
-            #   resp.nfac[ns] = parse(Float64, content(iii))
-            #
-            # elseif niii == "NormalizationFrequency"
-            #   resp.fn[ns] = parse(Float64, content(iii))
-            # end
           end
 
         elseif nii == "StageGain"
@@ -84,18 +85,10 @@ function full_resp(xe::XMLElement)
           for iii in child_elements(ii)
             niii = name(iii)
             if niii == "InputUnits"
-              units_in = fix_units(
-                lowercase(
-                  content(get_elements_by_tagname(iii, "Name")[1])
-                  )
-                )
+              resp.i[ns] = fix_units(content(get_elements_by_tagname(iii, "Name")[1]))
 
             elseif niii == "OutputUnits"
-              units_out = fix_units(
-                lowercase(
-                  content(get_elements_by_tagname(iii, "Name")[1])
-                  )
-                )
+              resp.o[ns] = fix_units(content(get_elements_by_tagname(iii, "Name")[1]))
 
             elseif niii == "NumeratorCoefficient" || niii == "Numerator"
               push!(num, parse(Float64, content(iii)))
@@ -107,8 +100,8 @@ function full_resp(xe::XMLElement)
 
         elseif nii == "Decimation"
           resp.fs[ns] = parse(Float64, content(get_elements_by_tagname(ii, "InputSampleRate")[1]))
-          resp.factor[ns] = parse(Int64, content(get_elements_by_tagname(ii, "Factor")[1]))
-          resp.offset[ns] = parse(Int64, content(get_elements_by_tagname(ii, "Offset")[1]))
+          resp.fac[ns] = parse(Int64, content(get_elements_by_tagname(ii, "Factor")[1]))
+          resp.os[ns] = parse(Int64, content(get_elements_by_tagname(ii, "Offset")[1]))
           resp.delay[ns] = parse(Float64, content(get_elements_by_tagname(ii, "Delay")[1]))
           resp.corr[ns] = parse(Float64, content(get_elements_by_tagname(ii, "Correction")[1]))
         end
@@ -118,19 +111,19 @@ function full_resp(xe::XMLElement)
       if resp_code == 0x02
         rmul!(z, c)
         rmul!(p ,c)
-        push!(resp.stage, PZResp64(z = z, p = p))
-        if ns == 1
-          resp.stage[ns].f0 = f0
-          resp_a0!(resp.stage[ns])
-        end
+        resp.stage[ns] = PZResp64(z = z, p = p, a0 = a0, f0 = f0)
       elseif resp_code == 0x03
-        push!(resp.stage, CoeffResp(units_in, units_out, num, den))
+        resp.stage[ns] = CoeffResp(num, den)
       else
-        push!(resp.stage, GenResp())
+        resp.stage[ns] = nothing
       end
     end
     # end stages
 
+  end
+  L = length(resp.fs)
+  for f in fieldnames(MultiStageResp)
+    deleteat!(getfield(resp, f), (nmax+1):L)
   end
   return gain, units, resp
 end
@@ -272,13 +265,10 @@ function FDSN_sta_xml(xmlf::String;
                                   # println("gain = ", c_gain)
                                 elseif name(y) == "Frequency"
                                   # normfreq
-                                  c_normfreq = parse(Float64, content(y))
+                                  # c_normfreq = parse(Float64, content(y))
                                 elseif name(y) == "InputUnits"
                                   # calibrationunits
-                                  c_units = units2ucum(
-                                    fix_units(
-                                      lowercase(content(get_elements_by_tagname(y, "Name")[1])))
-                                      )
+                                  c_units = units2ucum(fix_units(content(get_elements_by_tagname(y, "Name")[1])))
                                 end
                               end
 
@@ -308,6 +298,13 @@ function FDSN_sta_xml(xmlf::String;
                                       else
                                         push!(p, pzv)
                                       end
+
+                                    elseif npzx == "NormalizationFactor"
+                                      c_resp.a0 = parse(Float64, content(pzx))
+
+                                    elseif npzx == "NormalizationFrequency"
+                                      c_resp.f0 = parse(Float64, content(pzx))
+
                                     end
                                   end
                                   if length(z) > 0
@@ -332,12 +329,6 @@ function FDSN_sta_xml(xmlf::String;
                     c_id = join([nn, ss, ll, cc], ".")
                     if findid(c_id, S) > 0 && (v > 0)
                       @warn(string("Channel ", c_id, " has multiple sets of parameters in time range ", s, " - ", t))
-                    end
-
-                    # instrument response
-                    if msr == false
-                      c_resp.f0 = c_normfreq
-                      resp_a0!(c_resp)
                     end
 
                     # channel location
@@ -425,12 +416,13 @@ end
 
 
 function read_station_xml!(S::GphysData, file::String;
+                           msr::Bool=false,
                            v::Int64=KW.v)
 
   io = open(file, "r")
   xsta = read(io, String)
   close(io)
-  T = FDSN_sta_xml(xsta, msr=false, v=v)
+  T = FDSN_sta_xml(xsta, msr=msr, v=v)
   k = Int64[]
   for i = 1:length(T)
 
