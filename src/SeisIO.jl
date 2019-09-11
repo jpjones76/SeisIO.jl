@@ -31,11 +31,13 @@ include("CoreUtils/mkchans.jl")
 
 # Back-end types
 include("Types/KWDefs.jl")
-include("Types/SeisIOBuf.jl")
 
 # Prereqs for custom types
 include("Types/InstPosition.jl")
 include("Types/InstResp.jl")
+
+# IO buffer including location and instrument response buffers
+include("Types/SeisIOBuf.jl")
 
 # Abstract types
 include("Types/GphysData.jl")
@@ -87,6 +89,9 @@ end
 # Submodules
 include("Submodules/Formats.jl")
 import .Formats: formats
+include("Submodules/SEED.jl")
+using .SEED: mseed_support, parsemseed!, read_dataless, read_mseed_file!, read_seed_resp!, read_seed_resp, RESP_wont_read, seed_support
+export mseed_support, read_dataless, read_seed_resp!, read_seed_resp, RESP_wont_read, seed_support
 include("Submodules/Quake.jl")
 include("Submodules/RandSeis.jl")
 include("Submodules/SUDS.jl")
