@@ -57,13 +57,18 @@ rm("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")
 
 # SACPZ
 printstyled("    SACPZ\n", color=:light_green)
-S = read_data("sacpz", sac_pz_file)
+S = read_meta("sacpz", sac_pz_file)
 writesacpz(S, "local_sac.pz")
-T = read_data("sacpz", "local_sac.pz")
-for f in (:id, :name, :loc, :fs, :gain, :resp, :units)
+T = read_meta("sacpz", "local_sac.pz")
+for f in (:n, :id, :name, :loc, :fs, :gain, :units)
   @test isequal(getfield(S, f), getfield(T, f))
+end
+for f in fieldnames(typeof(S.resp[1]))
+  for i = 1:S.n
+    @test isapprox(getfield(S.resp[i], f), getfield(T.resp[i], f))
+  end
 end
 rm("local_sac.pz")
 
 # For the H^HCoverage!
-S = read_data("sacpz", sac_pz_wc)
+S = read_meta("sacpz", sac_pz_wc)

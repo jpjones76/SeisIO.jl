@@ -1,0 +1,1866 @@
+#
+###################################################################################
+#
+B050F03     Station:     JRO
+B050F16     Network:     CC
+B052F03     Location:    ??
+B052F04     Channel:     BHE
+B052F22     Start date:  2015,020,00:00:00
+B052F23     End date:    2599,365,23:59:59
+#
+#                  +-----------------------------------+
+#                  |    Response (Poles and Zeros)     |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B053F03     Transfer function type:                A
+B053F04     Stage sequence number:                 1
+B053F05     Response in units lookup:              M/S - Velocity in meters per second
+B053F06     Response out units lookup:             V - Voltage in Volts
+B053F07     A0 normalization factor:               +4.34493E+17
+B053F08     Normalization frequency:               +1.00000E+00
+B053F09     Number of zeroes:                      6
+B053F14     Number of poles:                       11
+#              Complex zeroes:
+#              i  real          imag          real_error    imag_error
+B053F10-13     0  +0.00000E+00  +0.00000E+00  +0.00000E+00  +0.00000E+00
+B053F10-13     1  +0.00000E+00  +0.00000E+00  +0.00000E+00  +0.00000E+00
+B053F10-13     2  -3.92000E+02  +0.00000E+00  +0.00000E+00  +0.00000E+00
+B053F10-13     3  -1.96000E+03  +0.00000E+00  +0.00000E+00  +0.00000E+00
+B053F10-13     4  -1.49000E+03  +1.74000E+03  +0.00000E+00  +0.00000E+00
+B053F10-13     5  -1.49000E+03  -1.74000E+03  +0.00000E+00  +0.00000E+00
+#              Complex poles:
+#              i  real          imag          real_error    imag_error
+B053F15-18     0  -3.69100E-02  +3.70200E-02  +0.00000E+00  +0.00000E+00
+B053F15-18     1  -3.69100E-02  -3.70200E-02  +0.00000E+00  +0.00000E+00
+B053F15-18     2  -3.43000E+02  +0.00000E+00  +0.00000E+00  +0.00000E+00
+B053F15-18     3  -3.70000E+02  +4.67000E+02  +0.00000E+00  +0.00000E+00
+B053F15-18     4  -3.70000E+02  -4.67000E+02  +0.00000E+00  +0.00000E+00
+B053F15-18     5  -8.36000E+02  +1.52200E+03  +0.00000E+00  +0.00000E+00
+B053F15-18     6  -8.36000E+02  -1.52200E+03  +0.00000E+00  +0.00000E+00
+B053F15-18     7  -4.90000E+03  +4.70000E+03  +0.00000E+00  +0.00000E+00
+B053F15-18     8  -4.90000E+03  -4.70000E+03  +0.00000E+00  +0.00000E+00
+B053F15-18     9  -6.90000E+03  +0.00000E+00  +0.00000E+00  +0.00000E+00
+B053F15-18    10  -1.50000E+04  +0.00000E+00  +0.00000E+00  +0.00000E+00
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 1
+B058F04     Sensitivity:                           +7.54300E+02
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 2
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |      Response (Coefficients)      |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B054F03     Transfer function type:                D
+B054F04     Stage sequence number:                 3
+B054F05     Response in units lookup:              V - Voltage in Volts
+B054F06     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B054F07     Number of numerators:                  0
+B054F10     Number of denominators:                0
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  3
+B057F04     Input sample rate (HZ):                 1.0240E+05
+B057F05     Decimation factor:                      00001
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +0.0000E+00
+B057F08     Correction applied (seconds):          +0.0000E+00
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 3
+B058F04     Sensitivity:                           +3.66972E+05
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 4
+B061F04     Response Name:                         130S_1_50_4
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                15
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +9.76562E-04
+B061F09     2  +2.44141E-03
+B061F09     3  +4.88281E-03
+B061F09     4  +8.54492E-03
+B061F09     5  +1.36719E-02
+B061F09     6  +2.05078E-02
+B061F09     7  +2.92969E-02
+B061F09     8  +3.93066E-02
+B061F09     9  +4.98047E-02
+B061F09    10  +6.00586E-02
+B061F09    11  +6.93359E-02
+B061F09    12  +7.69043E-02
+B061F09    13  +8.20312E-02
+B061F09    14  +8.39844E-02
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  4
+B057F04     Input sample rate (HZ):                 1.0240E+05
+B057F05     Decimation factor:                      00008
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +1.3672E-04
+B057F08     Correction applied (seconds):          +1.3672E-04
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 4
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 5
+B061F04     Response Name:                         130S_1_50_5
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  5
+B057F04     Input sample rate (HZ):                 1.2800E+04
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +4.6875E-04
+B057F08     Correction applied (seconds):          +4.6875E-04
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 5
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 6
+B061F04     Response Name:                         130S_1_50_6
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  6
+B057F04     Input sample rate (HZ):                 6.4000E+03
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +9.3750E-04
+B057F08     Correction applied (seconds):          +9.3750E-04
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 6
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 7
+B061F04     Response Name:                         130S_1_50_7
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  7
+B057F04     Input sample rate (HZ):                 3.2000E+03
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +1.8750E-03
+B057F08     Correction applied (seconds):          +1.8750E-03
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 7
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 8
+B061F04     Response Name:                         130S_1_50_8
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  8
+B057F04     Input sample rate (HZ):                 1.6000E+03
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +3.7500E-03
+B057F08     Correction applied (seconds):          +3.7500E-03
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 8
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 9
+B061F04     Response Name:                         130S_1_50_9
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  9
+B057F04     Input sample rate (HZ):                 8.0000E+02
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +7.5000E-03
+B057F08     Correction applied (seconds):          +7.5000E-03
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 9
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 10
+B061F04     Response Name:                         130S_1_50_10
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  10
+B057F04     Input sample rate (HZ):                 4.0000E+02
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +1.5000E-02
+B057F08     Correction applied (seconds):          +1.5000E-02
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 10
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 11
+B061F04     Response Name:                         130S_1_50_11
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  11
+B057F04     Input sample rate (HZ):                 2.0000E+02
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +3.0000E-02
+B057F08     Correction applied (seconds):          +3.0000E-02
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 11
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 12
+B061F04     Response Name:                         130S_1_50_12
+B061F05     Symmetry Code:                         A
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                101
+#              i  FIR Coefficient
+B061F09     0  -7.15032E-07
+B061F09     1  -5.60109E-06
+B061F09     2  -2.62179E-06
+B061F09     3  -4.31403E-05
+B061F09     4  -4.64771E-06
+B061F09     5  +1.43006E-06
+B061F09     6  +2.34769E-05
+B061F09     7  +1.43006E-06
+B061F09     8  -5.27932E-05
+B061F09     9  -3.66692E-04
+B061F09    10  +3.76107E-04
+B061F09    11  +8.54226E-04
+B061F09    12  +3.05081E-05
+B061F09    13  -1.27621E-03
+B061F09    14  -9.10951E-04
+B061F09    15  +1.27669E-03
+B061F09    16  +2.15165E-03
+B061F09    17  -4.61554E-04
+B061F09    18  -3.33765E-03
+B061F09    19  -1.40933E-03
+B061F09    20  +3.77072E-03
+B061F09    21  +4.19414E-03
+B061F09    22  -2.64288E-03
+B061F09    23  -7.20121E-03
+B061F09    24  -6.44006E-04
+B061F09    25  +9.18400E-03
+B061F09    26  +6.08445E-03
+B061F09    27  -8.57824E-03
+B061F09    28  -1.27401E-02
+B061F09    29  +3.98225E-03
+B061F09    30  +1.86261E-02
+B061F09    31  +5.20520E-03
+B061F09    32  -2.09407E-02
+B061F09    33  -1.81629E-02
+B061F09    34  +1.66669E-02
+B061F09    35  +3.22447E-02
+B061F09    36  -3.46588E-03
+B061F09    37  -4.29528E-02
+B061F09    38  -1.93265E-02
+B061F09    39  +4.43090E-02
+B061F09    40  +4.97909E-02
+B061F09    41  -2.94164E-02
+B061F09    42  -8.26078E-02
+B061F09    43  -9.34166E-03
+B061F09    44  +1.07552E-01
+B061F09    45  +8.16604E-02
+B061F09    46  -1.03110E-01
+B061F09    47  -2.04208E-01
+B061F09    48  -3.12231E-05
+B061F09    49  +3.90432E-01
+B061F09    50  +5.89958E-01
+B061F09    51  +3.90432E-01
+B061F09    52  -3.12231E-05
+B061F09    53  -2.04208E-01
+B061F09    54  -1.03110E-01
+B061F09    55  +8.16604E-02
+B061F09    56  +1.07552E-01
+B061F09    57  -9.34166E-03
+B061F09    58  -8.26078E-02
+B061F09    59  -2.94164E-02
+B061F09    60  +4.97909E-02
+B061F09    61  +4.43090E-02
+B061F09    62  -1.93265E-02
+B061F09    63  -4.29528E-02
+B061F09    64  -3.46588E-03
+B061F09    65  +3.22447E-02
+B061F09    66  +1.66669E-02
+B061F09    67  -1.81629E-02
+B061F09    68  -2.09407E-02
+B061F09    69  +5.20520E-03
+B061F09    70  +1.86261E-02
+B061F09    71  +3.98225E-03
+B061F09    72  -1.27401E-02
+B061F09    73  -8.57824E-03
+B061F09    74  +6.08445E-03
+B061F09    75  +9.18400E-03
+B061F09    76  -6.44006E-04
+B061F09    77  -7.20121E-03
+B061F09    78  -2.64288E-03
+B061F09    79  +4.19414E-03
+B061F09    80  +3.77072E-03
+B061F09    81  -1.40933E-03
+B061F09    82  -3.33765E-03
+B061F09    83  -4.61554E-04
+B061F09    84  +2.15165E-03
+B061F09    85  +1.27669E-03
+B061F09    86  -9.10951E-04
+B061F09    87  -1.27621E-03
+B061F09    88  +3.05081E-05
+B061F09    89  +8.54226E-04
+B061F09    90  +3.76107E-04
+B061F09    91  -3.66692E-04
+B061F09    92  -4.10310E-04
+B061F09    93  +2.52645E-05
+B061F09    94  +2.61821E-04
+B061F09    95  +1.20602E-04
+B061F09    96  -9.99854E-05
+B061F09    97  -1.62312E-04
+B061F09    98  -9.79595E-05
+B061F09    99  -2.94355E-05
+B061F09   100  -3.09847E-06
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  12
+B057F04     Input sample rate (HZ):                 1.0000E+02
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +5.0000E-01
+B057F08     Correction applied (seconds):          +5.0000E-01
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 12
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHE         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 0
+B058F04     Sensitivity:                           +2.76807E+08
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+###################################################################################
+#
+B050F03     Station:     JRO
+B050F16     Network:     CC
+B052F03     Location:    ??
+B052F04     Channel:     BHN
+B052F22     Start date:  2015,020,00:00:00
+B052F23     End date:    2599,365,23:59:59
+#
+#                  +-----------------------------------+
+#                  |    Response (Poles and Zeros)     |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B053F03     Transfer function type:                A
+B053F04     Stage sequence number:                 1
+B053F05     Response in units lookup:              M/S - Velocity in meters per second
+B053F06     Response out units lookup:             V - Voltage in Volts
+B053F07     A0 normalization factor:               +4.34493E+17
+B053F08     Normalization frequency:               +1.00000E+00
+B053F09     Number of zeroes:                      6
+B053F14     Number of poles:                       11
+#              Complex zeroes:
+#              i  real          imag          real_error    imag_error
+B053F10-13     0  +0.00000E+00  +0.00000E+00  +0.00000E+00  +0.00000E+00
+B053F10-13     1  +0.00000E+00  +0.00000E+00  +0.00000E+00  +0.00000E+00
+B053F10-13     2  -3.92000E+02  +0.00000E+00  +0.00000E+00  +0.00000E+00
+B053F10-13     3  -1.96000E+03  +0.00000E+00  +0.00000E+00  +0.00000E+00
+B053F10-13     4  -1.49000E+03  +1.74000E+03  +0.00000E+00  +0.00000E+00
+B053F10-13     5  -1.49000E+03  -1.74000E+03  +0.00000E+00  +0.00000E+00
+#              Complex poles:
+#              i  real          imag          real_error    imag_error
+B053F15-18     0  -3.69100E-02  +3.70200E-02  +0.00000E+00  +0.00000E+00
+B053F15-18     1  -3.69100E-02  -3.70200E-02  +0.00000E+00  +0.00000E+00
+B053F15-18     2  -3.43000E+02  +0.00000E+00  +0.00000E+00  +0.00000E+00
+B053F15-18     3  -3.70000E+02  +4.67000E+02  +0.00000E+00  +0.00000E+00
+B053F15-18     4  -3.70000E+02  -4.67000E+02  +0.00000E+00  +0.00000E+00
+B053F15-18     5  -8.36000E+02  +1.52200E+03  +0.00000E+00  +0.00000E+00
+B053F15-18     6  -8.36000E+02  -1.52200E+03  +0.00000E+00  +0.00000E+00
+B053F15-18     7  -4.90000E+03  +4.70000E+03  +0.00000E+00  +0.00000E+00
+B053F15-18     8  -4.90000E+03  -4.70000E+03  +0.00000E+00  +0.00000E+00
+B053F15-18     9  -6.90000E+03  +0.00000E+00  +0.00000E+00  +0.00000E+00
+B053F15-18    10  -1.50000E+04  +0.00000E+00  +0.00000E+00  +0.00000E+00
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 1
+B058F04     Sensitivity:                           +7.54300E+02
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 2
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |      Response (Coefficients)      |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B054F03     Transfer function type:                D
+B054F04     Stage sequence number:                 3
+B054F05     Response in units lookup:              V - Voltage in Volts
+B054F06     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B054F07     Number of numerators:                  0
+B054F10     Number of denominators:                0
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  3
+B057F04     Input sample rate (HZ):                 1.0240E+05
+B057F05     Decimation factor:                      00001
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +0.0000E+00
+B057F08     Correction applied (seconds):          +0.0000E+00
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 3
+B058F04     Sensitivity:                           +3.66972E+05
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 4
+B061F04     Response Name:                         130S_1_50_4
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                15
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +9.76562E-04
+B061F09     2  +2.44141E-03
+B061F09     3  +4.88281E-03
+B061F09     4  +8.54492E-03
+B061F09     5  +1.36719E-02
+B061F09     6  +2.05078E-02
+B061F09     7  +2.92969E-02
+B061F09     8  +3.93066E-02
+B061F09     9  +4.98047E-02
+B061F09    10  +6.00586E-02
+B061F09    11  +6.93359E-02
+B061F09    12  +7.69043E-02
+B061F09    13  +8.20312E-02
+B061F09    14  +8.39844E-02
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  4
+B057F04     Input sample rate (HZ):                 1.0240E+05
+B057F05     Decimation factor:                      00008
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +1.3672E-04
+B057F08     Correction applied (seconds):          +1.3672E-04
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 4
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 5
+B061F04     Response Name:                         130S_1_50_5
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  5
+B057F04     Input sample rate (HZ):                 1.2800E+04
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +4.6875E-04
+B057F08     Correction applied (seconds):          +4.6875E-04
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 5
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 6
+B061F04     Response Name:                         130S_1_50_6
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  6
+B057F04     Input sample rate (HZ):                 6.4000E+03
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +9.3750E-04
+B057F08     Correction applied (seconds):          +9.3750E-04
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 6
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 7
+B061F04     Response Name:                         130S_1_50_7
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  7
+B057F04     Input sample rate (HZ):                 3.2000E+03
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +1.8750E-03
+B057F08     Correction applied (seconds):          +1.8750E-03
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 7
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 8
+B061F04     Response Name:                         130S_1_50_8
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  8
+B057F04     Input sample rate (HZ):                 1.6000E+03
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +3.7500E-03
+B057F08     Correction applied (seconds):          +3.7500E-03
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 8
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 9
+B061F04     Response Name:                         130S_1_50_9
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  9
+B057F04     Input sample rate (HZ):                 8.0000E+02
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +7.5000E-03
+B057F08     Correction applied (seconds):          +7.5000E-03
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 9
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 10
+B061F04     Response Name:                         130S_1_50_10
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  10
+B057F04     Input sample rate (HZ):                 4.0000E+02
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +1.5000E-02
+B057F08     Correction applied (seconds):          +1.5000E-02
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 10
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 11
+B061F04     Response Name:                         130S_1_50_11
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  11
+B057F04     Input sample rate (HZ):                 2.0000E+02
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +3.0000E-02
+B057F08     Correction applied (seconds):          +3.0000E-02
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 11
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 12
+B061F04     Response Name:                         130S_1_50_12
+B061F05     Symmetry Code:                         A
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                101
+#              i  FIR Coefficient
+B061F09     0  -7.15032E-07
+B061F09     1  -5.60109E-06
+B061F09     2  -2.62179E-06
+B061F09     3  -4.31403E-05
+B061F09     4  -4.64771E-06
+B061F09     5  +1.43006E-06
+B061F09     6  +2.34769E-05
+B061F09     7  +1.43006E-06
+B061F09     8  -5.27932E-05
+B061F09     9  -3.66692E-04
+B061F09    10  +3.76107E-04
+B061F09    11  +8.54226E-04
+B061F09    12  +3.05081E-05
+B061F09    13  -1.27621E-03
+B061F09    14  -9.10951E-04
+B061F09    15  +1.27669E-03
+B061F09    16  +2.15165E-03
+B061F09    17  -4.61554E-04
+B061F09    18  -3.33765E-03
+B061F09    19  -1.40933E-03
+B061F09    20  +3.77072E-03
+B061F09    21  +4.19414E-03
+B061F09    22  -2.64288E-03
+B061F09    23  -7.20121E-03
+B061F09    24  -6.44006E-04
+B061F09    25  +9.18400E-03
+B061F09    26  +6.08445E-03
+B061F09    27  -8.57824E-03
+B061F09    28  -1.27401E-02
+B061F09    29  +3.98225E-03
+B061F09    30  +1.86261E-02
+B061F09    31  +5.20520E-03
+B061F09    32  -2.09407E-02
+B061F09    33  -1.81629E-02
+B061F09    34  +1.66669E-02
+B061F09    35  +3.22447E-02
+B061F09    36  -3.46588E-03
+B061F09    37  -4.29528E-02
+B061F09    38  -1.93265E-02
+B061F09    39  +4.43090E-02
+B061F09    40  +4.97909E-02
+B061F09    41  -2.94164E-02
+B061F09    42  -8.26078E-02
+B061F09    43  -9.34166E-03
+B061F09    44  +1.07552E-01
+B061F09    45  +8.16604E-02
+B061F09    46  -1.03110E-01
+B061F09    47  -2.04208E-01
+B061F09    48  -3.12231E-05
+B061F09    49  +3.90432E-01
+B061F09    50  +5.89958E-01
+B061F09    51  +3.90432E-01
+B061F09    52  -3.12231E-05
+B061F09    53  -2.04208E-01
+B061F09    54  -1.03110E-01
+B061F09    55  +8.16604E-02
+B061F09    56  +1.07552E-01
+B061F09    57  -9.34166E-03
+B061F09    58  -8.26078E-02
+B061F09    59  -2.94164E-02
+B061F09    60  +4.97909E-02
+B061F09    61  +4.43090E-02
+B061F09    62  -1.93265E-02
+B061F09    63  -4.29528E-02
+B061F09    64  -3.46588E-03
+B061F09    65  +3.22447E-02
+B061F09    66  +1.66669E-02
+B061F09    67  -1.81629E-02
+B061F09    68  -2.09407E-02
+B061F09    69  +5.20520E-03
+B061F09    70  +1.86261E-02
+B061F09    71  +3.98225E-03
+B061F09    72  -1.27401E-02
+B061F09    73  -8.57824E-03
+B061F09    74  +6.08445E-03
+B061F09    75  +9.18400E-03
+B061F09    76  -6.44006E-04
+B061F09    77  -7.20121E-03
+B061F09    78  -2.64288E-03
+B061F09    79  +4.19414E-03
+B061F09    80  +3.77072E-03
+B061F09    81  -1.40933E-03
+B061F09    82  -3.33765E-03
+B061F09    83  -4.61554E-04
+B061F09    84  +2.15165E-03
+B061F09    85  +1.27669E-03
+B061F09    86  -9.10951E-04
+B061F09    87  -1.27621E-03
+B061F09    88  +3.05081E-05
+B061F09    89  +8.54226E-04
+B061F09    90  +3.76107E-04
+B061F09    91  -3.66692E-04
+B061F09    92  -4.10310E-04
+B061F09    93  +2.52645E-05
+B061F09    94  +2.61821E-04
+B061F09    95  +1.20602E-04
+B061F09    96  -9.99854E-05
+B061F09    97  -1.62312E-04
+B061F09    98  -9.79595E-05
+B061F09    99  -2.94355E-05
+B061F09   100  -3.09847E-06
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  12
+B057F04     Input sample rate (HZ):                 1.0000E+02
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +5.0000E-01
+B057F08     Correction applied (seconds):          +5.0000E-01
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 12
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHN         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 0
+B058F04     Sensitivity:                           +2.76807E+08
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+###################################################################################
+#
+B050F03     Station:     JRO
+B050F16     Network:     CC
+B052F03     Location:    ??
+B052F04     Channel:     BHZ
+B052F22     Start date:  2015,020,00:00:00
+B052F23     End date:    2599,365,23:59:59
+#
+#                  +-----------------------------------+
+#                  |    Response (Poles and Zeros)     |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B053F03     Transfer function type:                A
+B053F04     Stage sequence number:                 1
+B053F05     Response in units lookup:              M/S - Velocity in meters per second
+B053F06     Response out units lookup:             V - Voltage in Volts
+B053F07     A0 normalization factor:               +4.34493E+17
+B053F08     Normalization frequency:               +1.00000E+00
+B053F09     Number of zeroes:                      6
+B053F14     Number of poles:                       11
+#              Complex zeroes:
+#              i  real          imag          real_error    imag_error
+B053F10-13     0  +0.00000E+00  +0.00000E+00  +0.00000E+00  +0.00000E+00
+B053F10-13     1  +0.00000E+00  +0.00000E+00  +0.00000E+00  +0.00000E+00
+B053F10-13     2  -3.92000E+02  +0.00000E+00  +0.00000E+00  +0.00000E+00
+B053F10-13     3  -1.96000E+03  +0.00000E+00  +0.00000E+00  +0.00000E+00
+B053F10-13     4  -1.49000E+03  +1.74000E+03  +0.00000E+00  +0.00000E+00
+B053F10-13     5  -1.49000E+03  -1.74000E+03  +0.00000E+00  +0.00000E+00
+#              Complex poles:
+#              i  real          imag          real_error    imag_error
+B053F15-18     0  -3.69100E-02  +3.70200E-02  +0.00000E+00  +0.00000E+00
+B053F15-18     1  -3.69100E-02  -3.70200E-02  +0.00000E+00  +0.00000E+00
+B053F15-18     2  -3.43000E+02  +0.00000E+00  +0.00000E+00  +0.00000E+00
+B053F15-18     3  -3.70000E+02  +4.67000E+02  +0.00000E+00  +0.00000E+00
+B053F15-18     4  -3.70000E+02  -4.67000E+02  +0.00000E+00  +0.00000E+00
+B053F15-18     5  -8.36000E+02  +1.52200E+03  +0.00000E+00  +0.00000E+00
+B053F15-18     6  -8.36000E+02  -1.52200E+03  +0.00000E+00  +0.00000E+00
+B053F15-18     7  -4.90000E+03  +4.70000E+03  +0.00000E+00  +0.00000E+00
+B053F15-18     8  -4.90000E+03  -4.70000E+03  +0.00000E+00  +0.00000E+00
+B053F15-18     9  -6.90000E+03  +0.00000E+00  +0.00000E+00  +0.00000E+00
+B053F15-18    10  -1.50000E+04  +0.00000E+00  +0.00000E+00  +0.00000E+00
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 1
+B058F04     Sensitivity:                           +7.54300E+02
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 2
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |      Response (Coefficients)      |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B054F03     Transfer function type:                D
+B054F04     Stage sequence number:                 3
+B054F05     Response in units lookup:              V - Voltage in Volts
+B054F06     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B054F07     Number of numerators:                  0
+B054F10     Number of denominators:                0
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  3
+B057F04     Input sample rate (HZ):                 1.0240E+05
+B057F05     Decimation factor:                      00001
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +0.0000E+00
+B057F08     Correction applied (seconds):          +0.0000E+00
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 3
+B058F04     Sensitivity:                           +3.66972E+05
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 4
+B061F04     Response Name:                         130S_1_50_4
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                15
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +9.76562E-04
+B061F09     2  +2.44141E-03
+B061F09     3  +4.88281E-03
+B061F09     4  +8.54492E-03
+B061F09     5  +1.36719E-02
+B061F09     6  +2.05078E-02
+B061F09     7  +2.92969E-02
+B061F09     8  +3.93066E-02
+B061F09     9  +4.98047E-02
+B061F09    10  +6.00586E-02
+B061F09    11  +6.93359E-02
+B061F09    12  +7.69043E-02
+B061F09    13  +8.20312E-02
+B061F09    14  +8.39844E-02
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  4
+B057F04     Input sample rate (HZ):                 1.0240E+05
+B057F05     Decimation factor:                      00008
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +1.3672E-04
+B057F08     Correction applied (seconds):          +1.3672E-04
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 4
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 5
+B061F04     Response Name:                         130S_1_50_5
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  5
+B057F04     Input sample rate (HZ):                 1.2800E+04
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +4.6875E-04
+B057F08     Correction applied (seconds):          +4.6875E-04
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 5
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 6
+B061F04     Response Name:                         130S_1_50_6
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  6
+B057F04     Input sample rate (HZ):                 6.4000E+03
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +9.3750E-04
+B057F08     Correction applied (seconds):          +9.3750E-04
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 6
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 7
+B061F04     Response Name:                         130S_1_50_7
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  7
+B057F04     Input sample rate (HZ):                 3.2000E+03
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +1.8750E-03
+B057F08     Correction applied (seconds):          +1.8750E-03
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 7
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 8
+B061F04     Response Name:                         130S_1_50_8
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  8
+B057F04     Input sample rate (HZ):                 1.6000E+03
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +3.7500E-03
+B057F08     Correction applied (seconds):          +3.7500E-03
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 8
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 9
+B061F04     Response Name:                         130S_1_50_9
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  9
+B057F04     Input sample rate (HZ):                 8.0000E+02
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +7.5000E-03
+B057F08     Correction applied (seconds):          +7.5000E-03
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 9
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 10
+B061F04     Response Name:                         130S_1_50_10
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  10
+B057F04     Input sample rate (HZ):                 4.0000E+02
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +1.5000E-02
+B057F08     Correction applied (seconds):          +1.5000E-02
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 10
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 11
+B061F04     Response Name:                         130S_1_50_11
+B061F05     Symmetry Code:                         B
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                7
+#              i  FIR Coefficient
+B061F09     0  +2.44141E-04
+B061F09     1  +2.92969E-03
+B061F09     2  +1.61133E-02
+B061F09     3  +5.37109E-02
+B061F09     4  +1.20850E-01
+B061F09     5  +1.93359E-01
+B061F09     6  +2.25586E-01
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  11
+B057F04     Input sample rate (HZ):                 2.0000E+02
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +3.0000E-02
+B057F08     Correction applied (seconds):          +3.0000E-02
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 11
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |           FIR Response            |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B061F03     Stage sequence number:                 12
+B061F04     Response Name:                         130S_1_50_12
+B061F05     Symmetry Code:                         A
+B061F06     Response in units lookup:              COUNTS - Digital Count in Digital counts
+B061F07     Response out units lookup:             COUNTS - Digital Count in Digital counts
+B061F08     Number of Coefficients:                101
+#              i  FIR Coefficient
+B061F09     0  -7.15032E-07
+B061F09     1  -5.60109E-06
+B061F09     2  -2.62179E-06
+B061F09     3  -4.31403E-05
+B061F09     4  -4.64771E-06
+B061F09     5  +1.43006E-06
+B061F09     6  +2.34769E-05
+B061F09     7  +1.43006E-06
+B061F09     8  -5.27932E-05
+B061F09     9  -3.66692E-04
+B061F09    10  +3.76107E-04
+B061F09    11  +8.54226E-04
+B061F09    12  +3.05081E-05
+B061F09    13  -1.27621E-03
+B061F09    14  -9.10951E-04
+B061F09    15  +1.27669E-03
+B061F09    16  +2.15165E-03
+B061F09    17  -4.61554E-04
+B061F09    18  -3.33765E-03
+B061F09    19  -1.40933E-03
+B061F09    20  +3.77072E-03
+B061F09    21  +4.19414E-03
+B061F09    22  -2.64288E-03
+B061F09    23  -7.20121E-03
+B061F09    24  -6.44006E-04
+B061F09    25  +9.18400E-03
+B061F09    26  +6.08445E-03
+B061F09    27  -8.57824E-03
+B061F09    28  -1.27401E-02
+B061F09    29  +3.98225E-03
+B061F09    30  +1.86261E-02
+B061F09    31  +5.20520E-03
+B061F09    32  -2.09407E-02
+B061F09    33  -1.81629E-02
+B061F09    34  +1.66669E-02
+B061F09    35  +3.22447E-02
+B061F09    36  -3.46588E-03
+B061F09    37  -4.29528E-02
+B061F09    38  -1.93265E-02
+B061F09    39  +4.43090E-02
+B061F09    40  +4.97909E-02
+B061F09    41  -2.94164E-02
+B061F09    42  -8.26078E-02
+B061F09    43  -9.34166E-03
+B061F09    44  +1.07552E-01
+B061F09    45  +8.16604E-02
+B061F09    46  -1.03110E-01
+B061F09    47  -2.04208E-01
+B061F09    48  -3.12231E-05
+B061F09    49  +3.90432E-01
+B061F09    50  +5.89958E-01
+B061F09    51  +3.90432E-01
+B061F09    52  -3.12231E-05
+B061F09    53  -2.04208E-01
+B061F09    54  -1.03110E-01
+B061F09    55  +8.16604E-02
+B061F09    56  +1.07552E-01
+B061F09    57  -9.34166E-03
+B061F09    58  -8.26078E-02
+B061F09    59  -2.94164E-02
+B061F09    60  +4.97909E-02
+B061F09    61  +4.43090E-02
+B061F09    62  -1.93265E-02
+B061F09    63  -4.29528E-02
+B061F09    64  -3.46588E-03
+B061F09    65  +3.22447E-02
+B061F09    66  +1.66669E-02
+B061F09    67  -1.81629E-02
+B061F09    68  -2.09407E-02
+B061F09    69  +5.20520E-03
+B061F09    70  +1.86261E-02
+B061F09    71  +3.98225E-03
+B061F09    72  -1.27401E-02
+B061F09    73  -8.57824E-03
+B061F09    74  +6.08445E-03
+B061F09    75  +9.18400E-03
+B061F09    76  -6.44006E-04
+B061F09    77  -7.20121E-03
+B061F09    78  -2.64288E-03
+B061F09    79  +4.19414E-03
+B061F09    80  +3.77072E-03
+B061F09    81  -1.40933E-03
+B061F09    82  -3.33765E-03
+B061F09    83  -4.61554E-04
+B061F09    84  +2.15165E-03
+B061F09    85  +1.27669E-03
+B061F09    86  -9.10951E-04
+B061F09    87  -1.27621E-03
+B061F09    88  +3.05081E-05
+B061F09    89  +8.54226E-04
+B061F09    90  +3.76107E-04
+B061F09    91  -3.66692E-04
+B061F09    92  -4.10310E-04
+B061F09    93  +2.52645E-05
+B061F09    94  +2.61821E-04
+B061F09    95  +1.20602E-04
+B061F09    96  -9.99854E-05
+B061F09    97  -1.62312E-04
+B061F09    98  -9.79595E-05
+B061F09    99  -2.94355E-05
+B061F09   100  -3.09847E-06
+#
+#                  +-----------------------------------+
+#                  |            Decimation             |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B057F03     Stage sequence number:                  12
+B057F04     Input sample rate (HZ):                 1.0000E+02
+B057F05     Decimation factor:                      00002
+B057F06     Decimation offset:                      00000
+B057F07     Estimated delay (seconds):             +5.0000E-01
+B057F08     Correction applied (seconds):          +5.0000E-01
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 12
+B058F04     Sensitivity:                           +1.00000E+00
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0
+#
+#                  +-----------------------------------+
+#                  |      Channel Sensitivity/Gain     |
+#                  |        CC  JRO        BHZ         |
+#                  |     01/20/2015 to 12/31/2599      |
+#                  +-----------------------------------+
+#
+B058F03     Stage sequence number:                 0
+B058F04     Sensitivity:                           +2.76807E+08
+B058F05     Frequency of sensitivity:              +1.00000E+00
+B058F06     Number of calibrations:                0

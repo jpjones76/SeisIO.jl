@@ -1,0 +1,141 @@
+* **********************************
+* NETWORK   (KNETWK): CC
+* STATION    (KSTNM): JRO
+* LOCATION   (KHOLE):   
+* CHANNEL   (KCMPNM): BHE
+* CREATED           : 2019-09-11T11:01:26
+* START             : 2015-01-20T00:00:00
+* END               : 2599-12-31T23:59:59
+* DESCRIPTION       : Johnston Ridge Observatory
+* LATITUDE          : 46.275270
+* LONGITUDE         : -122.218260
+* ELEVATION         : 1219.0
+* DEPTH             : 0.0
+* DIP               : 90.0
+* AZIMUTH           : 90.0
+* SAMPLE RATE       : 50.0
+* INPUT UNIT        : M
+* OUTPUT UNIT       : COUNTS
+* INSTTYPE          : TRILLIUM COMPACT,Velocity Transducer,NANOMETRICS
+* INSTGAIN          : 7.543000e+02 (M/S)
+* COMMENT           : 
+* SENSITIVITY       : 2.768070e+08 (M/S)
+* A0                : 4.344930e+17
+* **********************************
+ZEROS	7
+	+0.000000e+00	+0.000000e+00	
+	+0.000000e+00	+0.000000e+00	
+	+0.000000e+00	+0.000000e+00	
+	-3.920000e+02	+0.000000e+00	
+	-1.960000e+03	+0.000000e+00	
+	-1.490000e+03	+1.740000e+03	
+	-1.490000e+03	-1.740000e+03	
+POLES	11
+	-3.691000e-02	+3.702000e-02	
+	-3.691000e-02	-3.702000e-02	
+	-3.430000e+02	+0.000000e+00	
+	-3.700000e+02	+4.670000e+02	
+	-3.700000e+02	-4.670000e+02	
+	-8.360000e+02	+1.522000e+03	
+	-8.360000e+02	-1.522000e+03	
+	-4.900000e+03	+4.700000e+03	
+	-4.900000e+03	-4.700000e+03	
+	-6.900000e+03	+0.000000e+00	
+	-1.500000e+04	+0.000000e+00	
+CONSTANT	1.202707e+26
+
+
+* **********************************
+* NETWORK   (KNETWK): CC
+* STATION    (KSTNM): JRO
+* LOCATION   (KHOLE):   
+* CHANNEL   (KCMPNM): BHN
+* CREATED           : 2019-09-11T11:01:26
+* START             : 2015-01-20T00:00:00
+* END               : 2599-12-31T23:59:59
+* DESCRIPTION       : Johnston Ridge Observatory
+* LATITUDE          : 46.275270
+* LONGITUDE         : -122.218260
+* ELEVATION         : 1219.0
+* DEPTH             : 0.0
+* DIP               : 90.0
+* AZIMUTH           : 0.0
+* SAMPLE RATE       : 50.0
+* INPUT UNIT        : M
+* OUTPUT UNIT       : COUNTS
+* INSTTYPE          : TRILLIUM COMPACT,Velocity Transducer,NANOMETRICS
+* INSTGAIN          : 7.543000e+02 (M/S)
+* COMMENT           : 
+* SENSITIVITY       : 2.768070e+08 (M/S)
+* A0                : 4.344930e+17
+* **********************************
+ZEROS	7
+	+0.000000e+00	+0.000000e+00	
+	+0.000000e+00	+0.000000e+00	
+	+0.000000e+00	+0.000000e+00	
+	-3.920000e+02	+0.000000e+00	
+	-1.960000e+03	+0.000000e+00	
+	-1.490000e+03	+1.740000e+03	
+	-1.490000e+03	-1.740000e+03	
+POLES	11
+	-3.691000e-02	+3.702000e-02	
+	-3.691000e-02	-3.702000e-02	
+	-3.430000e+02	+0.000000e+00	
+	-3.700000e+02	+4.670000e+02	
+	-3.700000e+02	-4.670000e+02	
+	-8.360000e+02	+1.522000e+03	
+	-8.360000e+02	-1.522000e+03	
+	-4.900000e+03	+4.700000e+03	
+	-4.900000e+03	-4.700000e+03	
+	-6.900000e+03	+0.000000e+00	
+	-1.500000e+04	+0.000000e+00	
+CONSTANT	1.202707e+26
+
+
+* **********************************
+* NETWORK   (KNETWK): CC
+* STATION    (KSTNM): JRO
+* LOCATION   (KHOLE):   
+* CHANNEL   (KCMPNM): BHZ
+* CREATED           : 2019-09-11T11:01:26
+* START             : 2015-01-20T00:00:00
+* END               : 2599-12-31T23:59:59
+* DESCRIPTION       : Johnston Ridge Observatory
+* LATITUDE          : 46.275270
+* LONGITUDE         : -122.218260
+* ELEVATION         : 1219.0
+* DEPTH             : 0.0
+* DIP               : 0.0
+* AZIMUTH           : 0.0
+* SAMPLE RATE       : 50.0
+* INPUT UNIT        : M
+* OUTPUT UNIT       : COUNTS
+* INSTTYPE          : TRILLIUM COMPACT,Velocity Transducer,NANOMETRICS
+* INSTGAIN          : 7.543000e+02 (M/S)
+* COMMENT           : 
+* SENSITIVITY       : 2.768070e+08 (M/S)
+* A0                : 4.344930e+17
+* **********************************
+ZEROS	7
+	+0.000000e+00	+0.000000e+00	
+	+0.000000e+00	+0.000000e+00	
+	+0.000000e+00	+0.000000e+00	
+	-3.920000e+02	+0.000000e+00	
+	-1.960000e+03	+0.000000e+00	
+	-1.490000e+03	+1.740000e+03	
+	-1.490000e+03	-1.740000e+03	
+POLES	11
+	-3.691000e-02	+3.702000e-02	
+	-3.691000e-02	-3.702000e-02	
+	-3.430000e+02	+0.000000e+00	
+	-3.700000e+02	+4.670000e+02	
+	-3.700000e+02	-4.670000e+02	
+	-8.360000e+02	+1.522000e+03	
+	-8.360000e+02	-1.522000e+03	
+	-4.900000e+03	+4.700000e+03	
+	-4.900000e+03	-4.700000e+03	
+	-6.900000e+03	+0.000000e+00	
+	-1.500000e+04	+0.000000e+00	
+CONSTANT	1.202707e+26
+
+

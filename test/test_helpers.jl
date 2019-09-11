@@ -7,7 +7,7 @@ import SeisIO: BUF, FDSN_sta_xml,
   fillx_i16_le!, fillx_i32_be!, fillx_i32_le!, findhex, get_HTTP_req,
   get_http_post, get_views, int2tstr, mean, minreq!,
   mktaper!, mktime, parse_charr, parse_chstr, parse_sl,
-  read_sacpz!, read_sacpz, read_seed_resp!, read_seed_resp,
+  read_sacpz!, read_sacpz, read_seed_resp!, read_seed_resp, read_station_xml!,
   safe_isdir, safe_isfile, sep, sμ, t_collapse,
   t_expand, t_win, taper_seg!, tnote, tstr2int, w_time, webhdr,
   xtmerge!, μs,
@@ -177,8 +177,8 @@ function breaking_seis()
   S.resp[3].gain[1] = 3.5e15
   S.resp[3].fs[1] = 15.0
   S.resp[3].stage[1].b = randn(Float64, 120)
-  S.resp[3].stage[1].i = "{counts}"
-  S.resp[3].stage[1].o = "m/s"
+  S.resp[3].i[1] = "{counts}"
+  S.resp[3].o[1] = "m/s"
 
   S.x[4] = rand(Float64,4)
   S.t[4] = vcat(S.t[4][1:1,:], [4 0])

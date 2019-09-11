@@ -785,7 +785,7 @@ mseis!(S,T)
 printstyled(stdout,"      mseis! with Types from SeisIO.Quake\n", color=:light_green)
 S = randSeisData()
 Ev = randSeisEvent(2)
-C = ungap(deepcopy(EV.data[1]))
+C = ungap(deepcopy(Ev.data[1]))
 Ev.data[1] = deepcopy(C)
 C.t[1,2] += 1000000
 C.x = randn(eltype(C.x), length(C.x))
