@@ -360,11 +360,6 @@ function add_pzchan!(S::GphysData, D::Dict{String, Any}, file::String)
                   az  = parse(Float64, D["AZIMUTH"]),
                   inc = parse(Float64, D["DIP"])-90.0
                 )
-  resp = PZResp64(parse(Float64, D["A0"]),
-                  0.0,
-                  get(D, "P", ComplexF64[]),
-                  get(D, "Z", ComplexF64[])
-                  )
   fs    = parse(Float64, D["SAMPLE RATE"])
 
   # gain, units; note, not "INSTGAIN", that's just a scalar multipler
@@ -377,7 +372,26 @@ function add_pzchan!(S::GphysData, D::Dict{String, Any}, file::String)
   if endswith(units, ")")
     units = units[1:end-1]
   end
-  units = SeisIO.fix_units(units2ucum(units))
+  units = fix_units(units2ucum(units))
+
+  #= fix for poorly-documented fundamental shortcoming:
+    "INPUT UNIT"         => "M"
+    I have no idea why SACPZ uses displacement PZ =#
+  u_in = fix_units(units2ucum(D["INPUT UNIT"]))
+  Z = get(D, "Z", ComplexF32[])
+  if u_in != units
+    if u_in == "m" && units == "m/s"
+      deleteat!(Z, 1)
+    elseif u_in == "m" && units == "m/s2"
+      deleteat!(Z, 1:2)
+    end
+  end
+
+  resp = PZResp(parse(Float32, D["A0"]),
+                0.0f0,
+                get(D, "P", ComplexF32[]),
+                Z
+                )
 
   if i == 0
     # resp
@@ -472,14 +486,14 @@ function read_sacpz!(S::GphysData, file::String)
     # Zeros section
     elseif startswith(line, "ZEROS")
       N = parse(Int64, split(line, limit=2, keepempty=false)[2])
-      D["Z"] = Array{Complex{Float64},1}(undef, N)
+      D["Z"] = Array{Complex{Float32},1}(undef, N)
       for i = 1:N
         try
           mark(io)
           zc = split(readline(io), limit=2, keepempty=false)
-          D["Z"][i] = complex(parse(Float64, zc[1]), parse(Float64, zc[2]))
+          D["Z"][i] = complex(parse(Float32, zc[1]), parse(Float32, zc[2]))
         catch
-          D["Z"][i:N] .= zero(ComplexF64)
+          D["Z"][i:N] .= zero(ComplexF32)
           reset(io)
         end
       end
@@ -487,10 +501,10 @@ function read_sacpz!(S::GphysData, file::String)
     # Poles section
     elseif startswith(line, "POLES")
       N = parse(Int64, split(line, limit=2, keepempty=false)[2])
-      D["P"] = Array{Complex{Float64},1}(undef, N)
+      D["P"] = Array{Complex{Float32},1}(undef, N)
       for i = 1:N
         pc = split(readline(io), limit=2, keepempty=false)
-        D["P"][i] = complex(parse(Float64, pc[1]), parse(Float64, pc[2]))
+        D["P"][i] = complex(parse(Float32, pc[1]), parse(Float32, pc[2]))
       end
 
     # Constant section
@@ -564,11 +578,11 @@ function writesacpz(S::GphysData, file::String)
     if typeof(S.resp[i]) == GenResp
       a0 = 1.0
       P = S.resp[i][:,1]
-      Z = S.resp[i][:,2]
+      Z = deepcopy(S.resp[i][:,2])
     else
       a0 = getfield(S.resp[i], :a0)
       P = getfield(S.resp[i], :p)
-      Z = getfield(S.resp[i], :z)
+      Z = deepcopy(getfield(S.resp[i], :z))
     end
     NZ = length(Z)
     NP = length(P)
@@ -580,6 +594,14 @@ function writesacpz(S::GphysData, file::String)
     write(io, fill!(zeros(UInt8, 34), 0x2a))
     write(io, 0x0a)
 
+    # fix for units_in always being m
+    if S.units[i] == "m/s"
+      NZ += 1
+      pushfirst!(Z, zero(ComplexF32))
+    elseif S.units[i] == "m/s2"
+      NZ += 2
+      prepend!(Z, zeros(ComplexF32, 2))
+    end
     write(io, "ZEROS\t", string(NZ), 0x0a)
     for i = 1:NZ
       write(io, 0x09, @sprintf("%+12.6e", real(Z[i])), 0x09, @sprintf("%+12.6e", imag(Z[i])), 0x09, 0x0a)
