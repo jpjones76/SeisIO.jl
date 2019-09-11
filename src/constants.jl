@@ -1,10 +1,13 @@
 # Most constants are defined here, except:
+#
 # BUF           src/Types/SeisIOBuf.jl
 # KW            src/Types/KWDefs.jl
 # PhaseCat      src/Types/Quake/PhaseCat.jl
 # flat_resp     src/Types/InstResp.jl
 # RespStage     src/Types/InstResp.jl
 # type_codes    src/Types/Methods/0_type_codes.jl
+#
+# ...and submodule-specific constants, which are in the submodule declaration files (e.g. SEED.jl)
 
 # Type aliases
 const FloatArray  = Union{Array{Float64,1}, Array{Float32,1}}
@@ -21,8 +24,6 @@ const bad_chars = Dict{String, Any}(
 const datafields = (:id, :name, :loc, :fs, :gain, :resp, :units, :src, :notes, :misc, :t, :x)
 const days_per_month = Int32[31,28,31,30,31,30,31,31,30,31,30,31]
 const dtconst = 62135683200000000
-const id_positions = Int8[11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-const id_spacer = 0x2e
 const regex_chars = String[Sys.iswindows() ? "/" : "\\", "\$", "(", ")", "+", "?", "[", "\\0",
 "\\A", "\\B", "\\D", "\\E", "\\G", "\\N", "\\P", "\\Q", "\\S", "\\U", "\\U",
 "\\W", "\\X", "\\Z", "\\a", "\\b", "\\c", "\\d", "\\e", "\\f", "\\n", "\\n",
@@ -61,7 +62,6 @@ const segy_ftypes  = Array{DataType, 1}([UInt32, Int32, Int16, Any, Float32, Any
 const seis_inst_codes = ('H', 'J', 'L', 'M', 'N', 'P', 'Z')
 const seisio_file_begin = UInt8[0x53, 0x45, 0x49, 0x53, 0x49, 0x4f]
 const sep = Base.Filesystem.pathsep()
-const steim = reverse(collect(0x00000000:0x00000002:0x0000001e), dims=1)
 const sμ = 1000000.0
 const vSeisIO = Float32(0.51)
 const unindexed_fields = (:c, :n)

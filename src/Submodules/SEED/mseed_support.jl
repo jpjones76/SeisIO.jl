@@ -1,7 +1,5 @@
-export seed_support, mseed_support
-
 @doc """
-# SEED Support
+# Mini-SEED Support
 SeisIO supports mini-SEED, the "data-only" extension of the SEED (Standard for
 the Exchange of Earthquake Data) file format.
 
@@ -43,13 +41,60 @@ character (\\n).
 
 [^a]: Saved to C.misc["seed_ascii"]; generally not used for data
 [^b]: Converted to Float32
-""" seed_support
-function seed_support()
+""" mseed_support
+function mseed_support()
     return nothing
 end
 
-@doc (@doc seed_support)
-mseed_support() = seed_support()
+@doc """
+# Dataless SEED Support
+SeisIO supports reading of dataless SEED meta-data files.
+
+Reading full SEED volumes is NYI.
+
+## Supported Blockette Types
+
+| Blockette                                             |
+|:------------------------------------------------------|
+| [10] Volume Identifier Blockette                      |
+| [11] Volume Station Header Index Blockette            |
+| [12] Volume Time Span Index Blockette                 |
+| [31] Comment Description Blockette                    |
+| [33] Generic Abbreviation Blockette                   |
+| [34] Units Abbreviations Blockette                    |
+| [41] FIR Dictionary Blockette                         |
+| [43] Response (Poles & Zeros) Dictionary Blockette    |
+| [44] Response (Coefficients) Dictionary Blockette     |
+| [45] Response List Dictionary Blockette               |
+| [47] Decimation Dictionary Blockette                  |
+| [48] Channel Sensitivity/Gain Dictionary Blockette    |
+| [50] Station Identifier Blockette                     |
+| [52] Channel Identifier Blockette                     |
+| [53] Response (Poles & Zeros) Blockette               |
+| [54] Response (Coefficients) Blockette                |
+| [57] Decimation Blockette                             |
+| [58] Channel Sensitivity/Gain Blockette               |
+| [59] Channel Comment Blockette                        |
+| [60] Response Reference Blockette                     |
+| [61] FIR Response Blockette                           |
+
+## Unsupportable Blockette Types
+These blockettes will probably never be supported as
+their information lies outside the scope of SeisIO. At
+high verbosity (v > 2), their information is dumped to
+stdout.
+
+| Blockette                                             |
+|:------------------------------------------------------|
+| [30] Data Format Dictionary Blockette                 |
+| [32] Cited Source Dictionary Blockette                |
+| [51] Station Comment Blockette                        |
+
+"""
+seed_support
+function seed_support()
+    return nothing
+end
 
 #
 # ### Unsupported Data Encodings

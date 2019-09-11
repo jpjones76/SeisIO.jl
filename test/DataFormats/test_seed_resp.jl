@@ -1,6 +1,7 @@
 resp_file_0 = path*"/SampleFiles/YUK7.RESP"
 resp_file_1 = path*"/SampleFiles/RESP.cat"
 resp_file_2 = path*"/SampleFiles/RESP.*"
+rtol = eps(Float32)
 
 printstyled("  SEED RESP\n", color=:light_green)
 printstyled("    single-record file\n", color=:light_green)
@@ -21,7 +22,7 @@ end
 
 # First stage
 @test typeof(R.stage[1]) == PZResp64
-@test isapprox(R.stage[1].a0, 5.71404E+08)
+@test isapprox(R.stage[1].a0, 5.71404E+08, rtol=rtol)
 @test isapprox(R.stage[1].f0, 1.0)
 @test length(R.stage[1].z) == 2
 @test length(R.stage[1].p) == 5
@@ -38,8 +39,8 @@ end
 @test length(R.stage[10].b) == 251
 @test length(R.stage[10].a) == 0
 @test isapprox(R.stage[10].b[1:5], [+2.18133E-08, +1.07949E-07, +2.97668E-07, +6.73280E-07, +1.29904E-06])
-@test R.factor[10] == 5
-@test R.offset[10] == 0
+@test R.fac[10] == 5
+@test R.os[10] == 0
 @test R.delay[10] ≈ 2.5000E-01
 @test R.corr[10] ≈ 2.5000E-01
 @test R.gain[10] ≈ 1.0
@@ -50,13 +51,13 @@ end
 @test length(R.stage[11].b) == 251
 @test length(R.stage[11].a) == 0
 @test isapprox(R.stage[11].b[end-4:end], [-2.22747E-02, -1.03605E-01, +2.25295E-02, +3.17473E-01, +4.77384E-01])
-@test R.factor[11] == 2
-@test R.offset[11] == 0
+@test R.fac[11] == 2
+@test R.os[11] == 0
 @test R.delay[11] ≈ 1.25
 @test R.corr[11] ≈ 1.25
 @test R.gain[11] ≈ 1.0
 @test R.fg[11] ≈ 1.0
-@test S.fs[1] == R.fs[end]
+@test S.fs[1] == R.fs[end]/R.fac[end]
 
 # Channel 5 =================================================================
 @test S.id[5] == "PD.NS04..HHZ"
@@ -71,7 +72,7 @@ end
 
 # First stage
 @test typeof(R.stage[1]) == PZResp64
-@test isapprox(R.stage[1].a0, 1.4142)
+@test isapprox(R.stage[1].a0, 1.4142, rtol=rtol)
 @test isapprox(R.stage[1].f0, 1.0)
 @test length(R.stage[1].z) == 2
 @test length(R.stage[1].p) == 2
@@ -83,8 +84,8 @@ end
 # Second stage
 @test typeof(R.stage[2]) == CoeffResp
 @test isapprox(R.fs[2], 3.000000E+03)
-@test R.factor[2] == 1
-@test R.offset[2] == 0
+@test R.fac[2] == 1
+@test R.os[2] == 0
 @test R.delay[2] ≈ 0.0
 @test R.corr[2] ≈ 0.0
 @test R.gain[2] ≈ 1.0e6
@@ -95,8 +96,8 @@ end
 @test length(R.stage[3].b) == 180
 @test length(R.stage[3].a) == 0
 @test isapprox(R.stage[3].b[1:3], [1.327638E-08, 4.137208E-08, 9.662694E-08])
-@test R.factor[3] == 6
-@test R.offset[3] == 0
+@test R.fac[3] == 6
+@test R.os[3] == 0
 @test R.delay[3] ≈ 0.0
 @test R.corr[3] ≈ 0.0
 @test R.gain[3] ≈ 1.0
@@ -109,8 +110,8 @@ end
 @test length(R.stage[4].a) == 0
 @test isapprox(R.stage[4].b[1:3], [3.863808E-09, 2.261888E-09, -2.660399E-08])
 @test R.fs[4] ≈ 500.0
-@test R.factor[4] == 5
-@test R.offset[4] == 0
+@test R.fac[4] == 5
+@test R.os[4] == 0
 @test R.delay[4] ≈ 0.0
 @test R.corr[4] ≈ 0.0
 @test R.gain[4] ≈ 1.0
@@ -130,7 +131,7 @@ end
 
 # First stage
 @test typeof(R.stage[1]) == PZResp64
-@test isapprox(R.stage[1].a0, 1.0)
+@test isapprox(R.stage[1].a0, 1.0, rtol=rtol)
 @test isapprox(R.stage[1].f0, 5.0)
 @test length(R.stage[1].z) == 2
 @test length(R.stage[1].p) == 2
@@ -138,8 +139,8 @@ end
 @test isapprox(R.stage[1].z[2], 0.0 + 0.0im)
 @test isapprox(R.stage[1].p[1], -4.44 + 4.44im)
 @test isapprox(R.stage[1].p[2], -4.44 - 4.44im)
-@test R.factor[1] == 0
-@test R.offset[1] == 0
+@test R.fac[1] == 0
+@test R.os[1] == 0
 @test R.delay[1] ≈ 0.0
 @test R.corr[1] ≈ 0.0
 @test R.gain[1] ≈ 345.0
@@ -150,8 +151,8 @@ end
 @test length(R.stage[2].b) == 1
 @test length(R.stage[2].a) == 0
 @test isapprox(R.stage[2].b[1], 1.0)
-@test R.factor[2] == 1
-@test R.offset[2] == 0
+@test R.fac[2] == 1
+@test R.os[2] == 0
 @test R.delay[2] ≈ 0.0
 @test R.corr[2] ≈ 0.0
 @test R.gain[2] ≈ 1.0
@@ -194,7 +195,7 @@ for (i,t0) in enumerate([632188800000000,  # SeisIO.mktime(1990, 013, 0, 0, 0, 0
   C.t = [1 t0; nx 0]
   C.x = randn(nx)
   S = SeisData(C)
-  read_data!(S, "resp", resp_file_1)
+  read_meta!(S, "resp", resp_file_1)
   j = findid(S, "IU.ANMO..BHZ")
   @test S.gain[j] ≈ gain[i]
   @test S.resp[j].stage[1].a0 ≈ a0[i]
@@ -206,7 +207,7 @@ end
 # Test that mutli-file read commands work
 n += 1
 printstyled("    multi-file read\n", color=:light_green)
-S = read_data("resp", resp_file_2, units=true)
+S = read_meta("resp", resp_file_2, units=true)
 
 # Channel 1, file 2 =========================================================
 # Station info
@@ -220,8 +221,8 @@ end
 
 # First stage
 @test typeof(R.stage[1]) == PZResp64
-@test R.factor[1] == 0
-@test R.offset[1] == 0
+@test R.fac[1] == 0
+@test R.os[1] == 0
 @test R.delay[1] ≈ 0.0
 @test R.corr[1] ≈ 0.0
 @test R.gain[1] ≈ 3.23
@@ -232,8 +233,8 @@ end
 @test typeof(R.stage[2]) == CoeffResp
 @test length(R.stage[2].b) == 0
 @test length(R.stage[2].a) == 0
-@test R.factor[2] == 1
-@test R.offset[2] == 0
+@test R.fac[2] == 1
+@test R.os[2] == 0
 @test R.delay[2] ≈ 0.0
 @test R.corr[2] ≈ 0.0
 @test R.gain[2] ≈ 5.263200E+05
@@ -245,8 +246,8 @@ end
 @test length(R.stage[3].b) == 29
 @test length(R.stage[3].a) == 0
 @test R.stage[3].b[1:3] ≈ [2.441410E-04, 9.765620E-04, 2.441410E-03]
-@test R.factor[3] == 8
-@test R.offset[3] == 0
+@test R.fac[3] == 8
+@test R.os[3] == 0
 @test R.delay[3] ≈ 8.750000E-04
 @test R.corr[3] ≈ 8.750000E-04
 @test R.gain[3] ≈ 1.0
@@ -268,8 +269,8 @@ end
 @test R.stage[1].f0 ≈ 0.0
 @test isempty(R.stage[1].z)
 @test isempty(R.stage[1].p)
-@test R.factor[1] == 0
-@test R.offset[1] == 0
+@test R.fac[1] == 0
+@test R.os[1] == 0
 @test R.delay[1] ≈ 0.0
 @test R.corr[1] ≈ 0.0
 @test R.gain[1] ≈ 5.901050E-07
@@ -283,8 +284,8 @@ end
 @test length(R.stage[2].z) == 0
 @test length(R.stage[2].p) == 4
 @test R.stage[2].p[1:2] ≈ [-8.3E-02+0.0im, -8.4E-02+0.0im]
-@test R.factor[2] == 0
-@test R.offset[2] == 0
+@test R.fac[2] == 0
+@test R.os[2] == 0
 @test R.delay[2] ≈ 0.0
 @test R.corr[2] ≈ 0.0
 @test R.gain[2] ≈ 1.0
@@ -295,8 +296,8 @@ end
 @test typeof(R.stage[3]) == CoeffResp
 @test length(R.stage[3].b) == 0
 @test length(R.stage[3].a) == 0
-@test R.factor[3] == 1
-@test R.offset[3] == 0
+@test R.fac[3] == 1
+@test R.os[3] == 0
 @test R.delay[3] ≈ 0.0
 @test R.corr[3] ≈ 0.0
 @test R.gain[3] ≈ 3.052E-04
@@ -311,8 +312,8 @@ end
 for i = 1:10
   @test R.stage[4].b[i] ≈ 0.1
 end
-@test R.factor[4] == 10
-@test R.offset[4] == 4
+@test R.fac[4] == 10
+@test R.os[4] == 4
 @test R.delay[4] ≈ 0.5
 @test R.corr[4] ≈ 0.0
 @test R.gain[4] ≈ 1.0

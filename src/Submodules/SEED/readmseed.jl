@@ -16,7 +16,7 @@ function parsemseed!(S::SeisData, sid::IO, v::Int64, nx_new::Int64, nx_add::Int6
   return S
 end
 
-function read_seed_file!(S::SeisData, fname::String, v::Int64, nx_new::Int64, nx_add::Int64)
+function read_mseed_file!(S::SeisData, fname::String, v::Int64, nx_new::Int64, nx_add::Int64)
   io = open(fname, "r")
   skip(io, 6)
   c = read(io, UInt8)

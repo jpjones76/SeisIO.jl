@@ -11,6 +11,7 @@ function resp_unit_split(buf::Array{UInt8,1}, L::Int64)
   return String(buf[1:L])
 end
 
+# *** FIX ME ==> version in dataless.jl is better
 function parse_resp_date!(buf::Array{UInt8,1}, L::Int64, T::Array{Int16,1})
   is_u8_digit(buf[1]) || return typemax(Int64)
   fill!(T, zero(Int16))
@@ -33,23 +34,11 @@ function parse_resp_date!(buf::Array{UInt8,1}, L::Int64, T::Array{Int16,1})
   return mktime(T)
 end
 
-function close_resp_channel!(S::SeisData, C::SeisChannel, ts::Int64, te::Int64, fname::String,
-  corr  ::Array{Float64,1},
-  delay ::Array{Float64,1},
-  fg    ::Array{Float64,1},
-  fs_in ::Array{Float64,1},
-  gain  ::Array{Float64,1},
-  df    ::Array{Int64,1},
-  dn    ::Array{Int64,1},
-  ns    ::Int64)
-
-  C.resp.corr = corr[1:ns]
-  C.resp.delay = delay[1:ns]
-  C.resp.factor = df[1:ns]
-  C.resp.fg = fg[1:ns]
-  C.resp.fs = fs_in[1:ns]
-  C.resp.gain = gain[1:ns]
-  C.resp.offset = dn[1:ns]
+function close_resp_channel!(S::SeisData, C::SeisChannel, ts::Int64, te::Int64, fname::String, ns::Int64)
+  L = length(C.resp.fs)
+  for f in fieldnames(MultiStageResp)
+    deleteat!(getfield(C.resp, f), (ns+1):L)
+  end
 
   i = findid(S, C.id)
   if i != 0
@@ -60,20 +49,21 @@ function close_resp_channel!(S::SeisData, C::SeisChannel, ts::Int64, te::Int64, 
       note!(S, i, string("seed_resp, ", fname, ", overwrote :gain, :resp"))
     end
   else
-    # ObsPy does this but I don't think it's safe; stage fs is not uniform.
+    # ObsPy does this but I don't think it's safe; stage fs is not stored uniformly.
     if length(C.resp.fs) > 0
-      C.fs = C.resp.fs[end]
+      fac = C.resp.fac[end]
+      C.fs = C.resp.fs[end] * (fac > 0 ? 1/fac : 1.0)
     end
     push!(S, C)
   end
 
-  fill!(delay, zero(Float64))
-  fill!(fg, zero(Float64))
-  fill!(fs_in, zero(Float64))
-  fill!(gain, zero(Float64))
-  fill!(corr, zero(Float64))
-  fill!(df, zero(Int64))
-  fill!(dn, zero(Int64))
+  # fill!(delay, zero(Float64))
+  # fill!(fg, zero(Float64))
+  # fill!(fs_in, zero(Float64))
+  # fill!(gain, zero(Float64))
+  # fill!(corr, zero(Float64))
+  # fill!(fac, zero(Int64))
+  # fill!(os, zero(Int64))
 
   return nothing
 end
@@ -97,21 +87,23 @@ function read_seed_resp!(S::GphysData, fpat::String;
   units::Bool=false)
 
   buf   = BUF.buf
-  C     = SeisChannel(resp = MultiStageResp())
-  blk = zero(UInt64)
+  C     = SeisChannel(resp = MultiStageResp(12))
+  R     = C.resp
+  blk   = zero(UInt64)
 
   # Containers for parts of the response
-  nstg    = 12
-  delay = zeros(Float64, nstg)        # Estimated delay (seconds) (047F08, 057F07)
-  corr  = zeros(Float64, nstg)        # Correction applied (seconds) (047F09, 057F08)
-  fg    = zeros(Float64, nstg)        # Frequency of gain (058F05)
-  fs_in = zeros(Float64, nstg)        # Input sample rate (047F05, 057F04)
-  gain  = zeros(Float64, nstg)        # Gain (058F04)
-  df    = zeros(Int64,   nstg)        # Decimation factor (047F06, 057F05)
-  dn    = zeros(Int64,   nstg)        # Decimation offset (047F07, 057F06)
+  # nstg    = 12
+  # delay = zeros(Float64, nstg)        # Estimated delay (seconds) (047F08, 057F07)
+  # corr  = zeros(Float64, nstg)        # Correction applied (seconds) (047F09, 057F08)
+  # fg    = zeros(Float64, nstg)        # Frequency of gain (058F05)
+  # fs_in = zeros(Float64, nstg)        # Input sample rate (047F05, 057F04)
+  # gain  = zeros(Float64, nstg)        # Gain (058F04)
+  # fac   = zeros(Int64,   nstg)        # Decimation factor (047F06, 057F05)
+  # os    = zeros(Int64,   nstg)        # Decimation offset (047F07, 057F06)
   seq_n = zero(Int64)                 # Stage sequence number (053F04, 054F04, 057F03, 058F03, 060F04, 061F03, 062F04)
   seq_n_old = zero(Int64)             # Last sequence number
   d_arr = zeros(Int16, 6)             # Date
+  nmax = zero(Int64)
 
   # Array containers
   X = Float64[]
@@ -309,6 +301,7 @@ function read_seed_resp!(S::GphysData, fpat::String;
         while c != 0x0a
           buf[i] = c
           i += 1
+          eof(io) && break
           c = read(io, UInt8)
         end
         i -= 1
@@ -331,15 +324,15 @@ function read_seed_resp!(S::GphysData, fpat::String;
 
         elseif blk in (0x0000383046373530, 0x0000393046373430)
           # Correction applied (seconds) (057F08) / Response correction (047F09)
-          store_dbl!(corr, buf, i, seq_n)
+          store_dbl!(R.corr, buf, i, seq_n)
 
         elseif blk in (0x0000353046373530, 0x0000363046373430)
           # Decimation factor (057F05) / Response decimation factor (047F06)
-          store_int!(df, buf, i, seq_n)
+          store_int!(R.fac, buf, i, seq_n)
 
         elseif blk in (0x0000363046373530, 0x0000373046373430)
           # Decimation offset (057F06) /  Response decimation offset (047F07)
-          store_int!(dn, buf, i, seq_n)
+          store_int!(R.os, buf, i, seq_n)
 
         elseif blk == 0x0000333246323530
           # End date (052F23)
@@ -347,24 +340,24 @@ function read_seed_resp!(S::GphysData, fpat::String;
 
         elseif blk in (0x0000373046373530, 0x0000383046373430)
           # Estimated delay (seconds) (057F07) /  Response delay (047F08)
-          store_dbl!(delay, buf, i, seq_n)
+          store_dbl!(R.delay, buf, i, seq_n)
 
         elseif blk in (0x0000353046383530, 0x0000363046383430)
           # Frequency of gain (058F05) / Frequency of sensitivity (048F06)
           # println("blk = ", String(reinterpret(UInt8, [blk])), ", buf = ", String(buf[1:i]))
-          store_dbl!(fg, buf, i, seq_n)
+          store_dbl!(R.fg, buf, i, seq_n)
 
         elseif blk in (0x0000343046383530, 0x0000353046383430)
           # Gain (058F04) / Sensitivity (048F05)
           if seq_n > 0
-            store_dbl!(gain, buf, i, seq_n)
+            store_dbl!(R.gain, buf, i, seq_n)
           else
             C.gain = mkdbl(buf, i)
           end
 
         elseif blk in (0x0000343046373530, 0x0000353046373430)
           # Input sample rate (057F04) / Response input sample rate (047F05)
-          store_dbl!(fs_in, buf, i, seq_n)
+          store_dbl!(R.fs, buf, i, seq_n)
 
         elseif blk == 0x0000333046323530
           # Location (052F03)
@@ -406,9 +399,7 @@ function read_seed_resp!(S::GphysData, fpat::String;
           if units || isempty(C.units)
             units_in = fix_units(resp_unit_split(buf, i))
             if seq_n > 0 && units == true
-              if typeof(C.resp.stage[seq_n]) == CoeffResp
-                C.resp.stage[seq_n].i = units_in
-              end
+              C.resp.i[seq_n] = units_in
             end
           end
 
@@ -417,15 +408,14 @@ function read_seed_resp!(S::GphysData, fpat::String;
           if units
             units_out = fix_units(resp_unit_split(buf, i))
             if seq_n > 0
-              if typeof(C.resp.stage[seq_n]) == CoeffResp
-                C.resp.stage[seq_n].o = units_out
-              end
+              C.resp.o[seq_n] = units_out
             end
           end
 
         elseif blk in (0x0000343046333530, 0x0000343046343530, 0x0000333046373530, 0x0000333046383530, 0x0000343046303630, 0x0000333046313630, 0x0000343046323630)
           # Stage sequence number (053F04, 054F04, 057F03, 058F03, 060F04, 061F03, 062F04)
           seq_n = u8_to_int(buf, i)
+          nmax = max(nmax, seq_n)
 
           #= Here is where we dump everything to seq_n_old.
 
@@ -437,7 +427,7 @@ function read_seed_resp!(S::GphysData, fpat::String;
             # initialize stage seq_n
             if seq_n > 0
               if length(C.resp.stage) < seq_n
-                push!(C.resp.stage, nothing)
+                push!(C.resp, MultiStageResp(6))
               end
             end
 
@@ -478,13 +468,16 @@ function read_seed_resp!(S::GphysData, fpat::String;
         elseif blk == 0x0000333046303530
           # Station (050F03)
           if chip
-            close_resp_channel!(S, C, ts, te, file, corr, delay, fg, fs_in, gain, df, dn, length(C.resp.stage))
-            C = SeisChannel(resp = MultiStageResp())
+            # close_resp_channel!(S, C, ts, te, file, corr, delay, fg, fs_in, gain, fac, os, length(C.resp.stage))
+            close_resp_channel!(S, C, ts, te, file, nmax)
+            C = SeisChannel(resp = MultiStageResp(12))
+            R = C.resp
             chip = false
             seq_n = zero(Int64)
             seq_n_old = zero(Int64)
             tfc = 0x00
             units_in = ""
+            nmax = zero(Int64)
           end
           ni = min(i,5)
           id = zeros(UInt8, ni+1)
@@ -522,14 +515,16 @@ function read_seed_resp!(S::GphysData, fpat::String;
       end
     end
     close(io)
-    close_resp_channel!(S, C, ts, te, file, corr, delay, fg, fs_in, gain, df, dn, length(C.resp.stage))
+    close_resp_channel!(S, C, ts, te, file, nmax)
     if nf != lastindex(files)
-      C = SeisChannel(resp = MultiStageResp())
+      C = SeisChannel(resp = MultiStageResp(12))
+      R = C.resp
       chip = false
       seq_n = zero(Int64)
       seq_n_old = zero(Int64)
       tfc = 0x00
       units_in = ""
+      nmax = zero(Int64)
     end
   end
   return S
