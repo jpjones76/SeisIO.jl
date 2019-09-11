@@ -7,8 +7,7 @@ true_ot = DateTime("2011-03-11T05:46:23.200")
 true_loc = Float64[2.2376 38.2963; 93.0144 142.498; 26.3 19.7]
 true_mag = Float32[8.6, 9.1, 8.8, 8.5, 8.6, 9.0, 8.5]
 true_msc = String["MW", "MW", "MW", "MW", "MW", "MW", ""]
-r1 = PZResp(f0 = 0.02f0, p = ComplexF32[-981.0+1009.0im, -981.0-1009.0im, -3290.0+1263.0im, -3290.0-1263.0im])
-resp_a0!(r1)
+r1 = PZResp(a0 = 2.45956f13, f0 = 0.02f0, p = ComplexF32[-981.0+1009.0im, -981.0-1009.0im, -3290.0+1263.0im, -3290.0-1263.0im])
 r2 = PZResp(Complex{Float32}.([   0.0+0.0im       -0.037-0.037im
                                   0.0+0.0im       -0.037+0.037im
                                   -15.15+0.0im    -15.64+0.0im
@@ -22,7 +21,7 @@ r2 = PZResp(Complex{Float32}.([   0.0+0.0im       -0.037-0.037im
                                   0.0+0.0im       -255.097+0.0im ]),rev=true)
 r2.z = r2.z[1:6]
 r2.f0 = 0.02f0
-resp_a0!(r2)
+r2.a0 = 3.53734f17
 
 printstyled("  station XML\n", color=:light_green)
 io = open(xml_stfile, "r")
@@ -75,7 +74,7 @@ for f in fieldnames(MultiStageResp)
 end
 @test r.stage[3].b[1:3] == [0.000244141, 0.000976562, 0.00244141]
 @test r.fs[6] == 8000.0
-@test r.factor[6] == 2
+@test r.fac[6] == 2
 @test r.delay[6] == 7.5E-4
 @test r.corr[6] == 7.5E-4
 @test r.stage[9].b[6:9] == [-0.0000000298023, -0.0000000298023, -0.0000000298023, 0.0]
@@ -88,16 +87,17 @@ T = read_sxml(xml_stpat)
 @test findid(T.id[S.n+1], S.id) == 0
 
 printstyled("  station XML with read_data\n", color=:light_green)
-S = read_data("sxml", xml_stfile)
-T = read_data("sxml", xml_stpat)
+S = read_meta("sxml", xml_stfile)
+T = read_meta("sxml", xml_stpat)
 @assert T.n > S.n
 @test findid(T.id[S.n+1], S.id) == 0
 
 printstyled("  overwrite of channel headers at matching times\n", color=:light_green)
 redirect_stdout(out) do
   xml_stfile = path*"/SampleFiles/fdsnws-station_2017-01-12T03-17-42Z.xml"
-  S = read_data("sxml", xml_stfile, v=3)
+  S = SeisData()
+  read_station_xml!(S, xml_stfile, v=3)
   n = S.n
-  read_data!(S, "sxml", xml_stfile, v=3)
+  read_station_xml!(S, xml_stfile, v=3)
   @test S.n == n
 end
