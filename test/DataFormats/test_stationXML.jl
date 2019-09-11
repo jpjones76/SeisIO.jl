@@ -23,7 +23,7 @@ r2.z = r2.z[1:6]
 r2.f0 = 0.02f0
 r2.a0 = 3.53734f17
 
-printstyled("  station XML\n", color=:light_green)
+printstyled("  FDSN station XML\n", color=:light_green)
 io = open(xml_stfile, "r")
 xsta = read(io, String)
 close(io)
@@ -66,7 +66,7 @@ end
 # xdoc = LightXML.parse_string(xsta); xroot = LightXML.root(xdoc); xnet = child_elements(xroot);
 # xr = get_elements_by_tagname(get_elements_by_tagname(get_elements_by_tagname(get_elements_by_tagname(xroot, "Network")[1], "Station")[1], "Channel")[1], "Response")[1];
 # stage = get_elements_by_tagname(xr, "Stage");
-printstyled("  station XML with MultiStageResp\n", color=:light_green)
+printstyled("    with MultiStageResp\n", color=:light_green)
 S = FDSN_sta_xml(xsta, msr=true)
 r = S.resp[1]
 for f in fieldnames(MultiStageResp)
@@ -80,19 +80,19 @@ end
 @test r.stage[9].b[6:9] == [-0.0000000298023, -0.0000000298023, -0.0000000298023, 0.0]
 @test r.stage[9].a == []
 
-printstyled("  station XML with read_sxml\n", color=:light_green)
+printstyled("    read_sxml\n", color=:light_green)
 S = read_sxml(xml_stfile)
 T = read_sxml(xml_stpat)
 @assert T.n > S.n
 @test findid(T.id[S.n+1], S.id) == 0
 
-printstyled("  station XML with read_data\n", color=:light_green)
+printstyled("    read_meta\n", color=:light_green)
 S = read_meta("sxml", xml_stfile)
 T = read_meta("sxml", xml_stpat)
 @assert T.n > S.n
 @test findid(T.id[S.n+1], S.id) == 0
 
-printstyled("  overwrite of channel headers at matching times\n", color=:light_green)
+printstyled("    overwrite channel headers on time match\n", color=:light_green)
 redirect_stdout(out) do
   xml_stfile = path*"/SampleFiles/fdsnws-station_2017-01-12T03-17-42Z.xml"
   S = SeisData()
