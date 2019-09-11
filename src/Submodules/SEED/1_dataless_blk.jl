@@ -493,7 +493,8 @@ function blk_052!(io::IO, nb::Int64, C::SeisChannel, ts_req::Int64, te_req::Int6
     C.misc["te"] = te
     C.misc["timespan"] = string(u2d(div(ts, 1000000))) * " : " *  string(u2d(div(te, 1000000)))
     C.misc["inst"] = get(abbrev, inst, "")
-    C.units = fix_units(units_lookup[units_code])
+    units = get(units_lookup, units_code, "")
+    C.units = fix_units(units)
     skipping = false
   else
     if v > 1
