@@ -1,5 +1,5 @@
 # Responses
-printstyled("  T <: InstrumentResponse\n", color=:light_green)
+printstyled("  InstrumentResponse subtypes\n", color=:light_green)
 redirect_stdout(out) do
   v = 1.0 + 1.0*im
   X = rand(12,3)

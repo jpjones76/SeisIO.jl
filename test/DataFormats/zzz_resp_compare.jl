@@ -1,41 +1,40 @@
 using Test
 
-printstyled("  meta-data reader equivalence:\n", color=:light_green)
-printstyled("    full responses:\n", color=:light_green)
+printstyled("  read_meta equivalencies\n", color=:light_green)
+printstyled("    full (XML, RESP, dataless)\n", color=:light_green)
 
 S1 = read_meta("sxml", path*"/SampleFiles/fdsnws-station_2019-09-11T06_26_58Z.xml", s="2016-01-01T00:00:00", msr=true)
 S2 = read_meta("resp", path*"/SampleFiles/JRO.resp", units=true)
-S3 = read_meta("dataless", path*"/SampleFiles/CC.dataless", s="2016-01-01T00:00:00", units=true)[56:58]
+S3 = read_meta("dataless", path*"/SampleFiles/SEED/CC.dataless", s="2016-01-01T00:00:00", units=true)[56:58]
 S4 = read_meta("sacpz", path*"/SampleFiles/JRO.sacpz")
 
 C = Array{Char,2}(undef, 10, 3)
 fill!(C, ' ')
+SA = Array{String, 2}(undef, 10, 3)
 for k = 1:3
+  fstr = ""
   n = 0
-  println("    ===== ", S1.id[k], " =====")
+  # println("    ===== ", S1.id[k], " =====")
   R1 = S1.resp[k]
   R2 = S2.resp[k]
   R3 = S3.resp[k]
   for f in fieldnames(MultiStageResp)
+    fstr = uppercase(String(f))
     n += 1
     f1 = getfield(R1, f)
     f2 = getfield(R2, f)
     f3 = getfield(R3, f)
     t = min(isequal(f1, f2), isequal(f1, f3))
-    if t == true
-      C[n,k] = 't'
-      str = string("      ", uppercase(String(f)), ": =\n")
+    if t
+      C[n,k] = '='
     else
-      str = string("      ", uppercase(String(f)), ": f\n")
 
       # Check for same size, type
       L = length(f1)
       if L != length(f2) || L != length(f3)
-        println(str, "Inequal lengths!")
         C[n,k] = 'f'
         continue
       elseif typeof(f1) != typeof(f2) || typeof(f1) != typeof(f3)
-        println(str, "Wrong types!")
         C[n,k] = 'f'
         continue
       end
@@ -52,7 +51,6 @@ for k = 1:3
         else
           T1 = typeof(i1)
           if T1 != typeof(i2) || T1 != typeof(i3)
-            str *= string(" "^4, i, ": Type mismatch!\n")
             C[n,k] = 'f'
             break
 
@@ -69,10 +67,6 @@ for k = 1:3
             # Only possible for a String in these Types
             if isempty(FF)
               C[n,k] = 'f'
-              str *= string(" "^4, i, ": !=(", i1 == nothing ? repr(i1) : i1,
-                                          ", ", i2 == nothing ? repr(i2) : i2,
-                                          ", ", i3 == nothing ? repr(i3) : i3,
-                                          ")\n")
 
             # Check for approximately equal subfields
             else
@@ -84,15 +78,10 @@ for k = 1:3
 
                 # Dimension mismatch
                 if !(length(j1) == length(j2) == length(j3))
-                  str *= string(" "^4, g, ": Dimensions don't match!\n")
                   C[n,k] = 'f'
 
                 # True mismatch
                 elseif min(isapprox(j1, j2), isapprox(j1, j3)) == false
-                  str *= string(" "^4, g, ": !=(", j1 == nothing ? repr(j1) : j1,
-                                ", ", j2 == nothing ? repr(j2) : j2,
-                                ", ", j3 == nothing ? repr(j3) : j3,
-                                ")\n")
                   C[n,k] = 'f'
 
                 # Approx. equality
@@ -106,59 +95,74 @@ for k = 1:3
                 T[i] = true
               end
             end
-            continue
           end
         end
       end
 
       # If they're all approximate, set C[n,k] to ≈
       if minimum(T) == true
-        str = "      " * uppercase(String(f)) * ": ≈\n"
         C[n,k] = '≈'
       end
     end
-    printstyled(str)
+    SA[n,k] = (k == 1 ? lpad(fstr * ": ", 12) : "") * lpad(C[n,k], 5)
+    @test C[n,k] in ('≈', '=')
   end
-  @test C[n,k] in ('≈', 't')
 end
+println("")
+println(" "^12,
+        lpad(S1.id[1][end-3:end], 6),
+        lpad(S1.id[2][end-3:end], 6),
+        lpad(S1.id[3][end-3:end], 6))
+println(" "^12, "|", "="^5, "|", "="^5, "|", "="^5)
+for i = 1:size(SA,1)
+  println(join(SA[i,:], " "))
+end
+println("")
 
-printstyled("    one-stage responses:\n", color=:light_green)
+printstyled("    one-stage (SACPZ, XML)\n", color=:light_green)
 S1 = read_meta("sxml", path*"/SampleFiles/fdsnws-station_2019-09-11T06_26_58Z.xml", s="2016-01-01T00:00:00", msr=false)
 S4 = read_meta("sacpz", path*"/SampleFiles/JRO.sacpz")
 K = Array{Char,2}(undef, 3, 3)
 fill!(K, ' ')
+SA = Array{String, 2}(undef, 3, 3)
 for k = 1:3
   n = 0
-  println("    ===== ", S1.id[k], " =====")
   R1 = S1.resp[k]
   R2 = S4.resp[k]
   for f in fieldnames(PZResp)
+    fstr = uppercase(String(f))
     (f == :f0) && continue # SACPZ lacks f0 for some reason
     n += 1
     f1 = getfield(R1, f)
     f2 = getfield(R2, f)
     t = isequal(f1, f2)
     if t == true
-      K[n,k] = 't'
-      str = string("      ", uppercase(String(f)), ": =\n")
+      K[n,k] = '='
     else
-      str = string("      ", uppercase(String(f)), ": f\n")
 
       # Check for same size, type
       L = length(f1)
       if L != length(f2)
-        println(str, "Inequal lengths!")
         K[n,k] = 'f'
         continue
       elseif typeof(f1) != typeof(f2)
-        println(str, "Wrong types!")
         K[n,k] = 'f'
         continue
       elseif isapprox(f1, f2)
         K[n,k] = '≈'
       end
     end
-    printstyled(str)
+    @test K[n,k] in ('≈', '=')
+    SA[n,k] = (k == 1 ? lpad(fstr * ": ", 12) : "") * lpad(K[n,k], 5)
   end
-  @test K[n,k] in ('≈', 't')
 end
+println("")
+println(" "^12,
+        lpad(S1.id[1][end-3:end], 6),
+        lpad(S1.id[2][end-3:end], 6),
+        lpad(S1.id[3][end-3:end], 6))
+println(" "^12, "|", "="^5, "|", "="^5, "|", "="^5)
+for i = 1:size(SA,1)
+  println(join(SA[i,:], " "))
+end
+println("")
