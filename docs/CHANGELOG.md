@@ -3,6 +3,49 @@ The current set of updates, leading to v0.4.0, will focus on:
 2. expanded file format support
 3. expanded data acquisition options
 
+### 2019-09-11
+### Introducing read_meta
+* `read_meta` is a wrapper for reading instrument metadata files. The syntax
+is identical to `read_data` but the keywords differ somewhat. Supported formats
+currently include:
+  + "dataless": dataless SEED
+  + "sacpz": SAC pole-zero file
+  + "resp": SEED RESP
+  + "sxml": FDSN station XML
+* "sacpz", "sxml", and "resp" have moved here from `read_data`
+* Incidentally, there is now a dataless SEED reader.
+
+#### Respocalypse 2
+* The InstrumentResponse subtypes added 2019-09-03 have changed:
+  + Removed fields `:i`, `:o` from `CoeffResp`.
+  + Added fields `:i`, `:o` (input and output unit strings, respectively)
+  to MultiStageResp; renamed `:factor` to `:fac` and `:offset` to `:os`.
+* Added a reader for dataless SEED volumes: `read_data("dataless", ...)`
+
+#### Bugs, Consistency, Performance
+* Meta-data readers now strictly use `A0` from file, rather than recalculating
+it under certain circumstances.
+* Fixed several minor bugs in the initial implementation of `MultiStageResp`
+involving non-standardized and missing units.
+* Reading a SEED Resp file now sets channel `:fs` in a manner consistent with
+SEED "documentation".
+* As SEED functionality becomes bloated like SEED itself, I have moved most
+internal SEED functions to a submodule.
+* The number of zeros read from SACPZ is now consistent with, and adjusted for,
+the units.
+
+### 2019-09-07
+* Added a reader for SEED RESP: `read_data("resp", ...)`
+  + RESP files are poorly standardized. If your RESP files cause errors, please
+    check `?RESP_wont_read` before opening new issues.
+* Added `read_data` support for station XML with `read_data("sxml", ...)`.
+* Note: `guess` can't identify SACPZ files; `read_data` with only one input
+  string won't work on them.
+
+### 2019-09-05
+* `FDSN_sta_xml` and functions that call it (e.g. `get_data, ``read_sxml`) now
+only spam "overwrite" warnings at user-specified verbosity `v` > 0.
+
 ### 2019-09-03
 * Added two new Instrument Response (`:resp`) types: `CoeffResp` and
 `MultiStageResp`. These allow full descriptions of multi-stage instrument
@@ -13,12 +56,13 @@ responses in FDSN XML files.
   only modifies the *first* listed stage in the response, and only if the first
   stage is of Type `PZResp` or `PZResp64`.
 * Added `read_sxml` to read Station XML files; this functionality has existed
-since 2016 but was never exported in a way that could parse files with one 
+since 2016 but was never exported in a way that could parse files with one
 command.
 * Public documentation on low-level file formats has been copied into docs/desc
 
 ### 2019-08-31
-* Added read/write support for SACPZ files.
+* Added read/write support for SACPZ files. Read with e.g.,
+`read_data!(S, "sacpz", ...)`; write with e.g., `writesacpz(S)`
 
 ### 2019-08-30
 * Added function `guess` to guess data file format and endianness.
@@ -41,12 +85,14 @@ file formats. Type `formats["list"]` to see a list of options.
 
 #### SeisIO Native File Format
 * Incremented SeisIO file format version to 0.51.
-  - Legacy support for SeisIO file version 0.50 will assume PZResp, PZResp64 have field `:c` but not fields `:a0, :f0`.
+  - Legacy support for SeisIO file version 0.50 will assume PZResp, PZResp64
+    have field `:c` but not fields `:a0, :f0`.
   - For SeisIO files created *after* the addition of `:a0, :f0` to PZResp and
   PZResp64, set the file version to 0.51 with `set_file_ver(file, 0.51)`.
   - Workaround for issue #21
 * Added `get_file_ver` and `set_file_ver` for SeisIO native file format.
-* If you have problems reading files recently created with `wseis`, call `set_file_ver(file, 0.51)` on each file.
+* If you have problems reading files recently created with `wseis`, call
+  `set_file_ver(file, 0.51)` on each file.
 
 ### 2019-08-23
 * Fixed issue #20
@@ -61,9 +107,6 @@ now in {SeisIO}/src/Submodules/Quake.
 * UW file format support has been moved to submodule `UW`.
   + Access individual commands with e.g., `using SeisIO.UW; ?UW.uwpf`.
   + This does not change the syntax `read_data("uw", ...)`
-* In general, complicated file formats designed for discrete event handling
-will be added as submodules; however, SEED will remain in SeisIO core because
-it's the *de facto* FDSN standard.
 
 ### 2019-08-22
 * Fixed issue #19
