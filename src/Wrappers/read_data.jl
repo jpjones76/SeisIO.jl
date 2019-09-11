@@ -34,7 +34,6 @@ matching pattern `filestr`.
 | AH-1                      | ah1             |
 | AH-2                      | ah2             |
 | Bottle                    | bottle          |
-| FDSN Station XML          | sxml            |
 | GeoCSV, time-sample pair  | geocsv          |
 | GeoCSV, sample list       | geocsv.slist    |
 | Lennartz ASCII            | lennartzascii   |
@@ -42,8 +41,6 @@ matching pattern `filestr`.
 | PASSCAL SEG Y             | passcal         |
 | PC-SUDS                   | suds            |
 | SAC                       | sac             |
-| SACPZ                     | sacpz           |
-| SEED RESP                 | resp            |
 | SEG Y (rev 0 or rev 1)    | segy            |
 | UW                        | uw              |
 | Win32                     | win32           |
@@ -63,8 +60,7 @@ matching pattern `filestr`.
 |        | bottle   |         |           |                                 |
 |        | win32    |         |           |                                 |
 |jst     | win32    | Bool    | true      | are sample times JST (UTC+9)?   |
-|swap    | seed     | Bool    | true      | byte swap?                      |
-|units   | resp     | Bool    | false     | fill in CoeffResp units?        |
+|swap    | mseed    | Bool    | true      | byte swap?                      |
 |v       | all      | Int64   | 0         | verbosity                       |
 
 ### Performance Tip
@@ -102,7 +98,6 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
   swap    ::Bool    = false,              # do byte swap?
-  units   ::Bool    = false,              # fill in units of CoeffResp stages?
   v       ::Int64   = KW.v                # verbosity level
   )
 
@@ -140,19 +135,20 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
       end
     end
 
-  elseif (fmt == "seed" || fmt == "miniseed" || fmt == "mseed")
+  elseif (fmt == "miniseed" || fmt == "mseed")
     setfield!(BUF, :swap, swap)
     if one_file
-      read_seed_file!(S, filestr, v, nx_new, nx_add)
+      read_mseed_file!(S, filestr, v, nx_new, nx_add)
     else
       files = ls(filestr)
       for fname in files
-        read_seed_file!(S, fname, v, nx_new, nx_add)
+        read_mseed_file!(S, fname, v, nx_new, nx_add)
       end
     end
 
 # ============================================================================
 # Data formats that aren't SAC, SEED, or SEG Y begin here and are alphabetical
+# by first KW
 
   elseif fmt == "ah1"
     if one_file
@@ -198,19 +194,6 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
       end
     end
 
-  elseif fmt == "resp"
-    read_seed_resp!(S, filestr, units=units)
-
-  elseif fmt == "sacpz"
-    if one_file
-      read_sacpz!(S, filestr)
-    else
-      files = ls(filestr)
-      for fname in files
-        read_sacpz!(S, fname)
-      end
-    end
-
   elseif fmt == "suds"
     if one_file
       append!(S, SUDS.read_suds(filestr, full=full, v=v))
@@ -218,16 +201,6 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
       files = ls(filestr)
       for fname in files
         append!(S, SUDS.read_suds(fname, full=full, v=v))
-      end
-    end
-
-  elseif fmt == "sxml"
-    if one_file
-      read_station_xml!(S, filestr, v=v)
-    else
-      files = ls(filestr)
-      for fname in files
-        read_station_xml!(S, fname, v=v)
       end
     end
 
@@ -259,7 +232,6 @@ function read_data(fmt::String, filestr::String;
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
   swap    ::Bool    = false,              # do byte swap?
-  units   ::Bool    = false,              # fill in units of CoeffResp stages?
   v       ::Int64   = KW.v                # verbosity level
   )
 
@@ -271,7 +243,6 @@ function read_data(fmt::String, filestr::String;
     nx_add  = nx_add,
     nx_new  = nx_new,
     swap    = swap,
-    units   = units,
     v       = v
     )
   return S
