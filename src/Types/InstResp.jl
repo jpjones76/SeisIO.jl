@@ -262,9 +262,10 @@ function show(io::IO, Resp::Union{PZResp,PZResp64})
     showresp_full(io, Resp)
   else
     c = :compact => true
-    print(io, "a0 = ", repr(getfield(Resp, :a0), context=c), ", ",
-              length(getfield(Resp, :z)), " zeros, ",
-              length(getfield(Resp, :p)), " poles")
+    print(io, "a0 ", repr(getfield(Resp, :a0), context=c), ", ",
+              "f0 ", repr(getfield(Resp, :f0), context=c), ", ",
+              length(getfield(Resp, :z)), "z, ",
+              length(getfield(Resp, :p)), "p")
   end
   return nothing
 end
@@ -335,8 +336,6 @@ numerator `:b` and denominator `:a`.
 
 | F       | Type    | Meaning                   |
 |:---     |:---     |:----                      |
-| i       | String  | Input units               |
-| o       | String  | Output units              |
 | b       | String  | Numerator coefficients    |
 | a       | String  | Denominator coefficients  |
 
@@ -346,43 +345,36 @@ numerator `:b` and denominator `:a`.
 
 """ CoeffResp
 mutable struct CoeffResp <: InstrumentResponse
-  i::String                  # UnitsIn
-  o::String                 # UnitsOut
   b::Array{Float64,1}       # Numerator coeffs
   a::Array{Float64,1}       # Denominator coeffs
 
-  function CoeffResp( i::String,
-                      o::String,
-                      b::Array{Float64,1},
+  function CoeffResp( b::Array{Float64,1},
                       a::Array{Float64,1} )
-    return new(i, o, b, a)
+    return new(b, a)
   end
 end
 
 # CoeffResp default
 CoeffResp( ;
-        i::String                   = "",
-        o::String                   = "",
         b::Array{Float64,1}         = Float64[],
         a::Array{Float64,1}         = Float64[],
-        ) = CoeffResp(i, o, b, a)
+        ) = CoeffResp(b, a)
 
 function show(io::IO, Resp::CoeffResp)
   if get(io, :compact, false) == false
     showresp_full(io, Resp)
   else
     c = :compact => true
-    print(io, "in = ", Resp.i, ", out = ", Resp.o)
+    b = repr(Resp.b, context=c)
+    bstr = length(b) > 10 ? b[1:9] * "…" : b
+    a = repr(Resp.a, context=c)
+    astr = length(a) > 10 ? a[1:9] * "…" : a
+    print(io, "b = ", bstr, ", a = ", astr)
   end
   return nothing
 end
 
 function write(io::IO, R::CoeffResp)
-  write(io, Int64(sizeof(R.i)))
-  write(io, R.i)
-  write(io, Int64(sizeof(R.o)))
-  write(io, R.o)
-
   b = getfield(R, :b)
   write(io, Int64(lastindex(b)))
   write(io, b)
@@ -394,38 +386,27 @@ function write(io::IO, R::CoeffResp)
 end
 
 read(io::IO, ::Type{CoeffResp}) = CoeffResp(
-  String(read(io, read(io, Int64))),
-  String(read(io, read(io, Int64))),
   read!(io, Array{Float64,1}(undef, read(io, Int64))),
   read!(io, Array{Float64,1}(undef, read(io, Int64)))
   )
 
 isempty(R::CoeffResp) = min(
-  isempty(getfield(R, :i)),
-  isempty(getfield(R, :o)),
   isempty(getfield(R, :b)),
   isempty(getfield(R, :a))
   )
 
 function isequal(R1::CoeffResp, R2::CoeffResp)
-  q = isequal(getfield(R1, :i), getfield(R2, :i))
+  q = isequal(getfield(R1, :a), getfield(R2, :a))
   if q == true
-    q = min(q, isequal(getfield(R1, :o), getfield(R2, :o)))
     q = min(q, isequal(getfield(R1, :b), getfield(R2, :b)))
-    q = min(q, isequal(getfield(R1, :a), getfield(R2, :a)))
   end
   return q
 end
 ==(R1::CoeffResp, R2::CoeffResp) = isequal(R1, R2)
 
-function hash(R::CoeffResp)
-  h = hash(R.i)
-  h = hash(R.o, h)
-  h = hash(R.b, h)
-  return hash(R.a, h)
-end
+hash(R::CoeffResp) = hash(R.b, hash(R.a))
 
-sizeof(R::CoeffResp) = 32 + sizeof(getfield(R, :i)) + sizeof(getfield(R, :o)) + sizeof(getfield(R, :b)) + sizeof(getfield(R, :a))
+sizeof(R::CoeffResp) = 16 + sizeof(getfield(R, :b)) + sizeof(getfield(R, :a))
 const RespStage = Union{CoeffResp, PZResp, PZResp64, GenResp, Nothing}
 """
     MultiStageResp
@@ -437,13 +418,16 @@ optional information indexed within each field by stage number:
 
 | F       | Type    | Meaning                 | Units
 |:---     |:---     |:----                    | :---
+| stage   | Stage   | response transfer func  |
 | fs      | Float64 | input sample rate       | Hz
 | gain    | Float64 | stage gain              |
 | fg      | Float64 | frequency of gain       | Hz
 | delay   | Float64 | stage delay             | s
 | corr    | Float64 | correction applied      | s
-| factor  | Int64   | decimation factor       |
-| offset  | Int64   | decimation offset       |
+| fac     | Int64   | decimation factor       |
+| os      | Int64   | decimation offset       |
+| i       | String  | units in                |
+| o       | String  | units out               |
 
 
 !!! warning
@@ -458,8 +442,10 @@ mutable struct MultiStageResp <: InstrumentResponse
   fg::Array{Float64,1}
   delay::Array{Float64,1}
   corr::Array{Float64,1}
-  factor::Array{Int64,1}
-  offset::Array{Int64,1}
+  fac::Array{Int64,1}
+  os::Array{Int64,1}
+  i::Array{String,1}
+  o::Array{String,1}
 
   function MultiStageResp(stage::Array{RespStage,1},
                           fs::Array{Float64,1},
@@ -467,9 +453,11 @@ mutable struct MultiStageResp <: InstrumentResponse
                           fg::Array{Float64,1},
                           delay::Array{Float64,1},
                           corr::Array{Float64,1},
-                          factor::Array{Int64,1},
-                          offset::Array{Int64,1})
-    return new(stage, fs, gain, fg, delay, corr, factor, offset)
+                          fac::Array{Int64,1},
+                          os::Array{Int64,1},
+                          i::Array{String,1},
+                          o::Array{String,1})
+    return new(stage, fs, gain, fg, delay, corr, fac, os, i, o)
   end
 
   function MultiStageResp()
@@ -481,37 +469,72 @@ mutable struct MultiStageResp <: InstrumentResponse
         Array{Float64,1}(undef, 0),
         Array{Float64,1}(undef, 0),
         Array{Int64,1}(undef, 0),
-        Array{Int64,1}(undef, 0)
+        Array{Int64,1}(undef, 0),
+        String[],
+        String[]
       )
   end
 
   function MultiStageResp(n::UInt)
+
+
+
     Resp = new(Array{RespStage,1}(undef,n),
-    zeros(Float64,n),
-    zeros(Float64,n),
-    zeros(Float64,n),
-    zeros(Float64,n),
-    zeros(Float64,n),
-    zeros(Int64,n),
-    zeros(Int64,n))
+      zeros(Float64,n),
+      zeros(Float64,n),
+      zeros(Float64,n),
+      zeros(Float64,n),
+      zeros(Float64,n),
+      zeros(Int64,n),
+      zeros(Int64,n),
+      Array{String,1}(undef,n),
+      Array{String,1}(undef,n)
+      )
+
 
     # Fill these fields with something to prevent undefined reference errors
-    Resp.stage[1]  = PZResp()
-    for i = 2:n
-      Resp.stage[i]  = CoeffResp()
-    end
+    fill!(Resp.stage, nothing)
+    fill!(Resp.i, "")
+    fill!(Resp.o, "")
     return Resp
   end
 end
 
 MultiStageResp(n::Int) = n > 0 ? MultiStageResp(UInt(n)) : MultiStageResp()
 
+function append!(R1::MultiStageResp, R2::MultiStageResp)
+  for f in (:stage, :fs, :gain, :fg, :delay, :corr, :fac, :os, :i, :o)
+    append!(getfield(R1, f), getfield(R2, f))
+  end
+  return nothing
+end
 
 function show(io::IO, Resp::MultiStageResp)
   if get(io, :compact, false) == false
-    showresp_full(io, Resp)
+    for f in (:stage, :fs, :gain, :fg, :delay, :corr, :fac, :os, :i, :o)
+      fn = lpad(String(f), 5, " ")
+      if f == :stage
+        L = 0
+        i = 1
+        N = length(Resp.stage)
+        str = string(N) * " stages; "
+        W = max(80, displaysize(io)[2]) - show_os
+        while L < W && i < N
+          str *= string(typeof(Resp.stage[i])) * " (" * repr(Resp.stage[i], context=:compact => true) * "); "
+          i += 1
+          L += length(str)
+        end
+        L = length(str)
+        if L ≥ W
+          str = str[1:L-1] * "…"
+        end
+        println(io, fn, ": ", str)
+      else
+        println(io, fn, ": ", getfield(Resp,f))
+      end
+    end
   else
-    print(io, length(Resp.stage), " stages")
+    print(io, length(Resp.stage), "-stage response")
   end
   return nothing
 end
@@ -529,31 +552,36 @@ function write(io::IO, R::MultiStageResp)
       write(io, R.stage[i])
     end
   end
-  for f in (:fs, :gain, :fg, :delay, :corr, :factor, :offset)
+  for f in (:fs, :gain, :fg, :delay, :corr, :fac, :os)
     write(io, getfield(R, f))
   end
+  write_string_vec(io, R.i)
+  write_string_vec(io, R.o)
   return nothing
 end
 
 function read(io::IO, ::Type{MultiStageResp})
-  N = read(io, Int64)
-  codes   = read(io, N)
-  fs      = zeros(Float64, N)
-  gain    = zeros(Float64, N)
-  fg      = zeros(Float64, N)
-  delay   = zeros(Float64, N)
-  corr    = zeros(Float64, N)
-  factor  = zeros(Int64, N)
-  offset  = zeros(Int64, N)
-  A       = Array{RespStage,1}(undef, 0)
+  N         = read(io, Int64)
+  codes     = read(io, N)
+  A  = Array{RespStage,1}(undef, N)
+  fill!(A, nothing)
   for i = 1:N
     if codes[i] != 0xff
-      push!(A, read(io, code2resptyp(codes[i])))
+      A[i]  = read(io, code2resptyp(codes[i]))
     end
   end
-  return MultiStageResp(A,
-    read!(io, fs), read!(io, gain), read!(io, fg), read!(io, delay), read!(io, corr),
-    read!(io, factor), read!(io, offset))
+  R = MultiStageResp(N)
+  read!(io, R.fs)
+  read!(io, R.gain)
+  read!(io, R.fg)
+  read!(io, R.delay)
+  read!(io, R.corr)
+  read!(io, R.fac)
+  read!(io, R.os)
+  R.i       = read_string_vec(io, BUF.buf)
+  R.o       = read_string_vec(io, BUF.buf)
+  R.stage   = A
+  return R
 end
 
 isempty(R::MultiStageResp) = isempty(R.stage)
@@ -568,14 +596,18 @@ function hash(R::MultiStageResp)
   h = hash(R.fg, h)
   h = hash(R.delay, h)
   h = hash(R.corr, h)
-  h = hash(R.factor, h)
-  h = hash(R.offset, h)
+  h = hash(R.fac, h)
+  h = hash(R.os, h)
+  h = hash(R.i, h)
+  h = hash(R.o, h)
   for i = 1:N
     h = hash(R.stage[i], h)
   end
   return h
 end
 
-sizeof(R::MultiStageResp) = 64 +
-  sum([sizeof(getfield(R, f)) for f in (:fs, :gain, :fg, :delay, :corr, :factor, :offset)]) +
-  sum([sizeof(R.stage[i]) for i = 1:length(R.stage)])
+sizeof(R::MultiStageResp) = 80 + 8*length(R.i) + 8*length(R.o) +
+  sum([sizeof(getfield(R, f)) for f in (:fs, :gain, :fg, :delay, :corr, :fac, :os)]) +
+  sum([sizeof(R.stage[i]) for i = 1:length(R.stage)]) +
+  sum([sizeof(R.i[i]) for i = 1:length(R.stage)]) +
+  sum([sizeof(R.o[i]) for i = 1:length(R.stage)])
