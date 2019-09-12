@@ -55,6 +55,7 @@ function read_legacy(io::IO, ver::Float32)
       # push to R
       push!(R, T(p = p, z = z))
     end
+    S.resp .= R
     setfield!(S, :units, read_string_vec(io, Z))
     setfield!(S, :src, read_string_vec(io, Z))
     setfield!(S, :misc, [read_misc(io, Z) for i = 1:N])
@@ -64,25 +65,88 @@ function read_legacy(io::IO, ver::Float32)
     FloatArray[cmp ?
     (readbytes!(io, Z, getindex(nx, i)); Blosc.decompress(getindex(y,i), Z)) :
     read!(io, Array{getindex(y,i), 1}(undef, getindex(nx, i))) for i = 1:N])
+  elseif ver < 0.53
+    #=  Read process for 0.51 and 0.52 is identical; 0.52 added two Types <:
+        InstrumentResponse that v0.51 doesn't know about, so this is a safe
+        procedure =#
+    S = SeisData(N)
+    setfield!(S, :id, read_string_vec(io, Z))
+    setfield!(S, :name, read_string_vec(io, Z))
+    setfield!(S, :loc, InstrumentPosition[read(io, code2loctyp(getindex(c1, i))) for i = 1:N])
+    read!(io, S.fs)
+    read!(io, S.gain)
 
-    return S
-  else
-    # identical to v0.51 after 20190823; I didn't increment version #
-    return SeisData(N,
-    read_string_vec(io, Z),
-    read_string_vec(io, Z),
-    InstrumentPosition[read(io, code2loctyp(getindex(c1, i))) for i = 1:N],
-    read!(io, Array{Float64, 1}(undef, N)),
-    read!(io, Array{Float64, 1}(undef, N)),
-    InstrumentResponse[read(io, code2resptyp(getindex(c2, i))) for i = 1:N],
-    read_string_vec(io, Z),
-    read_string_vec(io, Z),
-    [read_misc(io, Z) for i = 1:N],
-    [read_string_vec(io, Z) for i = 1:N],
-    [read!(io, Array{Int64, 2}(undef, getindex(L, i), 2)) for i = 1:N],
+    # Here is the hard part. For older files, we read a degenerate InstResp
+    R = InstrumentResponse[]
+    for i = 1:N
+      T = code2resptyp(getindex(c2, i))
+      if T in (PZResp, PZResp64, GenResp)
+        push!(R, read(io, T))
+
+      # This leaves us with CoeffResp and MultiStageResp
+      elseif T == CoeffResp
+        # skip these
+        for j = 1:2
+          n = read(io, Int64)
+          skip(io, n)
+        end
+        push!(R, CoeffResp(
+                            read!(io, Array{Float64,1}(undef, read(io, Int64))),
+                            read!(io, Array{Float64,1}(undef, read(io, Int64)))
+                          ))
+      elseif T == MultiStageResp
+        K = read(io, Int64)
+        codes = read(io, K)
+        M = MultiStageResp(K)
+        A = Array{RespStage,1}(undef, 0)
+        for j = 1:K
+          c = codes[j]
+          if c == 0x03
+            units_out = String(read(io, read(io, Int64)))
+            units_in = String(read(io, read(io, Int64)))
+            M.i[j] = units_in
+            M.o[j] = units_out
+            if j == 2
+              M.i[1] = units_out
+            end
+            CR = CoeffResp(
+                       read!(io, Array{Float64,1}(undef, read(io, Int64))),
+                       read!(io, Array{Float64,1}(undef, read(io, Int64)))
+                       )
+            push!(A, CR)
+          else
+            push!(A, read(io, code2resptyp(c)))
+          end
+        end
+        M.stage .= A
+        read!(io, M.fs)
+        read!(io, M.gain)
+        read!(io, M.fg)
+        read!(io, M.delay)
+        read!(io, M.corr)
+        read!(io, M.fac)
+        read!(io, M.os)
+        push!(R, M)
+      end
+    end
+    S.resp .= R
+    setfield!(S, :units, read_string_vec(io, Z))
+    for i = 1:N
+      if typeof(S.resp[i]) == MultiStageResp
+        K = length(S.resp[i].fs)
+        if K > 0
+          S.resp[i].o[1] = S.units[i]
+        end
+      end
+    end
+    setfield!(S, :src, read_string_vec(io, Z))
+    setfield!(S, :misc, [read_misc(io, Z) for i = 1:N])
+    setfield!(S, :notes, [read_string_vec(io, Z) for i = 1:N])
+    setfield!(S, :t, [read!(io, Array{Int64, 2}(undef, getindex(L, i), 2)) for i = 1:N])
+    setfield!(S, :x,
     FloatArray[cmp ?
     (readbytes!(io, Z, getindex(nx, i)); Blosc.decompress(getindex(y,i), Z)) :
-    read!(io, Array{getindex(y,i), 1}(undef, getindex(nx, i)))
-    for i = 1:N])
+    read!(io, Array{getindex(y,i), 1}(undef, getindex(nx, i))) for i = 1:N])
   end
+  return S
 end
