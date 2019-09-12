@@ -63,7 +63,7 @@ const seis_inst_codes = ('H', 'J', 'L', 'M', 'N', 'P', 'Z')
 const seisio_file_begin = UInt8[0x53, 0x45, 0x49, 0x53, 0x49, 0x4f]
 const sep = Base.Filesystem.pathsep()
 const sμ = 1000000.0
-const vSeisIO = Float32(0.51)
+const vSeisIO = Float32(0.53)
 const unindexed_fields = (:c, :n)
 const webhdr = Dict("UserAgent" => "Julia-SeisIO-FSDN.jl/0.3.0")
 const μs = 1.0e-6

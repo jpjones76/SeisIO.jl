@@ -1,13 +1,17 @@
 export rseis, wseis
 
 # SeisIO file format version changes
-# 0.51  PZResp, PZResp64 changed 08-01-2019
+# 0.53  2019-09-11    removed :i, :o from CoeffResp
+#                     added :i, :o to MultiStageResp
+# 0.52  2019-09-03    added Types: CoeffResp, MultiStageResp
+# 0.51  2019-08-01    added :f0 to PZResp, PZResp64
 # 0.50  all custom types can use write(); rseis, wseis no longer required
 #       String arrays and :misc are written in a completely different way
 #       Type codes for :misc changed
 #       deprecated BigFloat/BigInt support in :misc
 #       :n is no longer stored as a UInt32
 #       :x compression no longer automatic and changed from Blosc to lz4
+# ======== File versions below 0.5 are no longer supported ===================
 # 0.41  :loc, :resp are now custom types with their own io subroutines
 #       Julia version is no longer written to file
 #       (likely misidentified in file header as 0.50)
