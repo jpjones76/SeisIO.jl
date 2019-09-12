@@ -22,23 +22,27 @@ end
 printstyled("Tests complete. Cleaning up...\n", color=:light_green)
 flush(out)
 close(out)
-files = ls("*.mseed")
-for f in files
-  rm(f)
-end
-files = ls("*.SAC")
-for f in files
-  rm(f)
-end
-files = ls("*.geocsv")
-for f in files
-  rm(f)
-end
-rm("FDSNsta.xml")
-rm("FDSNevq.log")
-if !keep_log
-  rm("runtests.log")
-end
+try
+  files = ls("*.mseed")
+  for f in files
+    rm(f)
+  end
+  files = ls("*.SAC")
+  for f in files
+    rm(f)
+  end
+  files = ls("*.geocsv")
+  for f in files
+    rm(f)
+  end
+  rm("FDSNsta.xml")
+  rm("FDSNevq.log")
+  if !keep_log
+    rm("runtests.log")
+  end
+catch err
+  println("Attempting to delete files threw error: ", err)
+end  
 
 test_end = Dates.now()
 δt = 0.001*(test_end-test_start).value
