@@ -3,7 +3,7 @@ The current set of updates, leading to v0.4.0, will focus on:
 2. expanded file format support
 3. expanded data acquisition options
 
-### 2019-09-11
+### 2019-09-12
 ### Introducing read_meta
 * `read_meta` is a wrapper for reading instrument metadata files. The syntax
 is identical to `read_data` but the keywords differ somewhat. Supported formats
@@ -33,6 +33,11 @@ SEED "documentation".
 internal SEED functions to a submodule.
 * The number of zeros read from SACPZ is now consistent with, and adjusted for,
 the units.
+
+#### SeisIO file format version increased to 0.53
+SeisIO files created with `wseis` between 2019-09-03 and 2019-09-12 use the
+original CoeffResp/MultiStageResp definitions. Legacy reader code *should* take
+care of the change, but please open a new issue if there are problems.
 
 ### 2019-09-07
 * Added a reader for SEED RESP: `read_data("resp", ...)`

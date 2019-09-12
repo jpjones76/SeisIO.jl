@@ -126,7 +126,13 @@ rm(savfile1)
 rm(savfile2)
 rm(savfile3)
 
-# Legacy file read
+# Legacy file reading ========================================================
+# 0.50  all custom types can use write(); rseis, wseis no longer required
+#       String arrays and :misc are written in a completely different way
+#       Type codes for :misc changed
+#       deprecated BigFloat/BigInt support in :misc
+#       :n is no longer stored as a UInt32
+#       :x compression no longer automatic and changed from Blosc to lz4
 legf = path * "/SampleFiles/2011.314.7D.J34A..HH1.seis"
 set_file_ver(legf, 0.4)
 @test get_file_ver(legf) == 0.4f0
@@ -136,3 +142,25 @@ set_file_ver(legf, 0.50)
 S = rseis(legf)[1]
 @test S.n == 3
 @test S.id == ["7D.J34A..HH1", "7D.J34A..HH2", "7D.J34A..HHZ"]
+
+# 0.52  2019-09-03    added Types: CoeffResp, MultiStageResp
+# 0.51  2019-08-01    added :f0 to PZResp, PZResp64
+# (legacy reader is the same for both)
+legf = path * "/SampleFiles/seisio_testfile_v0.52.seis"
+S = rseis(legf)[1]
+@test S.n == 3
+@test S.id == ["IU.COR.00.BH1",
+ "IU.COR.00.BH2",
+ "IU.COR.00.BHZ"]
+@test typeof(S.resp[1]) == MultiStageResp
+@test typeof(S.resp[1].stage[1]) == PZResp64
+@test isapprox(S.resp[1].stage[1].p, [ -0.0173949 + 0.01234im,
+                                       -0.0173949 - 0.01234im,
+                                       -0.0175489 + 0.0im    ,
+                                       -0.0591783 + 0.0im    ,
+                                           -39.18 + 49.12im  ,
+                                           -39.18 - 49.12im ])
+@test isapprox(S.resp[1].gain, [2660.0, 1.67772e6, 1.0])
+@test S.resp[1].fac == [0,1,1]
+@test S.resp[1].o[1] == "m/s"
+@test S.resp[1].i[1] == "v" # note: wrong in absolute sense. Should be "V" for UCUM

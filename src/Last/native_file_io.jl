@@ -84,7 +84,7 @@ function read_rec(io::IO, ver::Float32, c::UInt32, b::UInt64)
   while i < length(TCodes)
     i = i + 1
     if c == getindex(TCodes, i)
-      if ver < 0.51f0 && (c == 0x20474431)
+      if (ver < vSeisIO) && (c == 0x20474431)
         return read_legacy(io, ver)
       else
         return read(io, getindex(TNames, i))
