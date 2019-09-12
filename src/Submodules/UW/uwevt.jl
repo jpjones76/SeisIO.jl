@@ -13,7 +13,9 @@ function readuwevt(filename::String; v::Int64=KW.v, full::Bool=false)
   pf = String("")
 
   # Identify pickfile and datafile
-  filename = Sys.iswindows() ? realpath(filename) : relpath(filename)
+  if Sys.iswindows() == false
+    filename = relpath(filename)
+  end
   ec = UInt8(filename[end])
   lc = vcat(collect(UInt8, 0x61:0x76), 0x78, 0x79, 0x7a) # skip 'w'
   if Base.in(ec, lc)
