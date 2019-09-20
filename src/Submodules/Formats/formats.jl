@@ -17,7 +17,8 @@ AH_fmt = FormatDesc(
 AH_fmt.ver = [ FmtVer(2.0, Date("1994-02-20"), false),
                 FmtVer(1.0, Date("1985-06-11"), false)
                 ]
-formats["AH"] = AH_fmt
+formats["AH-1"] = AH_fmt
+formats["AH-2"] = AH_fmt
 
 Bottle_fmt = FormatDesc(
   "Bottle",
@@ -55,17 +56,17 @@ DATALESS_fmt.ver = [ FmtVer("2.4", Date("2012-08-01"), false),
                       FmtVer("2.3", Date("1992-12-31"), false),
                       FmtVer("2.2", Date("1991-08-31"), false),
                       ]
-formats["DATALESS"] = DATALESS_fmt
+formats["Dataless SEED"] = DATALESS_fmt
 
 GeoCSV_fmt = FormatDesc(
   "GeoCSV",
-  "\"geocsv\" (time-sample pairs), \"geocsv.slist\" (sample list)",
+  "\"geocsv\", \"geocsv.slist\"",
   "Incorporated Research Institutions for Seismology (IRIS), Washington, DC, United States of America",
   "(none)",
   "info@iris.edu",
   HistVec(),
   ["ASCII format intended for both human and machine readability.",
-   "both single- and two-column GeoCSV formats are supported."],
+   "both single-column (geocsv.slist) and two-column (geoscv) formats are supported."],
   [ "(unknown)"],
   ["http://geows.ds.iris.edu/documents/GeoCSV.pdf",
   "https://giswiki.hsr.ch/GeoCSV"],
@@ -87,7 +88,28 @@ Lennartz_fmt = FormatDesc(
   0x01
   )
 Lennartz_fmt.ver = [ FmtVer("", "", false) ]
-formats["Lennartz"] = Lennartz_fmt
+formats["Lennartz ASCII"] = Lennartz_fmt
+
+mSEED_fmt = FormatDesc(
+  "SEED (Standard for the Exchange of Earthquake Data)",
+  "\"mseed\"",
+  "International Federation of Digital Seismograph Networks (FDSN)",
+  "(no source code)",
+  "webmaster@fdsn.org",
+  HistVec(),
+  ["an omnibus seismic data standard for both data archival and arbitrarily detailed network and instrument descriptions",
+  "mini-SEED is a data-only variant that uses only data blockettes",
+  "documentation (official manual) is poorly organized and incomplete at length 224 pages, 7 years since release",
+  "intentionally abstruse; this is what happens when coders decide to be \"clever\" with no Project Managers or Business Analysts to direct them",
+  "a slow, turgid monolith, comically inappropriate for long time series",
+  "data spec 50% longer than HDF-5 data spec, yet SEED does vastly less."
+  ],
+  ["FDSN data standard; used worldwide"],
+  ["http://www.fdsn.org/pdf/SEEDManual_V2.4.pdf"],
+  0x01
+  )
+mSEED_fmt.ver = [ FmtVer("2.4", Date("2012-08-01"), false) ]
+formats["mini-SEED"] = mSEED_fmt
 
 RESP_fmt = FormatDesc(
   "SEED RESP (instrument response) file",
@@ -104,7 +126,7 @@ RESP_fmt = FormatDesc(
   ["https://ds.iris.edu/ds/nodes/dmc/data/formats/resp/"],
   0x01
   )
-formats["RESP"] = RESP_fmt
+formats["SEED RESP"] = RESP_fmt
 
 SAC_fmt = FormatDesc(
   "SAC (Seismic Analysis Code)",
@@ -147,27 +169,6 @@ SACPZ_fmt = FormatDesc(
 SACPZ_fmt.ver = [ FmtVer("101.6a", Date("2012-01-01"), true) ]
 formats["SACPZ"] = SACPZ_fmt
 
-mSEED_fmt = FormatDesc(
-  "SEED (Standard for the Exchange of Earthquake Data)",
-  "\"mseed\"",
-  "International Federation of Digital Seismograph Networks (FDSN)",
-  "(no source code)",
-  "webmaster@fdsn.org",
-  HistVec(),
-  ["an omnibus seismic data standard for both data archival and arbitrarily detailed network and instrument descriptions",
-  "mini-SEED is a data-only variant that uses only data blockettes",
-  "documentation (official manual) is poorly organized and incomplete at length 224 pages, 7 years since release",
-  "intentionally abstruse; this is what happens when coders decide to be \"clever\" with no Project Managers or Business Analysts to direct them",
-  "a slow, turgid monolith, comically inappropriate for long time series",
-  "data spec 50% longer than HDF-5 data spec, yet SEED does vastly less."
-  ],
-  ["FDSN data standard; used worldwide"],
-  ["http://www.fdsn.org/pdf/SEEDManual_V2.4.pdf"],
-  0x01
-  )
-mSEED_fmt.ver = [ FmtVer("2.4", Date("2012-08-01"), false) ]
-formats["SEED"] = mSEED_fmt
-
 SEGY_fmt = FormatDesc(
   "SEG Y",
   "\"segy\" (SEG Y 1.0 or SEG Y rev 1), \"passcal\" (PASSCAL SEG Y)",
@@ -196,7 +197,8 @@ SEGY_fmt.ver = [ FmtVer("rev 2", Date("2017-03-01"), nothing),
                 FmtVer("PASSCAL", "199?-??-??", false),
                 FmtVer(1.0, Date("1974-04-01"), false),
                 ]
-formats["SEGY"] = SEGY_fmt
+formats["SEG Y"] = SEGY_fmt
+formats["PASSCAL SEG Y"] = SEGY_fmt
 
 SXML_fmt = FormatDesc(
   "FDSN Station XML",
@@ -212,7 +214,7 @@ SXML_fmt = FormatDesc(
   "http://www.fdsn.org/pdf/SEEDManual_V2.4.pdf"],
   0x01
   )
-formats["SXML"] = SXML_fmt
+formats["FDSN Station XML"] = SXML_fmt
 
 WIN_fmt = FormatDesc(
   "WIN",
@@ -235,4 +237,4 @@ WIN_fmt = FormatDesc(
   0x01
   )
 WIN_fmt.ver = [ FmtVer("3.0.2", Date("2017-11-20"), false) ]
-formats["WIN"] = WIN_fmt
+formats["Win32"] = WIN_fmt
