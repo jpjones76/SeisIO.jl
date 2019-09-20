@@ -139,7 +139,11 @@ function uwdf(datafile::String;
     seek(fid, getindex(I32, 2, 1))
     buf = getfield(BUF, :buf)
     checkbuf_8!(buf, 4*maximum(I32[1,:]))
-    id = zeros(UInt8, 15)
+    id = BUF.id
+    id[1] = 0x55
+    id[2] = 0x57
+    id[3] = 0x2e
+
     i = 0
     os = 0
     @inbounds while i < N
@@ -148,18 +152,33 @@ function uwdf(datafile::String;
       nx = getindex(I32, 1, i)
 
       # Generate ID
-      fill!(id, 0x00)
-      id[1] = 0x55
-      id[2] = 0x57
-      id[3] = 0x2e
-      id[12] = 0x2e
-      fill_id!(id, getindex(U8, 1:8, i), 1, 8, 4, 8)
-      fill_id!(id, getindex(U8, 13:16, i), 1, 4, 13, 15)
-      id_str = String(id[id.!=0x00])
+      j = 3
+      k = 1
+      while j < 8 && k < 9
+        c = getindex(U8, k, i)
+        if c != 0x00
+          j += 1
+          id[j] = c
+        end
+        k += 1
+      end
+      id[j+1] = 0x2e
+      id[j+2] = 0x2e
+      j += 2
+      J = j+3
+      k = 13
+      while j < J && k < 17
+        c = getindex(U8, k, i)
+        if c != 0x00
+          j += 1
+          id[j] = c
+        end
+        k += 1
+      end
 
       # Save to SeisChannel
       C = SeisChannel()
-      setfield!(C, :id, id_str)
+      setfield!(C, :id, unsafe_string(pointer(id), j))
       setfield!(C, :fs, Float64(getindex(I32, 5, i))*1.0e-3)
       setfield!(C, :units, "m/s")
       setfield!(C, :src, fname)
