@@ -20,114 +20,123 @@
 \contentsline {subsection}{\numberline {1.3.4}Channel Maintenance}{8}{subsection.1.3.4}
 \contentsline {subsection}{\numberline {1.3.5}Taking Notes}{8}{subsection.1.3.5}
 \contentsline {chapter}{\numberline {2}Files}{11}{chapter.2}
-\contentsline {section}{\numberline {2.1}Geophysical Data}{11}{section.2.1}
+\contentsline {section}{\numberline {2.1}Time-Series Data File Formats}{11}{section.2.1}
 \contentsline {subsection}{\numberline {2.1.1}Supported File Formats}{12}{subsection.2.1.1}
 \contentsline {subsection}{\numberline {2.1.2}Supported Keywords}{12}{subsection.2.1.2}
 \contentsline {subsubsection}{Performance Tip}{12}{subsubsection*.9}
 \contentsline {paragraph}{Examples}{13}{paragraph*.10}
 \contentsline {subsection}{\numberline {2.1.3}Format Descriptions and Notes}{13}{subsection.2.1.3}
 \contentsline {subsection}{\numberline {2.1.4}Other File I/O Functions}{14}{subsection.2.1.4}
-\contentsline {section}{\numberline {2.2}XML Meta-Data}{14}{section.2.2}
-\contentsline {subsection}{\numberline {2.2.1}StationXML}{14}{subsection.2.2.1}
-\contentsline {subsection}{\numberline {2.2.2}QuakeML}{15}{subsection.2.2.2}
-\contentsline {chapter}{\numberline {3}Web}{17}{chapter.3}
-\contentsline {section}{\numberline {3.1}Web Requests}{17}{section.3.1}
-\contentsline {subsection}{\numberline {3.1.1}Examples}{18}{subsection.3.1.1}
-\contentsline {subsection}{\numberline {3.1.2}FDSN Queries}{18}{subsection.3.1.2}
-\contentsline {subsubsection}{Data Query}{18}{subsubsection*.19}
-\contentsline {subsubsection}{Station Query}{18}{subsubsection*.20}
-\contentsline {subsection}{\numberline {3.1.3}IRIS Queries}{19}{subsection.3.1.3}
-\contentsline {subsubsection}{Data Query Features}{19}{subsubsection*.22}
-\contentsline {section}{\numberline {3.2}SeedLink}{19}{section.3.2}
-\contentsline {subsection}{\numberline {3.2.1}Special Rules}{20}{subsection.3.2.1}
-\contentsline {subsection}{\numberline {3.2.2}Special Methods}{20}{subsection.3.2.2}
-\contentsline {subsubsection}{SeedLink Utilities}{20}{subsubsection*.23}
-\contentsline {chapter}{\numberline {4}Processing}{23}{chapter.4}
-\contentsline {section}{\numberline {4.1}Basic Functions}{23}{section.4.1}
-\contentsline {section}{\numberline {4.2}Customizable Functions}{24}{section.4.2}
-\contentsline {subsection}{\numberline {4.2.1}Convert Seismograms}{24}{subsection.4.2.1}
-\contentsline {subsubsection}{Keywords}{24}{subsubsection*.27}
-\contentsline {paragraph}{Behavior and Usage Warnings}{24}{paragraph*.28}
-\contentsline {subsection}{\numberline {4.2.2}Fill Gaps}{24}{subsection.4.2.2}
-\contentsline {subsubsection}{Keywords}{24}{subsubsection*.29}
-\contentsline {subsection}{\numberline {4.2.3}Merge}{25}{subsection.4.2.3}
-\contentsline {subsubsection}{Merge Behavior}{25}{subsubsection*.30}
-\contentsline {paragraph}{Which channels merge?}{25}{paragraph*.31}
-\contentsline {paragraph}{What happens to merged fields?}{25}{paragraph*.32}
-\contentsline {paragraph}{What does \sphinxstyleliteralintitle {\sphinxupquote {merge!}} resolve?}{25}{paragraph*.33}
-\contentsline {paragraph}{When SeisIO Won\IeC {\textquoteright }t Merge}{26}{paragraph*.34}
-\contentsline {subsection}{\numberline {4.2.4}Seismic Instrument Response}{26}{subsection.4.2.4}
-\contentsline {subsubsection}{Keywords}{26}{subsubsection*.35}
-\contentsline {subsubsection}{Precision and Memory Optimization}{26}{subsubsection*.36}
-\contentsline {subsection}{\numberline {4.2.5}Synchronize}{27}{subsection.4.2.5}
-\contentsline {subsubsection}{Specifying start time (s)}{27}{subsubsection*.37}
-\contentsline {subsubsection}{Specifying end time (t)}{27}{subsubsection*.38}
-\contentsline {subsection}{\numberline {4.2.6}Taper}{28}{subsection.4.2.6}
-\contentsline {subsubsection}{Keywords}{28}{subsubsection*.39}
-\contentsline {subsection}{\numberline {4.2.7}Zero-Phase Filter}{28}{subsection.4.2.7}
-\contentsline {subsubsection}{Keywords}{28}{subsubsection*.40}
-\contentsline {chapter}{\numberline {5}Submodules}{31}{chapter.5}
-\contentsline {section}{\numberline {5.1}Quake}{31}{section.5.1}
-\contentsline {subsection}{\numberline {5.1.1}Types}{31}{subsection.5.1.1}
-\contentsline {subsection}{\numberline {5.1.2}Web Queries}{32}{subsection.5.1.2}
-\contentsline {subsubsection}{Event Header Query}{32}{subsubsection*.51}
-\contentsline {subsubsection}{Event Header and Data Query}{32}{subsubsection*.52}
-\contentsline {subsubsection}{Phase Onset Query}{33}{subsubsection*.54}
-\contentsline {subsection}{\numberline {5.1.3}QuakeML Reader}{33}{subsection.5.1.3}
-\contentsline {subsection}{\numberline {5.1.4}File Readers}{34}{subsection.5.1.4}
-\contentsline {subsection}{\numberline {5.1.5}Utility Functions}{34}{subsection.5.1.5}
-\contentsline {section}{\numberline {5.2}RandSeis}{34}{section.5.2}
-\contentsline {chapter}{\numberline {6}Appendices}{37}{chapter.6}
-\contentsline {section}{\numberline {6.1}Utility Functions}{37}{section.6.1}
-\contentsline {section}{\numberline {6.2}SeisIO Write Formats}{38}{section.6.2}
-\contentsline {subsection}{\numberline {6.2.1}SeisIO File}{39}{subsection.6.2.1}
-\contentsline {section}{\numberline {6.3}Simple Object Types}{39}{section.6.3}
-\contentsline {subsection}{\numberline {6.3.1}EQLoc}{40}{subsection.6.3.1}
-\contentsline {subsection}{\numberline {6.3.2}EQMag}{41}{subsection.6.3.2}
-\contentsline {subsection}{\numberline {6.3.3}SeisPha}{41}{subsection.6.3.3}
-\contentsline {subsection}{\numberline {6.3.4}SourceTime}{41}{subsection.6.3.4}
-\contentsline {subsection}{\numberline {6.3.5}StringVec}{41}{subsection.6.3.5}
-\contentsline {section}{\numberline {6.4}Location Types}{42}{section.6.4}
-\contentsline {subsection}{\numberline {6.4.1}GenLoc}{42}{subsection.6.4.1}
-\contentsline {subsection}{\numberline {6.4.2}GeoLoc}{42}{subsection.6.4.2}
-\contentsline {subsection}{\numberline {6.4.3}UTMLoc}{42}{subsection.6.4.3}
-\contentsline {subsection}{\numberline {6.4.4}XYLoc}{42}{subsection.6.4.4}
-\contentsline {section}{\numberline {6.5}Response Types}{43}{section.6.5}
-\contentsline {subsection}{\numberline {6.5.1}GenResp}{43}{subsection.6.5.1}
-\contentsline {subsection}{\numberline {6.5.2}PZResp}{43}{subsection.6.5.2}
-\contentsline {section}{\numberline {6.6}The Misc Dictionary}{43}{section.6.6}
-\contentsline {subsection}{\numberline {6.6.1}Misc}{43}{subsection.6.6.1}
-\contentsline {subsubsection}{Dictionary Contents}{44}{subsubsection*.76}
-\contentsline {subsection}{\numberline {6.6.2}String Array (c == 0x81)}{44}{subsection.6.6.2}
-\contentsline {subsection}{\numberline {6.6.3}Other Array (c == 0x80 or c \textgreater {} 0x81)}{44}{subsection.6.6.3}
-\contentsline {subsection}{\numberline {6.6.4}String (c == 0x01)}{44}{subsection.6.6.4}
-\contentsline {subsection}{\numberline {6.6.5}Bits Type (c == 0x00 or 0x01 \textless {} c \textless {} 0x7f)}{44}{subsection.6.6.5}
-\contentsline {section}{\numberline {6.7}Compound Object Types}{44}{section.6.7}
-\contentsline {subsection}{\numberline {6.7.1}PhaseCat}{44}{subsection.6.7.1}
-\contentsline {subsection}{\numberline {6.7.2}EventChannel}{45}{subsection.6.7.2}
-\contentsline {subsection}{\numberline {6.7.3}SeisChannel}{45}{subsection.6.7.3}
-\contentsline {subsection}{\numberline {6.7.4}EventTraceData}{46}{subsection.6.7.4}
-\contentsline {subsection}{\numberline {6.7.5}SeisData}{47}{subsection.6.7.5}
-\contentsline {subsection}{\numberline {6.7.6}SeisHdr}{49}{subsection.6.7.6}
-\contentsline {subsection}{\numberline {6.7.7}SeisSrc}{49}{subsection.6.7.7}
-\contentsline {subsection}{\numberline {6.7.8}SeisEvent}{50}{subsection.6.7.8}
-\contentsline {section}{\numberline {6.8}Data Type Codes}{50}{section.6.8}
-\contentsline {subsection}{\numberline {6.8.1}Loc Type Codes}{50}{subsection.6.8.1}
-\contentsline {subsection}{\numberline {6.8.2}Resp Type Codes}{50}{subsection.6.8.2}
-\contentsline {subsection}{\numberline {6.8.3}Other Type Codes}{50}{subsection.6.8.3}
-\contentsline {subsubsection}{SeisIO Object Type codes}{52}{subsubsection*.77}
-\contentsline {section}{\numberline {6.9}Data Requests Syntax}{52}{section.6.9}
-\contentsline {subsection}{\numberline {6.9.1}Channel ID Syntax}{52}{subsection.6.9.1}
-\contentsline {subsubsection}{Wildcards and Blanks}{53}{subsubsection*.79}
-\contentsline {subsubsection}{Channel Configuration Files}{53}{subsubsection*.80}
-\contentsline {subsubsection}{Server List}{54}{subsubsection*.81}
-\contentsline {subsection}{\numberline {6.9.2}Time Syntax}{54}{subsection.6.9.2}
-\contentsline {section}{\numberline {6.10}SeisIO Standard Keywords}{55}{section.6.10}
-\contentsline {subsection}{\numberline {6.10.1}SeedLink Keywords}{56}{subsection.6.10.1}
-\contentsline {section}{\numberline {6.11}Examples}{56}{section.6.11}
-\contentsline {subsection}{\numberline {6.11.1}FDSN data query}{56}{subsection.6.11.1}
-\contentsline {subsection}{\numberline {6.11.2}FDSN station query}{56}{subsection.6.11.2}
-\contentsline {subsection}{\numberline {6.11.3}FDSN event header/data query}{57}{subsection.6.11.3}
-\contentsline {subsection}{\numberline {6.11.4}IRISWS data query}{57}{subsection.6.11.4}
-\contentsline {subsection}{\numberline {6.11.5}SeedLink sessions}{58}{subsection.6.11.5}
-\contentsline {chapter}{Index}{59}{section*.83}
+\contentsline {section}{\numberline {2.2}Metadata File Formats}{14}{section.2.2}
+\contentsline {subsection}{\numberline {2.2.1}Supported File Formats}{15}{subsection.2.2.1}
+\contentsline {subsection}{\numberline {2.2.2}Supported Keywords}{15}{subsection.2.2.2}
+\contentsline {subsection}{\numberline {2.2.3}Writing Metadata}{15}{subsection.2.2.3}
+\contentsline {section}{\numberline {2.3}HDF5 File Formats}{15}{section.2.3}
+\contentsline {subsection}{\numberline {2.3.1}Supported Keywords}{16}{subsection.2.3.1}
+\contentsline {section}{\numberline {2.4}XML Meta-Data}{16}{section.2.4}
+\contentsline {subsection}{\numberline {2.4.1}StationXML}{16}{subsection.2.4.1}
+\contentsline {subsection}{\numberline {2.4.2}QuakeML}{17}{subsection.2.4.2}
+\contentsline {chapter}{\numberline {3}Web}{19}{chapter.3}
+\contentsline {section}{\numberline {3.1}Web Requests}{19}{section.3.1}
+\contentsline {subsection}{\numberline {3.1.1}Examples}{20}{subsection.3.1.1}
+\contentsline {subsection}{\numberline {3.1.2}FDSN Queries}{20}{subsection.3.1.2}
+\contentsline {subsubsection}{Data Query}{20}{subsubsection*.21}
+\contentsline {subsubsection}{Station Query}{20}{subsubsection*.22}
+\contentsline {subsection}{\numberline {3.1.3}IRIS Queries}{21}{subsection.3.1.3}
+\contentsline {subsubsection}{Data Query Features}{21}{subsubsection*.24}
+\contentsline {section}{\numberline {3.2}SeedLink}{21}{section.3.2}
+\contentsline {subsection}{\numberline {3.2.1}Special Rules}{22}{subsection.3.2.1}
+\contentsline {subsection}{\numberline {3.2.2}Special Methods}{22}{subsection.3.2.2}
+\contentsline {subsubsection}{SeedLink Utilities}{22}{subsubsection*.25}
+\contentsline {chapter}{\numberline {4}Processing}{25}{chapter.4}
+\contentsline {section}{\numberline {4.1}Basic Functions}{25}{section.4.1}
+\contentsline {section}{\numberline {4.2}Customizable Functions}{26}{section.4.2}
+\contentsline {subsection}{\numberline {4.2.1}Convert Seismograms}{26}{subsection.4.2.1}
+\contentsline {subsubsection}{Keywords}{26}{subsubsection*.29}
+\contentsline {paragraph}{Behavior and Usage Warnings}{26}{paragraph*.30}
+\contentsline {subsection}{\numberline {4.2.2}Fill Gaps}{26}{subsection.4.2.2}
+\contentsline {subsubsection}{Keywords}{26}{subsubsection*.31}
+\contentsline {subsection}{\numberline {4.2.3}Merge}{27}{subsection.4.2.3}
+\contentsline {subsubsection}{Merge Behavior}{27}{subsubsection*.32}
+\contentsline {paragraph}{Which channels merge?}{27}{paragraph*.33}
+\contentsline {paragraph}{What happens to merged fields?}{27}{paragraph*.34}
+\contentsline {paragraph}{What does \sphinxstyleliteralintitle {\sphinxupquote {merge!}} resolve?}{27}{paragraph*.35}
+\contentsline {paragraph}{When SeisIO Won\IeC {\textquoteright }t Merge}{28}{paragraph*.36}
+\contentsline {subsection}{\numberline {4.2.4}Seismic Instrument Response}{28}{subsection.4.2.4}
+\contentsline {subsubsection}{Keywords}{28}{subsubsection*.37}
+\contentsline {subsubsection}{Precision and Memory Optimization}{28}{subsubsection*.38}
+\contentsline {subsection}{\numberline {4.2.5}Synchronize}{29}{subsection.4.2.5}
+\contentsline {subsubsection}{Specifying start time (s)}{29}{subsubsection*.39}
+\contentsline {subsubsection}{Specifying end time (t)}{29}{subsubsection*.40}
+\contentsline {subsection}{\numberline {4.2.6}Taper}{30}{subsection.4.2.6}
+\contentsline {subsubsection}{Keywords}{30}{subsubsection*.41}
+\contentsline {subsection}{\numberline {4.2.7}Zero-Phase Filter}{30}{subsection.4.2.7}
+\contentsline {subsubsection}{Keywords}{30}{subsubsection*.42}
+\contentsline {chapter}{\numberline {5}Submodules}{33}{chapter.5}
+\contentsline {section}{\numberline {5.1}Quake}{33}{section.5.1}
+\contentsline {subsection}{\numberline {5.1.1}Types}{33}{subsection.5.1.1}
+\contentsline {subsection}{\numberline {5.1.2}Web Queries}{34}{subsection.5.1.2}
+\contentsline {subsubsection}{Event Header Query}{34}{subsubsection*.53}
+\contentsline {subsubsection}{Event Header and Data Query}{34}{subsubsection*.54}
+\contentsline {subsubsection}{Phase Onset Query}{35}{subsubsection*.56}
+\contentsline {subsection}{\numberline {5.1.3}QuakeML Reader}{35}{subsection.5.1.3}
+\contentsline {subsection}{\numberline {5.1.4}File Readers}{36}{subsection.5.1.4}
+\contentsline {subsection}{\numberline {5.1.5}Utility Functions}{36}{subsection.5.1.5}
+\contentsline {section}{\numberline {5.2}Reading Earthquake Data Files}{36}{section.5.2}
+\contentsline {subsection}{\numberline {5.2.1}Supported File Formats}{37}{subsection.5.2.1}
+\contentsline {subsection}{\numberline {5.2.2}Supported Keywords}{37}{subsection.5.2.2}
+\contentsline {section}{\numberline {5.3}RandSeis}{37}{section.5.3}
+\contentsline {chapter}{\numberline {6}Appendices}{39}{chapter.6}
+\contentsline {section}{\numberline {6.1}Utility Functions}{39}{section.6.1}
+\contentsline {section}{\numberline {6.2}SeisIO Native Format}{41}{section.6.2}
+\contentsline {subsection}{\numberline {6.2.1}SeisIO File}{42}{subsection.6.2.1}
+\contentsline {section}{\numberline {6.3}Simple Object Types}{42}{section.6.3}
+\contentsline {subsection}{\numberline {6.3.1}EQLoc}{43}{subsection.6.3.1}
+\contentsline {subsection}{\numberline {6.3.2}EQMag}{44}{subsection.6.3.2}
+\contentsline {subsection}{\numberline {6.3.3}SeisPha}{44}{subsection.6.3.3}
+\contentsline {subsection}{\numberline {6.3.4}SourceTime}{44}{subsection.6.3.4}
+\contentsline {subsection}{\numberline {6.3.5}StringVec}{44}{subsection.6.3.5}
+\contentsline {section}{\numberline {6.4}Location Types}{45}{section.6.4}
+\contentsline {subsection}{\numberline {6.4.1}GenLoc}{45}{subsection.6.4.1}
+\contentsline {subsection}{\numberline {6.4.2}GeoLoc}{45}{subsection.6.4.2}
+\contentsline {subsection}{\numberline {6.4.3}UTMLoc}{45}{subsection.6.4.3}
+\contentsline {subsection}{\numberline {6.4.4}XYLoc}{45}{subsection.6.4.4}
+\contentsline {section}{\numberline {6.5}Response Types}{46}{section.6.5}
+\contentsline {subsection}{\numberline {6.5.1}GenResp}{46}{subsection.6.5.1}
+\contentsline {subsection}{\numberline {6.5.2}PZResp}{46}{subsection.6.5.2}
+\contentsline {section}{\numberline {6.6}The Misc Dictionary}{46}{section.6.6}
+\contentsline {subsection}{\numberline {6.6.1}Misc}{46}{subsection.6.6.1}
+\contentsline {subsubsection}{Dictionary Contents}{47}{subsubsection*.86}
+\contentsline {subsection}{\numberline {6.6.2}String Array (c == 0x81)}{47}{subsection.6.6.2}
+\contentsline {subsection}{\numberline {6.6.3}Other Array (c == 0x80 or c \textgreater {} 0x81)}{47}{subsection.6.6.3}
+\contentsline {subsection}{\numberline {6.6.4}String (c == 0x01)}{47}{subsection.6.6.4}
+\contentsline {subsection}{\numberline {6.6.5}Bits Type (c == 0x00 or 0x01 \textless {} c \textless {} 0x7f)}{47}{subsection.6.6.5}
+\contentsline {section}{\numberline {6.7}Compound Object Types}{47}{section.6.7}
+\contentsline {subsection}{\numberline {6.7.1}PhaseCat}{47}{subsection.6.7.1}
+\contentsline {subsection}{\numberline {6.7.2}EventChannel}{48}{subsection.6.7.2}
+\contentsline {subsection}{\numberline {6.7.3}SeisChannel}{48}{subsection.6.7.3}
+\contentsline {subsection}{\numberline {6.7.4}EventTraceData}{49}{subsection.6.7.4}
+\contentsline {subsection}{\numberline {6.7.5}SeisData}{50}{subsection.6.7.5}
+\contentsline {subsection}{\numberline {6.7.6}SeisHdr}{52}{subsection.6.7.6}
+\contentsline {subsection}{\numberline {6.7.7}SeisSrc}{52}{subsection.6.7.7}
+\contentsline {subsection}{\numberline {6.7.8}SeisEvent}{53}{subsection.6.7.8}
+\contentsline {section}{\numberline {6.8}Data Type Codes}{53}{section.6.8}
+\contentsline {subsection}{\numberline {6.8.1}Loc Type Codes}{53}{subsection.6.8.1}
+\contentsline {subsection}{\numberline {6.8.2}Resp Type Codes}{53}{subsection.6.8.2}
+\contentsline {subsection}{\numberline {6.8.3}Other Type Codes}{53}{subsection.6.8.3}
+\contentsline {subsubsection}{SeisIO Object Type codes}{55}{subsubsection*.87}
+\contentsline {section}{\numberline {6.9}Data Requests Syntax}{56}{section.6.9}
+\contentsline {subsection}{\numberline {6.9.1}Channel ID Syntax}{56}{subsection.6.9.1}
+\contentsline {subsubsection}{Wildcards and Blanks}{56}{subsubsection*.89}
+\contentsline {subsubsection}{Channel Configuration Files}{56}{subsubsection*.90}
+\contentsline {subsubsection}{Server List}{58}{subsubsection*.91}
+\contentsline {subsection}{\numberline {6.9.2}Time Syntax}{58}{subsection.6.9.2}
+\contentsline {section}{\numberline {6.10}SeisIO Standard Keywords}{59}{section.6.10}
+\contentsline {subsection}{\numberline {6.10.1}SeedLink Keywords}{59}{subsection.6.10.1}
+\contentsline {section}{\numberline {6.11}Examples}{60}{section.6.11}
+\contentsline {subsection}{\numberline {6.11.1}FDSN data query}{60}{subsection.6.11.1}
+\contentsline {subsection}{\numberline {6.11.2}FDSN station query}{60}{subsection.6.11.2}
+\contentsline {subsection}{\numberline {6.11.3}FDSN event header/data query}{61}{subsection.6.11.3}
+\contentsline {subsection}{\numberline {6.11.4}IRISWS data query}{61}{subsection.6.11.4}
+\contentsline {subsection}{\numberline {6.11.5}SeedLink sessions}{61}{subsection.6.11.5}
+\contentsline {chapter}{Index}{63}{section*.93}

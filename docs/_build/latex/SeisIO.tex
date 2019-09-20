@@ -9,19 +9,49 @@
 \usepackage[utf8]{inputenc}
 \ifdefined\DeclareUnicodeCharacter
 % support both utf8 and utf8x syntaxes
-\edef\sphinxdqmaybe{\ifdefined\DeclareUnicodeCharacterAsOptional\string"\fi}
-  \DeclareUnicodeCharacter{\sphinxdqmaybe00A0}{\nobreakspace}
-  \DeclareUnicodeCharacter{\sphinxdqmaybe2500}{\sphinxunichar{2500}}
-  \DeclareUnicodeCharacter{\sphinxdqmaybe2502}{\sphinxunichar{2502}}
-  \DeclareUnicodeCharacter{\sphinxdqmaybe2514}{\sphinxunichar{2514}}
-  \DeclareUnicodeCharacter{\sphinxdqmaybe251C}{\sphinxunichar{251C}}
-  \DeclareUnicodeCharacter{\sphinxdqmaybe2572}{\textbackslash}
+  \ifdefined\DeclareUnicodeCharacterAsOptional
+    \def\sphinxDUC#1{\DeclareUnicodeCharacter{"#1}}
+  \else
+    \let\sphinxDUC\DeclareUnicodeCharacter
+  \fi
+  \sphinxDUC{00A0}{\nobreakspace}
+  \sphinxDUC{2500}{\sphinxunichar{2500}}
+  \sphinxDUC{2502}{\sphinxunichar{2502}}
+  \sphinxDUC{2514}{\sphinxunichar{2514}}
+  \sphinxDUC{251C}{\sphinxunichar{251C}}
+  \sphinxDUC{2572}{\textbackslash}
 \fi
 \usepackage{cmap}
 \usepackage[T1]{fontenc}
 \usepackage{amsmath,amssymb,amstext}
 \usepackage{babel}
+
+
+
 \usepackage{times}
+\expandafter\ifx\csname T@LGR\endcsname\relax
+\else
+% LGR was declared as font encoding
+  \substitutefont{LGR}{\rmdefault}{cmr}
+  \substitutefont{LGR}{\sfdefault}{cmss}
+  \substitutefont{LGR}{\ttdefault}{cmtt}
+\fi
+\expandafter\ifx\csname T@X2\endcsname\relax
+  \expandafter\ifx\csname T@T2A\endcsname\relax
+  \else
+  % T2A was declared as font encoding
+    \substitutefont{T2A}{\rmdefault}{cmr}
+    \substitutefont{T2A}{\sfdefault}{cmss}
+    \substitutefont{T2A}{\ttdefault}{cmtt}
+  \fi
+\else
+% X2 was declared as font encoding
+  \substitutefont{X2}{\rmdefault}{cmr}
+  \substitutefont{X2}{\sfdefault}{cmss}
+  \substitutefont{X2}{\ttdefault}{cmtt}
+\fi
+
+
 \usepackage[Bjarne]{fncychap}
 \usepackage{sphinx}
 
@@ -36,30 +66,13 @@
 \urlstyle{same}
 \addto\captionsenglish{\renewcommand{\contentsname}{Introduction}}
 
-\addto\captionsenglish{\renewcommand{\figurename}{Fig.\@ }}
-\makeatletter
-\def\fnum@figure{\figurename\thefigure{}}
-\makeatother
-\addto\captionsenglish{\renewcommand{\tablename}{Table }}
-\makeatletter
-\def\fnum@table{\tablename\thetable{}}
-\makeatother
-\addto\captionsenglish{\renewcommand{\literalblockname}{Listing}}
-
-\addto\captionsenglish{\renewcommand{\literalblockcontinuedname}{continued from previous page}}
-\addto\captionsenglish{\renewcommand{\literalblockcontinuesname}{continues on next page}}
-\addto\captionsenglish{\renewcommand{\sphinxnonalphabeticalgroupname}{Non-alphabetical}}
-\addto\captionsenglish{\renewcommand{\sphinxsymbolsname}{Symbols}}
-\addto\captionsenglish{\renewcommand{\sphinxnumbersname}{Numbers}}
-
-\addto\extrasenglish{\def\pageautorefname{page}}
-
+\usepackage{sphinxmessages}
 \setcounter{tocdepth}{1}
 
 
 
 \title{SeisIO Documentation}
-\date{Sep 03, 2019}
+\date{Sep 19, 2019}
 \release{0.3.0}
 \author{Joshua Jones}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -145,7 +158,7 @@ with Julia, you probably want to start with one of the following topics:
 {\hyperref[\detokenize{src/working_with_data:wwd}]{\sphinxcrossref{\DUrole{std,std-ref}{Working with Data}}}}: learn how to manage data using SeisIO
 
 \item {} 
-{\hyperref[\detokenize{src/Formats/fileformats:readdata}]{\sphinxcrossref{\DUrole{std,std-ref}{Reading Data}}}}: learn how to read data from file
+{\hyperref[\detokenize{src/Formats/timeseries:readdata}]{\sphinxcrossref{\DUrole{std,std-ref}{Reading Data}}}}: learn how to read data from file
 
 \item {} 
 {\hyperref[\detokenize{src/Web/webclients:getdata}]{\sphinxcrossref{\DUrole{std,std-ref}{Requesting Data}}}}: learn how to make web requests
@@ -378,7 +391,7 @@ Discrete seismic events; includes SeisHdr and SeisData objects
 \subsection{Acquiring Data}
 \label{\detokenize{src/working_with_data:acquiring-data}}\begin{itemize}
 \item {} 
-Read files with {\hyperref[\detokenize{src/Formats/fileformats:readdata}]{\sphinxcrossref{\DUrole{std,std-ref}{read\_data}}}}
+Read files with {\hyperref[\detokenize{src/Formats/timeseries:readdata}]{\sphinxcrossref{\DUrole{std,std-ref}{read\_data}}}}
 
 \item {} 
 Make web requets with {\hyperref[\detokenize{src/Web/webclients:getdata}]{\sphinxcrossref{\DUrole{std,std-ref}{get\_data}}}}
@@ -599,8 +612,8 @@ Clear all notes from every channel in \sphinxcode{\sphinxupquote{S}}.
 \chapter{Files}
 \label{\detokenize{index:files}}
 
-\section{Geophysical Data}
-\label{\detokenize{src/Formats/fileformats:geophysical-data}}\label{\detokenize{src/Formats/fileformats:readdata}}\label{\detokenize{src/Formats/fileformats::doc}}
+\section{Time-Series Data File Formats}
+\label{\detokenize{src/Formats/timeseries:time-series-data-file-formats}}\label{\detokenize{src/Formats/timeseries:readdata}}\label{\detokenize{src/Formats/timeseries::doc}}
 
 \begin{fulllineitems}
 \pysigline{\sphinxbfcode{\sphinxupquote{read\_data!(S,~fmt::String,~filepat~{[},~KWs{]})}}}
@@ -617,7 +630,7 @@ Clear all notes from every channel in \sphinxcode{\sphinxupquote{S}}.
 \item[] Read data from a supported file format into memory.
 \item[] 
 \item[] \sphinxstylestrong{fmt}
-\item[] Lowercase string describin the file format. See below.
+\item[] Case-sensitive string describing the file format. See below.
 \item[] 
 \item[] \sphinxstylestrong{filepat}
 \item[] Read files with names matching pattern \sphinxcode{\sphinxupquote{filepat}}. Supports wildcards.
@@ -630,7 +643,7 @@ Clear all notes from every channel in \sphinxcode{\sphinxupquote{S}}.
 
 
 \subsection{Supported File Formats}
-\label{\detokenize{src/Formats/fileformats:supported-file-formats}}
+\label{\detokenize{src/Formats/timeseries:supported-file-formats}}
 
 \begin{savenotes}\sphinxattablestart
 \centering
@@ -667,7 +680,7 @@ Lennartz ASCII
 lenartzascii
 \\
 \hline
-Mini-SEED, SEED
+Mini-SEED
 &
 mseed
 \\
@@ -692,7 +705,7 @@ SUDS
 suds
 \\
 \hline
-UW
+UW data file
 &
 uw
 \\
@@ -711,7 +724,7 @@ and/or lowercase().
 
 
 \subsection{Supported Keywords}
-\label{\detokenize{src/Formats/fileformats:supported-keywords}}
+\label{\detokenize{src/Formats/timeseries:supported-keywords}}
 
 \begin{savenotes}\sphinxattablestart
 \centering
@@ -804,9 +817,20 @@ true
 byte swap?
 \\
 \hline
+units
+&
+resp
+&
+Bool
+&
+false
+&
+fill in units of CoeffResp stages?
+\\
+\hline
 v
 &
-ah
+(all)
 &
 Int64
 &
@@ -814,15 +838,6 @@ Int64
 &
 verbosity
 \\
-\hline&
-mseed
-&&&\\
-\hline&
-uw
-&&&\\
-\hline&
-win32
-&&&\\
 \hline
 \end{tabular}
 \par
@@ -830,7 +845,7 @@ win32
 
 
 \subsubsection{Performance Tip}
-\label{\detokenize{src/Formats/fileformats:performance-tip}}
+\label{\detokenize{src/Formats/timeseries:performance-tip}}
 With mseed or win32 data, adjust \sphinxtitleref{nx\_new} and \sphinxtitleref{nx\_add} based on the sizes of
 the data vectors that you expect to read. If the largest has \sphinxtitleref{Nmax} samples,
 and the smallest has \sphinxtitleref{Nmin}, we recommend \sphinxtitleref{nx\_new=Nmin} and \sphinxtitleref{nx\_add=Nmax-Nmin}.
@@ -847,7 +862,7 @@ values with very small jobs will greatly decrease performance.
 
 
 \paragraph{Examples}
-\label{\detokenize{src/Formats/fileformats:examples}}\begin{enumerate}
+\label{\detokenize{src/Formats/timeseries:examples}}\begin{enumerate}
 \def\theenumi{\arabic{enumi}}
 \def\labelenumi{\theenumi .}
 \makeatletter\def\p@enumii{\p@enumi \theenumi .}\makeatother
@@ -894,7 +909,11 @@ Assign new channels an initial size of \sphinxcode{\sphinxupquote{nx\_new}} samp
 
 
 \subsection{Format Descriptions and Notes}
-\label{\detokenize{src/Formats/fileformats:format-descriptions-and-notes}}
+\label{\detokenize{src/Formats/timeseries:format-descriptions-and-notes}}
+Additional format information can be accessed from the command line by typing
+\sphinxcode{\sphinxupquote{SeisIO.formats("FMT")}} where FMT is the format name; \sphinxcode{\sphinxupquote{keys(SeisIO.formats)}}
+for a list.
+
 \sphinxstylestrong{AH} (Ad-Hoc) was developed as a machine-independent seismic data format
 based on External Data Representation (XDR).
 
@@ -946,10 +965,10 @@ parameters, particularly gains, are known to exist.
 
 
 \subsection{Other File I/O Functions}
-\label{\detokenize{src/Formats/fileformats:other-file-i-o-functions}}\index{rseis() (built-in function)@\spxentry{rseis()}\spxextra{built-in function}}
+\label{\detokenize{src/Formats/timeseries:other-file-i-o-functions}}\index{rseis() (built-in function)@\spxentry{rseis()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Formats/fileformats:rseis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{rseis}}}{\emph{fname}}{}
+\phantomsection\label{\detokenize{src/Formats/timeseries:rseis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{rseis}}}{\emph{fname}}{}
 \end{fulllineitems}
 
 
@@ -957,7 +976,7 @@ Read SeisIO native format data into an array of SeisIO structures.
 \index{sachdr() (built-in function)@\spxentry{sachdr()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Formats/fileformats:sachdr}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{sachdr}}}{\emph{fname}}{}
+\phantomsection\label{\detokenize{src/Formats/timeseries:sachdr}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{sachdr}}}{\emph{fname}}{}
 \end{fulllineitems}
 
 
@@ -965,7 +984,7 @@ Print headers from SAC file to stdout.
 \index{segyhdr() (built-in function)@\spxentry{segyhdr()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Formats/fileformats:segyhdr}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{segyhdr}}}{\emph{fname}\sphinxoptional{, \emph{PASSCAL=true::Bool}}}{}
+\phantomsection\label{\detokenize{src/Formats/timeseries:segyhdr}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{segyhdr}}}{\emph{fname}\sphinxoptional{, \emph{PASSCAL=true::Bool}}}{}
 \end{fulllineitems}
 
 
@@ -973,7 +992,7 @@ Print headers from SEG Y file to stdout. Specify \sphinxcode{\sphinxupquote{pass
 \index{uwdf() (built-in function)@\spxentry{uwdf()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Formats/fileformats:uwdf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{uwdf}}}{\emph{dfname}}{}
+\phantomsection\label{\detokenize{src/Formats/timeseries:uwdf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{uwdf}}}{\emph{dfname}}{}
 \end{fulllineitems}
 
 
@@ -981,7 +1000,7 @@ Parse UW event data file \sphinxcode{\sphinxupquote{dfname}} into a new SeisEven
 \index{writesac() (built-in function)@\spxentry{writesac()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Formats/fileformats:writesac}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{writesac}}}{\emph{S}\sphinxoptional{, \emph{ts=true}}}{}
+\phantomsection\label{\detokenize{src/Formats/timeseries:writesac}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{writesac}}}{\emph{S}\sphinxoptional{, \emph{ts=true}}}{}
 \end{fulllineitems}
 
 
@@ -990,7 +1009,7 @@ time stamps; this will flag the file as generic x-y data in the SAC interpreter.
 \index{wseis() (built-in function)@\spxentry{wseis()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Formats/fileformats:wseis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{wseis}}}{\emph{fname}, \emph{S}}{}
+\phantomsection\label{\detokenize{src/Formats/timeseries:wseis}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{wseis}}}{\emph{fname}, \emph{S}}{}
 \end{fulllineitems}
 
 \index{wseis() (built-in function)@\spxentry{wseis()}\spxextra{built-in function}}
@@ -1001,6 +1020,279 @@ time stamps; this will flag the file as generic x-y data in the SAC interpreter.
 
 
 Write SeisIO data to fname. Multiple objects can be written at once.
+
+
+\section{Metadata File Formats}
+\label{\detokenize{src/Formats/metadata:metadata-file-formats}}\label{\detokenize{src/Formats/metadata::doc}}
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{read\_meta!(S,~fmt::String,~filepat~{[},~KWs{]})}}}
+\end{fulllineitems}
+
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{S~=~read\_meta(fmt::String,~filepat~{[},~KWs{]})}}}
+\end{fulllineitems}
+
+
+\begin{DUlineblock}{0em}
+\item[] Read metadata in file format \sphinxstylestrong{fmt} matching file pattern \sphinxstylestrong{filestr} into S.
+\item[] 
+\item[] \sphinxstylestrong{fmt}
+\item[] Lowercase string describing the file format. See below.
+\item[] 
+\item[] \sphinxstylestrong{filepat}
+\item[] Read files with names matching pattern \sphinxcode{\sphinxupquote{filepat}}. Supports wildcards.
+\item[] 
+\item[] \sphinxstylestrong{KWs}
+\item[] Keyword arguments; see also {\hyperref[\detokenize{src/Appendices/keywords:dkw}]{\sphinxcrossref{\DUrole{std,std-ref}{SeisIO standard KWs}}}} or type \sphinxcode{\sphinxupquote{?SeisIO.KW}}.
+\end{DUlineblock}
+
+
+\subsection{Supported File Formats}
+\label{\detokenize{src/Formats/metadata:supported-file-formats}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{2}{3}|\X{1}{3}|}
+\hline
+\sphinxstyletheadfamily 
+File Format
+&\sphinxstyletheadfamily 
+String
+\\
+\hline
+Dataless SEED
+&
+dataless
+\\
+\hline
+FDSN Station XML
+&
+sxml
+\\
+\hline
+SACPZ
+&
+sacpz
+\\
+\hline
+SEED RESP
+&
+resp
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsection{Supported Keywords}
+\label{\detokenize{src/Formats/metadata:supported-keywords}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{8}|\X{1}{8}|\X{1}{8}|\X{1}{8}|\X{4}{8}|}
+\hline
+\sphinxstyletheadfamily 
+KW
+&\sphinxstyletheadfamily 
+Used By
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+Default
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+msr
+&
+sxml
+&
+Bool
+&
+false
+&
+read full MultiStageResp?
+\\
+\hline
+s
+&
+all
+&
+TimeSpec
+&&
+Start time
+\\
+\hline
+t
+&
+all
+&
+TimeSpec
+&&
+Termination (end) time
+\\
+\hline
+units
+&
+resp
+&
+Bool
+&
+false
+&
+fill in MultiStageResp units?
+\\
+\hline&
+dataless
+&&&\\
+\hline
+v
+&
+all
+&
+Int64
+&
+0
+&
+verbosity
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsection{Writing Metadata}
+\label{\detokenize{src/Formats/metadata:writing-metadata}}\index{writesacpz() (built-in function)@\spxentry{writesacpz()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Formats/metadata:writesacpz}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{writesacpz}}}{\emph{S::GphysData}, \emph{pzfile::String}}{}
+\end{fulllineitems}
+
+
+Write fields from SeisIO struct \sphinxtitleref{S} to sacpz file \sphinxtitleref{pzfile}.
+
+
+\section{HDF5 File Formats}
+\label{\detokenize{src/Formats/hdf5:hdf5-file-formats}}\label{\detokenize{src/Formats/hdf5::doc}}
+Of the emerging HDF5 geophysical data formats, only the ASDF format is
+supported at present. Support for other geophysical HDF5 (sub)formats is planned.
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{S~=~read\_hdf5(fname::String,~{[},~KWs{]})}}}
+\end{fulllineitems}
+
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{S~=~read\_meta(fname::String,~{[},~KWs{]})}}}
+\end{fulllineitems}
+
+
+\begin{DUlineblock}{0em}
+\item[] Read metadata in seismic HDF5 file format from file \sphinxstylestrong{fname} into S.
+\item[] 
+\item[] \sphinxstylestrong{KWs}
+\item[] Keyword arguments; see also {\hyperref[\detokenize{src/Appendices/keywords:dkw}]{\sphinxcrossref{\DUrole{std,std-ref}{SeisIO standard KWs}}}} or type \sphinxcode{\sphinxupquote{?SeisIO.KW}}.
+\end{DUlineblock}
+
+This has one fundamental design difference from {\hyperref[\detokenize{src/Formats/timeseries:readdata}]{\sphinxcrossref{\DUrole{std,std-ref}{read\_data}}}}:
+HDF5 archives are assumed to be large files with data from multiple channels;
+they are scanned selectively for data of interest to read, rather than read
+into memory in their entirety.
+
+
+\subsection{Supported Keywords}
+\label{\detokenize{src/Formats/hdf5:supported-keywords}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{7}|\X{1}{7}|\X{1}{7}|\X{4}{7}|}
+\hline
+\sphinxstyletheadfamily 
+KW
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+Default
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+id
+&
+String
+&
+“\sphinxstyleemphasis{.}..*”
+&
+id pattern, formated nn.sss.ll.ccc
+\\
+\hline&&&
+(net.sta.loc.cha); FDSN-style wildcards $^{\text{(a)}}$
+\\
+\hline
+s
+&
+TimeSpec
+&&
+start time $^{\text{(b)}}$
+\\
+\hline
+t
+&
+TimeSpec
+&&
+termination (end) time $^{\text{(b)}}$
+\\
+\hline
+msr
+&
+Bool
+&
+true
+&
+read full (MultiStageResp) instrument resp?
+\\
+\hline
+v
+&
+Int64
+&
+0
+&
+verbosity
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+$^{\text{(a)}}$  A question mark (‘?’) is a wildcard for a single character (exactly
+one); an asterisk (‘*’) is a wildcard for zero or more characters.
+$^{\text{(b)}}$  If unset, (s,t) \textasciitilde{} (21 September 1677, 11 April 2262), the limits of
+timekeeping (relative to the Unix epoch) with Int64 nanoseconds.
+
+The use of \sphinxcode{\sphinxupquote{s}}, \sphinxcode{\sphinxupquote{t}} are \sphinxstyleemphasis{very strongly} recommended.
+\index{scan\_hdf5() (built-in function)@\spxentry{scan\_hdf5()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Formats/hdf5:scan_hdf5}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scan\_hdf5}}}{\emph{fname::String}}{}
+\end{fulllineitems}
+
+\index{scan\_hdf5() (built-in function)@\spxentry{scan\_hdf5()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{scan\_hdf5}}}{\emph{fname::String}, \emph{level=channel}}{}
+\end{fulllineitems}
+
+
+Scans supported seismic HDF5 formats and returns a list of strings describing
+the waveform contents. If level=channel, output is more verbose.
 
 
 \section{XML Meta-Data}
@@ -1422,6 +1714,9 @@ to channel number(s) CC. Ignores NaNs.
 Remove the polynomial trend of degree n from every regularly-sampled channel
 in S using a least-squares polynomial fit. Specify chans=CC to restrict
 to channel number(s) CC. Ignores NaNs.
+
+Compute the envelope of channel data in S. Only affects regularly-sampled
+channels.
 
 
 \begin{fulllineitems}
@@ -2288,6 +2583,108 @@ with coordinates \sphinxtitleref{{[}s\_lat, s\_lon{]}} to receivers \sphinxtitle
 Formatted display of seismic phases in dictionary P.
 
 
+\section{Reading Earthquake Data Files}
+\label{\detokenize{src/Submodules/quake:reading-earthquake-data-files}}
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{S~=~read\_quake(fmt::String,~filename~{[},~KWs{]})}}}
+\end{fulllineitems}
+
+
+\begin{DUlineblock}{0em}
+\item[] Read data in file \sphinxstyleemphasis{fmt} from file \sphinxstyleemphasis{filename} into memory.
+\item[] 
+\item[] \sphinxstylestrong{fmt}
+\item[] Case-sensitive string describing the file format. See below.
+\item[] 
+\item[] \sphinxstylestrong{KWs}
+\item[] Keyword arguments; see also {\hyperref[\detokenize{src/Appendices/keywords:dkw}]{\sphinxcrossref{\DUrole{std,std-ref}{SeisIO standard KWs}}}} or type \sphinxcode{\sphinxupquote{?SeisIO.KW}}.
+\item[] Standard keywords: full, nx\_add, nx\_new, v
+\item[] Other keywords: See below.
+\end{DUlineblock}
+
+
+\subsection{Supported File Formats}
+\label{\detokenize{src/Submodules/quake:supported-file-formats}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{5}|\X{1}{5}|\X{3}{5}|}
+\hline
+\sphinxstyletheadfamily 
+File Format
+&\sphinxstyletheadfamily 
+String
+&\sphinxstyletheadfamily \\
+\hline
+PC-SUDS
+&
+suds
+&\\
+\hline
+QuakeML
+&
+qml, quakeml
+&
+only reads first event from file
+\\
+\hline
+UW
+&
+uw
+&\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsection{Supported Keywords}
+\label{\detokenize{src/Submodules/quake:supported-keywords}}
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{1}{8}|\X{1}{8}|\X{1}{8}|\X{1}{8}|\X{4}{8}|}
+\hline
+\sphinxstyletheadfamily 
+KW
+&\sphinxstyletheadfamily 
+Used By
+&\sphinxstyletheadfamily 
+Type
+&\sphinxstyletheadfamily 
+Default
+&\sphinxstyletheadfamily 
+Meaning
+\\
+\hline
+full
+&
+suds, uw
+&
+Bool
+&
+false
+&
+read full header into \sphinxtitleref{:misc}?
+\\
+\hline
+v
+&
+all
+&
+Int64
+&
+0
+&
+verbosity
+\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
 \section{RandSeis}
 \label{\detokenize{src/Submodules/randseis:randseis}}\label{\detokenize{src/Submodules/randseis::doc}}
 This submodule is used to quickly generate SeisIO objects with quasi-random
@@ -2403,6 +2800,12 @@ Generate a SeisSrc structure filled with random values.
 \section{Utility Functions}
 \label{\detokenize{src/Appendices/function_list:utility-functions}}\label{\detokenize{src/Appendices/function_list:function-list}}\label{\detokenize{src/Appendices/function_list::doc}}
 This appendix covers utility functions that belong in no other category.
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{?RESP\_wont\_read}}}
+\end{fulllineitems}
+
 \index{d2u() (built-in function)@\spxentry{d2u()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
@@ -2413,14 +2816,14 @@ This appendix covers utility functions that belong in no other category.
 Aliased to \sphinxcode{\sphinxupquote{Dates.datetime2unix}}.
 
 Keyword \sphinxcode{\sphinxupquote{hc\_new}} specifies the new critical damping constant. Keyword \sphinxcode{\sphinxupquote{C}} specifies an array of channel numbers on which to operate; by default, every channel with fs \textgreater{} 0.0 is affected.
-\index{fctopz() (built-in function)@\spxentry{fctopz()}\spxextra{built-in function}}
+\index{fctoresp() (built-in function)@\spxentry{fctoresp()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{src/Appendices/function_list:fctopz}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{fctopz}}}{\emph{fc}}{}
+\phantomsection\label{\detokenize{src/Appendices/function_list:fctoresp}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{fctoresp}}}{\emph{fc}, \emph{c}}{}
 \end{fulllineitems}
 
 
-Convert critical frequency \sphinxcode{\sphinxupquote{fc}} to a matrix of complex poles and zeros; zeros in \sphinxcode{\sphinxupquote{resp{[}:,1{]}}}, poles in \sphinxcode{\sphinxupquote{resp{[}:,2{]}}}.
+Generate a generic PZResp object for a geophone with critical frequency \sphinxcode{\sphinxupquote{fc}} and damping constant \sphinxcode{\sphinxupquote{c}}. If no damping constant is specified, assumes c = 1/sqrt(2).
 \index{find\_regex() (built-in function)@\spxentry{find\_regex()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
@@ -2437,6 +2840,50 @@ OS-agnostic equivalent to Linux \sphinxtitleref{find}. First argument is a path 
 
 
 Get SEED-compliant one-character band code corresponding to instrument sample rate \sphinxcode{\sphinxupquote{fs}} and corner frequency \sphinxcode{\sphinxupquote{FC}}. If unset, \sphinxcode{\sphinxupquote{FC}} is assumed to be 1 Hz.
+\index{get\_file\_ver() (built-in function)@\spxentry{get\_file\_ver()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Appendices/function_list:get_file_ver}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_file\_ver}}}{\emph{fname::String}}{}
+\end{fulllineitems}
+
+
+Get the version of a SeisIO native format file.
+\index{get\_seis\_channels() (built-in function)@\spxentry{get\_seis\_channels()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Appendices/function_list:get_seis_channels}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_seis\_channels}}}{\emph{S::GphysData}}{}
+\end{fulllineitems}
+
+
+Get numeric indices of channels in S whose instrument codes indicate seismic data.
+\index{guess() (built-in function)@\spxentry{guess()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Appendices/function_list:guess}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{guess}}}{\emph{fname::String}}{}
+\end{fulllineitems}
+
+
+Attempt to guess data file format and endianness using known binary file markers.
+\index{inst\_code() (built-in function)@\spxentry{inst\_code()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Appendices/function_list:inst_code}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{inst\_code}}}{\emph{C::GphysChannel}}{}
+\end{fulllineitems}
+
+\index{inst\_code() (built-in function)@\spxentry{inst\_code()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{inst\_code}}}{\emph{S::GphysData}, \emph{i::Int64}}{}
+\end{fulllineitems}
+
+\index{inst\_code() (built-in function)@\spxentry{inst\_code()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{inst\_code}}}{\emph{S::GphysData}}{}
+\end{fulllineitems}
+
+
+Get instrument codes.
 \index{ls() (built-in function)@\spxentry{ls()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
@@ -2487,6 +2934,36 @@ Convert times \sphinxstylestrong{s} and \sphinxstylestrong{t} to strings \(\alph
 Expected string format is “yyyy-mm-ddTHH:MM:SS.nnn”, e.g. 2016-03-23T11:17:00.333.
 
 “Safe” synchronize of start and end times of all trace data in SeisData structure \sphinxcode{\sphinxupquote{S}} to a new structure \sphinxcode{\sphinxupquote{U}}.
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{resp\_a0!(R::InstrumentResponse)}}}
+\end{fulllineitems}
+
+
+
+\begin{fulllineitems}
+\pysigline{\sphinxbfcode{\sphinxupquote{resp\_a0!(S::GphysData)}}}
+\end{fulllineitems}
+
+
+Updates sensitivity :a0 of PZResp/PZResp64 responses.
+\index{resptofc() (built-in function)@\spxentry{resptofc()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Appendices/function_list:resptofc}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{resptofc}}}{\emph{R}}{}
+\end{fulllineitems}
+
+
+Attempt to guess critical frequency from poles and zeros of a PZResp/PZResp64.
+\index{set\_file\_ver() (built-in function)@\spxentry{set\_file\_ver()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Appendices/function_list:set_file_ver}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{set\_file\_ver}}}{\emph{fname::String}}{}
+\end{fulllineitems}
+
+
+Sets the SeisIO file version of file fname.
 \index{u2d() (built-in function)@\spxentry{u2d()}\spxextra{built-in function}}
 
 \begin{fulllineitems}
@@ -2495,15 +2972,29 @@ Expected string format is “yyyy-mm-ddTHH:MM:SS.nnn”, e.g. 2016-03-23T11:17:0
 
 
 Alias to \sphinxcode{\sphinxupquote{Dates.unix2datetime}}.
+\index{validate\_units() (built-in function)@\spxentry{validate\_units()}\spxextra{built-in function}}
 
-function:: w\_time(W::Array\{Int64,2\}, fs::Float64)
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Appendices/function_list:validate_units}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{validate\_units}}}{\emph{S::GphysData}}{}
+\end{fulllineitems}
 
-Convert matrix W from time windows (w{[}:,1{]}:w{[}:,2{]}) in integer \(\mu s\) from the Unix epoch (1970-01-01T00:00:00) to sparse delta-encoded time representation. Specify fs in Hz.
+
+Validate strings in :units field to ensure UCUM compliance.
+\index{vucum() (built-in function)@\spxentry{vucum()}\spxextra{built-in function}}
+
+\begin{fulllineitems}
+\phantomsection\label{\detokenize{src/Appendices/function_list:vucum}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{vucum}}}{\emph{str::String}}{}
+\end{fulllineitems}
 
 
-\section{SeisIO Write Formats}
-\label{\detokenize{src/Appendices/seisio_file_format:seisio-write-formats}}\label{\detokenize{src/Appendices/seisio_file_format:seisio-file-format}}\label{\detokenize{src/Appendices/seisio_file_format::doc}}
-Files are written in little-endian byte order. Abbreviations used:
+Check whether \sphinxcode{\sphinxupquote{str}} contains valid UCUM units.
+
+
+\section{SeisIO Native Format}
+\label{\detokenize{src/Appendices/seisio_file_format:seisio-native-format}}\label{\detokenize{src/Appendices/seisio_file_format:seisio-file-format}}\label{\detokenize{src/Appendices/seisio_file_format::doc}}
+Invoking the command \sphinxstyleemphasis{wseis} writes SeisIO structures to a native data format
+in little-endian byte order. This page documents the low-level file format.
+Abbreviations used:
 
 
 \begin{savenotes}\sphinxattablestart
@@ -5743,6 +6234,84 @@ EQLoc
 0x45514d30
 &
 EQMag
+\\
+\hline&\\
+\hline&\\
+\hline
+File Format Version History
+&\\
+\hline&\\
+\hline
+File format versions \textless{}0.50 are no longer supported; please email us if you
+&\\
+\hline
+need to read in very old data.
+&\\
+\hline
+\end{tabular}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabular}[t]{|\X{5}{72}|\X{12}{72}|\X{55}{72}|}
+\hline
+\sphinxstyletheadfamily 
+Version
+&\sphinxstyletheadfamily 
+Date
+&\sphinxstyletheadfamily 
+Change
+\\
+\hline
+0.53
+&
+2019-09-11
+&
+removed :i, :o from CoeffResp
+\\
+\hline&&
+added :i, :o to MultiStageResp
+\\
+\hline
+0.52
+&
+2019-09-03
+&
+added CoeffResp, MultiStageResp
+\\
+\hline
+0.51
+&
+2019-08-01
+&
+added :f0 to PZResp, PZResp64
+\\
+\hline
+0.50
+&
+2019-06-05
+&
+all custom Types can now use write() directly
+\\
+\hline&&
+rewrote how :misc is stored
+\\
+\hline&&
+Type codes for :misc changed
+\\
+\hline&&
+deprecated BigFloat/BigInt support in :misc
+\\
+\hline&&
+:n is no longer stored as a UInt32
+\\
+\hline&&
+:x compression no longer automatic
+\\
+\hline&&
+:x compression changed from Blosc to lz4
 \\
 \hline
 \end{tabular}

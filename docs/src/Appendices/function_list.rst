@@ -5,15 +5,17 @@ Utility Functions
 #################
 This appendix covers utility functions that belong in no other category.
 
+.. function:: ?RESP_wont_read
+
 .. function:: d2u(DT::DateTime)
 
 Aliased to ``Dates.datetime2unix``.
 
 Keyword ``hc_new`` specifies the new critical damping constant. Keyword ``C`` specifies an array of channel numbers on which to operate; by default, every channel with fs > 0.0 is affected.
 
-.. function:: fctopz(fc)
+.. function:: fctoresp(fc, c)
 
-Convert critical frequency ``fc`` to a matrix of complex poles and zeros; zeros in ``resp[:,1]``, poles in ``resp[:,2]``.
+Generate a generic PZResp object for a geophone with critical frequency ``fc`` and damping constant ``c``. If no damping constant is specified, assumes c = 1/sqrt(2).
 
 .. function:: find_regex(path::String, r::Regex)
 
@@ -22,6 +24,24 @@ OS-agnostic equivalent to Linux `find`. First argument is a path string, second 
 .. function:: getbandcode(fs, fc=FC)
 
 Get SEED-compliant one-character band code corresponding to instrument sample rate ``fs`` and corner frequency ``FC``. If unset, ``FC`` is assumed to be 1 Hz.
+
+.. function:: get_file_ver(fname::String)
+
+Get the version of a SeisIO native format file.
+
+.. function:: get_seis_channels(S::GphysData)
+
+Get numeric indices of channels in S whose instrument codes indicate seismic data.
+
+.. function:: guess(fname::String)
+
+Attempt to guess data file format and endianness using known binary file markers.
+
+.. function:: inst_code(C::GphysChannel)
+.. function:: inst_code(S::GphysData, i::Int64)
+.. function:: inst_code(S::GphysData)
+
+Get instrument codes.
 
 .. function:: ls(s::String)
 
@@ -55,10 +75,27 @@ Expected string format is "yyyy-mm-ddTHH:MM:SS.nnn", e.g. 2016-03-23T11:17:00.33
 
 "Safe" synchronize of start and end times of all trace data in SeisData structure ``S`` to a new structure ``U``.
 
+.. function:: resp_a0!(R::InstrumentResponse)
+.. function:: resp_a0!(S::GphysData)
+
+Updates sensitivity :a0 of PZResp/PZResp64 responses.
+
+.. function:: resptofc(R)
+
+Attempt to guess critical frequency from poles and zeros of a PZResp/PZResp64.
+
+.. function:: set_file_ver(fname::String)
+
+Sets the SeisIO file version of file fname.
+
 .. function:: u2d(x)
 
 Alias to ``Dates.unix2datetime``.
 
-function:: w_time(W::Array{Int64,2}, fs::Float64)
+.. function:: validate_units(S::GphysData)
 
-Convert matrix W from time windows (w[:,1]:w[:,2]) in integer :math:`\mu s` from the Unix epoch (1970-01-01T00:00:00) to sparse delta-encoded time representation. Specify fs in Hz.
+Validate strings in :units field to ensure UCUM compliance.
+
+.. function:: vucum(str::String)
+
+Check whether ``str`` contains valid UCUM units.

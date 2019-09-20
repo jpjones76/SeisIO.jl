@@ -1,15 +1,15 @@
 .. _readdata:
 
-################
-Geophysical Data
-################
+#############################
+Time-Series Data File Formats
+#############################
 .. function:: read_data!(S, fmt::String, filepat [, KWs])
 .. function:: S = read_data(fmt::String, filepat [, KWs])
 
 | Read data from a supported file format into memory.
 |
 | **fmt**
-| Lowercase string describin the file format. See below.
+| Case-sensitive string describing the file format. See below.
 |
 | **filepat**
 | Read files with names matching pattern ``filepat``. Supports wildcards.
@@ -32,20 +32,20 @@ Supported File Formats
   GeoCSV, time-sample pair  | geocsv
   GeoCSV, sample list       | geocsv.slist
   Lennartz ASCII            | lenartzascii
-  Mini-SEED, SEED           | mseed
+  Mini-SEED                 | mseed
   PASSCAL SEG Y             | passcal
   SAC                       | sac
   SEG Y (rev 0 or rev 1)    | segy
   SUDS                      | suds
-  UW                        | uw
+  UW data file              | uw
   Win32                     | win32
 
 Strings are case-sensitive to prevent any performance impact from using matches
 and/or lowercase().
 
-**********************
+******************
 Supported Keywords
-**********************
+******************
 .. csv-table::
   :header: KW, Used By, Type, Default, Meaning
   :delim: |
@@ -60,10 +60,8 @@ Supported Keywords
   nx_new | mseed    | Int64   | 86400000  | length of **:x** for new channels
   jst    | win32    | Bool    | true      | are sample times JST (UTC+9)?
   swap   | seed     | Bool    | true      | byte swap?
-  v      | ah       | Int64   | 0         | verbosity
-         | mseed    |         |           |
-         | uw       |         |           |
-         | win32    |         |           |
+  units  | resp     | Bool    | false     | fill in units of CoeffResp stages?
+  v      | (all)    | Int64   | 0         | verbosity
 
 
 Performance Tip
@@ -99,6 +97,9 @@ Examples
 *****************************
 Format Descriptions and Notes
 *****************************
+Additional format information can be accessed from the command line by typing
+``SeisIO.formats("FMT")`` where FMT is the format name; ``keys(SeisIO.formats)``
+for a list.
 
 **AH** (Ad-Hoc) was developed as a machine-independent seismic data format
 based on External Data Representation (XDR).

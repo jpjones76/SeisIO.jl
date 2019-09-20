@@ -36,7 +36,7 @@
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="SeisIO Write Formats" href="seisio_file_format.html" />
+    <link rel="next" title="SeisIO Native Format" href="seisio_file_format.html" />
     <link rel="prev" title="RandSeis" href="../Submodules/randseis.html" /> 
 </head>
 
@@ -93,7 +93,9 @@
 </ul>
 <p class="caption"><span class="caption-text">Reading Files</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">Geophysical Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/timeseries.html">Time-Series Data File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/metadata.html">Metadata File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/hdf5.html">HDF5 File Formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Formats/xml.html">XML Meta-Data</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Downloading Data</span></p>
@@ -109,12 +111,13 @@
 <p class="caption"><span class="caption-text">Submodules</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Submodules/quake.html">Quake</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Submodules/quake.html#reading-earthquake-data-files">Reading Earthquake Data Files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Submodules/randseis.html">RandSeis</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Utility Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html">SeisIO Write Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html">SeisIO Native Format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html#simple-object-types">Simple Object Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html#location-types">Location Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html#response-types">Response Types</a></li>
@@ -192,6 +195,11 @@
 <span id="function-list"></span><h1>Utility Functions<a class="headerlink" href="#utility-functions" title="Permalink to this headline">¶</a></h1>
 <p>This appendix covers utility functions that belong in no other category.</p>
 <dl class="function">
+<dt>
+<code class="descname">?RESP_wont_read</code></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="d2u">
 <code class="descname">d2u</code><span class="sig-paren">(</span><em>DT::DateTime</em><span class="sig-paren">)</span><a class="headerlink" href="#d2u" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -199,11 +207,11 @@
 <p>Aliased to <code class="docutils literal notranslate"><span class="pre">Dates.datetime2unix</span></code>.</p>
 <p>Keyword <code class="docutils literal notranslate"><span class="pre">hc_new</span></code> specifies the new critical damping constant. Keyword <code class="docutils literal notranslate"><span class="pre">C</span></code> specifies an array of channel numbers on which to operate; by default, every channel with fs &gt; 0.0 is affected.</p>
 <dl class="function">
-<dt id="fctopz">
-<code class="descname">fctopz</code><span class="sig-paren">(</span><em>fc</em><span class="sig-paren">)</span><a class="headerlink" href="#fctopz" title="Permalink to this definition">¶</a></dt>
+<dt id="fctoresp">
+<code class="descname">fctoresp</code><span class="sig-paren">(</span><em>fc</em>, <em>c</em><span class="sig-paren">)</span><a class="headerlink" href="#fctoresp" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<p>Convert critical frequency <code class="docutils literal notranslate"><span class="pre">fc</span></code> to a matrix of complex poles and zeros; zeros in <code class="docutils literal notranslate"><span class="pre">resp[:,1]</span></code>, poles in <code class="docutils literal notranslate"><span class="pre">resp[:,2]</span></code>.</p>
+<p>Generate a generic PZResp object for a geophone with critical frequency <code class="docutils literal notranslate"><span class="pre">fc</span></code> and damping constant <code class="docutils literal notranslate"><span class="pre">c</span></code>. If no damping constant is specified, assumes c = 1/sqrt(2).</p>
 <dl class="function">
 <dt id="find_regex">
 <code class="descname">find_regex</code><span class="sig-paren">(</span><em>path::String</em>, <em>r::Regex</em><span class="sig-paren">)</span><a class="headerlink" href="#find_regex" title="Permalink to this definition">¶</a></dt>
@@ -216,6 +224,40 @@
 <dd></dd></dl>
 
 <p>Get SEED-compliant one-character band code corresponding to instrument sample rate <code class="docutils literal notranslate"><span class="pre">fs</span></code> and corner frequency <code class="docutils literal notranslate"><span class="pre">FC</span></code>. If unset, <code class="docutils literal notranslate"><span class="pre">FC</span></code> is assumed to be 1 Hz.</p>
+<dl class="function">
+<dt id="get_file_ver">
+<code class="descname">get_file_ver</code><span class="sig-paren">(</span><em>fname::String</em><span class="sig-paren">)</span><a class="headerlink" href="#get_file_ver" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Get the version of a SeisIO native format file.</p>
+<dl class="function">
+<dt id="get_seis_channels">
+<code class="descname">get_seis_channels</code><span class="sig-paren">(</span><em>S::GphysData</em><span class="sig-paren">)</span><a class="headerlink" href="#get_seis_channels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Get numeric indices of channels in S whose instrument codes indicate seismic data.</p>
+<dl class="function">
+<dt id="guess">
+<code class="descname">guess</code><span class="sig-paren">(</span><em>fname::String</em><span class="sig-paren">)</span><a class="headerlink" href="#guess" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Attempt to guess data file format and endianness using known binary file markers.</p>
+<dl class="function">
+<dt id="inst_code">
+<code class="descname">inst_code</code><span class="sig-paren">(</span><em>C::GphysChannel</em><span class="sig-paren">)</span><a class="headerlink" href="#inst_code" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt>
+<code class="descname">inst_code</code><span class="sig-paren">(</span><em>S::GphysData</em>, <em>i::Int64</em><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt>
+<code class="descname">inst_code</code><span class="sig-paren">(</span><em>S::GphysData</em><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<p>Get instrument codes.</p>
 <dl class="function">
 <dt id="ls">
 <code class="descname">ls</code><span class="sig-paren">(</span><em>s::String</em><span class="sig-paren">)</span><a class="headerlink" href="#ls" title="Permalink to this definition">¶</a></dt>
@@ -255,13 +297,46 @@
 Expected string format is “yyyy-mm-ddTHH:MM:SS.nnn”, e.g. 2016-03-23T11:17:00.333.</p>
 <p>“Safe” synchronize of start and end times of all trace data in SeisData structure <code class="docutils literal notranslate"><span class="pre">S</span></code> to a new structure <code class="docutils literal notranslate"><span class="pre">U</span></code>.</p>
 <dl class="function">
+<dt>
+<code class="descname">resp_a0!(R::InstrumentResponse)</code></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt>
+<code class="descname">resp_a0!(S::GphysData)</code></dt>
+<dd></dd></dl>
+
+<p>Updates sensitivity :a0 of PZResp/PZResp64 responses.</p>
+<dl class="function">
+<dt id="resptofc">
+<code class="descname">resptofc</code><span class="sig-paren">(</span><em>R</em><span class="sig-paren">)</span><a class="headerlink" href="#resptofc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Attempt to guess critical frequency from poles and zeros of a PZResp/PZResp64.</p>
+<dl class="function">
+<dt id="set_file_ver">
+<code class="descname">set_file_ver</code><span class="sig-paren">(</span><em>fname::String</em><span class="sig-paren">)</span><a class="headerlink" href="#set_file_ver" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Sets the SeisIO file version of file fname.</p>
+<dl class="function">
 <dt id="u2d">
 <code class="descname">u2d</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="headerlink" href="#u2d" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p>Alias to <code class="docutils literal notranslate"><span class="pre">Dates.unix2datetime</span></code>.</p>
-<p>function:: w_time(W::Array{Int64,2}, fs::Float64)</p>
-<p>Convert matrix W from time windows (w[:,1]:w[:,2]) in integer <span class="math notranslate nohighlight">\(\mu s\)</span> from the Unix epoch (1970-01-01T00:00:00) to sparse delta-encoded time representation. Specify fs in Hz.</p>
+<dl class="function">
+<dt id="validate_units">
+<code class="descname">validate_units</code><span class="sig-paren">(</span><em>S::GphysData</em><span class="sig-paren">)</span><a class="headerlink" href="#validate_units" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Validate strings in :units field to ensure UCUM compliance.</p>
+<dl class="function">
+<dt id="vucum">
+<code class="descname">vucum</code><span class="sig-paren">(</span><em>str::String</em><span class="sig-paren">)</span><a class="headerlink" href="#vucum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Check whether <code class="docutils literal notranslate"><span class="pre">str</span></code> contains valid UCUM units.</p>
 </div>
 
 
@@ -272,7 +347,7 @@ Expected string format is “yyyy-mm-ddTHH:MM:SS.nnn”, e.g. 2016-03-23T11:17:0
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="seisio_file_format.html" class="btn btn-neutral float-right" title="SeisIO Write Formats" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="seisio_file_format.html" class="btn btn-neutral float-right" title="SeisIO Native Format" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="../Submodules/randseis.html" class="btn btn-neutral float-left" title="RandSeis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

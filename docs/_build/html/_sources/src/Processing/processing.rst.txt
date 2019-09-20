@@ -25,6 +25,11 @@ Remove the polynomial trend of degree n from every regularly-sampled channel
 in S using a least-squares polynomial fit. Specify chans=CC to restrict
 to channel number(s) CC. Ignores NaNs.
 
+.. function: env!(S::GphysData[, chans=CC])
+
+Compute the envelope of channel data in S. Only affects regularly-sampled
+channels.
+
 .. function:: nanfill!(S)
 
 For each channel **i** in **S**, replace all NaNs in **S.x[i]** with the mean

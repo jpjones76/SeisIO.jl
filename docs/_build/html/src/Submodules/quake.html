@@ -93,7 +93,9 @@
 </ul>
 <p class="caption"><span class="caption-text">Reading Files</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">Geophysical Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/timeseries.html">Time-Series Data File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/metadata.html">Metadata File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/hdf5.html">HDF5 File Formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Formats/xml.html">XML Meta-Data</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Downloading Data</span></p>
@@ -121,12 +123,17 @@
 <li class="toctree-l2"><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="#reading-earthquake-data-files">Reading Earthquake Data Files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#supported-file-formats">Supported File Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#supported-keywords">Supported Keywords</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="randseis.html">RandSeis</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/function_list.html">Utility Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html">SeisIO Write Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html">SeisIO Native Format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#simple-object-types">Simple Object Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#location-types">Location Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#response-types">Response Types</a></li>
@@ -290,9 +297,9 @@ a tuple consisting of an Array{SeisHdr,1} and an Array{SeisSrc,1}, so that
 the <cite>i`th entry of each array describes the header and source process of event `i</cite>.</p>
 <p>Notes:</p>
 <ol class="arabic simple">
-<li>Specify <cite>ot</cite> as a string formatted YYYY-MM-DDThh:mm:ss in UTC (e.g. “2001-02-08T18:54:32”). Returns a SeisHdr array.</li>
-<li>Incomplete string queries are read to the nearest fully-specified time constraint; thus, <cite>FDSNevq(“2001-02-08”)</cite> returns the nearest event to 2001-02-08T00:00:00.</li>
-<li>If no event is found in the specified search window, FDSNevq exits with an error.</li>
+<li><p>Specify <cite>ot</cite> as a string formatted YYYY-MM-DDThh:mm:ss in UTC (e.g. “2001-02-08T18:54:32”). Returns a SeisHdr array.</p></li>
+<li><p>Incomplete string queries are read to the nearest fully-specified time constraint; thus, <cite>FDSNevq(“2001-02-08”)</cite> returns the nearest event to 2001-02-08T00:00:00.</p></li>
+<li><p>If no event is found in the specified search window, FDSNevq exits with an error.</p></li>
 </ol>
 <div class="line-block">
 <div class="line"><a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">Shared keywords</span></a>: evw, reg, mag, nev, src, to, w</div>
@@ -330,8 +337,8 @@ and z in km with + = down.</p>
 </div>
 <p><strong>References</strong></p>
 <ul class="simple">
-<li>Crotwell, H. P., Owens, T. J., &amp; Ritsema, J. (1999). The TauP Toolkit: Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.</li>
-<li>TauP manual: <a class="reference external" href="http://www.seis.sc.edu/downloads/TauP/taup.pdf">http://www.seis.sc.edu/downloads/TauP/taup.pdf</a></li>
+<li><p>Crotwell, H. P., Owens, T. J., &amp; Ritsema, J. (1999). The TauP Toolkit: Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.</p></li>
+<li><p>TauP manual: <a class="reference external" href="http://www.seis.sc.edu/downloads/TauP/taup.pdf">http://www.seis.sc.edu/downloads/TauP/taup.pdf</a></p></li>
 </ul>
 </div>
 </div>
@@ -423,6 +430,89 @@ with coordinates <cite>[s_lat, s_lon]</cite> to receivers <cite>rec</cite> with 
 <dd></dd></dl>
 
 <p>Formatted display of seismic phases in dictionary P.</p>
+</div>
+</div>
+<div class="section" id="reading-earthquake-data-files">
+<h1>Reading Earthquake Data Files<a class="headerlink" href="#reading-earthquake-data-files" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt>
+<code class="descname">S = read_quake(fmt::String, filename [, KWs])</code></dt>
+<dd></dd></dl>
+
+<div class="line-block">
+<div class="line">Read data in file <em>fmt</em> from file <em>filename</em> into memory.</div>
+<div class="line"><br /></div>
+<div class="line"><strong>fmt</strong></div>
+<div class="line">Case-sensitive string describing the file format. See below.</div>
+<div class="line"><br /></div>
+<div class="line"><strong>KWs</strong></div>
+<div class="line">Keyword arguments; see also <a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">SeisIO standard KWs</span></a> or type <code class="docutils literal notranslate"><span class="pre">?SeisIO.KW</span></code>.</div>
+<div class="line">Standard keywords: full, nx_add, nx_new, v</div>
+<div class="line">Other keywords: See below.</div>
+</div>
+<div class="section" id="supported-file-formats">
+<h2>Supported File Formats<a class="headerlink" href="#supported-file-formats" title="Permalink to this headline">¶</a></h2>
+<table class="colwidths-given docutils align-center">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>File Format</p></th>
+<th class="head"><p>String</p></th>
+<th class="head"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>PC-SUDS</p></td>
+<td><p>suds</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>QuakeML</p></td>
+<td><p>qml, quakeml</p></td>
+<td><p>only reads first event from file</p></td>
+</tr>
+<tr class="row-even"><td><p>UW</p></td>
+<td><p>uw</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="supported-keywords">
+<h2>Supported Keywords<a class="headerlink" href="#supported-keywords" title="Permalink to this headline">¶</a></h2>
+<table class="colwidths-given docutils align-center">
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 13%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>KW</p></th>
+<th class="head"><p>Used By</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>full</p></td>
+<td><p>suds, uw</p></td>
+<td><p>Bool</p></td>
+<td><p>false</p></td>
+<td><p>read full header into <cite>:misc</cite>?</p></td>
+</tr>
+<tr class="row-odd"><td><p>v</p></td>
+<td><p>all</p></td>
+<td><p>Int64</p></td>
+<td><p>0</p></td>
+<td><p>verbosity</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 
