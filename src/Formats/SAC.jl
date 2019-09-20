@@ -540,6 +540,34 @@ function writesacpz(S::GphysData, file::String)
     unit_in   = get(S.misc[i], "INPUT UNIT", "?")
     unit_out  = get(S.misc[i], "OUTPUT UNIT", "?")
 
+    Y = typeof(S.resp[i])
+    if Y == GenResp
+      a0 = 1.0
+      P = S.resp[i][:,1]
+      Z = deepcopy(S.resp[i][:,2])
+    elseif Y in (PZResp, PZResp64)
+      a0 = getfield(S.resp[i], :a0)
+      P = getfield(S.resp[i], :p)
+      Z = deepcopy(getfield(S.resp[i], :z))
+    elseif Y == MultiStageResp
+      j = 0
+      for k = 1:length(S.resp[i].stage)
+        stg = S.resp[i].stage[k]
+        if typeof(stg) in (PZResp, PZResp64)
+          j = k
+          break
+        end
+      end
+      if j == 0
+        @warn(string("Skipped channel ", i, " (", id, "): incompatible response Type"))
+        continue
+      else
+        a0 = getfield(S.resp[i].stage[j], :a0)
+        P = getfield(S.resp[i].stage[j], :p)
+        Z = deepcopy(getfield(S.resp[i].stage[j], :z))
+      end
+    end
+
     write(io, 0x2a)
     write(io, 0x20)
     write(io, fill!(zeros(UInt8, 34), 0x2a))
@@ -575,15 +603,6 @@ function writesacpz(S::GphysData, file::String)
     end
 
     write(io, "* SENSITIVITY       : ", @sprintf("%12.6e", S.gain[i]), 0x20, 0x28, uppercase(S.units[i]), 0x29, 0x0a)
-    if typeof(S.resp[i]) == GenResp
-      a0 = 1.0
-      P = S.resp[i][:,1]
-      Z = deepcopy(S.resp[i][:,2])
-    else
-      a0 = getfield(S.resp[i], :a0)
-      P = getfield(S.resp[i], :p)
-      Z = deepcopy(getfield(S.resp[i], :z))
-    end
     NZ = length(Z)
     NP = length(P)
     write(io, "* A0                : ", @sprintf("%12.6e", a0), 0x0a)
