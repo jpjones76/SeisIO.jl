@@ -31,6 +31,7 @@ end
 
 function SEED_Unenc!(io::IO, S::SeisData, c::Int64, xi::Int64, nb::UInt16)
   buf = getfield(BUF, :buf)
+  checkbuf_8!(buf, xi)
   x = getindex(getfield(S, :x), c)
   readbytes!(io, buf, nb)
   T::Type = if BUF.fmt == 0x01
