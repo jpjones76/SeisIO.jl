@@ -60,6 +60,9 @@ for i in ls(path*"/Utils/")
     include(i)
   end
 end
+include("Utils/Parsing/streams.jl")
+include("Utils/Parsing/strings.jl")
+include("Utils/Parsing/buffers.jl")
 
 # =========================================================
 # Data processing operations
@@ -89,11 +92,20 @@ end
 # Submodules
 include("Submodules/Formats.jl")
 import .Formats: formats
+
 include("Submodules/SEED.jl")
 using .SEED: mseed_support, parsemseed!, read_dataless, read_mseed_file!, read_seed_resp!, read_seed_resp, RESP_wont_read, seed_support
 export mseed_support, read_dataless, read_seed_resp!, read_seed_resp, RESP_wont_read, seed_support
+
 include("Submodules/Quake.jl")
+using .Quake:read_qml
+export read_qml
 include("Submodules/RandSeis.jl")
+
+include("Submodules/SeisHDF.jl")
+using .SeisHDF: read_hdf5, read_hdf5!, scan_hdf5
+export read_hdf5, read_hdf5!, scan_hdf5
+
 include("Submodules/SUDS.jl")
 include("Submodules/UW.jl")
 
@@ -108,7 +120,6 @@ end
 # We need these types for the native file format
 using .Quake: EQLoc, EQMag, EventChannel, EventTraceData, PhaseCat, SeisEvent, SeisHdr, SeisPha, SeisSrc, SourceTime
 formats["list"] = collect(keys(formats))
-export formats
 
 # Last steps
 include("Last/splat.jl")
