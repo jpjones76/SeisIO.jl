@@ -127,6 +127,9 @@ mutable struct SeisIOBuf
   sac_iv::Array{Int32,1}
   sac_cv::Array{UInt8,1}
 
+  # For parsing dates
+  date_buf::Array{Int32,1}
+
   # Blockette containers
   B201::Blk201
   B500::Blk500
@@ -163,16 +166,19 @@ mutable struct SeisIOBuf
         0x0000,                             # n::UInt16
 
         # data-related arrays
-        Array{Float32,1}(undef, 65536),     # x::Array{Float32,1}
+        Array{Float32,1}(undef, 65535),     # x::Array{Float32,1}
         Array{UInt8,1}(undef, 4),           # flags::Array{UInt8,1}
         Array{UInt32,1}(undef, 16384),      # x32::Array{UInt32,1}
-        Array{UInt8,1}(undef, 65536),       # buf::Array{UInt8,1}
+        Array{UInt8,1}(undef, 65535),       # buf::Array{UInt8,1}
         Array{Int16,1}(undef, 62),          # int16_buf::Array{Int16,1}
         Array{Int32,1}(undef, 29),          # int32_buf::Array{Int32,1}
         Array{Int64,1}(undef, 8),           # int64_buf::Array{Int64,1}
         Array{Float32,1}(undef, 70),        # sac_fv::Array{Float32,1}
         Array{Int32,1}(undef, 40),          # sac_iv::Array{Int32,1}
         Array{UInt8,1}(undef, 192),         # sac_cv::Array{UInt8,1}
+
+        # dedicated array for parsing dates
+        Array{Int32,1}(undef, 7),           # date_buf::Array{Int32,1}
 
         # blockette fields
         Blk201(),                           # Blk201:: Blk201
