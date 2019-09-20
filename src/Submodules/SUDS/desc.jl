@@ -26,4 +26,4 @@ SUDS_fmt = FormatDesc(
 SUDS_fmt.ver = [  FmtVer(2.6, "1994-05-11", false) ,
                 FmtVer(1.41, "1989-03-29", nothing)
                 ]
-formats["SUDS"] = SUDS_fmt
+formats["PC-SUDS"] = SUDS_fmt
