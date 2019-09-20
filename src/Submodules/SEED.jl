@@ -10,14 +10,16 @@ import SeisIO:
   TimeSpec,
   check_for_gap!,
   checkbuf!,
+  checkbuf_8!,
   endtime,
   fix_units,
   is_u8_digit,
-  mkdbl,
+  buf_to_double,
   mktime,
   sμ,
   trunc_x!,
-  u8_to_int,
+  buf_to_int,
+  stream_int,
   y2μs,
   μs
 
