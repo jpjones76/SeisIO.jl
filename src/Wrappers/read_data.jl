@@ -63,10 +63,12 @@ matching pattern `filestr`.
 |swap    | mseed    | Bool    | true      | byte swap?                      |
 |v       | all      | Int64   | 0         | verbosity                       |
 
-### Performance Tip
-With mseed, win32, and bottle data, adjust `nx_new` and `nx_add` based on the
-expected lengths of the data vectors. If the largest has `Nmax` samples,
-and the smallest has `Nmin`, we recommend `nx_new=Nmin` and `nx_add=Nmax-Nmin`.
+### Format-Dependent Performance Tips
+
+#### `mseed`, `win32`, `bottle`
+Adjust `nx_new` and `nx_add` based on expected data vector lengths. If the
+largest data vector has `Nmax` samples, and the smallest has `Nmin`, we
+recommend `nx_new`≈`Nmin` and `nx_add`≈`Nmax - Nmin`.
 
 Default values can be changed in SeisIO keywords, e.g.,
 ```julia
