@@ -138,11 +138,14 @@ function FDSN_sta_xml(xmlf::String;
   xroot = LightXML.root(xdoc)
   xnet = child_elements(xroot)
   S = SeisData()
+  s = string_time(s, BUF.date_buf)
+  t = string_time(t, BUF.date_buf)
+
   for net in xnet
     # network level
     if name(net) == "Network"
-      net_s = has_attribute(net, "startDate") ? attribute(net, "startDate") : "0001-01-01T00:00:00"
-      net_t = has_attribute(net, "endDate") ? attribute(net, "endDate") : "9999-12-31T11:59:59"
+      net_s = string_time(has_attribute(net, "startDate") ? attribute(net, "startDate") : "0001-01-01T00:00:00", BUF.date_buf)
+      net_t = string_time(has_attribute(net, "endDate") ? attribute(net, "endDate") : "9999-12-31T11:59:59", BUF.date_buf)
 
       # do string comparisons work with <, > in Julia when dates are correctly formatted?
       if net_s ≤ t && net_t ≥ s
@@ -153,8 +156,8 @@ function FDSN_sta_xml(xmlf::String;
         for sta in xsta
 
           if name(sta) == "Station"
-            sta_s = has_attribute(sta, "startDate") ? attribute(sta, "startDate") : "0001-01-01T00:00:00"
-            sta_t = has_attribute(sta, "endDate") ? attribute(sta, "endDate") : "9999-12-31T11:59:59"
+            sta_s = string_time(has_attribute(sta, "startDate") ? attribute(sta, "startDate") : "0001-01-01T00:00:00", BUF.date_buf)
+            sta_t = string_time(has_attribute(sta, "endDate") ? attribute(sta, "endDate") : "9999-12-31T11:59:59", BUF.date_buf)
 
             if sta_s ≤ t && sta_t ≥ s
               ss = has_attribute(sta, "code") ? attribute(sta, "code") : ""
@@ -190,8 +193,8 @@ function FDSN_sta_xml(xmlf::String;
 
                 # channel element
                 elseif name(c) == "Channel"
-                  cha_s = has_attribute(c, "startDate") ? attribute(c, "startDate") : "0001-01-01T00:00:00"
-                  cha_t = has_attribute(c, "endDate") ? attribute(c, "endDate") : "9999-12-31T11:59:59"
+                  cha_s = string_time(has_attribute(c, "startDate") ? attribute(c, "startDate") : "0001-01-01T00:00:00", BUF.date_buf)
+                  cha_t = string_time(has_attribute(c, "endDate") ? attribute(c, "endDate") : "9999-12-31T11:59:59", BUF.date_buf)
                   ll = has_attribute(c, "locationCode") ? attribute(c, "locationCode") : ""
                   cc = has_attribute(c, "code") ? attribute(c, "code") : ""
 
@@ -348,8 +351,8 @@ function FDSN_sta_xml(xmlf::String;
                                     units = c_units,
                                     resp  = c_resp )
                     C.misc["ClockDrift"] = c_drift
-                    C.misc["startDate"] = Dates.DateTime(cha_s).instant.periods.value*1000 - dtconst
-                    C.misc["endDate"] = Dates.DateTime(cha_t).instant.periods.value*1000 - dtconst
+                    C.misc["startDate"] = cha_s #Dates.DateTime(cha_s).instant.periods.value*1000 - dtconst
+                    C.misc["endDate"] = cha_t #Dates.DateTime(cha_t).instant.periods.value*1000 - dtconst
                     if !isempty(c_sensor)
                       C.misc["SensorDescription"] = c_sensor
                     end
@@ -414,15 +417,15 @@ function read_sxml(fpat::String;
   return S
 end
 
+function sxml_mergehdr!(S::GphysData, T::GphysData;
+                        noappend::Bool=false,
+                        nofs::Bool=false,
+                        s::String="0001-01-01T00:00:00",
+                        t::String="9999-12-31T23:59:59",
+                        v::Int64=KW.v)
 
-function read_station_xml!(S::GphysData, file::String;
-                           msr::Bool=false,
-                           v::Int64=KW.v)
 
-  io = open(file, "r")
-  xsta = read(io, String)
-  close(io)
-  T = FDSN_sta_xml(xsta, msr=msr, v=v)
+  relevant_fields = nofs ? (:name, :loc, :gain, :resp, :units) : (:name, :loc, :fs, :gain, :resp, :units)
   k = Int64[]
   for i = 1:length(T)
 
@@ -445,10 +448,10 @@ function read_station_xml!(S::GphysData, file::String;
     # Overwrite S[j] headers on match
     if c != 0
       (v > 2) && println("id/time match! id = ", S.id[c], ". Overwriting S[", c, "] headers from T[", i, "]")
-      for f in (:name, :loc, :fs, :gain, :resp, :units)
+      for f in relevant_fields
         setindex!(getfield(S, f), getindex(getfield(T, f), i), c)
       end
-      note!(S, c, string("read_station_xml!,", file, ", overwrote (:name, :loc, :fs, :gain, :resp, :units)"))
+      note!(S, c, string("sxml_mergehdr!, overwrote ", relevant_fields))
       S.misc[c] = merge(T.misc[i], S.misc[c])
       if i in k
         @warn(string("Already used ID = ", T.id[i], " to overwrite a channel header!"))
@@ -471,4 +474,35 @@ function read_station_xml!(S::GphysData, file::String;
   end
 
   return nothing
+end
+
+function read_station_xml!(S::GphysData, file::String;
+                           msr::Bool=false,
+                           noappend::Bool=false,
+                           s::String="0001-01-01T00:00:00",
+                           t::String="9999-12-31T23:59:59",
+                           v::Int64=KW.v)
+
+  if sizeof(file) < 256
+    io = open(file, "r")
+    xsta = read(io, String)
+    close(io)
+  else
+    xsta = file
+  end
+  T = FDSN_sta_xml(xsta, msr=msr, s=s, t=t, v=v)
+  sxml_mergehdr!(S, T, noappend=noappend, s=s, t=t, v=v)
+  return nothing
+end
+
+function read_station_xml(file::String;
+                 msr::Bool=false,
+                 noappend::Bool=false,
+                 s::String="0001-01-01T00:00:00",
+                 t::String="9999-12-31T23:59:59",
+                 v::Int64=KW.v)
+
+  S = SeisData()
+  read_station_xml!(S, file, msr=msr, noappend=noappend, s=s, t=t, v=v)
+  return S
 end
