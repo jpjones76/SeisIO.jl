@@ -1,7 +1,23 @@
-The current set of updates, leading to v0.4.0, will focus on:
-1. more detailed instrument responses
-2. expanded file format support
-3. expanded data acquisition options
+### 2019-09-19
+### Introducing read_hdf5
+* `read_hdf5` is a wrapper to extracting data from HDF5 archives. This works
+differently from `read_data` in that we assume HDF5 archives are large and
+contain data from multiple channels; they are thus scanned selectively for
+data of interest to read, rather than read into memory as a whole file.
+  + currently only the ASDF data format is supported, but others will be
+  added if various staff respond to our emails.
+* `scan_hdf5` scans supported Seismic HDF5 formats and returns a list of
+strings describing the waveform contents.
+
+### Introducing read_quake
+* `read_quake` is a wrapper to read discrete event data into a SeisEvent
+structure.
+
+#### Bugs, Consistency, Performance
+* fixed several bugs that could cause buffer size to degrade performance after
+reading long files.
+* `update_resp_a0!(S)` has been renamed `resp_a0!(S)` and now works on
+`MultiStageResp`.
 
 ### 2019-09-12
 ### Introducing read_meta
