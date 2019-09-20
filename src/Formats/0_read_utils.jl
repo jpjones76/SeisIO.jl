@@ -1,25 +1,5 @@
 is_u8_digit(u::UInt8) = u > 0x2f && u < 0x3a
 
-function u8_to_int(buf::Array{UInt8,1}, L::Int64)
-  c = 10^(L-1)
-  n = zero(Int64)
-  for i = 1:L
-    n += c*(buf[i]-0x30)
-    c = div(c, 10)
-  end
-  return n
-end
-
-function u8_to_int(buf::Array{UInt8,1}, i::Int64, j::Int64)
-  c = Int16(10)^Int16(i-j)
-  n = zero(Int16)
-  for p = j:i
-    n += c * Int16(buf[p]-0x30)
-    c = div(c, Int16(10))
-  end
-  return n
-end
-
 # id = targ vector
 # cv = char vector
 # i = starting index in cv
@@ -63,15 +43,21 @@ function checkbuf_strict!(buf::AbstractArray, nx::T) where {T<:Integer}
   end
 end
 
-# ensures length(buf) is divisible by 8
+# ensures length(buf) is divisible by 8...needed to reinterpret as 64-bit type
 function checkbuf_8!(buf::Array{UInt8,1}, n::Integer)
   if div(n, 8) == 0
     nx = n
   else
     nx = n + 8 - rem(n,8)
   end
-  if nx > lastindex(buf)
+  L = length(buf)
+  if nx > L
     resize!(buf, nx)
+  else
+    r = rem(L, 8)
+    if r > 0
+      resize!(buf, L + 8 - r)
+    end
   end
 end
 
@@ -190,184 +176,4 @@ function fillx_u32_be!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::I
     x[j] = y
   end
   return nothing
-end
-
-# An order of magnitude faster than parse
-function mkuint(vi::Int8, v_buf::Array{UInt8,1})
-  v_buf .-= 0x30
-  o = one(UInt64)
-  p = UInt64(vi-o)
-  nx = zero(UInt64)
-  i = zero(Int8)
-  m = i
-  t = UInt64(10)
-  while i < vi
-    i += one(Int8)
-    nx += UInt64(getindex(v_buf, i))*t^p
-    p -= o
-  end
-  return UInt64(nx)
-end
-
-# A factor of two faster than ccall(:strtof, Float32, (Cstring, Ptr), Cstring(ptr), C_NULL)
-# even with ptr being a pointer to a predefined array
-function mkfloat(io::IO, c::UInt8)
-  read_state = 0x00
-  mant_sgn = 1.0f0
-  exp_sgn = 1.0f0
-
-  while c == 0x20
-    c = read(io, UInt8)
-  end
-
-  zz = zero(Int32)
-  z = zero(Int8)
-  o = one(Int8)
-  i = z
-  imax = Int8(8)
-  p0 = Int32(10)^Int32(imax)
-  p = p0
-  t = Int32(10)
-  d = zz
-  m = zz
-  q = zz
-  v = zz
-  x = zz
-  while c != 0x0a
-    if read_state == 0x00
-      if is_u8_digit(c) && i < imax
-        p = div(p,t)
-        i += o
-        v += Int32(c-0x30)*p
-        m = p
-      elseif c == 0x2d
-        mant_sgn = -1.0f0
-      elseif c == 0x2b
-        mant_sgn = 1.0f0
-      elseif c == 0x2e
-        # transition to state 1
-        read_state = 0x01
-        i = z
-        p = p0
-      elseif c == 0x65 || c == 0x66 || c == 0x65 || c == 0x65
-        # transition to state 2 (no decimal)
-        read_state = 0x02
-        i = z
-        p = p0
-      end
-    elseif read_state == 0x01
-      if is_u8_digit(c) && i < imax
-        p = div(p,t)
-        i += o
-        d += Int32(c-0x30)*p
-
-      elseif c == 0x65 || c == 0x66 || c == 0x65 || c == 0x65
-        # transition to state 2
-        read_state = 0x02
-        i = z
-        p = p0
-      end
-    else
-      if is_u8_digit(c) && i < imax
-        p = div(p,t)
-        i += o
-        x += Int32(c-0x30)*p
-        q = p
-      elseif c == 0x2d
-        exp_sgn = -1.0f0
-      elseif c == 0x2b
-        exp_sgn = 1.0f0
-      end
-    end
-    c = read(io, UInt8)
-  end
-  v1 = Float32(div(v, m))
-  v2 = Float32(d) / Float32(p0)
-  if q > zz
-    v3 = 10.0f0^(exp_sgn * Float32(div(x,q)))
-  else
-    v3 = one(Float32)
-  end
-  return mant_sgn * (v1 + v2) * v3
-end
-
-# Factor of two faster than parse(Float64, str) for a string
-# Order of magnitude faster than parse(Float64, String[uu]) for a u8 array
-function mkdbl(buf::Array{UInt8,1}, L::Int64)
-  read_state = 0x00
-  mant_sgn = 1.0e0
-  exp_sgn = 1.0e0
-
-  j = one(Int64)
-  zz = zero(Int64)
-  z = zero(Int8)
-  o = one(Int8)
-  i = z
-  imax = Int8(16)
-  p0 = Int64(10)^Int64(imax)
-  p = p0
-  t = Int64(10)
-  d = zz
-  m = zz
-  q = zz
-  v = zz
-  x = zz
-  while j ≤ L
-    c = buf[j]
-    if read_state == 0x00
-      if is_u8_digit(c) && (i < imax)
-        p = div(p,t)
-        i += o
-        v += Int64(c-0x30)*p
-        m = p
-      elseif c == 0x2d # '-'
-        mant_sgn = -1.0e0
-      elseif c == 0x2b # '+'
-        mant_sgn = 1.0e0
-      elseif c == 0x2e # '.'
-        # transition to state 1
-        read_state = 0x01
-        i = z
-        p = p0
-      elseif c in (0x45, 0x46, 0x65, 0x66) # 'E', 'F', 'e', 'f'
-        # transition to state 2 (no decimal)
-        read_state = 0x02
-        i = z
-        p = p0
-      end
-    elseif read_state == 0x01
-      if is_u8_digit(c) && i < imax
-        p = div(p,t)
-        i += o
-        d += Int64(c-0x30)*p
-      elseif c in (0x45, 0x46, 0x65, 0x66)
-        # transition to state 2
-        read_state = 0x02
-        i = z
-        p = p0
-      end
-    else
-      if is_u8_digit(c) && (i < imax)
-        p = div(p,t)
-        i += o
-        x += Int64(c-0x30)*p
-        q = p
-      elseif c == 0x2d # '-'
-        exp_sgn = -1.0e0
-      elseif c == 0x2b # '+'
-        exp_sgn = 1.0e0
-      else
-        break
-      end
-    end
-    j += 1
-  end
-  v1 = Float64(div(v, m))
-  v2 = Float64(d) / Float64(p0)
-  if q > zz
-    v3 = 10.0e0^(exp_sgn * Float64(div(x,q)))
-  else
-    v3 = one(Float64)
-  end
-  return mant_sgn * (v1 + v2) * v3
 end
