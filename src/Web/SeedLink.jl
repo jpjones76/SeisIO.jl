@@ -176,6 +176,7 @@ function SL_info(level::String;                                 # verbosity
     close(conn)
     deleteat!(x, i:length(x))
   end
+  resize!(buf, 65535)
   return String(x)
 end
 
@@ -441,7 +442,7 @@ function SeedLink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
           (v > 1) && @printf(stdout, "%s: Processing packets ", string(now()))
           while !eof(buf)
             pkt_id = String(read!(buf, Array{UInt8, 1}(undef, 8)))
-            parserec!(S, BUF, buf, v, 65536, 65536)
+            parserec!(S, BUF, buf, v, 65535, 65535)
             (v > 1) && @printf(stdout, "%s, ", pkt_id)
           end
           (v > 1) && @printf(stdout, "\b\b...done current packet dump.\n")
