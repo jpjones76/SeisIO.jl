@@ -46,6 +46,7 @@ function read_asdf!(S::GphysData, hdf::String, id::Union{String,Regex}, s::TimeS
           t1 = t0 + nx*Δ
 
           if (ts ≤ t1) && (te ≥ t0)
+            xi = 0
             i0, i1, t2 = get_trace_bounds(ts, te, t0, t1, Δ, nx)
             ni = i1-i0+1
             trace_start = div(t0 + Δ*(i0-1), 1000)
@@ -53,22 +54,13 @@ function read_asdf!(S::GphysData, hdf::String, id::Union{String,Regex}, s::TimeS
 
             cid = String(split(n, "_", limit=2, keepempty=true)[1])
             j = findid(cid, S.id)
+            nX = div(te-ts, Δ)
             if j == 0
               T = eltype(x)
-              nX = div(te-ts, Δ)
               push!(S, SeisChannel(id = cid,
                                    fs = fs,
                                    x = Array{T,1}(undef, nX)))
               j = S.n
-              nt = 2
-              ct = Array{Int64, 2}(undef, 2, 2)
-              setindex!(ct, one(Int64), 1)
-              setindex!(ct, ni, 2)
-              setindex!(ct, div(t2, 1000), 3)
-              setindex!(ct, zero(Int64), 4)
-              setindex!(getfield(S, :t), ct, j)
-              si = 1
-              ei = ni
             else
               ct = getindex(getfield(S, :t), j)
               nt = div(lastindex(ct), 2)
@@ -76,15 +68,27 @@ function read_asdf!(S::GphysData, hdf::String, id::Union{String,Regex}, s::TimeS
               if nt > 0
                 xi = getindex(ct, nt)
                 te = endtime(ct, getindex(getfield(S, :fs), j))
+                check_for_gap!(S, j, div(t2, 1000), ni, v)
               end
               if xi + ni > L
                 resize!(S.x[j], xi + max(ni, nX))
               end
-              check_for_gap!(S, j, div(t2, 1000), ni, v)
-              si = xi+1
-              ei = si+ni-1
+              if S.fs[j] == 0.0
+                S.fs[j] = fs
+              end
             end
 
+            if xi == 0
+              ct = Array{Int64, 2}(undef, 2, 2)
+              setindex!(ct, one(Int64), 1)
+              setindex!(ct, ni, 2)
+              setindex!(ct, div(t2, 1000), 3)
+              setindex!(ct, zero(Int64), 4)
+              setindex!(getfield(S, :t), ct, j)
+            end
+
+            si = xi+1
+            ei = si+ni-1
             X = S.x[j]
             load_data!(X, x, i0:i1, si:ei)
           end
