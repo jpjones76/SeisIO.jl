@@ -1,6 +1,6 @@
 module SUDS
 using SeisIO, SeisIO.Quake
-import SeisIO: check_for_gap!, checkbuf!, BUF, endtime, KW, sμ
+import SeisIO: check_for_gap!, checkbuf!, checkbuf_8!, BUF, endtime, KW, sμ
 import SeisIO.Formats: formats, FmtVer, FormatDesc, HistVec
 
 include("SUDS/SUDSbuf.jl")
@@ -12,5 +12,5 @@ include("SUDS/read_suds.jl")
 include("SUDS/desc.jl")
 
 # exports
-export formats, suds_support
+export formats, readsudsevt, suds_support
 end

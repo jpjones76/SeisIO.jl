@@ -1,7 +1,7 @@
 # trace data character codes
-# /* s = 12 bit unsigned stored as short int, 0 to 4096, */
-# /* q = 12 bit signed stored as short int, -2048 to 2048, */
-# /* u = 16 bit unsigned stored as short int, 0 to 65536 */
+# /* s = 12 bit unsigned stored as short int, 0 to 4095, */
+# /* q = 12 bit signed stored as short int, -2048 to 2047, */
+# /* u = 16 bit unsigned stored as short int, 0 to 65535 */
 # /* i = 16 bit signed stored as short int, -32767 to 32767, */
 # /* 2 = 24 bit signed integer stored as long, */
 # /* l = 32 bit signed integer stored as long, */

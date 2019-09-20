@@ -111,7 +111,7 @@ function read_suds(fname::String;
     if SB.nbx > 0
       # read and reinterpret data
       (v > 2) && println(stdout, "reading ", SB.nbx, " B")
-      checkbuf!(BUF.buf, SB.nbx)
+      checkbuf_8!(BUF.buf, SB.nbx)
       readbytes!(sid, BUF.buf, SB.nbx)
       (y, sz) = suds_decode(BUF.buf, SB.data_type)
       nx = div(SB.nbx, sz)
@@ -181,6 +181,8 @@ function read_suds(fname::String;
     end
   end
   flush_suds!(S, xc, xn, xt, xz, xj, v)
+  resize!(BUF.buf, 65535)
+  resize!(BUF.x, 65535)
 
   return S
 end
