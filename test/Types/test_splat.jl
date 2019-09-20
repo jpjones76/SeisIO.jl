@@ -1,3 +1,4 @@
+printstyled("  \"splat\" structure creation\n", color=:light_green)
 U = randSeisData()
 C = randSeisChannel()
 W = randSeisEvent()

@@ -1,27 +1,34 @@
+printstyled("  seismogram differentiation/integration\n", color=:light_green)
+
+convert_file = path*"/SampleFiles/2019_M7.1_Ridgecrest.seis"
+S = randSeisData(3, s=1.0)
+S.units = ["m/s2", "m", "m/s"]
+U = deepcopy(S)
+S1 = deepcopy(S)
+
+printstyled("  conversion to m/s\n", color=:light_green)
 redirect_stdout(out) do
-  convert_file = path*"/SampleFiles/2019_M7.1_Ridgecrest.seis"
-  S = randSeisData(3, s=1.0)
-  S.units = ["m/s2", "m", "m/s"]
-  U = deepcopy(S)
-  S1 = deepcopy(S)
-
-  println("\ntest conversion to m/s\n")
   convert_seis!(S, v=3)
-
   @test S.units[1] == S.units[2] == S.units[3] == "m/s"
   @test S.x[3] == U.x[3]
+end
 
-  println("\nconversion to m/s2\n")
+printstyled("  conversion to m/s2\n", color=:light_green)
+redirect_stdout(out) do
   convert_seis!(S, v=2, units_out="m/s2")
   @test S.units[1] == S.units[2] == S.units[3] == "m/s2"
   @test isapprox(S.x[1], U.x[1])
+end
 
-  println("\nconversion to m\n")
+printstyled("  conversion to m\n", color=:light_green)
+redirect_stdout(out) do
   convert_seis!(S1, v=2, units_out="m")
   @test S1.units[1] == S1.units[2] == S1.units[3] == "m"
   @test isapprox(S1.x[2], U.x[2])
+end
 
-  println("\ntest conversion from m to m/s2 and back to m\n")
+printstyled("  conversion from m to m/s2 and back to m\n", color=:light_green)
+redirect_stdout(out) do
   for j = 1:100
     S = randSeisData(3, s=1.0)
     S.units = ["m", "m", "m"]
@@ -42,8 +49,10 @@ redirect_stdout(out) do
       @test isapprox(S.x[i], U.x[i])
     end
   end
+end
 
-  println("\n testing at Float32 precision... \n")
+printstyled("    at Float32 precision\n", color=:light_green)
+redirect_stdout(out) do
   S = rseis(convert_file)[1]
   U = deepcopy(S)
   convert_seis!(S, units_out="m/s2", v=2)
@@ -51,8 +60,11 @@ redirect_stdout(out) do
   for i = 1:16
     @test isapprox(S.x[i], U.x[i])
   end
+end
 
-  println("\n testing at Float64 precision... \n")
+
+printstyled("    at Float64 precision\n", color=:light_green)
+redirect_stdout(out) do
   S = rseis(convert_file)[1]
   for i = 1:S.n
     S.x[i] = Float64.(S.x[i])

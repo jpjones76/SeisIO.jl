@@ -81,3 +81,4 @@ if Sys.iswindows() == false
 end
 
 @test_throws ErrorException read_data("deez", "nutz.sac")
+resize!(x, 65535)

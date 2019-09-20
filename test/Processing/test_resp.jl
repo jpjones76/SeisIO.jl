@@ -9,6 +9,21 @@ printstyled("    fctoresp\n", color=:light_green)
 r = fctoresp(0.2f0)
 r2 = fctoresp(2.0f0)
 
+printstyled("    resp_a0\n", color=:light_green)
+S = randSeisData(3, s=1.0)
+R = MultiStageResp(2)
+S.units = ["m/s", "m", "m/s2"]
+R.stage[1] = r
+R.stage[2] = r2
+S.resp[1] = R
+S.resp[2] = CoeffResp()
+S.resp[3] = r2
+resp_a0!(S)
+@test S.resp[1].stage[1].a0 ≈ -1.7771534f0
+@test S.resp[1].stage[2].a0 ≈ 17.771534f0
+@test S.resp[1].stage[2].a0 == S.resp[3].a0
+@test isempty(S.resp[2])
+
 printstyled("    translate_resp (SeisData)\n", color=:light_green)
 S = randSeisData(3, s=1.0)
 S.resp[1] = fctoresp(0.2f0)
@@ -47,7 +62,7 @@ end
 
 # unit tests
 S = deepcopy(U)
-update_resp_a0!(S)
+resp_a0!(S)
 fc = resptofc(S.resp[1])
 @test isapprox(fc, 0.2f0)
 fc = resptofc(S.resp[3])
@@ -69,15 +84,24 @@ U.resp[3] = fctoresp(2.0f0)
 U.resp[4] = fctoresp(1.0f0)
 ungap!(U)
 detrend!(U)
-update_resp_a0!(U)
+resp_a0!(U)
 S = deepcopy(U)
 T = deepcopy(U)
 S1 = translate_resp(S, r, chans=1:3)
 T1 = translate_resp(T, r, chans=1:3)
-@test S1[1] == T1[1]
-@test S1[2] == T1[2]
-@test S1[3] == T1[3]
-@test S1[4] == T1[4] == U[4]
+for i = 1:3
+  if (any(isnan, S1.x[i]) == false) && (any(isnan, T1.x[i]) == false)
+    @test S1[i] == T1[i]
+  else
+    @warn(string("NaNs in channel ", i, " -- can't test equality!"))
+  end
+end
+if (any(isnan, S1.x[4]) == false) && (any(isnan, T1.x[4]) == false) &&
+    (any(isnan, U.x[4]) == false)
+  @test S1[4] == T1[4] == U[4]
+else
+  @warn(string("NaNs in channel 4 -- can't test equality!"))
+end
 for i = 2:6
   @test S1.resp[2].stage[i] == T1.resp[2].stage[i] == U.resp[2].stage[i]
 end

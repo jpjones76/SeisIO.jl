@@ -1,4 +1,4 @@
-printstyled(stdout,"    show\n", color=:light_green)
+printstyled(stdout,"  show\n", color=:light_green)
 
 # SeisChannel show
 S = SeisChannel()

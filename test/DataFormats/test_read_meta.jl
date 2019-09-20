@@ -1,5 +1,3 @@
-using Test
-
 printstyled("  read_meta equivalencies\n", color=:light_green)
 printstyled("    full (XML, RESP, dataless)\n", color=:light_green)
 

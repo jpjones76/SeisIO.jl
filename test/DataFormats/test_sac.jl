@@ -68,6 +68,21 @@ for f in fieldnames(typeof(S.resp[1]))
     @test isapprox(getfield(S.resp[i], f), getfield(T.resp[i], f))
   end
 end
+U = deepcopy(S)
+for i = 1:U.n
+  U.resp[i] = MultiStageResp(3)
+  U.resp[i].stage[1] = S.resp[i]
+end
+writesacpz(U, "local_sac.pz")
+T = read_meta("sacpz", "local_sac.pz")
+for f in (:n, :id, :name, :loc, :fs, :gain, :units)
+  @test isequal(getfield(S, f), getfield(T, f))
+end
+for f in fieldnames(typeof(S.resp[1]))
+  for i = 1:S.n
+    @test isapprox(getfield(S.resp[i], f), getfield(T.resp[i], f))
+  end
+end
 rm("local_sac.pz")
 
 # For the H^HCoverage!
