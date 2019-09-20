@@ -92,7 +92,9 @@
 </ul>
 <p class="caption"><span class="caption-text">Reading Files</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../Formats/fileformats.html">Geophysical Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/timeseries.html">Time-Series Data File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/metadata.html">Metadata File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Formats/hdf5.html">HDF5 File Formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Formats/xml.html">XML Meta-Data</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Downloading Data</span></p>
@@ -108,12 +110,13 @@
 <p class="caption"><span class="caption-text">Submodules</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Submodules/quake.html">Quake</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Submodules/quake.html#reading-earthquake-data-files">Reading Earthquake Data Files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Submodules/randseis.html">RandSeis</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="function_list.html">Utility Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html">SeisIO Write Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html">SeisIO Native Format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html#simple-object-types">Simple Object Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html#location-types">Location Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html#response-types">Response Types</a></li>
@@ -238,7 +241,7 @@
 <h2>IRISWS data query<a class="headerlink" href="#irisws-data-query" title="Permalink to this headline">¶</a></h2>
 <p>Note that the “src” keyword is not used in IRIS queries.</p>
 <ol class="arabic simple">
-<li>Get trace data from IRISws from <code class="docutils literal notranslate"><span class="pre">TS</span></code> to <code class="docutils literal notranslate"><span class="pre">TT</span></code> at channels <code class="docutils literal notranslate"><span class="pre">CHA</span></code></li>
+<li><p>Get trace data from IRISws from <code class="docutils literal notranslate"><span class="pre">TS</span></code> to <code class="docutils literal notranslate"><span class="pre">TT</span></code> at channels <code class="docutils literal notranslate"><span class="pre">CHA</span></code></p></li>
 </ol>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>S = SeisData()
 CHA = &quot;UW.TDH..EHZ, UW.VLL..EHZ, CC.VALT..BHZ&quot;

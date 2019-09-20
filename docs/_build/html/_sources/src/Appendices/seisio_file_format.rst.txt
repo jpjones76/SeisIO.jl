@@ -1,9 +1,11 @@
 .. _seisio_file_format:
 
 ********************
-SeisIO Write Formats
+SeisIO Native Format
 ********************
-Files are written in little-endian byte order. Abbreviations used:
+Invoking the command *wseis* writes SeisIO structures to a native data format
+in little-endian byte order. This page documents the low-level file format.
+Abbreviations used:
 
 .. csv-table::
   :header: Type, Meaning, C, Fortran 77
@@ -633,3 +635,26 @@ SeisIO Object Type codes
   0x20535430, SourceTime
   0x45514c30, EQLoc
   0x45514d30, EQMag
+
+  ***************************
+  File Format Version History
+  ***************************
+  File format versions <0.50 are no longer supported; please email us if you
+  need to read in very old data.
+
+.. csv-table::
+  :header: Version, Date, Change
+  :delim: ;
+  :widths: 5, 12, 55
+
+  0.53; 2019-09-11; removed :i, :o from CoeffResp
+  ; ; added :i, :o to MultiStageResp
+  0.52; 2019-09-03; added CoeffResp, MultiStageResp
+  0.51; 2019-08-01; added :f0 to PZResp, PZResp64
+  0.50; 2019-06-05; all custom Types can now use write() directly
+  ; ; rewrote how :misc is stored
+  ; ; Type codes for :misc changed
+  ; ; deprecated BigFloat/BigInt support in :misc
+  ; ; :n is no longer stored as a UInt32
+  ; ; :x compression no longer automatic
+  ; ; :x compression changed from Blosc to lz4

@@ -92,7 +92,9 @@
 </ul>
 <p class="caption"><span class="caption-text">Reading Files</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="src/Formats/fileformats.html">Geophysical Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Formats/timeseries.html">Time-Series Data File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Formats/metadata.html">Metadata File Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Formats/hdf5.html">HDF5 File Formats</a></li>
 <li class="toctree-l1"><a class="reference internal" href="src/Formats/xml.html">XML Meta-Data</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Downloading Data</span></p>
@@ -108,12 +110,13 @@
 <p class="caption"><span class="caption-text">Submodules</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="src/Submodules/quake.html">Quake</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Submodules/quake.html#reading-earthquake-data-files">Reading Earthquake Data Files</a></li>
 <li class="toctree-l1"><a class="reference internal" href="src/Submodules/randseis.html">RandSeis</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="src/Appendices/function_list.html">Utility Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html">SeisIO Write Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html">SeisIO Native Format</a></li>
 <li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#simple-object-types">Simple Object Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#location-types">Location Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html#response-types">Response Types</a></li>
@@ -225,11 +228,21 @@
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Reading Files</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="src/Formats/fileformats.html">Geophysical Data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="src/Formats/fileformats.html#supported-file-formats">Supported File Formats</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src/Formats/fileformats.html#supported-keywords">Supported Keywords</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src/Formats/fileformats.html#format-descriptions-and-notes">Format Descriptions and Notes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="src/Formats/fileformats.html#other-file-i-o-functions">Other File I/O Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="src/Formats/timeseries.html">Time-Series Data File Formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/Formats/timeseries.html#supported-file-formats">Supported File Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Formats/timeseries.html#supported-keywords">Supported Keywords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Formats/timeseries.html#format-descriptions-and-notes">Format Descriptions and Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Formats/timeseries.html#other-file-i-o-functions">Other File I/O Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src/Formats/metadata.html">Metadata File Formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/Formats/metadata.html#supported-file-formats">Supported File Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Formats/metadata.html#supported-keywords">Supported Keywords</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Formats/metadata.html#writing-metadata">Writing Metadata</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="src/Formats/hdf5.html">HDF5 File Formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/Formats/hdf5.html#supported-keywords">Supported Keywords</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="src/Formats/xml.html">XML Meta-Data</a><ul>
@@ -291,6 +304,11 @@
 <li class="toctree-l2"><a class="reference internal" href="src/Submodules/quake.html#utility-functions">Utility Functions</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="src/Submodules/quake.html#reading-earthquake-data-files">Reading Earthquake Data Files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="src/Submodules/quake.html#supported-file-formats">Supported File Formats</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src/Submodules/quake.html#supported-keywords">Supported Keywords</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="src/Submodules/randseis.html">RandSeis</a></li>
 </ul>
 </div>
@@ -301,7 +319,7 @@
 <p class="caption"><span class="caption-text">Appendices</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="src/Appendices/function_list.html">Utility Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html">SeisIO Write Formats</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="src/Appendices/seisio_file_format.html">SeisIO Native Format</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="src/Appendices/seisio_file_format.html#seisio-file">SeisIO File</a></li>
 </ul>
 </li>

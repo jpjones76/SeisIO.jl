@@ -182,3 +182,41 @@ with coordinates `[s_lat, s_lon]` to receivers `rec` with coordinates
 .. function:: show_phases(P::PhaseCat)
 
 Formatted display of seismic phases in dictionary P.
+
+#############################
+Reading Earthquake Data Files
+#############################
+.. function:: S = read_quake(fmt::String, filename [, KWs])
+
+| Read data in file *fmt* from file *filename* into memory.
+|
+| **fmt**
+| Case-sensitive string describing the file format. See below.
+|
+| **KWs**
+| Keyword arguments; see also :ref:`SeisIO standard KWs<dkw>` or type ``?SeisIO.KW``.
+| Standard keywords: full, nx_add, nx_new, v
+| Other keywords: See below.
+
+**********************
+Supported File Formats
+**********************
+.. csv-table::
+  :header: File Format, String
+  :delim: |
+  :widths: 1, 1, 3
+
+  PC-SUDS     | suds            |
+  QuakeML     | qml, quakeml    | only reads first event from file
+  UW          | uw              |
+
+******************
+Supported Keywords
+******************
+.. csv-table::
+  :header: KW, Used By, Type, Default, Meaning
+  :delim: |
+  :widths: 1, 1, 1, 1, 4
+
+  full    | suds, uw  | Bool    | false     | read full header into `:misc`?
+  v       | all       | Int64   | 0         | verbosity

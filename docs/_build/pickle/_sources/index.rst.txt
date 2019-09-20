@@ -26,7 +26,9 @@ Files
    :caption: Reading Files
    :maxdepth: 2
 
-   src/Formats/fileformats.rst
+   src/Formats/timeseries.rst
+   src/Formats/metadata.rst
+   src/Formats/hdf5.rst
    src/Formats/xml.rst
 
 ***
