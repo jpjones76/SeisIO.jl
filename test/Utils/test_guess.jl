@@ -16,8 +16,8 @@ uw = path*"/SampleFiles/" .* ["00012502123W", "99011116541W"]
 geocsv1 = path*"/SampleFiles/FDSNWS.IRIS.geocsv"
 geocsv2 = path*"/SampleFiles/geocsv_slist.csv"
 lennf = path*"/SampleFiles/0215162000.c00"
-xml_stfile = path*"/SampleFiles/fdsnws-station_2017-01-12T03-17-42Z.xml"
-resp_file = path*"/SampleFiles/RESP.cat"
+# xml_stfile = path*"/SampleFiles/fdsnws-station_2017-01-12T03-17-42Z.xml"
+# resp_file = path*"/SampleFiles/RESP.cat"
 self = path*"/Utils/test_guess.jl"
 
 redirect_stdout(out) do
@@ -34,8 +34,8 @@ end
 @test guess(geocsv1) == ("geocsv", false)
 @test guess(geocsv2) == ("geocsv.slist", false)
 @test guess(lennf) == ("lennasc", false)
-@test guess(xml_stfile) == ("sxml", false)
-@test guess(resp_file) == ("resp", false)
+# @test guess(xml_stfile) == ("sxml", false)
+# @test guess(resp_file) == ("resp", false)
 @test guess(self) == ("unknown", false)
 
 # Restricted files
@@ -47,7 +47,7 @@ if safe_isdir(path*"/SampleFiles/Restricted")
 end
 
 # Does the method for read_data with guess actually work?
-printstyled("    read_data with guess(); no file format given...\n", color=:light_green)
+printstyled("    read_data with guess()\n", color=:light_green)
 segy_file_1 = path * "/SampleFiles/test_PASSCAL.segy"
 Sg = read_data(segy_file_1, full=true)
 @test Sg.gain[1] == Sg.misc[1]["scale_fac"] == 4.80184e+08

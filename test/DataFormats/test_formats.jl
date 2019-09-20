@@ -1,4 +1,5 @@
 import SeisIO.Formats: formats, FmtVer, FormatDesc, HistVec
+printstyled("  formats()\n", color=:light_green)
 
 Fake_fmt = FormatDesc(
   "Fake data format",
@@ -28,6 +29,6 @@ formats["Fake2"] = Fake_fmt_2
 delete!(formats, "Fake2")
 
 redirect_stdout(out) do
-  show(formats["AH"])
+  show(formats["AH-1"])
   show(formats["SAC"])
 end

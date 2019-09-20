@@ -106,7 +106,7 @@ printstyled("      second link initialized\n", color=:light_green)
 
 # Seedlink with a config string
 redirect_stdout(out) do
-  SeedLink!(U, "CC.VALT..???, UW.ELK..EHZ", mode="TIME", refresh=10.0, s=d0, t=d1, v=3)
+  SeedLink!(U, "CC.VALT..???, UW.ELK..EHZ", mode="TIME", refresh=10.0, kai=19.0, s=d0, t=d1, v=3)
 end
 printstyled("      third link initialized\n", color=:light_green)
 wait_on_data!(U, tmax=50.0)
