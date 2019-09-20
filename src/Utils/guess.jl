@@ -89,30 +89,30 @@ function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Int64)
     (v > 2) && @warn(string("test for mini-SEED threw error:", err))
   end
 
-  # FDSN station XML ---------------------------------------------------------
-  seekstart(io)
-  try
-    @assert occursin("FDSNStationXML", String(read(io, 255)))
-    push!(str, "sxml")
-  catch err
-    (v > 2) && @warn(string("test for station XML threw error:", err))
-  end
-
-  # SEED RESP ---------------------------------------------------------------
-  seekstart(io)
-  try
-    line = readline(io)
-    @assert eof(io) == false
-    for i = 1:6
-      while startswith(line, "#")
-        line = readline(io)
-      end
-      @assert startswith(line, "B0")
-    end
-    push!(str, "resp")
-  catch err
-    (v > 2) && @warn(string("test for SEED RESP threw error:", err))
-  end
+  # # FDSN station XML ---------------------------------------------------------
+  # seekstart(io)
+  # try
+  #   @assert occursin("FDSNStationXML", String(read(io, 255)))
+  #   push!(str, "sxml")
+  # catch err
+  #   (v > 2) && @warn(string("test for station XML threw error:", err))
+  # end
+  #
+  # # SEED RESP ---------------------------------------------------------------
+  # seekstart(io)
+  # try
+  #   line = readline(io)
+  #   @assert eof(io) == false
+  #   for i = 1:6
+  #     while startswith(line, "#")
+  #       line = readline(io)
+  #     end
+  #     @assert startswith(line, "B0")
+  #   end
+  #   push!(str, "resp")
+  # catch err
+  #   (v > 2) && @warn(string("test for SEED RESP threw error:", err))
+  # end
 
   # =========================================================================
   # Non-robust file tests: exact "magic number", start sequence, etc....
