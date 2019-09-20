@@ -98,7 +98,7 @@ function read_asdf!(S::GphysData, hdf::String, id::Union{String,Regex}, s::TimeS
   end
 
   # Ensure data source is logged accurately
-  fill!(S.src, hdf)
+  fill!(S.src, realpath(hdf))
 
   # merge in the XML that we read
   sxml_mergehdr!(S, SX, noappend=true, nofs=true, s=s, t=t, v=v)
