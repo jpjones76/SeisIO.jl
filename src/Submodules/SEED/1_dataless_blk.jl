@@ -12,12 +12,12 @@ function blk_011!(io::IO, nb::Int64, v::Int64)
   if v > 1
     println("")
     if v > 2
-      nsta = string_int(sio, 3)
+      nsta = stream_int(sio, 3)
       println(" "^16, lpad("STA", 5), " | SEQ")
       println(" "^16, "------|-------")
       @inbounds for i = 1:nsta
         sta = String(read(sio, 5))
-        seq = string_int(sio, 6)
+        seq = stream_int(sio, 6)
         println(" "^16, sta, " | ", seq)
       end
     end
@@ -29,13 +29,13 @@ end
 function blk_012!(io::IO, nb::Int64, v::Int64)
   sio = blk_string_read(io, nb, v)
   if v > 1
-    N = string_int(sio, 4)
+    N = stream_int(sio, 4)
     println(", N_SPANS = ", N)
     if v > 2
       @inbounds for i = 1:N
         ts = string_field(sio)
         te = string_field(sio)
-        seq_no = string_int(sio, 6)
+        seq_no = stream_int(sio, 6)
         println("ts = ", ts, ", te = ", te, ", seq #", seq_no)
       end
     end
@@ -53,11 +53,11 @@ function blk_030!(io::IO, nb::Int64, v::Int64)
   sio = blk_string_read(io, nb, v)
   if v > 1
     desc = string_field(sio)
-    code = string_int(sio, 4)
-    fam = string_int(sio, 3)
+    code = stream_int(sio, 4)
+    fam = stream_int(sio, 3)
     println(", CODE ", code, ", DESC ", desc, ", FAM ", fam)
     if v > 2
-      ND = string_int(sio, 2)
+      ND = stream_int(sio, 2)
       @inbounds for i = 1:ND
         desc = string_field(sio)
         println(" "^18, desc)
@@ -70,11 +70,11 @@ end
 
 function blk_031!(io::IO, nb::Int64, v::Int64)
   sio = blk_string_read(io, nb, v)
-  k = string_int(sio, 4)
+  k = stream_int(sio, 4)
   class = read(sio, UInt8)
   desc = string_field(sio)
   if v > 1
-    units = string_int(sio, 3)
+    units = stream_int(sio, 3)
     println(", CODE ", k, ", CLASS ", Char(class), ", DESC ", desc, ", UNITS ", units)
   end
   close(sio)
@@ -86,7 +86,7 @@ end
 function blk_032!(io::IO, nb::Int64, v::Int64)
   sio = blk_string_read(io, nb, v)
   if v > 1
-    code = string_int(sio, 2)
+    code = stream_int(sio, 2)
     pub = string_field(sio)
     date = string_field(sio)
     name = string_field(sio)
@@ -100,7 +100,7 @@ end
 function blk_033!(io::IO, nb::Int64, v::Int64)
   sio = blk_string_read(io, nb, v)
 
-  code = string_int(sio, 3)
+  code = stream_int(sio, 3)
   desc = string_field(sio)
   close(sio)
 
@@ -114,7 +114,7 @@ end
 function blk_034!(io::IO, nb::Int64, v::Int64)
   sio = blk_string_read(io, nb, v)
 
-  code = string_int(sio, 3)
+  code = stream_int(sio, 3)
   name = string_field(sio)
   if v > 1
     desc = string_field(sio)
@@ -130,16 +130,16 @@ end
 function blk_041!(io::IO, nb::Int64, v::Int64, units::Bool)
   sio = blk_string_read(io, nb, v)
 
-  resp_lookup_key = string_int(sio, 4)
+  resp_lookup_key = stream_int(sio, 4)
   skip_string!(sio)
   symm_code = read(sio, UInt8)
-  uic = string_int(sio, 3)
-  uoc = string_int(sio, 3)
+  uic = stream_int(sio, 3)
+  uoc = stream_int(sio, 3)
 
   #= NF can be completely wrong here. Two issues:
   (1) The SEED manual quietly suggests writing only part of "symmetric" FIR
   filters to file; in which case NF is not the length of the vector we need. =#
-  NF = string_int(sio, 4)
+  NF = stream_int(sio, 4)
   if symm_code == 0x42
     NF = div(NF, 2)+1
   elseif symm_code == 0x43
@@ -169,7 +169,7 @@ function blk_041!(io::IO, nb::Int64, v::Int64, units::Bool)
   F = Array{Float64, 1}(undef, NF_true)
   @inbounds for i = 1:NF_true
     readbytes!(sio, BUF.hdr_old, 14)
-    setindex!(F, mkdbl(BUF.hdr_old, 14), i)
+    setindex!(F, buf_to_double(BUF.hdr_old, 14), i)
   end
   close(sio)
 
@@ -193,32 +193,32 @@ end
 
 function blk_043!(io::IO, nb::Int64, v::Int64, units::Bool)
   sio = blk_string_read(io, nb, v)
-  resp_lookup_key = string_int(sio, 4)
+  resp_lookup_key = stream_int(sio, 4)
   skip_string!(sio)
   skip(sio, 1)
-  uic = string_int(sio, 3)
-  uoc = string_int(sio, 3)
+  uic = stream_int(sio, 3)
+  uoc = stream_int(sio, 3)
   readbytes!(sio, BUF.hdr_old, 12)
-  A0 = mkdbl(BUF.hdr_old, 12)
+  A0 = buf_to_double(BUF.hdr_old, 12)
   readbytes!(sio, BUF.hdr_old, 12)
-  F0 = mkdbl(BUF.hdr_old, 12)
-  NZ = string_int(sio, 3)
+  F0 = buf_to_double(BUF.hdr_old, 12)
+  NZ = stream_int(sio, 3)
   Z = Array{ComplexF64, 1}(undef, NZ)
   @inbounds for i = 1:NZ
     readbytes!(sio, BUF.hdr_old, 12)
-    rr = mkdbl(BUF.hdr_old, 12)
+    rr = buf_to_double(BUF.hdr_old, 12)
     readbytes!(sio, BUF.hdr_old, 12)
-    ii = mkdbl(BUF.hdr_old, 12)
+    ii = buf_to_double(BUF.hdr_old, 12)
     Z[i] = complex(rr, ii)
     skip(sio, 24)
   end
-  NP = string_int(sio, 3)
+  NP = stream_int(sio, 3)
   P = Array{ComplexF64,1}(undef, NP)
   @inbounds for i = 1:NP
     readbytes!(sio, BUF.hdr_old, 12)
-    rr = mkdbl(BUF.hdr_old, 12)
+    rr = buf_to_double(BUF.hdr_old, 12)
     readbytes!(sio, BUF.hdr_old, 12)
-    ii = mkdbl(BUF.hdr_old, 12)
+    ii = buf_to_double(BUF.hdr_old, 12)
     P[i] = complex(rr, ii)
     skip(sio, 24)
   end
@@ -250,23 +250,23 @@ end
 function blk_044!(io::IO, nb::Int64, v::Int64, units::Bool)
   sio = blk_string_read(io, nb, v)
 
-  resp_lookup_key = string_int(sio, 4)
+  resp_lookup_key = stream_int(sio, 4)
   skip_string!(sio)
   skip(sio, 1)
-  uic = string_int(sio, 3)
-  uoc = string_int(sio, 3)
-  NN = string_int(sio, 4)
+  uic = stream_int(sio, 3)
+  uoc = stream_int(sio, 3)
+  NN = stream_int(sio, 4)
   N = Array{Float64,1}(undef, NN)
   @inbounds for i = 1:NN
     readbytes!(sio, BUF.hdr_old, 12)
-    N[i] = mkdbl(BUF.hdr_old, 12)
+    N[i] = buf_to_double(BUF.hdr_old, 12)
     skip(sio, 12)
   end
-  ND = string_int(sio, 4)
+  ND = stream_int(sio, 4)
   D = Array{Float64,1}(undef, ND)
   @inbounds for i = 1:ND
     readbytes!(sio, BUF.hdr_old, 12)
-    D[i] = mkdbl(BUF.hdr_old, 12)
+    D[i] = buf_to_double(BUF.hdr_old, 12)
     skip(sio, 12)
   end
   close(sio)
@@ -300,16 +300,16 @@ end
 
 function blk_047!(io::IO, nb::Int64, v::Int64)
   sio = blk_string_read(io, nb, v)
-  resp_lookup_key = string_int(sio, 4)
+  resp_lookup_key = stream_int(sio, 4)
   skip_string!(sio)
   readbytes!(sio, BUF.hdr_old, 10)
-  fs = mkdbl(BUF.hdr_old, 10)
-  fac = string_int(sio, 5)
-  os = string_int(sio, 5)
+  fs = buf_to_double(BUF.hdr_old, 10)
+  fac = stream_int(sio, 5)
+  os = stream_int(sio, 5)
   readbytes!(sio, BUF.hdr_old, 11)
-  delay = mkdbl(BUF.hdr_old, 11)
+  delay = buf_to_double(BUF.hdr_old, 11)
   readbytes!(sio, BUF.hdr_old, 11)
-  corr = mkdbl(BUF.hdr_old, 11)
+  corr = buf_to_double(BUF.hdr_old, 11)
   close(sio)
 
   if v > 1
@@ -331,13 +331,13 @@ end
 function blk_048!(io::IO, nb::Int64, v::Int64)
   sio = blk_string_read(io, nb, v)
 
-  resp_lookup_key = string_int(sio, 4)
+  resp_lookup_key = stream_int(sio, 4)
   skip_string!(sio)
   readbytes!(sio, BUF.hdr_old, 12)
-  gain = mkdbl(BUF.hdr_old, 12)
+  gain = buf_to_double(BUF.hdr_old, 12)
   readbytes!(sio, BUF.hdr_old, 12)
-  fg = mkdbl(BUF.hdr_old, 12)
-  nv = string_int(sio, 2)
+  fg = buf_to_double(BUF.hdr_old, 12)
+  nv = stream_int(sio, 2)
   # channel histories are not in the scope of SeisIO
   @inbounds for i = 1:nv
     # skip(sio, 24)
@@ -415,8 +415,8 @@ function blk_051!(io::IO, nb::Int64, v::Int64)
     if v > 2
       ts = string_field(sio)
       te = string_field(sio)
-      k = string_int(sio, 4)
-      comment_level = string_int(sio, 6)
+      k = stream_int(sio, 4)
+      comment_level = stream_int(sio, 6)
       println(" "^16, "ts = ", ts)
       println(" "^16, "te = ", te)
       println(" "^16, "comment code key #", k)
@@ -438,29 +438,29 @@ function blk_052!(io::IO, nb::Int64, C::SeisChannel, ts_req::Int64, te_req::Int6
   p = pointer(BUF.hdr, 8)
   unsafe_read(sio, p, 3)
   skip(sio, 4)
-  inst = string_int(sio, 3)
+  inst = stream_int(sio, 3)
   skip_string!(sio)
-  units_code = string_int(sio, 3)
+  units_code = stream_int(sio, 3)
   skip(sio, 3)
 
   # lat, lon, el, dep, az, inc
   readbytes!(sio, BUF.hdr_old, 10)
-  lat = mkdbl(BUF.hdr_old, 10)
+  lat = buf_to_double(BUF.hdr_old, 10)
   readbytes!(sio, BUF.hdr_old, 11)
-  lon = mkdbl(BUF.hdr_old, 11)
+  lon = buf_to_double(BUF.hdr_old, 11)
   readbytes!(sio, BUF.hdr_old, 7)
-  el = mkdbl(BUF.hdr_old, 7)
+  el = buf_to_double(BUF.hdr_old, 7)
   readbytes!(sio, BUF.hdr_old, 5)
-  dep = mkdbl(BUF.hdr_old, 5)
+  dep = buf_to_double(BUF.hdr_old, 5)
   readbytes!(sio, BUF.hdr_old, 5)
-  az = mkdbl(BUF.hdr_old, 5)
+  az = buf_to_double(BUF.hdr_old, 5)
   readbytes!(sio, BUF.hdr_old, 5)
-  inc = 90.0 - mkdbl(BUF.hdr_old, 5)
+  inc = 90.0 - buf_to_double(BUF.hdr_old, 5)
   skip(sio, 6)
 
   # fs
   readbytes!(sio, BUF.hdr_old, 10)
-  fs = mkdbl(BUF.hdr_old, 10)
+  fs = buf_to_double(BUF.hdr_old, 10)
 
   # don't really need max. drift; skip_string passes it over
   skip_string!(sio)
@@ -508,30 +508,30 @@ end
 function blk_053(io::IO, nb::Int64, v::Int64, R::MultiStageResp, units::Bool)
   sio = blk_string_read(io, nb, v)
   tft = Char(read(sio, UInt8))
-  stage = string_int(sio, 2)
-  uic = string_int(sio, 3)
-  uoc = string_int(sio, 3)
+  stage = stream_int(sio, 2)
+  uic = stream_int(sio, 3)
+  uoc = stream_int(sio, 3)
   readbytes!(sio, BUF.hdr_old, 12)
-  A0 = mkdbl(BUF.hdr_old, 12)
+  A0 = buf_to_double(BUF.hdr_old, 12)
   readbytes!(sio, BUF.hdr_old, 12)
-  F0 = mkdbl(BUF.hdr_old, 12)
-  NZ = string_int(sio, 3)
+  F0 = buf_to_double(BUF.hdr_old, 12)
+  NZ = stream_int(sio, 3)
   Z = Array{ComplexF64,1}(undef, NZ)
   @inbounds for i = 1:NZ
     readbytes!(sio, BUF.hdr_old, 12)
-    rr = mkdbl(BUF.hdr_old, 12)
+    rr = buf_to_double(BUF.hdr_old, 12)
     readbytes!(sio, BUF.hdr_old, 12)
-    ii = mkdbl(BUF.hdr_old, 12)
+    ii = buf_to_double(BUF.hdr_old, 12)
     Z[i] = complex(rr, ii)
     skip(sio, 24)
   end
-  NP = string_int(sio, 3)
+  NP = stream_int(sio, 3)
   P = Array{ComplexF64,1}(undef, NP)
   @inbounds for i = 1:NP
     readbytes!(sio, BUF.hdr_old, 12)
-    rr = mkdbl(BUF.hdr_old, 12)
+    rr = buf_to_double(BUF.hdr_old, 12)
     readbytes!(sio, BUF.hdr_old, 12)
-    ii = mkdbl(BUF.hdr_old, 12)
+    ii = buf_to_double(BUF.hdr_old, 12)
     P[i] = complex(rr, ii)
     skip(sio, 24)
   end
@@ -571,21 +571,21 @@ function blk_054(io::IO, nb::Int64, v::Int64, R::MultiStageResp, units::Bool)
   sio = blk_string_read(io, nb, v)
 
   skip(sio, 1)
-  stage = string_int(sio, 2)
-  uic = string_int(sio, 3)
-  uoc = string_int(sio, 3)
-  NN = string_int(sio, 4)
+  stage = stream_int(sio, 2)
+  uic = stream_int(sio, 3)
+  uoc = stream_int(sio, 3)
+  NN = stream_int(sio, 4)
   N = Array{Float64,1}(undef, NN)
   @inbounds for i = 1:NN
     readbytes!(sio, BUF.hdr_old, 12)
-    N[i] = mkdbl(BUF.hdr_old, 12)
+    N[i] = buf_to_double(BUF.hdr_old, 12)
     skip(sio, 12)
   end
-  ND = string_int(sio, 4)
+  ND = stream_int(sio, 4)
   D = Array{Float64,1}(undef, ND)
   @inbounds for i = 1:ND
     readbytes!(sio, BUF.hdr_old, 12)
-    D[i] = mkdbl(BUF.hdr_old, 12)
+    D[i] = buf_to_double(BUF.hdr_old, 12)
     skip(sio, 12)
   end
   close(sio)
@@ -619,15 +619,15 @@ end
 
 function blk_057(io::IO, nb::Int64, v::Int64, R::MultiStageResp)
   sio = blk_string_read(io, nb, v)
-  stage = string_int(sio, 2)
+  stage = stream_int(sio, 2)
   readbytes!(sio, BUF.hdr_old, 10)
-  fs = mkdbl(BUF.hdr_old, 10)
-  fac = string_int(sio, 5)
-  os = string_int(sio, 5)
+  fs = buf_to_double(BUF.hdr_old, 10)
+  fac = stream_int(sio, 5)
+  os = stream_int(sio, 5)
   readbytes!(sio, BUF.hdr_old, 11)
-  delay = mkdbl(BUF.hdr_old, 11)
+  delay = buf_to_double(BUF.hdr_old, 11)
   readbytes!(sio, BUF.hdr_old, 11)
-  corr = mkdbl(BUF.hdr_old, 11)
+  corr = buf_to_double(BUF.hdr_old, 11)
   close(sio)
 
   if v > 1
@@ -651,19 +651,19 @@ end
 
 function blk_058(io::IO, nb::Int64, v::Int64, C::SeisChannel)
   sio = blk_string_read(io, nb, v)
-  stage = string_int(sio, 2)
+  stage = stream_int(sio, 2)
   readbytes!(sio, BUF.hdr_old, 12)
   if stage == 0
-    C.gain = mkdbl(BUF.hdr_old, 12)
+    C.gain = buf_to_double(BUF.hdr_old, 12)
     close(sio)
     if v > 1
       println(", STAGE #", stage)
     end
     return stage
   else
-    C.resp.gain[stage] = mkdbl(BUF.hdr_old, 12)
+    C.resp.gain[stage] = buf_to_double(BUF.hdr_old, 12)
     readbytes!(sio, BUF.hdr_old, 12)
-    C.resp.fg[stage] = mkdbl(BUF.hdr_old, 12)
+    C.resp.fg[stage] = buf_to_double(BUF.hdr_old, 12)
 
     if v > 1
       println(", STAGE #", stage)
@@ -688,7 +688,7 @@ function blk_059!(io::IO, nb::Int64, v::Int64, C::SeisChannel, units::Bool)
     if te == -56504908800000000
       te = 19880899199000000
     end
-    k = string_int(sio, 4)
+    k = stream_int(sio, 4)
     tstr = string("comment,", ts, ",", te, ",", comments[k])
     if v > 2
       println(u2d(div(ts, 1000000)), "–", u2d(div(te, 1000000)), ": ", comments[k])
@@ -703,16 +703,16 @@ end
 function blk_060(io::IO, nb::Int64, v::Int64, R::MultiStageResp)
   sio = blk_string_read(io, nb, v)
 
-  nstg = string_int(sio, 2)
+  nstg = stream_int(sio, 2)
   if v > 1
     println(", # STAGES = ", nstg)
   end
 
   for i = 1:nstg
-    seq = string_int(sio, 2)
-    nr = string_int(sio, 2)
+    seq = stream_int(sio, 2)
+    nr = stream_int(sio, 2)
     for j = 1:nr
-      k = string_int(sio, 4)
+      k = stream_int(sio, 4)
       rr = get(responses, k, "")
       if v > 2
         printstyled(" "^16, " assigning response to stage #", seq, ":\n", color=:green, bold=true)
@@ -745,16 +745,16 @@ end
 function blk_061(io::IO, nb::Int64, v::Int64, R::MultiStageResp, units::Bool)
   sio = blk_string_read(io, nb, v)
 
-  stage = string_int(sio, 2)
+  stage = stream_int(sio, 2)
   skip_string!(sio)
   symm_code = Char(read(sio, UInt8))
-  uic = string_int(sio, 3)
-  uoc = string_int(sio, 3)
-  NF = string_int(sio, 4)
+  uic = stream_int(sio, 3)
+  uoc = stream_int(sio, 3)
+  NF = stream_int(sio, 4)
   F = Array{Float64,1}(undef, NF)
   @inbounds for i = 1:NF
     readbytes!(sio, BUF.hdr_old, 14)
-    F[i] = mkdbl(BUF.hdr_old, 14)
+    F[i] = buf_to_double(BUF.hdr_old, 14)
   end
   close(sio)
 

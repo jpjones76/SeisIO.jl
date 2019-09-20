@@ -21,11 +21,11 @@ function parse_resp_date!(buf::Array{UInt8,1}, L::Int64, T::Array{Int16,1})
   while i ≤ L
     i += 1
     if i > L
-      T[k] = u8_to_int(buf, i-1, j)
+      T[k] = buf_to_int(buf, i-1, j)
       T[k] = parse(Int16, String(buf[j:i-1]))
       break
     elseif is_u8_digit(buf[i]) == false
-      T[k] = u8_to_int(buf, i-1, j)
+      T[k] = buf_to_int(buf, i-1, j)
       k += 1
       k > 6 && break
       j = i+1
@@ -222,7 +222,7 @@ function read_seed_resp!(S::GphysData, fpat::String;
               k += 1
               c = read(io, UInt8)
             end
-            xr = mkdbl(buf, k)
+            xr = buf_to_double(buf, k)
 
             # imaginary part
             c = skip_whitespace(io, c)
@@ -232,7 +232,7 @@ function read_seed_resp!(S::GphysData, fpat::String;
               k += 1
               c = read(io, UInt8)
             end
-            xi = mkdbl(buf, k)
+            xi = buf_to_double(buf, k)
 
             # store
             if is_p
@@ -309,7 +309,7 @@ function read_seed_resp!(S::GphysData, fpat::String;
         # header parsing =======================================================
         if blk in (0x0000383046333430, 0x0000373046333530)
           # A0 normalization factor (043F08, 053F07)
-          a0 = mkdbl(buf, i)
+          a0 = buf_to_double(buf, i)
 
         elseif blk == 0x0000343046323530
           # Channel (052F04)
@@ -352,7 +352,7 @@ function read_seed_resp!(S::GphysData, fpat::String;
           if seq_n > 0
             store_dbl!(R.gain, buf, i, seq_n)
           else
-            C.gain = mkdbl(buf, i)
+            C.gain = buf_to_double(buf, i)
           end
 
         elseif blk in (0x0000343046373530, 0x0000353046373430)
@@ -376,23 +376,23 @@ function read_seed_resp!(S::GphysData, fpat::String;
 
         elseif blk in (0x0000393046333430, 0x0000383046333530)
           # Normalization frequency (043F09, 053F08)
-          f0 = mkdbl(buf, i)
+          f0 = buf_to_double(buf, i)
 
         elseif blk in (0x0000313146343430, 0x0000303146343530)
           # Number of denominators (044F11, 054F10)
-          ND = u8_to_int(buf, i)
+          ND = buf_to_int(buf, i)
 
         elseif blk in (0x0000383046313430, 0x0000383046343430, 0x0000373046343530, 0x0000383046313630, 0x0000343146323630)
           # Number of numerators (041F08, 044F08, 054F07, 061F08) / Number of coefficients (062F14)
-          NN = u8_to_int(buf, i)
+          NN = buf_to_int(buf, i)
 
         elseif blk in (0x0000353146333430, 0x0000343146333530)
           # Number of poles (043F15, 053F14)
-          NP = u8_to_int(buf, i)
+          NP = buf_to_int(buf, i)
 
         elseif blk in (0x0000303146333430, 0x0000393046333530)
           # Number of zeroes (043F10, 053F09)
-          NZ = u8_to_int(buf, i)
+          NZ = buf_to_int(buf, i)
 
         elseif blk in (0x0000363046313430, 0x0000363046333430, 0x0000363046343430, 0x0000353046333530, 0x0000353046343530, 0x0000363046313630, 0x0000353046323630)
           # Response in units lookup (041F06, 043F06, 044F06, 053F05, 054F05, 061F06, 062F05)
@@ -414,7 +414,7 @@ function read_seed_resp!(S::GphysData, fpat::String;
 
         elseif blk in (0x0000343046333530, 0x0000343046343530, 0x0000333046373530, 0x0000333046383530, 0x0000343046303630, 0x0000333046313630, 0x0000343046323630)
           # Stage sequence number (053F04, 054F04, 057F03, 058F03, 060F04, 061F03, 062F04)
-          seq_n = u8_to_int(buf, i)
+          seq_n = buf_to_int(buf, i)
           nmax = max(nmax, seq_n)
 
           #= Here is where we dump everything to seq_n_old.

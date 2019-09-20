@@ -75,7 +75,7 @@ function parse_dataless!(S::SeisData, io::IO, s::TimeSpec, t::TimeSpec, v::Int64
         end
 
         # Read blockette number; skip rest of record if blk == 0
-        blk = string_int(io, 3)
+        blk = stream_int(io, 3)
         BUF.k += 3
         if blk == 0
           δp = 4096-BUF.k
@@ -95,7 +95,7 @@ function parse_dataless!(S::SeisData, io::IO, s::TimeSpec, t::TimeSpec, v::Int64
         end
 
         # Read number of bytes
-        nb = string_int(io, 4)-7
+        nb = stream_int(io, 4)-7
         BUF.k += 4
 
         if v > 1
