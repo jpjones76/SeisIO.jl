@@ -10,7 +10,7 @@ function read_lenn_file!(S::SeisData, f::String)
   io = open(fname, "r")
   h_line = readline(io)
   while !eof(io)
-    v = mkfloat(io, 0x00)
+    v = stream_float(io, 0x00)
     setindex!(X, v, i)
     i += 1
   end

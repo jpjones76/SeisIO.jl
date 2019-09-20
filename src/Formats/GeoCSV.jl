@@ -1,4 +1,4 @@
-function get_sep(vi::Int8, v_buf::Array{UInt8,1})
+function get_sep(v_buf::Array{UInt8,1}, vi::Int8)
   z = zero(Int8)
   o = one(Int8)
   i = z
@@ -173,10 +173,10 @@ function read_geocsv_slist!(S::SeisData, io::IO)
       (ki, vi) = mkhdr(io, c, k_buf, v_buf)
       # println(String(k_buf[1:ki]), " = ", String(v_buf[1:vi]))
       if ki == Int8(9)
-        sep = get_sep(vi, v_buf)
+        sep = get_sep(v_buf, vi)
       elseif ki == Int8(12)
         if k_buf[1] == 0x73 && k_buf[2] == 0x61
-          nx = mkuint(vi, v_buf)
+          nx = buf_to_uint(v_buf, vi)
         else
           assign_val!(C, loc, k_buf, v_buf, ki, vi)
         end
@@ -213,7 +213,7 @@ function read_geocsv_slist!(S::SeisData, io::IO)
           c = read(io, UInt8)
         end
       end
-      x = mkfloat(io, c)
+      x = stream_float(io, c)
       push!(X, x)
       i += 1
     end
@@ -300,10 +300,10 @@ function read_geocsv_tspair!(S::SeisData, io::IO)
         end
         (ki, vi) = mkhdr(io, c, k_buf, v_buf)
         if ki == Int8(9)
-          sep = get_sep(vi, v_buf)
+          sep = get_sep(v_buf, vi)
         elseif ki == Int8(12)
           if k_buf[1] == 0x73 && k_buf[2] == 0x61
-            nx = mkuint(vi, v_buf)
+            nx = buf_to_uint(v_buf, vi)
           else
             assign_val!(C, loc, k_buf, v_buf, ki, vi)
           end
@@ -388,7 +388,7 @@ function read_geocsv_tspair!(S::SeisData, io::IO)
 
     # 0x04 = data state -------------------------
     elseif read_state == 0x04
-      x = mkfloat(io, c)
+      x = stream_float(io, c)
       push!(X, x)
       read_state = 0x00
       i += 1
