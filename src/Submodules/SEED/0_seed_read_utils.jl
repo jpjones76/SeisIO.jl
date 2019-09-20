@@ -6,7 +6,7 @@ function store_int!(X::Array{Int64,1}, buf::Array{UInt8,1}, i::Int64, n::Int64)
     if n > nx
       append!(X, zeros(Int64, n-nx))
     end
-    X[n] = u8_to_int(buf, i)
+    X[n] = buf_to_int(buf, i)
   end
   return nothing
 end
@@ -18,7 +18,7 @@ function store_dbl!(X::Array{Float64,1}, buf::Array{UInt8,1}, i::Int64, n::Int64
     if n > nx
       append!(X, zeros(Float64, n-nx))
     end
-    X[n] = mkdbl(buf, i)
+    X[n] = buf_to_double(buf, i)
   end
   return nothing
 end
@@ -30,7 +30,7 @@ function get_coeff_n(io::IO, c::UInt8, buf::Array{UInt8,1})
     i += 1
     c = read(io, UInt8)
   end
-  return u8_to_int(buf, i-1)+1
+  return buf_to_int(buf, i-1)+1
 end
 
 
@@ -58,7 +58,7 @@ function parse_resp_date(io::IO, T::Array{UInt16,1})
     if c in (0x2c, 0x2e, 0x3a)
       L = position(io)-i-1
       reset(io)
-      T[k] = string_int(io, L)
+      T[k] = stream_int(io, L)
       skip(io, 1)
       i = mark(io)
       k += 1
@@ -66,26 +66,13 @@ function parse_resp_date(io::IO, T::Array{UInt16,1})
       L = position(io)-i-1
       if L > 0
         reset(io)
-        T[k] = string_int(io, L)
+        T[k] = stream_int(io, L)
         skip(io, 1)
       end
       break
     end
   end
   return mktime(T)
-end
-
-function string_int(io::IO, L::Int64)
-  p = 10^(L-1)
-  n = zero(Int64)
-  @inbounds for i = 1:L
-    c = read(io, UInt8)
-    if is_u8_digit(c)
-      n += p*(c-0x30)
-    end
-    p = div(p, 10)
-  end
-  return n
 end
 
 function string_field(sio::IO)
