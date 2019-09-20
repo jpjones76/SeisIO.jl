@@ -46,6 +46,7 @@ function do_trace(f::IO,
   # First part of trace header is quite standard
   checkbuf!(ints, 29)
   checkbuf!(shorts, 62)
+  checkbuf_8!(buf, length(buf))
   readbytes!(f, buf, 180)
 
   intbuf = reinterpret(Int32, buf)
@@ -88,7 +89,6 @@ function do_trace(f::IO,
     nb    = checkbuf!(buf, nx, T)
 
     readbytes!(f, buf, nb)
-    close(f)
 
     # trace processing
     y = reinterpret(T, buf)
@@ -289,6 +289,8 @@ function read_segy_file(fname::String,
   trace_fh = Array{Int16,1}(undef,3)
   if passcal == true
     S = SeisData(do_trace(f, buf, shorts, ints, true, full, fname, swap, trace_fh))
+    resize!(buf, 65535)
+    close(f)
   else
     shorts  = getfield(BUF, :int16_buf)
     checkbuf!(shorts, 62)

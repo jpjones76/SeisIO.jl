@@ -96,7 +96,7 @@ function read_bottle!(S::GphysData, fstr::String, v::Int64, nx_new::Int64, nx_ad
     # Read data ==============================================================
     T = ty == 0 ? Int16 : ty == 1 ? Int32 : Float32
     nb = nx*sizeof(T)
-    checkbuf!(buf, nb)
+    checkbuf_8!(buf, nb)
     readbytes!(io, buf, nb)
     close(io)
 
@@ -163,6 +163,7 @@ function read_bottle!(S::GphysData, fstr::String, v::Int64, nx_new::Int64, nx_ad
     end
   end
   trunc_x!(S)
+  resize!(buf, 65535)
 
   return nothing
 end
