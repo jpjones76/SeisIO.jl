@@ -154,21 +154,21 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
 
   elseif fmt == "ah1"
     if one_file
-      append!(S, read_ah1(filestr, v=v, full=full))
+      read_ah1!(S, filestr, v=v, full=full)
     else
       files = ls(filestr)
       for fname in files
-        append!(S, read_ah1(fname, v=v, full=full))
+        read_ah1!(S, fname, v=v, full=full)
       end
     end
 
   elseif fmt == "ah2"
     if one_file
-      append!(S, read_ah2(filestr, v=v, full=full))
+      read_ah2!(S, filestr, v=v, full=full)
     else
       files = ls(filestr)
       for fname in files
-        append!(S, read_ah2(fname, v=v, full=full))
+        read_ah2!(S, fname, v=v, full=full)
       end
     end
 
