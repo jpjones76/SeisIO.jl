@@ -131,6 +131,6 @@ function show(io::IO, F::FormatDesc)
 end
 show(F::FormatDesc) = show(stdout, F)
 
-include("Formats/formats.jl")
+include("FormatGuide/formats_list.jl")
 
 end
