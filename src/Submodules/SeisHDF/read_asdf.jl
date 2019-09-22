@@ -1,4 +1,10 @@
-function read_asdf!(S::GphysData, hdf::String, id::Union{String,Regex}, s::TimeSpec, t::TimeSpec, msr::Bool, v::Int64)
+function read_asdf!(  S::GphysData,
+                      hdf::String,
+                      id::Union{String,Regex},
+                      s::TimeSpec,
+                      t::TimeSpec,
+                      msr::Bool,
+                      v::Int64  )
 
   SX = SeisData() # for XML
   idr = isa(id, String) ? id_to_regex(id) : id
