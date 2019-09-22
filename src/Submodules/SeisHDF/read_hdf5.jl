@@ -1,32 +1,26 @@
 @doc """
-    S = read_hdf5(filestr [, keywords])
-    read_hdf5!(S, filestr [, keywords])
+    S = read_hdf5(filestr, s::TimeSpec, t::TimeSpec, [, keywords])
+    read_hdf5!(S, filestr, s::TimeSpec, t::TimeSpec, [, keywords])
 
 Read data in seismic HDF5 format from files matching pattern `filestr`.
+
+`s`, `t` are required arguments but can be any Type ∈ (DateTime, Real, String);
+type `?timespec` for more information about how these are interpreted.
 
 |KW     | Type      | Default   | Meaning                                     |
 |:---   |:---       |:---       |:---                                         |
 | id    | String    | "*"       | id pattern, formated nn.sss.ll.ccc          |
 |       |           |           |  (net.sta.loc.cha); FDSN wildcards [^1]     |
-| s     | TimeSpec  | [^2]      | start time                                  |
-| t     | TimeSpec  | [^2]      | termination (end) time                      |
 | msr   | Bool      | true      | read full (MultiStageResp) instrument resp? |
 | v     | Int64     | 0         | verbosity                                   |
 
 [^1] A question mark ('?') is a wildcard for a single character; an asterisk ('*') is a wildcard for zero or more characters
-[^2] If unset, (s,t) ≈ (21 September 1677, 11 April 2262), the limits of timekeeping (relative to the Unix epoch) with Int64 nanoseconds
 
-See also: SeisIO.KW, get_data, read_data, read_meta
-
-!!! warning
-
-    `s`, `t` are strongly recommended, unless the intent is to read many GB of data into memory.
+See also: timespec, parsetimewin, read_data
 """ read_hdf5!
-function read_hdf5!(S::GphysData, filestr::String;
+function read_hdf5!(S::GphysData, filestr::String, s::TimeSpec, t::TimeSpec;
   fmt ::String                = "asdf",                 # data format
   id  ::Union{String, Regex}  = "*",                    # id string
-  s   ::TimeSpec              = unset_s,                # start time
-  t   ::TimeSpec              = unset_t,                # termination (end) time
   msr ::Bool                  = true,                   # read multistage response?
   v   ::Int64                 = KW.v                    # verbosity
   )
@@ -51,21 +45,17 @@ function read_hdf5!(S::GphysData, filestr::String;
 end
 
 @doc (@doc read_hdf5!)
-function read_hdf5(filestr::String;
+function read_hdf5(filestr::String, s::TimeSpec, t::TimeSpec;
   fmt ::String                = "asdf",                 # data format
   id  ::Union{String, Regex}  = "*",                    # id string
-  s   ::TimeSpec              = unset_s,                # start time
-  t   ::TimeSpec              = unset_t,                # termination (end) time
   msr ::Bool                  = true,                   # read multistage response?
   v   ::Int64                 = KW.v                    # verbosity
   )
 
   S = SeisData()
-  read_hdf5!(S, filestr,
+  read_hdf5!(S, filestr, s, t,
     fmt     = fmt,
     id      = id,
-    s       = s,
-    t       = t,
     msr     = msr,
     v       = v
     )
