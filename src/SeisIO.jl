@@ -90,7 +90,7 @@ end
 
 # =========================================================
 # Submodules
-include("Submodules/Formats.jl")
+include("Submodules/FormatGuide.jl")
 import .Formats: formats
 
 include("Submodules/SEED.jl")
