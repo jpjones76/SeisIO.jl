@@ -1,7 +1,7 @@
 @info("Please allow up to 20 minutes for all tests to execute.")
 import SeisIO
 cd(dirname(pathof(SeisIO))*"/../test")
-keep_log = true
+keep_log = false
 include("test_helpers.jl")
 test_start = Dates.now()
 ltestname = 48
