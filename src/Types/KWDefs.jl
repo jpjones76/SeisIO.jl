@@ -6,6 +6,14 @@ mutable struct SLDefs
   mode::String
   refresh::Real
   x_on_err::Bool
+
+  SLDefs( port::Int64,
+          gap::Int64,
+          kai::Int64,
+          mode::String,
+          refresh::Real,
+          x_on_err::Bool
+          ) = new(port, gap, kai, mode, refresh, x_on_err)
 end
 
 mutable struct FiltDefs
@@ -16,6 +24,14 @@ mutable struct FiltDefs
   rs::Int64
   rt::String
   dm::String
+
+  FiltDefs( fl::Float64,
+            fh::Float64,
+            np::Int64,
+            rp::Int64,
+            rs::Int64,
+            rt::String,
+            dm::String) = new(fl, fh, np, rp, rs, rt, dm)
 end
 
 mutable struct KWDefs
