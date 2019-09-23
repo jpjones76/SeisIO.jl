@@ -82,18 +82,6 @@ function read_legacy(io::IO, ver::Float32)
       T = code2resptyp(getindex(c2, i))
       if T in (PZResp, PZResp64, GenResp)
         push!(R, read(io, T))
-
-      # This leaves us with CoeffResp and MultiStageResp
-      elseif T == CoeffResp
-        # skip these
-        for j = 1:2
-          n = read(io, Int64)
-          skip(io, n)
-        end
-        push!(R, CoeffResp(
-                            read!(io, Array{Float64,1}(undef, read(io, Int64))),
-                            read!(io, Array{Float64,1}(undef, read(io, Int64)))
-                          ))
       elseif T == MultiStageResp
         K = read(io, Int64)
         codes = read(io, K)
