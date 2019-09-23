@@ -5,7 +5,7 @@ function full_resp(xe::XMLElement)
   ns = 0
   nmax = 0
   gain = one(Float64)
-  f0 = zero(Float64)
+  f0 = one(Float64)
   xr = child_elements(xe)
   units = ""
 
@@ -30,9 +30,9 @@ function full_resp(xe::XMLElement)
         append!(resp, MultiStageResp(6))
       end
       resp_code = 0x00
-      c = 1.0
-      a0 = 0.0
-      f0 = 0.0
+      c = one(Float64)
+      a0 = one(Float64)
+      f0 = one(Float64)
       p = Array{Complex{Float64},1}(undef, 0)
       z = Array{Complex{Float64},1}(undef, 0)
       num = Array{Float64,1}(undef, 0)
