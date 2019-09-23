@@ -1,3 +1,8 @@
+### 2019-09-22
+* Adjusted user agent settings when connecting to FDSN servers in California.
+* `get_data` now warns when requesting a (non-miniseed) format from FDSN
+dataselect servers that don't implement the `format` keyword.
+
 ### 2019-09-19
 ### Introducing read_hdf5
 * `read_hdf5` is a wrapper to extracting data from HDF5 archives. This works
