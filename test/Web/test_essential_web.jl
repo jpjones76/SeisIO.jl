@@ -5,39 +5,45 @@ d1 = "2019-03-14T02:18:00"
 d2 = "2019-03-14T02:28:00"
 to = 30
 
+# fdsn_hdr
+@test fdsn_hdr("http://http://service.ncedc.org/fdsnws/station/1/") == ["Host" => "service.ncedc.org", "User-Agent" => "curl/7.60.0", "Accept" => "*/*"]
+@test fdsn_hdr("http://http://service.ncedc.org/fdsnws/dataselect/1/") == ["Host" => "service.ncedc.org", "User-Agent" => "curl/7.60.0", "Accept" => "*/*"]
+@test fdsn_hdr("http://http://service.ncedc.org/fdsnws/event/1/") == ["Host" => "service.ncedc.org", "User-Agent" => "curl/7.60.0", "Accept" => "*/*"]
+@test fdsn_hdr("http://service.scedc.caltech.edu/fdsnws/dataselect/1/")  == ["User-Agent" => "Julia"]
+@test fdsn_hdr("http://service.scedc.caltech.edu/fdsnws/station/1/")  == ["User-Agent" => "Julia"]
+@test fdsn_hdr("http://service.scedc.caltech.edu/fdsnws/event/1/")  == ["User-Agent" => "Julia"]
+@test fdsn_hdr("http://www.cnn.com.") == webhdr
+
 # From FDSN the response code is 200
 url = "http://service.iris.edu/fdsnws/dataselect/1/query?format=miniseed&net=UW&sta=XNXNX&loc=99&cha=QQQ&start="*d1*"&end="*d2*"&szsrecs=true"
+hdr = fdsn_hdr(url)
 req_info_str = datareq_summ("FDSNWS data", "UW.XNXNX.99.QQQ", d1, d2)
-(req, parsable) = get_HTTP_req(url, req_info_str, to, status_exception=false)
+(req, parsable) = get_http_req(url, hdr, req_info_str, to, status_exception=false)
 @test typeof(req) == Array{UInt8,1}
 @test startswith(String(req), "HTTP.Messages.Response")
 @test parsable == false
-
-(req,parsable) = get_HTTP_req(url, req_info_str, to, status_exception=true)
+(req,parsable) = get_http_req(url, hdr, req_info_str, to, status_exception=true)
 @test typeof(req) == Array{UInt8,1}
 @test startswith(String(req), "HTTP.Messages.Response")
 @test parsable == false
 
 # From IRIS the response code is 400 and we can get an error
 url = "http://service.iris.edu/irisws/timeseries/1/query?net=DE&sta=NENA&loc=99&cha=LUFTBALLOONS&start="*d1*"&end="*d2*"&scale=AUTO&output=miniseed"
+hdr = fdsn_hdr(url)
 req_info_str = datareq_summ("IRISWS data", "DE.NENA.99.LUFTBALLOONS", d1, d2)
-(req,parsable) = get_HTTP_req(url, req_info_str, to, status_exception=false)
+(req,parsable) = get_http_req(url, hdr, req_info_str, to, status_exception=false)
 @test typeof(req) == Array{UInt8,1}
 @test startswith(String(req), "HTTP.Messages.Response")
 @test parsable == false
-
-url = "http://service.iris.edu/irisws/timeseries/1/query?net=DE&sta=NENA&loc=99&cha=LUFTBALLOONS&start="*d1*"&end="*d2*"&scale=AUTO&output=miniseed"
-(req, parsable) = get_HTTP_req(url, req_info_str, to, status_exception=true)
+(req, parsable) = get_http_req(url, hdr, req_info_str, to, status_exception=true)
 @test typeof(req) == Array{UInt8,1}
 @test startswith(String(req), "HTTP.Messages.Response")
 @test parsable == false
-
-(req, parsable) = get_http_post(url, NOOF, to, status_exception=false)
+(req, parsable) = get_http_post(url, hdr, NOOF, to, status_exception=false)
 @test typeof(req) == Array{UInt8,1}
 @test startswith(String(req), "HTTP.Messages.Response")
 @test parsable == false
-
-(req, parsable) = get_http_post(url, NOOF, to, status_exception=true)
+(req, parsable) = get_http_post(url, hdr, NOOF, to, status_exception=true)
 @test typeof(req) == Array{UInt8,1}
 @test startswith(String(req), "HTTP.Messages.Response")
 @test parsable == false
@@ -124,41 +130,6 @@ printstyled("    station XML\n", color=:light_green)
 io = open(xml_stfile, "r")
 xsta = read(io, String)
 close(io)
-
-# (ID, NAME, LOC, FS, GAIN, RESP, UNITS, MISC) = FDSN_sta_xml(xsta)
-# S = FDSN_sta_xml(xsta)
-# ID = S.id
-# NAME = S.name
-# LOC = S.loc
-# FS = S.fs
-# GAIN = S.gain
-# RESP = S.resp
-# UNITS = S.units
-# MISC = S.misc
-#
-# @assert(ID[1]=="AK.ATKA..BNE", id_err)
-# @assert(ID[2]=="AK.ATKA..BNN", id_err)
-# @assert(ID[end-1]=="IU.MIDW.01.BHN", id_err)
-# @assert(ID[end]=="IU.MIDW.01.BHZ", id_err)
-# @test ==(LOC[1], GeoLoc(lat=52.2016, lon=-174.1975, el=55.0, az=90.0, inc=-90.0))
-# @test ≈(LOC[3].lat, LOC[1].lat)
-# @test ≈(LOC[3].lon, LOC[1].lon)
-# @test ≈(LOC[3].dep, LOC[1].dep)
-# for i = 1:length(UNITS)
-#     if UNITS[i] == "m/s2"
-#         @assert(in(split(ID[i],'.')[4][2],['G', 'L', 'M', 'N'])==true, unit_err)
-#     elseif UNITS[i] in ["m/s", "m"]
-#         @assert(in(split(ID[i],'.')[4][2],['L', 'H'])==true, unit_err)
-#     elseif UNITS[i] == "v"
-#         @assert(split(ID[i],'.')[4][2]=='C', unit_err)
-#     end
-# end
-# @test ≈(GAIN[1], 283255.0)
-# @test ≈(GAIN[2], 284298.0)
-# @test ≈(GAIN[end-1], 8.38861E9)
-# @test ≈(GAIN[end], 8.38861E9)
-# @test RESP[1] == RESP[2] == r1
-# @test RESP[end-1] == RESP[end] == r2
 
 chanspec()
 chanspec()
