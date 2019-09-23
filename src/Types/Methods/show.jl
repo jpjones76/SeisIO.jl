@@ -1,13 +1,17 @@
 showtail(b::Bool) = b ? "…" : ""
 ngaps(t::Array{Int64,2}) = max(0, size(t,1)-2)
 
-function str_trunc(s::String, w::Int64)
-  L = length(s)
-  if L ≥ w
-    return s[1:w-2] * "… "
-  else
-    return rpad(s, w)
-  end
+function str_trunc(str::String, W::Int64)
+  i = 0
+  j = firstindex(str)
+  for c in eachindex(str)
+   i += 1
+   if i > W-2
+     return str[1:j] * "… "
+   end
+   j = c
+ end
+ return(rpad(str, W))
 end
 
 function show_str(io::IO, S::Array{String,1}, w::Int, N::Int64)
@@ -17,7 +21,7 @@ function show_str(io::IO, S::Array{String,1}, w::Int, N::Int64)
   println(io, showtail(N<length(S)))
   return nothing
 end
-# 
+#
 # function show_float(io::IO, X::FloatArray, w::Int, N::Int64)
 #   for i = 1:N
 #      print(io, rpad(@sprintf("%+10.3e", X[i]), w))
