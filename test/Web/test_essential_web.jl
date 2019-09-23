@@ -6,44 +6,42 @@ d2 = "2019-03-14T02:28:00"
 to = 30
 
 # fdsn_hdr
-@test fdsn_hdr("http://http://service.ncedc.org/fdsnws/station/1/") == ["Host" => "service.ncedc.org", "User-Agent" => "curl/7.60.0", "Accept" => "*/*"]
-@test fdsn_hdr("http://http://service.ncedc.org/fdsnws/dataselect/1/") == ["Host" => "service.ncedc.org", "User-Agent" => "curl/7.60.0", "Accept" => "*/*"]
-@test fdsn_hdr("http://http://service.ncedc.org/fdsnws/event/1/") == ["Host" => "service.ncedc.org", "User-Agent" => "curl/7.60.0", "Accept" => "*/*"]
-@test fdsn_hdr("http://service.scedc.caltech.edu/fdsnws/dataselect/1/")  == ["User-Agent" => "Julia"]
-@test fdsn_hdr("http://service.scedc.caltech.edu/fdsnws/station/1/")  == ["User-Agent" => "Julia"]
-@test fdsn_hdr("http://service.scedc.caltech.edu/fdsnws/event/1/")  == ["User-Agent" => "Julia"]
-@test fdsn_hdr("http://www.cnn.com.") == webhdr
+# @test fdsn_hdr("http://http://service.ncedc.org/fdsnws/station/1/") == ["Host" => "service.ncedc.org", "User-Agent" => "curl/7.60.0", "Accept" => "*/*"]
+# @test fdsn_hdr("http://http://service.ncedc.org/fdsnws/dataselect/1/") == ["Host" => "service.ncedc.org", "User-Agent" => "curl/7.60.0", "Accept" => "*/*"]
+# @test fdsn_hdr("http://http://service.ncedc.org/fdsnws/event/1/") == ["Host" => "service.ncedc.org", "User-Agent" => "curl/7.60.0", "Accept" => "*/*"]
+# @test fdsn_hdr("http://service.scedc.caltech.edu/fdsnws/dataselect/1/")  == ["User-Agent" => "Julia"]
+# @test fdsn_hdr("http://service.scedc.caltech.edu/fdsnws/station/1/")  == ["User-Agent" => "Julia"]
+# @test fdsn_hdr("http://service.scedc.caltech.edu/fdsnws/event/1/")  == ["User-Agent" => "Julia"]
+# @test fdsn_hdr("http://www.cnn.com.") == webhdr
 
 # From FDSN the response code is 200
 url = "http://service.iris.edu/fdsnws/dataselect/1/query?format=miniseed&net=UW&sta=XNXNX&loc=99&cha=QQQ&start="*d1*"&end="*d2*"&szsrecs=true"
-hdr = fdsn_hdr(url)
 req_info_str = datareq_summ("FDSNWS data", "UW.XNXNX.99.QQQ", d1, d2)
-(req, parsable) = get_http_req(url, hdr, req_info_str, to, status_exception=false)
+(req, parsable) = get_http_req(url, req_info_str, to, status_exception=false)
 @test typeof(req) == Array{UInt8,1}
 @test startswith(String(req), "HTTP.Messages.Response")
 @test parsable == false
-(req,parsable) = get_http_req(url, hdr, req_info_str, to, status_exception=true)
+(req,parsable) = get_http_req(url, req_info_str, to, status_exception=true)
 @test typeof(req) == Array{UInt8,1}
 @test startswith(String(req), "HTTP.Messages.Response")
 @test parsable == false
 
 # From IRIS the response code is 400 and we can get an error
 url = "http://service.iris.edu/irisws/timeseries/1/query?net=DE&sta=NENA&loc=99&cha=LUFTBALLOONS&start="*d1*"&end="*d2*"&scale=AUTO&output=miniseed"
-hdr = fdsn_hdr(url)
 req_info_str = datareq_summ("IRISWS data", "DE.NENA.99.LUFTBALLOONS", d1, d2)
-(req,parsable) = get_http_req(url, hdr, req_info_str, to, status_exception=false)
+(req,parsable) = get_http_req(url, req_info_str, to, status_exception=false)
 @test typeof(req) == Array{UInt8,1}
 @test startswith(String(req), "HTTP.Messages.Response")
 @test parsable == false
-(req, parsable) = get_http_req(url, hdr, req_info_str, to, status_exception=true)
+(req, parsable) = get_http_req(url, req_info_str, to, status_exception=true)
 @test typeof(req) == Array{UInt8,1}
 @test startswith(String(req), "HTTP.Messages.Response")
 @test parsable == false
-(req, parsable) = get_http_post(url, hdr, NOOF, to, status_exception=false)
+(req, parsable) = get_http_post(url, NOOF, to, status_exception=false)
 @test typeof(req) == Array{UInt8,1}
 @test startswith(String(req), "HTTP.Messages.Response")
 @test parsable == false
-(req, parsable) = get_http_post(url, hdr, NOOF, to, status_exception=true)
+(req, parsable) = get_http_post(url, NOOF, to, status_exception=true)
 @test typeof(req) == Array{UInt8,1}
 @test startswith(String(req), "HTTP.Messages.Response")
 @test parsable == false

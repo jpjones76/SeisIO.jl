@@ -77,8 +77,7 @@ function FDSNevq(ot::String;
     v > 0 && println(stdout, "URL = ", url)
     req_info_str = "\nFDSN event query:"
 
-    hdr = fdsn_hdr(url)
-    (R, parsable) = get_http_req(url, hdr, req_info_str, to)
+    (R, parsable) = get_http_req(url, req_info_str, to)
     if parsable
       str_req = String(R)
       v > 1 && println(stdout, "REQUEST BODY:\n", str_req)

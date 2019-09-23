@@ -54,7 +54,7 @@ function get_pha!(Ev::SeisEvent;
     v > 1 && println(stdout, "url = ", url)
 
     req_info_str = string("\nIRIS travel time request:\nΔ = ", Δ, "\nDepth = ", z, "\nPhases = ", pq, "\nmodel = ", model)
-    (R, parsable) = get_http_req(url, webhdr, req_info_str, to)
+    (R, parsable) = get_http_req(url, req_info_str, to)
 
     # Parse results
     if parsable
