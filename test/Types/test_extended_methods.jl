@@ -5,6 +5,8 @@ printstyled(stdout,"    getindex\n", color=:light_green)
 @test findid(T, S) == [0, 0, 4, 5]
 
 printstyled(stdout,"    getindex + Int on SeisData ==> SeisChannel\n", color=:light_green)
+C = S[1]
+@test S[firstindex(S)] == C
 i_targ = 3
 C = S[i_targ]
 test_fields_preserved(C,S,i_targ)

@@ -24,7 +24,9 @@ for d in ["CoreUtils", "Types", "RandSeis", "Utils", "NativeIO", "DataFormats", 
 end
 
 include("cleanup.jl")
-
+if !keep_log
+  rm("runtests.log")
+end
 test_end = Dates.now()
 δt = 0.001*(test_end-test_start).value
 mm = round(Int, div(δt, 60))
