@@ -447,19 +447,6 @@ mutable struct MultiStageResp <: InstrumentResponse
   i::Array{String,1}
   o::Array{String,1}
 
-  function MultiStageResp(stage::Array{RespStage,1},
-                          fs::Array{Float64,1},
-                          gain::Array{Float64,1},
-                          fg::Array{Float64,1},
-                          delay::Array{Float64,1},
-                          corr::Array{Float64,1},
-                          fac::Array{Int64,1},
-                          os::Array{Int64,1},
-                          i::Array{String,1},
-                          o::Array{String,1})
-    return new(stage, fs, gain, fg, delay, corr, fac, os, i, o)
-  end
-
   function MultiStageResp()
     return new(
         Array{RespStage,1}(undef, 0),
@@ -510,31 +497,23 @@ function append!(R1::MultiStageResp, R2::MultiStageResp)
 end
 
 function show(io::IO, Resp::MultiStageResp)
+  println(io, "MultiStageResp (", length(Resp.stage), " stages) with fields:")
   if get(io, :compact, false) == false
+    W = max(80, displaysize(io)[2]) - show_os
     for f in (:stage, :fs, :gain, :fg, :delay, :corr, :fac, :os, :i, :o)
       fn = lpad(String(f), 5, " ")
       if f == :stage
-        L = 0
         i = 1
         N = length(Resp.stage)
-        str = string(N) * " stages; "
-        W = max(80, displaysize(io)[2]) - show_os
-        while L < W && i < N
-          str *= string(typeof(Resp.stage[i])) * " (" * repr(Resp.stage[i], context=:compact => true) * "); "
-          i += 1
-          L += length(str)
-        end
-        L = length(str)
-        if L ≥ W
-          str = str[1:L-1] * "…"
-        end
-        println(io, fn, ": ", str)
+        str = "stage: [" * join([
+          string(typeof(Resp.stage[i]), " (", repr(Resp.stage[i], context=:compact => true), ")") for i = 1:N], ", ") * "]"
       else
-        println(io, fn, ": ", getfield(Resp,f))
+        str = fn * ": " * repr(getfield(Resp,f), context=:compact => true)
       end
+      println(io, str_trunc(str, W))
     end
   else
-    print(io, length(Resp.stage), "-stage response")
+    print(io, length(Resp.stage), "-stage MultiStageResp")
   end
   return nothing
 end
