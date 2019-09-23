@@ -5,6 +5,7 @@ S1 = read_meta("sxml", path*"/SampleFiles/fdsnws-station_2019-09-11T06_26_58Z.xm
 S2 = read_meta("resp", path*"/SampleFiles/JRO.resp", units=true)
 S3 = read_meta("dataless", path*"/SampleFiles/SEED/CC.dataless", s="2016-01-01T00:00:00", units=true)[56:58]
 S4 = read_meta("sacpz", path*"/SampleFiles/JRO.sacpz")
+@test_throws ErrorException read_meta("deez", "nutz.sac")
 
 C = Array{Char,2}(undef, 10, 3)
 fill!(C, ' ')

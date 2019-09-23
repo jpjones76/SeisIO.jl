@@ -89,9 +89,10 @@ redirect_stdout(out) do
     @test R[i] == A[i]
   end
 
-  # add an incompatible type; should throw a warning
+  # add an incompatible type; should throw a warning, and another when read back in
   push!(A, rand(Float64,3))
   wseis(savfile1, A...)
+  R = rseis(savfile1, v=2)
 end
 
 printstyled("  test read/write with data compression\n", color=:light_green)

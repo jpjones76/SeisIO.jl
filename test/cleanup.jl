@@ -11,6 +11,3 @@ for fpat in ("*.mseed", "*.SAC", "*.geocsv", "FDSNsta.xml", "FDSNevq.log")
     println("Attempting to delete ", fpat, " threw error: ", err)
   end
 end
-if !keep_log
-  rm("runtests.log")
-end

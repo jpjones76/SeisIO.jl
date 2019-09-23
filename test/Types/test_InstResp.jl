@@ -30,10 +30,37 @@ redirect_stdout(out) do
     @test code2resptyp(resptyp2code(R)) == T
     @test sizeof(R) == sizeof(R2)
   end
+
+  nr = 255
+  R = MultiStageResp(nr)
+  for f in (:fs, :gain, :fg, :delay, :corr, :fac, :os)
+    setfield!(R, f, rand(eltype(getfield(R, f)), nr))
+  end
+  i = Array{String,1}(undef,nr)
+  o = Array{String,1}(undef,nr)
+  o[1] = "m/s"
+  i[1] = "{counts}"
+  for j = 2:nr
+    i[j] = randstring(2^rand(2:6))
+    o[j] = i[j-1]
+  end
+  R.i = i
+  R.o = o
+  R.stage[1] = RandSeis.randResp()
+  for i = 2:nr
+    R.stage[i] = CoeffResp(b = rand(rand(1:1200)))
+  end
+  show(R)
 end
 
 printstyled("    resp codes\n", color=:light_green)
-for c in (0x00, 0x01, 0x02, 0x03, 0x04, 0xff)
+codes = (0x00, 0x01, 0x02, 0x03, 0x04, 0xff)
+types = (GenResp, PZResp, PZResp64, CoeffResp, MultiStageResp, Nothing)
+for c in codes
   T = code2resptyp(c)()
   @test c == resptyp2code(T)
+end
+for (i, T) in enumerate(types)
+  resp = T()
+  @test resptyp2code(resp) == codes[i]
 end

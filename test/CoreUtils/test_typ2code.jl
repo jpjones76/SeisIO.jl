@@ -10,4 +10,4 @@ for c = 0x00:0xfe
   end
 end
 
-@test_throws UndefVarError code2typ(0x02)
+@test_throws ErrorException code2typ(0x02)

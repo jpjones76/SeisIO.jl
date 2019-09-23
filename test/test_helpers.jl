@@ -3,6 +3,7 @@ import Dates: DateTime, Hour, now
 import DelimitedFiles: readdlm
 import Random: rand, randperm, randstring
 import SeisIO: BUF, FDSN_sta_xml,
+  code2typ, typ2code,
   bad_chars, checkbuf!, checkbuf_8!, datafields, datareq_summ, endtime,
   fillx_i16_le!, fillx_i32_be!, fillx_i32_le!, findhex, formats, get_http_req,
   get_http_post, get_views, int2tstr, mean, minreq!,

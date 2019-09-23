@@ -5,6 +5,11 @@ printstyled("  UW\n", color=:light_green)
 uwf = joinpath(path, "SampleFiles/[0-9]*W")
 
 S = read_data("uw", uwf)
+S1 = SeisData()
+uwdf!(S1, joinpath(path, "SampleFiles/00012502123W"))
+uwdf!(S1, joinpath(path, "SampleFiles/99011116541W"))
+@test S == S1
+
 uwf1 = joinpath(path, "SampleFiles/99011116541")
 uwf2 = joinpath(path, "SampleFiles/94100613522o")
 uwf3 = joinpath(path, "SampleFiles/02062915175o")
