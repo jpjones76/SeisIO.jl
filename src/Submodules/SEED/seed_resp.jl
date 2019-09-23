@@ -132,8 +132,8 @@ function read_seed_resp!(S::GphysData, fpat::String;
     NN = zero(Int64)          # Number of coefficients (041F08, 044F08, 054F07, 061F08, 062F14)
     NZ = zero(Int64)          # Number of zeroes (043F10, 053F09)
     NP = zero(Int64)          # Number of poles (043F15, 053F14)
-    a0 = zero(Float64)        # A0 normalization factor (043F08, 048F05, 053F07)
-    f0 = zero(Float64)        # Normalization frequency (043F09, 048F06, 053F08)
+    a0 = one(Float64)         # A0 normalization factor (043F08, 048F05, 053F07)
+    f0 = one(Float64)         # Normalization frequency (043F09, 048F06, 053F08)
     id = UInt8[]
     units_in = ""             # Response in units lookup (041F06, 043F06, 044F06, 053F05, 054F05, 061F06, 062F05)
 
@@ -445,8 +445,8 @@ function read_seed_resp!(S::GphysData, fpat::String;
                 C.resp.stage[seq_n_old].p = P
                 Z = ComplexF64[]
                 P = ComplexF64[]
-                a0 = zero(Float64)
-                f0 = zero(Float64)
+                a0 = one(Float64)
+                f0 = one(Float64)
               end
             end
 
