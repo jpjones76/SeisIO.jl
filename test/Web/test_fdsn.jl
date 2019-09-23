@@ -159,3 +159,31 @@ S = get_data("FDSN", "GE.BKB..BH?", src="GFZ", s="2011-03-11T06:00:00", t="2011-
 if isempty(S)
   @warn(string("No data from GFZ request; check connection!"))
 end
+
+# ❄❄❄❄❄❄❄❄❄❄❄❄❄❄❄❄❄❄ (oh, California...)
+printstyled("    servers with special headers:\n", color=:light_green)
+ds = now()-Day(1)
+ds -= Millisecond(ds)
+s = string(ds)
+t = string(ds+Hour(1))
+
+rubric = [
+  "NCEDC" "BK.MOD..BHE"
+  "SCEDC" "CI.SDD..BHZ"
+]
+❄ = size(rubric, 1)
+
+for i = 1:❄
+  printstyled("      ", rubric[i,1], ":\n", color=:light_green)
+  printstyled("        station info\n", color=:light_green)
+  S = FDSNsta(rubric[i,2], s=s, t=t, msr=true, src=rubric[i,1])
+  if isempty(S)
+    printstyled("        No data; check headers & connection!\n", color=:red)
+  end
+
+  printstyled("        trace data\n", color=:light_green)
+  S = get_data("FDSN", rubric[i,2], src=rubric[i,1], s=s, t=t, msr=true, w=true)
+  if isempty(S)
+    printstyled("        No data; check headers & connection!\n", color=:red)
+  end
+end

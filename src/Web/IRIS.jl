@@ -32,7 +32,7 @@ function irisws(cha::String, d0::String, d1::String;
   req_info_str = datareq_summ("IRISWS data", ID, d0, d1)
 
   # Do request
-  (R, parsable) = get_HTTP_req(url, req_info_str, to)
+  (R, parsable) = get_http_req(url, webhdr, req_info_str, to)
   if parsable
     if w
       savereq(R, fmt, c[1], c[2], c[3], c[4], d0, d1, "R")

@@ -4,9 +4,9 @@ export chanspec, seis_www, track_on!, track_off!
 # Returns:
 #   R::Array{UInt8,1}, either request body or error data
 #   parsable::Bool, whether or not R is parsable
-function get_HTTP_req(url::String, req_info_str::String, to::Int; status_exception::Bool=false)
+function get_http_req(url::String, headers::Union{Array{Pair{String,String},1},Dict{String,String}}, req_info_str::String, to::Int; status_exception::Bool=false)
   (R::Array{UInt8,1}, parsable::Bool) = try
-    req = request(  "GET", url, webhdr,
+    req = request(  "GET", url, headers,
                     readtimeout = to,
                     status_exception = status_exception  )
     if req.status == 200
@@ -33,19 +33,11 @@ function get_HTTP_req(url::String, req_info_str::String, to::Int; status_excepti
   return R, parsable
 end
 
-function get_http_post(url::String, body::String, to::Int; status_exception::Bool=false)
-  headers = occursin("ncedc", url) ? ["Host" => "service.ncedc.org", "User-Agent" => "curl/7.60.0", "Accept" => "*/*"] : webhdr
+function get_http_post(url::String, headers::Union{Array{Pair{String,String},1},Dict{String,String}}, body::String, to::Int; status_exception::Bool=false)
   try
-    if occursin("ncedc", url)
-      req = request(  "POST", url, webhdr, body,
-                      readtimeout = to,
-                      status_exception = status_exception,
-                      headers=["Host" => "service.ncedc.org", "User-Agent" => "curl/7.60.0", "Accept" => "*/*"] )
-    else
-      req = request(  "POST", url, webhdr, body,
-                      readtimeout = to,
-                      status_exception = status_exception  )
-    end
+    req = request(  "POST", url, headers , body,
+                    readtimeout = to,
+                    status_exception = status_exception)
     if req.status == 200
       return (req.body, true)
     else
