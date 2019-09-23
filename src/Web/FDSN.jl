@@ -3,13 +3,6 @@ export FDSNsta
 
 # =============================================================================
 # No export
-fdsn_hdr(URL::String) = (if occursin("ncedc", URL)
-    ["Host" => "service.ncedc.org", "User-Agent" => "curl/7.60.0", "Accept" => "*/*"]
-  elseif occursin("scedc", URL)
-    ["User-Agent" => "Julia"]
-  else
-    webhdr
-  end)
 
 function fdsn_chp(chans::Union{String,Array{String,1},Array{String,2}}; v::Int64 = KW.v)
   # Parse channel config
@@ -95,15 +88,7 @@ function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
     println(BODY)
   end
   open(xf, "w") do io
-    # if occursin("ncedc", URL)
-    #   hdr = ["Host" => "service.ncedc.org", "User-Agent" => "curl/7.60.0", "Accept" => "*/*"]
-    # elseif occursin("scedc", URL)
-    #   hdr = ["User-Agent"=>"Julia"]
-    # else
-    #   hdr = webhdr
-    # end
-    hdr = fdsn_hdr(URL)
-    request("POST", URL, hdr, BODY, response_stream=io)
+    request("POST", URL, webhdr, BODY, response_stream=io)
   end
 
   # Build channel list
@@ -213,7 +198,6 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
     end
 
     # Request via "POST"
-    hdr = fdsn_hdr(URL)
     if w
       if fmt == "miniseed"
         ext = "mseed"
@@ -232,12 +216,12 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
                     '.')
 
       open(fname, "w") do io
-        request("POST", URL, hdr, QUERY, readtimeout=to, response_stream=io)
+        request("POST", URL, webhdr, QUERY, readtimeout=to, response_stream=io)
       end
       io = open(fname, "r")
       parsable = true
     else
-      (R, parsable) = get_http_post(URL, hdr, QUERY, to)
+      (R, parsable) = get_http_post(URL, QUERY, to)
       if parsable
         io = IOBuffer(R)
       end

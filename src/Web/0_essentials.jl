@@ -4,9 +4,9 @@ export chanspec, seis_www, track_on!, track_off!
 # Returns:
 #   R::Array{UInt8,1}, either request body or error data
 #   parsable::Bool, whether or not R is parsable
-function get_http_req(url::String, headers::Union{Array{Pair{String,String},1},Dict{String,String}}, req_info_str::String, to::Int; status_exception::Bool=false)
+function get_http_req(url::String, req_info_str::String, to::Int; status_exception::Bool=false)
   (R::Array{UInt8,1}, parsable::Bool) = try
-    req = request(  "GET", url, headers,
+    req = request(  "GET", url, webhdr,
                     readtimeout = to,
                     status_exception = status_exception  )
     if req.status == 200
@@ -33,9 +33,9 @@ function get_http_req(url::String, headers::Union{Array{Pair{String,String},1},D
   return R, parsable
 end
 
-function get_http_post(url::String, headers::Union{Array{Pair{String,String},1},Dict{String,String}}, body::String, to::Int; status_exception::Bool=false)
+function get_http_post(url::String, body::String, to::Int; status_exception::Bool=false)
   try
-    req = request(  "POST", url, headers , body,
+    req = request(  "POST", url, webhdr, body,
                     readtimeout = to,
                     status_exception = status_exception)
     if req.status == 200
