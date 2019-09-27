@@ -4,7 +4,7 @@ printstyled("    read_hdf5\n", color=:light_green)
 
 id = "CI.SDD..HHZ"
 idr = "C*.SDD..HH?"
-hdf = path*"/SampleFiles/2019_07_07_00_00_00.h5"
+hdf = path*"/SampleFiles/2days-40hz.h5"
 ts = "2019-07-07T23:00:00"
 te = "2019-07-08T02:00:00"
 
@@ -26,7 +26,7 @@ S2 = read_asdf(hdf, id, ts, te, true, 0)
 @test S1 == S2
 
 # check file wildcards
-hdf_pat = path*"/SampleFiles/2019_07_07_00_00_00.h*"
+hdf_pat = path*"/SampleFiles/2days-40hz.h*"
 S2 = read_hdf5(hdf_pat, ts, te, id = id)
 @test S1 == S2
 

@@ -7,19 +7,19 @@ nx_new = 36000
 pref = path * "/SampleFiles/"
 cfile = pref * "Restricted/03_02_27_20140927.sjis.ch"
 files = String[ "99011116541W"                "uw"            "_"
-                "test_PASSCAL.segy"           "passcal"       "pa-full"
-                "test_PASSCAL.segy"           "passcal"       "passcal"
-                "one_day.sac"                 "sac"           "_"
-                "one_day.mseed"               "mseed"         "_"
+                "1day-100hz.segy"           "passcal"       "pa-full"
+                "1day-100hz.segy"           "passcal"       "passcal"
+                "1day-100hz.sac"                 "sac"           "_"
+                "1day-100hz.mseed"               "mseed"         "_"
                 "Restricted/2014092709*.cnt"  "win32"         "win"
                 "0215162000.c00"              "lennasc"       "_"
-                "geocsv_slist.csv"            "geocsv.slist"  "_"
+                "geo-slist.csv"            "geocsv.slist"  "_"
                 "Restricted/SHW.UW.mseed"     "mseed"         "lo-mem"
                 "Restricted/test_rev_1.segy"  "segy"          "full"
                 "Restricted/test_rev_1.segy"  "segy"          "_"
                 "test_be.sac"                 "sac"           "full"
                 "test_be.sac"                 "sac"           "_"
-                "FDSNWS.IRIS.geocsv"          "geocsv"        "_"      ]
+                "geo-tspair.csv"          "geocsv"        "_"      ]
 
 checkbuf_8!(buf, 65536)
 checkbuf_8!(buf, 4*(os + nx))
@@ -46,7 +46,7 @@ if Sys.iswindows() == false
   nf = size(files,1)
   for n = 1:nf
     fname = pref * files[n,1]
-    fwild = fname[1:end-2] * "*"
+    fwild = fname[1:end-1] * "*"
     f_call = files[n,2]
     opt = files[n,3]
     printstyled(string("    ", n, "/", nf, " ", f_call, "\n"), color=:light_green)

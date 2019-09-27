@@ -1,4 +1,4 @@
-segy_file_1 = string(path, "/SampleFiles/test_PASSCAL.segy")
+segy_file_1 = string(path, "/SampleFiles/1day-100hz.segy")
 segy_file_2 = string(path, "/SampleFiles/Restricted/test_rev_1.segy")
 
 printstyled("  SEG Y\n", color=:light_green)
@@ -72,7 +72,7 @@ SEG = read_data("passcal", segfpat, full=true, swap=true)
 @test SEG.misc[1]["trigyear"] == SEG.misc[1]["year"] == 2002
 
 printstyled("    wildcard support\n", color=:light_green)
-segfpat = joinpath(path, "SampleFiles/*PASSCAL*segy")
+segfpat = joinpath(path, "SampleFiles/*day-100*segy")
 SEG = read_data("passcal", segfpat, full=true)
 @test SEG.n == 1
 @test Float64(SEG.misc[1]["max"]) == maximum(SEG.x[1]) == 2047.0
