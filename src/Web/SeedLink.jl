@@ -433,17 +433,24 @@ function SeedLink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
         τ = ceil(Int, refresh*(0.8 + 0.2*rand()))
         sleep(τ)
         eof(S.c[q])
-        N = floor(Int, bytesavailable(S.c[q])/520)
+        N = div(bytesavailable(S.c[q]), 520)
         if N > 0
-          buf = IOBuffer(read!(S.c[q], Array{UInt8, 1}(undef, 520*N)))
+          #=
+            This syntax consumes 2x memory but is "safe" in that a partially
+            downloaded packet will be left in S.c[q], rather than causing the
+            SEED parser to throw errors and/or hang the REPL. (From experience,
+            it is NOT guaranteed that full packets are transmitted)
+          =#
+          buf = read(S.c[q], 520*N)
+          io = IOBuffer(buf)
           if w
-            write(fid, copy(buf))
+            write(fid, copy(io))
           end
-          (v > 1) && @printf(stdout, "%s: Processing packets ", string(now()))
-          while !eof(buf)
-            pkt_id = String(read!(buf, Array{UInt8, 1}(undef, 8)))
-            parserec!(S, BUF, buf, v, 65535, 65535)
+          (v > 1) && printstyled(stdout, now(), ": Processing packets ", color=:green)
+          while !eof(io)
+            pkt_id = String(read(io, 8))
             (v > 1) && @printf(stdout, "%s, ", pkt_id)
+            parserec!(S, BUF, io, v, 65535, 65535)
           end
           (v > 1) && @printf(stdout, "\b\b...done current packet dump.\n")
           seed_cleanup!(S, BUF)
