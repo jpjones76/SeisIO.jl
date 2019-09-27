@@ -35,7 +35,7 @@ have their responses translated to `resp_new`.
 
 ### Interaction with the :resp field
 
-    `translate_resp` and `remove_resp` only work on a channel `i` that satisfies
+`translate_resp` and `remove_resp` only work on a channel `i` that satisfies
 `S.resp[i] <: PZResp, PZResp64, MultiStageResp`. In the last case,
 `S.resp[i].stage[1]` must be a PZResp or PZResp64, only the first stage of
 the response is changed, and the stage gain is ignored; instead, the
@@ -43,7 +43,7 @@ sensitivity `S.resp[i].stage[1].a0` is used.
 
 ### Poles and zeros should be rad/s
 
-    Always check when loading from an unsupported data format. Responses read
+Always check when loading from an unsupported data format. Responses read
 from station XML are corrected to rad/s automatically (most use rad/s);
 responses read from a SACPZ or SEED RESP file already use rad/s.
 """ translate_resp!
@@ -183,7 +183,6 @@ function translate_resp( S::GphysData,
   return U
 end
 
-@doc (@doc translate_resp!)
 function translate_resp!(C::GphysChannel,
                     resp_new::Union{PZResp, PZResp64};
                     wl::Float32=eps(Float32))
@@ -267,7 +266,6 @@ function translate_resp!(C::GphysChannel,
   return nothing
 end
 
-@doc (@doc translate_resp!)
 function translate_resp(C::GphysChannel,
                         resp_new::Union{PZResp, PZResp64};
                         wl::Float32=eps(Float32))
@@ -287,10 +285,8 @@ remove_resp(S::GphysData;
             chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
             wl::Float32=eps(Float32)) = translate_resp(S, flat_resp, chans=chans, wl=wl)
 
-@doc (@doc translate_resp!)
 remove_resp!(Ch::GphysChannel;
              wl::Float32=eps(Float32)) = translate_resp!(Ch, flat_resp, wl=wl)
 
-@doc (@doc translate_resp!)
 remove_resp(Ch::GphysChannel;
             wl::Float32=eps(Float32)) = translate_resp(Ch, flat_resp, wl=wl)
