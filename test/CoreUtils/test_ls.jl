@@ -46,9 +46,9 @@ if safe_isfile(cfile)
                 "/SampleFiles/*",
                 "/SampleFiles/Restricted/2014092709*cnt"
               ]
-  T_expect =  [63, 748, 60]
+  T_expect =  [63, 749, 60]
 
-  # Test that ls finds the same number of files as `ls -1`
+  # Test that ls finds the same number of files as bash `ls -1`
   for (n,v) in enumerate(T)
     files = ls(v)
     @test (isempty(files) == false)
