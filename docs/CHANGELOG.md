@@ -1,3 +1,10 @@
+### 2019-09-27
+* Fixed `resample` docstrings
+* `resample` will no longer throw an error if the desired sampling frequency
+equals `:fs` for the largest group of segments
+* Fixed imports from `SeisIO.SEED`; SeedLink connections correctly process
+buffered data again
+
 ### 2019-09-22
 * Adjusted user agent settings when connecting to FDSN servers in California.
 * `get_data` now warns when requesting a (non-miniseed) format from FDSN

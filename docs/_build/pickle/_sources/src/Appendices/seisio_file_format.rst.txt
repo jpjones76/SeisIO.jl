@@ -1,8 +1,8 @@
 .. _seisio_file_format:
 
-********************
+####################
 SeisIO Native Format
-********************
+####################
 Invoking the command *wseis* writes SeisIO structures to a native data format
 in little-endian byte order. This page documents the low-level file format.
 Abbreviations used:
@@ -34,8 +34,9 @@ in two parts: an Int64 (String length in bytes) followed by the String contents
 (as bytes, equivalent to UInt8). Unlike C/Fortran, there are no issues with
 strings that contain the null character (0x00 or ``'\x0'``).
 
+***********
 SeisIO File
-===========
+***********
 
 .. csv-table::
   :header: Var, Meaning, T, N
@@ -636,9 +637,9 @@ SeisIO Object Type codes
   0x45514c30, EQLoc
   0x45514d30, EQMag
 
-  ***************************
-  File Format Version History
-  ***************************
+***************************
+File Format Version History
+***************************
   File format versions <0.50 are no longer supported; please email us if you
   need to read in very old data.
 

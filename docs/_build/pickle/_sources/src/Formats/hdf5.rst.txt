@@ -1,11 +1,11 @@
 #################
 HDF5 File Formats
 #################
-Of the emerging HDF5 geophysical data formats, only the ASDF format is
-supported at present. Support for other geophysical HDF5 (sub)formats is planned.
+Of the increasingly popular HDF5-based formats for geophysical data, only ASDF
+is supported at present. Support for other (sub)formats is planned.
 
-.. function:: S = read_hdf5(fname::String, [, KWs])
-.. function:: S = read_meta(fname::String, [, KWs])
+.. function:: S = read_hdf5(fname::String, s::TimeSpec, t::TimeSpec, [, KWs])
+.. function:: read_hdf5!(S::GphysData, fname::String, s::TimeSpec, t::TimeSpec, [, KWs])
 
 | Read metadata in seismic HDF5 file format from file **fname** into S.
 |
@@ -27,17 +27,11 @@ Supported Keywords
 
   id    | String    | \"*.*..*\"| id pattern, formated nn.sss.ll.ccc
         |           |           |  (net.sta.loc.cha); FDSN-style wildcards \ :sup:`(a)`
-  s     | TimeSpec  |           | start time \ :sup:`(b)`
-  t     | TimeSpec  |           | termination (end) time \ :sup:`(b)`
   msr   | Bool      | true      | read full (MultiStageResp) instrument resp?
   v     | Int64     | 0         | verbosity
 
 :sup:`(a)`  A question mark ('?') is a wildcard for a single character (exactly
 one); an asterisk ('*') is a wildcard for zero or more characters.
-:sup:`(b)`  If unset, (s,t) ~ (21 September 1677, 11 April 2262), the limits of
-timekeeping (relative to the Unix epoch) with Int64 nanoseconds.
-
-The use of ``s``, ``t`` are *very strongly* recommended.
 
 .. function:: scan_hdf5(fname::String)
 .. function:: scan_hdf5(fname::String, level=channel)

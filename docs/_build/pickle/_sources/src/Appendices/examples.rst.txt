@@ -1,11 +1,16 @@
 .. _webex:
 
-********
+########
 Examples
-********
+########
 
-FDSN data query
+***********************
+Timeseries data queries
+***********************
+
+FDSN dataselect
 ===============
+
 1. Download 10 minutes of data from four stations at Mt. St. Helens (WA, USA), delete the low-gain channels, and save as SAC files in the current directory.
 ::
 
@@ -29,27 +34,9 @@ FDSN data query
   te = "2011-03-11T06:05:00"
   R = get_data("FDSN", "GE.BKB..BH?", src="GFZ", s=ts, t=te, v=1, y=true)
 
-FDSN station query
-==================
+IRIS timeseries
+===============
 
-A sample FDSN station query
-::
-
-  S = FDSNsta("CC.VALT..,PB.B001..BS?,PB.B001..E??")
-
-
-FDSN event header/data query
-============================
-
-Get seismic and strainmeter records for the P-wave of the Tohoku-Oki great earthquake on two borehole stations and write to native SeisData format:
-::
-
-  S = FDSNevt("201103110547", "PB.B004..EH?,PB.B004..BS?,PB.B001..BS?,PB.B001..EH?")
-  wseis("201103110547_evt.seis", S)
-
-
-IRISWS data query
-=================
 Note that the "src" keyword is not used in IRIS queries.
 
 1. Get trace data from IRISws from ``TS`` to ``TT`` at channels ``CHA``
@@ -85,8 +72,30 @@ Note that the "src" keyword is not used in IRIS queries.
   S = get_data("IRIS", "CC.JRO..BHZ", s=ts, t=te, fmt="sacbl")
   T = get_data("IRIS", "CC.JRO..BHZ", s=ts, t=te, fmt="miniseed")
 
+******************
+FDSN station query
+******************
+
+Get channel information for strain and seismic channels at station PB.B001:
+
+::
+
+  S = FDSNsta("CC.VALT..,PB.B001..BS?,PB.B001..E??")
+
+****************
+FDSN event query
+****************
+
+Get seismic and strainmeter records for the P-wave of the Tohoku-Oki great earthquake on two borehole stations and write to native SeisData format:
+::
+
+  S = FDSNevt("201103110547", "PB.B004..EH?,PB.B004..BS?,PB.B001..BS?,PB.B001..EH?")
+  wseis("201103110547_evt.seis", S)
+
+
+*****************
 SeedLink sessions
-=================
+*****************
 1. An attended SeedLink session in DATA mode. Initiate a SeedLink session in DATA mode using config file SL.conf and write all packets received directly to file (in addition to parsing to S itself). Set nominal refresh interval for checking for new data to 10 s. A mini-seed file will be generated automatically.
 ::
 

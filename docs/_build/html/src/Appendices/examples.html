@@ -117,19 +117,16 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="function_list.html">Utility Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html">SeisIO Native Format</a></li>
-<li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html#simple-object-types">Simple Object Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html#location-types">Location Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html#response-types">Response Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html#the-misc-dictionary">The Misc Dictionary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html#compound-object-types">Compound Object Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="seisio_file_format.html#data-type-codes">Data Type Codes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="web_syntax.html">Data Requests Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="keywords.html">SeisIO Standard Keywords</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#fdsn-data-query">FDSN data query</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#timeseries-data-queries">Timeseries data queries</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fdsn-dataselect">FDSN dataselect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#iris-timeseries">IRIS timeseries</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#fdsn-station-query">FDSN station query</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fdsn-event-header-data-query">FDSN event header/data query</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#irisws-data-query">IRISWS data query</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fdsn-event-query">FDSN event query</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#seedlink-sessions">SeedLink sessions</a></li>
 </ul>
 </li>
@@ -199,8 +196,10 @@
             
   <div class="section" id="examples">
 <span id="webex"></span><h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="fdsn-data-query">
-<h2>FDSN data query<a class="headerlink" href="#fdsn-data-query" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="timeseries-data-queries">
+<h2>Timeseries data queries<a class="headerlink" href="#timeseries-data-queries" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="fdsn-dataselect">
+<h3>FDSN dataselect<a class="headerlink" href="#fdsn-dataselect" title="Permalink to this headline">¶</a></h3>
 <p>1. Download 10 minutes of data from four stations at Mt. St. Helens (WA, USA), delete the low-gain channels, and save as SAC files in the current directory.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">S</span> <span class="o">=</span> <span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;FDSN&quot;</span><span class="p">,</span> <span class="s2">&quot;CC.VALT, UW.SEP, UW.SHW, UW.HSR&quot;</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="s2">&quot;IRIS&quot;</span><span class="p">,</span> <span class="n">t</span><span class="o">=-</span><span class="mi">600</span><span class="p">)</span>
 <span class="n">S</span> <span class="o">-=</span> <span class="s2">&quot;SHW.ELZ..UW&quot;</span>
@@ -222,26 +221,11 @@
 </pre></div>
 </div>
 </div>
-<div class="section" id="fdsn-station-query">
-<h2>FDSN station query<a class="headerlink" href="#fdsn-station-query" title="Permalink to this headline">¶</a></h2>
-<p>A sample FDSN station query</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">S</span> <span class="o">=</span> <span class="n">FDSNsta</span><span class="p">(</span><span class="s2">&quot;CC.VALT..,PB.B001..BS?,PB.B001..E??&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="fdsn-event-header-data-query">
-<h2>FDSN event header/data query<a class="headerlink" href="#fdsn-event-header-data-query" title="Permalink to this headline">¶</a></h2>
-<p>Get seismic and strainmeter records for the P-wave of the Tohoku-Oki great earthquake on two borehole stations and write to native SeisData format:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">S</span> <span class="o">=</span> <span class="n">FDSNevt</span><span class="p">(</span><span class="s2">&quot;201103110547&quot;</span><span class="p">,</span> <span class="s2">&quot;PB.B004..EH?,PB.B004..BS?,PB.B001..BS?,PB.B001..EH?&quot;</span><span class="p">)</span>
-<span class="n">wseis</span><span class="p">(</span><span class="s2">&quot;201103110547_evt.seis&quot;</span><span class="p">,</span> <span class="n">S</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="irisws-data-query">
-<h2>IRISWS data query<a class="headerlink" href="#irisws-data-query" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="iris-timeseries">
+<h3>IRIS timeseries<a class="headerlink" href="#iris-timeseries" title="Permalink to this headline">¶</a></h3>
 <p>Note that the “src” keyword is not used in IRIS queries.</p>
 <ol class="arabic simple">
-<li><p>Get trace data from IRISws from <code class="docutils literal notranslate"><span class="pre">TS</span></code> to <code class="docutils literal notranslate"><span class="pre">TT</span></code> at channels <code class="docutils literal notranslate"><span class="pre">CHA</span></code></p></li>
+<li>Get trace data from IRISws from <code class="docutils literal notranslate"><span class="pre">TS</span></code> to <code class="docutils literal notranslate"><span class="pre">TT</span></code> at channels <code class="docutils literal notranslate"><span class="pre">CHA</span></code></li>
 </ol>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>S = SeisData()
 CHA = &quot;UW.TDH..EHZ, UW.VLL..EHZ, CC.VALT..BHZ&quot;
@@ -268,6 +252,22 @@ get_data!(S, &quot;IRIS&quot;, CHA, s=TS, t=TT)
 <span class="n">te</span> <span class="o">=</span> <span class="s2">&quot;2016-03-23T23:17:00&quot;</span>
 <span class="n">S</span> <span class="o">=</span> <span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;IRIS&quot;</span><span class="p">,</span> <span class="s2">&quot;CC.JRO..BHZ&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">ts</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">te</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;sacbl&quot;</span><span class="p">)</span>
 <span class="n">T</span> <span class="o">=</span> <span class="n">get_data</span><span class="p">(</span><span class="s2">&quot;IRIS&quot;</span><span class="p">,</span> <span class="s2">&quot;CC.JRO..BHZ&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="n">ts</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">te</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;miniseed&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="fdsn-station-query">
+<h2>FDSN station query<a class="headerlink" href="#fdsn-station-query" title="Permalink to this headline">¶</a></h2>
+<p>Get channel information for strain and seismic channels at station PB.B001:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">S</span> <span class="o">=</span> <span class="n">FDSNsta</span><span class="p">(</span><span class="s2">&quot;CC.VALT..,PB.B001..BS?,PB.B001..E??&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="fdsn-event-query">
+<h2>FDSN event query<a class="headerlink" href="#fdsn-event-query" title="Permalink to this headline">¶</a></h2>
+<p>Get seismic and strainmeter records for the P-wave of the Tohoku-Oki great earthquake on two borehole stations and write to native SeisData format:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">S</span> <span class="o">=</span> <span class="n">FDSNevt</span><span class="p">(</span><span class="s2">&quot;201103110547&quot;</span><span class="p">,</span> <span class="s2">&quot;PB.B004..EH?,PB.B004..BS?,PB.B001..BS?,PB.B001..EH?&quot;</span><span class="p">)</span>
+<span class="n">wseis</span><span class="p">(</span><span class="s2">&quot;201103110547_evt.seis&quot;</span><span class="p">,</span> <span class="n">S</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>

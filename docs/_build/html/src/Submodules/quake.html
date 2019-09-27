@@ -134,12 +134,6 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/function_list.html">Utility Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html">SeisIO Native Format</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#simple-object-types">Simple Object Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#location-types">Location Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#response-types">Response Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#the-misc-dictionary">The Misc Dictionary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#compound-object-types">Compound Object Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../Appendices/seisio_file_format.html#data-type-codes">Data Type Codes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/web_syntax.html">Data Requests Syntax</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/keywords.html">SeisIO Standard Keywords</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../Appendices/examples.html">Examples</a></li>
@@ -297,9 +291,9 @@ a tuple consisting of an Array{SeisHdr,1} and an Array{SeisSrc,1}, so that
 the <cite>i`th entry of each array describes the header and source process of event `i</cite>.</p>
 <p>Notes:</p>
 <ol class="arabic simple">
-<li><p>Specify <cite>ot</cite> as a string formatted YYYY-MM-DDThh:mm:ss in UTC (e.g. “2001-02-08T18:54:32”). Returns a SeisHdr array.</p></li>
-<li><p>Incomplete string queries are read to the nearest fully-specified time constraint; thus, <cite>FDSNevq(“2001-02-08”)</cite> returns the nearest event to 2001-02-08T00:00:00.</p></li>
-<li><p>If no event is found in the specified search window, FDSNevq exits with an error.</p></li>
+<li>Specify <cite>ot</cite> as a string formatted YYYY-MM-DDThh:mm:ss in UTC (e.g. “2001-02-08T18:54:32”). Returns a SeisHdr array.</li>
+<li>Incomplete string queries are read to the nearest fully-specified time constraint; thus, <cite>FDSNevq(“2001-02-08”)</cite> returns the nearest event to 2001-02-08T00:00:00.</li>
+<li>If no event is found in the specified search window, FDSNevq exits with an error.</li>
 </ol>
 <div class="line-block">
 <div class="line"><a class="reference internal" href="../Appendices/keywords.html#dkw"><span class="std std-ref">Shared keywords</span></a>: evw, reg, mag, nev, src, to, w</div>
@@ -337,8 +331,8 @@ and z in km with + = down.</p>
 </div>
 <p><strong>References</strong></p>
 <ul class="simple">
-<li><p>Crotwell, H. P., Owens, T. J., &amp; Ritsema, J. (1999). The TauP Toolkit: Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.</p></li>
-<li><p>TauP manual: <a class="reference external" href="http://www.seis.sc.edu/downloads/TauP/taup.pdf">http://www.seis.sc.edu/downloads/TauP/taup.pdf</a></p></li>
+<li>Crotwell, H. P., Owens, T. J., &amp; Ritsema, J. (1999). The TauP Toolkit: Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.</li>
+<li>TauP manual: <a class="reference external" href="http://www.seis.sc.edu/downloads/TauP/taup.pdf">http://www.seis.sc.edu/downloads/TauP/taup.pdf</a></li>
 </ul>
 </div>
 </div>
@@ -452,64 +446,64 @@ with coordinates <cite>[s_lat, s_lon]</cite> to receivers <cite>rec</cite> with 
 </div>
 <div class="section" id="supported-file-formats">
 <h2>Supported File Formats<a class="headerlink" href="#supported-file-formats" title="Permalink to this headline">¶</a></h2>
-<table class="colwidths-given docutils align-center">
+<table border="1" class="colwidths-given docutils">
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 60%" />
+<col width="20%" />
+<col width="20%" />
+<col width="60%" />
 </colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>File Format</p></th>
-<th class="head"><p>String</p></th>
-<th class="head"></th>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">File Format</th>
+<th class="head">String</th>
+<th class="head">&#160;</th>
 </tr>
 </thead>
-<tbody>
-<tr class="row-even"><td><p>PC-SUDS</p></td>
-<td><p>suds</p></td>
-<td></td>
+<tbody valign="top">
+<tr class="row-even"><td>PC-SUDS</td>
+<td>suds</td>
+<td>&#160;</td>
 </tr>
-<tr class="row-odd"><td><p>QuakeML</p></td>
-<td><p>qml, quakeml</p></td>
-<td><p>only reads first event from file</p></td>
+<tr class="row-odd"><td>QuakeML</td>
+<td>qml, quakeml</td>
+<td>only reads first event from file</td>
 </tr>
-<tr class="row-even"><td><p>UW</p></td>
-<td><p>uw</p></td>
-<td></td>
+<tr class="row-even"><td>UW</td>
+<td>uw</td>
+<td>&#160;</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section" id="supported-keywords">
 <h2>Supported Keywords<a class="headerlink" href="#supported-keywords" title="Permalink to this headline">¶</a></h2>
-<table class="colwidths-given docutils align-center">
+<table border="1" class="colwidths-given docutils">
 <colgroup>
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 13%" />
-<col style="width: 50%" />
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="50%" />
 </colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>KW</p></th>
-<th class="head"><p>Used By</p></th>
-<th class="head"><p>Type</p></th>
-<th class="head"><p>Default</p></th>
-<th class="head"><p>Meaning</p></th>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">KW</th>
+<th class="head">Used By</th>
+<th class="head">Type</th>
+<th class="head">Default</th>
+<th class="head">Meaning</th>
 </tr>
 </thead>
-<tbody>
-<tr class="row-even"><td><p>full</p></td>
-<td><p>suds, uw</p></td>
-<td><p>Bool</p></td>
-<td><p>false</p></td>
-<td><p>read full header into <cite>:misc</cite>?</p></td>
+<tbody valign="top">
+<tr class="row-even"><td>full</td>
+<td>suds, uw</td>
+<td>Bool</td>
+<td>false</td>
+<td>read full header into <cite>:misc</cite>?</td>
 </tr>
-<tr class="row-odd"><td><p>v</p></td>
-<td><p>all</p></td>
-<td><p>Int64</p></td>
-<td><p>0</p></td>
-<td><p>verbosity</p></td>
+<tr class="row-odd"><td>v</td>
+<td>all</td>
+<td>Int64</td>
+<td>0</td>
+<td>verbosity</td>
 </tr>
 </tbody>
 </table>

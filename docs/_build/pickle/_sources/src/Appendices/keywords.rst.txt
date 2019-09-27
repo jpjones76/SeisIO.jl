@@ -1,8 +1,8 @@
 .. _dkw:
 
-************************
+########################
 SeisIO Standard Keywords
-************************
+########################
 
 SeisIO.KW is a memory-resident structure of default values for common keywords
 used by package functions. KW has one substructure, SL, with keywords specific
@@ -55,8 +55,9 @@ default for nev to 2.
 .. [#] **-v=0** = quiet; 1 = verbose, 2 = debug; 3 = verbose debug
 .. [#] If **-w=true**, a file name is automatically generated from the request parameters, in addition to parsing data to a SeisData structure. Files are created from the raw download even if data processing fails, in contrast to get_data(... wsac=true).
 
+*****************
 SeedLink Keywords
------------------
+*****************
 Change these with SeisIO.KW.SL.[key] = value, e.g., SeisIO.KW.SL.refresh = 30.
 
 .. csv-table::
