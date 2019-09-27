@@ -21,9 +21,9 @@ SUDS_fmt = FormatDesc(
   "https://banfill.net/suds/PC-SUDS.pdf",
   "https://banfill.net/suds/Win-SUDS.pdf",
   "docs/Formats/suds_man.pdf"],
-  0xff
+  0xfd
   )
 SUDS_fmt.ver = [  FmtVer(2.6, "1994-05-11", false) ,
                 FmtVer(1.41, "1989-03-29", nothing)
                 ]
-formats["PC-SUDS"] = SUDS_fmt
+formats["suds"] = SUDS_fmt

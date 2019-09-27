@@ -29,6 +29,8 @@ formats["Fake2"] = Fake_fmt_2
 delete!(formats, "Fake2")
 
 redirect_stdout(out) do
-  show(formats["AH-1"])
-  show(formats["SAC"])
+  show(formats["ah1"])
+  show(formats["sac"])
+  show(formats["suds"])
+  show(formats["uw"])
 end

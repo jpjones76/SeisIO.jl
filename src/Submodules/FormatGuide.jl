@@ -19,9 +19,9 @@ const HistVec = Array{FmtVer,1}
 const FmtStatus = Dict{UInt8, String}(
   0x00 => "unknown",
   0x01 => "in use; maintained",
-  0x20 => "legacy",
-  0xfd => "allegedly maintained, but maintainers don't answer our emails",
-  0xfe => "suspected abandoned",
+  0x20 => "legacy; maintained but no longer in use",
+  0xfd => "ostensibly maintained, but they don't answer our emails",
+  0xfe => "suspected abandoned, can't find contact info",
   0xff => "abandoned"
 )
 

@@ -19,4 +19,4 @@ UW_fmt = FormatDesc(
 UW_fmt.ver = [  FmtVer(2, "1996-06-02", false),
                 FmtVer(1, "ca. 1978", nothing)
                 ]
-formats["UW"] = UW_fmt
+formats["uw"] = UW_fmt

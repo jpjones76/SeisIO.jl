@@ -5,7 +5,7 @@ AH_fmt = FormatDesc(
   "ftp://www.orfeus-eu.org/pub/software/mirror/ldeo.columbia/ (defunct)",
   "unknown",
   HistVec(),
-  ["machine-independent data storage format using External Data Representation (XDR)"],
+  ["machine-independent file format using External Data Representation (XDR)"],
   ["Comprehensive Nuclear Test Ban Tready (CTBT) monitoring",
     "earthquake seismology",
     "Lamont-Doherty Earth Observatory (Columbia University, NY, USA)",
@@ -17,8 +17,8 @@ AH_fmt = FormatDesc(
 AH_fmt.ver = [ FmtVer(2.0, Date("1994-02-20"), false),
                 FmtVer(1.0, Date("1985-06-11"), false)
                 ]
-formats["AH-1"] = AH_fmt
-formats["AH-2"] = AH_fmt
+formats["ah1"] = AH_fmt
+formats["ah2"] = AH_fmt
 
 Bottle_fmt = FormatDesc(
   "Bottle",
@@ -27,13 +27,14 @@ Bottle_fmt = FormatDesc(
   "(none)",
   "data@unavco.org",
   HistVec(),
-  ["a portable, simple data format designed for short sequences of single-channel time series data"],
+  ["a portable, simple data format designed for short sequences of",
+  " single-channel time series data"],
   ["geodesy; raw format of PBO strain meter stations"],
   ["https://www.unavco.org/data/strain-seismic/bsm-data/lib/docs/bottle_format.pdf"],
   0x00
   )
 Bottle_fmt.ver = [ FmtVer("1", "Unknown", false) ]
-formats["Bottle"] = Bottle_fmt
+formats["bottle"] = Bottle_fmt
 
 DATALESS_fmt = FormatDesc(
   "Dataless SEED (instrument metadata) file",
@@ -44,8 +45,10 @@ DATALESS_fmt = FormatDesc(
   HistVec(),
   ["contains Volume, Abbreviation, and Station Control Headers.",
   "no Time Span Control Headers or data records.",
-  "blockettes are completely non-unique; all info can appear in at least 4 blockettes, because SEED wasn't confusing and bloated enough.",
-  "documentation is terrible as usual, many critical caveats in notes and margins.",
+  "blockettes are completely non-unique; all info can appear in at least",
+  "  four places, because SEED wasn't confusing and bloated enough.",
+  "documentation is terrible as usual, many critical caveats in notes",
+  "  or margins (or simply not present).",
   "the SEED manual makes less sense than bathroom stall graffiti."
   ],
   ["FDSN data standard; used worldwide"],
@@ -56,7 +59,7 @@ DATALESS_fmt.ver = [ FmtVer("2.4", Date("2012-08-01"), false),
                       FmtVer("2.3", Date("1992-12-31"), false),
                       FmtVer("2.2", Date("1991-08-31"), false),
                       ]
-formats["Dataless SEED"] = DATALESS_fmt
+formats["dataless"] = DATALESS_fmt
 
 GeoCSV_fmt = FormatDesc(
   "GeoCSV",
@@ -66,14 +69,16 @@ GeoCSV_fmt = FormatDesc(
   "info@iris.edu",
   HistVec(),
   ["ASCII format intended for both human and machine readability.",
-   "both single-column (geocsv.slist) and two-column (geoscv) formats are supported."],
+   "single-column (geocsv.slist) and two-column (geoscv) formats."],
   [ "(unknown)"],
   ["http://geows.ds.iris.edu/documents/GeoCSV.pdf",
   "https://giswiki.hsr.ch/GeoCSV"],
   0x01
   )
 GeoCSV_fmt.ver = [ FmtVer("2.0.4", "2015-07-21", false) ]
-formats["GeoCSV"] = GeoCSV_fmt
+formats["geocsv"] = GeoCSV_fmt
+formats["geocsv.slist"] = GeoCSV_fmt
+formats["geocsv.tspair"] = GeoCSV_fmt
 
 Lennartz_fmt = FormatDesc(
   "Lennartz MarsLite ASCII",
@@ -82,13 +87,13 @@ Lennartz_fmt = FormatDesc(
   "(none)",
   "info@lennartz-electronic.de",
   HistVec(),
-  ["ASCII format recorded by Lennartz portable digitizers."],
+  ["ASCII format (slist variant) recorded by Lennartz portable digitizers."],
   [ "Lennartz"],
   ["(none)"],
   0x01
   )
 Lennartz_fmt.ver = [ FmtVer("", "", false) ]
-formats["Lennartz ASCII"] = Lennartz_fmt
+formats["lenartzascii"] = Lennartz_fmt
 
 mSEED_fmt = FormatDesc(
   "SEED (Standard for the Exchange of Earthquake Data)",
@@ -97,19 +102,21 @@ mSEED_fmt = FormatDesc(
   "(no source code)",
   "webmaster@fdsn.org",
   HistVec(),
-  ["an omnibus seismic data standard for both data archival and arbitrarily detailed network and instrument descriptions",
+  ["an omnibus seismic data standard for data archival and detailed network",
+  "  and instrument descriptions",
   "mini-SEED is a data-only variant that uses only data blockettes",
-  "documentation (official manual) is poorly organized and incomplete at length 224 pages, 7 years since release",
-  "intentionally abstruse; this is what happens when coders decide to be \"clever\" with no Project Managers or Business Analysts to direct them",
+  "documentation (official manual) is poorly organized and incomplete at",
+  "  224 pages length, 7 years since last update",
+  "intentionally abstruse; this is what happens when coders decide to get",
+  "  \"clever\" with no Project Managers or Business Analysts to guide them",
   "a slow, turgid monolith, comically inappropriate for long time series",
-  "data spec 50% longer than HDF-5 data spec, yet SEED does vastly less."
   ],
   ["FDSN data standard; used worldwide"],
   ["http://www.fdsn.org/pdf/SEEDManual_V2.4.pdf"],
   0x01
   )
 mSEED_fmt.ver = [ FmtVer("2.4", Date("2012-08-01"), false) ]
-formats["mini-SEED"] = mSEED_fmt
+formats["mseed"] = mSEED_fmt
 
 RESP_fmt = FormatDesc(
   "SEED RESP (instrument response) file",
@@ -126,7 +133,7 @@ RESP_fmt = FormatDesc(
   ["https://ds.iris.edu/ds/nodes/dmc/data/formats/resp/"],
   0x01
   )
-formats["SEED RESP"] = RESP_fmt
+formats["resp"] = RESP_fmt
 
 SAC_fmt = FormatDesc(
   "SAC (Seismic Analysis Code)",
@@ -135,7 +142,7 @@ SAC_fmt = FormatDesc(
   "https://ds.iris.edu/ds/nodes/dmc/software/downloads/sac/101-6a/",
   "Brian Savage, University of Rhode Island (URI) / Arthur Snoke, Department of Geosciences at Virginia Tech (VT)",
   HistVec(),
-  ["machine-independent format for storing geophysical data at 32-bit Float precision",
+  ["machine-independent format for storing geophysical data at 32-bit precision",
   "SAC software has distribution restrictions; see https://www.ecfr.gov/cgi-bin/retrieveECFR?n=15y2.1.3.4.30",
   ],
   [ "US Geological Survey (USGS), United States of America",
@@ -147,7 +154,7 @@ SAC_fmt = FormatDesc(
   0x01
   )
 SAC_fmt.ver = [ FmtVer("101.6a", Date("2012-01-01"), true) ]
-formats["SAC"] = SAC_fmt
+formats["sac"] = SAC_fmt
 
 SACPZ_fmt = FormatDesc(
   "SACPZ (Seismic Analysis Code Poles and Zeros file)",
@@ -167,19 +174,20 @@ SACPZ_fmt = FormatDesc(
   0x01
   )
 SACPZ_fmt.ver = [ FmtVer("101.6a", Date("2012-01-01"), true) ]
-formats["SACPZ"] = SACPZ_fmt
+formats["sacpz"] = SACPZ_fmt
 
 SEGY_fmt = FormatDesc(
   "SEG Y",
   "\"segy\" (SEG Y 1.0 or SEG Y rev 1), \"passcal\" (PASSCAL SEG Y)",
-  "Society of Exploration Geophysicists, Tulsa, Oklahoma, United States of America",
+  "Society of Exploration Geophysicists, Tulsa, Oklahoma, United States",
   "(no source code)",
-  "SEG Technical Standards Committee, https://seg.org/Publications/SEG-Technical-Standards",
+  "SEG Technical Standards Committee,\nhttps://seg.org/Publications/SEG-Technical-Standards",
   HistVec(),
   ["machine-independent open-standard format for storing geophysical data",
-  "in SEG Y 1.0 and SEG Y rev 1, header variables were NOT required, only \"recommended\"",
-  "some industry files may not read for this reason",
-  "a variant of SEG Y with no file header, developed by PASSCAL and New Mexico Tech (USA), was used with older PASSCAL equipment until ~2010"
+  "in SEG Y 1.0 and SEG Y rev 1, header variables were NOT required",
+  "  only \"recommended\"; resultantly some industry files won't read",
+  "PASSCAL is a SEG Y variant with no file header, developed by PASSCAL",
+  "  and New Mexico Tech (USA), used with their equipment through late 2000s"
   ],
   [ "widely used in exploration geophysics",
     "petroleum and gas industry",
@@ -197,8 +205,8 @@ SEGY_fmt.ver = [ FmtVer("rev 2", Date("2017-03-01"), nothing),
                 FmtVer("PASSCAL", "199?-??-??", false),
                 FmtVer(1.0, Date("1974-04-01"), false),
                 ]
-formats["SEG Y"] = SEGY_fmt
-formats["PASSCAL SEG Y"] = SEGY_fmt
+formats["segy"] = SEGY_fmt
+formats["passcal"] = SEGY_fmt
 
 SXML_fmt = FormatDesc(
   "FDSN Station XML",
@@ -224,9 +232,11 @@ WIN_fmt = FormatDesc(
   "(unknown)",
   HistVec(),
   ["format for storing multiplexed seismic data in one-minute chunks",
-  "each data file divides data into one-second segments by channel, stored as variable-precision delta-encoded integers",
+  "each data file divides data into one-second segments by channel",
+  "  stored as variable-precision delta-encoded integers",
   "channel information must be retrieved from an external file",
-  "channel files are not strictly controlled by a central authority and inconsistencies in channel parameters, particularly gains, are known to exist."
+  "channel files are not strictly controlled by a central authority and",
+  "  inconsistencies in channel parameters are known to exist."
   ],
   [ "used throughout Japan",
     "Earthquake Research Institute, University of Tokyo, Japan",
