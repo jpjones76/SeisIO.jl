@@ -24,7 +24,7 @@ channels `i` with `S.fs[i] > 0.0` are resampled.
     resample!(C::SeisChannel, fs::Float64)
     resample(C::SeisChannel, fs::Float64)
 
-Resample `C.x` to `fs`. 
+Resample `C.x` to `fs`.
 """ resample!
 function resample!(S::GphysData;
   chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
@@ -58,6 +58,13 @@ function resample!(S::GphysData;
   i = GRPS[1][1]
   ty = eltype(S.x[i])
   fs = ty(S.fs[i])
+  j = 1
+  while isapprox(fs, f0)
+    j += 1
+    j > length(GRPS) && return nothing
+    i = GRPS[j][1]
+    fs = ty(S.fs[i])
+  end
   ff = mkresample(ty(f0/fs))
   rate_old = f0/fs
   si::Int = 0
@@ -68,6 +75,7 @@ function resample!(S::GphysData;
     c = grp[1]
     ty = eltype(S.x[c])
     fs = ty(S.fs[c])
+    fs == f0 && continue
     rate = f0/fs
 
     # update rate, filter
@@ -124,6 +132,7 @@ end
 
 function resample!(C::GphysChannel, f0::Float64)
   C.fs > 0.0 || error("Can't resample non-timeseries data!")
+  (C.fs == f0) && return nothing
   @assert f0 > 0.0
 
   # This setup is very similar to filtfilt!
