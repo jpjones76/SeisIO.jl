@@ -100,14 +100,14 @@ SeedLink sessions
 ::
 
   S = SeisData()
-  SeedLink!(S, "SL.conf", mode="DATA", r=10, w=true)
+  seedlink!(S, "SL.conf", mode="DATA", r=10, w=true)
 
 2. An unattended SeedLink download in TIME mode. Get the next two minutes of data from stations GPW, MBW, SHUK in the UW network. Put the Julia REPL to sleep while the request fills. If the connection is still open, close it (SeedLink's time bounds arent precise in TIME mode, so this may or may not be necessary). Pause briefly so that the last data packets are written. Synchronize results and write data in native SeisIO file format.
 ::
 
   sta = "UW.GPW,UW.MBW,UW.SHUK"
   s0 = now()
-  S = SeedLink(sta, mode="TIME", s=s0, t=120, r=10)
+  S = seedlink(sta, mode="TIME", s=s0, t=120, r=10)
   sleep(180)
   isopen(S.c[1]) && close(S.c[1])
   sleep(20)
@@ -119,7 +119,7 @@ SeedLink sessions
 ::
 
   sta = "UW.GPW, UW.MBW, UW.SHUK"
-  S1 = SeedLink(sta, mode="TIME", s=0, t=120)
+  S1 = seedlink(sta, mode="TIME", s=0, t=120)
 
 4. A SeedLink session in DATA mode with multiple servers, including a config file. Data are parsed roughly every 10 seconds. A total of 5 minutes of data are requested.
 ::
@@ -132,14 +132,14 @@ SeedLink sessions
   (d0,d1) = parsetimewin(st,en)
 
   S = SeisData()
-  SeedLink!(S, sta, mode="TIME", r=10.0, s=d0, t=d1)
+  seedlink!(S, sta, mode="TIME", r=10.0, s=d0, t=d1)
   println(stdout, "...first link initialized...")
 
   # Seedlink with a config file
   config_file = "seedlink.conf"
-  SeedLink!(S, config_file, r=10.0, mode="TIME", s=d0, t=d1)
+  seedlink!(S, config_file, r=10.0, mode="TIME", s=d0, t=d1)
   println(stdout, "...second link initialized...")
 
   # Seedlink with a config string
-  SeedLink!(S, "CC.VALT..???, UW.ELK..EHZ", mode="TIME", r=10.0, s=d0, t=d1)
+  seedlink!(S, "CC.VALT..???, UW.ELK..EHZ", mode="TIME", r=10.0, s=d0, t=d1)
   println(stdout, "...third link initialized...")

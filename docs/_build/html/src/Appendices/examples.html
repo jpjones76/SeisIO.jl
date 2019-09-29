@@ -225,7 +225,7 @@
 <h3>IRIS timeseries<a class="headerlink" href="#iris-timeseries" title="Permalink to this headline">¶</a></h3>
 <p>Note that the “src” keyword is not used in IRIS queries.</p>
 <ol class="arabic simple">
-<li>Get trace data from IRISws from <code class="docutils literal notranslate"><span class="pre">TS</span></code> to <code class="docutils literal notranslate"><span class="pre">TT</span></code> at channels <code class="docutils literal notranslate"><span class="pre">CHA</span></code></li>
+<li><p>Get trace data from IRISws from <code class="docutils literal notranslate"><span class="pre">TS</span></code> to <code class="docutils literal notranslate"><span class="pre">TT</span></code> at channels <code class="docutils literal notranslate"><span class="pre">CHA</span></code></p></li>
 </ol>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>S = SeisData()
 CHA = &quot;UW.TDH..EHZ, UW.VLL..EHZ, CC.VALT..BHZ&quot;
@@ -275,13 +275,13 @@ get_data!(S, &quot;IRIS&quot;, CHA, s=TS, t=TT)
 <h2>SeedLink sessions<a class="headerlink" href="#seedlink-sessions" title="Permalink to this headline">¶</a></h2>
 <p>1. An attended SeedLink session in DATA mode. Initiate a SeedLink session in DATA mode using config file SL.conf and write all packets received directly to file (in addition to parsing to S itself). Set nominal refresh interval for checking for new data to 10 s. A mini-seed file will be generated automatically.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>S = SeisData()
-SeedLink!(S, &quot;SL.conf&quot;, mode=&quot;DATA&quot;, r=10, w=true)
+seedlink!(S, &quot;SL.conf&quot;, mode=&quot;DATA&quot;, r=10, w=true)
 </pre></div>
 </div>
 <p>2. An unattended SeedLink download in TIME mode. Get the next two minutes of data from stations GPW, MBW, SHUK in the UW network. Put the Julia REPL to sleep while the request fills. If the connection is still open, close it (SeedLink’s time bounds arent precise in TIME mode, so this may or may not be necessary). Pause briefly so that the last data packets are written. Synchronize results and write data in native SeisIO file format.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>sta = &quot;UW.GPW,UW.MBW,UW.SHUK&quot;
 s0 = now()
-S = SeedLink(sta, mode=&quot;TIME&quot;, s=s0, t=120, r=10)
+S = seedlink(sta, mode=&quot;TIME&quot;, s=s0, t=120, r=10)
 sleep(180)
 isopen(S.c[1]) &amp;&amp; close(S.c[1])
 sleep(20)
@@ -292,7 +292,7 @@ wseis(fname, S)
 </div>
 <p>3. A SeedLink session in TIME mode</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sta</span> <span class="o">=</span> <span class="s2">&quot;UW.GPW, UW.MBW, UW.SHUK&quot;</span>
-<span class="n">S1</span> <span class="o">=</span> <span class="n">SeedLink</span><span class="p">(</span><span class="n">sta</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;TIME&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">120</span><span class="p">)</span>
+<span class="n">S1</span> <span class="o">=</span> <span class="n">seedlink</span><span class="p">(</span><span class="n">sta</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;TIME&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">120</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>4. A SeedLink session in DATA mode with multiple servers, including a config file. Data are parsed roughly every 10 seconds. A total of 5 minutes of data are requested.</p>
@@ -304,16 +304,16 @@ dt = en-st
 (d0,d1) = parsetimewin(st,en)
 
 S = SeisData()
-SeedLink!(S, sta, mode=&quot;TIME&quot;, r=10.0, s=d0, t=d1)
+seedlink!(S, sta, mode=&quot;TIME&quot;, r=10.0, s=d0, t=d1)
 println(stdout, &quot;...first link initialized...&quot;)
 
 # Seedlink with a config file
 config_file = &quot;seedlink.conf&quot;
-SeedLink!(S, config_file, r=10.0, mode=&quot;TIME&quot;, s=d0, t=d1)
+seedlink!(S, config_file, r=10.0, mode=&quot;TIME&quot;, s=d0, t=d1)
 println(stdout, &quot;...second link initialized...&quot;)
 
 # Seedlink with a config string
-SeedLink!(S, &quot;CC.VALT..???, UW.ELK..EHZ&quot;, mode=&quot;TIME&quot;, r=10.0, s=d0, t=d1)
+seedlink!(S, &quot;CC.VALT..???, UW.ELK..EHZ&quot;, mode=&quot;TIME&quot;, r=10.0, s=d0, t=d1)
 println(stdout, &quot;...third link initialized...&quot;)
 </pre></div>
 </div>

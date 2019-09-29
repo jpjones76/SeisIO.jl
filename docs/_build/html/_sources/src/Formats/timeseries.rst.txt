@@ -36,6 +36,7 @@ Supported File Formats
   PASSCAL SEG Y             | passcal
   SAC                       | sac
   SEG Y (rev 0 or rev 1)    | segy
+  SLIST (ASCII sample list) | slist
   SUDS                      | suds
   UW data file              | uw
   Win32                     | win32
@@ -107,7 +108,8 @@ based on External Data Representation (XDR).
 `GeoCSV\ <http://geows.ds.iris.edu/documents/GeoCSV.pdf>`_: an extension of
 "human-readable", tabular file format Comma-Separated Values (CSV).
 
-**Lennartz ASCII**: ASCII output of Lennartz portable digitizers.
+**Lennartz ASCII**: ASCII output of Lennartz portable digitizers, a variant of
+sample list (SLIST) ASCII.
 
 `PASSCAL\ <https://www.passcal.nmt.edu/content/seg-y-what-it-is>`_: A single-
 channel variant of SEG Y with no file header, developed by PASSCAL/New Mexico
@@ -128,6 +130,9 @@ data format. Common in the energy industry, developed and maintained by the SEG.
 Only SEG Y rev 0 and `rev 1\ <https://seg.org/Portals/0/SEG/News%20and%20Resources/Technical%20Standards/seg_y_rev1.pdf>`_
 with standard headers are supported.
 
+**SLIST**: An ASCII file with a one-line header and data written to file in
+ASCII string format.
+
 **UW**: the University of Washington data format has no online reference and is
 no longer in use. Created by the Pacific Northwest Seismic Network for event
 archival; used from the 1970s through early 2000s. A UW event is described by a
@@ -135,10 +140,10 @@ pickfile and corresponding data file, whose names are identical except for the
 last character; for example, files 99062109485o and 99062109485W together
 describe event 99062109485. Unlike the win32 data format, the data file is
 self-contained; the pick file is not required to use raw trace data. However,
-like the win32 data format, instrument locations are stored in an external
+like the win32 data format, instrument locations were stored in an external
 human-maintained text file. Only UW-2 data files are supported by SeisIO; we
-have never encountered a UW-1 data file outside of Exabyte tapes and have no
-reason to suspect that any remain in circulation.
+have never encountered a UW-1 data file except in Exabyte tapes from the 80s
+and have no reason to suspect that any are in circulation.
 
 `Win32\ <http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html>`_: data format developed
 by the Earthquake Research Institute (ERI), University of Tokyo, Japan. Data

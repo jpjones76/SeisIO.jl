@@ -9,9 +9,9 @@ TCP/IP-based data transmission protocol that allows near-real-time access to
 data from thousands of geophysical monitoring instruments. See
 :ref:`data keywords list <dkw>` and :ref:`channel id syntax <cid>` for options.
 
-.. function:: SeedLink!(S, chans, KWs)
-.. function:: SeedLink!(S, chans, patts, KWs)
-.. function:: S = SeedLink(chans, KWs)
+.. function:: seedlink!(S, chans, KWs)
+.. function:: seedlink!(S, chans, patts, KWs)
+.. function:: S = seedlink(chans, KWs)
 
 
 | **chans**
