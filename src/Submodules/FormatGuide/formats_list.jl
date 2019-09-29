@@ -87,7 +87,7 @@ Lennartz_fmt = FormatDesc(
   "(none)",
   "info@lennartz-electronic.de",
   HistVec(),
-  ["ASCII format (slist variant) recorded by Lennartz portable digitizers."],
+  ["SLIST (single-column ASCII) variant recorded by Lennartz MarsLite digitizers."],
   [ "Lennartz"],
   ["(none)"],
   0x01
@@ -207,6 +207,20 @@ SEGY_fmt.ver = [ FmtVer("rev 2", Date("2017-03-01"), nothing),
                 ]
 formats["segy"] = SEGY_fmt
 formats["passcal"] = SEGY_fmt
+
+SLIST_fmt = FormatDesc(
+  "SLIST (ASCII sample list)",
+  "\"slist\"",
+  "unknown",
+  "(no source code)",
+  "unknown",
+  HistVec(),
+  ["A one-line ASCII header followed by numbers stored as ASCII strings"],
+  ["unknown"],
+  ["unknown"],
+  0x00
+  )
+formats["slist"] = SLIST_fmt
 
 SXML_fmt = FormatDesc(
   "FDSN Station XML",
