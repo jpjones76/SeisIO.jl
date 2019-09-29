@@ -200,7 +200,7 @@ The allowed subfield widths before channel IDs break is identical to the FDSN
 standard: NN.SSSSS.LL.CCC (network name length ≤ 2 chars, etc.)
 
 #### SEEDLINK ONLY
-For SeedLink functions (`SeedLink!`, `has_stream`, etc.), channel IDs can
+For SeedLink functions (`seedlink!`, `has_stream`, etc.), channel IDs can
 include a fifth field (i.e. NET.STA.LOC.CHA.T) to set the "type" flag (one of
 DECOTL, for Data, Event, Calibration, blOckette, Timing, or Logs). Note that
 SeedLink calibration, timing, and logs are not supported by SeisIO.

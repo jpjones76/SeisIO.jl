@@ -1,4 +1,4 @@
-export SeedLink, SeedLink!, SL_info, has_sta, has_stream
+  export seedlink, seedlink!, sl_info, has_sta, has_stream
 
 # ========================================================================
 # Utility functions not for export
@@ -31,7 +31,7 @@ function sync_add(r::Task)
     r
 end
 
-function getSLver(vline::String)
+function get_sl_ver(vline::String)
   # Versioning will break if SeedLink switches to VV.PPP.NNN format
   ver = 0.0
   vinfo = split(vline)
@@ -111,14 +111,14 @@ end
 
 
 """
-    info_xml = SL_info(level=LEVEL::String; u=URL::String, port=PORT::Integer)
+    info_xml = sl_info(level=LEVEL::String; u=URL::String, port=PORT::Integer)
 
 Retrieve XML output of SeedLink command "INFO `LEVEL`" from server `URL:PORT`.
 Returns formatted XML. `LEVEL` must be one of "ID", "CAPABILITIES",
 "STATIONS", "STREAMS", "GAPS", "CONNECTIONS", "ALL".
 
 """
-function SL_info(level::String;                                 # verbosity
+function sl_info(level::String;                                 # verbosity
                 to::Int64     = KW.to,                          # Timeout (s)
                  u::String    = "rtserve.iris.washington.edu",  # url
                  port::Int64  = KW.SL.port                      # port
@@ -206,19 +206,19 @@ function has_sta(C::String;
   end
   # This exists to convert SeedLink syntax (SSS NN) to FDSN (NN.SSS)
 
-  return check_sta_exists(sta, SL_info("STATIONS", u=u, port=port))
+  return check_sta_exists(sta, sl_info("STATIONS", u=u, port=port))
 end
 
 has_sta(sta::Array{String,1};
   u::String     = "rtserve.iris.washington.edu",
   port::Int64   = KW.SL.port
-  ) = check_sta_exists(sta, SL_info("STATIONS", u=u, port=port))
+  ) = check_sta_exists(sta, sl_info("STATIONS", u=u, port=port))
 
 has_sta(sta::Array{String,2};
   u::String   = "rtserve.iris.washington.edu",
   port::Int64 = KW.SL.port
   ) = check_sta_exists([join(sta[i,:], '.') for i=1:size(sta,1)],
-                       SL_info("STATIONS", u=u, port=port))
+                       sl_info("STATIONS", u=u, port=port))
 
 """
     has_stream(cha[, u=url, port=N, gap=G)
@@ -254,7 +254,7 @@ function has_stream(sta::Array{String,1}, pat::Array{String,1};
     c = split(pat[i], '.')
     cha[i] = join([s[1], s[2], c[1][1:2], c[1][3:5], c[2]], '.')
   end
-  return check_stream_exists(cha, SL_info("STREAMS", u=u, port=port), gap=gap, to=to)
+  return check_stream_exists(cha, sl_info("STREAMS", u=u, port=port), gap=gap, to=to)
 end
 
 has_stream(sta::String;
@@ -263,14 +263,14 @@ to::Int64   = KW.to                               ,  # Timeout (s)
 port::Int64 = KW.SL.port,
 gap::Real   = KW.SL.gap,
 d::Char     = ','
-) = check_stream_exists(String.(split(sta, d)), SL_info("STREAMS", u=u, port=port), gap=gap, to=to)
+) = check_stream_exists(String.(split(sta, d)), sl_info("STREAMS", u=u, port=port), gap=gap, to=to)
 
 has_stream(sta::Array{String,1};
   u::String   = "rtserve.iris.washington.edu",
   to::Int64   = KW.to                               ,  # Timeout (s)
   port::Int64 = KW.SL.port,
   gap::Real   = KW.SL.gap
-  ) = check_stream_exists(sta, SL_info("STREAMS", u=u, port=port), gap=gap, to=to)
+  ) = check_stream_exists(sta, sl_info("STREAMS", u=u, port=port), gap=gap, to=to)
 
 has_stream(sta::Array{String,2};
   u::String   = "rtserve.iris.washington.edu",
@@ -278,31 +278,31 @@ has_stream(sta::Array{String,2};
   port::Int64 = KW.SL.port,
   gap::Real   = KW.SL.gap
   ) = check_stream_exists([join(sta[i,:], '.') for i=1:size(sta,1)],
-                          SL_info("STREAMS", u=u, port=port), gap=gap, to=to)
+                          sl_info("STREAMS", u=u, port=port), gap=gap, to=to)
 
 @doc """
-    SeedLink!(S, sta)
+    seedlink!(S, sta)
 
-Begin acquiring SeedLink data to SeisData structure `S`. New channels
+Begin acquiring seedlink data to SeisData structure `S`. New channels
 are added to `S` automatically based on `sta`. Connections are added
 to S.c.
 
-    S = SeedLink(sta)
+    S = seedlink(sta)
 
-Create a new SeisData structure `S` to acquire SeedLink data. Connection will be in S.c[1].
+Create a new SeisData structure `S` to acquire seedlink data. Connection will be in S.c[1].
 
 ### INPUTS
 * `S`: SeisData object
 * `sta`: Array{String, 1} formatted NET.STA.LOC.CHA.DFLAG, e.g. ["UW.TDH..EHZ.D", "CC.HOOD..BH?.E"].
 Use "?" to match any single character; leave LOC and CHA fields blank to select all. Don't use "*" for wildcards,
-it isn't valid SeedLink syntax.
+it isn't valid seedlink syntax.
 
 When finished, close connection manually with `close(S.c[n])` where n is connection #.
 
 * Standard keywords: fmt, opts, q, si, to, v, w, y
 * SL keywords: gap, kai, mode, port, refresh, safety, x_on_err
-""" SeedLink!
-function SeedLink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
+""" seedlink!
+function seedlink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
                     gap::Real=KW.SL.gap,
                     kai::Real=KW.SL.kai,
                     mode::String=KW.SL.mode,
@@ -343,7 +343,7 @@ function SeedLink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
   write(S.c[q],"HELLO\r")
   vline = readline(S.c[q])
   sline = readline(S.c[q])
-  ver = getSLver(vline)
+  ver = get_sl_ver(vline)
 
   (v > 1) && println("Version = ", ver)
   (v > 1) && println("Server = ", strip(sline,['\r','\n']))
@@ -476,7 +476,7 @@ function SeedLink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
 
   return S
 end
-function SeedLink!(S::SeisData, C::Union{String,Array{String,1},Array{String,2}};
+function seedlink!(S::SeisData, C::Union{String,Array{String,1},Array{String,2}};
                     gap::Real=KW.SL.gap,
                     kai::Real=KW.SL.kai,
                     mode::String=KW.SL.mode,
@@ -496,12 +496,12 @@ function SeedLink!(S::SeisData, C::Union{String,Array{String,1},Array{String,2}}
   else
     sta, pat = parse_sl(C)
   end
-  SeedLink!(S, sta, pat, u=u, port=port, mode=mode, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
+  seedlink!(S, sta, pat, u=u, port=port, mode=mode, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
   return S
 end
 
-@doc (@doc SeedLink!)
-function SeedLink(sta::Array{String,1}, pat::Array{String,1};
+@doc (@doc seedlink!)
+function seedlink(sta::Array{String,1}, pat::Array{String,1};
   gap::Real=KW.SL.gap,
   kai::Real=KW.SL.kai,
   mode::String=KW.SL.mode,
@@ -515,11 +515,11 @@ function SeedLink(sta::Array{String,1}, pat::Array{String,1};
   x_on_err::Bool=KW.SL.x_on_err)
 
   S = SeisData()
-  SeedLink!(S, sta, pat, u=u, port=port, mode=mode, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
+  seedlink!(S, sta, pat, u=u, port=port, mode=mode, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
   return S
 end
 
-function SeedLink(C::Union{String,Array{String,1},Array{String,2}};
+function seedlink(C::Union{String,Array{String,1},Array{String,2}};
   gap::Real=KW.SL.gap,
   kai::Real=KW.SL.kai,
   mode::String=KW.SL.mode,
@@ -540,6 +540,6 @@ function SeedLink(C::Union{String,Array{String,1},Array{String,2}};
   else
     sta, pat = parse_sl(C)
   end
-  SeedLink!(S, sta, pat, u=u, port=port, mode=mode, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
+  seedlink!(S, sta, pat, u=u, port=port, mode=mode, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
   return S
 end

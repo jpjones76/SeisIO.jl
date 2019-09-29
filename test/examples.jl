@@ -34,11 +34,11 @@ println(stdout, "SeedLink example (part 1): see structure seis_sl")
 sta = "UW.GRUT,UW.H1K,UW.MDW"
 s1 = -120
 t1 = 120
-println(stdout, "seis_sl = SeedLink(\"", sta, "\", mode=\"TIME\", s=", s1, ", t=", t1, ")")
-seis_sl = SeedLink(sta, mode="TIME", s=s1, t=t1)
+println(stdout, "seis_sl = seedlink(\"", sta, "\", mode=\"TIME\", s=", s1, ", t=", t1, ")")
+seis_sl = seedlink(sta, mode="TIME", s=s1, t=t1)
 
 # IRIS SeedLink session in DATA mode, to same structure
 println(stdout, "SeedLink example (part 2): adds to structure seis_sl")
 println(stdout, "SeedLink!(seis_sl, \"SampleFiles/SL_long_test.conf\", mode=\"DATA\")")
-SeedLink!(seis_sl, "SampleFiles/SL_long_test.conf", mode="DATA")
+seedlink!(seis_sl, "SampleFiles/SL_long_test.conf", mode="DATA")
 println(stdout, "When finished, close connections with command \"for conn in seis_sl.c; close(conn); end\"")
