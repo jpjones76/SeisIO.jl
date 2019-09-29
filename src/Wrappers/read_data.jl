@@ -42,6 +42,7 @@ matching pattern `filestr`.
 | PC-SUDS                   | suds            |
 | SAC                       | sac             |
 | SEG Y (rev 0 or rev 1)    | segy            |
+| SLIST (ASCII sample list) | slist           |
 | UW                        | uw              |
 | Win32                     | win32           |
 
@@ -193,6 +194,16 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
       files = ls(filestr)
       for fname in files
         read_lenn_file!(S, fname)
+      end
+    end
+
+  elseif fmt == "slist"
+    if one_file
+      read_slist!(S, filestr)
+    else
+      files = ls(filestr)
+      for fname in files
+        read_slist!(S, fname)
       end
     end
 
