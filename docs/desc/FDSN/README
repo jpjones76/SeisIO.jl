@@ -1,6 +1,0 @@
-StationXML specifications downloaded from https://www.fdsn.org/xml/station/
-
-ERRATA IN fdsn-station-1.1.xsd
-* "DIGITAL (Z-TRANSFORM)" is totally undocumented.
-  + It is unknown whether this is a Z-transform in Z^-1 or Z.
-  + It is not clear from this string alone how to convert to rad/s.

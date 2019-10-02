@@ -1,8 +1,0 @@
-bottle_format.pdf was downloaded from https://www.unavco.org/data/strain-seismic/bsm-data/lib/docs/bottle_format.pdf ; last accessed 2019-08-23.
-
-NOTES
-* It is unclear whether bad data can exist in a file that stores data as
-Int16, the "invalid data point" is stored as an Int32 and the default value
-is larger than an Int16 can represent. If it is NOT possible for Int16 data
-to contain "invalid data point" values, then the code could be simplified a
-great deal.
