@@ -99,6 +99,7 @@ export mseed_support, read_dataless, read_seed_resp!, read_seed_resp, RESP_wont_
 
 include("Submodules/Quake.jl")
 using .Quake:read_qml
+import .Quake:convert
 export read_qml
 include("Submodules/RandSeis.jl")
 
