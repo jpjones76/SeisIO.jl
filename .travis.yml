@@ -24,7 +24,7 @@ after_success:
   Codecov.submit(Coveralls.process_folder()); '
 before_install:
 - cd test
-- svn export https://github.com/jpjones76/SeisIO-TestData/trunk/test/SampleFiles SampleFiles
+- svn export https://github.com/jpjones76/SeisIO-TestData/trunk/SampleFiles SampleFiles
 - cd SampleFiles
 - openssl aes-256-cbc -K $encrypted_91c8855269b0_key -iv $encrypted_91c8855269b0_iv
   -in restricted.enc -out restricted.tar.gz -d
