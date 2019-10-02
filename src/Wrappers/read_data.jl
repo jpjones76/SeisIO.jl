@@ -1,5 +1,35 @@
 export read_data, read_data!
 
+function read_data_seisio!(S::SeisData, filestr::String, v::Int64)
+  S_in = rseis(filestr)
+  L = length(S_in)
+  for i in 1:L
+    if typeof(S_in[i]) == SeisChannel
+      push!(S, S_in[i])
+      break
+    elseif typeof(S_in[i]) <: GphysChannel
+      C = convert(SeisChannel, S_in[i])
+      push!(S, C)
+      break
+    elseif typeof(S_in[i]) == SeisData
+      append!(S, S_in[i])
+      break
+    elseif typeof(S_in[i]) <: GphysData
+      S1 = convert(SeisData, S_in[i])
+      append!(S, S1)
+      break
+    elseif typeof(S_in[i]) == SeisEvent
+      (v > 0) && @warn(string("Obj ", i, " is type SeisEvent: only reading :data field"))
+      S1 = convert(SeisData, getfield(S_in[i], :data))
+      append!(S, S1)
+      break
+    else
+      (v > 0) && @warn(string("Obj ", i, " skipped (Type incompatible with read_data)"))
+    end
+  end
+  return nothing
+end
+
 @doc """
     read_data
 
@@ -42,6 +72,7 @@ matching pattern `filestr`.
 | PC-SUDS                   | suds            |
 | SAC                       | sac             |
 | SEG Y (rev 0 or rev 1)    | segy            |
+| SEISIO                    | seisio          |
 | SLIST (ASCII sample list) | slist           |
 | UW                        | uw              |
 | Win32                     | win32           |
@@ -80,6 +111,12 @@ SeisIO.KW.nx_add = 360000
 The system-wide defaults are `nx_new=86400000` and `nx_add=360000`. Using these
 values with very small jobs will greatly decrease performance.
 
+#### SeisIO native format
+
+`read_data("seisio", ...)` largely exists as a convenience wrapper; it reads
+only the first SeisIO object from each file that can be converted to a SeisData
+structure. For more complicated read operations on SeisIO files, use `rseis`.
+
 ## Examples
 1. `S = read_data("uw", "99011116541W", full=true)`
     + Read UW-format data file `99011116541W`
@@ -92,7 +129,7 @@ values with very small jobs will greatly decrease performance.
     + Use ASCII channel information filenames that match pattern `20140927*ch`
     + Assign new channels an initial size of `nx_new` samples
 
-See also: SeisIO.KW, get_data, guess
+See also: SeisIO.KW, get_data, guess, rseis
 """ read_data!
 function read_data!(S::GphysData, fmt::String, filestr::String;
   full    ::Bool    = false,              # full SAC/SEGY hdr
@@ -122,21 +159,16 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
       end
     end
 
-  elseif fmt == "segy" || fmt == "passcal"
-    passcal = fmt == "passcal"
-    buf     = getfield(BUF, :buf)
-    shorts  = getfield(BUF, :int16_buf)
-    ints    = getfield(BUF, :int32_buf)
-    checkbuf!(buf, 240)
-
+  elseif fmt == "seisio"
     if one_file
-      append!(S, read_segy_file(filestr, buf, shorts, ints, passcal, swap, full))
+      read_data_seisio!(S, filestr, v)
     else
       files = ls(filestr)
       for fname in files
-        append!(S, read_segy_file(fname, buf, shorts, ints, passcal, swap, full))
+        read_data_seisio!(S, fname, v)
       end
     end
+
 
   elseif (fmt == "miniseed" || fmt == "mseed")
     setfield!(BUF, :swap, swap)
@@ -150,7 +182,7 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
     end
 
 # ============================================================================
-# Data formats that aren't SAC, SEED, or SEG Y begin here and are alphabetical
+# Data formats that aren't SAC, SEISIO, or SEED begin here and are alphabetical
 # by first KW
 
   elseif fmt == "ah1"
@@ -194,6 +226,22 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
       files = ls(filestr)
       for fname in files
         read_lenn_file!(S, fname)
+      end
+    end
+
+  elseif fmt == "segy" || fmt == "passcal"
+    passcal = fmt == "passcal"
+    buf     = getfield(BUF, :buf)
+    shorts  = getfield(BUF, :int16_buf)
+    ints    = getfield(BUF, :int32_buf)
+    checkbuf!(buf, 240)
+
+    if one_file
+      append!(S, read_segy_file(filestr, buf, shorts, ints, passcal, swap, full))
+    else
+      files = ls(filestr)
+      for fname in files
+        append!(S, read_segy_file(fname, buf, shorts, ints, passcal, swap, full))
       end
     end
 
