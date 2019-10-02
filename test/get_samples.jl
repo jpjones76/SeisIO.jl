@@ -1,6 +1,7 @@
 function get_SampleFiles()
   status = 1
   if Sys.iswindows()
+    p = run(`cmd /c svn export https://github.com/jpjones76/SeisIO-TestData/trunk/SampleFiles SampleFiles`)
     @warn("Windows svn NYI")
     status = 1
   else
