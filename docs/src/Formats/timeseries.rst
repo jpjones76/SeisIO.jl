@@ -36,6 +36,7 @@ Supported File Formats
   PASSCAL SEG Y             | passcal
   SAC                       | sac
   SEG Y (rev 0 or rev 1)    | segy
+  SEISIO                    | seisio
   SLIST (ASCII sample list) | slist
   SUDS                      | suds
   UW data file              | uw
@@ -43,6 +44,11 @@ Supported File Formats
 
 Strings are case-sensitive to prevent any performance impact from using matches
 and/or lowercase().
+
+Note that read_data with file format "seisio" largely exists as a convenience
+wrapper; it reads only the first SeisIO object from each file that can be
+converted to a SeisData structure. For more complicated read operations,
+``rseis`` should be used.
 
 ******************
 Supported Keywords
