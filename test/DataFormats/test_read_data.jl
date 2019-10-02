@@ -45,9 +45,7 @@ printstyled("  read_data\n", color=:light_green)
 nf = size(files,1)
 for n = 1:nf
   fname = pref * files[n,1]
-  if occursin("Restricted", fname)
-    has_restricted || continue
-  end
+  (occursin("Restricted", fname) && (has_restricted==false)) && continue
   fwild = fname[1:end-1] * "*"
   f_call = files[n,2]
   opt = files[n,3]
