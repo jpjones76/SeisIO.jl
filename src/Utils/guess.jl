@@ -6,6 +6,15 @@ function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Int64)
   # =========================================================================
   # Robust file tests: exact "magic number", start sequence, etc....
 
+  # SeisIO Native ------------------------------------------------------------
+  seekstart(io)
+  try
+    @assert read(io, 6) == UInt8[0x53, 0x45, 0x49, 0x53, 0x49, 0x4f]
+    return ["seisio"]
+  catch err
+    (v > 2) && @warn(string("Test for SeisIO native format threw error:", err))
+  end
+
   # AH-2 --------------------------------------------------------------------
   seekstart(io)
   try
@@ -260,7 +269,8 @@ Only recognizes file formats supported by SeisIO.read_data.
 Returns a tuple: (ftype::String, swap::Bool)
 * `ftype` is the file type string to pass to `read_data`, except in these cases:
   + if ftype == "unknown", guess couldn't identify the file type.
-  + if ftype begins with "!" and contains a comma-separated list, the file type
+  + if ftype contains a comma-separated list, the file type couldn't be
+  uniquely determined.
 * `swap` determines whether or not file should be byte-swapped by `read_data`.
 Generally `swap=true` for big-Endian files, with two exceptions:
   wasn't determined uniquely.
@@ -303,6 +313,6 @@ function guess(file::String; v::Int64=KW.v)
       ftype = unique(vcat(str_le, str_be))
     end
   end
-  fstr = length(ftype) > 1 ? "!"*join(ftype, ",") : ftype[1]
+  fstr = length(ftype) > 1 ? join(ftype, ",") : ftype[1]
   return (fstr, swap)
 end
