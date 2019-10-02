@@ -1,12 +1,14 @@
 # test_le.sac was generated in SAC 101.6a with "fg seismogram; write test_le.sac"
-sac_file = path*"/SampleFiles/test_le.sac"
-sac_be_file = path*"/SampleFiles/test_be.sac"
-sac_pz_file = path*"/SampleFiles/test_sac.pz"
-sac_pz_wc = path*"/SampleFiles/test_sac.*"
+sac_file    = path*"/SampleFiles/SAC/test_le.sac"
+sac_be_file = path*"/SampleFiles/SAC/test_be.sac"
+sac_pz_file = path*"/SampleFiles/SAC/test_sac.pz"
+sac_pz_wc   = path*"/SampleFiles/SAC/test_sac.*"
+uw_file     = path*"/SampleFiles/UW/00012502123W"
+sac_pat     = path*"/SampleFiles/SAC/*.sac"
 
 printstyled("  SAC\n", color=:light_green)
 printstyled("    read\n", color=:light_green)
-@test_throws ErrorException read_data("sac", path*"/SampleFiles/99011116541W")
+@test_throws ErrorException read_data("sac", uw_file)
 
 SAC1 = read_data("sac", sac_file)[1]
 @test ≈(SAC1.fs, 100.0)
@@ -17,7 +19,7 @@ SAC2 = read_data("sac", sac_file, full=true)[1]
 @test ≈(length(SAC1.x), SAC2.misc["npts"])
 
 printstyled("    wildcard read\n", color=:light_green)
-SAC = read_data("sac", path*"/SampleFiles/*.sac", full=true)
+SAC = read_data("sac", sac_pat, full=true)
 
 printstyled("    bigendian read\n", color=:light_green)
 SAC3 = read_data("sac", sac_be_file, full=true)[1]

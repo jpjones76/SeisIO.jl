@@ -3,9 +3,14 @@
 # versions of libmseed, which reads with no issues
 printstyled("  mini-SEED file read\n", color=:light_green)
 
-@test_throws ErrorException read_data("mseed", string(path, "/SampleFiles/1day-100hz.sac"))
+test_sac_file     = string(path, "/SampleFiles/SAC/test_le.sac")
+test_mseed_file   = string(path, "/SampleFiles/SEED/test.mseed")
+test_mseed_pat    = string(path, "/SampleFiles/SEED/t*.mseed")
+mseed_vals_file   = string(path, "/SampleFiles/SEED/test_mseed_vals.txt")
 
-S = read_data("mseed", string(path, "/SampleFiles/test.mseed"), v=0)
+@test_throws ErrorException read_data("mseed", test_sac_file)
+
+S = read_data("mseed", test_mseed_file, v=0)
 @test isequal(S.id[1], "NL.HGN.00.BHZ")
 @test ≈(S.fs[1], 40.0)
 @test ≈(S.gain[1], 1.0)
@@ -13,14 +18,14 @@ S = read_data("mseed", string(path, "/SampleFiles/test.mseed"), v=0)
 @test ≈(S.x[1][1:5], [ 2787, 2776, 2774, 2780, 2783 ])
 
 # Test breaks if memory-resident SeisIOBuf structure SEED is not reset
-S1 = read_data("mseed", string(path, "/SampleFiles/test.mseed"), v=0)
+S1 = read_data("mseed", test_mseed_file, v=0)
 if Sys.iswindows() == false
-  S2 = read_data("mseed", string(path, "/SampleFiles/t*.mseed"), v=0)
+  S2 = read_data("mseed", test_mseed_pat, v=0)
   @test S == S1 == S2
 end
 
 
-mseed_vals = readdlm("DataFormats/test_mseed_vals.txt", ',', comments=true, comment_char='#')
+mseed_vals = readdlm(mseed_vals_file, ',', comments=true, comment_char='#')
 seedvals = Dict{String,Any}()
 ntest = size(mseed_vals,1)
 for i = 1:ntest

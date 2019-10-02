@@ -1,7 +1,7 @@
 fname = path*"/SampleFiles/fdsn.conf"
+sac_pz_file = path*"/SampleFiles/SAC/test_sac.pz"
 hood_reg = Float64[44.8, 46.0, -122.4, -121.0]
 rainier_rad = Float64[46.852886, -121.760374, 0.0, 0.1]
-sac_pz_file = path*"/SampleFiles/test_sac.pz"
 
 printstyled("  FDSN web requests\n", color=:light_green)
 

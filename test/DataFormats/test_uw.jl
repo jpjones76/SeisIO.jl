@@ -2,19 +2,18 @@ using SeisIO.UW
 import SeisIO.UW: readuwevt, uwdf, uwdf!, uwpf, uwpf!
 
 printstyled("  UW\n", color=:light_green)
-uwf = joinpath(path, "SampleFiles/[0-9]*W")
+uwf0 = joinpath(path, "SampleFiles/UW/00*W")
+uwf1 = joinpath(path, "SampleFiles/UW/99011116541")
+uwf2 = joinpath(path, "SampleFiles/UW/94100613522o")
+uwf3 = joinpath(path, "SampleFiles/UW/02062915175o")
+uwf4 = joinpath(path, "SampleFiles/UW/00012502123W")
+uwf5 = joinpath(path, "SampleFiles/UW/02062915205o")
 
-S = read_data("uw", uwf)
+S = read_data("uw", uwf0)
 S1 = SeisData()
-uwdf!(S1, joinpath(path, "SampleFiles/00012502123W"))
-uwdf!(S1, joinpath(path, "SampleFiles/99011116541W"))
+uwdf!(S1, joinpath(path, "SampleFiles/UW/00012502123W"))
 @test S == S1
 
-uwf1 = joinpath(path, "SampleFiles/99011116541")
-uwf2 = joinpath(path, "SampleFiles/94100613522o")
-uwf3 = joinpath(path, "SampleFiles/02062915175o")
-uwf4 = joinpath(path, "SampleFiles/00012502123W")
-uwf5 = joinpath(path, "SampleFiles/02062915205o")
 
 printstyled("  readuwevt\n", color=:light_green)
 

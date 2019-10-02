@@ -1,9 +1,40 @@
 @info("Please allow up to 20 minutes for all tests to execute.")
 import SeisIO
 cd(dirname(pathof(SeisIO))*"/../test")
+
+# Check that the sample files exist
+if isdir("SampleFiles")
+  println("SampleFiles/ exists; not downloading.")
+else
+  include("get_samples.jl")
+  p = get_SampleFiles()
+  (p == 0) || error("error downloading SampleFiles/!")
+end
+
+# Check for redist-restricted samples ... only works if you're me. W.A.I., email if you need 'em
+restr_path = Base.source_dir() * "/SampleFiles/Restricted/"
+if isdir(restr_path) == false
+  restr_dir = "/data2/SeisIO-TestFiles/SampleFiles/Restricted"
+  if isdir(restr_dir)
+      run(`cp -r $restr_dir SampleFiles/`)
+      println("copied SampleFiles/Restricted/ from /data2/")
+  else
+    restr_dir_2 = "/data/SeisIO-TestFiles/SampleFiles/Restricted"
+    if isdir(restr_dir_2)
+      run(`cp -r $restr_dir_2 SampleFiles/`)
+      println("copied SampleFiles/Restricted/ from /data/")
+    end
+  end
+else
+  println("nothing to copy, SampleFiles/Restricted/ exists")
+end
+
+# Add needed test functions
 include("test_helpers.jl")
-test_start = Dates.now()
-ltestname = 48
+
+# Announce test begin
+test_start  = Dates.now()
+ltestname   = 48
 printstyled(stdout, string(test_start, ": tests begin, source_dir = ", path, "/\n"), color=:light_green, bold=true)
 
 # huehuehue grep "include(joinpath" runtests.jl | awk -F "(" '{print $3}' | awk -F "," {'print $1'}
@@ -23,6 +54,9 @@ for d in ["CoreUtils", "Types", "RandSeis", "Utils", "NativeIO", "DataFormats", 
   end
 end
 
+if keep_samples == false
+  include("rm_samples.jl")
+end
 include("cleanup.jl")
 if !keep_log
   rm("runtests.log")

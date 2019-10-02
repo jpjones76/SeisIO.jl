@@ -1,9 +1,9 @@
-ah1_file = path*"/SampleFiles/ah1.f"
-ah1_fstr = path*"/SampleFiles/ah1.*"
-ahc_file = path*"/SampleFiles/lhz.ah"
-ah_resp = path*"/SampleFiles/BRV.TSG.DS.lE21.resp"
-ah2_file = path*"/SampleFiles/ah2.f"
-ah2_fstr = path*"/SampleFiles/ah2.*"
+ah1_file  = path*"/SampleFiles/AH/ah1.f"
+ah1_fstr  = path*"/SampleFiles/AH/ah1.*"
+ahc_file  = path*"/SampleFiles/AH/lhz.ah"
+ah_resp   = path*"/SampleFiles/AH/BRV.TSG.DS.lE21.resp"
+ah2_file  = path*"/SampleFiles/AH/ah2.f"
+ah2_fstr  = path*"/SampleFiles/AH/ah2.*"
 
 printstyled("  AH (Ad Hoc)\n", color=:light_green)
 

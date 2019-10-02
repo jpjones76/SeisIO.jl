@@ -1,12 +1,13 @@
-xml_stfile = path*"/SampleFiles/fdsnws-station_2017-01-12T03-17-42Z.xml"
-xml_stpat = path*"/SampleFiles/fdsnws-station*"
-id_err = "error in Station ID creation!"
-unit_err = "units don't match instrument code!"
-true_id = String["3337497", "3279407", "2844986", "2559759", "2092067", "1916079", "2413"]
-true_ot = DateTime("2011-03-11T05:46:23.200")
-true_loc = Float64[2.2376 38.2963; 93.0144 142.498; 26.3 19.7]
-true_mag = Float32[8.6, 9.1, 8.8, 8.5, 8.6, 9.0, 8.5]
-true_msc = String["MW", "MW", "MW", "MW", "MW", "MW", ""]
+xml_stfile = path*"/SampleFiles/XML/fdsnws-station_2017-01-12T03-17-42Z.xml"
+xml_stpat   = path*"/SampleFiles/XML/fdsnws-station*"
+
+id_err    = "error in Station ID creation!"
+unit_err  = "units don't match instrument code!"
+true_id   = String["3337497", "3279407", "2844986", "2559759", "2092067", "1916079", "2413"]
+true_ot   = DateTime("2011-03-11T05:46:23.200")
+true_loc  = Float64[2.2376 38.2963; 93.0144 142.498; 26.3 19.7]
+true_mag  = Float32[8.6, 9.1, 8.8, 8.5, 8.6, 9.0, 8.5]
+true_msc  = String["MW", "MW", "MW", "MW", "MW", "MW", ""]
 r1 = PZResp(a0 = 2.45956f13, f0 = 0.02f0, p = ComplexF32[-981.0+1009.0im, -981.0-1009.0im, -3290.0+1263.0im, -3290.0-1263.0im])
 r2 = PZResp(Complex{Float32}.([   0.0+0.0im       -0.037-0.037im
                                   0.0+0.0im       -0.037+0.037im
@@ -19,7 +20,7 @@ r2 = PZResp(Complex{Float32}.([   0.0+0.0im       -0.037-0.037im
                                   0.0+0.0im       -10530.0+10050.0im
                                   0.0+0.0im       -13300.0+0.0im
                                   0.0+0.0im       -255.097+0.0im ]),rev=true)
-r2.z = r2.z[1:6]
+r2.z  = r2.z[1:6]
 r2.f0 = 0.02f0
 r2.a0 = 3.53734f17
 
@@ -94,7 +95,7 @@ T = read_meta("sxml", xml_stpat)
 
 printstyled("    overwrite channel headers on time match\n", color=:light_green)
 redirect_stdout(out) do
-  xml_stfile = path*"/SampleFiles/fdsnws-station_2017-01-12T03-17-42Z.xml"
+  xml_stfile = path*"/SampleFiles/XML/fdsnws-station_2017-01-12T03-17-42Z.xml"
   S = SeisData()
   read_station_xml!(S, xml_stfile, v=3)
   n = S.n

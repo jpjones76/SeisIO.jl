@@ -1,6 +1,6 @@
 printstyled("  seismogram differentiation/integration\n", color=:light_green)
 
-convert_file = path*"/SampleFiles/2019_M7.1_Ridgecrest.seis"
+convert_file = path*"/SampleFiles/SEIS/2019_M7.1_Ridgecrest.seis"
 S = randSeisData(3, s=1.0)
 S.units = ["m/s2", "m", "m/s"]
 U = deepcopy(S)

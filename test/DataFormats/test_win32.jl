@@ -5,8 +5,8 @@ hexIDs = UInt16[0x0001, 0x0002, 0x0003]
 @test findhex(0x0003, hexIDs) == 3
 
 # win32 with gaps
-cfile = path*"/SampleFiles/Restricted/03_02_27_20140927.euc.ch"
-if safe_isfile(cfile)
+if has_restricted
+  cfile = path*"/SampleFiles/Restricted/03_02_27_20140927.euc.ch"
   printstyled("  win32\n", color=:light_green)
   @info(string(timestamp(), ": win32 tests use an SSL-encrypted tarball."))
 
@@ -26,13 +26,13 @@ if safe_isfile(cfile)
     # Check against SAC files
     printstyled("    checking read integrity against HiNet SAC files\n", color=:light_green)
     testfiles = path*"/SampleFiles/Restricted/" .* ["20140927000000.V.ONTA.E.SAC",
-                                              "20140927000000.V.ONTA.H.SAC",
-                                              "20140927000000.V.ONTA.N.SAC",
-                                              "20140927000000.V.ONTA.U.SAC",
-                                              "20140927000000.V.ONTN.E.SAC",
-                                              "20140927000000.V.ONTN.H.SAC",
-                                              "20140927000000.V.ONTN.N.SAC",
-                                              "20140927000000.V.ONTN.U.SAC"]
+                                                    "20140927000000.V.ONTA.H.SAC",
+                                                    "20140927000000.V.ONTA.N.SAC",
+                                                    "20140927000000.V.ONTA.U.SAC",
+                                                    "20140927000000.V.ONTN.E.SAC",
+                                                    "20140927000000.V.ONTN.H.SAC",
+                                                    "20140927000000.V.ONTN.N.SAC",
+                                                    "20140927000000.V.ONTN.U.SAC"]
 
     # SAC files prepared in SAC with these commands from day-long Ontake files
     # beginning at midnight Japan time converted to SAC with win32 precompiled
@@ -132,5 +132,5 @@ if safe_isfile(cfile)
   fname = path*"/SampleFiles/Restricted/2014092712370207VM.cnt"
   read_data!(S, "win32", fname, cf=cfile)
 else
-  printstyled("  win32 data format skipped. (files not found; is this Appveyor?)\n", color=:light_green)
+  printstyled("  win32 data format not tested (files not found)\n", color=:red)
 end

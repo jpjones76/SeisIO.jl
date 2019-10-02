@@ -1,5 +1,5 @@
 printstyled("  resp\n", color=:light_green)
-sac_pz_file = path*"/SampleFiles/test_sac.pz"
+sac_pz_file = path*"/SampleFiles/SAC/test_sac.pz"
 non_resp = PZResp(p = Complex{Float32}[complex(1.0, 1.0)], z = Complex{Float32}[2.0/Complex(1.0, -1.0)])
 Nx = 1000000
 C = randSeisChannel(s=true)

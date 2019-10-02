@@ -1,10 +1,15 @@
 printstyled("  read_meta equivalencies\n", color=:light_green)
 printstyled("    full (XML, RESP, dataless)\n", color=:light_green)
 
-S1 = read_meta("sxml", path*"/SampleFiles/fdsnws-station_2019-09-11T06_26_58Z.xml", s="2016-01-01T00:00:00", msr=true)
-S2 = read_meta("resp", path*"/SampleFiles/JRO.resp", units=true)
-S3 = read_meta("dataless", path*"/SampleFiles/SEED/CC.dataless", s="2016-01-01T00:00:00", units=true)[56:58]
-S4 = read_meta("sacpz", path*"/SampleFiles/JRO.sacpz")
+sxml_file     = path*"/SampleFiles/XML/fdsnws-station_2019-09-11T06_26_58Z.xml"
+resp_file     = path*"/SampleFiles/SEED/JRO.resp"
+dataless_file = path*"/SampleFiles/SEED/CC.dataless"
+sacpz_file    = path*"/SampleFiles/SAC/JRO.sacpz"
+
+S1 = read_meta("sxml", sxml_file, s="2016-01-01T00:00:00", msr=true)
+S2 = read_meta("resp", resp_file, units=true)
+S3 = read_meta("dataless", dataless_file, s="2016-01-01T00:00:00", units=true)[56:58]
+S4 = read_meta("sacpz", sacpz_file)
 @test_throws ErrorException read_meta("deez", "nutz.sac")
 
 C = Array{Char,2}(undef, 10, 3)
@@ -119,8 +124,8 @@ end
 println("")
 
 printstyled("    one-stage (SACPZ, XML)\n", color=:light_green)
-S1 = read_meta("sxml", path*"/SampleFiles/fdsnws-station_2019-09-11T06_26_58Z.xml", s="2016-01-01T00:00:00", msr=false)
-S4 = read_meta("sacpz", path*"/SampleFiles/JRO.sacpz")
+S1 = read_meta("sxml", sxml_file, s="2016-01-01T00:00:00", msr=false)
+S4 = read_meta("sacpz", sacpz_file)
 K = Array{Char,2}(undef, 3, 3)
 fill!(K, ' ')
 SA = Array{String, 2}(undef, 3, 3)

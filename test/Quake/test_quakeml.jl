@@ -1,6 +1,6 @@
-xml_evfile1 = path*"/SampleFiles/fdsnws-event_2017-01-12T03-18-55Z.xml"
-xml_evfile2 = path*"/SampleFiles/ISC_2011-tohoku-oki.xml"
-xml_stfile = path*"/SampleFiles/fdsnws-station_2017-01-12T03-17-42Z.xml"
+xml_evfile1 = path*"/SampleFiles/XML/fdsnws-event_2017-01-12T03-18-55Z.xml"
+xml_evfile2 = path*"/SampleFiles/XML/ISC_2011-tohoku-oki.xml"
+xml_stfile = path*"/SampleFiles/XML/fdsnws-station_2017-01-12T03-17-42Z.xml"
 
 printstyled("  QuakeML\n", color=:light_green)
 

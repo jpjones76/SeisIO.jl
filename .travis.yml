@@ -23,10 +23,12 @@ after_success:
   || cd(Pkg.dir("SeisIO")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder());
   Codecov.submit(Coveralls.process_folder()); '
 before_install:
-- openssl aes-256-cbc -K $encrypted_d21b36055eee_key -iv $encrypted_d21b36055eee_iv
-  -in test/SampleFiles/samples.enc -out test/SampleFiles/samples.tar.gz -d
-- cd test/SampleFiles
-- tar zxvf samples.tar.gz
+- cd test
+- svn export https://github.com/jpjones76/SeisIO-TestData/trunk/test/SampleFiles SampleFiles
+- cd SampleFiles
+- openssl aes-256-cbc -K $encrypted_91c8855269b0_key -iv $encrypted_91c8855269b0_iv
+  -in restricted.enc -out restricted.tar.gz -d
+- tar zxvf restricted.tar.gz
 - cd ../..
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi

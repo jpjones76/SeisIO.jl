@@ -1,6 +1,6 @@
-resp_file_0 = path*"/SampleFiles/YUK7.RESP"
-resp_file_1 = path*"/SampleFiles/RESP.cat"
-resp_file_2 = path*"/SampleFiles/RESP.*"
+resp_file_0 = path*"/SampleFiles/SEED/YUK7.RESP"
+resp_file_1 = path*"/SampleFiles/SEED/RESP.cat"
+resp_file_2 = path*"/SampleFiles/SEED/RESP.*"
 rtol = eps(Float32)
 
 printstyled("  SEED RESP\n", color=:light_green)

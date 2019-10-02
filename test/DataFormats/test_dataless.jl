@@ -1,6 +1,6 @@
 printstyled("  dataless SEED\n", color=:light_green)
 redirect_stdout(out) do
-  metafile = path*"/SampleFiles/CC.dataless"
+  metafile = path*"/SampleFiles/SEED/jones.hood.dataless"
   S = read_meta("dataless", metafile, v=3,
                 s="2008-01-01T00:00:00",
                 t="2008-02-01T00:00:00",

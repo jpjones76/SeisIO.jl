@@ -319,5 +319,7 @@ global_logger(logger)
 @info("stdout redirect and logging")
 
 # Set some keyword defaults
+has_restricted = safe_isdir(path * "/SampleFiles/Restricted/")
 SeisIO.KW.comp = 0x00
 keep_log = false
+keep_samples = true

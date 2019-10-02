@@ -1,7 +1,7 @@
 using SeisIO.SUDS, SeisIO.UW
 
-qml_file  = path*"/SampleFiles/ISC_2011-tohoku-oki.xml"
-uw_file   = path*"/SampleFiles/99011116541"
+qml_file  = path*"/SampleFiles/XML/ISC_2011-tohoku-oki.xml"
+uw_file   = path*"/SampleFiles/UW/99011116541"
 suds_file = path*"/SampleFiles/SUDS/eq_wvm1.sud"
 
 

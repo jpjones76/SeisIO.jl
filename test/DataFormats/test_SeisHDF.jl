@@ -2,11 +2,13 @@ import SeisIO.SeisHDF:read_asdf, read_asdf!, id_match, id_to_regex
 printstyled("  ASDF\n", color=:light_green)
 printstyled("    read_hdf5\n", color=:light_green)
 
-id = "CI.SDD..HHZ"
+hdf     = path*"/SampleFiles/HDF5/2days-40hz.h5"
+hdf_pat = path*"/SampleFiles/HDF5/2days-40hz.h*"
+
+id  = "CI.SDD..HHZ"
 idr = "C*.SDD..HH?"
-hdf = path*"/SampleFiles/2days-40hz.h5"
-ts = "2019-07-07T23:00:00"
-te = "2019-07-08T02:00:00"
+ts  = "2019-07-07T23:00:00"
+te  = "2019-07-08T02:00:00"
 
 # id_to_regex
 @test id_to_regex("*.*.*.*") == r".*\.*\.*\.*"
@@ -26,7 +28,6 @@ S2 = read_asdf(hdf, id, ts, te, true, 0)
 @test S1 == S2
 
 # check file wildcards
-hdf_pat = path*"/SampleFiles/2days-40hz.h*"
 S2 = read_hdf5(hdf_pat, ts, te, id = id)
 @test S1 == S2
 
