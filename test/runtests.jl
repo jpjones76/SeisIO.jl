@@ -35,7 +35,10 @@ include("test_helpers.jl")
 # Announce test begin
 test_start  = Dates.now()
 ltestname   = 48
-printstyled(stdout, string(test_start, ": tests begin, source_dir = ", path, "/\n"), color=:light_green, bold=true)
+printstyled(stdout,
+  string(test_start, ": tests begin, path = ", path, ", has_restricted = ", has_restricted, ", keep_log = ", keep_log, ", keep_samples = ", keep_samples, "\n"), 
+  color=:light_green,
+  bold=true)
 
 # huehuehue grep "include(joinpath" runtests.jl | awk -F "(" '{print $3}' | awk -F "," {'print $1'}
 for d in ["CoreUtils", "Types", "RandSeis", "Utils", "NativeIO", "DataFormats", "Processing", "Quake", "Web"]
