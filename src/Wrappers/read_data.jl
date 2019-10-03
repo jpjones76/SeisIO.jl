@@ -170,7 +170,7 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
     end
 
 
-  elseif (fmt == "miniseed" || fmt == "mseed")
+  elseif ((fmt == "miniseed") || (fmt == "mseed"))
     setfield!(BUF, :swap, swap)
     if one_file
       read_mseed_file!(S, filestr, v, nx_new, nx_add)
