@@ -8,7 +8,18 @@ if isdir("SampleFiles")
 else
   include("get_samples.jl")
   p = get_SampleFiles()
-  (p == 0) || error("error downloading SampleFiles/!")
+  if p != 0
+    err_string = "can't download SampleFiles!
+
+    Check: is a command-line SVN client installed?
+    (type \"run(`svn --version`)\"; if an error is thrown, you don't have SVN.)
+
+    SlikSVN Windows client: https://sliksvn.com/download/
+    Subversion for Ubuntu: sudo apt install subversion
+    Subversion for OS X: pkg_add subversion
+    "
+    error(err_string)
+  end
 end
 
 # Check for redist-restricted samples ... only works if you're me. W.A.I., email if you need 'em
