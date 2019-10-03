@@ -11,7 +11,7 @@ else
   if p != 0
     err_string = "can't download SampleFiles!
 
-    Check: is a command-line SVN client installed?
+    Please check: is a command-line SVN client installed?
     (type \"run(`svn --version`)\"; if an error is thrown, you don't have SVN.)
 
     SlikSVN Windows client: https://sliksvn.com/download/
