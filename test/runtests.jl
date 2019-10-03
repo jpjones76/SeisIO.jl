@@ -36,7 +36,7 @@ include("test_helpers.jl")
 test_start  = Dates.now()
 ltestname   = 48
 printstyled(stdout,
-  string(test_start, ": tests begin, path = ", path, ", has_restricted = ", has_restricted, ", keep_log = ", keep_log, ", keep_samples = ", keep_samples, "\n"), 
+  string(test_start, ": tests begin, path = ", path, ", has_restricted = ", has_restricted, ", keep_log = ", keep_log, ", keep_samples = ", keep_samples, "\n"),
   color=:light_green,
   bold=true)
 
@@ -62,7 +62,11 @@ if keep_samples == false
 end
 include("cleanup.jl")
 if !keep_log
-  rm("runtests.log")
+  try
+    rm("runtests.log")
+  catch err
+    @warn(string("can't remove runtests.log; threw err", err))
+  end
 end
 test_end = Dates.now()
 δt = 0.001*(test_end-test_start).value

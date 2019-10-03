@@ -29,14 +29,14 @@ end
 U = deepcopy(S)
 filtfilt!(S)
 S1 = filtfilt(U)
-kill = Int64[]
+klist = Int64[]
 for i = 1:S.n
   if any(isnan.(S.x[i])) || any(isnan.(S1.x[i]))
-    push!(kill, i)
+    push!(klist, i)
   end
 end
-deleteat!(S, kill)
-deleteat!(S1, kill)
+deleteat!(S, klist)
+deleteat!(S1, klist)
 if S.n > 0
   @test S == S1
 else

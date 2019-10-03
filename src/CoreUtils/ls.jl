@@ -96,6 +96,11 @@ function ls(s::String)
     end
 
     # So we're going to check for matches on all but the first m of each string:
+    if Sys.iswindows()
+        for i = 1:length(fpat)
+            fpat[i] = replace(fpat[i], "." => "\\.")
+        end
+    end
     ff = join(fpat, ".*")
     mpat = Regex(ff * "\$")
 
