@@ -11,6 +11,6 @@ function pkg_check(pkgs::Array{String,1})
 end
 pkg_check(["Dates", "DSP", "SeisIO", "IJulia"])
 using IJulia
-import SeisIO: svn_get
-svn_get("https://github.com/jpjones76/SeisIO-TestData/trunk/Tutorial", "DATA")
+import SeisIO: get_svn
+get_svn("https://github.com/jpjones76/SeisIO-TestData/trunk/Tutorial", "DATA")
 jupyterlab(dir=pwd())
