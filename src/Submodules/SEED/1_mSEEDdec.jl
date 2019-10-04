@@ -29,7 +29,7 @@ function SEED_Float64!(io::IO, S::SeisData, c::Int64, xi::Int64, nb::UInt16)
   return nothing
 end
 
-function SEED_Unenc!(io::IO, S::SeisData, c::Int64, xi::Int64, nb::UInt16)
+function SEED_Unenc!(io::IO, S::SeisData, c::Int64, xi::Int64, nb::UInt16, nx::UInt16)
   buf = getfield(BUF, :buf)
   checkbuf_8!(buf, xi)
   x = getindex(getfield(S, :x), c)
@@ -46,7 +46,6 @@ function SEED_Unenc!(io::IO, S::SeisData, c::Int64, xi::Int64, nb::UInt16)
   else
     xr = reinterpret(T, buf)
   end
-  nx = div(nb, sizeof(T))
   copyto!(x, xi+1, xr, 1, nx)
   setfield!(BUF, :k, Int64(nx))
   return nothing
