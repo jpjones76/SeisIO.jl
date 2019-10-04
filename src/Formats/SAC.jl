@@ -93,12 +93,12 @@ function fill_sac(S::GphysChannel, ts::Bool, leven::Bool)
   end
 
   # Assign a filename
-  y_s = string(y); y_s="0"^(4-length(y_s))*y_s
-  j_s = string(j); j_s="0"^(3-length(j_s))*j_s
-  h_s = string(tt[4]); h_s="0"^(2-length(h_s))*h_s
-  m_s = string(tt[5]); m_s="0"^(2-length(m_s))*m_s
-  s_s = string(tt[6]); s_s="0"^(2-length(s_s))*s_s
-  ms_s = string(tt[7]); ms_s="0"^(3-length(ms_s))*ms_s
+  y_s = lpad(y, 4, '0')
+  j_s = lpad(j, 3, '0')
+  h_s = lpad(tt[4], 2, '0')
+  m_s = lpad(tt[5], 2, '0')
+  s_s = lpad(tt[6], 2, '0')
+  ms_s = lpad(tt[7], 3, '0')
   fname = join([y_s, j_s, h_s, m_s, s_s, ms_s, id[1], id[2], id[3], id[4], "R.SAC"],'.')
   return (fv, iv, cv, fname)
 end
