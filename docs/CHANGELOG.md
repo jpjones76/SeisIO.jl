@@ -1,3 +1,16 @@
+### 2019-10-03
+* Added kw `autoname` to `get_data`; see documentation for functionality
+and behavior. Implements request in issue #24.
+* Discovered/fixed a rare mini-SEED bug wherein the last packet of a request
+containing unencoded data could throw a BoundsError when padded with empty bytes.
+
+### 2019-10-02
+* The memory footprint of SeisIO has been reduced by moving most large files
+to https://github.com/jpjones76/SeisIO-TestData. SeisIO now requires ~3 MB
+rather than ~300 MB.
+  + The development version is somewhat unwieldy due to the commit history.
+  This can be safely pruned with BFG Repo-Cleaner at a max. file size of 50k.
+
 ### 2019-10-01
 * `read_data("seisio", ...)` now works as a wrapper to `rseis`
   + Note: this is a convenience wrapper and lacks the functionality of `rseis`.
