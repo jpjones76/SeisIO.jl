@@ -35,7 +35,7 @@ function irisws(cha::String, d0::String, d1::String;
   (R, parsable) = get_http_req(url, req_info_str, to)
   if parsable
     if w
-      savereq(R, fmt, c[1], c[2], c[3], c[4], d0, d1, "R")
+      savereq(R, fmt, Ch.id, d0, d1)
     end
     if fmt == "sacbl"
       Ch = read_sac_stream(IOBuffer(R), BUF.sac_fv, BUF.sac_iv, BUF.sac_cv, false, false)
