@@ -20,6 +20,25 @@ end
 # FDSNsta with MultiStageResp
 S = FDSNsta("CC.VALT..,PB.B001..BS?,PB.B001..E??", msr=true)
 
+# With autoname
+printstyled("      get_data(\"FDSN\", ..., autoname=true)\n", color=:light_green)
+req_f = "2019.001.00.00.00.000.UW.VLL..EHZ.R.mseed"
+req_ok = (try
+    S = get_data("FDSN", "UW.VLL..EHZ", src="IRIS", s="2019-01-01", t=3600, autoname=true)
+    true
+  catch
+    @warn("Station VLL appears to be offline; test skipped.")
+    false
+  end)
+if req_ok
+  @test safe_isfile(req_f)
+  rm(req_f)
+
+  printstyled("        test match to IRIS filename convention\n", color=:light_green)
+  S = get_data("IRIS", "UW.VLL..EHZ", s="2019-01-01", t=3600, autoname=true)
+  @test safe_isfile("2019.001.00.00.00.UW.VLL..EHZ.R.mseed")
+end
+
 printstyled("      radius search (rad=)\n", color=:light_green)
 rad = Float64[45.373514, -121.695919, 0.0, 0.1]
 S = FDSNsta(rad=rainier_rad)

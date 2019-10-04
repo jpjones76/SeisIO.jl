@@ -101,6 +101,7 @@ function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
 end
 
 function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,2}};
+  autoname  ::Bool              = false,          # Auto-generate file names?
   fmt       ::String            = KW.fmt,         # Request format
   msr       ::Bool              = false,          # MultiStageResp
   nd        ::Real              = KW.nd,          # Number of days per request
@@ -137,6 +138,9 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
                 xf    = xf
                 )
   end
+
+  # (1a) Can we autoname the file? True iff S.n == 1
+  (S.n == 1) || (autoname = false)
 
   # (2) Build ID strings for data query
   ID_str = Array{String,1}(undef,S.n)
@@ -204,17 +208,22 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
       else
         ext = fmt
       end
-      ymd = split(string(s_str), r"[A-Z]")
-      (y, m, d) = split(ymd[1], "-")
-      j = md2j(y, m, d)
-      fname = join([String(y),
-                    string(j),
-                    replace(split(s_str, 'T')[2], ':' => '.'),
-                    "FDSNWS",
-                    src,
-                    ext],
-                    '.')
 
+      # Generate filename
+      yy = s_str[1:4]
+      mm = s_str[6:7]
+      dd = s_str[9:10]
+      HH = s_str[12:13]
+      MM = s_str[15:16]
+      SS = s_str[18:19]
+      nn = lpad(div(parse(Int64, s_str[21:26]), 1000), 3, '0')
+      jj = lpad(md2j(yy, mm, dd), 3, '0')
+      if autoname
+        fname = join([yy, jj, HH, MM, SS, nn, S.id[1], "R", ext], '.')
+      else
+        fname = join([yy, jj, HH, MM, SS, nn, "FDSNWS", src, ext], '.')
+      end
+      safe_isfile(fname) && @warn(string("File ", fname, " contains an identical request; overwriting."))
       open(fname, "w") do io
         request("POST", URL, webhdr, QUERY, readtimeout=to, response_stream=io)
       end
@@ -222,29 +231,35 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
       parsable = true
     else
       (R, parsable) = get_http_post(URL, QUERY, to)
-      if parsable
-        io = IOBuffer(R)
-      end
+      io = IOBuffer(R)
     end
 
     # Parse data (if we can)
-    if parsable && fmt in ["mseed", "miniseed", "geocsv"]
+    if parsable
       if fmt == "mseed" || fmt == "miniseed"
         parsemseed!(S, io, v, KW.nx_add, KW.nx_add)
       elseif fmt == "geocsv" || fmt == "geocsv.tspair"
         read_geocsv_tspair!(S, io)
       elseif fmt == "geocsv.slist"
         read_geocsv_slist!(S, io)
+      else
+        parse_err = true
+        n_badreq += 1
+        S += SeisChannel(id = string("...YYY", n_badreq),
+                         misc = Dict{String,Any}( "url" => URL,
+                                                  "body" => QUERY,
+                                                  "data" => read(io) ) )
       end
     else
+      # Should only happen with an error message (parsable to String) in io
       parse_err = true
       n_badreq += 1
-      S += SeisChannel(id = string("XX..", n_badreq),
+      S += SeisChannel(id = string("XX...", n_badreq),
                        misc = Dict{String,Any}( "url" => URL,
                                                 "body" => QUERY,
-                                                "data" => readlines(IOBuffer(R)) ) )
+                                                "data" => readlines(io) ) )
     end
-
+    close(io)
     ts += ti
   end
 

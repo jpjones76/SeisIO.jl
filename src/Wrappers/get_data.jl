@@ -7,7 +7,7 @@ export get_data!, get_data
 ## Arguments
 * `method`: String retrieval method
   + `"FDSN"`: FDSNWS dataselect
-  + `"IRIS"`: IRISWS
+  + `"IRIS"`: IRISWS timeseries
 * `channels`: channel selectors. (Union{String,Array{String,1},Array{String,2}})
 * `S`: SeisData structure
 
@@ -29,20 +29,58 @@ pressure sensors). The relevant keywords and order of operations is as follows:
 None of these keywords are mutually exclusive. Hey, it's your CPU time.
 
 ### Other keywords
-* msr: Get multi-stage response? (FDSN only)
-* s: Start time
-* t: Termination (end) time
-* xf: Name of XML file to save station metadata
+* `autoname`: Determine file names from channel ID?
+* `msr`: Get multi-stage response? (FDSN only)
+* `s`: Start time
+* `t`: Termination (end) time
+* `xf`: Name of XML file to save station metadata
+
+#### Writing to disk and file names
+KW `autoname=true` sets `w=true` automatically. In both cases, each valid
+request is written directly to disk before parsing; a file persists even if
+parsing fails.
+
+If method is "IRIS", file names are uniquely specified if `w=true`. KW `autoname`
+is not needed.
+
+If method is "FDSN", then `autoname=true` attempts to emulate IRIS channel file
+naming conventions. A major changes to request syntax is needed for this to
+work, however: each request must return *exactly one* channel.
+
+Example:
+* `get_data("FDSN", "UW.LON..BHZ", autoname=true)` generates IRIS-style
+filenames because the channel name is uniquely specified.
+* `get_data("FDSN", "UW.LON..BH?", autoname=true)` still writes to disk, but
+can't use IRIS-style file names because the request returns three channels.
+
+## Best Practices
+* `get_data("IRIS", ...)` is preferable to `get_data("FDSN", ..., src="IRIS")`
+for a single-channel request available from both services.
+  + Note: not all stations in IRIS metadata are available from both services.
+* Avoid wildcards with `autoname=true`.
 
 ## Examples
-1. `S = get_data("FDSN", "UW.SEP..EHZ,UW.SHW..EHZ,UW.HSR..EHZ", src="IRIS", t=(-600))`: using FDSNWS, get the last 10 minutes of data from three short-period vertical-component channels at Mt. St. Helens, USA.
-2. `get_data!(S, "IRIS", "CC.PALM..EHN", t=(-120), f="sacbl")`: using IRISWS, fetch the last two minutes of data from component EHN, station PALM (Palmer Lift (Mt. Hood), OR, USA,), network CC (USGS Cascade Volcano Observatory, Vancouver, WA, USA), in bigendian SAC format, and merge into SeisData structure `S`.
-3. `S = get_data("FDSN", "CC.TIMB..EHZ", t=(-600), w=true)`: using FDSNWS, get the last 10 minutes of data from channel EHZ, station TIMB (Timberline Lodge, OR, USA), and save the data directly to disk (in addition to returning data in a new SeisData structure S).
-4. `S = get_data("FDSN", "HV.MOKD..HHZ", s="2012-01-01T00:00:00", t=(-3600))`: using FDSNWS, create a new SeisData structure `S` with an hour of data ending at 2012-01-01, 00:00:00 UTC, from HV.MOKD..HHZ (USGS Hawai'i Volcano Observatory).
+1. `S = get_data("FDSN", "UW.SEP..EHZ,UW.SHW..EHZ,UW.HSR..EHZ", src="IRIS",
+t=(-600))`: using FDSNWS, get the last 10 minutes of data from three short-
+period vertical-component channels at Mt. St. Helens, USA.
+2. `get_data!(S, "IRIS", "CC.PALM..EHN", t=(-120), f="sacbl", demean=true)`:
+using IRISWS, fetch the last two minutes of data from component EHN, station
+PALM (Palmer Lift (Mt. Hood), OR, USA,), network CC (USGS Cascade Volcano
+Observatory, Vancouver, WA, USA), in bigendian SAC format, and append to
+SeisData structure `S`. Remove the mean from the request after download and
+before appending.
+3. `S = get_data("FDSN", "CC.TIMB..EHZ", t=(-600), autoname=true)`: using FDSNWS,
+get the last 10 minutes of data from channel EHZ, station TIMB (Timberline Lodge,
+OR, USA). Save directly to disk with an automated file name, in addition to
+returning data in a new SeisData structure S.
+4. `S = get_data("FDSN", "HV.MOKD..HHZ", s="2012-01-01T00:00:00", t=(-3600))`:
+using FDSNWS, create a new SeisData structure `S` with an hour of data ending
+at 2012-01-01, 00:00:00 UTC, from HV.MOKD..HHZ (USGS Hawai'i Volcano Observatory).
 
 See also: chanspec, parsetimewin, seis_www, SeisIO.KW
 """ get_data
 function get_data(method_in::String, C="*"::Union{String,Array{String,1},Array{String,2}};
+        autoname::Bool = false                               ,  # Auto-generate file names?
           demean::Bool = false                               ,  # Demean data after download?
          detrend::Bool = false                               ,  # Detrend data after download?
            fmt::String = KW.fmt                              ,  # File format
@@ -70,6 +108,9 @@ function get_data(method_in::String, C="*"::Union{String,Array{String,1},Array{S
   # Parse time window
   α, ω = parsetimewin(s, t)
 
+  # KWs that ovewrite other KWs (rare; keep this behavior to an absolute minimum!)
+  (autoname == true) && (w = true)
+
   # Generate SeisData
   S = SeisData()
 
@@ -82,6 +123,7 @@ function get_data(method_in::String, C="*"::Union{String,Array{String,1},Array{S
     end
     R = minreq(C)
     parse_err = FDSNget!(S, C,
+                          autoname=autoname,
                           fmt=fmt,
                           msr=msr,
                           nd=nd,
@@ -184,6 +226,7 @@ end
 
 @doc (@doc get_data)
 function get_data!(S::SeisData, method_in::String, C="*"::Union{String,Array{String,1},Array{String,2}};
+        autoname::Bool = false                               ,  # Auto-generate file names?
           demean::Bool = false                               ,  # Demean data after download?
          detrend::Bool = false                               ,  # Detrend data after download?
            fmt::String = KW.fmt                              ,  # File format
@@ -209,6 +252,7 @@ function get_data!(S::SeisData, method_in::String, C="*"::Union{String,Array{Str
      )
 
   U = get_data(method_in, C,
+                autoname=autoname,
                 demean=demean,
                 detrend=detrend,
                 fmt=fmt,
