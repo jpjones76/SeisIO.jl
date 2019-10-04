@@ -36,7 +36,7 @@ if req_ok
 
   printstyled("        test match to IRIS filename convention\n", color=:light_green)
   S = get_data("IRIS", "UW.VLL..EHZ", s="2019-01-01", t=3600, autoname=true)
-  @test safe_isfile("2019.001.00.00.00.UW.VLL..EHZ.R.mseed")
+  @test safe_isfile(req_f)
 end
 
 printstyled("      radius search (rad=)\n", color=:light_green)
