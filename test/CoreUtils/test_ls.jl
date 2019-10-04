@@ -47,6 +47,9 @@ if safe_isfile(cfile)
                 "/SampleFiles/Restricted/2014092709*cnt"
               ]
   T_expect =  [63, 532, 60]
+  if safe_isfile(path .* "/SampleFiles/restricted.tar.gz")
+    T_expect[2] += 1
+  end
 
   # Test that ls finds the same number of files as bash `ls -1`
   for (n,v) in enumerate(T)
