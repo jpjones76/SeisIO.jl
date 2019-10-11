@@ -1,5 +1,5 @@
 module SEED
-using Dates, SeisIO, SeisIO.Formats
+using Dates, Printf, SeisIO, SeisIO.Formats
 import SeisIO.Formats: formats, FmtVer, FormatDesc, HistVec
 import SeisIO:
   BUF,

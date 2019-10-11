@@ -16,11 +16,12 @@ the Exchange of Earthquake Data) file format.
 | [500] Timing Blockette                        | seed_timing     |
 | [1000] Data Only SEED Blockette               |                 |
 | [1001] Data Extension Blockette               |                 |
-| [2000] Variable Length Opaque Data Blockette  | seed_opaque*    |
+| [2000] Variable Length Opaque Data Blockette  | seed_opaque     |
 
 Information unrelated to data or timing is stored in `:misc` as String arrays;
 each blockette gets a single String in the named key, separated by a newline
-character (\\n).
+character (\\n). `:misc["seed_opaque"]`, if present, contains raw (UInt8) byte
+vectors of all data in each packet.
 
 ## Supported Data Encodings
 
@@ -39,12 +40,26 @@ character (\\n).
 | 30      | SRO                                                         |
 | 32      | DWWSSN gain ranged                                          |
 
-[^a]: Saved to C.misc["seed_ascii"]; generally not used for data
+[^a]: Saved to `C.misc["seed_ascii"]`; generally not used for data
 [^b]: Converted to Float32
 """ mseed_support
 function mseed_support()
-    return nothing
+  println("\nCurrently supported mini-SEED blockette types:\n")
+  printstyled(@sprintf("%10s|%40s|%18s\n", "BLOCKETTE", " ", "KEY IN :MISC"), color=:green, bold=true)
+  printstyled(@sprintf("%10s|%40s|%18s\n", "[100]", "Sample Rate", " "), color=:green)
+  printstyled(@sprintf("%10s|%40s|%18s\n", "[201]", "Murdock Event Detection", "seed_event"), color=:green)
+  printstyled(@sprintf("%10s|%40s|%18s\n", "[300]", "Step Calibration", "seed_calib"), color=:green)
+  printstyled(@sprintf("%10s|%40s|%18s\n", "[310]", "Sine Calibration", "seed_calib"), color=:green)
+  printstyled(@sprintf("%10s|%40s|%18s\n", "[320]", "Pseudo-random Calibration", "seed_calib"), color=:green)
+  printstyled(@sprintf("%10s|%40s|%18s\n", "[390]", "Generic Calibration", "seed_calib"), color=:green)
+  printstyled(@sprintf("%10s|%40s|%18s\n", "[500]", "Timing", "seed_timing"), color=:green)
+  printstyled(@sprintf("%10s|%40s|%18s\n", "[1000]", "Data Only SEED", " "), color=:green)
+  printstyled(@sprintf("%10s|%40s|%18s\n", "[1001]", "Data Extension", " "), color=:green)
+  printstyled(@sprintf("%10s|%40s|%18s\n", "[2000]", "Variable Length Opaque Data","seed_opaque*"), color=:green)
+
+  return nothing
 end
+
 
 @doc """
 # Dataless SEED Support
@@ -93,7 +108,28 @@ stdout.
 """
 seed_support
 function seed_support()
-    return nothing
+  println("\nCurrently supported dataless SEED blockette types:\n")
+  printstyled("[10] Volume Identifier Blockette\n", color=:green)
+  printstyled("[11] Volume Station Header Index Blockette\n", color=:green)
+  printstyled("[12] Volume Time Span Index Blockette\n", color=:green)
+  printstyled("[31] Comment Description Blockette\n", color=:green)
+  printstyled("[33] Generic Abbreviation Blockette\n", color=:green)
+  printstyled("[34] Units Abbreviations Blockette\n", color=:green)
+  printstyled("[41] FIR Dictionary Blockette\n", color=:green)
+  printstyled("[43] Response (Poles & Zeros) Dictionary Blockette\n", color=:green)
+  printstyled("[44] Response (Coefficients) Dictionary Blockette\n", color=:green)
+  printstyled("[45] Response List Dictionary Blockette\n", color=:green)
+  printstyled("[47] Decimation Dictionary Blockette\n", color=:green)
+  printstyled("[48] Channel Sensitivity/Gain Dictionary Blockette\n", color=:green)
+  printstyled("[50] Station Identifier Blockette\n", color=:green)
+  printstyled("[52] Channel Identifier Blockette\n", color=:green)
+  printstyled("[53] Response (Poles & Zeros) Blockette\n", color=:green)
+  printstyled("[54] Response (Coefficients) Blockette\n", color=:green)
+  printstyled("[57] Decimation Blockette\n", color=:green)
+  printstyled("[58] Channel Sensitivity/Gain Blockette\n", color=:green)
+  printstyled("[59] Channel Comment Blockette\n", color=:green)
+  printstyled("[60] Response Reference Blockette\n", color=:green)
+  printstyled("[61] FIR Response Blockette\n", color=:green)
 end
 
 #

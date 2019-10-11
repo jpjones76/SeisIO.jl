@@ -10,7 +10,7 @@ AH_fmt = FormatDesc(
     "earthquake seismology",
     "Lamont-Doherty Earth Observatory (Columbia University, NY, USA)",
     "Borovoye Geophysical Observatory, Kazakhstan",
-    "CORAL by K. Creager (U. Washington, Seattle, WA, USA)"],
+    "native output format of CORAL by K. Creager (U. Washington, Seattle, WA, USA)"],
   ["none known"],
   0x00
   )
@@ -45,12 +45,7 @@ DATALESS_fmt = FormatDesc(
   HistVec(),
   ["contains Volume, Abbreviation, and Station Control Headers.",
   "no Time Span Control Headers or data records.",
-  "blockettes are completely non-unique; all info can appear in at least",
-  "  four places, because SEED wasn't confusing and bloated enough.",
-  "documentation is terrible as usual, many critical caveats in notes",
-  "  or margins (or simply not present).",
-  "the SEED manual makes less sense than bathroom stall graffiti."
-  ],
+  "poorly documented; many critical caveats in notes or margins."],
   ["FDSN data standard; used worldwide"],
   ["http://www.fdsn.org/pdf/SEEDManual_V2.4.pdf"],
   0x01
@@ -105,11 +100,8 @@ mSEED_fmt = FormatDesc(
   ["an omnibus seismic data standard for data archival and detailed network",
   "  and instrument descriptions",
   "mini-SEED is a data-only variant that uses only data blockettes",
-  "documentation (official manual) is poorly organized and incomplete at",
-  "  224 pages length, 7 years since last update",
-  "intentionally abstruse; this is what happens when coders decide to get",
-  "  \"clever\" with no Project Managers or Business Analysts to guide them",
-  "a slow, turgid monolith, comically inappropriate for long time series",
+  "official manual is poorly organized and incomplete at 224 pages length,",
+  "  7 years since last update",
   ],
   ["FDSN data standard; used worldwide"],
   ["http://www.fdsn.org/pdf/SEEDManual_V2.4.pdf"],
@@ -127,7 +119,7 @@ RESP_fmt = FormatDesc(
   HistVec(),
   ["ASCII instrument responses in a format compatible with SEED blockettes",
    "extremely self-incompatible and easy to break, even compared to SEED",
-   "no low-level ASCII file format description or API is known to exist"
+   "no low-level format description or API is known to exist"
   ],
   ["people who like making extra work for themselves"],
   ["https://ds.iris.edu/ds/nodes/dmc/data/formats/resp/"],
@@ -184,10 +176,10 @@ SEGY_fmt = FormatDesc(
   "SEG Technical Standards Committee,\nhttps://seg.org/Publications/SEG-Technical-Standards",
   HistVec(),
   ["machine-independent open-standard format for storing geophysical data",
-  "in SEG Y 1.0 and SEG Y rev 1, header variables were NOT required",
-  "  only \"recommended\"; resultantly some industry files won't read",
+  "SEG Y rev 1 and earlier have very few required header variables,",
+  "  creating self-incompatibility issues.",
   "PASSCAL is a SEG Y variant with no file header, developed by PASSCAL",
-  "  and New Mexico Tech (USA), used with their equipment through late 2000s"
+  "  and New Mexico Tech (USA), used with their equipment through late 2000s."
   ],
   [ "widely used in exploration geophysics",
     "petroleum and gas industry",
@@ -250,7 +242,7 @@ WIN_fmt = FormatDesc(
   "  stored as variable-precision delta-encoded integers",
   "channel information must be retrieved from an external file",
   "channel files are not strictly controlled by a central authority and",
-  "  inconsistencies in channel parameters are known to exist."
+  "  inconsistencies in channel parameters have been found by SeisIO developers."
   ],
   [ "used throughout Japan",
     "Earthquake Research Institute, University of Tokyo, Japan",
