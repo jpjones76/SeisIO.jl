@@ -1,3 +1,7 @@
+### 2019-10-08
+* `SEED.mseed_support()` and `SEED.seed_support()` now output some text; users
+don't need to check their respective help files.
+
 ### 2019-10-03
 * Added kw `autoname` to `get_data`; see documentation for functionality
 and behavior. Implements request in issue #24.

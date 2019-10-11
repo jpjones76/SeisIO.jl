@@ -14,20 +14,21 @@
 * Our target code coverage is 98% on both [CodeCov](https://codecov.io/gh/jpjones76/SeisIO.jl) and [Coveralls](https://coveralls.io/github/jpjones76/SeisIO.jl?branch=master). We're rarely below 97%. Please don't break that for us.
 * Good tests include a mix of [unit testing](https://en.wikipedia.org/wiki/Unit_testing) and [use cases](https://en.wikipedia.org/wiki/Use_case).
 
-Data formats with rare encodings can be exceptions to the 95% rule. For example, SEG Y is one of four extant file formats that still uses [IBM hexadecimal Float](https://en.wikipedia.org/wiki/IBM_hexadecimal_floating_point); we've never encountered it, so we can't test it, but it exists. We understand the need to handle these digital coelocanths, but please consider their rarity before deciding that SeisIO should support one. (For example, although Int24 encoding of SEED data exists in theory, we cannot find a single researcher who's encountered it; this includes IRIS DMC staff.)
+Data formats with rare encodings can be exceptions to the 95% rule. For example, SEG Y is one of four extant file formats that still uses [IBM hexadecimal Float](https://en.wikipedia.org/wiki/IBM_hexadecimal_floating_point); we've never encountered it, so we can't test it, but it exists. We understand the need to handle these digital coelocanths, but please consider their rarity before deciding that SeisIO should support one. (For example, although Int24 encoding of SEED data exists in theory, we cannot find a single researcher who's encountered it; neither can the IRIS DMC staff that we've asked.)
 
 ## **Don't add dependencies to the SeisIO core module**
+Please keep the footprint small.
 
 ## **Write comprehensible code**
-Other contributors must be able to understand your work. People must be able to use it. Scientific software shouldn't require a Ph.D. to use, even if one needs a Ph.D. to understand the science.
+Other contributors must be able to understand your work. People must be able to use it. Scientific software should require a Ph.D to understand the science, not to learn the syntax.
 
 ## Please limit calls to other languages
 For reasons of transparency, portability, and reproducibility, external calls must meet three conditions:
 1. Works correctly in (non-emulated) Windows, Linux, and Mac OS.
 1. Source code free and publicly available. "Please contact the author for the source code" emphatically **does not** meet this standard.
-1. Must free pointers after use. If we can make your code trigger a segmentation fault, we have no choice but to reject it.
+1. Must free pointers after use. If we can make your code trigger a segmentation fault, we have no choice but to reject it. Beware that LightXML caused this inclusion; it does *not* free pointers on its own.
 
-We strongly recommend only calling external functions for tasks with no Julia equivalent (e.g. plotting) or whose native Julia versions perform poorly (e.g. `DateTime`).
+We strongly recommend only calling external functions for tasks with no Julia equivalent (e.g. plotting) or whose native Julia versions behave strangely, perform poorly, or do both (e.g. `DateTime`).
 
 ### Prohibited external calls
 * No software with (re)distribution restrictions, such as Seismic Analysis Code (SAC)
@@ -64,21 +65,21 @@ Your code must handle (or skip, as needed) channels in `GphysData` subtypes (and
 * data that are neither seismic nor geodetic (e.g. timing, radiometers, gas flux)
 * empty or unusual `:resp` or `:loc` fields
 
-You don't need to plan for others' PEBKAC errors, but these situations aren't mistakes.
+You don't need to plan for others' PEBKAC errors, but the above examples aren't mistakes.
 
-It's OK to skip channels that cannot logically be processed by your code. For example, one can't bandpass filter irregularly-sampled data in a straightforward way; even *approximate* filtering requires interpolating to a regularly-sampled time series, filtering that, and extracting results at the original sample times. That's a cool trick to impress one's Ph.D. committee, but we see little demand for filtering irregularly-sampled univariate geophysical data...
+It's OK to skip channels that cannot logically be processed by your code. For example, one can't bandpass filter irregularly-sampled data in a straightforward way; even *approximate* filtering requires interpolating to a regularly-sampled time series, filtering that, and extracting results at the original sample times. That's a cool trick to impress one's Ph.D. committee, but is there a demand for it...?
 
 ## Don't assume a work flow
-If a function assumes or requires specific preprocessing steps, the best practice is to add code in the function that checks `:notes` for prerequisite steps and applies them as needed.
+If a function assumes or requires specific preprocessing steps, the best practice is to add code to the function that checks `:notes` for prerequisite steps and applies them as needed.
 
 ## Leave unprocessed data alone
-Skip channels (or segments within channels) that you don't process. Never alter or delete unprocessed data. We realize that some code requires very specific data (for example, three-dimensional trace rotation requires a multicomponent seismometer); in these cases, use `getfield` and `getindex` to select applicable channels.
+Skip channels (or segments within channels) that you don't process. Never alter or delete unprocessed data. We realize that some code requires very specific data (for example, three-dimensional trace rotation requires a multicomponent seismometer); in these cases, use `getfield`, `getindex`, and utilities like `get_seis_channels` to select applicable channels.
 
 ### Tips for selecting the right data
 In an object that contains data from more than one instrument type, finding the right channels to process is non-trivial. For this reason, whenever possible, SeisIO follows [SEED channel naming conventions](http://www.fdsn.org/seed_manual/SEEDManual_V2.4_Appendix-A.pdf) for the `:id` field. Thus, there are at least two ways to identify channels of interest:
 1. Get the single-character "channel instrument code" for channel `i` (`get_inst_codes` does this efficiently). Compare to [standard SEED instrument codes](https://ds.iris.edu/ds/nodes/dmc/data/formats/seed-channel-naming/) and build a channel list, as `get_seis_channels` does.
   - This method can break on instruments whose IDs don't follow the SEED standard.
-  - Channel code `Y` is ambiguous; beware of matching on it.
+  - Channel code `Y` is opaque and therefore ambiguous; beware matching on it.
 2. Check `:units`. See the [units mini-API](./API/units.md). This is usually safe, but can be problematic in two situations:
   - Some sources report units in "counts" (e.g., "counts/s", "counts/s²"), because the "stage zero" gain is a unit conversion.
   - Some units are ambiguous; for example, displacement seismometers and displacement GPS both use distance (typically "m").
