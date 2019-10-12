@@ -397,6 +397,7 @@ function read_sxml(fpat::String;
     xsta = read(io, String)
     close(io)
     S = FDSN_sta_xml(xsta, s=s, t=t, msr=msr, v=v)
+    fill!(S.src, fpat)
   else
     files = ls(fpat)
     if length(files) > 0
@@ -409,7 +410,9 @@ function read_sxml(fpat::String;
           io = open(files[i], "r")
           xsta = read(io, String)
           close(io)
-          append!(S, FDSN_sta_xml(xsta, s=s, t=t, msr=msr, v=v))
+          T = FDSN_sta_xml(xsta, s=s, t=t, msr=msr, v=v)
+          fill!(T.src, fpat)
+          append!(S, T)
         end
       end
     end
@@ -452,6 +455,7 @@ function sxml_mergehdr!(S::GphysData, T::GphysData;
         setindex!(getfield(S, f), getindex(getfield(T, f), i), c)
       end
       note!(S, c, string("sxml_mergehdr!, overwrote ", relevant_fields))
+      note!(S, c, string("src: ", T.src[i]))
       S.misc[c] = merge(T.misc[i], S.misc[c])
       if i in k
         @warn(string("Already used ID = ", T.id[i], " to overwrite a channel header!"))
@@ -491,6 +495,7 @@ function read_station_xml!(S::GphysData, file::String;
     xsta = file
   end
   T = FDSN_sta_xml(xsta, msr=msr, s=s, t=t, v=v)
+  fill!(T.src, file)
   sxml_mergehdr!(S, T, noappend=noappend, s=s, t=t, v=v)
   return nothing
 end
