@@ -1,5 +1,6 @@
-xml_stfile = path*"/SampleFiles/XML/fdsnws-station_2017-01-12T03-17-42Z.xml"
+xml_stfile  = path*"/SampleFiles/XML/fdsnws-station_2017-01-12T03-17-42Z.xml"
 xml_stpat   = path*"/SampleFiles/XML/fdsnws-station*"
+f_out       = "test.xml"
 
 id_err    = "error in Station ID creation!"
 unit_err  = "units don't match instrument code!"
@@ -101,4 +102,53 @@ redirect_stdout(out) do
   n = S.n
   read_station_xml!(S, xml_stfile, v=3)
   @test S.n == n
+end
+
+# XML writer
+printstyled("    write_sxml\n", color=:light_green)
+S = randSeisData(12)
+S.id[1] = "CC.VALT..BHZ"
+S.id[2] = "CC.VALT..BHE"
+S.name[2] = S.name[1]
+write_sxml(f_out, S)
+Sr = read_sxml(f_out)
+sort!(S)
+sort!(Sr)
+for i in 1:S.n
+  for f in (:id, :name, :fs, :gain, :units)
+    @test getfield(S, f)[i] == getfield(Sr, f)[i]
+  end
+  if typeof(S.resp[i]) in (PZResp, PZResp64, MultiStageResp)
+    if typeof(S.resp[i]) == PZResp64
+      R = S.resp[i]
+      S.resp[i] = PZResp(a0 = Float32(R.a0), f0 = Float32(R.f0),
+        p = ComplexF32.(R.p), z = ComplexF32.(R.z))
+    end
+    @test S.resp[i] == Sr.resp[i]
+  end
+  if typeof(S.loc[i]) == GeoLoc
+    for f in (:lat, :lon, :el, :dep, :az, :inc)
+      @test getfield(S.loc[i],f) ≈ getfield(Sr.loc[i],f)
+    end
+  end
+end
+
+printstyled("      check that output of write_sxml is re-read identically\n", color=:light_green)
+files = ls(xml_stpat)
+for file in files
+  S = read_sxml(file, msr=true)
+  write_sxml(f_out, S)
+  Sr = read_sxml("test.xml", msr=true)
+  sort!(S)
+  sort!(Sr)
+
+  for f in datafields
+    (f == :src) && continue
+    @test getfield(S,f) == getfield(Sr,f)
+  end
+end
+try
+  rm(f_out)
+catch err
+  @warn(string("Can't remove ", f_out, ": throws error ", err))
 end
