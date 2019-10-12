@@ -247,3 +247,8 @@ function validate_units(S::GphysData)
 end
 
 validate_units(C::GphysChannel) = vucum(C.units)
+
+ucum_to_seed = Dict{String,String}(
+  "{counts}" => "counts",
+  "m/s2" => "M/S**2"
+)
