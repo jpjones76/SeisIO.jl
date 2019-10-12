@@ -112,6 +112,9 @@ include("Submodules/SUDS.jl")
 include("Submodules/UW.jl")
 using .UW: formats
 
+include("Submodules/XMLwrite.jl")
+using .XMLwrite
+export write_sxml
 # =========================================================
 # Wrappers
 for i in ls(path*"/Wrappers/")
