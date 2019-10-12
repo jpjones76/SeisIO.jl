@@ -1,3 +1,10 @@
+### 2019-10-12
+* Added `write_sxml` to create station XML from SeisData headers.
+  + Note: output is valid FDSN station XML 1.1 but the IRIS validator may issue
+  up to three warnings per channel; see stationxml-validator issues
+  [78](https://github.com/iris-edu/stationxml-validator/issues/78) \&
+  [79](https://github.com/iris-edu/stationxml-validator/issues/79) for details.
+
 ### 2019-10-08
 * `SEED.mseed_support()` and `SEED.seed_support()` now output some text; users
 don't need to check their respective help files.

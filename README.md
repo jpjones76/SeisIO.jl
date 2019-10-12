@@ -12,7 +12,5 @@ Designed for speed, efficiency, and ease of use. Includes web clients, readers f
 * Web clients: SeedLink, FDSN, IRIS
 * File formats: GeoCSV, Lennartz ASCII, mini-SEED, QuakeML, SAC, SEG Y (rev 0, rev 1, PASSCAL/NMT), Win32, UW
 
-## [Changelog](docs/CHANGELOG.md) | [Issues](docs/ISSUES.md)
-
-## Publications
+## Publications | [Changelog](docs/CHANGELOG.md) | [Issues](docs/ISSUES.md)
 Please see: Jones, J.P.,  Okubo, K., Clements. T., \& Denolle, M. (2019). SeisIO: a fast, efficient geophysical data architecture for the Julia language, *Submitted to Seimol. Res. Lett.*
