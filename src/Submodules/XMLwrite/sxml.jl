@@ -113,10 +113,14 @@ function msr_to_xml(io::IO, cha::XCha)
   return nothing
 end
 
-function mk_xml!(io::IO, S::GphysData)
+function mk_xml!(io::IO, S::GphysData;
+  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[])
+
+  chans = mkchans(chans, S.n)
+
   blank_t0 = round(Int64, d2u(now())*1.0e6)
   SXML = Dict{String, XNet}()
-  for i in 1:S.n
+  for i in chans
     id = String.(split(S.id[i], ".", limit=4, keepempty=true))
     L = length(id)
     if L < 4
@@ -248,13 +252,19 @@ function mk_xml!(io::IO, S::GphysData)
 end
 
 """
-    write_sxml(fname::String, S::GphysData)
+    write_sxml(fname::String, S::GphysData[, chans=Cha])
 
 Write station XML from the fields of `S` to file `fname`.
+
+Use keyword `chans=Cha` to restrict station XML write to `Cha`. This keyword
+can accept an Integer, UnitRange, or Array{Int64,1} as its argument.
 """
-function write_sxml(str::String, S::GphysData)
+function write_sxml(str::String, S::GphysData;
+  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[])
+
+  chans = mkchans(chans, S.n)
   fid = open(str, "w")
-  mk_xml!(fid, S)
+  mk_xml!(fid, S, chans=chans)
   close(fid)
   return nothing
 end
