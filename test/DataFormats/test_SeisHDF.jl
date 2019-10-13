@@ -4,6 +4,7 @@ printstyled("    read_hdf5\n", color=:light_green)
 
 hdf     = path*"/SampleFiles/HDF5/2days-40hz.h5"
 hdf_pat = path*"/SampleFiles/HDF5/2days-40hz.h*"
+hdf_out = "test.h5"
 
 id  = "CI.SDD..HHZ"
 idr = "C*.SDD..HH?"
@@ -60,3 +61,14 @@ printstyled("    scan_hdf5\n", color=:light_green)
                                           "/Waveforms/CI.SDD/StationXML" ]
 @test_throws ErrorException scan_hdf5(hdf, level="response")
 @test_throws ErrorException scan_hdf5(hdf, fmt="MatlabLol")
+
+# ASDF write
+write_hdf5( hdf_out, S1 )
+S2 = read_hdf5(hdf_out, ts, te, id = id)
+for f in datafields
+  (f in (:src, :notes)) && continue
+  @test isequal(getfield(S1, f), getfield(S2, f))
+end
+rm(hdf_out)
+
+@test_throws ErrorException write_hdf5(hdf_out, S1, fmt="MatlabLol")
