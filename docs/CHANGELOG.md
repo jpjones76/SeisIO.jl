@@ -1,9 +1,16 @@
+### 2019-10-13
+* Added `write_hdf5` to allow writing complete structures to seismic HDF5 files.
+Currently only supports ASDF; PH5 may be added later.
+  + This functionality will be modified before v0.5.0 to allow writing
+  specific sub-windows of data structures to file.
+  + A `write_hdf5!` method will be added before v0.5.0 to allow overwrite of
+  subwindows within existing HDF5 files using (sub-windows of) data structures.
+
 ### 2019-10-12
 * Added `write_sxml` to create station XML from SeisData headers.
   + Note: output is valid FDSN station XML 1.1 but the IRIS validator may issue
-  up to three warnings per channel; see stationxml-validator issues
-  [78](https://github.com/iris-edu/stationxml-validator/issues/78) \&
-  [79](https://github.com/iris-edu/stationxml-validator/issues/79) for details.
+  up to two warnings per channel inconsistently; see stationxml-validator issue
+  [78](https://github.com/iris-edu/stationxml-validator/issues/78) for details.
 
 ### 2019-10-08
 * `SEED.mseed_support()` and `SEED.seed_support()` now output some text; users
