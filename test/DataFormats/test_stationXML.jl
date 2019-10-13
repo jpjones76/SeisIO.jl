@@ -109,15 +109,17 @@ printstyled("    write_sxml\n", color=:light_green)
 S = randSeisData(12)
 S.id[1] = "CC.VALT..BHZ"
 S.id[2] = "CC.VALT..BHE"
+S.id[3] = "YY.FAIL"
 S.name[2] = S.name[1]
 write_sxml(f_out, S)
 Sr = read_sxml(f_out)
 sort!(S)
 sort!(Sr)
 for i in 1:S.n
-  for f in (:id, :name, :fs, :gain, :units)
+  for f in (:name, :fs, :gain, :units)
     @test getfield(S, f)[i] == getfield(Sr, f)[i]
   end
+  @test S.id[i]*(S.id[i] == "YY.FAIL" ? ".." : "") == Sr.id[i]
   if typeof(S.resp[i]) in (PZResp, PZResp64, MultiStageResp)
     if typeof(S.resp[i]) == PZResp64
       R = S.resp[i]
