@@ -1,6 +1,6 @@
 module SUDS
 using SeisIO, SeisIO.Quake
-import SeisIO: check_for_gap!, checkbuf!, checkbuf_8!, BUF, endtime, KW, sμ
+import SeisIO: check_for_gap!, checkbuf!, checkbuf_8!, BUF, KW, sμ
 import SeisIO.Formats: formats, FmtVer, FormatDesc, HistVec
 
 include("SUDS/SUDSbuf.jl")
