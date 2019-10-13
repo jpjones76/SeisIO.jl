@@ -69,6 +69,9 @@ for f in datafields
   (f in (:src, :notes)) && continue
   @test isequal(getfield(S1, f), getfield(S2, f))
 end
-rm(hdf_out)
-
+try
+  rm(hdf_out)
+catch err
+  @warn(string("Can't remove ", hdf_out, ": throws error ", err))
+end
 @test_throws ErrorException write_hdf5(hdf_out, S1, fmt="MatlabLol")
