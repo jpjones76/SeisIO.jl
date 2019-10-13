@@ -49,7 +49,7 @@ function read_asdf!(  S::GphysData,
 
           # convert fs to sampling interval in ns
           Δ = round(Int64, 1.0e9/fs)
-          t1 = t0 + nx*Δ
+          t1 = t0 + (nx-1)*Δ
 
           if (ts ≤ t1) && (te ≥ t0)
             xi = 0
@@ -60,7 +60,7 @@ function read_asdf!(  S::GphysData,
 
             cid = String(split(n, "_", limit=2, keepempty=true)[1])
             j = findid(cid, S.id)
-            nX = div(te-ts, Δ)
+            nX = div(te-ts, Δ)+1
             if j == 0
               T = eltype(x)
               push!(S, SeisChannel(id = cid,
