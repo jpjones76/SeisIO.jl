@@ -93,6 +93,9 @@ end
 # Submodules
 include("Submodules/FormatGuide.jl")
 import .Formats: formats
+include("Submodules/XMLwrite.jl")
+using .XMLwrite
+export write_sxml
 
 include("Submodules/SEED.jl")
 using .SEED: mseed_support, parsemseed!, parserec!, read_dataless, read_mseed_file!, read_seed_resp!, read_seed_resp, RESP_wont_read, seed_cleanup!, seed_support
@@ -105,16 +108,13 @@ export read_qml
 include("Submodules/RandSeis.jl")
 
 include("Submodules/SeisHDF.jl")
-using .SeisHDF: read_hdf5, read_hdf5!, scan_hdf5
-export read_hdf5, read_hdf5!, scan_hdf5
+using .SeisHDF: read_hdf5, read_hdf5!, scan_hdf5, write_hdf5
+export read_hdf5, read_hdf5!, scan_hdf5, write_hdf5
 
 include("Submodules/SUDS.jl")
 include("Submodules/UW.jl")
 using .UW: formats
 
-include("Submodules/XMLwrite.jl")
-using .XMLwrite
-export write_sxml
 # =========================================================
 # Wrappers
 for i in ls(path*"/Wrappers/")
