@@ -18,20 +18,13 @@ structure number in the output of `SeisIO.SUDS.suds_support()` gives the status:
   + If expanded SUDS support is needed, send us test data with examples of the
   requested structures.
 
-# Suspected External
-1. The IRIS XML validator issues warnings for files produced with `write_sxml`.
-Written station XML files read correctly into other programs and conform to
-[FDSN schema](https://www.fdsn.org/xml/station/fdsn-station-1.1.xsd). We
-suspect that these warnings are erroneous; see stationxml-validator issues
-[78](https://github.com/iris-edu/stationxml-validator/issues/78) \&
-[79](https://github.com/iris-edu/stationxml-validator/issues/79).
-
 # External / Won't Fix
 1. Very rarely, reported code coverage appears to be <95%, rather than 97-98%,
 because Travis-CI fails to upload test results to code coverage services. This
 happens even though all tests pass.
 1. A few permanent North American short-period stations don't handle response
-translation well; tremendous (two orders of magnitude) scaling problems are introduced with `translate_resp` and `remove_resp` on these channels.
+translation well; tremendous (two orders of magnitude) scaling problems are
+introduced with `translate_resp` and `remove_resp` on these channels.
   * Test: using `get_data("FDSN", ...)`, check channel ``i`` with
   ``S.misc[i]["SensorDescription"] == "HS-1-LT/Quanterra 330 Linear Phase Composite"``.
     + This description is shorthand for "Geospace Technologies HS-1-LT geophone
@@ -51,6 +44,19 @@ translation well; tremendous (two orders of magnitude) scaling problems are intr
     We have never encountered this variant in the wild and only learned of its
     existence when looking for a PASSCAL reader in ObsPy.
     - Trying to read SU as PASSCAL won't work; trace headers are incompatible.
+1. The IRIS XML validator may issue two warnings for files produced
+with `write_sxml`: "No decimation found" and "Decimation cannot be null".
+  + SeisIO creates no `Decimation` nodes for `PolesZeros` response stages
+  because no data center has them. When channel `i` of structure `S` satisfies
+  the condition `typeof(S.resp[i]) == MultiStageResp`, with subconditions
+  `length(S.resp[i].stage) == 1` and
+  `typeof(S.resp[i].stage[1]) in (PZResp, PZResp64)`, the response contains no
+  decimation information and these warnings occur.
+    - stationxml-validator
+    issue [78](https://github.com/iris-edu/stationxml-validator/issues/78) was
+    created because these warnings aren't thrown consistently. We're not sure
+    they should actually exist in this case because decimation in a `PolesZeros`
+    response stage makes little sense.
 
 # Reporting New Issues
 If possible, please include a text dump of a minimum working example (MWE),
