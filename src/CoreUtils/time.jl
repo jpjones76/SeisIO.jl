@@ -183,7 +183,13 @@ end
 
 # =========================================================
 # Time windowing functions
+"""
+    endtime(t::Array{Int64,2}, Δ::Int64)
 
+Compute the time of the last sample in SeisIO time matrix `t` sampled at
+(integer μs sampling interval) Δ. Result is measured from the Unix epoch in
+integer μs.
+"""
 function endtime(t::Array{Int64,2}, Δ::Int64)
   if isempty(t)
     t_end = 0
