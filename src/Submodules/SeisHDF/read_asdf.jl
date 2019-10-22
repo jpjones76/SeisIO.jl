@@ -40,7 +40,7 @@ function read_asdf!(  S::GphysData,
       for n in N
         if n == "StationXML"
           sxml = String(UInt8.(read(w[n])))
-          read_station_xml!(SX, sxml, msr=msr, noappend=false, s=s, t=t, v=v)
+          read_station_xml!(SX, sxml, msr=msr, s=s, t=t, v=v)
         elseif occursin(idr, n)
           x = w[n]
           nx = length(x)
@@ -55,9 +55,6 @@ function read_asdf!(  S::GphysData,
             xi = 0
             i0, i1, t2 = get_trace_bounds(ts, te, t0, t1, Δ, nx)
             ni = i1-i0+1
-            trace_start = div(t0 + Δ*(i0-1), 1000)
-            trace_end = div(t0 + Δ*(i1-1), 1000)
-
             cid = String(split(n, "_", limit=2, keepempty=true)[1])
             j = findid(cid, S.id)
             nX = div(te-ts, Δ)+1
@@ -107,11 +104,12 @@ function read_asdf!(  S::GphysData,
   fill!(S.src, realpath(hdf))
 
   # merge in the XML that we read
-  sxml_mergehdr!(S, SX, noappend=true, nofs=true, s=s, t=t, v=v)
+  sxml_mergehdr!(S, SX, app=false, nofs=true, v=v)
 
   trunc_x!(S)
 
   # Done
+  close(f)
   return S
 end
 
