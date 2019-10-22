@@ -1,3 +1,27 @@
+### 2019-10-19
+* `write_hdf5` improvements:
+  + added KW `chans` to support writing only some channels from a structure.
+  + calling `write_hdf5` on an existing file now appends data to the file,
+  rather than recreating it.
+  + users can now specify `add=true` to add trace data to a file while preserving
+  the structure of existing traces. See `write_hdf5` docstring for details.
+  + users can now specify `ovr=true` to overwrite existing trace data in a file.
+  See `write_hdf5` docstring for details.
+  + irregularly-sampled channels are now skipped.
+
+* Performance
+  + Reduced memory overhead of `write_sxml` by ~80% with significant speedup.
+  + `ungap!` and `gapfill!` have been optimized for better memory usage.
+    - The docstring of `ungap!` now explicitly warns to call `merge` before `ungap`
+    if any channel has segments that aren't in chronological order.
+
+* Bugs/Consistency
+  * `endtime(t, fs)` once again behaves correctly for irregularly-sampled data.
+  * `ungap!` with a negative time gap now partly overwrites output with earlier
+  segments (corresponding to the time overlap).
+  * `merge!` once again works consistently with `MultiStageResp` responses.
+  * `write_hdf5` can now write gapped channels.
+
 ### 2019-10-13
 * Added `write_hdf5` to allow writing complete structures to seismic HDF5 files.
 Currently only supports ASDF; PH5 may be added later.
