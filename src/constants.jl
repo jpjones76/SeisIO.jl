@@ -66,4 +66,5 @@ const sμ = 1000000.0
 const vSeisIO = Float32(0.53)
 const unindexed_fields = (:c, :n)
 const webhdr = Dict("User-Agent" => "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/76.0.3809.100 Chrome/76.0.3809.100 Safari/537.36") # lol
+const xml_endtime = 19880899199000000
 const μs = 1.0e-6
