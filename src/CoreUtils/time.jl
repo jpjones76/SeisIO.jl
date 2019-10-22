@@ -205,7 +205,13 @@ function endtime(t::Array{Int64,2}, Δ::Int64)
   end
   return t_end
 end
-endtime(t::Array{Int64,2}, fs::Float64) = endtime(t, round(Int64, 1.0/(fs*μs)))
+function endtime(t::Array{Int64,2}, fs::Float64)
+  if fs == 0.0
+    return t[size(t,1), 2]
+  else
+    return endtime(t, round(Int64, 1.0/(fs*μs)))
+  end
+end
 
 function t_expand(t::Array{Int64,2}, fs::Float64)
   fs == 0.0 && return t[:,2]
