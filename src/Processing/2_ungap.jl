@@ -15,6 +15,10 @@ As above for GphysChannel object C.
 * `chans=CC`: only ungap channels `CC`.
 * `m=false`: this flag fills gaps with NaNs instead of the mean.
 * `tap=true`: taper data before filling gaps.
+
+!!! warning
+
+    If channel segments aren't in chronological order, call `merge` before using `ungap`.
 """ ungap!
 function ungap!(C::GphysChannel; m::Bool=true, tap::Bool=false)
   if tap
