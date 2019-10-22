@@ -93,9 +93,6 @@ end
 # Submodules
 include("Submodules/FormatGuide.jl")
 import .Formats: formats
-include("Submodules/XMLwrite.jl")
-using .XMLwrite
-export write_sxml
 
 include("Submodules/SEED.jl")
 using .SEED: mseed_support, parsemseed!, parserec!, read_dataless, read_mseed_file!, read_seed_resp!, read_seed_resp, RESP_wont_read, seed_cleanup!, seed_support
