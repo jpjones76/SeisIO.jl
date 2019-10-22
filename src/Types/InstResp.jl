@@ -569,8 +569,8 @@ minimum([isequal(getfield(A, f), getfield(R,f)) for f in fieldnames(MultiStageRe
 ==(A::MultiStageResp, R::MultiStageResp) = isequal(A::MultiStageResp, R::MultiStageResp)
 
 function hash(R::MultiStageResp)
-  N = length(R.stage)
-  h = hash(R.fs)
+  h = hash([hash(i) for i in 1:length(R.stage)])
+  h = hash(R.fs, h)
   h = hash(R.gain, h)
   h = hash(R.fg, h)
   h = hash(R.delay, h)
@@ -579,9 +579,6 @@ function hash(R::MultiStageResp)
   h = hash(R.os, h)
   h = hash(R.i, h)
   h = hash(R.o, h)
-  for i = 1:N
-    h = hash(R.stage[i], h)
-  end
   return h
 end
 
