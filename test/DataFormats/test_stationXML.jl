@@ -140,12 +140,12 @@ files = ls(xml_stpat)
 for file in files
   S = read_sxml(file, msr=true)
   write_sxml(f_out, S)
-  Sr = read_sxml("test.xml", msr=true)
+  Sr = read_sxml(f_out, msr=true)
   sort!(S)
   sort!(Sr)
 
   for f in datafields
-    (f == :src) && continue
+    (f in (:id, :src)) && continue
     @test getfield(S,f) == getfield(Sr,f)
   end
 end
@@ -153,4 +153,18 @@ try
   rm(f_out)
 catch err
   @warn(string("Can't remove ", f_out, ": throws error ", err))
+end
+
+printstyled("      checking channel list handling\n", color=:light_green)
+file = files[2]
+chans = 21:40
+S = read_sxml(file, msr=true)
+write_sxml(f_out, S, chans=chans)
+S1 = S[chans]
+sort!(S1)
+Sr = read_sxml(f_out, msr=true)
+sort!(Sr)
+for f in datafields
+  (f in (:id, :src)) && continue
+  @test getfield(S1,f) == getfield(Sr,f)
 end
