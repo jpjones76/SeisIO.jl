@@ -1,4 +1,4 @@
-export read_sxml
+export read_sxml, write_sxml
 
 function full_resp(xe::XMLElement)
   resp = MultiStageResp(12)
@@ -415,16 +415,16 @@ function read_sxml(fpat::String;
           append!(S, T)
         end
       end
+    else
+      error("file(s) not found!")
     end
   end
   return S
 end
 
 function sxml_mergehdr!(S::GphysData, T::GphysData;
-                        noappend::Bool=false,
                         nofs::Bool=false,
-                        s::String="0001-01-01T00:00:00",
-                        t::String="9999-12-31T23:59:59",
+                        app::Bool=true,
                         v::Int64=KW.v)
 
 
@@ -442,7 +442,7 @@ function sxml_mergehdr!(S::GphysData, T::GphysData;
         sj = isempty(S.t[j]) ? get(S.misc[j], "startDate", si) : S.t[j][1,2]
         ej = isempty(S.t[j]) ? get(S.misc[j], "endDate", ei) : endtime(S.t[j], S.fs[j])
         if min(si ≤ ej, ei ≥ sj) == true
-          c = i
+          c = j
           break
         end
       end
@@ -452,6 +452,7 @@ function sxml_mergehdr!(S::GphysData, T::GphysData;
     if c != 0
       (v > 2) && println("id/time match! id = ", S.id[c], ". Overwriting S[", c, "] headers from T[", i, "]")
       for f in relevant_fields
+        # S.(f)[c] = T.(f)[i]
         setindex!(getfield(S, f), getindex(getfield(T, f), i), c)
       end
       note!(S, c, string("sxml_mergehdr!, overwrote ", relevant_fields))
@@ -473,7 +474,7 @@ function sxml_mergehdr!(S::GphysData, T::GphysData;
 
   # Append remainder of T
   (v > 1) && println("remaining entries in T = ", T.n)
-  if isempty(T) == false
+  if app && (isempty(T) == false)
     append!(S, T)
   end
 
@@ -482,7 +483,6 @@ end
 
 function read_station_xml!(S::GphysData, file::String;
                            msr::Bool=false,
-                           noappend::Bool=false,
                            s::String="0001-01-01T00:00:00",
                            t::String="9999-12-31T23:59:59",
                            v::Int64=KW.v)
@@ -496,18 +496,337 @@ function read_station_xml!(S::GphysData, file::String;
   end
   T = FDSN_sta_xml(xsta, msr=msr, s=s, t=t, v=v)
   fill!(T.src, file)
-  sxml_mergehdr!(S, T, noappend=noappend, s=s, t=t, v=v)
+  sxml_mergehdr!(S, T, v=v)
   return nothing
 end
 
 function read_station_xml(file::String;
                  msr::Bool=false,
-                 noappend::Bool=false,
                  s::String="0001-01-01T00:00:00",
                  t::String="9999-12-31T23:59:59",
                  v::Int64=KW.v)
 
   S = SeisData()
-  read_station_xml!(S, file, msr=msr, noappend=noappend, s=s, t=t, v=v)
+  read_station_xml!(S, file, msr=msr, s=s, t=t, v=v)
   return S
+end
+
+function msr_to_xml(io::IO, r::MultiStageResp, gain::Float64, units::String)
+  Nstg = length(r.stage)
+  sens_f = 0.0
+  if Nstg > 0
+    sens_f = r.fg[1]
+  end
+
+  write(io, "          <InstrumentSensitivity>\n            <Value>")
+  print(io, gain)
+  write(io, "</Value>\n            <Frequency>")
+  print(io, sens_f)
+  write(io, "</Frequency>\n            <InputUnits>\n              <Name>")
+  write(io, get(ucum_to_seed, units, units))
+  write(io, "</Name>\n            </InputUnits>\n          </InstrumentSensitivity>\n")
+
+  u1 = "              <InputUnits>\n                <Name>"
+  u2 = "</Name>\n              </InputUnits>\n              <OutputUnits>\n                <Name>"
+  u3 =   "</Name>\n              </OutputUnits>\n"
+
+  @inbounds for i in 1:Nstg
+    ui = get(ucum_to_seed, r.i[i], r.i[i])
+    uo = get(ucum_to_seed, r.o[i], r.o[i])
+
+    write(io, "          <Stage number=\"")
+    print(io, i)
+    write(io, "\">\n")
+
+    if typeof(r.stage[i]) in (PZResp64, PZResp)
+      write(io, "            <PolesZeros>\n")
+      write(io, u1)
+      write(io, ui)
+      write(io, u2)
+      write(io, uo)
+      write(io, u3)
+      write(io, "              <PzTransferFunctionType>LAPLACE (RADIANS/SECOND)</PzTransferFunctionType>\n              <NormalizationFactor>")
+      print(io, r.stage[i].a0)
+      write(io, "</NormalizationFactor>\n              <NormalizationFrequency>")
+      print(io, r.stage[i].f0)
+      write(io, "</NormalizationFrequency>\n")
+      for j = 1:length(r.stage[i].z)
+        write(io, "              <Zero number = \"")
+        print(io, j)
+        write(io, "\">\n                <Real minusError=\"0\" plusError=\"0\">")
+        print(io, real(r.stage[i].z[j]))
+        write(io, "</Real>\n                <Imaginary minusError=\"0\" plusError=\"0\">")
+        print(io, imag(r.stage[i].z[j]))
+        write(io, "</Imaginary>\n              </Zero>\n")
+      end
+      for j = 1:length(r.stage[i].p)
+        write(io, "              <Pole number = \"")
+        print(io, j)
+        write(io, "\">\n                <Real minusError=\"0\" plusError=\"0\">")
+        print(io, real(r.stage[i].p[j]))
+        write(io, "</Real>\n                <Imaginary minusError=\"0\" plusError=\"0\">")
+        print(io, imag(r.stage[i].p[j]))
+        write(io, "</Imaginary>\n              </Pole>\n")
+      end
+      write(io, "            </PolesZeros>\n")
+    else
+      if typeof(r.stage[i]) == CoeffResp
+        write(io, "            <Coefficients>\n")
+        write(io, u1)
+        write(io, ui)
+        write(io, u2)
+        write(io, uo)
+        write(io, u3)
+        write(io, "              <CfTransferFunctionType>DIGITAL</CfTransferFunctionType>\n")
+        for j = 1:length(r.stage[i].b)
+          write(io, "              <Numerator minusError=\"0\" plusError=\"0\">")
+          print(io, r.stage[i].b[j])
+          write(io, "</Numerator>\n")
+        end
+        for j = 1:length(r.stage[i].a)
+          write(io, "              <Denominator minusError=\"0\" plusError=\"0\">")
+          print(io, r.stage[i].a[j])
+          write(io, "</Denominator>\n")
+        end
+        write(io, "            </Coefficients>\n")
+      end
+
+      if r.fac[i] > 0
+        write(io, "            <Decimation>\n              <InputSampleRate>")
+        print(io, r.fs[i])
+        write(io, "</InputSampleRate>\n              <Factor>")
+        print(io, r.fac[i])
+        write(io, "</Factor>\n              <Offset>")
+        print(io, r.os[i])
+        write(io, "</Offset>\n              <Delay>")
+        print(io, r.delay[i])
+        write(io, "</Delay>\n              <Correction>")
+        print(io, r.corr[i])
+        write(io, "</Correction>\n            </Decimation>\n")
+      end
+    end
+    write(io, "            <StageGain>\n              <Value>")
+    print(io, r.gain[i])
+    write(io, "</Value>\n              <Frequency>")
+    print(io, r.fg[i])
+    write(io, "</Frequency>\n            </StageGain>\n          </Stage>\n")
+  end
+  return nothing
+end
+
+function mk_xml!(io::IO, S::GphysData, chans::Array{Int64,1})
+  blank_t0 = round(Int64, d2u(now())*μs)
+
+  write(io, "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n\n<FDSNStationXML xmlns=\"http://www.fdsn.org/xml/station/1\" schemaVersion=\"1.0\" xsi:schemaLocation=\"http://www.fdsn.org/xml/station/1 http://www.fdsn.org/xml/station/fdsn-station-1.0.xsd\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <Source>SeisIO</Source>\n\n  <Created>")
+  print(io, now())
+  write(io, "</Created>\n")
+
+  nch = length(chans)
+  nets = Array{String,1}(undef, nch)
+  stas = Array{String,1}(undef, nch)
+  locs = Array{String,1}(undef, nch)
+  chas = Array{String,1}(undef, nch)
+  t0 = zeros(Int64, nch)
+  t1 = zeros(Int64, nch)
+
+  done = falses(nch)
+
+  # Fill in nets, stas, locs, chas
+  fill!(t0, blank_t0)
+  fill!(t1, xml_endtime)
+  @inbounds for j = 1:nch
+    i = chans[j]
+    id = split_id(S.id[i])
+    nets[j] = id[1]
+    stas[j] = id[2]
+    locs[j] = id[3]
+    chas[j] = id[4]
+
+    # precedence for start time: S.misc[i]["startDate"] > S.t[i][1,2] > blank_t0
+    if haskey(S.misc[i], "startDate")
+      c_start = get(S.misc[i], "startDate", blank_t0)
+      if typeof(c_start) == Int64
+        t0[j] = c_start
+      end
+    end
+
+    # precedence for end time: S.misc[i]["startDate"] > endtime(S.t[i],S.fs[i]) > 19880899199000000
+    if haskey(S.misc[i], "endDate")
+      c_end = get(S.misc[i], "endDate", xml_endtime)
+      if typeof(c_end) == Int64
+        t1[j] = c_end
+      end
+    end
+
+    if isempty(S.t[i]) == false
+      if t0[j] == blank_t0
+        t0[j] = S.t[i][1,2]
+      end
+      if t1[j] == xml_endtime
+        t1[j] = endtime(S.t[i], S.fs[i])
+      end
+    end
+  end
+
+  # Loop over all channels in cha that are not done
+  @inbounds for j = 1:nch
+    (done[j]) && continue
+
+    # Get all selected channels from same network
+    nn = nets[j]
+    ss = stas[j]
+    net = findall(nets.==nn)
+    ts = minimum(t0[net])*μs
+    te = maximum(t1[net])*μs
+    ds = u2d(ts)
+    de = u2d(te)
+
+    # Open net node
+    write(io, "  <Network code=\"")
+    write(io, nn)
+    write(io, "\" startDate=\"")
+    print(io, ds)
+    write(io, "\" endDate=\"")
+    print(io, de)
+    write(io, "\">\n")
+
+    # Loop over stations in network
+    ci = Int64[]
+    sta_name = ""
+    sta_lat = 0.0
+    sta_lon = 0.0
+    sta_el = 0.0
+
+    # Fill channel index array, ci; set station location and name
+    for j = 1:nch
+      if stas[j] == ss && nets[j] == nn
+        i = chans[j]
+        push!(ci, j)
+
+        if isempty(sta_name)
+          if !isempty(S.name[i])
+            sta_name = S.name[i]
+          end
+        end
+
+        if (sta_lat == 0.0) || (sta_lon == 0.0) || (sta_el == 0.0)
+          if typeof(S.loc[i]) == GeoLoc
+            loc = S.loc[i]
+            if loc.lat != 0.0
+              sta_lat = loc.lat
+            end
+
+            if loc.lon != 0.0
+              sta_lon = loc.lon
+            end
+
+            if loc.el != 0.0
+              sta_el = loc.el
+            end
+          end
+        end
+      end
+    end
+    ts = minimum(t0[ci])*μs
+    te = maximum(t1[ci])*μs
+    ds = u2d(ts)
+    de = u2d(te)
+
+    # Open sta node
+    write(io, "    <Station code=\"")
+    write(io, ss)
+    write(io, "\" startDate=\"")
+    print(io, ds)
+    write(io, "\" endDate=\"")
+    print(io, de)
+    write(io, "\">\n      <Latitude>")
+    print(io, sta_lat)
+    write(io, "</Latitude>\n      <Longitude>")
+    print(io, sta_lon)
+    write(io, "</Longitude>\n      <Elevation>")
+    print(io, sta_el)
+    write(io, "</Elevation>\n      <Site>\n        <Name>")
+    write(io, sta_name)
+    write(io, "</Name>\n      </Site>\n")
+
+    # Loop over cha nodes
+    for j in ci
+      i = chans[j]
+
+      # Channel location
+      if typeof(S.loc[i]) == GeoLoc
+        loc = S.loc[i]
+      else
+        loc = GeoLoc()
+      end
+
+      # Instrument response
+      if typeof(S.resp[i]) == MultiStageResp
+        resp = S.resp[i]
+      else
+        if typeof(S.resp[i]) in (PZResp, PZResp64)
+          resp = MultiStageResp(2)
+          resp.fac[2] = 1
+        else
+          resp = MultiStageResp(1)
+        end
+        resp.stage[1] = S.resp[i]
+      end
+
+      # Open cha node
+      write(io, "      <Channel code=\"")
+      write(io, chas[j])
+      write(io, "\" locationCode=\"")
+      write(io, locs[j])
+      write(io, "\" startDate=\"")
+      print(io, u2d(t0[j]*μs))
+      write(io, "\" endDate=\"")
+      print(io, u2d(t1[j]*μs))
+      write(io, "\">\n", "        <Latitude>")
+      print(io, loc.lat)
+      write(io, "</Latitude>\n        <Longitude>")
+      print(io, loc.lon)
+      write(io, "</Longitude>\n        <Elevation>")
+      print(io, loc.el)
+      write(io, "</Elevation>\n        <Depth>")
+      print(io, loc.dep)
+      write(io, "</Depth>\n        <Azimuth>")
+      print(io, loc.az)
+      write(io, "</Azimuth>\n        <Dip>")
+      print(io, 90.0 + loc.inc)
+      write(io, "</Dip>\n        <SampleRate>")
+      print(io, S.fs[i])
+      write(io, "</SampleRate>\n        <ClockDrift>")
+      print(io, get(S.misc[i], "ClockDrift", 0.0))
+      write(io, "</ClockDrift>\n        <Sensor>\n          <Description>")
+      write(io, get(S.misc[i], "SensorDescription", "Unknown"))
+      write(io, "</Description>\n        </Sensor>\n        <Response>\n")
+      msr_to_xml(io, resp, S.gain[i], S.units[i])
+      write(io, "        </Response>\n      </Channel>\n")
+
+      done[j] = true
+    end
+    write(io, "    </Station>\n  </Network>\n")
+  end
+  write(io, "</FDSNStationXML>\n")
+
+  return nothing
+end
+
+"""
+    write_sxml(fname::String, S::GphysData[, chans=Cha])
+
+Write station XML from the fields of `S` to file `fname`.
+
+Use keyword `chans=Cha` to restrict station XML write to `Cha`. This keyword
+can accept an Integer, UnitRange, or Array{Int64,1} as its argument.
+"""
+function write_sxml(str::String, S::GphysData;
+  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[])
+
+  chans = mkchans(chans, S.n)
+  fid = open(str, "w")
+  mk_xml!(fid, S, chans)
+  close(fid)
+  return nothing
 end
