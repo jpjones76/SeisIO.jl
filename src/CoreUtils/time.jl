@@ -243,6 +243,7 @@ function t_collapse(tt::Array{Int64,1}, fs::Float64)
 end
 
 function t_win(T::Array{Int64,2}, Δ::Int64)
+  isempty(T) && return(T)
   n = size(T,1)-1
   if T[n+1,2] != 0
     T = vcat(T, [T[n+1,1] 0])
