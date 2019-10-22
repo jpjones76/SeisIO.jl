@@ -33,6 +33,12 @@ The option **msr=true** processes XML files to give full response information
 at every documented stage of the acquisition process: sampling, digitization,
 FIR filtering, decimation, etc.
 
+.. function:: write_sxml(fname::String, S::GphysData[, chans=Cha])
+
+Write station XML from the fields of **S** to file **fname**.
+
+Use keyword **chans=Cha** to restrict station XML write to **Cha**. This
+keyword can accept an Integer, UnitRange, or Array{Int64,1} argument.
 
 *******
 QuakeML
