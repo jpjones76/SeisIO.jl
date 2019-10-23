@@ -94,42 +94,13 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
         # ====================================================================
         # overwrite StationXML
         (v > 1) && println("merging XML")
-
-        # read old XML
-        SX = SeisData()
-        sxml = String(UInt8.(read(sta["StationXML"])))
-        read_station_xml!(SX, sxml, msr=msr, v=v)
-        # (v > 2) && println("Current XML SeisData = ", SX)
-
-        # merge S into SX, overwriting it
-        SM = SeisData(length(chan_numbers))
-        for f in (:id, :name, :loc, :fs, :gain, :resp, :units)
-          setfield!(SM, f, deepcopy(getindex(getfield(S, f), chan_numbers)))
-        end
-        sxml_mergehdr!(SX, SM, nofs=true, app=false, v=v)
-        # (v > 2) && println("Merged XML SeisData = ", SX)
-
-        # remake channel list; SX ordering differs from S
-        cc = Int64[]
-        for i in 1:SX.n
-          idx = split_id(SX.id[i])
-          ns = idx[1]*"."*idx[2]
-          if ns == id
-            push!(cc, i)
-          end
-        end
-        o_delete(sta, "StationXML")
-        asdf_sxml(xml_buf, SX, cc, sta)
+        asdf_merge_xml(xml_buf, S, chan_numbers, sta, id)
 
         # ==================================================================
         # overwrite trace data
         trace_ids = S.id[chans]
-        # ts = zeros(Int64, nc)
-        # te = zeros(Int64, nc)
         t = Array{Array{Int64,2},1}(undef,nc)
         for (i,j) in enumerate(chans)
-          # ts[i] = S.t[j][1,2]*1000
-          # te[i] = endtime(S.t[j], S.fs[j])*1000
           t[i] = t_win(S.t[j], S.fs[j])
           broadcast!(*, t[i], t[i], 1000)
         end
@@ -183,16 +154,8 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
                 # overwrite
                 if v > 2
                   println("writing ", si, ":", ei, " to ", i0, ":", i1)
-                  if ei-si != i1-i0
-                    close(io)
-                    close(xml_buf)
-                    @assert ei-si == i1-i0
-                  end
                 end
                 save_data!(S.x[j], x, i0:i1, si:ei)
-                if v > 2
-                  printstyled("wrote ", ei-si+1, " samples to file.\n", color=:green)
-                end
               end
             end
           end
@@ -214,7 +177,11 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
       end
 
       # Write StationXML to sta
-      asdf_sxml(xml_buf, S, chans, sta)
+      if has(sta, "StationXML")
+        asdf_merge_xml(xml_buf, S, chans, sta, id)
+      else
+        asdf_sxml(xml_buf, S, chans, sta)
+      end
     end
   end
 
