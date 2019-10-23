@@ -140,9 +140,11 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
           (n == "StationXML") && continue
           cha_id = String(split(n, "_", limit=2, keepempty=true)[1])
           x = sta[n]
+          (v > 1) && println("checking ", n)
           nx = length(x)
           t0 = read(x["starttime"])
           fs = read(x["sampling_rate"])
+          (v > 2) && println("t0 = ", t0, "; fs = ", fs, "; nx = ", nx)
 
           # convert fs to sampling interval in ns
           Δ = round(Int64, 1.0e9/fs)
@@ -153,29 +155,44 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
             nk = size(t[i], 1)
 
             for k in 1:nk
+              (v > 2) && println("segment k = ", k, "/", nk)
               # overlap
               ts = t[i][k,1]
               te = t[i][k,2]
               if (ts ≤ t1) && (te ≥ t0)
                 # set channel index j in S
                 j = chans[i]
+                (v > 2) && println("j = ", j)
 
                 # check for fs mismatch
                 trace_fs = S.fs[j]
-                Lx = length(S.x[j])
                 if trace_fs != fs
                   @warn(string("Can't write ", S.id[j], "; fs mismatch!"))
                   continue
                 end
+                lx = div(te-ts, Δ)+1
 
                 # determine start, end indices in x that are overwritten
+                (v > 2) && println("ts = ", ts, "; te = ", te, "; t0 = ", t0, "; t1 = ", t1, "; nx = ", nx, "; lx = ", lx)
                 i0, i1, t2 = get_trace_bounds(ts, te, t0, t1, Δ, nx)
 
                 # determine start, end indices in X to copy
-                si, ei, t2 = get_trace_bounds(t0, t1, ts, te, Δ, Lx)
+                si = get_trace_bound(t0, ts, Δ, lx)
+                ei = si + min(i1-i0, lx-1)
 
                 # overwrite
+                if v > 2
+                  println("writing ", si, ":", ei, " to ", i0, ":", i1)
+                  if ei-si != i1-i0
+                    close(io)
+                    close(xml_buf)
+                    @assert ei-si == i1-i0
+                  end
+                end
                 save_data!(S.x[j], x, i0:i1, si:ei)
+                if v > 2
+                  printstyled("wrote ", ei-si+1, " samples to file.\n", color=:green)
+                end
               end
             end
           end
