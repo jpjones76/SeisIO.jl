@@ -83,7 +83,7 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
         # ====================================================================
         # overwrite StationXML
         (v > 1) && println("merging XML")
-        
+
         # read old XML
         SX = SeisData()
         sxml = String(UInt8.(read(sta["StationXML"])))
@@ -149,10 +149,7 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
 
                 # check for fs mismatch
                 trace_fs = S.fs[j]
-                if trace_fs != fs
-                  @warn(string("Can't write ", S.id[j], "; fs mismatch!"))
-                  continue
-                end
+                (trace_fs == fs) || (@warn(string("Can't write ", S.id[j], "; fs mismatch!")); continue)
                 lx = div(te-ts, Δ)+1
 
                 # determine start, end indices in x that are overwritten
