@@ -147,7 +147,7 @@ else
     @warn(string("Partial outage; missing data from ", id, "; check connection!"))
   end
 
-  printstyled("        checking request is written identically in ASDF, SAC, and SeisIO\n", color=:green)
+  printstyled("        are data written identically?\n", color=:green)
 
   # write ASDF first, since this modifies the first sample start time in S
   write_hdf5("sacreq.h5", S, add=true, ovr=true, len=Day(2))
