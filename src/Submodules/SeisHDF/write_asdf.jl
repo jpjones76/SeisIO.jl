@@ -15,8 +15,18 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
     for i in chan_numbers
       if (size(S.t[i],1) < 2) && (S.fs[i] != 0.0)
         error(string(S.id[i] *
-          ": gapped :x or malformed :t; can't write with ovr=true."))
+          ": malformed :t; can't write with ovr=true."))
       end
+
+      # ensure each channel starts on an exact sample
+      t0 = S.t[i][1,2]
+      Δ = round(Int64, 1.0e6/S.fs[i])
+      t1 = div(t0,Δ)*Δ
+      δ = t0-t1
+      S.t[i][1,2] = t1
+      note!(S, i, string("write_asdf, t0 -= ", δ,
+        " μs, channel start time decreased ", δ,
+        " μs to align to file trace bounds"))
     end
   end
 
