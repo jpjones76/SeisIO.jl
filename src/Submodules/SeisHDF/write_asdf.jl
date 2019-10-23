@@ -83,7 +83,30 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
         # ====================================================================
         # overwrite StationXML
         (v > 1) && println("merging XML")
-        asdf_merge_xml(xml_buf, S, chan_numbers, sta, id)
+        
+        # read old XML
+        SX = SeisData()
+        sxml = String(UInt8.(read(sta["StationXML"])))
+        read_station_xml!(SX, sxml, msr=true)
+
+        # merge S headers into SX, overwriting SX
+        SM = SeisData(length(chan_numbers))
+        for f in (:id, :name, :loc, :fs, :gain, :resp, :units)
+          setfield!(SM, f, deepcopy(getindex(getfield(S, f), chan_numbers)))
+        end
+        sxml_mergehdr!(SX, SM, nofs=true, app=false)
+
+        # remake channel list; SX ordering differs from S
+        cc = Int64[]
+        for i in 1:SX.n
+          idx = split_id(SX.id[i])
+          ns = idx[1]*"."*idx[2]
+          if ns == id
+            push!(cc, i)
+          end
+        end
+        o_delete(sta, "StationXML")
+        asdf_sxml(xml_buf, SX, cc, sta)
 
         # ==================================================================
         # overwrite trace data
