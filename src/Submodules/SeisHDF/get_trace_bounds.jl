@@ -1,15 +1,16 @@
-function get_trace_bounds(ts::Int64, te::Int64, t0::Int64, t1::Int64, Δ::Int64, i1::Int64)
+function get_trace_bounds(ts::Int64, te::Int64, t0::Int64, t1::Int64, Δ::Int64, nx::Int64)
   i0 = 1
-  while i0 < i1
-    if t0 >= ts
+  i1 = nx
+  while t0 < ts
+    if i0 >= i1
       break
     end
     t0 += Δ
     i0 += 1
   end
 
-  while i1 > i0
-    if t1 <= te
+  while t1 > te
+    if i1 <= i0
       break
     end
     t1 -= Δ
