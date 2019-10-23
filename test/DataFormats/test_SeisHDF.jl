@@ -78,6 +78,7 @@ printstyled("    write_hdf5\n", color=:light_green)
 safe_rm(hdf_out1)
 
 # ASDF write test 1: can we write to a new file?
+printstyled("      write to new file\n", color=:light_green)
 write_hdf5( hdf_out1, S1 )
 S2 = read_hdf5(hdf_out1, ts, te, id = id)
 for f in datafields
@@ -86,6 +87,7 @@ for f in datafields
 end
 
 # ASDF write test 2: can we overwrite part of an existing file?
+printstyled("      add to existing file\n", color=:light_green)
 ts  = "2019-07-08T00:00:00"
 te  = "2019-07-08T02:00:00"
 S3 = read_hdf5(hdf_out1, ts, te, id = id)
@@ -95,6 +97,7 @@ end
 write_hdf5( hdf_out1, S3, ovr=true, v=3 )
 
 # ASDF write test 3: write with gaps
+printstyled("      write to new file with gaps\n", color=:light_green)
 safe_rm(hdf_out1)
 ts  = "2019-07-08T10:00:00"
 te  = "2019-07-08T12:00:00"
@@ -118,6 +121,7 @@ if has_restricted
   ts = "2014-09-27T09:00:00"
 
   # Test for intended read behavior
+  printstyled("        are written traces the right length?\n", color=:light_green)
   te = "2014-09-27T10:00:00"
   C = read_hdf5(hdf_out1, ts, te, id = id)[1]
   @test length(C.x) == 360000 # Stop at last available sample
@@ -132,35 +136,37 @@ if has_restricted
   @test length(C2.x) == 359990 # Exact, ten samples shorter
   @test C.x[2:5] == C2.x[1:4]
 
-  # test 1: are the right traces created?
+  # test 1: are the right trace names created?
+  printstyled("        are the right trace names created?\n", color=:light_green)
   append!(S, S1)
   safe_rm(hdf_out1)
   write_hdf5(hdf_out1, S, add=true, ovr=true, v=3)
   @test scan_hdf5(hdf_out1, level="trace") == [
-  "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-07T00:00:00__2019-07-08T00:00:00__hhz_",
-  "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-08T00:00:00__2019-07-09T00:00:00__hhz_",
+  "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-07T00:00:00__2019-07-07T23:59:59.975__hhz_",
+  "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-08T00:00:00__2019-07-08T23:59:59.975__hhz_",
   "/Waveforms/CI.SDD/StationXML",
-  "/Waveforms/JP.VONTA/JP.VONTA..E__2014-09-27T00:00:00__2014-09-28T00:00:00__e_",
-  "/Waveforms/JP.VONTA/JP.VONTA..H__2014-09-27T00:00:00__2014-09-28T00:00:00__h_",
-  "/Waveforms/JP.VONTA/JP.VONTA..N__2014-09-27T00:00:00__2014-09-28T00:00:00__n_",
-  "/Waveforms/JP.VONTA/JP.VONTA..U__2014-09-27T00:00:00__2014-09-28T00:00:00__u_",
+  "/Waveforms/JP.VONTA/JP.VONTA..E__2014-09-27T00:00:00__2014-09-27T23:59:59.99__e_",
+  "/Waveforms/JP.VONTA/JP.VONTA..H__2014-09-27T00:00:00__2014-09-27T23:59:59.99__h_",
+  "/Waveforms/JP.VONTA/JP.VONTA..N__2014-09-27T00:00:00__2014-09-27T23:59:59.99__n_",
+  "/Waveforms/JP.VONTA/JP.VONTA..U__2014-09-27T00:00:00__2014-09-27T23:59:59.99__u_",
   "/Waveforms/JP.VONTA/StationXML",
-  "/Waveforms/JP.VONTN/JP.VONTN..E__2014-09-27T00:00:00__2014-09-28T00:00:00__e_",
-  "/Waveforms/JP.VONTN/JP.VONTN..H__2014-09-27T00:00:00__2014-09-28T00:00:00__h_",
-  "/Waveforms/JP.VONTN/JP.VONTN..N__2014-09-27T00:00:00__2014-09-28T00:00:00__n_",
-  "/Waveforms/JP.VONTN/JP.VONTN..U__2014-09-27T00:00:00__2014-09-28T00:00:00__u_",
+  "/Waveforms/JP.VONTN/JP.VONTN..E__2014-09-27T00:00:00__2014-09-27T23:59:59.99__e_",
+  "/Waveforms/JP.VONTN/JP.VONTN..H__2014-09-27T00:00:00__2014-09-27T23:59:59.99__h_",
+  "/Waveforms/JP.VONTN/JP.VONTN..N__2014-09-27T00:00:00__2014-09-27T23:59:59.99__n_",
+  "/Waveforms/JP.VONTN/JP.VONTN..U__2014-09-27T00:00:00__2014-09-27T23:59:59.99__u_",
   "/Waveforms/JP.VONTN/StationXML"
   ]
 
   # test 2: ONLY write CI.SDD..HHZ, JP.VONTA..H, JP.VONTA..N, JP.VONTA..U
+  printstyled("        write with a channel sublist\n", color=:light_green)
   write_hdf5(hdf_out2, S, chans=[2,3,4,9], add=true, ovr=true, v=3)
   @test scan_hdf5(hdf_out2, level="trace") == [
-  "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-07T00:00:00__2019-07-08T00:00:00__hhz_",
-  "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-08T00:00:00__2019-07-09T00:00:00__hhz_",
+  "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-07T00:00:00__2019-07-07T23:59:59.975__hhz_",
+  "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-08T00:00:00__2019-07-08T23:59:59.975__hhz_",
   "/Waveforms/CI.SDD/StationXML",
-  "/Waveforms/JP.VONTA/JP.VONTA..H__2014-09-27T00:00:00__2014-09-28T00:00:00__h_",
-  "/Waveforms/JP.VONTA/JP.VONTA..N__2014-09-27T00:00:00__2014-09-28T00:00:00__n_",
-  "/Waveforms/JP.VONTA/JP.VONTA..U__2014-09-27T00:00:00__2014-09-28T00:00:00__u_",
+  "/Waveforms/JP.VONTA/JP.VONTA..H__2014-09-27T00:00:00__2014-09-27T23:59:59.99__h_",
+  "/Waveforms/JP.VONTA/JP.VONTA..N__2014-09-27T00:00:00__2014-09-27T23:59:59.99__n_",
+  "/Waveforms/JP.VONTA/JP.VONTA..U__2014-09-27T00:00:00__2014-09-27T23:59:59.99__u_",
   "/Waveforms/JP.VONTA/StationXML"
   ]
 
@@ -172,6 +178,7 @@ if has_restricted
   end
 
   # ensure what's read back in are the correct traces with NaNs in the right places
+  printstyled("        trace indexing with ovr=true\n", color=:light_green)
   S1 = read_hdf5(hdf_out2, "2014-09-27T08:00:00.00", "2014-09-27T10:00:00.00", id="*.VONTA..*")
   for i in 1:S1.n
     x = S1.x[i]
