@@ -34,11 +34,13 @@ function asdf_mktrace(S::GphysData, xml_buf::IO, chan_numbers::Array{Int64,1}, w
     # divide t0 and t1 by the time length using div to get d0, d1
     d0[i] = len*(div(ts[i], len))
     d1 = len*(div(te[i], len))
-    # range of times is then d0:d1
+    Δ = round(Int64, 1.0e9/S.fs[j])
 
+    # range of times is then d0:d1
     for d in d0[i]:len:d1
-      s0 = string(u2d(div(d, 1000000000)))
-      s1 = string(u2d(div(d+len, 1000000000)))
+      # ...but we must end Δ ns *before* d1 to prevent a one-sample overlap
+      s0 = string(u2d(d/1000000000))
+      s1 = string(u2d((d+len-Δ)/1000000000))
 
       # create string like CI.SDD..HHZ__2019-07-07T00:00:00__2019-07-09T00:00:00__hhz_
       chan_str = join([id, s0, s1, cc], "__")
