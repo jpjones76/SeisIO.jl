@@ -86,7 +86,7 @@ for f in datafields
   @test isequal(getfield(S1, f), getfield(S2, f))
 end
 
-# ASDF write test 2: can we overwrite part of an existing file?
+# ASDF write test 2: can we overwrite parts of an existing file?
 printstyled("      add to existing file\n", color=:light_green)
 ts  = "2019-07-08T00:00:00"
 te  = "2019-07-08T02:00:00"
@@ -97,16 +97,35 @@ end
 redirect_stdout(out) do
   write_hdf5( hdf_out1, S3, ovr=true, v=3 )
   push!(S3, SeisChannel(id="YY.ZZTOP.00.LEG", fs=50.0))
+
+  # This should work but throw a warning
   write_hdf5( hdf_out1, S3, v=3 )
+
+  # This should fail
   @test_throws ErrorException write_hdf5( hdf_out1, S3, ovr=true, v=3 )
+
+  # GphysChannel extension
   C = S3[1]
   write_hdf5( hdf_out1, C, v=3 )
+  safe_rm(hdf_out1)
   deleteat!(S3, 2)
+
+  # Force write to channel with existing net.sta
+  write_hdf5(hdf_out1, S3)
+  ts  = "2019-07-08T10:00:00"
+  te  = "2019-07-08T12:00:00"
+  S4 = read_hdf5(hdf, ts, te)
+  write_hdf5(hdf_out1, S4, ovr=true, add=true)
 end
+@test scan_hdf5(hdf_out1, level="trace") == [
+  "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-08T00:00:00__2019-07-08T02:00:00__hhz_",
+  "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-08T00:00:00__2019-07-08T23:59:59.975__hhz_",
+  "/Waveforms/CI.SDD/StationXML"
+  ]
+safe_rm(hdf_out1)
 
 # ASDF write test 3: write with gaps
 printstyled("      write to new file with gaps\n", color=:light_green)
-safe_rm(hdf_out1)
 ts  = "2019-07-08T10:00:00"
 te  = "2019-07-08T12:00:00"
 read_hdf5!(S3, hdf, ts, te)
