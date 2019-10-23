@@ -18,6 +18,34 @@ function asdf_sxml(xbuf::IOBuffer, S::GphysData, chans::Array{Int64,1}, sta::HDF
   return nothing
 end
 
+function asdf_merge_xml(xml_buf::IOBuffer, S::GphysData, chans::Array{Int64,1}, sta::HDF5Group, id::String)
+  # read old XML
+  SX = SeisData()
+  sxml = String(UInt8.(read(sta["StationXML"])))
+  read_station_xml!(SX, sxml, msr=true)
+
+  # merge S headers into SX, overwriting SX
+  SM = SeisData(length(chans))
+  for f in (:id, :name, :loc, :fs, :gain, :resp, :units)
+    setfield!(SM, f, deepcopy(getindex(getfield(S, f), chans)))
+  end
+  sxml_mergehdr!(SX, SM, nofs=true, app=false)
+
+  # remake channel list; SX ordering differs from S
+  cc = Int64[]
+  for i in 1:SX.n
+    idx = split_id(SX.id[i])
+    ns = idx[1]*"."*idx[2]
+    if ns == id
+      push!(cc, i)
+    end
+  end
+  o_delete(sta, "StationXML")
+  asdf_sxml(xml_buf, SX, cc, sta)
+
+  return nothing
+end
+
 function asdf_mktrace(S::GphysData, xml_buf::IO, chan_numbers::Array{Int64,1}, wav::HDF5Group, ts::Array{Int64,1}, te::Array{Int64,1}, len::Int64, v::Int64)
   nc = length(chan_numbers)
   netsta, cha, nsid = mk_netsta(S)
@@ -113,9 +141,6 @@ function asdf_write_chan(S::GphysData, sta::HDF5Group, i::Int64, cha::String, v:
     return
   end
 
-  # t0 = t[1,2]
-  # s0 = string(u2d(div(t0, 1000000)))
-  # s1 = string(u2d(div(endtime(t, fs), 1000000)))
   for k = 1:n_seg
     t0 = t[k,1]
     s0 = string(u2d(div(t0, 1000000)))
