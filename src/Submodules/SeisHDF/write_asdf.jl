@@ -63,17 +63,6 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
     asdf_mktrace(S, xml_buf, chan_numbers, wav, ts, te, p, v)
   end
 
-  # determine a setting for msr
-  if ovr
-    msr = false
-    for i in chan_numbers
-      if typeof(S.resp[i]) == MultiStageResp
-        msr = true
-        break
-      end
-    end
-  end
-
   # write channels to net.sta waveform groups
   for j in 1:length(nsid)
     (v > 0) && println("writing ", nsid)
