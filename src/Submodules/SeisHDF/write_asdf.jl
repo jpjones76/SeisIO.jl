@@ -166,11 +166,7 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
       end
 
       # Write StationXML to sta
-      if has(sta, "StationXML")
-        asdf_merge_xml(xml_buf, S, chans, sta, id)
-      else
-        asdf_sxml(xml_buf, S, chans, sta)
-      end
+      asdf_sxml(xml_buf, S, chans, sta)
     end
   end
 
