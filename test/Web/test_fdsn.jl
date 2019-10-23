@@ -131,7 +131,9 @@ S = get_data("FDSN", "CC.JRO..BHZ,IU.COLA.00.*", src="IRIS", s=-600, t=0, v=1,
 
 # This should return exactly 4 days of data, which we know IRIS' FDSN server has
 printstyled("      multi-day request\n", color=:light_green)
-S = get_data("FDSN","CI.ADO..BH?",s="2018-02-01T00:00:00",t="2018-02-03T00:00:00")
+ts = "2018-01-31T00:00:00"
+te = "2018-02-02T00:00:00"
+S = get_data("FDSN","CI.ADO..BH?", s=ts, t=te)
 id = "CI.ADO..BHE"
 i = findid(S, id)
 if i == 0
@@ -145,16 +147,32 @@ else
     @warn(string("Partial outage; missing data from ", id, "; check connection!"))
   end
 
-  # Check that these data can be written and read faithfully in SAC and SeisIO formats
+  printstyled("        checking request is written identically in ASDF, SAC, and SeisIO\n", color=:green)
+
+  # write ASDF first, since this modifies the first sample start time in S
+  write_hdf5("sacreq.h5", S, add=true, ovr=true, len=Day(2))
+  S1 = read_hdf5("sacreq.h5", ts, te, msr=false)
+
+  for f in SeisIO.datafields
+    f in (:name, :src, :notes) && continue
+    @test isequal(getfield(S1,f), getfield(S,f))
+  end
+
+  # Check that these data can be written and read faithfully in ASDF, SAC, and SeisIO
   writesac(S)
   wseis("sacreq.seis", S)
   S2 = rseis("sacreq.seis")[1]
   @test S == S2
 
   # These are the only fields preserved; :loc is preserved to Float32 precision
-  S1 = read_data("sac", "2018.032*CI.ADO..BH*SAC")
+  d0 = DateTime(ts)
+  y0 = Year(d0).value
+  j0 = md2j(y0, Month(d0).value, Day(d0).value)
+  sac_str = string(y0, ".", lpad(j0, 3, '0'), "*CI.ADO..BH*SAC")
+  S1 = read_data("sac", sac_str)
   for f in (:id, :fs, :gain, :t, :x)
     @test getfield(S, f) == getfield(S1, f)
+    @test getfield(S, f) == getfield(S2, f)
   end
   for f in (:lat, :lon, :el, :dep, :az, :inc)
     @test isapprox(getfield(S.loc[i], f), getfield(S1.loc[i], f), atol=1.0e-3)
@@ -162,8 +180,8 @@ else
 
   # clean up
   rm("sacreq.seis")
+  rm("sacreq.h5")
 end
-
 
 # A bad data format should produce a warning
 printstyled("      request an unparseable format (sac.zip)\n", color=:light_green)
