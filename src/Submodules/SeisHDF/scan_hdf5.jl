@@ -26,6 +26,7 @@ function scan_hdf5(hdf::String; fmt::String="asdf", level::String="station")
   else
     error("unknown format or NYI!")
   end
+  close(f)
   unique!(str)
   return str
 end
