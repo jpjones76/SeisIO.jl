@@ -20,10 +20,8 @@ initializes new traces (filled with NaNs) of length = `len`.
 #### ASDF behavior
 Mode `add=true` follows these steps in this order:
 1. Determine times of all data in `S[chans]` and all traces in "Waveforms/".
-1. For all data in `S[chans]` that cannot be written to an existing trace, a new
-trace of length = `len` sampled at `S.fs[i]` is initialized (filled with NaNs).
-1. If a segment in `S[chans]` overlaps a trace in "Waveforms/" (including newly-
-created traces):
+1. For all data whose times lie outside existing trace bounds, a new trace of length = `len` sampled at `S.fs[i]` is initialized (filled with NaNs).
+1. If a segment in `S[chans]` overlaps a trace in "Waveforms/" (including newly-created traces):
   + Merge the header data in `S[chans]` into the relevant station XML.
   + Overwrite the relevant segment(s) of the trace.
 
