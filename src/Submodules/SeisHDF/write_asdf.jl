@@ -10,7 +10,7 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
     ovr = true
   end
 
-  # Precheck for ungap, degenerate time structs
+  # Precheck for degenerate time structs, time shift
   if ovr
     for i in chan_numbers
       if (size(S.t[i],1) < 2) && (S.fs[i] != 0.0)
@@ -24,9 +24,7 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
       t1 = div(t0,Δ)*Δ
       δ = t0-t1
       S.t[i][1,2] = t1
-      note!(S, i, string("write_asdf, t0 -= ", δ,
-        " μs, channel start time decreased ", δ,
-        " μs to align to file trace bounds"))
+      S.misc[i]["tc"] = δ
     end
   end
 
@@ -192,5 +190,15 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
 
   close(xml_buf)
   close(io)
+
+  # Correct :t
+  if ovr
+    for i in chan_numbers
+      δ = get(S.misc[i], "tc", 0)
+      t0 = S.t[i][1,2]
+      S.t[i][1,2] = t0+δ
+      delete!(S.misc[i], "tc")
+    end
+  end
   return nothing
 end

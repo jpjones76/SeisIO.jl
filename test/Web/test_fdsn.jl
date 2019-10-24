@@ -154,7 +154,7 @@ else
   S1 = read_hdf5("sacreq.h5", ts, te, msr=false)
 
   for f in SeisIO.datafields
-    f in (:name, :src, :notes) && continue
+    f in (:name, :src, :notes, :t) && continue
     @test isequal(getfield(S1,f), getfield(S,f))
   end
 
