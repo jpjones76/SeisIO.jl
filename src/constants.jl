@@ -61,7 +61,6 @@ const sac_nul_Int8 = UInt8[0x31, 0x32, 0x33, 0x34, 0x35]
 const segy_ftypes  = Array{DataType, 1}([UInt32, Int32, Int16, Any, Float32, Any, Any, Int8]) # Note: type 1 is IBM Float32
 const seis_inst_codes = ('H', 'J', 'L', 'M', 'N', 'P', 'Z')
 const seisio_file_begin = UInt8[0x53, 0x45, 0x49, 0x53, 0x49, 0x4f]
-const sep = Base.Filesystem.pathsep()
 const sμ = 1000000.0
 const vSeisIO = Float32(0.53)
 const unindexed_fields = (:c, :n)

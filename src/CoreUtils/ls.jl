@@ -26,14 +26,13 @@ OS-agnostic equivalent to Linux `find`. First argument is a path string, second 
 """
 function regex_find(path::String, r::Regex)
   path = realpath(path)
-
   if Sys.iswindows()
     s = filter(x -> !(isempty(x) || x == path),
       String.(split(read(
           `powershell -Command "(Get-ChildItem -Path $path -File -Force -Recurse).FullName"`,
           String), "\r\n"))
               )
-    s = [replace(i, sep => "/") for i in s]
+    s = [replace(i, Base.Filesystem.pathsep() => "/") for i in s]
     s2 = s[findall([occursin(r, f) for f in s])]
 
   else
