@@ -1,3 +1,6 @@
+### 2019-10-23
+* Added `asdf_qml` to read QuakeML from ASDF files.
+
 ### 2019-10-19
 * `write_hdf5` improvements:
   + added KW `chans` to support writing only some channels from a structure.

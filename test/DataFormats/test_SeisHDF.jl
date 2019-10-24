@@ -1,3 +1,4 @@
+using SeisIO.SeisHDF
 import SeisIO.SeisHDF:read_asdf, read_asdf!, id_match, id_to_regex
 printstyled("  ASDF\n", color=:light_green)
 printstyled("    read_hdf5\n", color=:light_green)
@@ -15,6 +16,7 @@ hdf     = path*"/SampleFiles/HDF5/2days-40hz.h5"
 hdf_pat = path*"/SampleFiles/HDF5/2days-40hz.h*"
 hdf_out1 = "test1.h5"
 hdf_out2 = "test2.h5"
+hdf_evt  = path*"/SampleFiles/HDF5/example.h5"
 
 id  = "CI.SDD..HHZ"
 idr = "C*.SDD..HH?"
@@ -231,6 +233,21 @@ if has_restricted
     @test S1.x[1] == S.x[9]
   end
 end
+
+# HDF event read
+(H,R) = asdf_qml(hdf_evt)
+@test H[1].id == "20120404_0000041"
+@test H[2].id == "20120404_0000038"
+@test H[3].id == "20120404_0000039"
+@test H[1].loc.lat ≈ 41.818
+@test H[1].loc.lon ≈ 79.689
+@test H[1].loc.dep ≈ 1.0
+@test H[1].mag.val ≈ 4.4
+@test H[1].mag.scale == "mb"
+@test H[2].loc.lat ≈ 39.342
+@test H[2].loc.dep ≈ 14.4
+@test H[2].mag.val ≈ 4.3
+@test H[2].mag.scale == "ML"
 
 # HDF write cleanup
 safe_rm(hdf_out1)
