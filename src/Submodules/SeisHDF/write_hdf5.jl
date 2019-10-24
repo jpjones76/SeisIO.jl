@@ -20,10 +20,10 @@ initializes new traces (filled with NaNs) of length = `len`.
 #### ASDF behavior
 Mode `add=true` follows these steps in this order:
 1. Determine times of all data in `S[chans]` and all traces in "Waveforms/".
-1. For all data whose times lie outside existing trace bounds, a new trace of length = `len` sampled at `S.fs[i]` is initialized (filled with NaNs).
-1. If a segment in `S[chans]` overlaps a trace in "Waveforms/" (including newly-created traces):
+1. If data lie outside existing trace bounds, new traces are initialized.
+1. For each segment in `S[chans]`:
   + Merge the header data in `S[chans]` into the relevant station XML.
-  + Overwrite the relevant segment(s) of the trace.
+  + Overwrite part of the relevant trace in `Waveforms/`.
 
 Thus, unless `len` exactly matches the time boundaries of each segment in `S`,
 the traces created will be intentionally larger.
@@ -35,6 +35,10 @@ If `ovr=true` is specified, but `add=false`, `write_hdf5` *only* overwrites
 * No new file is created. If `hdf_out` doesn't exist, nothing happens.
 * If no traces in `hdf_out` overlap segments in `S`, `hdf_out` isn't modified.
 * In ASDF format, station XML is merged in channels that are partly overwritten.
+
+!!! warning
+
+    `add=true`/`ovr=true` changes `:t` on file to begin at an exact sample time.
 
 See also: read_hdf5
 """ write_hdf5
