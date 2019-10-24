@@ -1,4 +1,5 @@
-using Compat, Dates, DSP, Logging, Printf, SeisIO, SeisIO.Quake, SeisIO.RandSeis, Test
+using Compat, Dates, DSP, HDF5, Logging, Printf, SeisIO, Test
+using SeisIO.Quake, SeisIO.RandSeis, SeisIO.SeisHDF
 import Dates: DateTime, Hour, now
 import DelimitedFiles: readdlm
 import Random: rand, randperm, randstring
@@ -9,7 +10,7 @@ import SeisIO: BUF, FDSN_sta_xml,
   get_http_post, get_views, int2tstr, mean, minreq!,
   mktaper!, mktime, parse_charr, parse_chstr, parse_sl,
   read_sacpz!, read_sacpz, read_seed_resp!, read_seed_resp, read_station_xml!,
-  safe_isdir, safe_isfile, sep, sμ, t_collapse,
+  safe_isdir, safe_isfile, sμ, t_collapse,
   t_expand, t_win, taper_seg!, tnote, tstr2int, w_time, webhdr,
   xtmerge!, μs,
   diff_x!, int_x!,
@@ -17,6 +18,7 @@ import SeisIO: BUF, FDSN_sta_xml,
   poly, polyval, polyfit
 import SeisIO.RandSeis: getyp2codes, pop_rand_dict!
 import SeisIO.Quake: unsafe_convert
+import SeisIO.SeisHDF:read_asdf, read_asdf!, id_match, id_to_regex
 import Statistics: mean
 
 # ===========================================================================
@@ -59,7 +61,7 @@ const NOOF = "
 # ===========================================================================
 # All functions used by tests are here
 Lx(T::GphysData) = [length(T.x[i]) for i=1:T.n]
-change_sep(S::Array{String,1}) = [replace(i, "/" => sep) for i in S]
+change_sep(S::Array{String,1}) = [replace(i, "/" => Base.Filesystem.pathsep()) for i in S]
 test_fields_preserved(S1::GphysData, S2::GphysData, x::Int, y::Int) =
   @test(minimum([getfield(S1,f)[x]==getfield(S2,f)[y] for f in datafields]))
 test_fields_preserved(S1::SeisChannel, S2::GphysData, y::Int) =
@@ -309,6 +311,15 @@ function printcol(r::Float64)
          r ≥ 0.75 ? 202 :
          r ≥ 0.50 ? 190 :
          r ≥ 0.25 ? 148 : 10
+end
+
+function safe_rm(file::String)
+  try
+    rm(file)
+  catch err
+    @warn(string("Can't remove ", file, ": throws error ", err))
+  end
+  return nothing
 end
 
 # ===========================================================================
