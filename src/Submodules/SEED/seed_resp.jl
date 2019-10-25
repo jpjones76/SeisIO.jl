@@ -24,7 +24,7 @@ function parse_resp_date!(buf::Array{UInt8,1}, L::Int64, T::Array{Int16,1})
       T[k] = buf_to_int(buf, i-1, j)
       T[k] = parse(Int16, String(buf[j:i-1]))
       break
-    elseif is_u8_digit(buf[i]) == false
+    elseif buf[i] in (0x2c, 0x2e, 0x3a)
       T[k] = buf_to_int(buf, i-1, j)
       k += 1
       k > 6 && break
@@ -427,7 +427,7 @@ function read_seed_resp!(S::GphysData, fpat::String;
             # initialize stage seq_n
             if seq_n > 0
               if length(C.resp.stage) < seq_n
-                push!(C.resp, MultiStageResp(6))
+                append!(C.resp, MultiStageResp(6))
               end
             end
 
