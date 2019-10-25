@@ -6,11 +6,11 @@ geocsv_pat  = string(path, "/SampleFiles/ASCII/geo-tspair.*")
 slist_pat   = string(path, "/SampleFiles/ASCII/*.slist")
 
 printstyled("  Lennartz ASCII\n", color=:light_green)
-C = read_data("lennasc", lenn_file)[1]
+C = read_data("lennartz", lenn_file)[1]
 @test ≈(C.fs, 62.5)
 
 printstyled("    wildcard support\n", color=:light_green)
-S = read_data("lennasc", lenn_pat)
+S = read_data("lennartz", lenn_pat)
 
 printstyled("  GeoCSV timeseries\n", color=:light_green)
 S = read_data("geocsv", geocsv_file)
@@ -28,10 +28,14 @@ printstyled("    wildcard support\n", color=:light_green)
 S = read_data("geocsv", geocsv_pat)
 
 printstyled("  slist\n", color=:light_green)
-S2 = read_data("slist", slist_file)
-nx = length(S2.x[1])
-@test ≈(S2.fs[1], 62.5)
-@test isapprox(C.x[1:nx], S2.x[1])
+S = read_data("slist", slist_file)
+nx = length(S.x[1])
+@test S.id[1] == "YY.ERTA..EHZ"
+@test ≈(S.fs[1], 62.5)
+@test isapprox(C.x[1:nx], S.x[1])
 
 printstyled("    wildcard support\n", color=:light_green)
 S = read_data("slist", slist_pat)
+@test S.id[1] == "YY.ERTA..EHZ"
+@test ≈(S.fs[1], 62.5)
+@test isapprox(C.x[1:nx], S.x[1])

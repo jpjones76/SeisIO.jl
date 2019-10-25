@@ -66,7 +66,7 @@ matching pattern `filestr`.
 | Bottle                    | bottle          |
 | GeoCSV, time-sample pair  | geocsv          |
 | GeoCSV, sample list       | geocsv.slist    |
-| Lennartz ASCII            | lennartzascii   |
+| Lennartz SLIST            | lennartz        |
 | Mini-SEED                 | mseed           |
 | PASSCAL SEG Y             | passcal         |
 | PC-SUDS                   | suds            |
@@ -219,13 +219,13 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
       end
     end
 
-  elseif fmt == "lennartzascii" || fmt == "lennasc"
+  elseif fmt == "lennartz"
     if one_file
-      read_lenn_file!(S, filestr)
+      read_slist!(S, filestr, lennartz=true)
     else
       files = ls(filestr)
       for fname in files
-        read_lenn_file!(S, fname)
+        read_slist!(S, fname, lennartz=true)
       end
     end
 

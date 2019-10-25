@@ -57,7 +57,7 @@ function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Int64)
       end
     else hdr = split(line)
       if hdr[2] == "station"
-        push!(str, "lennasc")
+        push!(str, "lennartz")
       end
     end
   catch err

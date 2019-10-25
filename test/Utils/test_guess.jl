@@ -37,7 +37,7 @@ end
 [@test guess(i) == ("uw", true) for i in uw]
 @test guess(geocsv1) == ("geocsv", false)
 @test guess(geocsv2) == ("geocsv.slist", false)
-@test guess(lennf) == ("lennasc", false)
+@test guess(lennf) == ("lennartz", false)
 # @test guess(xml_stfile) == ("sxml", false)
 # @test guess(resp_file) == ("resp", false)
 @test guess(seisf) == ("seisio", false)
