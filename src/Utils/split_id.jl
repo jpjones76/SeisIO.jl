@@ -1,13 +1,12 @@
-function split_id(sid::String)
-  id = String.(split(sid, ".", limit=4, keepempty=true))
+function split_id(sid::AbstractString; c::String=".")
+  id = String.(split(sid, c, keepempty=true))
   L = length(id)
   if L < 4
-    id2 = deepcopy(id)
-    id = Array{String, 1}(undef, 4)
-    fill!(id, "")
-    for j = 1:L
-      id[j] = identity(id2[j])
-    end
+    id2 = Array{String, 1}(undef, 4-L)
+    fill!(id2, "")
+    append!(id, id2)
+  elseif L > 4
+    deleteat!(id, 5:L)
   end
   return id
 end
