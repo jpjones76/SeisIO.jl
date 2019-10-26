@@ -9,28 +9,47 @@ os:
 - linux
 - osx
 - windows
+arch:
+- x64
+# - x86
+# - arm64
 julia:
 - 1.0
 - 1.1
 - 1.2
-- nightly
+- 1.3
+# - nightly
 matrix:
+  exclude:
+    # - os: osx
+      # arch: arm64
+      # arch: x86
+    # - os: windows
+    #   arch: arm64
   allow_failures:
   - os: windows
-  - julia: nightly
+  # - julia: nightly
+  - julia: 1.3
+  # - arch: arm64
+  # - arch: x86
 after_success:
-- julia -e 'VERSION >= v"0.7.0-DEV.5183" && using Pkg; VERSION >= v"0.7.0-DEV.5183"
-  || cd(Pkg.dir("SeisIO")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder());
-  Codecov.submit(Coveralls.process_folder()); '
+- julia -e 'import Pkg; Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder()); Codecov.submit(Codecov.process_folder())'
 before_install:
 - cd test
-- svn export https://github.com/jpjones76/SeisIO-TestData/trunk/SampleFiles SampleFiles
+- if [ "$TRAVIS_OS_NAME" = "windows" ]; then git clone https://github.com/jpjones76/SeisIO-TestData TestData; cp -r TestData/SampleFiles/ .; else svn export https://github.com/jpjones76/SeisIO-TestData/trunk/SampleFiles SampleFiles; fi
 - cd SampleFiles
-- openssl aes-256-cbc -K $encrypted_91c8855269b0_key -iv $encrypted_91c8855269b0_iv
-  -in restricted.enc -out restricted.tar.gz -d
+- openssl aes-256-cbc -K $encrypted_91c8855269b0_key -iv $encrypted_91c8855269b0_iv -in restricted.enc -out restricted.tar.gz -d
 - tar zxvf restricted.tar.gz
 - rm -f restricted.tar.gz
 - cd ../..
-script:
-  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - julia --project --color=yes --check-bounds=yes -e 'using Pkg; Pkg.build(); Pkg.test(; coverage=true)';
+# addons:
+#   apt:
+#     packages:
+#       - ruby
+# before_script:
+# - if [[ "$TRAVIS_OS_NAME" == "windows" ]];
+#   then powershell -c "svn export https://github.com/jpjones76/SeisIO-TestData/trunk/SampleFiles SampleFiles";
+#   fi
+# script:
+#   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+#   - julia --project --color=yes --check-bounds=yes -e 'using Pkg; Pkg.build(); Pkg.test(; coverage=true)';
