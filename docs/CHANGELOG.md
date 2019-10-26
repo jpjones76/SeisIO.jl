@@ -1,3 +1,12 @@
+### 2019-10-25
+* The string to read Lennartz SLIST (ASCII) in `read_data` has changed from
+"lennasc" to "lennartz".
+* Empty SAC character strings are written correctly by `writesac` again.
+* `writesac` now handles data gaps by writing one segment per file. Previous
+behavior of assuming no gaps was poorly documented, albeit intentional.
+* For better similarity to other software, the option to write to SAC as
+generic x-y data now uses the keyword "xy=true", rather than "ts=true".
+
 ### 2019-10-23
 * Added `asdf_qml` to read QuakeML from ASDF files.
 
