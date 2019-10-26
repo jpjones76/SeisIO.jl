@@ -52,7 +52,7 @@ writesac(SAC1, fname="test_write_2", v=1)
 rm("test_write_2.sac")
 
 redirect_stdout(out) do
-  writesac(SAC1, ts=true, v=1)
+  writesac(SAC1, xy=true, v=1)
 end
 @test safe_isfile("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")
 rm("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")

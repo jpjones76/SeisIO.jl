@@ -23,84 +23,54 @@ function should_bswap(io::IO)
   return q
 end
 
-function write_sac_file(fname::String, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Array{UInt8,1}, x::Array{Float32,1};
-                        t::Array{Float32,1}=Float32[],
-                        ts::Bool=true)
-  f = open(fname, "w")
-  write(f, fv)
-  write(f, iv)
-  write(f, cv)
-  write(f, x)
-  if ts
-    write(f, t)
+function write_sac_file(fname::String, x::AbstractArray, tdata::Array{Float32,1}, xy::Bool)
+  open(fname, "w") do io
+    write(io, BUF.sac_fv)
+    write(io, BUF.sac_iv)
+    write(io, BUF.sac_cv)
+    if eltype(x) == Float32
+      write(io, x)
+    elseif eltype(x) <: Complex
+      write(io, Float32.(real.(x)))
+    else
+      write(io, Float32.(x))
+    end
+    if xy
+      write(io, tdata)
+    end
   end
-  close(f)
-  return
+  return nothing
 end
 
-function fill_sac(S::GphysChannel, ts::Bool, leven::Bool)
-  fv = sac_nul_f.*ones(Float32, 70)
-  iv = sac_nul_i.*ones(Int32, 40)
-  cv = repeat(vcat(sac_nul_Int8, sac_nul_start, 0x20, 0x20), 24)
-  cv[17:22] .= 0x20
+function fill_sac(si::Int64, nx::Int32, ts::Int64, id::Array{String,1})
+  @assert nx ≤ typemax(Int32)
+  tt = [Base.parse(Int32, k) for k in split(string(u2d(ts*μs)), r"[\.\:T\-]")]
+  L = length(tt)
+  (L < 7) && append!(tt, zeros(Int32, 7-L))
 
   # Ints
-  T = getfield(S, :t)
-  tt = Int32[Base.parse(Int32, i) for i in split(string(u2d(T[1,2]*μs)),r"[\.\:T\-]")]
-  length(tt) == 6 && append!(tt, zero(Int32))
   y = tt[1]
   j = Int32(md2j(y, tt[2], tt[3]))
-  iv[1:6] = prepend!(tt[4:7], [y, j])
-  iv[7] = Int32(6)
-  iv[10] = Int32(length(S.x))
-  iv[16] = Int32(ts ? 4 : 1)
-  iv[36] = Int32(leven ? 1 : 0)
+  BUF.sac_iv[1] = y
+  BUF.sac_iv[2] = j
+  for i in 3:6
+    BUF.sac_iv[i] = tt[i+1]
+  end
+  BUF.sac_iv[10] = Int32(nx)
 
   # Floats
-  dt = 1.0/S.fs
-  fv[1] = Float32(dt)
-  fv[4] = Float32(S.gain)
-  fv[6] = rem(T[1,2], 1000)*1.0f-3
-  fv[7] = Float32(dt*length(S.x) + sum(T[2:end,2])*μs)
-  if !isempty(S.loc)
-    loc = getfield(S, :loc)
-    if typeof(loc) == GeoLoc
-      fv[32] = Float32(getfield(loc, :lat))
-      fv[33] = Float32(getfield(loc, :lon))
-      fv[34] = Float32(getfield(loc, :el))
-      fv[58] = Float32(getfield(loc, :az))
-      fv[59] = Float32(getfield(loc, :inc))
-    end
-  end
+  BUF.sac_fv[6] = rem(ts, 1000)*1.0f-3
+  BUF.sac_fv[7] = BUF.sac_fv[6] + BUF.sac_fv[1]*nx
 
-  # Chars (ugh...)
-  id = String.(split(S.id,'.'))
-  ci = [169, 1, 25, 161]
-  Lc = [8, 16, 8, 8]
-  for i = 1:4
-    if !isempty(id[i])
-      L_max = Lc[i]
-      si = ci[i]
-      ei = ci[i] + L_max - 1
-      s = codeunits(id[i])
-      Ls = length(s)
-      L = min(Ls, L_max)
-      copyto!(cv, si, s, 1, L)
-      if L < L_max
-        cv[si+L:ei] .= 0x20
-      end
-    end
-  end
-
-  # Assign a filename
+  # Filename
   y_s = lpad(y, 4, '0')
   j_s = lpad(j, 3, '0')
   h_s = lpad(tt[4], 2, '0')
   m_s = lpad(tt[5], 2, '0')
   s_s = lpad(tt[6], 2, '0')
   ms_s = lpad(tt[7], 3, '0')
-  fname = join([y_s, j_s, h_s, m_s, s_s, ms_s, id[1], id[2], id[3], id[4], "R.SAC"],'.')
-  return (fv, iv, cv, fname)
+  fname = join([y_s, j_s, h_s, m_s, s_s, ms_s, id[1], id[2], id[3], id[4], "R.SAC"], '.')
+  return fname
 end
 
 function read_sac_stream(f::IO, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Array{UInt8,1}, full::Bool, swap::Bool)
@@ -276,64 +246,126 @@ function sachdr(fname::String)
   return nothing
 end
 
+function reset_sacbuf()
+  checkbuf_strict!(BUF.sac_fv, 70)
+  checkbuf_strict!(BUF.sac_iv, 40)
+  checkbuf_strict!(BUF.sac_cv, 192)
+
+  fill!(BUF.sac_fv, sac_nul_f)
+  fill!(BUF.sac_iv, sac_nul_i)
+  for i in 1:24
+    BUF.sac_cv[1+8*(i-1):8*i] = sac_nul_c
+  end
+  BUF.sac_cv[17:24] .= 0x20
+  BUF.sac_iv[7] = Int32(6)
+end
+
+function fill_sac_id(id_str::String)
+  id = split_id(id_str)
+
+  # Chars, all segments
+  ci = [169, 1, 25, 161]
+  for j = 1:4
+    sj = ci[j]
+    if isempty(id[j])
+      BUF.sac_cv[sj:sj+7] .= sac_nul_c
+    else
+      s = codeunits(id[j])
+      L = min(length(s), 8)
+      copyto!(BUF.sac_cv, sj, s, 1, L)
+      if L < 8
+        BUF.sac_cv[sj+L:sj+7] .= 0x20
+      end
+    end
+  end
+  return id
+end
+
+function write_sac_channel(S::GphysData, i::Int64, v::Int64, xy::Bool, fn::String)
+  id = fill_sac_id(S.id[i])
+  fs = S.fs[i]
+  t = S.t[i]
+  tdata = Array{Float32,1}(undef, 0)
+
+  # Floats, all segments
+  BUF.sac_fv[1] = (fs == 0.0 ? 0.0f0 : Float32(1.0/fs))
+  BUF.sac_fv[4] = Float32(S.gain[i])
+  for i in (32, 33, 34, 58, 59)
+    BUF.sac_fv[i] = 0.0f0
+  end
+  if !isempty(S.loc[i])
+    loc = S.loc[i]
+    if typeof(loc) == GeoLoc
+      BUF.sac_fv[32] = Float32(getfield(loc, :lat))
+      BUF.sac_fv[33] = Float32(getfield(loc, :lon))
+      BUF.sac_fv[34] = Float32(getfield(loc, :el))
+      BUF.sac_fv[58] = Float32(getfield(loc, :az))
+      BUF.sac_fv[59] = Float32(getfield(loc, :inc))
+    end
+  end
+
+  if (xy == true || fs == 0.0)
+    si = 1
+    nx = Int32(length(S.x[i]))
+    @assert nx ≤ typemax(Int32)
+    ts = t[1,2]
+    tdata = Float32.(μs*(t_expand(t, fs) .- ts))
+    if fn == ""
+      fname = fill_sac(si, nx, ts, id)
+    else
+      fill_sac(si, nx, ts, id)
+      fname = fn
+    end
+    BUF.sac_fv[7] += sum(t[2:end,2])*μs
+    BUF.sac_iv[16] = Int32(4)
+    BUF.sac_iv[36] = zero(Int32)
+    write_sac_file(fname, S.x[i], tdata, true)
+    v > 0  && println(stdout, now(), ": Wrote SAC xy file ", fname, " from channel ", i)
+  else
+    W = t_win(S.t[i], fs)
+    inds = x_inds(S.t[i])
+    BUF.sac_iv[16] = one(Int32)
+    BUF.sac_iv[36] = one(Int32)
+    for j in 1:size(W,1)
+      si = inds[j,1]
+      ei = inds[j,2]
+      ts = W[j,1]
+      nx = Int32(ei-si+1)
+      if fn == ""
+        fname = fill_sac(si, nx, ts, id)
+      else
+        fill_sac(si, nx, ts, id)
+        fname = fn
+      end
+      vx = view(S.x[i], si:ei)
+      write_sac_file(fname, vx, tdata, false)
+      v > 0  && println(stdout, now(), ": Wrote SAC ts file ", fname, " from channel ", i, " segment ", j)
+    end
+  end
+
+end
+
 """
     writesac(S::Union{SeisData}[; ts=false, v=0])
 
 Write all data in SeisData structure `S` to auto-generated SAC files.
 """
-function writesac(S::GphysData; ts::Bool=false, v::Int64=KW.v)
-  if ts
-    ift = Int32(4); leven = false
-  else
-    ift = Int32(1); leven = true
-  end
-  tdata = Array{Float32,1}(undef, 0)
-  N     = S.n
-  for i = 1:N
-    T = getindex(S, i)
-    b = T.t[1,2]
-    dt = 1.0/T.fs
-    (fv, iv, cv, fname) = fill_sac(T, ts, leven)
-
-    # Data
-    x = eltype(T.x) == Float32 ? getfield(T, :x) : map(Float32, T.x)
-    ts && (tdata = map(Float32, μs*(t_expand(T.t, dt) .- b)))
-
-    # Write to file
-    write_sac_file(fname, fv, iv, cv, x, t=tdata, ts=ts)
-    v > 0  && @printf(stdout, "%s: Wrote file %s from channel %i\n", string(now()), fname, i)
+function writesac(S::GphysData; fn::String="", xy::Bool=false, v::Int64=KW.v)
+  reset_sacbuf()
+  for i = 1:S.n
+    write_sac_channel(S, i, v, xy, fn)
   end
   return nothing
 end
 
 function writesac(S::GphysChannel;
   fname::String="",
-  ts::Bool=false,
+  xy::Bool=false,
   v::Int64=KW.v)
 
-  b = S.t[1,2]
-  dt = 1.0/S.fs
-  if ts
-    ift = Int32(4)
-    leven = false
-    tdata = Float32.(μs*(t_expand(S.t, dt) .- b))
-  else
-    ift = Int32(1)
-    leven = true
-    tdata = Array{Float32,1}(undef, 0)
-  end
-  (fv, iv, cv, fn) = fill_sac(S, ts, leven)
-
-  # Data
-  x = getfield(S, :x)
-  if eltype(x) != Float32
-    x = Float32.(x)
-  end
-
-  # Write to file
   fstr = String(
     if fname == ""
-      fn
+      fname
     else
       if endswith(lowercase(fname), ".sac")
         fname
@@ -342,8 +374,7 @@ function writesac(S::GphysChannel;
       end
     end
     )
-  write_sac_file(fstr, fv, iv, cv, x, t=tdata, ts=ts)
-  v > 0  && println(stdout, timestamp(), ": Wrote file ", fstr)
+  writesac(SeisData(S), fn=fstr, xy=xy, v=v)
   return nothing
 end
 

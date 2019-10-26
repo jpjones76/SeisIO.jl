@@ -54,6 +54,7 @@ const sac_keys = (  String[ "delta", "depmin", "depmax", "scale", "odelta",
                     String[ "kstnm", "kevnm", "khole", "ko", "ka", "kt0", "kt1", "kt2",
                             "kt3", "kt4", "kt5", "kt6", "kt7", "kt8", "kt9", "kf", "kuser0",
                             "kuser1", "kuser2", "kcmpnm", "knetwk", "kdatrd", "kinst" ] )
+const sac_nul_c = UInt8[0x2d, 0x31, 0x32, 0x33, 0x34, 0x35, 0x20, 0x20]
 const sac_nul_f = -12345.0f0
 const sac_nul_i = Int32(-12345)
 const sac_nul_start = 0x2d
