@@ -242,6 +242,16 @@ function t_collapse(tt::Array{Int64,1}, fs::Float64)
   return t
 end
 
+function x_inds(t::Array{Int64,2})
+  nt = size(t, 1)-1
+  inds = zeros(Int64, nt, 2)
+  for i in 1:nt
+    inds[i,1] = t[i,1]
+    inds[i,2] = t[i+1,1] - (i == nt ? 0 : 1)
+  end
+  return inds
+end
+
 function t_win(T::Array{Int64,2}, Δ::Int64)
   isempty(T) && return(T)
   n = size(T,1)-1
