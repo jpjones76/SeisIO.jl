@@ -88,4 +88,4 @@ If **ovr=true** is specified, but **add=false**, **write_hdf5** *only* overwrite
 .. function:: scan_hdf5(fname::String, level="trace")
 
 Scans supported seismic HDF5 formats and returns a list of strings describing
-the waveform contents. If level=channel, output is more verbose.
+the waveform contents. If level="trace", output is more verbose.

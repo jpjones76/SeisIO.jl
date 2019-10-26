@@ -181,10 +181,11 @@ Print headers from SEG Y file to stdout. Specify ``passcal=true`` for PASSCAL SE
 
 Parse UW event data file ``dfname`` into a new SeisEvent structure.
 
-.. function:: writesac(S[, ts=true])
+.. function:: writesac(S[, xy=true])
 
-Write SAC data to SAC files with auto-generated names. Specify ts=true to write
-time stamps; this will flag the file as generic x-y data in the SAC interpreter.
+Write SAC data to SAC files with auto-generated names. Specify xy=true to write
+time-stamped x-y data; this will flag the file as generic x-y data in the SAC
+interpreter.
 
 .. function:: wseis(fname, S)
 .. function:: wseis(fname, S, T, U...)
