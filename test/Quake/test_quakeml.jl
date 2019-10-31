@@ -63,7 +63,7 @@ R = R[1]
 @test H.loc.dep == 19.7152
 @test H.loc.rms == 2.1567
 @test H.loc.nst == 2643
-@test H.loc.src == "ISC"
+@test H.loc.src == "smi:ISC/origid=602227159,author=ISC"
 
 # Check source params
 @test R.id == "600002952"
@@ -75,6 +75,6 @@ R = R[1]
 @test R.st.dur == 70.0
 @test R.misc["methodID"] == "Best_double_couple"
 @test R.misc["pax_desc"] == "azimuth, plunge, length"
-@test R.misc["author"] == "GCMT"
+@test split(split(R.src, ",")[2],"=")[2] == "GCMT"
 @test R.misc["planes_desc"] == "strike, dip, rake"
 @test R.misc["derivedOriginID"] == "600126955"

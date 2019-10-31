@@ -10,6 +10,7 @@ Write data in a seismic HDF5 format to file `hdf_out` from structure `S`.
 | chans       | ChanSpec  | 1:S.n     | Channels to write to file             |
 | len         | Period    | Day(1)    | Length of new traces added to file    |
 | ovr         | Bool      | false     | Overwrite data in existing traces?    |
+| tag         | String    | ""        | Tag for trace names in ASDF volumes   |
 | v           | Int64     | 0         | verbosity                             |
 
 ## Write Methods
@@ -48,12 +49,13 @@ function write_hdf5(file::String, S::GphysData;
   fmt       ::String    = "asdf",           # data format
   len       ::Period    = Day(1),           # length of added traces
   ovr       ::Bool      = false,            # overwrite trace data
+  tag       ::String    = "",               # trace tag (ASDF)
   v         ::Int64     = KW.v              # verbosity
   )
 
   chans = mkchans(chans, S.n)
   if fmt == "asdf"
-    write_asdf(file, S, chans, add=add, len=len, ovr=ovr, v=v)
+    write_asdf(file, S, chans, add=add, len=len, ovr=ovr, tag=tag, v=v)
   else
     error("Unknown file format (possibly NYI)!")
   end

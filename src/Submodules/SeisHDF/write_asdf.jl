@@ -2,6 +2,7 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
   add           ::Bool      = false,            # add traces
   ovr           ::Bool      = false,            # overwrite trace data
   len           ::Period    = Day(1),           # length of added traces
+  tag           ::String    = "",               # trace tag
   v             ::Int64     = KW.v              # verbosity
   )
 
@@ -58,7 +59,7 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
       te[i] = endtime(S.t[j], S.fs[j])*1000
     end
     p = convert(Nanosecond, len).value
-    asdf_mktrace(S, xml_buf, chan_numbers, wav, ts, te, p, v)
+    asdf_mktrace(S, xml_buf, chan_numbers, wav, ts, te, p, v, tag)
   end
 
   # write channels to net.sta waveform groups
@@ -180,7 +181,7 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
 
       # Create Waveforms/net.sta/chan_str
       for i in chans
-        asdf_write_chan(S, sta, i, cha[i], v)
+        asdf_write_chan(S, sta, i, isempty(tag) ? cha[i] : tag, v)
       end
 
       # Write StationXML to sta

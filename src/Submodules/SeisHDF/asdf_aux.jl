@@ -4,7 +4,7 @@ function mk_netsta(S::GphysData)
   for i in 1:S.n
     id = split_id(S.id[i])
     netsta[i] = id[1]*"."*id[2]
-    cha[i] = lowercase(id[4]) * "_"
+    cha[i] = lowercase(id[4])
   end
   nsid = unique(netsta)
   return netsta, cha, nsid
@@ -19,7 +19,7 @@ function asdf_sxml(xbuf::IOBuffer, S::GphysData, chans::Array{Int64,1}, sta::HDF
 end
 
 
-function asdf_mktrace(S::GphysData, xml_buf::IO, chan_numbers::Array{Int64,1}, wav::HDF5Group, ts::Array{Int64,1}, te::Array{Int64,1}, len::Int64, v::Int64)
+function asdf_mktrace(S::GphysData, xml_buf::IO, chan_numbers::Array{Int64,1}, wav::HDF5Group, ts::Array{Int64,1}, te::Array{Int64,1}, len::Int64, v::Int64, tag::String)
   nc = length(chan_numbers)
   netsta, cha, nsid = mk_netsta(S)
   trace_names = Array{Array{String,1},1}(undef, nc)
@@ -30,7 +30,7 @@ function asdf_mktrace(S::GphysData, xml_buf::IO, chan_numbers::Array{Int64,1}, w
   for (i,j) in enumerate(chan_numbers)
     trace_names[i] = String[]
     id = S.id[j]
-    cc = cha[j]
+    cc = isempty(tag) ? cha[j] : tag
 
     # divide t0 and t1 by the time length using div to get d0, d1
     d0[i] = len*(div(ts[i], len))
@@ -104,7 +104,7 @@ function asdf_mktrace(S::GphysData, xml_buf::IO, chan_numbers::Array{Int64,1}, w
   return nothing
 end
 
-function asdf_write_chan(S::GphysData, sta::HDF5Group, i::Int64, cha::String, v::Int64)
+function asdf_write_chan(S::GphysData, sta::HDF5Group, i::Int64, tag::String, v::Int64)
   fs = S.fs[i]
   tx = S.t[i]
   t = t_win(tx, fs)
@@ -123,7 +123,7 @@ function asdf_write_chan(S::GphysData, sta::HDF5Group, i::Int64, cha::String, v:
     ei = S.t[i][k+1,1] - (k == n_seg ? 0 : 1)
 
     # create string like CI.SDD..HHZ__2019-07-07T00:00:00__2019-07-09T00:00:00__hhz_
-    chan_str = join([S.id[i], s0, s1, cha], "__")
+    chan_str = join([S.id[i], s0, s1, tag], "__")
     if has(sta, chan_str)
       (v > 0) && println("rewriting ", chan_str)
       o_delete(sta, chan_str)
