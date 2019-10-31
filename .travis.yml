@@ -34,6 +34,8 @@ matrix:
   # - arch: x86
 after_success:
 - julia -e 'import Pkg; Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder()); Codecov.submit(Codecov.process_folder())'
+after_failure:
+- cat test/runtests.log
 before_install:
 - cd test
 - if [ "$TRAVIS_OS_NAME" = "windows" ]; then git clone https://github.com/jpjones76/SeisIO-TestData TestData; cp -r TestData/SampleFiles/ .; else svn export https://github.com/jpjones76/SeisIO-TestData/trunk/SampleFiles SampleFiles; fi
