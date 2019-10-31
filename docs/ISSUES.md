@@ -4,7 +4,7 @@
 
 # Incomplete File Formats
 ## To Add
-If you want support expanded for any of these, **please send us test files**, along with some expected values. 
+If you want support expanded for any of these, **please send us test files**, along with some expected values.
 * **ASDF** test files are needed with the following properties:
   + Waveforms with attributes `event_id`, `magnitude_id`, `focal_mechanism_id`
   corresponding to values in `QuakeML`
@@ -24,6 +24,9 @@ If you find an example that you feel should be supported, but isn't, please open
   + *Green* structures should be readable without issue.
   + *Yellow* structures contain metadata outside the scope of SeisIO. Info can be dumped to stdout at high verbosity but isn't read into memory.
   + *Red* structures are skipped.
+
+# External, Fixable
+* **SCEDC connection issues**: See gist: https://gist.github.com/jpjones76/0175e762bea8c37d99b97ef3cb056068
 
 # External / Won't Fix
 * **Coverage**: rarely, reported code coverage drops to 94-95%, rather than 97-98%. This happens when Travis-CI fails to upload test results to code coverage services, even if tests pass. True coverage has been >97% since at least 2019-06-06.
