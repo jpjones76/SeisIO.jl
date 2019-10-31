@@ -1,3 +1,9 @@
+### 2019-10-30
+* Added `tag` as a keyword to `write_hdf5` to allow user control over the tag
+in the trace name string.
+  + If unset, the channel name is used.
+  + Previously, the default tag was the channel name with a trailing underscore.
+
 ### 2019-10-25
 * The string to read Lennartz SLIST (ASCII) in `read_data` has changed from
 "lennasc" to "lennartz".
