@@ -218,9 +218,11 @@ for i = 1:❄
     printstyled("        No data; check headers & connection!\n", color=:red)
   end
 
-  printstyled("        trace data\n", color=:light_green)
-  S = get_data("FDSN", rubric[i,2], src=rubric[i,1], s=s, t=t, msr=true, w=true)
-  if isempty(S)
-    printstyled("        No data; check headers & connection!\n", color=:red)
+  if rubric[i] != "SCEDC"
+    printstyled("        trace data\n", color=:light_green)
+    S = get_data("FDSN", rubric[i,2], src=rubric[i,1], s=s, t=t, msr=true, w=true)
+    if isempty(S)
+      printstyled("        No data; check headers & connection!\n", color=:red)
+    end
   end
 end
