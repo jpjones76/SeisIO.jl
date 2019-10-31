@@ -17,7 +17,8 @@ end
 
 function parse_qml(evt::XMLElement)
   MT = Array{SeisSrc,1}(undef, 0)
-  evt_id = split(attribute(evt, "publicID"), r"[;:/=]")[end]
+  evt_src = attribute(evt, "publicID")
+  evt_id = split(evt_src, r"[;:/=]")[end]
   preferredOriginID = ""
   preferredMagnitudeID = ""
   preferredFocalMechanismID = ""
@@ -51,6 +52,7 @@ function parse_qml(evt::XMLElement)
   n = 0
   while n < length(mechs)
     n         = n+1
+    auth      = ""
     mech      = getindex(mechs, n)
     np        = zeros(Float64, 3, 2)
     pax       = zeros(Float64, 3, 3)
@@ -59,7 +61,8 @@ function parse_qml(evt::XMLElement)
 
     # generate SeisSrc object
     S = SeisSrc()
-    setfield!(S, :id, String(split(attribute(mech, "publicID"), r"[;:/=]")[end]))
+    ssrc = attribute(mech, "publicID")
+    setfield!(S, :id, String(split(ssrc, r"[;:/=]")[end]))
 
     for child in child_elements(mech)
       cname = name(child)
@@ -67,7 +70,7 @@ function parse_qml(evt::XMLElement)
       if cname == "creationInfo"
         for grandchild in child_elements(child)
           if name(grandchild) ==  "author"
-            S.misc["author"] = content(grandchild)
+            auth = content(grandchild)
           end
         end
 
@@ -146,6 +149,7 @@ function parse_qml(evt::XMLElement)
     setfield!(S, :pax, pax)
     setfield!(S, :mt, mt)
     setfield!(S, :dm, dm)
+    setfield!(S, :src, ssrc * ",author=" * auth) 
 
     push!(MT, S)
   end
@@ -222,7 +226,7 @@ function parse_qml(evt::XMLElement)
       end
     end
   end
-  MAG = EQMag(m, msc, nst, gap, "originID " * oid * ",author " * auth)
+  MAG = EQMag(m, msc, nst, gap, oid * ",author=" * auth)
 
   # ==========================================================================
   # Location
@@ -231,6 +235,7 @@ function parse_qml(evt::XMLElement)
   gap = 0.0
   auth = ""
   ltyp = ""
+  loc_src = ""
   locflags = Array{Char, 1}(undef,8)
   fill!(locflags, '0')
   nst = zero(Int64)
@@ -242,6 +247,7 @@ function parse_qml(evt::XMLElement)
     # _______________________________________________________
     # Only parse locations corresponding to a desirable ID
     if occursin(attribute(orig, "publicID"), loc_id) || (n == 1)
+      loc_src = attribute(orig, "publicID")
 
       # Try to set location first
       fill!(loc, zero(Float64))
@@ -333,13 +339,14 @@ function parse_qml(evt::XMLElement)
 
     end
   end
-  LOC = EQLoc(loc..., nst, parse(UInt8, join(locflags), base=2), "", ltyp, "", auth)
+  LOC = EQLoc(loc..., nst, parse(UInt8, join(locflags), base=2), "", ltyp, "", loc_src * ",author=" * auth )
 
   setfield!(H, :id, String(evt_id))
   setfield!(H, :loc, LOC)
   setfield!(H, :ot, DateTime(replace(ot, r"[A-S,U-Z,a-z]" => "")[1:min(end,23)]))
   setfield!(H, :mag, MAG)
   setfield!(H, :typ, eqtype)
+  setfield!(H, :src, evt_src)
 
   return H, R
 end
