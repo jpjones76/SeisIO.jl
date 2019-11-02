@@ -1,6 +1,7 @@
 # Known Issues
 * **Source tracking** (`:src` and copying `:src` to `:notes` on overwrite) is unreliable at present. Standardizing this is a priority for v0.5.0.
 * **`FDSNevq(..., src="all")`**: no checks are made for redundant events or that all servers are up (the latter is *not* always true). Can yield duplicates or lead to connection timeouts.
+* **`write_hdf5` with SeisEvent**: phase and source-receiver geometry are not yet written to ASDF volumes when `write_hdf5(..., fmt="ASDF")` is invoked on a SeisEvent structure.
 
 # Incomplete File Formats
 ## To Add
