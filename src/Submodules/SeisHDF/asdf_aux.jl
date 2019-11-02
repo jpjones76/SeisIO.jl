@@ -104,7 +104,7 @@ function asdf_mktrace(S::GphysData, xml_buf::IO, chan_numbers::Array{Int64,1}, w
   return nothing
 end
 
-function asdf_write_chan(S::GphysData, sta::HDF5Group, i::Int64, tag::String, v::Int64)
+function asdf_write_chan(S::GphysData, sta::HDF5Group, i::Int64, tag::String, eid::String, v::Int64)
   fs = S.fs[i]
   tx = S.t[i]
   t = t_win(tx, fs)
@@ -131,8 +131,13 @@ function asdf_write_chan(S::GphysData, sta::HDF5Group, i::Int64, tag::String, v:
     sta[chan_str] = S.x[i][si:ei]
 
     # set dictionary attributes
-    attrs(sta[chan_str])["sampling_rate"] = fs
-    attrs(sta[chan_str])["starttime"] = t0*1000
+    D = attrs(sta[chan_str])
+    D["sampling_rate"] = fs
+    D["starttime"] = t0*1000
+
+    if !isempty(eid)
+      D["event_id"] = eid
+    end
   end
 
   return nothing

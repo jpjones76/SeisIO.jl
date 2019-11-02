@@ -1,5 +1,6 @@
 function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1} ;
   add           ::Bool      = false,            # add traces
+  evid          ::String    = "",               # event ID
   ovr           ::Bool      = false,            # overwrite trace data
   len           ::Period    = Day(1),           # length of added traces
   tag           ::String    = "",               # trace tag
@@ -171,7 +172,7 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
         end
       else
         for i in chans
-          asdf_write_chan(S, sta, i, cha[i], v)
+          asdf_write_chan(S, sta, i, cha[i], evid, v)
         end
       end
 
@@ -181,7 +182,7 @@ function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1}
 
       # Create Waveforms/net.sta/chan_str
       for i in chans
-        asdf_write_chan(S, sta, i, isempty(tag) ? cha[i] : tag, v)
+        asdf_write_chan(S, sta, i, isempty(tag) ? cha[i] : tag, evid, v)
       end
 
       # Write StationXML to sta
