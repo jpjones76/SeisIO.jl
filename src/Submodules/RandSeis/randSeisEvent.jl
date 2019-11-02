@@ -65,10 +65,9 @@ function randSeisSrc(; mw::Float32=0.0f0)
   setfield!(R, :npol, rand(Int64(6):Int64(120)))                    # :npol
   [note!(R, randstring(rand(16:256))) for i = 1:rand(1:6)]          # :notes
   setfield!(R, :pax,
-    vcat(360.0.*(rand(Float64, 2, 2).-0.5),
-          (rand(-1:2:1)*m0).*[rand() -1.0*rand()]))                 # :pax
-  setfield!(R, :planes,
-    360.0.*(rand(Float64, rand(2:3), rand(2:3)).-0.5))              # :planes
+    vcat(360.0.*(rand(Float64, 2, 3).-0.5),
+          (rand(-1:2:1)*m0).*[rand() -1.0*rand() rand()]))          # :pax
+  setfield!(R, :planes, 360.0.*(rand(Float64, 3, 2).-0.5))          # :planes
   setfield!(R, :src, "randSeisSrc")                                 # :src
   # setfield!(R, :src, join([join([randstring(12), " ",
   #                           randstring(20)]) for i=1:5], ","
@@ -88,29 +87,43 @@ Generate a SeisHdr structure filled with random values.
 function randSeisHdr()
   H = SeisHdr()
 
-  # a random earthquake location
-  loc = EQLoc()
-  setfield!(loc, :lat, (rand(0.0:1.0:89.0)+rand())*-1.0^(rand(1:2)))
-  setfield!(loc, :lon, (rand(0.0:1.0:179.0)+rand())*-1.0^(rand(1:2)))
-  setfield!(loc, :dep, (min(10.0*randexp(Float64), 660.0)))
-  setfield!(loc, :dx, rand()*4.0)
-  setfield!(loc, :dy, rand()*4.0)
-  setfield!(loc, :dz, rand()*8.0)
-  setfield!(loc, :src, rand(["HYPOELLIPSE", "HypoDD", "Velest", "centroid"]))
-  setfield!(loc, :typ, "hypocenter")
-  setfield!(loc, :sig, "1σ")
-
   # moment magnitude and m0 in SI units
-  mw = 10^(rand(Float32)-1.0f0)
+  mw = Float32(log10(10.0^rand(0.0:0.1:7.0)))
   m0 = 1.0e-7*(10^(1.5*(Float64(mw)+10.7)))
 
+  # a random earthquake location
+  dmin = 10.0^(rand()+0.5)
+  dmax = dmin + exp(mw)*10.0^rand()
+
+  loc = EQLoc(
+           (rand(0.0:1.0:89.0) + rand())*-1.0^rand(1:2),
+           (rand(0.0:1.0:179.0)+rand())*-1.0^rand(1:2),
+           min(10.0*randexp(Float64), 660.0),
+           rand()*4.0,
+           rand()*4.0,
+           rand()*8.0,
+           rand(),
+           rand(),
+           rand(),
+           10.0*10.0^rand(),
+           dmin,
+           dmax,
+           4 + round(Int64, rand()*exp(mw)),
+           rand(0x00:0x10:0xf0),
+           rand_datum(),
+           "hypocenter",
+           "",
+           rand(["HYPOELLIPSE", "HypoDD", "Velest", "centroid"]))
+
+  # setfield!(loc, :sig, "1σ")
   # event type
   rtyp = rand()
   typ = rtyp > 0.3 ? "earthquake" : rand(evtypes)
 
   # Generate random header
   setfield!(H, :id, string(rand(1:2^62)))                           # :id
-  setfield!(H, :int, (floor(UInt8, mw), randstring(rand(2:4))))     # :int
+  setfield!(H, :int, (mw < 0.0f0 ? 0x00 : floor(UInt8, mw),
+    randstring(rand(2:4))))                                         # :int
   setfield!(H, :loc, loc)                                           # :loc
   setfield!(H, :mag, EQMag( val   = mw,                             # :mag
                             scale = rand(["M","m"]) * randstring(2),
