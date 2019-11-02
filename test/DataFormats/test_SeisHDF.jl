@@ -5,7 +5,11 @@ hdf       = path*"/SampleFiles/HDF5/2days-40hz.h5"
 hdf_pat   = path*"/SampleFiles/HDF5/2days-40hz.h*"
 hdf_out1  = "test1.h5"
 hdf_out2  = "test2.h5"
+hdf_out3  = "test3.h5"
 hdf_evt   = path*"/SampleFiles/HDF5/example.h5"
+safe_rm(hdf_out1)
+safe_rm(hdf_out2)
+safe_rm(hdf_out3)
 
 id  = "CI.SDD..HHZ"
 idr = "C*.SDD..HH?"
@@ -64,8 +68,8 @@ printstyled("    scan_hdf5\n", color=:light_green)
 
 
 # HDF event read
-printstyled("    asdf_qml\n", color=:light_green)
-(H,R) = asdf_qml(hdf_evt)
+printstyled("    asdf_rqml\n", color=:light_green)
+(H,R) = asdf_rqml(hdf_evt)
 @test H[1].id == "20120404_0000041"
 @test H[2].id == "20120404_0000038"
 @test H[3].id == "20120404_0000039"
@@ -80,7 +84,7 @@ printstyled("    asdf_qml\n", color=:light_green)
 @test H[2].mag.scale == "ML"
 
 io = h5open(hdf_evt)
-(H1, R1) = asdf_qml(io)
+(H1, R1) = asdf_rqml(io)
 @test H == H1
 @test R == R1
 
@@ -248,6 +252,98 @@ if has_restricted
   @test S1.x[1] == S.x[9]
 end
 
+# HDF write with SeisEvent
+printstyled("      write SeisEvent\n", color=:light_green)
+Ev = Array{SeisEvent,1}(undef,3)
+for i in 1:3
+  Ev[i] = randSeisEvent(3, s=1.0)
+
+  Ev[i].source.misc = Dict{String,Any}(
+  "pax_desc"    => "azimuth, plunge, length",
+  "mt_id"       => "smi:SeisIO/moment_tensor;fmid="*Ev[i].source.id,
+  "planes_desc" => "strike, dip, rake")
+  Ev[i].source.eid = Ev[i].hdr.id
+  Ev[i].source.npol = 0
+  Ev[i].source.src = Ev[i].source.id * "," * Ev[i].source.src
+  Ev[i].source.notes = String[]
+
+  Ev[i].hdr.int = (0x00, "")
+  Ev[i].hdr.src = "randSeisHdr:" * Ev[i].hdr.id
+  Ev[i].hdr.loc.src = Ev[i].hdr.id * "," * Ev[i].hdr.loc.src
+  Ev[i].hdr.loc.datum = ""
+  Ev[i].hdr.loc.typ = ""
+  Ev[i].hdr.loc.rms = 0.0
+  flags = bitstring(Ev[i].hdr.loc.flags)
+  if flags[1] == '1' || flags[2] == '1'
+    flags = "11" * flags[3:8]
+    Ev[i].hdr.loc.flags = parse(UInt8, flags, base=2)
+  end
+
+  Ev[i].hdr.mag.src = Ev[i].hdr.loc.src * ","
+  Ev[i].hdr.notes = String[]
+  Ev[i].hdr.misc = Dict{String,Any}()
+
+  for j in 1:Ev[i].data.n
+    Ev[i].data.misc[j] = Dict{String,Any}()
+    Ev[i].data.notes[j] = String[]
+    Ev[i].data.loc[j] = GeoLoc(
+      lat = (rand(0.0:1.0:89.0) + rand())*-1.0^rand(1:2),
+      lon = (rand(0.0:1.0:179.0) + rand())*-1.0^rand(1:2),
+      el = rand()*1000.0,
+      dep = rand()*1000.0,
+      az = (rand()-0.5)*180.0,
+      inc = rand()*90.0
+    )
+    Δ = round(Int64, 1.0e6/Ev[i].data.fs[j])
+    nt = size(Ev[i].data.t[j],1)
+    k = trues(nt)
+    for n in 2:nt-1
+      if Ev[i].data.t[j][n,2] ≤ Δ
+        k[n] = false
+      end
+    end
+    Ev[i].data.t[j] = Ev[i].data.t[j][k,:]
+  end
+end
+
+printstyled("        to new file\n", color=:light_green)
+write_hdf5(hdf_out3, Ev[1])
+
+printstyled("        to existing file\n", color=:light_green)
+write_hdf5(hdf_out3, Ev[2], chans=[1,2])
+
+printstyled("        to appended file\n", color=:light_green)
+write_hdf5(hdf_out3, Ev[3], chans=[3])
+
+printstyled("      read_asdf_evt\n", color=:light_green)
+EvCat = read_asdf_evt(hdf_out3, Ev[1].hdr.id, msr=false)
+
+printstyled("        accuracy of SeisEvent i/o\n", color=:light_green)
+
+printstyled("          single-event read\n", color=:light_green)
+W = EvCat[1]
+Ev1 = deepcopy(Ev[1])
+compare_events(Ev1, W)
+
+EvCat = read_asdf_evt(hdf_out3, Ev[2].hdr.id, msr=false)
+W = EvCat[1]
+Ev2 = deepcopy(Ev[2])
+Ev2.data = Ev2.data[1:2]
+compare_events(Ev2, W)
+
+EvCat = read_asdf_evt(hdf_out3, Ev[3].hdr.id, msr=false)
+W = EvCat[1]
+Ev3 = deepcopy(Ev[3])
+Ev3.data = Ev3.data[3]
+compare_events(Ev3, W)
+
+printstyled("          multi-event read\n", color=:light_green)
+EvCat = read_asdf_evt(hdf_out3, msr=false)
+compare_events(EvCat[1], Ev1)
+compare_events(EvCat[2], Ev2)
+compare_events(EvCat[3], Ev3)
+
 # HDF write cleanup
 safe_rm(hdf_out1)
 safe_rm(hdf_out2)
+safe_rm(hdf_out3)
