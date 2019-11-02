@@ -6,6 +6,8 @@ Blosc.set_num_threads(Sys.CPU_THREADS)
 path = Base.source_dir()
 
 const tracefields = (:az, :baz, :dist, :id, :loc, :fs, :gain, :misc, :name, :notes, :pha, :resp, :src, :t, :units, :x)
+const loc_qual_fields = (:se, :gap, :dmin, :dmax)
+const loc_qual_names = ("standardError", "azimuthalGap", "minimumDistance", "maximumDistance")
 
 # imports
 include("Quake/imports.jl")

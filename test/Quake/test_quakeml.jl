@@ -58,12 +58,16 @@ R = R[1]
 @test H.mag.scale == "MW"
 
 # Check H.loc
-@test H.loc.lat == 38.2963
-@test H.loc.lon == 142.498
-@test H.loc.dep == 19.7152
-@test H.loc.rms == 2.1567
+@test H.loc.lat ≈ 38.2963
+@test H.loc.lon ≈ 142.498
+@test H.loc.dep ≈ 19.7152
 @test H.loc.nst == 2643
-@test H.loc.src == "smi:ISC/origid=602227159,author=ISC"
+@test H.loc.gap ≈ 6.314
+@test H.loc.dt ≈ 0.31
+@test H.loc.se ≈ 2.1567
+@test H.loc.dmin ≈ 0.917
+@test H.loc.dmax ≈ 163.253
+@test H.loc.src == "smi:ISC/origid=602227159,ISC"
 
 # Check source params
 @test R.id == "600002952"
@@ -73,8 +77,8 @@ R = R[1]
 @test R.pax == [295.0 115.0 205.0; 55.0 35.0 0.0; 5.305e22 -5.319e22 1.4e20]
 @test R.planes == [25.0 203.0; 80.0 10.0; 90.0 88.0]
 @test R.st.dur == 70.0
-@test R.misc["methodID"] == "Best_double_couple"
+@test R.misc["methodID"] == "smi:ISC/methodID=Best_double_couple"
 @test R.misc["pax_desc"] == "azimuth, plunge, length"
-@test split(split(R.src, ",")[2],"=")[2] == "GCMT"
+@test split(R.src, ",")[2] == "GCMT"
 @test R.misc["planes_desc"] == "strike, dip, rake"
 @test R.misc["derivedOriginID"] == "600126955"
