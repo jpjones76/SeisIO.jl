@@ -1,3 +1,8 @@
+function rand_datum()
+  x = rand()
+  return x > 0.5 ? "WGS-84 " : x > 0.25 ? "ETRS89 " : x > 0.1 ? "GRS 80 " : "JGD2011"
+end
+
 # Things that work for both regularly and irregularly sampled data
 function randResp(n::Int64=0)
   if n > 0
@@ -59,9 +64,8 @@ function rand_t(Lx::Int64, n::Int64=0)
 end
 
 function randLoc(randtype::Bool=true)
-  x = rand()
   y = randtype == true ? rand() : 1.0
-  datum = x > 0.5 ? "WGS-84 " : x > 0.25 ? "ETRS89 " : x > 0.1 ? "GRS 80 " : "JGD2011"
+  datum = rand_datum()
   loc = [ 180*(rand()-0.5),
           360*(rand()-0.5),
           1000*rand(),
