@@ -9,7 +9,10 @@ therein as a list of Strings formatted "nn.sssss" (network.station).
 Scan HDF5 archive `hdf` and return channel names with waveform data contained
 therein as a list of Strings formatted "nn.sssss.ll.ccc" (network.station.location.channel).
 """
-function scan_hdf5(hdf::String; fmt::String="asdf", level::String="station")
+function scan_hdf5( hdf::String; 
+  fmt::String="asdf",
+  level::String="station")
+
   f = h5open(hdf, "r")
   if fmt =="asdf"
     if level == "station"
