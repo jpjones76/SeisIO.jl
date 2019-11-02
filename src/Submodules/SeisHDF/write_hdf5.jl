@@ -1,7 +1,7 @@
 @doc """
     write_hdf5( hdf_out::String, S::GphysData[, KWs] )
 
-Write data in a seismic HDF5 format to file `hdf_out` from structure `S`.
+Write data to file `hdf_out` from structure `S` in a seismic HDF5 format.
 
 ## Keywords
 |KW           | Type      | Default   | Meaning                               |
@@ -36,6 +36,20 @@ If `ovr=true` is specified, but `add=false`, `write_hdf5` *only* overwrites
 * No new file is created. If `hdf_out` doesn't exist, nothing happens.
 * If no traces in `hdf_out` overlap segments in `S`, `hdf_out` isn't modified.
 * In ASDF format, station XML is merged in channels that are partly overwritten.
+
+    write_hdf5( hdf_out::String, Evt::SeisEvent[, KWs] )
+
+Write data to file `hdf_out` from structure `Evt` in a seismic HDF5 format.
+If possible, data from Evt.hdr and Evt.source are written to file; otherwise,
+only Evt.data is used.
+
+## Keywords
+Please note that writing a `SeisEvent` to file uses slightly different keywords.
+|KW           | Type      | Default   | Meaning                               |
+|:---         |:---       |:---       |:---                                   |
+| chans       | ChanSpec  | 1:S.n     | Channels to write to file             |
+| tag         | String    | ""        | Tag for trace names in ASDF volumes   |
+| v           | Int64     | 0         | verbosity                             |
 
 !!! warning
 
@@ -73,5 +87,26 @@ function write_hdf5(file::String, C::GphysChannel;
 
   S = SeisData(C)
   write_hdf5(file, S, fmt=fmt, ovr=ovr, v=v)
+  return nothing
+end
+
+function write_hdf5(file::String, W::SeisEvent;
+  chans     ::Union{Integer, UnitRange, Array{Int64,1}} = Int64[], # channels
+  fmt       ::String    = "asdf",           # data format
+  tag       ::String    = "",               # trace tag (ASDF)
+  v         ::Int64     = KW.v              # verbosity
+  )
+
+  S = getfield(W, :data)
+  chans = mkchans(chans, S.n)
+  if fmt == "asdf"
+    H = getfield(W, :hdr)
+    R = getfield(W, :source)
+    write_asdf(file, S, chans, evid=H.id, tag=tag, v=v)
+    asdf_wqml(file, [H], [R], v=v)
+  else
+    error("Unknown file format (possibly NYI)!")
+  end
+
   return nothing
 end
