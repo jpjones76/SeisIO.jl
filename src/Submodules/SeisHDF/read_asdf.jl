@@ -1,6 +1,6 @@
 function read_asdf!(  S::GphysData,
                       hdf::String,
-                      id::Union{String,Regex},
+                      id::String,
                       s::TimeSpec,
                       t::TimeSpec,
                       msr::Bool,
@@ -69,6 +69,9 @@ function read_asdf!(  S::GphysData,
                                    fs = fs,
                                    x = Array{T,1}(undef, nX)))
               j = S.n
+              if has(x, "event_id")
+                S.misc[j]["event_id"] = read(x["event_id"])
+              end
             else
               ct = getindex(getfield(S, :t), j)
               nt = div(lastindex(ct), 2)
