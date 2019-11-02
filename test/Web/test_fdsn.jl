@@ -153,16 +153,31 @@ else
   write_hdf5("sacreq.h5", S, add=true, ovr=true, len=Day(2))
   S1 = read_hdf5("sacreq.h5", ts, te, msr=false)
 
-  for f in SeisIO.datafields
-    f in (:name, :src, :notes, :t) && continue
+  for f in (:id, :loc, :fs, :gain, :resp, :units, :misc)
     @test isequal(getfield(S1,f), getfield(S,f))
+  end
+  for i in 1:S.n
+    x1 = S1.x[i]
+    x2 = S.x[i]
+    if (any(isnan.(x1)) == false) && (any(isnan.(x2)) == false)
+      @test x1 ≈ x2
+    end
   end
 
   # Check that these data can be written and read faithfully in ASDF, SAC, and SeisIO
   writesac(S)
   wseis("sacreq.seis", S)
   S2 = rseis("sacreq.seis")[1]
-  @test S == S2
+  for f in (:id, :loc, :fs, :gain, :resp, :units, :misc)
+    @test isequal(getfield(S2,f), getfield(S,f))
+  end
+  for i in 1:S.n
+    x1 = S.x[i]
+    x2 = S2.x[i]
+    if (any(isnan.(x1)) == false) && (any(isnan.(x2)) == false)
+      @test x1 ≈ x2
+    end
+  end
 
   # These are the only fields preserved; :loc is preserved to Float32 precision
   d0 = DateTime(ts)
@@ -170,12 +185,21 @@ else
   j0 = md2j(y0, Month(d0).value, Day(d0).value)
   sac_str = string(y0, ".", lpad(j0, 3, '0'), "*CI.ADO..BH*SAC")
   S1 = read_data("sac", sac_str)
-  for f in (:id, :fs, :gain, :t, :x)
+  for f in (:id, :fs, :gain, :t)
     @test getfield(S, f) == getfield(S1, f)
     @test getfield(S, f) == getfield(S2, f)
   end
   for f in (:lat, :lon, :el, :dep, :az, :inc)
     @test isapprox(getfield(S.loc[i], f), getfield(S1.loc[i], f), atol=1.0e-3)
+  end
+  for i in 1:S.n
+    x = S.x[i]
+    x1 = S1.x[i]
+    x2 = S2.x[i]
+    if (any(isnan.(x)) == false) && (any(isnan.(x1)) == false) && (any(isnan.(x2)) == false)
+      @test x ≈ x1
+      @test x1 ≈ x2
+    end
   end
 
   # clean up
