@@ -1,3 +1,22 @@
+### 2019-11-02
+#### SeisHDF
+* Added `asdf_wqml` to write QuakeML to a (new or existing) ASDF file.
+* Added `read_asdf_evt` to read events from an ASDF archive and return an
+array of SeisEvent structures.
+* Added a `write_hdf5` method for SeisEvent structures.
+* Renamed `asdf_qml` => `asdf_rqml`.
+
+### 2019-11-01
+* Added `write_qml` to write and append QuakeML files.
+
+#### Bugs/Consistency
+* Fixed bug where reading QuakeXML wrote standard error in a Location element
+to loc.rms rather than loc.se.
+* SeisSrc objects created with `randSeisEvent` now have `:pax` and `:planes`
+fields whose geometries are consistent with what `read_qml` produces.
+* When using `read_qml`, the `:src` fields of .hdr, .hdr.loc, .hdr.mag, and
+.source now follow an internally consistent format.
+
 ### 2019-10-30
 * Added `tag` as a keyword to `write_hdf5` to allow user control over the tag
 in the trace name string.
