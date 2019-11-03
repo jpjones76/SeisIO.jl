@@ -6,10 +6,12 @@ hdf_pat   = path*"/SampleFiles/HDF5/2days-40hz.h*"
 hdf_out1  = "test1.h5"
 hdf_out2  = "test2.h5"
 hdf_out3  = "test3.h5"
+hdf_out4  = "test4.h5"
 hdf_evt   = path*"/SampleFiles/HDF5/example.h5"
 safe_rm(hdf_out1)
 safe_rm(hdf_out2)
 safe_rm(hdf_out3)
+safe_rm(hdf_out4)
 
 id  = "CI.SDD..HHZ"
 idr = "C*.SDD..HH?"
@@ -253,7 +255,6 @@ if has_restricted
 end
 
 # HDF write with SeisEvent
-printstyled("      write SeisEvent\n", color=:light_green)
 Ev = Array{SeisEvent,1}(undef,3)
 for i in 1:3
   Ev[i] = randSeisEvent(3, s=1.0)
@@ -306,6 +307,63 @@ for i in 1:3
   end
 end
 
+printstyled("      asdf_wqml\n", color=:light_green)
+
+printstyled("        append mode\n", color=:light_green)
+SHDR = [Ev[i].hdr for i in 1:3]
+SSRC = [Ev[i].source for i in 1:3]
+asdf_wqml(hdf_out2, Ev[1].hdr, Ev[1].source)
+asdf_wqml(hdf_out2, Ev[2])
+asdf_wqml(hdf_out2, Ev)
+asdf_wqml(hdf_out2, SHDR, SSRC)
+(H,R) = asdf_rqml(hdf_out2)
+@test length(H) == length(R) == 8
+
+# Check that data are appended in the right order
+inds = [1,2,1,2,3,1,2,3]
+for i in 1:length(H)
+  j = inds[i]
+  compare_SeisHdr(Ev[j].hdr, H[i])
+  compare_SeisSrc(Ev[j].source, R[i])
+end
+
+printstyled("        overwrite mode\n", color=:light_green)
+asdf_wqml(hdf_out2, Ev[2].hdr, Ev[2].source, ovr=true, v=1)
+(H,R) = asdf_rqml(hdf_out2)
+@test length(H) == length(R) == 1
+compare_SeisHdr(Ev[2].hdr, H[1])
+compare_SeisSrc(Ev[2].source, R[1])
+
+printstyled("        to new file\n", color=:light_green)
+asdf_wqml(hdf_out4, SHDR, SSRC)
+(H,R) = asdf_rqml(hdf_out4)
+for i in 1:3
+  compare_SeisHdr(SHDR[i], H[i])
+  compare_SeisSrc(SSRC[i], R[i])
+end
+
+printstyled("        append file with incompatible QML\n", color=:light_green)
+
+# Create incompatible QML in file
+xml_evfile1 = path*"/SampleFiles/XML/fdsnws-event_2017-01-12T03-18-55Z.xml"
+xml_buf = read(xml_evfile1)
+io = h5open(hdf_out4, "r+")
+o_delete(io, "QuakeML")
+io["QuakeML"] = xml_buf
+close(io)
+
+# Now try to write to the file...does it work?
+asdf_wqml(hdf_out4, SHDR, SSRC)
+(H,R) = asdf_rqml(hdf_out4)
+L = length(H)
+H = H[L-2:L]
+R = R[L-2:L]
+for i in 1:3
+  compare_SeisHdr(SHDR[i], H[i])
+  compare_SeisSrc(SSRC[i], R[i])
+end
+
+printstyled("      write SeisEvent\n", color=:light_green)
 printstyled("        to new file\n", color=:light_green)
 write_hdf5(hdf_out3, Ev[1])
 
@@ -343,7 +401,22 @@ compare_events(EvCat[1], Ev1)
 compare_events(EvCat[2], Ev2)
 compare_events(EvCat[3], Ev3)
 
+if Sys.iswindows() == false
+  printstyled("          multi-file read\n", color=:light_green)
+  write_hdf5(hdf_out4, Ev1)
+  EC2 = read_asdf_evt("test[3-4].h5", msr=true)
+  inds = [1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 1]
+  for i in 1:length(EC2)
+    j = inds[i]
+    if j > 0
+      compare_SeisHdr(EC2[i].hdr, EvCat[j].hdr)
+      compare_SeisSrc(EC2[i].source, EvCat[j].source)
+    end
+  end
+end
+
 # HDF write cleanup
 safe_rm(hdf_out1)
 safe_rm(hdf_out2)
 safe_rm(hdf_out3)
+safe_rm(hdf_out4)
