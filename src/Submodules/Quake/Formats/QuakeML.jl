@@ -380,6 +380,26 @@ function parse_qml(evt::XMLElement)
   setfield!(H, :src, evt_src)
   setfield!(R, :eid, String(evt_id))
 
+  # Post-process: ensure these are empty if not initialized
+  if R.mt == zeros(Float64,6)
+    R.mt = Float64[]
+  end
+
+  if R.dm == Inf64.*ones(Float64,6)
+    R.dm = Float64[]
+  end
+
+  if R.pax == zeros(Float64, 3, 3)
+    R.pax = Array{Float64, 2}(undef, 0, 0)
+  end
+
+  if R.planes == zeros(Float64, 3, 2)
+    R.planes = Array{Float64, 2}(undef, 0, 0)
+  end
+
+  if R.src == ","
+    R.src = ""
+  end
   return H, R
 end
 
