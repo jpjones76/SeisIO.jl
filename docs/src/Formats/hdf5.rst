@@ -33,9 +33,13 @@ Supported Keywords
 :sup:`(a)`  A question mark ('?') is a wildcard for a single character (exactly
 one); an asterisk ('*') is a wildcard for zero or more characters.
 
-.. function:: write_hdf5(fname::String, S::GphysData)
+.. function:: write_hdf5(fname, S::Union{GphysData, SeisEvent})
 
-Write data in a seismic HDF5 format to file `hdf_out` from structure `S`.
+Write data from **S** to file **fname** in a seismic HDF5 format. The default
+file format is ASDF.
+
+With ASDF files, if typeof(S) == SeisEvent, **S.hdr** and **S.source** are
+written (appended) to the "QuakeML/" element.
 
 ******************
 Supported Keywords
@@ -64,8 +68,8 @@ For the ASDF file format, **add=true** follows these steps in this order:
 trace of length = **len** sampled at **S.fs[i]** is initialized (filled with NaNs).
 3. If a segment in **S[chans]** overlaps a trace in "Waveforms/" (including newly-
 created traces):
-  + Merge the header data in **S[chans]** into the relevant station XML.
-  + Overwrite the relevant segment(s) of the trace.
++ Merge the header data in **S[chans]** into the relevant station XML.
++ Overwrite the relevant segment(s) of the trace.
 
 
 Unless **len** exactly matches the time boundaries of each segment in **S**,
