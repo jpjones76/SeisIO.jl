@@ -257,54 +257,7 @@ end
 # HDF write with SeisEvent
 Ev = Array{SeisEvent,1}(undef,3)
 for i in 1:3
-  Ev[i] = randSeisEvent(3, s=1.0)
-
-  Ev[i].source.misc = Dict{String,Any}(
-  "pax_desc"    => "azimuth, plunge, length",
-  "mt_id"       => "smi:SeisIO/moment_tensor;fmid="*Ev[i].source.id,
-  "planes_desc" => "strike, dip, rake")
-  Ev[i].source.eid = Ev[i].hdr.id
-  Ev[i].source.npol = 0
-  Ev[i].source.src = Ev[i].source.id * "," * Ev[i].source.src
-  Ev[i].source.notes = String[]
-
-  Ev[i].hdr.int = (0x00, "")
-  Ev[i].hdr.src = "randSeisHdr:" * Ev[i].hdr.id
-  Ev[i].hdr.loc.src = Ev[i].hdr.id * "," * Ev[i].hdr.loc.src
-  Ev[i].hdr.loc.datum = ""
-  Ev[i].hdr.loc.typ = ""
-  Ev[i].hdr.loc.rms = 0.0
-  flags = bitstring(Ev[i].hdr.loc.flags)
-  if flags[1] == '1' || flags[2] == '1'
-    flags = "11" * flags[3:8]
-    Ev[i].hdr.loc.flags = parse(UInt8, flags, base=2)
-  end
-
-  Ev[i].hdr.mag.src = Ev[i].hdr.loc.src * ","
-  Ev[i].hdr.notes = String[]
-  Ev[i].hdr.misc = Dict{String,Any}()
-
-  for j in 1:Ev[i].data.n
-    Ev[i].data.misc[j] = Dict{String,Any}()
-    Ev[i].data.notes[j] = String[]
-    Ev[i].data.loc[j] = GeoLoc(
-      lat = (rand(0.0:1.0:89.0) + rand())*-1.0^rand(1:2),
-      lon = (rand(0.0:1.0:179.0) + rand())*-1.0^rand(1:2),
-      el = rand()*1000.0,
-      dep = rand()*1000.0,
-      az = (rand()-0.5)*180.0,
-      inc = rand()*90.0
-    )
-    Δ = round(Int64, 1.0e6/Ev[i].data.fs[j])
-    nt = size(Ev[i].data.t[j],1)
-    k = trues(nt)
-    for n in 2:nt-1
-      if Ev[i].data.t[j][n,2] ≤ Δ || (Ev[i].data.t[j][n+1,1]-Ev[i].data.t[j][n,1] < 2)
-        k[n] = false
-      end
-    end
-    Ev[i].data.t[j] = Ev[i].data.t[j][k,:]
-  end
+  Ev[i] = rse_wb(3)
 end
 
 printstyled("      asdf_wqml\n", color=:light_green)

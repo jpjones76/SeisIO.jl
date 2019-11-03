@@ -1,2 +1,2 @@
 printstyled("  writesac from SeisEvent\n", color=:light_green)
-writesac(randSeisEvent())
+writesac(rse_wb(8))
