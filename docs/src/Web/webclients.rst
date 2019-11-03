@@ -18,8 +18,8 @@ real-time streaming, see :ref:`SeedLink<seedlink-section>`.
 | ``src`` using the :ref:`server list<servers>` (see ``?seis_www``).
 |
 | **channels**
-| Channels to retrieve; can be passed as a :ref:`string, string array, or
-| parameter file<cid>`. Type ``?chanspec`` at the Julia prompt for more info.
+| :ref:`Channels to retrieve<cid>` -- string, string array, or parameter file.
+| Type ``?chanspec`` at the Julia prompt for more info.
 |
 | **KWs**
 | Keyword arguments; see also :ref:`SeisIO standard KWs<dkw>` or type ``?SeisIO.KW``.
