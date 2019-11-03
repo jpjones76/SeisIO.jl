@@ -805,6 +805,8 @@ Write QML to file `fname` from `SHDR` and `SSRC`.
     To write data from `R ∈ SSRC`, it must be true that `R.eid == H.id` for some `H ∈ SHDR`.
 """ write_qml
 function write_qml(fname::String, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1}; v::Int64=0)
+  H0 = SeisHdr[]
+  R0 = SeisSrc[]
 
   if safe_isfile(fname)
     io = open(fname, "a+")
@@ -825,11 +827,13 @@ function write_qml(fname::String, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1}; 
         fstart = String(read(io, 5))
         if fstart == "<?xml"
           close(io)
+          append!(H0, HDR)
+          append!(R0, SRC)
           (H1, R1) = read_qml(fname)
           @assert (isempty(H1) == false)
           @assert (isempty(R1) == false)
-          append!(HDR, H1)
-          append!(SRC, R1)
+          append!(H0, H1)
+          append!(R0, R1)
         else
           error("incompatible file type!")
         end
@@ -850,7 +854,11 @@ function write_qml(fname::String, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1}; 
     new_qml!(io)
   end
 
-  write_qml!(io, HDR, SRC, v)
+  if isempty(H0) && isempty(R0)
+    write_qml!(io, HDR, SRC, v)
+  else
+    write_qml!(io, H0, R0, v)
+  end
   close(io)
   return nothing
 end
