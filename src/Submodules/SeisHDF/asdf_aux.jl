@@ -108,7 +108,7 @@ function asdf_write_chan(S::GphysData, sta::HDF5Group, i::Int64, tag::String, ei
   fs = S.fs[i]
   tx = S.t[i]
   t = t_win(tx, fs)
-  n_seg = size(t,1)
+  n_seg = size(tx,1)-1
   if n_seg == 0
     @warn(S.id[i] * ": malformed or empty :t field; can't write to file.")
     return
