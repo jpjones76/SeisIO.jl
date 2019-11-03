@@ -103,3 +103,26 @@ H1 = H1[4]
 R1 = R1[2]
 compare_SeisHdr(H1, H)
 compare_SeisSrc(R1, R)
+
+xstr = read(xml_evfile1)
+io = open(xf, "w")
+write(io, xstr)
+close(io)
+write_qml(xf, [H], [R])
+H1, R1 = read_qml(xf)
+H1 = H1[2:end]
+R1 = R1[2:end]
+H, R = read_qml(xml_evfile1)
+for i in 1:length(R)
+  compare_SeisHdr(H1[i], H[i])
+  compare_SeisSrc(R1[i], R[i])
+end
+
+printstyled("      does trying to append a non-XML file error?\n", color=:light_green)
+io = open(xf, "w")
+write(io, rand(UInt8, 64))
+close(io)
+@test_throws ErrorException write_qml(xf, H, R)
+
+# Clean up
+safe_rm(xf)
