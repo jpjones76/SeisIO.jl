@@ -322,9 +322,7 @@ function safe_rm(file::String)
   return nothing
 end
 
-function compare_events(Ev1::SeisEvent, Ev2::SeisEvent)
-  H1 = Ev1.hdr
-  H2 = Ev2.hdr
+function compare_SeisHdr(H1::SeisHdr, H2::SeisHdr)
   for f in fieldnames(EQLoc)
     if typeof(getfield(H1.loc, f)) <: AbstractFloat
       @test isapprox(getfield(H1.loc, f), getfield(H2.loc,f))
@@ -341,9 +339,10 @@ function compare_events(Ev1::SeisEvent, Ev2::SeisEvent)
   @test H1.ot == H2.ot
   @test H1.src == H2.src
   @test H1.typ == H2.typ
+  return nothing
+end
 
-  R1 = Ev1.source
-  R2 = Ev2.source
+function compare_SeisSrc(R1::SeisSrc, R2::SeisSrc)
   @test R1.id == R2.id
   @test R1.eid == R2.eid
   @test R1.m0 ≈ R2.m0
@@ -357,9 +356,10 @@ function compare_events(Ev1::SeisEvent, Ev2::SeisEvent)
   @test R1.st.dur ≈ R2.st.dur
   @test R1.st.rise ≈ R2.st.rise
   @test R1.st.decay ≈ R2.st.decay
+  return nothing
+end
 
-  S1 = convert(SeisData, Ev1.data)
-  S2 = convert(SeisData, Ev2.data)
+function compare_SeisData(S1::SeisData, S2::SeisData)
   sort!(S1)
   sort!(S2)
   @test S1.id == S2.id
@@ -386,6 +386,15 @@ function compare_events(Ev1::SeisEvent, Ev2::SeisEvent)
     @test S1.t[i] == S2.t[i]
     @test isapprox(S1.x[i],S2.x[i])
   end
+  return nothing
+end
+
+function compare_events(Ev1::SeisEvent, Ev2::SeisEvent)
+  compare_SeisHdr(Ev1.hdr, Ev2.hdr)
+  compare_SeisSrc(Ev1.source, Ev2.source)
+  S1 = convert(SeisData, Ev1.data)
+  S2 = convert(SeisData, Ev2.data)
+  compare_SeisData(S1, S2)
   return nothing
 end
 
