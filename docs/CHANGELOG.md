@@ -6,6 +6,12 @@ array of SeisEvent structures.
 * Added a `write_hdf5` method for SeisEvent structures.
 * Renamed `asdf_qml` => `asdf_rqml`.
 
+#### Bugs/Consistency
+* `read_qml`: SeisSrc structures with uninitialized array fields now return
+empty fields, rather than fields filled with program defaults (e.g. zeros);
+this is more consistent with `SeisSrc()` and the `isempty` method extension for
+this Type.
+
 ### 2019-11-01
 * Added `write_qml` to write and append QuakeML files.
 
