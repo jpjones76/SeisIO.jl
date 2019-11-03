@@ -299,7 +299,7 @@ for i in 1:3
     nt = size(Ev[i].data.t[j],1)
     k = trues(nt)
     for n in 2:nt-1
-      if Ev[i].data.t[j][n,2] ≤ Δ
+      if Ev[i].data.t[j][n,2] ≤ Δ || (Ev[i].data.t[j][n+1,1]-Ev[i].data.t[j][n,1] < 2)
         k[n] = false
       end
     end
