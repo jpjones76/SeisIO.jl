@@ -77,6 +77,7 @@ function read_asdf_evt(filestr::String, event_id::Union{String, Regex};
 
     # Read data
     for fname in files
+      (v > 0) && println("reading from ", fname)
       append!(S, read_asdf(fname, "*", t_start, t_end, msr, v))
     end
   end
