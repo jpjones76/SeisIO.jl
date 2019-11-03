@@ -326,7 +326,7 @@ function write_sac_channel(S::GphysData, i::Int64, v::Int64, xy::Bool, fn::Strin
     inds = x_inds(S.t[i])
     BUF.sac_iv[16] = one(Int32)
     BUF.sac_iv[36] = one(Int32)
-    for j in 1:size(W,1)
+    for j in 1:size(inds,1)
       si = inds[j,1]
       ei = inds[j,2]
       ts = W[j,1]
