@@ -82,3 +82,24 @@ R = R[1]
 @test split(R.src, ",")[2] == "GCMT"
 @test R.misc["planes_desc"] == "strike, dip, rake"
 @test R.misc["derivedOriginID"] == "600126955"
+
+printstyled("    file write\n", color=:light_green)
+xf = "test.xml"
+if isfile(xf)
+  safe_rm(xf)
+end
+write_qml(xf, H, R)
+H1, R1 = read_qml(xf)
+H1 = H1[1]
+R1 = R1[1]
+compare_SeisHdr(H1, H)
+compare_SeisSrc(R1, R)
+
+write_qml(xf, [H], [R])
+write_qml(xf, H)
+write_qml(xf, [H])
+H1, R1 = read_qml(xf)
+H1 = H1[4]
+R1 = R1[2]
+compare_SeisHdr(H1, H)
+compare_SeisSrc(R1, R)
