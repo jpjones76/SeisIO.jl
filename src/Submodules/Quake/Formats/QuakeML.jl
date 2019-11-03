@@ -478,17 +478,6 @@ function write_real(io::IO, str::String, x::Union{DateTime,AbstractFloat}, dx::A
   return nothing
 end
 
-function write_loc(io::IO, L::EQLoc, q::Symbol)
-  write(io, "        <")
-  print(io, q)
-  write(io, ">\n          <value>")
-  print(io, getfield(L, q))
-  write(io, "</value>\n        </")
-  print(io, getfield(L, q))
-  write(io, ">\n")
-  return nothing
-end
-
 function write_pax(io::IO, pax::Array{Float64,2})
   str = ("t", "p", "n")
   nP = size(pax, 2)
@@ -546,7 +535,7 @@ function write_qml!(io::IO, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1}, v::Int
 
       # ---------------------------------------------------
       # Origin
-      write(io, "      <origin publicID=\"", H.id, "\">\n")
+      write(io, "      <origin publicID=\"", loc_orig, "\">\n")
       if H.loc.dt > 0.0
         write_real(io, "time", H.ot, H.loc.dt, 4)
       else
@@ -777,6 +766,24 @@ function write_qml!(io::IO, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1}, v::Int
   return nothing
 end
 
+@doc """
+    write_qml(fname, SHDR::SeisHdr; v::Int64=0)
+    write_qml(fname, SHDR::Array{SeisHdr,1}; v::Int64=0)
+
+Write QML to file `fname` from `SHDR`.
+
+If `fname` exists, and is QuakeML, SeisIO appends the existing XML. If the
+file exists, but is NOT QuakeML, an error is thrown; the file isn't overwritten.
+
+    write_qml(fname, SHDR::SeisHdr, SSRC::SeisSrc; v::Int64=0)
+    write_qml(fname, SHDR::Array{SeisHdr,1}, SSRC::Array{SeisSrc,1}; v::Int64=0)
+
+Write QML to file `fname` from `SHDR` and `SSRC`.
+
+!!! warning
+
+    To write data from `R ∈ SSRC`, it must be true that `R.eid == H.id` for some `H ∈ SHDR`.
+""" write_qml
 function write_qml(fname::String, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1}; v::Int64=0)
 
   if safe_isfile(fname)
@@ -828,3 +835,5 @@ function write_qml(fname::String, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1}; 
   return nothing
 end
 write_qml(fname::String, H::SeisHdr, R::SeisSrc; v::Int64=0) = write_qml(fname, [H], [R], v=v)
+write_qml(fname::String, HDR::Array{SeisHdr,1}; v::Int64=0) = write_qml(fname, HDR, SeisSrc[], v=v)
+write_qml(fname::String, H::SeisHdr; v::Int64=0) = write_qml(fname, [H], SeisSrc[], v=v)
