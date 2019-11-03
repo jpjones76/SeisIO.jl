@@ -398,6 +398,58 @@ function compare_events(Ev1::SeisEvent, Ev2::SeisEvent)
   return nothing
 end
 
+function rse_wb(n::Int64)
+  Ev = randSeisEvent(n, s=1.0)
+
+  Ev.source.misc = Dict{String,Any}(
+  "pax_desc"    => "azimuth, plunge, length",
+  "mt_id"       => "smi:SeisIO/moment_tensor;fmid="*Ev.source.id,
+  "planes_desc" => "strike, dip, rake")
+  Ev.source.eid = Ev.hdr.id
+  Ev.source.npol = 0
+  Ev.source.src = Ev.source.id * "," * Ev.source.src
+  Ev.source.notes = String[]
+
+  Ev.hdr.int = (0x00, "")
+  Ev.hdr.src = "randSeisHdr:" * Ev.hdr.id
+  Ev.hdr.loc.src = Ev.hdr.id * "," * Ev.hdr.loc.src
+  Ev.hdr.loc.datum = ""
+  Ev.hdr.loc.typ = ""
+  Ev.hdr.loc.rms = 0.0
+  flags = bitstring(Ev.hdr.loc.flags)
+  if flags[1] == '1' || flags[2] == '1'
+    flags = "11" * flags[3:8]
+    Ev.hdr.loc.flags = parse(UInt8, flags, base=2)
+  end
+
+  Ev.hdr.mag.src = Ev.hdr.loc.src * ","
+  Ev.hdr.notes = String[]
+  Ev.hdr.misc = Dict{String,Any}()
+
+  for j in 1:Ev.data.n
+    Ev.data.misc[j] = Dict{String,Any}()
+    Ev.data.notes[j] = String[]
+    Ev.data.loc[j] = GeoLoc(
+      lat = (rand(0.0:1.0:89.0) + rand())*-1.0^rand(1:2),
+      lon = (rand(0.0:1.0:179.0) + rand())*-1.0^rand(1:2),
+      el = rand()*1000.0,
+      dep = rand()*1000.0,
+      az = (rand()-0.5)*180.0,
+      inc = rand()*90.0
+    )
+    Δ = round(Int64, 1.0e6/Ev.data.fs[j])
+    nt = size(Ev.data.t[j],1)
+    k = trues(nt)
+    for n in 2:nt-1
+      if Ev.data.t[j][n,2] ≤ Δ || (Ev.data.t[j][n+1,1]-Ev.data.t[j][n,1] < 2)
+        k[n] = false
+      end
+    end
+    Ev.data.t[j] = Ev.data.t[j][k,:]
+  end
+  return Ev
+end
+
 # ===========================================================================
 # Redirect info, warnings, and errors to the logger
 out = open("runtests.log", "a")
