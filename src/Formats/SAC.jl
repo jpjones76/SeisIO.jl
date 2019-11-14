@@ -349,6 +349,11 @@ end
     writesac(S::Union{SeisData}[; ts=false, v=0])
 
 Write all data in SeisData structure `S` to auto-generated SAC files.
+
+Keywords:
+* `fname=FF` uses filename FF, rather than creating file names automatically.
+(Only works with GphysChannel objects)
+* `xy=true` writes generic x-y data with time as the independent variable.
 """
 function writesac(S::GphysData; fn::String="", xy::Bool=false, v::Int64=KW.v)
   reset_sacbuf()
