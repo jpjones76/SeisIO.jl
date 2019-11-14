@@ -25,7 +25,7 @@ usually discrete, self-contained files.
 file string syntax.
 
 See also: read_data, get_data, read_meta
-""" read_quake!
+""" read_quake
 function read_quake(fmt::String, fname::String;
   full    ::Bool    = false,              # full header
   v       ::Int64   = KW.v                # verbosity level
