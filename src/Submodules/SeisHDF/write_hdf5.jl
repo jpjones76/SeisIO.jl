@@ -3,13 +3,27 @@
 
 Write data to file `hdf_out` from structure `S` in a seismic HDF5 format.
 
+    write_hdf5( hdf_out::String, W::SeisEvent[, KWs] )
+
+Write data to file `hdf_out` from structure `W` in a seismic HDF5 format.
+If the format doesn't record event header and source info, only `W.data` is
+stored.
+
 ## Keywords
+#### GphysData
 |KW           | Type      | Default   | Meaning                               |
 |:---         |:---       |:---       |:---                                   |
 | add         | Bool      | false     | Add new traces to file as needed?     |
 | chans       | ChanSpec  | 1:S.n     | Channels to write to file             |
 | len         | Period    | Day(1)    | Length of new traces added to file    |
 | ovr         | Bool      | false     | Overwrite data in existing traces?    |
+| tag         | String    | ""        | Tag for trace names in ASDF volumes   |
+| v           | Int64     | 0         | verbosity                             |
+
+#### SeisEvent
+|KW           | Type      | Default   | Meaning                               |
+|:---         |:---       |:---       |:---                                   |
+| chans       | ChanSpec  | 1:S.data.n| Channels to write to file             |
 | tag         | String    | ""        | Tag for trace names in ASDF volumes   |
 | v           | Int64     | 0         | verbosity                             |
 
@@ -36,20 +50,6 @@ If `ovr=true` is specified, but `add=false`, `write_hdf5` *only* overwrites
 * No new file is created. If `hdf_out` doesn't exist, nothing happens.
 * If no traces in `hdf_out` overlap segments in `S`, `hdf_out` isn't modified.
 * In ASDF format, station XML is merged in channels that are partly overwritten.
-
-    write_hdf5( hdf_out::String, Evt::SeisEvent[, KWs] )
-
-Write data to file `hdf_out` from structure `Evt` in a seismic HDF5 format.
-If possible, data from Evt.hdr and Evt.source are written to file; otherwise,
-only Evt.data is used.
-
-## Keywords
-Please note that writing a `SeisEvent` to file uses slightly different keywords.
-|KW           | Type      | Default   | Meaning                               |
-|:---         |:---       |:---       |:---                                   |
-| chans       | ChanSpec  | 1:S.n     | Channels to write to file             |
-| tag         | String    | ""        | Tag for trace names in ASDF volumes   |
-| v           | Int64     | 0         | verbosity                             |
 
 !!! warning
 
