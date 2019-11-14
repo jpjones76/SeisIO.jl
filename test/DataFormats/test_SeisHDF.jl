@@ -373,3 +373,46 @@ safe_rm(hdf_out1)
 safe_rm(hdf_out2)
 safe_rm(hdf_out3)
 safe_rm(hdf_out4)
+
+# asdf_waux
+# write to new file
+X = randn(32768, 2)
+pstr = "CI.SDD/CI.SDD..HHZ__2019-07-07T00:00:00__2019-07-09T00:00:00__hhz_"
+asdf_waux(hdf_out1, pstr, X)
+
+# does overwrite work?
+asdf_waux(hdf_out1, pstr, X)
+f = h5open(hdf_out1, "r")
+aux = f["AuxiliaryData"]
+@test names(aux) == [ "CI.SDD" ]
+Xr = read(aux[pstr])
+@test Xr == X
+close(f)
+
+# can we correct for a starting / in the string?
+pstr = "//" * pstr
+X = randn(32768, 2)
+asdf_waux(hdf_out1, pstr, X)
+f = h5open(hdf_out1, "r")
+aux = f["AuxiliaryData"]
+@test names(aux) == [ "CI.SDD" ]
+pstr = "CI.SDD/CI.SDD..HHZ__2019-07-07T00:00:00__2019-07-09T00:00:00__hhz_"
+@test names(aux["CI.SDD"]) == [ String(split(pstr,"/")[2]) ]
+Yr = read(aux[pstr])
+@test Yr == X
+@test Xr != Yr
+close(f)
+
+# what about path that starts with /AuxiliaryData/?
+pstr = "/AuxiliaryData/" * pstr
+X = randn(32768, 2)
+asdf_waux(hdf_out1, pstr, X)
+f = h5open(hdf_out1, "r")
+aux = f["AuxiliaryData"]
+@test names(aux) == [ "CI.SDD" ]
+pstr = "CI.SDD/CI.SDD..HHZ__2019-07-07T00:00:00__2019-07-09T00:00:00__hhz_"
+@test names(aux["CI.SDD"]) == [ String(split(pstr,"/")[2]) ]
+Yr = read(aux[pstr])
+@test Yr == X
+@test Xr != Yr
+close(f)
