@@ -110,6 +110,7 @@ end
     FDSNevt(ot::String, chans::String)
 
 Get trace data for the event closest to origin time `ot` on channels `chans`.
+Returns a SeisEvent structure.
 
 Standard keywords: fmt, mag, nd, opts, pha, rad, reg, src, to, v, w
 
