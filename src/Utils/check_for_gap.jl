@@ -6,7 +6,7 @@ function check_for_gap!(S::GphysData, i::Integer, t0::Int64, nx::Integer, v::Int
   lxi = t[nt,1]
   te = endtime(t, Δ)
   τ = t0 - te - Δ
-  if τ > div(Δ, 2)
+  if abs(τ) > div(Δ, 2)
     v > 1 && println(stdout, S.id[i], ": gap = ", τ, " μs (old end = ",
     te, ", New start = ", τ + te + Δ)
     setindex!(t, getindex(t, nt)+1, nt)
