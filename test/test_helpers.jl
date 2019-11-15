@@ -4,14 +4,14 @@ import Dates: DateTime, Hour, now
 import DelimitedFiles: readdlm
 import Random: rand, randperm, randstring
 import SeisIO: BUF, FDSN_sta_xml,
-  code2typ, typ2code,
+  auto_coords, code2typ, typ2code,
   bad_chars, checkbuf!, checkbuf_8!, datafields, datareq_summ, endtime,
   fillx_i16_le!, fillx_i32_be!, fillx_i32_le!, findhex, formats, get_http_req,
   get_http_post, get_views, int2tstr, mean, minreq!,
   mktaper!, mktime, parse_charr, parse_chstr, parse_sl,
   read_sacpz!, read_sacpz, read_seed_resp!, read_seed_resp, read_station_xml!,
   safe_isdir, safe_isfile, sμ, t_collapse,
-  t_expand, t_win, taper_seg!, tnote, tstr2int, w_time, webhdr,
+  t_expand, t_win, taper_seg!, tnote, trid, tstr2int, w_time, webhdr,
   xtmerge!, μs,
   diff_x!, int_x!,
   code2resptyp, resptyp2code,
@@ -448,6 +448,15 @@ function rse_wb(n::Int64)
     Ev.data.t[j] = Ev.data.t[j][k,:]
   end
   return Ev
+end
+
+function latlon2xy(xlat::Float64, xlon::Float64)
+  s = sign(xlon)
+  c = 111194.6976
+  y = c*xlat
+  d = acosd(cosd(xlon*s)*cosd(xlat))
+  x = sqrt(c^2*d^2-y^2)
+  return [round(Int32, s*x), round(Int32, y)]
 end
 
 # ===========================================================================

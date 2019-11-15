@@ -46,7 +46,7 @@ if safe_isfile(cfile)
                 "/SampleFiles/*",
                 "/SampleFiles/Restricted/2014092709*cnt"
               ]
-  T_expect =  [63, 533, 60]
+  T_expect =  [63, 535, 60]
   if safe_isfile(path .* "/SampleFiles/restricted.tar.gz")
     T_expect[2] += 1
   end

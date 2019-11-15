@@ -1,33 +1,38 @@
 export segyhdr
 # ============================================================================
 # Utility functions not for export
-function trid(i::Int16; fs=2000.0::Float64)
+function trid(i::Int16; fs=2000.0::Float64, fc=10.0::Float64)
   S = ["DH", "HZ", "H1", "H2", "HZ", "HT", "HR"]
-  return string(getbandcode(fs, fc=10.0), S[i])
+  return string(getbandcode(fs, fc=fc), S[i])
 end
 
-function auto_coords(xy::Array{Int32, 1}, c::Array{Int16, 1})
+function auto_coords(xy::Array{Int32, 1}, sc::Array{Int16, 1})
   xy == Int32[0,0] && return (0.0, 0.0)
-  lon = xy[1]
-  lat = xy[2]
-  coord_scale = c[1]
-  coord_units = c[2]
+  lon = Float64(xy[1])
+  lat = Float64(xy[2])
+  coord_scale = sc[1]
+  coord_units = sc[2]
   if coord_scale < 0
     coord_scale = -1 / coord_scale
   end
   lat *= coord_scale
   lon *= coord_scale
+
+  #=
+  Conversion formula for coord_units == 1 "borrowed" from PASSSOFT segy2sac.
+  Assumes (possibly wrong) x-y coordinate origin & spherical Earth.
+  coord_units == 3 and coord_units == 4 aren't supported; never seen them.
+  =#
   if coord_units == 1
       iflg = lon < 0 ? -1 : 1
-      x = 111132.95
-      D = sqrt(lat^2+lon^2) / x
-      lat = lat/x
+      c = 111194.6976
+      D = sqrt(lat^2 + lon^2) / c
+      lat /= c
       d = cosd(D)
-      D = acosd(d / cosd(lat))
-      lon = (iflg*D)
+      lon = iflg*acosd(d / cosd(lat))
   else
-    lat = Float64(lat/3600.0)
-    lon = Float64(lon/3600.0)
+    lat /= 3600.0
+    lon /= 3600.0
   end
   return lat, lon
 end
@@ -105,7 +110,7 @@ function do_trace(f::IO,
     z = getindex(shorts, 5)
     δ = getindex(shorts, 21)
     fs        = 1.0e6 / Float64(δ == one(Int16) ? dt : δ)
-    gain      = Float64(scale_fac)  * 10.0^(-1.0*Float64(shorts[24]) / 10.0) / Float64(shorts[23])
+    gain      = 1.0 / (Float64(scale_fac)  * 10.0^(-1.0*Float64(shorts[24]) / 10.0) / Float64(shorts[23]))
     lat, lon  = auto_coords(ints[18:19], shorts[6:7])
     if abs(lat) < 0.1 && abs(lon) < 0.1
       lat *= 3600.0
@@ -128,10 +133,15 @@ function do_trace(f::IO,
     id_arr[8] = 0x2e
     deleteat!(id_arr, id_arr.==0x00)
 
-    # Channel part is tedious; people use one-char channel names like "Z"
-    ch_arr = chars[15:18]
-    deleteat!(ch_arr, ch_arr.==0x00)
-    nc = lastindex(ch_arr)
+    # Channel string is tedious; use of one-char channel names like "Z"
+    inds = Int64[]
+    for i in 15:18
+      if chars[i] > 0x20
+        push!(inds, i)
+      end
+    end
+    ch_arr = isempty(inds) ? UInt8[] : chars[inds]
+    nc = length(ch_arr)
     if nc == 1
       c = uppercase(Char(ch_arr[1]))
       if c in ('Z','N','E')
@@ -139,10 +149,10 @@ function do_trace(f::IO,
       else
         cha = "YYY"
       end
-    elseif nc ≥ 3
-      cha = String(ch_arr[1:3])
-    else
+    elseif nc == 0
       cha = "YYY"
+    else
+      cha = String(ch_arr[1:min(3, nc)])
     end
     id = String(id_arr) * cha
 

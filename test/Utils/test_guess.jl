@@ -56,7 +56,7 @@ printstyled("    read_data with guess()\n", color=:light_green)
 SEG = read_data(segyf, full=true)
 @test SEG.misc[1]["gain_const"] == 32
 @test SEG.gain[1] == SEG.misc[1]["scale_fac"]
-@test isapprox(SEG.gain[1], 4.47021e-07/SEG.misc[1]["gain_const"], atol=eps(Float32))
+@test isapprox(1.0/SEG.gain[1], 4.47021e-07/SEG.misc[1]["gain_const"], atol=eps(Float32))
 @test SEG.fs[1] == 100.0 == 1.0e6 / SEG.misc[1]["delta"]
 @test lastindex(SEG.x[1]) == 247698
 @test SEG.misc[1]["trace_seq_line"] == 3
@@ -85,7 +85,6 @@ SEG = read_data(segyf, full=true)
 @test SEG.misc[1]["inst_no"] == 0x016a # 0362
 @test strip(SEG.misc[1]["sensor_serial"]) == "UNKNOWN"
 @test strip(SEG.misc[1]["station_name"]) == "362"
-@test strip(SEG.misc[1]["channel_name"]) == "N"
 
 St = SeisData()
 read_data!(St, segyf, full=true)
