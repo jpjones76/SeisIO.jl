@@ -1,3 +1,18 @@
+### 2019-11-15
+* The tutorial has been updated and expanded to include more practice writing
+ASDF volumes and an optional tutorial for the Quake submodule.
+
+#### SeisHDF
+* Added `asdf_waux` as a thin wrapper to write to the "AuxiliaryData" group.
+
+#### Bugs/Consistency
+* Fixed issue #28
+* UW events with no external event ID in the pick file now set the event ID
+from the pick file name (if available) or data file name (if no pick file).
+* Fixed a bug where PASSCAL SEG Y stored 1.0/gain to `:gain`.
+* Fixed a minor bug with PASSCAL SEG Y channel names.
+* The docstring for `read_quake` is now correctly accessed with `?read_quake`.
+
 ### 2019-11-02
 #### SeisHDF
 * Added `asdf_wqml` to write QuakeML to a (new or existing) ASDF file.
