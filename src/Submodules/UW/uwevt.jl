@@ -99,5 +99,12 @@ function readuwevt(filename::String; v::Int64=KW.v, full::Bool=false)
     W = SeisEvent(hdr = hdr, source = source)
   end
 
+  # Set event name if unset
+  if isempty(W.hdr.id)
+    evid = String((split(safe_isfile(pf) ? pf : df, r"[/\\]")[end])[1:end-1])
+    W.hdr.id = evid
+    W.source.eid = evid
+  end
+
   return W
 end

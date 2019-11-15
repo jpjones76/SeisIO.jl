@@ -36,6 +36,7 @@ end
 # Can we read from filename stub?
 printstyled("    read (pickfile, datafile) from filename stub\n", color=:light_green)
 W = readuwevt(uwf1)
+@test W.hdr.id == W.source.eid == "99011116541"
 @test W.hdr.mag.val == 3.0f0
 @test occursin("99011116541o", W.hdr.src)
 @test W.hdr.ot == DateTime("1999-01-11T16:54:11.96")
