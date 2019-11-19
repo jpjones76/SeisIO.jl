@@ -176,12 +176,7 @@ function parse_qml(evt::XMLElement)
     else
       mag_id = preferredMagnitudeID
     end
-
-    if isempty(preferredOriginID)
-      loc_id = mag_id
-    else
-      loc_id = preferredOriginID
-    end
+    loc_id = isempty(preferredOriginID) ? mag_id : preferredOriginID
   else
     R = SeisSrc()
   end

@@ -41,11 +41,7 @@ function SEED_Unenc!(io::IO, S::SeisData, c::Int64, xi::Int64, nb::UInt16, nx::U
     elseif BUF.fmt == 0x04
       Float32
     end
-  if getfield(BUF, :swap) == true
-    xr = bswap.(reinterpret(T, buf))
-  else
-    xr = reinterpret(T, buf)
-  end
+  xr = BUF.swap ? bswap.(reinterpret(T, buf)) : reinterpret(T, buf)
   copyto!(x, xi+1, xr, 1, nx)
   setfield!(BUF, :k, Int64(nx))
   return nothing
@@ -112,9 +108,7 @@ function SEED_Steim!(io::IO, BUF::SeisIOBuf, nb::UInt16)
   readbytes!(io, buf, nb)
 
   # Parse buf as UInt32s
-  if ni > lastindex(ff)
-    resize!(ff, ni)
-  end
+  (ni > lastindex(ff)) && resize!(ff, ni)
   yy = zero(UInt32)
   if getfield(BUF, :xs) == true
     @inbounds for ib = 1:ni

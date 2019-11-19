@@ -61,7 +61,7 @@ function resample!(S::GphysData;
   j = 1
   while isapprox(fs, f0)
     j += 1
-    j > length(GRPS) && return nothing
+    (j > length(GRPS)) && return nothing
     i = GRPS[j][1]
     fs = ty(S.fs[i])
   end

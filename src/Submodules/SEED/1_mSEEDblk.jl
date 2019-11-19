@@ -66,22 +66,17 @@ end
 # [390] Generic Calibration Blockette (28 bytes)
 function blk_calib(S::SeisData, sid::IO, c::Int64, bt::UInt16)
   p = position(sid)
-  blk_time!(BUF.Calib.t, sid, BUF.swap)       # Calibration time
+  blk_time!(BUF.Calib.t, sid, BUF.swap)         # Calibration time
   skip(sid, 1)                                  # Reserved byte
-  if bt == 0x012c
-    BUF.Calib.n        = read(sid, UInt8)      # Number of step calibrations
-  end
-  BUF.Calib.flags      = read(sid, UInt8)      # Calibration flags
-  BUF.Calib.dur1       = read(sid, UInt32)     # Calibration duration
-  if bt == 0x012c
-    BUF.Calib.dur2     = read(sid, UInt32)     # Interval duration
-  elseif bt == 0x0136
-    BUF.Calib.period   = read(sid, Float32)    # Period of signal (seconds)
-  end
-  BUF.Calib.amplitude  = read(sid, Float32)    # Peak-to-peak amplitude
+  (bt == 0x012c) && (BUF.Calib.n = read(sid, UInt8))          # Number of step calibrations
+  BUF.Calib.flags      = read(sid, UInt8)       # Calibration flags
+  BUF.Calib.dur1       = read(sid, UInt32)      # Calibration duration
+  (bt == 0x012c) && (BUF.Calib.dur2   = read(sid, UInt32))    # Interval duration
+  (bt == 0x0136) && (BUF.Calib.period = read(sid, Float32))   # Period of signal (seconds)
+  BUF.Calib.amplitude  = read(sid, Float32)     # Peak-to-peak amplitude
   BUF.Calib.channel    = read(sid, 3)
   skip(sid, 1)                                  # Reserved byte
-  BUF.Calib.ref        = read(sid, UInt32)     # Reference amplitude
+  BUF.Calib.ref        = read(sid, UInt32)      # Reference amplitude
 
   # String arrays
   if bt < 0x0186

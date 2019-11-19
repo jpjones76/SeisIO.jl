@@ -79,9 +79,7 @@ function readuwevt(filename::String; v::Int64=KW.v, full::Bool=false)
         for p in keys(D)
           pha = get(D, p, SeisPha())
           tt = getfield(pha, :tt) - δt
-          if tt < 0.0
-            tt = mod(tt, 60)
-          end
+          (tt < 0.0) && (tt = mod(tt, 60))
           setfield!(pha, :tt, tt)
         end
       end
