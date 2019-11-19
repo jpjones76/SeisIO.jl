@@ -1,3 +1,9 @@
+### 2019-11-19
+* Fixed issue #29
+  - `ungap!` should no longer break when encountering subsample negative gaps
+  of length `-0.5Δ ≤ δt < -Δ`
+  - `merge!` now handles sample times more robustly in overlapping segments
+
 ### 2019-11-15
 * The tutorial has been updated and expanded to include more practice writing
 ASDF volumes and an optional tutorial for the Quake submodule.
