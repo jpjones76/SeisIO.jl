@@ -13,34 +13,50 @@ function gapfill!(x::Array{T,1}, t::Array{Int64,2}, fs::Float64; m::Bool=true) w
   nt = size(t,1)
   ng = nt - (t[nt,2] == 0 ? 2 : 1)
   (ng == 0) && (return x)
-  mx = m ? mean(skipmissing(x)) : T(NaN)
-  u = max(Int64(20), round(Int64, 0.2*fs))
-  Δ = round(Int64, 1.0/(fs*μs))
-  nx = length(x) + div(sum(t[2:end,2]), Δ)
-  resize!(x, nx)
 
+  timegaps = t[2:end,2]                       # number of time gaps
+  mx = m ? mean(skipmissing(x)) : T(NaN)      # mean or NaN
+  Δ = round(Int64, 1.0/(fs*μs))               # sampling interval in μs
+
+  # this always yields rows in w whose indices are correct output assignments
   w = t_win(t, Δ)
+  nw = size(w,1)
   broadcast!(-, w, w, w[1,1])
   broadcast!(div, w, w, Δ)
   broadcast!(+, w, w, 1)
-  nw = size(w,1)
-  for i = nw:-1:1
-    N = w[i,2]-w[i,1]+1
-    j = t[i,1]
-    copyto!(x, w[i,1], x, j, N)
-    if i > 1
-      fill_s = w[i-1,2]+1
-      fill_e = w[i,1]-1
-      x[fill_s:fill_e] .= mx
+  nx = maximum(w)-minimum(w)+1
+
+  if minimum(timegaps) ≥ 0
+    resize!(x, nx)
+    for i = nw:-1:1
+      N = w[i,2]-w[i,1]+1
+      j = t[i,1]
+      copyto!(x, w[i,1], x, j, N)
+      if i > 1
+        fill_s = w[i-1,2]+1
+        fill_e = w[i,1]-1
+        x[fill_s:fill_e] .= mx
+      end
     end
+  else
+    # Fix for issue #29
+    x1 = Array{T,1}(undef, nx)
+
+    # with negative gaps, source start indices are in t[:,1]
+    for i in 1:nw
+      N = w[i,2]-w[i,1]+1
+      j = t[i,1]
+      unsafe_copyto!(x1, w[i,1], x, j, N)
+      if i > 1
+        fill_s = w[i-1,2]+1
+        fill_e = w[i,1]-1
+        (fill_e > fill_s) && (x1[fill_s:fill_e] .= mx)
+      end
+    end
+    unsafe_copyto!(x, 1, x1, 1, nx)
+    resize!(x, nx)
   end
   return nothing
-end
-
-function gapfill(x::Array{T,1}, t::Array{Int64,2}, fs::Float64; m::Bool=true) where T<: Real
-  y = deepcopy(x)
-  gapfill!(y, t, fs, m=m)
-  return y
 end
 
 # replace NaNs with the mean
