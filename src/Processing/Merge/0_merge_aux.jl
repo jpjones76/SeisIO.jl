@@ -1,3 +1,11 @@
+function get_δt(t::Int64, Δ::Int64)
+  δts = rem(t, Δ)
+  if δts > div(Δ,2)
+    δts -= Δ
+  end
+  return δts
+end
+
 function check_alignment(Ti::Array{Int64,1}, Tj::Array{Int64,1}, Xi::Array{T,1}, Xj::Array{T,1}, Δ::Int64) where {T<:AbstractFloat}
   z = zero(Int64)
 

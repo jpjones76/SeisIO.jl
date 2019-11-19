@@ -166,12 +166,31 @@ function merge!(S::Y; v::Int64=KW.v, purge_only::Bool=false) where Y<:GphysData
 
       # T,X ===================================================================
       nW = size(W,1)
+
+      #= added 2019-11-19:
+      fixes a rare off-by-one bug with slightly-offset windows (issue #29)
+      issue creator only sees bug in one file from 20 years of data
+
+      clumsy fix based on sound principles:
+      * force X to start an integer # of samples from the epoch
+        - prevents a discrepancy between length(X) and length(T)
+      * add the offset back to the start time of the merged channel data
+      =#
+      i = argmin(W[:,1])
+      δts = get_δt(W[i,1], Δ)
+      if δts != 0
+        for i = 1:nW
+          W[i,1] -= δts
+          W[i,2] -= δts
+        end
+      end
+
       (src, dest) = get_next_pair(W)
       while (src, dest) != (zeros(Int64, 7), zeros(Int64, 7))
         ts_i = src[1];  te_i = src[2];  p = src[3];  p_i = src[4];  os_p = src[5];  W_p = src[7]
         ts_j = dest[1]; te_j = dest[2]; q = dest[3]; q_i = dest[4]; os_q = dest[5]; W_q = dest[7]
-        ts_max = max(ts_i, ts_j)
-        te_min = min(te_i, te_j)
+        ts_max = max(ts_i, ts_j); ts_max -= get_δt(ts_max, Δ)
+        te_min = min(te_i, te_j); te_min -= get_δt(te_min, Δ)
         nov = 1 + div(te_min - ts_max, Δ)
         Xq = getindex(X, q)
 
@@ -182,10 +201,10 @@ function merge!(S::Y; v::Int64=KW.v, purge_only::Bool=false) where Y<:GphysData
 
         # b. get sample indices within each overlap window
         # i
-        xsi_i = div(ts_max - ts_i, Δ) + os_p
+        xsi_i = round(Int64, (ts_max - ts_i)/Δ) + os_p
         xei_i = xsi_i + nov - 1
         # j
-        xsi_j = div(ts_max - ts_j, Δ) + os_q
+        xsi_j = round(Int64, (ts_max - ts_j)/Δ) + os_q
         xei_j = xsi_j + nov - 1
 
         # (2) Extract sample windows
@@ -282,6 +301,7 @@ function merge!(S::Y; v::Int64=KW.v, purge_only::Bool=false) where Y<:GphysData
         n = n - 1
       end
       W = W[m, [1,2]]
+      broadcast!(+, W, W, δts)
       setindex!(T, w_time(W, Δ), Ω)
       setindex!(X, X_Ω, Ω)
       note!(S, Ω, string("merge!, combined channels ",
