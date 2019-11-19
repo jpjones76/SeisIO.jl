@@ -93,6 +93,7 @@ redirect_stdout(out) do
   convert_seis!(C, units_out="m", v=1)
   convert_seis!(C, units_out="m/s", v=1)
   convert_seis!(C, units_out="m/s2", v=1)
+  convert_seis!(C, units_out="m/s", v=1)
   convert_seis!(C, units_out="m", v=1)
   D = convert_seis(C, units_out="m/s2", v=1)
 end

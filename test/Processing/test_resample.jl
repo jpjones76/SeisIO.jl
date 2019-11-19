@@ -53,6 +53,23 @@ C.fs = 40.0
 resample!(C, 10.0)
 @test length(C.x) == 48561 # off by one because of the gap
 
+# A controlled test with two groups of channels, 40.0 Hz and 20.0 Hz
+S = randSeisData(4)
+S.id = ["NN.STA1.00.EHZ", "NN.STA2.00.EHZ", "NN.STA3.00.EHZ", "NN.STA4.00.EHZ"]
+n = 400
+fs = 20.0
+t20 = [1 1559599308051202; n 0]
+t40 = [1 1559599308051202; 2n 0]
+S.fs = [fs, 2fs, fs, 2fs]
+S.t = [deepcopy(t20), deepcopy(t40), deepcopy(t20), deepcopy(t40)]
+S.x = [randn(n), randn(2n), randn(n), randn(2n)]
+resample!(S, fs=fs)
+for i = 1:S.n
+  @test length(S.x[i]) == n
+  @test S.fs[i] == fs
+  @test S.t[i] == t20
+end
+
 norm_sz = Array{Float64,2}(undef,N,4)
 printstyled("      trial ", color=:light_green)
 for i = 1:N

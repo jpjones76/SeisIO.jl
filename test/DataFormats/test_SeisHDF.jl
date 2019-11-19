@@ -321,10 +321,12 @@ printstyled("        to new file\n", color=:light_green)
 write_hdf5(hdf_out3, Ev[1])
 
 printstyled("        to existing file\n", color=:light_green)
+@test_throws ErrorException write_hdf5(hdf_out3, Ev[2], fmt="GarfieldTheCat")
 write_hdf5(hdf_out3, Ev[2], chans=[1,2])
 
 printstyled("        to appended file\n", color=:light_green)
-write_hdf5(hdf_out3, Ev[3], chans=[3])
+push!(Ev[3].data, EventChannel(id="AA.STA.00.YYY"))
+write_hdf5(hdf_out3, Ev[3], chans=[3,4])
 
 printstyled("      read_asdf_evt\n", color=:light_green)
 EvCat = read_asdf_evt(hdf_out3, Ev[1].hdr.id, msr=false)

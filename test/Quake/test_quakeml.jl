@@ -118,6 +118,10 @@ for i in 1:length(R)
   compare_SeisSrc(R1[i], R[i])
 end
 
+# Write with no location set: should warn
+H1[1].loc = EQLoc()
+write_qml(xf, H1, R1)
+
 printstyled("      does trying to append a non-XML file error?\n", color=:light_green)
 io = open(xf, "w")
 write(io, rand(UInt8, 64))

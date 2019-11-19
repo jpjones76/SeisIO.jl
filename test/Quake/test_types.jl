@@ -45,3 +45,8 @@ m2 = EQMag(3.2f0, "Ml", 23, Δ, "localmag")
 @test isempty(SourceTime())
 ST1 = SourceTime()
 @test hash(ST1) == hash(SourceTime())
+
+# SeisSrc
+@test isempty(SeisSrc())
+@test isempty(SeisSrc(m0=1.0e22)) == false
+@test isempty(SeisSrc(id = "123")) == false
