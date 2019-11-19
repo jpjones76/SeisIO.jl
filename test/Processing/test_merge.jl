@@ -63,7 +63,10 @@ end
 # ===========================================================================
 printstyled(stdout,"    xtmerge!\n", color=:light_green)
 x = randn(12)
-t = sort!(rand(Int64,12))
+t = sort(rand(Int64, 12))
+while length(unique(t)) < 12
+  t = sort(rand(Int64, 12))
+end
 x = vcat(x, x[1:6])
 t = vcat(t, t[1:6])
 xtmerge!(t, x, 10000)
@@ -841,7 +844,7 @@ n_targ = 7
 # Old: (Test Passed, 1.42978256,  154864097, 0.038663895, Base.GC_Diff(154864097, 109, 0, 1845386, 4165, 0,  38663895, 7, 0))
 # New: (Test Passed, 1.263168574, 128490661, 0.108295874, Base.GC_Diff(128490661,  81, 0, 1324714, 3857, 0, 108295874, 6, 1))
 
-printstyled(stdout,"      purge!\n", color=:light_green)
+printstyled(stdout,"    purge!\n", color=:light_green)
 (S,T) = mktestseis()
 S.t[5] = Array{Int64,2}(undef,0,2)
 S.x[5] = Array{Float32,1}(undef,0)
@@ -849,3 +852,19 @@ U = purge(S)
 purge!(S)
 @test S == U
 @test S.n == 4
+
+printstyled(stdout,"    issue 29\n", color=:light_green)
+S = read_data(path * "/SampleFiles/SEED/CIRIO__BHE___2017101.mseed")
+merge!(S)
+C2 = S[1]
+ungap!(C2)
+
+#=  In Issue #29, ObsPy handled the merge without repeated data, so this is the
+    basis for comparison
+=#
+io = open(path * "/SampleFiles/SEED/obspy.dat", "r")
+X2 = Array{Int32,1}(undef, length(C2.x))
+read!(io, X2)
+close(io)
+X = map(Float32, X2)
+@test isapprox(C2.x, X)
