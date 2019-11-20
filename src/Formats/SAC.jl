@@ -44,9 +44,14 @@ end
 
 function fill_sac(si::Int64, nx::Int32, ts::Int64, id::Array{String,1})
   @assert nx ≤ typemax(Int32)
-  tt = [Base.parse(Int32, k) for k in split(string(u2d(ts*μs)), r"[\.\:T\-]")]
-  L = length(tt)
-  (L < 7) && append!(tt, zeros(Int32, 7-L))
+  tstr = String.(split(string(u2d(ts*μs)), r"[\:T\-]"))
+  tt = zeros(Int32, 7)
+  for i = 1:5
+    tt[i] = parse(Int32, tstr[i])
+  end
+  ss = parse(Float32, tstr[6])
+  tt[6] = round(Int32, ss)
+  tt[7] = round(Int32, 1000.0*(ss-tt[6]))
 
   # Ints
   y = tt[1]
