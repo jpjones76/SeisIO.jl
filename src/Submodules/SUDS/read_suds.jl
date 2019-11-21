@@ -46,6 +46,7 @@ function read_suds(fname::String;
           if S.fs[i] == 0.0
             S.fs[i] = SB.fs
           end
+          S.src[i] = fname
         end
         fs_last = SB.fs
       elseif fs_last != SB.fs
@@ -60,9 +61,13 @@ function read_suds(fname::String;
 
       # 7: DESCRIPTRACE  -----------------------------------------------------
       elseif SB.sid == Int16(7)
-        # (id, data_type, nz, fs, ts) = read_7!(S, sid, v, full)
         read_7!(S, sid, v, full)
         t0 = 1000000*round(Int64, SB.t_f64)
+        j =  findid(SB.id_str, S)
+        if j > 0
+          (S.fs[j] == 0.0) && (S.fs[j] = Float64(SB.fs))
+          isempty(S.src[j]) && (S.src[j] = fname)
+        end
 
       # 20: COMMENT  ---------------------------------------------------------
       elseif SB.sid == Int16(20)
@@ -72,7 +77,6 @@ function read_suds(fname::String;
 
       # 30: TIMECORRECTION ---------------------------------------------------
       elseif SB.sid == Int16(30)
-        # (tc, rc, t_eff, id, net_flag) = read_30!(S, sid, v, full)
         read_30!(S, sid, v, full)
         SB.data_type = 0x00
         t0 = 0
@@ -127,7 +131,7 @@ function read_suds(fname::String;
         resize!(xz, L+32)
         resize!(xnet, L+32)
       end
-      copyto!(BUF.x, xi, y, 1, nx)
+      copyto!(BUF.x, xi, SB.data_type == 0x63 ? real.(y) : y, 1, nx)
 
       # Store channel indices to xc
       if SB.sid == Int16(6)
