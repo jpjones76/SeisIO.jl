@@ -13,10 +13,6 @@ function timed_wait!(conn::TCPSocket, to::Real, b::Bool)
     te = time()
     n = bytesavailable(conn)
   end
-  if m == bytesavailable(conn)
-    close(conn)
-    error("Connection timed out.")
-  end
   return nothing
 end
 
