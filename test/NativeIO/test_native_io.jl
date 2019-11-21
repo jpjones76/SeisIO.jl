@@ -141,6 +141,10 @@ for i = 1:Tr.n
   end
 end
 
+# verify wildcard functionality
+S1 = read_data("test.se*")
+@test convert(SeisData, S.data) == S1
+
 # Type unit tests with read_data("seisio", ...)
 C = randSeisChannel()
 wseis(savfile1, C)
