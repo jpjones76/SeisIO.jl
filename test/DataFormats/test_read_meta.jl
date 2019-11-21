@@ -4,6 +4,7 @@ printstyled("    full (XML, RESP, dataless)\n", color=:light_green)
 sxml_file     = path*"/SampleFiles/XML/fdsnws-station_2019-09-11T06_26_58Z.xml"
 resp_file     = path*"/SampleFiles/SEED/JRO.resp"
 dataless_file = path*"/SampleFiles/SEED/CC.dataless"
+dataless_wc   = path*"/SampleFiles/SEED/CC.*"
 sacpz_file    = path*"/SampleFiles/SAC/JRO.sacpz"
 sacpz_wc      = path*"/SampleFiles/SAC/JRO.sacp*"
 
@@ -14,7 +15,6 @@ S4 = read_meta("sacpz", sacpz_file)
 
 @test_throws ErrorException read_meta("dataless", sxml_file)
 @test_throws ErrorException read_meta("deez", "nutz.sac")
-
 
 C = Array{Char,2}(undef, 10, 3)
 fill!(C, ' ')
@@ -177,6 +177,7 @@ println("")
 
 S1 = read_meta("sacpz", sacpz_file)
 S2 = read_meta("sacpz", sacpz_wc)
+S3 = read_meta("dataless", dataless_wc, s="2016-01-01T00:00:00")
 for f in SeisIO.datafields
   if (f in (:src, :notes)) == false
     @test isequal(getfield(S1,f), getfield(S2,f))
