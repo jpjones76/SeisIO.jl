@@ -5,6 +5,7 @@ sxml_file     = path*"/SampleFiles/XML/fdsnws-station_2019-09-11T06_26_58Z.xml"
 resp_file     = path*"/SampleFiles/SEED/JRO.resp"
 dataless_file = path*"/SampleFiles/SEED/CC.dataless"
 sacpz_file    = path*"/SampleFiles/SAC/JRO.sacpz"
+sacpz_wc      = path*"/SampleFiles/SAC/JRO.sacp*"
 
 S1 = read_meta("sxml", sxml_file, s="2016-01-01T00:00:00", msr=true)
 S2 = read_meta("resp", resp_file, units=true)
@@ -173,3 +174,11 @@ for i = 1:size(SA,1)
   println(join(SA[i,:], " "))
 end
 println("")
+
+S1 = read_meta("sacpz", sacpz_file)
+S2 = read_meta("sacpz", sacpz_wc)
+for f in SeisIO.datafields
+  if (f in (:src, :notes)) == false
+    @test isequal(getfield(S1,f), getfield(S2,f))
+  end
+end
