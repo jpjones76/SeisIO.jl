@@ -232,10 +232,10 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
       D["seed_ascii"] = Array{String,1}(undef,0)
     end
     push!(D["seed_ascii"], SEED_Char(sid, BUF, nb))
-  elseif fmt in UInt8[0x01, 0x03, 0x04]
+  elseif fmt in UInt8[0x01, 0x03, 0x04, 0x05]
     SEED_Unenc!(sid, S, c, xi, nb, n)
-  elseif fmt == 0x05
-    SEED_Float64!(sid, S, c, xi, nb)
+  # elseif fmt == 0x05
+  #   SEED_Float64!(sid, S, c, xi, nb)
   elseif fmt == 0x0d || fmt == 0x0e
     SEED_Geoscope!(sid, BUF)
   elseif fmt == 0x10

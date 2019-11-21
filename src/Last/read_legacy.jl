@@ -12,10 +12,7 @@ function read_legacy(io::IO, ver::Float32)
   cmp   = read(io, Bool)
   read!(io, L)
   nx    = getindex(L, N+1:2*N)
-
-  if cmp
-    checkbuf_8!(Z, maximum(nx))
-  end
+  cmp && checkbuf_8!(Z, maximum(nx))
 
   ver < 0.5f0 && error("No legacy support for SeisIO file format version < 0.5")
 

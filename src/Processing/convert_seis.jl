@@ -129,8 +129,8 @@ function convert_seis!(C::GphysChannel;
   v::Int64=KW.v)
 
   # sanity check
-  if units_out in ("m", "m/s", "m/s2") == false
-    error("units_out must be in (\"m\", \"m/s\", \"m/s2\")!")
+  if (units_out in ("m", "m/s", "m/s2")) == false || (C.units in ("m", "m/s", "m/s2")) == false
+    error("units must be in (\"m\", \"m/s\", \"m/s2\")!")
   end
 
   units_in = lowercase(C.units)

@@ -19,6 +19,7 @@ include("constants.jl")
 include("CoreUtils/ls.jl")
 include("CoreUtils/time.jl")
 include("CoreUtils/namestrip.jl")
+include("CoreUtils/read_utils.jl")
 include("CoreUtils/typ2code.jl")
 include("CoreUtils/file_io.jl")
 include("CoreUtils/poly.jl")
@@ -100,7 +101,7 @@ export mseed_support, read_dataless, read_seed_resp!, read_seed_resp, RESP_wont_
 
 include("Submodules/Quake.jl")
 using .Quake:read_qml
-import .Quake:convert
+import .Quake:convert, merge_ext!
 export read_qml, write_qml
 include("Submodules/RandSeis.jl")
 
