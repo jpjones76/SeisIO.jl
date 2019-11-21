@@ -5,6 +5,7 @@ S = randSeisData(3, s=1.0)
 S.units = ["m/s2", "m", "m/s"]
 U = deepcopy(S)
 S1 = deepcopy(S)
+C = deepcopy(U[1])
 
 printstyled("  conversion to m/s\n", color=:light_green)
 redirect_stdout(out) do
@@ -87,9 +88,10 @@ redirect_stdout(out) do
   convert_seis!(S, units_out="m")
   convert_seis!(S, units_out="m/s2")
   T = convert_seis(S, units_out="m")
+end
 
-  # Test on a SeisChannel
-  C = deepcopy(U[1])
+printstyled("    extension to SeisChannel\n", color=:light_green)
+redirect_stdout(out) do
   convert_seis!(C, units_out="m", v=1)
   convert_seis!(C, units_out="m/s", v=1)
   convert_seis!(C, units_out="m/s2", v=1)
@@ -97,3 +99,5 @@ redirect_stdout(out) do
   convert_seis!(C, units_out="m", v=1)
   D = convert_seis(C, units_out="m/s2", v=1)
 end
+C.units = "{unknown}"
+@test_throws ErrorException convert_seis!(C, units_out="m")
