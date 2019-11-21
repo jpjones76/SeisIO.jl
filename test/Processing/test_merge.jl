@@ -680,13 +680,9 @@ ungap!(S, m=false, tap=false)
 @test ≈(length(S.x[i]), 350)
 @test ≈(S.x[i][101]/S.gain[i], s4.x[1]/s4.gain)
 
-printstyled("    fastmerge!\n", color=:light_green)
-
-# Repeating data
+printstyled("      repeating data\n", color=:light_green)
 loc1 = GeoLoc(lat=45.28967, lon=-121.79152, el=1541.0)
 loc2 = GeoLoc(lat=48.78384, lon=-121.90093, el=1676.0)
-
-
 s1 = SeisChannel(fs = fs1, gain = 10.0, name = "DEAD.STA.EHZ", id = "DEAD.STA..EHZ",
 t = [1 t1; 100 0], x=randn(100))
 s2 = SeisChannel(fs = fs1, gain = 10.0, name = "DEAD.STA.EHZ", id = "DEAD.STA..EHZ",
@@ -696,7 +692,7 @@ C = (s1 * s2)[1]
 @test C.x[1:100] == s1.x
 @test C.x[101:200] == s2.x[51:150]
 
-# Simple overlapping times
+printstyled("    overlapping times\n", color=:light_green)
 os = 50
 nx = length(s1.x)
 lx = length(s1.x)/s1.fs
@@ -709,7 +705,7 @@ C = (s1 * s2)[1]
 @test C.x[nx-os+1:nx] == 0.5.*(s1.x[nx-os+1:nx]+s2.x[1:os])
 @test C.x[nx+1:200] == s2.x[os+1:150]
 
-# two-sample offset
+printstyled("    two-sample offset\n", color=:light_green)
 os = 2
 nx = length(s1.x)
 lx = length(s1.x)/s1.fs
@@ -733,6 +729,29 @@ T = (s5 * s6)
 ungap!(T)
 @test ≈(length(T.x[1]),3200)
 
+printstyled("    one repeating segment in two channels\n", color=:light_green)
+fs1 = 50.0
+Δ = round(Int64, 1.0e6/fs1)
+g1 = 10.0
+ns = 2
+n1 = "DEAD.STA..EHZ"
+id = "DEAD.STA..EHZ"
+t_in = [1 0; 300 0]
+nx = round(Int64, ns*fs1)
+seg_1 = randn(nx)
+seg_2 = randn(nx)
+seg_3 = randn(nx)
+t = t_expand(t_in, fs1)
+i1 = vcat(collect(1:100), collect(201:300))
+i2 = collect(101:300)
+t1 = t_collapse(t[i1], fs1)
+t2 = t_collapse(t[i2], fs1)
+s1 = SeisChannel(fs = fs1, gain = g1, name = n1, id = id, t = t1, x = vcat(seg_1, seg_3))
+s2 = SeisChannel(fs = fs1, gain = g1, name = n1, id = id, t = t2, x = vcat(seg_2, seg_3))
+C = (s1 * s2)[1]
+@test length(C.x) == 300
+@test C.x == vcat(seg_1, seg_2, seg_3)
+@test C.t == t_in
 
 printstyled(stdout,"    SeisData * SeisChannel ==> SeisData\n", color=:light_green)
 (S,T) = mktestseis()

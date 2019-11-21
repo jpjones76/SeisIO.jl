@@ -70,3 +70,26 @@ D = convert(EventChannel, randSeisChannel())
 S = merge(C,D)
 @test typeof(S) == EventTraceData
 @test C*D == S
+
+# Check that dist, az, baz merge correctly
+(S,T) = mktestseis()
+S = convert(EventTraceData, S)
+T = convert(EventTraceData, T)
+S.az[4:5] .= 0.0
+S.baz[4:5] .= 0.0
+S.dist[4:5] .= 0.0
+
+for i = 1:T.n
+  T.az[i] = (rand()-0.5)*360.0
+  T.baz[i] = (rand()-0.5)*360.0
+  T.dist[i] = (rand()-0.5)*360.0
+end
+merge!(S,T)
+for i in 1:S.n
+  n = findid(S.id[i], T)
+  if n > 0
+    @test S.az[i] == T.az[n]
+    @test S.baz[i] == T.baz[n]
+    @test S.dist[i] == T.dist[n]
+  end
+end
