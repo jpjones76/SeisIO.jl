@@ -1,3 +1,14 @@
+### 2019-11-20
+* Fixed issue #30
+* Various internal improvements:
+  - Added `merge_ext!` for merging extra fields of future GphysData subtypes.
+  - Added `t_arr!` to populate a time array.
+* SUDS:
+  - Comment structure support status has changed to "display only"; there is no
+  feasible way to read them into SeisIO and no evidence anyone ever used them.
+  - Fixed a bug where a struct 7 might not set channel fs correctly.
+  - `:src` should now be logged correctly for all channels.
+
 ### 2019-11-19
 * Fixed issue #29
   - `ungap!` should no longer break when encountering subsample negative gaps
