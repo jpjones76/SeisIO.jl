@@ -1,6 +1,6 @@
 # Code lists begin on page 322 of the SUDS manual
 const unsupported = Int16.((3, 4, 8, 9, 11, 12, 13, 15, 16, 17, 18, 19, 21, 22, 23, 24))
-const disp_only = Int16.((25, 26, 27, 28, 29, 31))
+const disp_only = Int16.((20, 25, 26, 27, 28, 29, 31))
 
 const suds_codes = Dict{Int64, String}(
   1   => "STATIONID",

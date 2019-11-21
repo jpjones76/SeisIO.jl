@@ -287,13 +287,6 @@ function read_20!(S::GphysData, io::IO, v::Int64, full::Bool)
             ", L = ", L)
   end
   SB.comm_s = String(copy(read(io, L)))
-  for i in 1:S.n
-    if haskey(S.misc[i], "comment")
-      append!(S.misc[i]["comment"], SB.comm_s)
-    else
-      S.misc[i]["comment"] = [SB.comm_s]
-    end
-  end
   (v > 2) && (printstyled("comment: \n", color=:green); println(SB.comm_s); printstyled("--\n", color=:green))
   return nothing
 end
