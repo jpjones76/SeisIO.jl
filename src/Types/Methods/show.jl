@@ -43,9 +43,10 @@ function show_t(io::IO, T::Array{Array{Int64,2},1}, w::Int, N::Int64)
   return
 end
 
-function mkxstr(N, X::Union{Array{Array{Float64,1},1},
-                            Array{Array{Float32,1},1},
-                            Array{Union{Array{Float64,1}, Array{Float32,1}},1}})
+function mkxstr(N::Int64, X::Union{ Array{Array{Float64,1},1},
+                                    Array{Array{Float32,1},1},
+                                    Array{Union{Array{Float64,1},
+                                          Array{Float32,1}},1} })
 
   # Fill matrix of X values
   vx = 5
@@ -53,22 +54,23 @@ function mkxstr(N, X::Union{Array{Array{Float64,1},1},
   fill!(X_str, "")
   for j = 1:N
     x = getindex(X, j)
-    nx = lastindex(x)
+    nx = length(x)
     if nx == 0
       X_str[1,j] = "(empty)"
       continue
-    elseif nx < vx
-      for i = 1:nx
-        X_str[i,j] = @sprintf("%+10.3e", x[i])
-      end
     else
-      nx_str          = string(nx)
-      for i = 1:vx-3
-        X_str[i,j]    = @sprintf("%+10.3e", x[i])
+      if nx < vx
+        for i = 1:nx
+          X_str[i,j] = @sprintf("%+10.3e", x[i])
+        end
+      else
+        for i = 1:vx-3
+          X_str[i,j]    = @sprintf("%+10.3e", x[i])
+        end
+        X_str[vx-2,j]   = "    ..."
+        X_str[vx-1,j]   = @sprintf("%+10.3e", x[nx])
       end
-      X_str[vx-2,j]   = "    ..."
-      X_str[vx-1,j]   = @sprintf("%+10.3e", x[nx])
-      X_str[vx,j]     = string("(nx = ", nx_str, ")")
+      X_str[vx,j] = string("(nx = ", nx, ")")
     end
   end
   return X_str
