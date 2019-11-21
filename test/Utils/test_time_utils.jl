@@ -44,3 +44,10 @@ t_arr!(buf, t, digits=6, md=true)
 @test buf[1:7] == Int32[2019, 6, 1, 3, 50, 4, 20000]
 t_arr!(buf, t, digits=4, md=false)
 @test buf[1:6] == Int32[2019, 152, 3, 50, 4, 200]
+
+buf = zeros(Int32, 5)
+t_arr!(buf, t)
+@test length(buf) == 7
+resize!(buf, 5)
+t_arr!(buf, dt)
+@test length(buf) == 7
