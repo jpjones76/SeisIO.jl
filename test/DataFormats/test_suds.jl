@@ -172,4 +172,4 @@ for (j, data_code) in enumerate([0x32, 0x63, 0x64, 0x66, 0x74])
     @test_throws ErrorException read_data("suds", f_out)
   end
 end
-rm(f_out)
+safe_rm(f_out)
