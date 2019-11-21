@@ -7,7 +7,6 @@ function get_sep(v_buf::Array{UInt8,1}, vi::Int8)
     y = getindex(v_buf, i)
     if y != 0x20
       return y
-      break
     end
   end
   return nothing
