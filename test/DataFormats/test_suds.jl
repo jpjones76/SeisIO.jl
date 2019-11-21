@@ -80,7 +80,8 @@ for n = 1:S1.n
 end
 
 # from lsm.sud
-S = SUDS.read_suds(lsm_file)
+S = SeisData()
+SUDS.read_suds!(S, lsm_file)
 S1 = read_data("sac", lsm_pat)
 for n = 1:S1.n
   i = findid(S1.id[n], S)
@@ -103,4 +104,72 @@ for n = 1:S1.n
   end
 end
 
-nothing
+printstyled("    data types not yet seen in real samples\n", color=:light_green)
+f_out = string("fake_suds.sud")
+id_buf = codeunits("UWSPORTSBALL")
+nb = Int32(3200)
+n_unreadable = Int32(60)
+suds_types = (Int32, Complex{Float32}, Float64, Float32, Complex{Float64})
+
+# skeleton: 0x53, 0x00, struct_id, struct_size, nbytes_following_struct
+suds_struct_tag = (0x53, 0x00, zero(Int16), zero(Int32), zero(Int32))
+suds_unreadable = (0x53, 0x36, Int16(4), n_unreadable, zero(Int32))
+suds_5 = (0x53, 0x36, Int16(5), Int32(76), zero(Int32))
+suds_readable = (0x53, 0x36, Int16(7), Int32(62), nb)
+
+for (j, data_code) in enumerate([0x32, 0x63, 0x64, 0x66, 0x74])
+  T = suds_types[j]
+
+  x = rand(T, div(nb, sizeof(T)))
+  io = open(f_out, "w")
+
+  # Unreadable packet
+  [write(io, i) for i in suds_unreadable]
+  write(io, rand(UInt8, n_unreadable))
+
+  # Packet 5
+  [write(io, i) for i in suds_5]
+  p = position(io)
+  write(io, id_buf)
+  write(io, rand(Int16, 2))
+  write(io, 45.55)
+  write(io, 122.62)
+  write(io, 77.1f0)
+  write(io, rand(UInt8, 7))
+  write(io, 0x76)
+  write(io, data_code)
+  write(io, rand(UInt8, 3))
+  write(io, 1.152f8, 0.0f0, 0.0f0)
+  write(io, Int16[2, 32])
+  skip(io, 4)
+  write(io, 0.0f0, -32767.0f0)
+
+  # Packet 7
+  [write(io, i) for i in suds_readable]
+  p = position(io)
+  write(io, id_buf)
+  write(io, d2u(now()))
+  write(io, zero(Int16))
+  write(io, data_code)
+  write(io, 0x00)
+  skip(io, 4)
+  write(io, Int32(div(nb, sizeof(T))))
+  write(io, 50.0f0)
+  skip(io, 16)
+  write(io, zero(Float64))
+  write(io, 0.0f0)
+  write(io, x)
+  close(io)
+
+  if j < 5
+    S = read_data("suds", f_out)
+    if data_code == 0x63
+      @test isapprox(S.x[1], real(x))
+    else
+      @test isapprox(S.x[1], x)
+    end
+  else
+    @test_throws ErrorException read_data("suds", f_out)
+  end
+end
+rm(f_out)
