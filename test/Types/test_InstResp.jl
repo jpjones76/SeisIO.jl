@@ -1,5 +1,6 @@
 # Responses
 printstyled("  InstrumentResponse subtypes\n", color=:light_green)
+@test resptyp2code(CoeffResp()) == 0x03
 redirect_stdout(out) do
   v = 1.0 + 1.0*im
   X = rand(12,3)
