@@ -134,35 +134,8 @@ function merge!(S::Y; v::Int64=KW.v, purge_only::Bool=false) where Y<:GphysData
       end
       sort!(notes)
 
-      # EventTraceData extra fields ===========================================
-      if Y == EventTraceData
-        pha   = PhaseCat()
-        az    = getindex(getfield(S, :az), Ω)
-        baz   = getindex(getfield(S, :baz), Ω)
-        dist  = getindex(getfield(S, :dist), Ω)
-        for i in rest
-          if az == 0.0
-            θ = getindex(getfield(S, :az), i)
-            (θ != 0.0) && (az = θ)
-          end
-          if baz == 0.0
-            β = getindex(getfield(S, :baz), i)
-            (β != 0.0) && (baz = β)
-          end
-          if dist == 0.0
-            # Δ is already in use, so...
-            d = getindex(getfield(S, :dist), i)
-            (d != 0.0) && (dist = d)
-          end
-          merge!(pha, getindex(getfield(S, :pha), i))
-        end
-        # This guarantees that the phase catalog of Ω overwrites others
-        merge!(pha, getindex(getfield(S, :pha), Ω))
-        setindex!(getfield(S, :az),     az, Ω)
-        setindex!(getfield(S, :baz),   baz, Ω)
-        setindex!(getfield(S, :dist), dist, Ω)
-        setindex!(getfield(S, :pha),   pha, Ω)
-      end
+      # Extra fields ==========================================================
+      merge_ext!(S, Ω, rest)
 
       # T,X ===================================================================
       nW = size(W,1)

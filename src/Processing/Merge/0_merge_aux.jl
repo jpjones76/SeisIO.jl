@@ -1,3 +1,5 @@
+merge_ext!(S::SeisData, Ω::Int64, rest::Array{Int64, 1}) = nothing
+
 function get_δt(t::Int64, Δ::Int64)
   δts = rem(t, Δ)
   if δts > div(Δ,2)
