@@ -23,22 +23,19 @@ end
 
 function resptyp2code(Resp::Union{InstrumentResponse, Nothing})
   T = typeof(Resp)
-  c = UInt8(
   if T == PZResp
-    0x01
+    return 0x01
   elseif T == PZResp64
-    0x02
+    return 0x02
   elseif T == CoeffResp
-    0x03
+    return 0x03
   elseif T == MultiStageResp
-    0x04
+    return 0x04
   elseif T == Nothing
-    0xff
+    return 0xff
   else
-    0x00
+    return 0x00
   end
-  )
-  return c
 end
 
 function code2resptyp(c::UInt8)
