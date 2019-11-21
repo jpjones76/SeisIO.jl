@@ -44,23 +44,9 @@ end
 
 function fill_sac(si::Int64, nx::Int32, ts::Int64, id::Array{String,1})
   @assert nx ≤ typemax(Int32)
-  tstr = String.(split(string(u2d(ts*μs)), r"[\:T\-]"))
-  tt = zeros(Int32, 7)
-  for i = 1:5
-    tt[i] = parse(Int32, tstr[i])
-  end
-  ss = parse(Float32, tstr[6])
-  tt[6] = round(Int32, ss)
-  tt[7] = round(Int32, 1000.0*(ss-tt[6]))
+  t_arr!(BUF.sac_iv, ts, digits=3)
 
   # Ints
-  y = tt[1]
-  j = Int32(md2j(y, tt[2], tt[3]))
-  BUF.sac_iv[1] = y
-  BUF.sac_iv[2] = j
-  for i in 3:6
-    BUF.sac_iv[i] = tt[i+1]
-  end
   BUF.sac_iv[10] = Int32(nx)
 
   # Floats
@@ -68,12 +54,12 @@ function fill_sac(si::Int64, nx::Int32, ts::Int64, id::Array{String,1})
   BUF.sac_fv[7] = BUF.sac_fv[6] + BUF.sac_fv[1]*nx
 
   # Filename
-  y_s = lpad(y, 4, '0')
-  j_s = lpad(j, 3, '0')
-  h_s = lpad(tt[4], 2, '0')
-  m_s = lpad(tt[5], 2, '0')
-  s_s = lpad(tt[6], 2, '0')
-  ms_s = lpad(tt[7], 3, '0')
+  y_s = lpad(BUF.sac_iv[1], 4, '0')
+  j_s = lpad(BUF.sac_iv[2], 3, '0')
+  h_s = lpad(BUF.sac_iv[3], 2, '0')
+  m_s = lpad(BUF.sac_iv[4], 2, '0')
+  s_s = lpad(BUF.sac_iv[5], 2, '0')
+  ms_s = lpad(BUF.sac_iv[6], 3, '0')
   fname = join([y_s, j_s, h_s, m_s, s_s, ms_s, id[1], id[2], id[3], id[4], "R.SAC"], '.')
   return fname
 end
