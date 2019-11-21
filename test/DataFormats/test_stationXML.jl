@@ -102,6 +102,7 @@ redirect_stdout(out) do
   n = S.n
   read_station_xml!(S, xml_stfile, v=3)
   @test S.n == n
+  S = read_station_xml(xml_stfile)
 end
 
 # XML writer
