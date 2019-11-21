@@ -30,6 +30,7 @@ t = [ 1262304000000000,
 
 for (i,j) in enumerate(s)
   @test string_time(j, date_buf) == t[i]
+  @test string_time(j) == t[i]
   @test stream_time(IOBuffer(j*"~"), date_buf) == t[i]
 end
 
