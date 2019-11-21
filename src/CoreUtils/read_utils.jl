@@ -177,3 +177,19 @@ function fillx_u32_be!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::I
   end
   return nothing
 end
+
+function fillx_u32_le!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::Int64)
+  y = zero(UInt32)
+  j = os
+  i = 0
+  while i < nx
+    i += 1
+    j += 1
+    y = UInt32(buf[4*i-3])
+    y |= UInt32(buf[4*i-2]) << 8
+    y |= UInt32(buf[4*i-1]) << 16
+    y |= UInt32(buf[4*i])   << 24
+    x[j] = y
+  end
+  return nothing
+end
