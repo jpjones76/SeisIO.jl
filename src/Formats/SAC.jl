@@ -304,8 +304,7 @@ function write_sac_channel(S::GphysData, i::Int64, v::Int64, xy::Bool, fn::Strin
     if fn == ""
       fname = fill_sac(si, nx, ts, id)
     else
-      fill_sac(si, nx, ts, id)
-      fname = fn
+      fill_sac(si, nx, ts, id); fname = fn
     end
     BUF.sac_fv[7] += sum(t[2:end,2])*μs
     BUF.sac_iv[16] = Int32(4)
@@ -439,29 +438,12 @@ function add_pzchan!(S::GphysData, D::Dict{String, Any}, file::String)
     te = Dates.DateTime(get(D, "END", "2599-12-31T23:59:59")).instant.periods.value*1000 - dtconst
     t0 = isempty(S.t[i]) ? ts : S.t[i][1,2]
     if ts ≤ t0 ≤ te
-      if S.fs[i] == 0.0
-        S.fs[i] = fs
-      end
-
-      if isempty(S.units[i])
-        S.units[i] = units
-      end
-
-      if S.gain[i] == 1.0
-        S.gain[i] = gain
-      end
-
-      if typeof(S.resp[i]) == GenResp || isempty(S.resp[i])
-        S.resp[i] = resp
-      end
-
-      if isempty(S.name[i])
-        S.name[i] = D["DESCRIPTION"]
-      end
-
-      if isempty(S.loc[i])
-        S.loc[i]  = loc
-      end
+      (S.fs[i] == 0.0) && (S.fs[i] = fs)
+      (isempty(S.units[i])) && (S.units[i] = units)
+      (S.gain[i] == 1.0) && (S.gain[i] = gain)
+      (typeof(S.resp[i]) == GenResp || isempty(S.resp[i])) && (S.resp[i] = resp)
+      (isempty(S.name[i])) && (S.name[i] = D["DESCRIPTION"])
+      isempty(S.loc[i]) && (S.loc[i]  = loc)
 
       S.misc[i] = merge(D, S.misc[i])
     end

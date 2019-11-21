@@ -211,9 +211,7 @@ function readwin32(dfilestr::String, cfilestr::String;
 
           y = getindex(getfield(S, :x), k)
           xa = first(x)
-          j = 1
-          while j < Nh
-            j += 1
+          for j in 2:Nh
             xa += getindex(x,j)
             setindex!(x, xa, j)
           end
@@ -231,12 +229,9 @@ function readwin32(dfilestr::String, cfilestr::String;
   end
 
   # Post-process
-  src = dfilestr
   κ = findall(xi.==0)
-  i = 0
-  @inbounds while i < S.n
-    i += 1
-    i in κ && continue
+  @inbounds for i = 1:S.n
+    (i in κ) && continue
     χ = getindex(S.x, i)
 
     # Ensure we aren't overcompensating
@@ -259,8 +254,7 @@ function readwin32(dfilestr::String, cfilestr::String;
     cc = String(cha)[1:1]
 
     if cc == "U"
-      cc = "Z"
-      S.loc[i].inc = 180.0
+      cc = "Z"; S.loc[i].inc = 180.0
     elseif cc == "N"
       S.loc[i].inc = 90.0
     elseif cc == "E"
@@ -269,7 +263,7 @@ function readwin32(dfilestr::String, cfilestr::String;
     end
     id = string(net, ".", sta, ".", locID[i], ".", bb, "H", cc)
     setindex!(getfield(S, :id), id, i)
-    setindex!(getfield(S, :src), src, i)
+    setindex!(getfield(S, :src), dfilestr, i)
 
     # Fill gaps with mean of data
     J = length(gapStart[i])
@@ -284,7 +278,7 @@ function readwin32(dfilestr::String, cfilestr::String;
       end
     end
   end
-  note!(S, "+src: " * src)
+  note!(S, "+src: " * dfilestr)
   note!(S, "channel file: " * cfilestr)
   if !isempty(κ)
     deleteat!(S, κ)

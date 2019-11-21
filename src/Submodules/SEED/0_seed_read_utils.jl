@@ -3,9 +3,7 @@ function store_int!(X::Array{Int64,1}, buf::Array{UInt8,1}, i::Int64, n::Int64)
   n == 0 && return
   nx = length(X)
   if n > 0
-    if n > nx
-      append!(X, zeros(Int64, n-nx))
-    end
+    (n > nx) && append!(X, zeros(Int64, n-nx))
     X[n] = buf_to_int(buf, i)
   end
   return nothing
@@ -15,9 +13,7 @@ function store_dbl!(X::Array{Float64,1}, buf::Array{UInt8,1}, i::Int64, n::Int64
   n == 0 && return
   nx = length(X)
   if n > 0
-    if n > nx
-      append!(X, zeros(Float64, n-nx))
-    end
+    (n > nx) && append!(X, zeros(Float64, n-nx))
     X[n] = buf_to_double(buf, i)
   end
   return nothing

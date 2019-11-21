@@ -729,9 +729,7 @@ function blk_060(io::IO, nb::Int64, v::Int64, R::MultiStageResp)
         @inbounds R.fac[seq] = rr.fac
         @inbounds R.os[seq] = rr.os
       elseif typeof(rr[1]) <: InstrumentResponse
-        if length(R.fs) < seq
-          append!(R, MultiStageResp(6))
-        end
+        (length(R.fs) < seq) && append!(R, MultiStageResp(6))
         @inbounds R.stage[seq] = rr[1]
         @inbounds R.i[seq] = rr[2]
         @inbounds R.o[seq] = rr[3]
@@ -770,9 +768,7 @@ function blk_061(io::IO, nb::Int64, v::Int64, R::MultiStageResp, units::Bool)
     end
   end
 
-  if length(R.fs) < stage
-    append!(R, MultiStageResp(6))
-  end
+  (length(R.fs) < stage) && append!(R, MultiStageResp(6))
   @inbounds R.stage[stage] = CoeffResp(F, Float64[])
   if units
     @inbounds R.i[stage] = fix_units(units_lookup[uic])

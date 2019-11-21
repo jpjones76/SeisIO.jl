@@ -62,8 +62,7 @@ function checkbuf_8!(buf::Array{UInt8,1}, n::Integer)
 end
 
 function fillx_i4!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::Int64)
-  j = os
-  i = 0
+  j = os; i = 0
   while i < nx
     i += 1
     j += 1
@@ -78,8 +77,7 @@ function fillx_i4!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::Int64
 end
 
 function fillx_i8!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::Int64)
-  j = os
-  i = 0
+  j = os; i = 0
   while i < nx
     i += 1
     j += 1
@@ -89,9 +87,7 @@ function fillx_i8!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::Int64
 end
 
 function fillx_i16_le!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::Int64)
-  y = zero(UInt16)
-  j = os
-  i = 0
+  y = zero(UInt16); j = os; i = 0
   while i < nx
     i += 1
     j += 1
@@ -103,9 +99,7 @@ function fillx_i16_le!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::I
 end
 
 function fillx_i16_be!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::Int64)
-  y = zero(UInt16)
-  j = os
-  i = 0
+  y = zero(UInt16); j = os; i = 0
   while i < nx
     i += 1
     j += 1
@@ -117,9 +111,7 @@ function fillx_i16_be!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::I
 end
 
 function fillx_i24_be!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::Int64)
-  y = zero(UInt32)
-  j = os
-  i = 0
+  y = zero(UInt32); j = os; i = 0
   while i < nx
     i += 1
     j += 1
@@ -131,9 +123,7 @@ function fillx_i24_be!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::I
 end
 
 function fillx_i32_le!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::Int64)
-  y = zero(UInt32)
-  j = os
-  i = 0
+  y = zero(UInt32); j = os; i = 0
   while i < nx
     i += 1
     j += 1
@@ -147,9 +137,7 @@ function fillx_i32_le!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::I
 end
 
 function fillx_i32_be!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::Int64)
-  y = zero(UInt32)
-  j = os
-  i = 0
+  y = zero(UInt32); j = os; i = 0
   while i < nx
     i += 1
     j += 1
@@ -163,9 +151,7 @@ function fillx_i32_be!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::I
 end
 
 function fillx_u32_be!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::Int64)
-  y = zero(UInt32)
-  j = os
-  i = 0
+  y = zero(UInt32); j = os; i = 0
   while i < nx
     i += 1
     j += 1
@@ -179,9 +165,7 @@ function fillx_u32_be!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::I
 end
 
 function fillx_u32_le!(x::AbstractArray, buf::Array{UInt8,1}, nx::Integer, os::Int64)
-  y = zero(UInt32)
-  j = os
-  i = 0
+  y = zero(UInt32); j = os; i = 0
   while i < nx
     i += 1
     j += 1
