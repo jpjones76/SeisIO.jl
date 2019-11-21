@@ -12,9 +12,7 @@ function auto_coords(xy::Array{Int32, 1}, sc::Array{Int16, 1})
   lat = Float64(xy[2])
   coord_scale = sc[1]
   coord_units = sc[2]
-  if coord_scale < 0
-    coord_scale = -1 / coord_scale
-  end
+  (coord_scale < 0) && (coord_scale = -1 / coord_scale)
   lat *= coord_scale
   lon *= coord_scale
 
