@@ -559,7 +559,7 @@ from fields :fs, :gain, :loc, :misc, :name, :resp, :units.
 function writesacpz(S::GphysData, file::String)
   io = open(file, "w")
   for i in 1:S.n
-    id = split(S.id[i], ".")
+    id = split_id(S.id[i])
     created   = get(S.misc[i], "CREATED", string(u2d(time())))
     ts_str    = isempty(S.t[i]) ? "1970-01-01T00:00:00" : string(u2d(S.t[i][1,2]*1.0e-6))
     t_start   = get(S.misc[i], "START", ts_str)
