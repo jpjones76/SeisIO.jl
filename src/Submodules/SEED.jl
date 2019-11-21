@@ -12,6 +12,8 @@ import SeisIO:
   checkbuf!,
   checkbuf_8!,
   endtime,
+  fillx_u32_be!,
+  fillx_u32_le!,  
   fix_units,
   is_u8_digit,
   buf_to_double,

@@ -1,34 +1,6 @@
 SEED_Char(io::IO, BUF::SeisIOBuf, nb::UInt16) = replace(String(read(io, nb)),
                                             ['\r', '\0'] =>"")
 
-# This gets special handling as Float64 arrays are assumed in S.x[c]
-function SEED_Float64!(io::IO, S::SeisData, c::Int64, xi::Int64, nb::UInt16)
-  buf = getfield(BUF, :buf)
-  x = getindex(getfield(S, :x), c)
-  readbytes!(io, buf, nb)
-  nx = div(nb, 8)
-  if getfield(BUF, :xs) == true
-    j = xi
-    @inbounds for i = 1:nx
-      j += 1
-      y  = UInt32(buf[8*i-7]) << 56
-      y |= UInt32(buf[8*i-6]) << 48
-      y |= UInt32(buf[8*i-5]) << 40
-      y |= UInt32(buf[8*i-4]) << 32
-      y |= UInt32(buf[8*i-3]) << 24
-      y |= UInt32(buf[8*i-2]) << 16
-      y |= UInt32(buf[8*i-1]) << 8
-      y |= UInt32(buf[8*i])
-      x[j] = y
-    end
-  else
-    xr = reinterpret(Float64, buf)
-    copyto!(x, xi+1, xr, 1, nx)
-  end
-  setfield!(BUF, :k, Int64(nx))
-  return nothing
-end
-
 function SEED_Unenc!(io::IO, S::SeisData, c::Int64, xi::Int64, nb::UInt16, nx::UInt16)
   buf = getfield(BUF, :buf)
   checkbuf_8!(buf, xi)
@@ -40,6 +12,8 @@ function SEED_Unenc!(io::IO, S::SeisData, c::Int64, xi::Int64, nb::UInt16, nx::U
       Int32
     elseif BUF.fmt == 0x04
       Float32
+    else
+      Float64
     end
   xr = BUF.swap ? bswap.(reinterpret(T, buf)) : reinterpret(T, buf)
   copyto!(x, xi+1, xr, 1, nx)
@@ -110,23 +84,7 @@ function SEED_Steim!(io::IO, BUF::SeisIOBuf, nb::UInt16)
   # Parse buf as UInt32s
   (ni > lastindex(ff)) && resize!(ff, ni)
   yy = zero(UInt32)
-  if getfield(BUF, :xs) == true
-    @inbounds for ib = 1:ni
-      yy  = UInt32(buf[4*ib-3]) << 24
-      yy |= UInt32(buf[4*ib-2]) << 16
-      yy |= UInt32(buf[4*ib-1]) << 8
-      yy |= UInt32(buf[4*ib])
-      ff[ib] = yy
-    end
-  else
-    @inbounds for il = 1:ni
-      yy  = UInt32(buf[4*il]) << 24
-      yy |= UInt32(buf[4*il-1]) << 16
-      yy |= UInt32(buf[4*il-2]) << 8
-      yy |= UInt32(buf[4*il-3])
-      ff[il] = yy
-    end
-  end
+  getfield(BUF, :xs) ? fillx_u32_be!(ff, buf, ni, 0) : fillx_u32_le!(ff, buf, ni, 0)
 
   k = zero(Int64)
   x0 = zero(Float32)
@@ -217,10 +175,7 @@ function SEED_Steim!(io::IO, BUF::SeisIOBuf, nb::UInt16)
     r = r+16
   end
 
-  if BUF.wo != 0x01
-    vx = view(getfield(BUF, :x), 1:k)
-    reverse!(vx)
-  end
+  (BUF.wo == 0x01) || reverse!(view(getfield(BUF, :x), 1:k))
   setindex!(x, x0, 1)
 
   # Cumsum by hand
