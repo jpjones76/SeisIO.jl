@@ -1,5 +1,8 @@
 Adding Types: an API for new data structures
 
+# 0. When is This API Mandatory?
+Any pull request for SeisIO that adds Types
+
 # 1. Supertypes
 
 ## GphysChannel
@@ -40,30 +43,60 @@ GphysChannel subtype.
 Failure to include one or more of these fields may break how your new Type
 interacts with SeisIO core code.
 
-# 3. Methods to Extend
-The following methods should be imported and extended if you want your new Type
-to be usable:
+# 3. Required Method Extensions
+For general Types, the following methods must be imported and extended at a
+bare minimum:
 
-`Base: ==, convert, isempty, isequal, show, size, sizeof, summary`
+```
+Base: ==, hash, isempty, isequal, show, sizeof, summary
+```
 
-Strongly recommended:
+## 3a. GphysData subtypes
+More methods are needed for GphysData subtypes:
+```
+Base: +, *, ==, append!, convert, deleteat!, getindex, hash, isempty, isequal,
+merge!, push!, setindex!, show, size, sizeof, sort!, summary
+SeisIO: merge_ext!
+```
 
-`Base: hash`
+### Required behavior
+* Let `C` be a single-channel object of type `T <: GphysChannel`.
+* Let `S` be a multichannel object of type `Y <: GphysData`, analogous to a
+multichannel version of `C`.
 
-Beware that `hash` can be annoying. It's best to look at the Types in SeisIO
-core as examples before trying to extend it.
+The following are required and should be demonstrated in your tests:
+* `sort!` uses the `:id` field
+* `append!` attaches an object of type Y <: GphysData to `S`
+* `push!` attaches `C` to `S` and thereby extends each Array field in S by 1
+* `+` calls `push!` or `append!` followed by `sort!`
+* `*` is aliased to `merge!`
+* `convert`
+  - Converts `C` to and from Type SeisChannel.
+  - Converts `S` to and from Type SeisData.
+  - Include the mandatory fields above.
+  - If fields aren't stored in the target Type, set them to default values.
+  - Obviously, not all fields are preserved by conversion. In general, expect
+    `convert(Y, convert(SeisData, S)) != S`.
+    - Changing this to `==` would require storing your new fields in `:misc`;
+    but relying on keys in `:misc` is non-robust and potentially slow.
+* `==` should be aliased to `isequal` as a "convenience" wrapper.
+* `isempty` should always return `true` for a newly initialized structure with
+no keywords passed during initialization.
+  - For numeric fields, I recommend initializing to 0 or 1 (as appropriate)
+  and testing against the default value in your `isempty` method extension.
+  - Strings and Arrays are best initialized empty.
+  - This does imply that the "default" values of keyword init. must be the
+  same values that `isempty` considers "empty".
+* `hash` returns the same value for two empty structures of the same Type.
 
-## Extending `convert`
-1. Add `import SeisIO: convert` to your your module imports.
-2. Add methods to convert between the new Type and corresponding SeisIO core
-Types.
-3. Include the mandatory fields above.
-4. If fields aren't stored in the target Type, set them to default values.
+#### Note on `hash`
+`hash` is somewhat unstable in Julia. We're sorry. Check the `hash` function
+documentation and experiment until the above test succeeds. This may take far
+more time than this paragraph suggests; our apologies.
 
-## Recommended for GphysData Subtypes
-`Base: +, append!, deleteat!, getindex, push!, setindex!`
+# 4. Recommendations
 
-# 4. Extending Native File IO
+# Native File IO
 If you want your new Types to be readable/writable (with `rseis/wseis`), do the
 following:
 1. Add `import SeisIO: TNames, TCodes, rseis, wseis` to your module imports.
@@ -72,7 +105,3 @@ following:
 4. Add your Types to Tnames.
 5. Generate type codes and add to TCodes.
 6. Be aware of the strong potential for conflicts in TCodes with other submodules.
-
-# 5. When is This API Mandatory?
-Any pull request for SeisIO that adds Types in violation of this guide will be
-rejected.
