@@ -46,15 +46,15 @@ function gapfill!(x::Array{T,1}, t::Array{Int64,2}, fs::Float64; m::Bool=true) w
     for i in 1:nw
       N = w[i,2]-w[i,1]+1
       j = t[i,1]
-      unsafe_copyto!(x1, w[i,1], x, j, N)
+      copyto!(x1, w[i,1], x, j, N)
       if i > 1
         fill_s = w[i-1,2]+1
         fill_e = w[i,1]-1
         (fill_e > fill_s) && (x1[fill_s:fill_e] .= mx)
       end
     end
-    unsafe_copyto!(x, 1, x1, 1, nx)
     resize!(x, nx)
+    copyto!(x, 1, x1, 1, nx)
   end
   return nothing
 end
