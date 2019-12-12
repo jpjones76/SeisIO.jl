@@ -1,3 +1,17 @@
+# Packages that throw "not installed" error on upgrade: Compat, DSP, HDF5
+using Pkg
+function pkg_check(pkgs::Array{String,1})
+  for p in pkgs
+    if get(Pkg.installed(), p, nothing) == nothing
+      Pkg.add(p)
+    else
+      println(p * " found, not installing.")
+    end
+  end
+  return nothing
+end
+pkg_check(["Compat", "DSP", "HDF5"])
+
 using Compat, Dates, DSP, HDF5, Logging, Printf, SeisIO, Test
 using SeisIO.Quake, SeisIO.RandSeis, SeisIO.SeisHDF
 import Dates: DateTime, Hour, now
@@ -10,7 +24,7 @@ import SeisIO: BUF, FDSN_sta_xml,
   get_http_post, get_views, int2tstr, mean, minreq!,
   mktaper!, mktime, mk_t, mk_t!, parse_charr, parse_chstr, parse_sl,
   read_sacpz!, read_sacpz, read_seed_resp!, read_seed_resp,
-  read_station_xml!, read_station_xml, 
+  read_station_xml!, read_station_xml,
   safe_isdir, safe_isfile, sμ, t_arr!, t_collapse,
   t_expand, t_win, taper_seg!, tnote, trid, tstr2int, w_time, webhdr,
   xtmerge!, μs,
