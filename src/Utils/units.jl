@@ -203,7 +203,7 @@ end
 
 Test whether `str` is a valid UCUM unit string.
 """
-function vucum(str::String)
+function vucum(str::String; v::Int64=0)
   rstr = identity(str)
   if any([occursin(c, rstr) for c in ('%', '^', '[', ']', '{', '}')])
     rstr = replace(rstr, "%" => "%25")
@@ -214,8 +214,9 @@ function vucum(str::String)
     rstr = replace(rstr, "}" => "%7D")
   end
   url = "https://ucum.nlm.nih.gov/ucum-service/v1/isValidUCUM/" * rstr
+  (v > 1) && println("URL = ", url)
   tf = try
-    req = request("GET", url)
+    req = request("GET", url, timeout=30)
     b = String(req.body)
     if b == "true"
       true
@@ -239,11 +240,16 @@ Test whether unit strings in S.units are valid under the UCUM standard.
 Test whether C.units is valid under the UCUM standard.
 """
 function validate_units(S::GphysData)
-  isv = falses(S.n)
-  for i = 1:S.n
-    isv[i] = vucum(S.units[i])
+  u = join(S.units, '.')
+  if vucum(u) == true
+    return trues(S.n)
+  else
+    isv = falses(S.n)
+    for i = 1:S.n
+      isv[i] = vucum(S.units[i])
+    end
+    return isv
   end
-  return isv
 end
 
 validate_units(C::GphysChannel) = vucum(C.units)
