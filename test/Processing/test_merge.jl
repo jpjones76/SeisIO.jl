@@ -62,14 +62,15 @@ end
 
 # ===========================================================================
 printstyled(stdout,"    xtmerge!\n", color=:light_green)
+δ = 20000
 x = randn(12)
-t = sort(rand(Int64, 12))
+t = sort(rand(typemin(Int64):δ:typemax(Int64), 12))
 while length(unique(t)) < 12
   t = sort(rand(Int64, 12))
 end
 x = vcat(x, x[1:6])
 t = vcat(t, t[1:6])
-xtmerge!(t, x, 10000)
+xtmerge!(t, x, div(δ,2))
 @test length(t) == 12
 @test length(x) == 12
 
