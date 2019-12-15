@@ -25,28 +25,28 @@ include("Quake/Types/EventChannel.jl")
 include("Quake/Types/SeisEvent.jl")
 
 # formats
-for i in ls(path*"/Quake/Formats/*")
+for i in ls(path*"/Quake/Formats/")
   if endswith(i, ".jl")
     include(i)
   end
 end
 
 # processing
-for i in ls(path*"/Quake/Processing/*")
+for i in ls(path*"/Quake/Processing/")
   if endswith(i, ".jl")
     include(i)
   end
 end
 
 # utilities
-for i in ls(path*"/Quake/Utils/*")
+for i in ls(path*"/Quake/Utils/")
   if endswith(i, ".jl")
     include(i)
   end
 end
 
 # web
-for i in ls(path*"/Quake/Web/*")
+for i in ls(path*"/Quake/Web/")
   if endswith(i, ".jl")
     include(i)
   end

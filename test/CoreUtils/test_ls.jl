@@ -44,10 +44,17 @@ for (n,v) in enumerate(S)
   # end
   [@test isfile(f) for f in ls(v)]
 end
-# Test that ls invokes find_regex under the right circumstances
-@test change_sep(ls(S[5])) == change_sep(regex_find("SampleFiles/", r"02.*o$"))
+println("arch = ", Sys.ARCH)
+arch_allowed = Sys.ARCH == :x86_64
+# Arm64 = :aarch64
 
-if safe_isfile(cfile)
+# Test that ls invokes find_regex under the right circumstances
+if arch_allowed
+  @test change_sep(ls(S[5])) == change_sep(regex_find("SampleFiles/", r"02.*o$"))
+end
+
+if safe_isfile(cfile) && arch_allowed
+  println("extended ls tests")
   T = path .* [
                 "/SampleFiles/Restricted/*.cnt",
                 "/SampleFiles/*",

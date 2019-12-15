@@ -484,5 +484,5 @@ global_logger(logger)
 # Set some keyword defaults
 SeisIO.KW.comp = 0x00
 has_restricted = safe_isdir(path * "/SampleFiles/Restricted/")
-keep_log = false
+keep_log = true
 keep_samples = true

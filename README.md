@@ -14,3 +14,5 @@ Designed for speed, efficiency, and ease of use. Includes web clients, readers f
 
 ## Publications | [Changelog](docs/CHANGELOG.md) | [Issues](docs/ISSUES.md)
 Jones, J.P.,  Okubo, K., Clements. T., \& Denolle, M. (2019). SeisIO: a fast, efficient geophysical data architecture for the Julia language, *Submitted to Seimol. Res. Lett.*
+
+This work has been partially supported by a grant from the Packard Foundation.

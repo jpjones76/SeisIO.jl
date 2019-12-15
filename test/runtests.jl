@@ -2,7 +2,9 @@
 import SeisIO
 import SeisIO: get_svn
 cd(dirname(pathof(SeisIO))*"/../test")
-get_svn("https://github.com/jpjones76/SeisIO-TestData/trunk/SampleFiles", "SampleFiles")
+if isdir("SampleFiles") == false
+  get_svn("https://github.com/jpjones76/SeisIO-TestData/trunk/SampleFiles", "SampleFiles")
+end
 include("local_restricted.jl")
 include("test_helpers.jl")
 

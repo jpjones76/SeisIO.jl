@@ -49,9 +49,9 @@ include("Types/GphysChannel.jl")
 include("Types/SeisData.jl")
 include("Types/SeisChannel.jl")
 
-for i in readdir(path*"/Types/Methods")
+for i in ls(path*"/Types/Methods/")
   if endswith(i, ".jl")
-    include(joinpath("Types/Methods",i))
+    include(i)
   end
 end
 
@@ -76,7 +76,7 @@ end
 
 # =========================================================
 # Data formats
-for i in ls(path*"/Formats/*")
+for i in ls(path*"/Formats/")
   if endswith(i, ".jl")
     include(i)
   end
