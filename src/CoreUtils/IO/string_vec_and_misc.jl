@@ -1,4 +1,4 @@
-function read_string_vec(io::IOStream, u::Array{UInt8,1})
+function read_string_vec(io::IO, u::Array{UInt8,1})
   b = fastread(io)
   S = String[]
   if b == 0x00
@@ -16,7 +16,7 @@ function read_string_vec(io::IOStream, u::Array{UInt8,1})
   return S
 end
 
-function read_misc(io::IOStream, u::Array{UInt8,1})
+function read_misc(io::IO, u::Array{UInt8,1})
   D = Dict{String,Any}()
   L = fastread(io, UInt64)
   if L != zero(Int64)
