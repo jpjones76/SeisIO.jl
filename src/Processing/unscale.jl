@@ -28,7 +28,12 @@ function unscale!(S::GphysData;
   end
   return nothing
 end
-unscale!(C::GphysChannel) = (rmul!(C.x, eltype(C.x)(1.0/C.gain)); C.gain = 1.0)
+function unscale!(C::GphysChannel)
+  rmul!(C.x, eltype(C.x)(1.0/C.gain))
+  note!(C, "processing ¦ unscale!(C) ¦ divided out gain = " * @sprintf("%.3e", C.gain))
+  C.gain = 1.0
+  return nothing
+end
 
 @doc (@doc unscale!)
 function unscale(S::GphysData;
