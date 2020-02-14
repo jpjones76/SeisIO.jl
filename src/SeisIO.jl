@@ -16,6 +16,9 @@ include("constants.jl")
 # =========================================================
 # CoreUtils: SeisIO needs these for core functions
 # DO NOT CHANGE ORDER OF INCLUSIONS
+include("CoreUtils/IO/FastIO.jl")
+using .FastIO
+
 include("CoreUtils/ls.jl")
 include("CoreUtils/time.jl")
 include("CoreUtils/namestrip.jl")
@@ -23,10 +26,8 @@ include("CoreUtils/typ2code.jl")
 include("CoreUtils/poly.jl")
 include("CoreUtils/calculus.jl")
 include("CoreUtils/svn.jl")
-include("CoreUtils/IO/FastIO.jl")
 include("CoreUtils/IO/read_utils.jl")
 include("CoreUtils/IO/string_vec_and_misc.jl")
-using .FastIO
 
 # =========================================================
 # Types and methods
