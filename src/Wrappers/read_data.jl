@@ -59,6 +59,7 @@ SeisData object `S`.
 As above, but calls `guess(filestr)` to set the format based on the first file
 matching pattern `filestr`.
 
+## Supported Data Formats
 | Format                    | String          |
 | :---                      | :---            |
 | AH-1                      | ah1             |
@@ -77,6 +78,7 @@ matching pattern `filestr`.
 | UW                        | uw              |
 | Win32                     | win32           |
 
+### Keywords
 |KW      | Used By  | Type    | Default   | Meaning                         |
 |:---    |:---      |:---     |:---       |:---                             |
 |cf      | win32    | String  | ""        | win32 channel info filestr      |
@@ -93,14 +95,18 @@ matching pattern `filestr`.
 |        | win32    |         |           |                                 |
 |jst     | win32    | Bool    | true      | are sample times JST (UTC+9)?   |
 |swap    | mseed    | Bool    | true      | byte swap?                      |
+|        | passcal  |         |           |                                 |
+|        | segy     |         |           |                                 |
 |v       | all      | Int64   | 0         | verbosity                       |
+|vl      | all      | Bool    | false     | verbose logging to :notes [^1]  |
 
-### Format-Dependent Performance Tips
+[^1]: verbose logging adds one line to `:notes` for each file read.
 
-#### `mseed`, `win32`, `bottle`
-Adjust `nx_new` and `nx_add` based on expected data vector lengths. If the
-largest data vector has `Nmax` samples, and the smallest has `Nmin`, we
-recommend `nx_new`≈`Nmin` and `nx_add`≈`Nmax - Nmin`.
+### Performance Tip
+For `mseed`, `win32`, or `bottle` formats, adjust `nx_new` and `nx_add` based
+on expected data vector lengths. If the largest data vector has `Nmax` samples,
+and the smallest has `Nmin`, we recommend `nx_new`≈`Nmin` and
+`nx_add`≈`Nmax - Nmin`.
 
 Default values can be changed in SeisIO keywords, e.g.,
 ```julia
@@ -109,7 +115,7 @@ SeisIO.KW.nx_add = 360000
 ```
 
 The system-wide defaults are `nx_new=86400000` and `nx_add=360000`. Using these
-values with very small jobs will greatly decrease performance.
+values with very small jobs greatly decreases performance.
 
 #### SeisIO native format
 
@@ -131,17 +137,23 @@ structure. For more complicated read operations on SeisIO files, use `rseis`.
 
 See also: SeisIO.KW, get_data, guess, rseis
 """ read_data!
-function read_data!(S::GphysData, fmt::String, filestr::String;
+function read_data!(S::GphysData, fmt::String, fpat::String;
   full    ::Bool    = false,              # full SAC/SEGY hdr
   cf      ::String  = "",                 # win32 channel info file
   jst     ::Bool    = true,               # are sample times JST (UTC+9)?
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
   swap    ::Bool    = false,              # do byte swap?
-  v       ::Int64   = KW.v                # verbosity level
+  v       ::Int64   = KW.v,               # verbosity level
+  vl      ::Bool    = false               # verbose logging
   )
 
+  N = S.n
+  filestr = abspath(fpat)
   one_file = safe_isfile(filestr)
+  if fmt != "seisio"
+    opt_strings = Array{String,1}(undef, 0)
+  end
 
   if fmt == "sac"
     fv = getfield(BUF, :sac_fv)
@@ -180,6 +192,9 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
         read_mseed_file!(S, fname, v, nx_new, nx_add)
       end
     end
+    push!(opt_strings, string("swap = ", swap,
+                              ", nx_new = ", nx_new,
+                              ", nx_add = ", nx_add))
 
 # ============================================================================
 # Data formats that aren't SAC, SEISIO, or SEED begin here and are alphabetical
@@ -194,6 +209,7 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
         read_ah1!(S, fname, v=v, full=full)
       end
     end
+    push!(opt_strings, string("full = ", full))
 
   elseif fmt == "ah2"
     if one_file
@@ -204,9 +220,12 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
         read_ah2!(S, fname, v=v, full=full)
       end
     end
+    push!(opt_strings, string("full = ", full))
 
   elseif fmt == "bottle"
     read_bottle!(S, filestr, v, nx_new, nx_add)
+    push!(opt_strings, string("nx_new = ", nx_new,
+                              ", nx_add = ", nx_add))
 
   elseif fmt in ("geocsv", "geocsv.tspair", "geocsv", "geocsv.slist")
     tspair = (fmt == "geocsv" || fmt == "geocsv.tspair")
@@ -244,6 +263,8 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
         append!(S, read_segy_file(fname, buf, shorts, ints, passcal, swap, full))
       end
     end
+    push!(opt_strings, string("full = ", full,
+                              ", swap = ", swap))
 
   elseif fmt == "slist"
     if one_file
@@ -264,6 +285,7 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
         append!(S, SUDS.read_suds(fname, full=full, v=v))
       end
     end
+    push!(opt_strings, string("full = ", full))
 
   elseif fmt == "uw"
     if one_file
@@ -274,14 +296,50 @@ function read_data!(S::GphysData, fmt::String, filestr::String;
         append!(S, UW.uwdf(fname, v=v))
       end
     end
+    push!(opt_strings, string("full = ", full))
 
   elseif fmt == "win32" || fmt =="win"
     readwin32!(S, filestr, cf, jst=jst, nx_new=nx_new, nx_add=nx_add, v=v)
+    push!(opt_strings, string("cf = \"", abspath(cf), "\"",
+                              ", jst = ", jst,
+                              ", nx_new = ", nx_new,
+                              ", nx_add = ", nx_add))
 
   else
     error("Unknown file format!")
   end
 
+  # ===================================================================
+  # logging
+  if fmt != "seisio"
+    if length(opt_strings) == 0
+      opts = string("v = ", v, ", vl = ", vl)
+    else
+      push!(opt_strings, string("v = ", v, ", vl = ", vl))
+      opts = join(opt_strings, ", ")
+    end
+
+    new_chan_src = view(S.src, N+1:S.n)
+    fill!(new_chan_src, filestr)
+    if vl && (one_file == false)
+      files = ls(filestr)
+      for f in files
+        note!(S, N+1:S.n, string( "+source ¦ read_data!(S, ",
+                                  "\"", fmt,  "\", ",
+                                  "\"", f, "\", ",
+                                  opts, ")" )
+              )
+      end
+    else
+      note!(S, N+1:S.n, string( "+source ¦ read_data!(S, ",
+                                "\"", fmt,  "\", ",
+                                "\"", filestr, "\", ",
+                                opts, ")" )
+            )
+    end
+  end
+
+  # ===================================================================
   return nothing
 end
 
@@ -293,7 +351,8 @@ function read_data(fmt::String, filestr::String;
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
   swap    ::Bool    = false,              # do byte swap?
-  v       ::Int64   = KW.v                # verbosity level
+  v       ::Int64   = KW.v,               # verbosity level
+  vl      ::Bool    = false               # verbose logging
   )
 
   S = SeisData()
@@ -304,7 +363,8 @@ function read_data(fmt::String, filestr::String;
     nx_add  = nx_add,
     nx_new  = nx_new,
     swap    = swap,
-    v       = v
+    v       = v,
+    vl      = vl
     )
   return S
 end
@@ -315,7 +375,8 @@ function read_data(filestr::String;
   jst     ::Bool    = true,               # are sample times JST (UTC+9)?
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
-  v       ::Int64   = KW.v                # verbosity level
+  v       ::Int64   = KW.v,               # verbosity level
+  vl      ::Bool    = false               # verbose logging
   )
 
   if safe_isfile(filestr)
@@ -332,7 +393,8 @@ function read_data(filestr::String;
     nx_add  = nx_add,
     nx_new  = nx_new,
     swap    = g[2],
-    v       = v
+    v       = v,
+    vl      = vl
     )
   return S
 end
@@ -343,7 +405,8 @@ function read_data!(S::GphysData, filestr::String;
   jst     ::Bool    = true,               # are sample times JST (UTC+9)?
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
-  v       ::Int64   = KW.v                # verbosity level
+  v       ::Int64   = KW.v,               # verbosity level
+  vl      ::Bool    = false               # verbose logging
   )
 
   if safe_isfile(filestr)
@@ -360,7 +423,8 @@ function read_data!(S::GphysData, filestr::String;
     nx_add  = nx_add,
     nx_new  = nx_new,
     swap    = g[2],
-    v       = v
+    v       = v,
+    vl      = vl
     )
   return S
 end
