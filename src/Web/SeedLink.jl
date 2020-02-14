@@ -16,6 +16,17 @@ function timed_wait!(conn::TCPSocket, to::Real, b::Bool)
   return nothing
 end
 
+function sl_cparse(C::Union{String,Array{String,1},Array{String,2}})
+  if isa(C, String)
+    sta,pat = parse_sl(parse_chstr(C))
+  elseif ndims(C) == 1
+    sta,pat = parse_sl(parse_charr(C))
+  else
+    sta, pat = parse_sl(C)
+  end
+  return sta, pat
+end
+
 # This was deprecated in Julia 0.6; hard-copied here, still works
 function sync_add(r::Task)
     spawns = get(task_local_storage(), :SPAWNS, ())
@@ -513,13 +524,7 @@ function seedlink!(S::SeisData, C::Union{String,Array{String,1},Array{String,2}}
                     w::Bool=KW.w,
                     x_on_err::Bool=KW.SL.x_on_err)
 
-  if isa(C, String)
-    sta, pat = parse_sl(parse_chstr(C))
-  elseif ndims(C) == 1
-    sta, pat = parse_sl(parse_charr(C))
-  else
-    sta, pat = parse_sl(C)
-  end
+  sta, pat = sl_cparse(C)
   seedlink!(S, sta, pat, u=u, port=port, mode=mode, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
   return S
 end
@@ -557,13 +562,7 @@ function seedlink(C::Union{String,Array{String,1},Array{String,2}};
   x_on_err::Bool=KW.SL.x_on_err)
 
   S = SeisData()
-  if isa(C, String)
-    sta,pat = parse_sl(parse_chstr(C))
-  elseif ndims(C) == 1
-    sta,pat = parse_sl(parse_charr(C))
-  else
-    sta, pat = parse_sl(C)
-  end
+  sta, pat = sl_cparse(C)
   seedlink!(S, sta, pat, u=u, port=port, mode=mode, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
   return S
 end
