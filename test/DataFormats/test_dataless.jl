@@ -8,6 +8,7 @@ redirect_stdout(out) do
 
   files = ls(path*"/SampleFiles/SEED/*.dataless")
   for i in files
+    println("Reading file ", i)
     S = read_meta("dataless", i, v=0, units=false)
     S = read_meta("dataless", i, v=1, units=false)
     S = read_meta("dataless", i, v=2, units=false)

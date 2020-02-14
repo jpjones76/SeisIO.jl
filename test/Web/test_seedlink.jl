@@ -1,7 +1,7 @@
 # Seedlink with command-line stations
 config_file = path*"/SampleFiles/seedlink.conf"
 sta = ["CC.SEP", "UW.HDW"]
-pat = ["?????.D"; "?????.D"]
+pat = ["?????.D", "?????.D"]
 trl = ".??.???.D"
 sta_matrix = String.(reshape(split(sta[2],'.'), 1,2))
 
@@ -65,6 +65,10 @@ redirect_stdout(out) do
   S3 = seedlink([replace(sta[1], "SEP" => "XOX")], ["*****.X"], x_on_err=false)
   write(S3.c[1], "BYE\r")
   close(S3.c[1])
+
+  S4 = seedlink(hcat(sta_matrix, "***", "***", "X"), x_on_err=false)
+  write(S4.c[1], "BYE\r")
+  close(S4.c[1])
 end
 
 # DATA mode
