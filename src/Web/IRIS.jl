@@ -29,6 +29,7 @@ function irisws(cha::String, d0::String, d1::String;
           build_stream_query(c,d0,d1) * "&scale=AUTO&output=" * fmt
   v > 0 && println(url)
   Ch.src = url
+  note!(Ch, "+source ¦ " * url)
   req_info_str = datareq_summ("IRISWS data", ID, d0, d1)
 
   # Do request

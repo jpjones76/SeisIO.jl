@@ -25,7 +25,7 @@ timestamp() = tstr(Dates.unix2datetime(time()))
 timestamp(t::DateTime) = tstr(t)
 timestamp(t::Real) = tstr(u2d(t))
 timestamp(t::String) = tstr(Dates.DateTime(t))
-tnote(s::String) = string(timestamp(), ": ", s)
+tnote(s::String) = string(timestamp(), " ¦ ", s)
 
 """
   m,d = j2md(y,j)

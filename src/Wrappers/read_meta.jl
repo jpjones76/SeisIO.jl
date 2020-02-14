@@ -48,6 +48,7 @@ function read_meta!(S::GphysData, fmt::String, filestr::String;
   v       ::Int64     = KW.v                      ,  # verbosity level
   )
 
+  N = S.n
   one_file = safe_isfile(filestr)
 
   if fmt == "dataless"
@@ -87,6 +88,17 @@ function read_meta!(S::GphysData, fmt::String, filestr::String;
     error("Unknown file format!")
   end
 
+  # ===================================================================
+  # logging
+  note!(S, N+1:S.n, string( " ¦ +meta ¦ read_meta!(S, ",
+                            "msr=", msr,  ", ",
+                            "s=\"", s,  "\", ",
+                            "t=\"", t,  "\", ",
+                            "units=", units, ", ",
+                            "v=", KW.v, ")" )
+        )
+
+  # ===================================================================
   return nothing
 end
 

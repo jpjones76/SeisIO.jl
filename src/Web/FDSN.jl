@@ -97,6 +97,19 @@ function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
   xsta = read(io, String)
   close(io)
   S = FDSN_sta_xml(xsta, msr=msr, v=v)
+
+  # ===================================================================
+  # Logging
+  note!(S, string( "+meta ¦ ", URL ))
+  for i in 1:S.n
+    id = split_id(S.id[i])
+    if isempty(id[3])
+      id[3] = "--"
+    end
+    note!(S, i, string("POST ¦ ", join(id, " "), " ", d0, " ", d1))
+  end
+  # ===================================================================
+
   return S
 end
 
@@ -175,9 +188,7 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
   end
 
   # Set the data source
-  for i = 1:S.n
-    S.src[i] = URL
-  end
+  fill!(S.src, URL)
 
   # Create variables for query
   ts = tstr2int(d0)
@@ -262,6 +273,18 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
     close(io)
     ts += ti
   end
+
+  # ===================================================================
+  # Logging
+  note!(S, string( "+source ¦ ", URL ))
+  for i in 1:S.n
+    id = split_id(S.id[i])
+    if isempty(id[3])
+      id[3] = "--"
+    end
+    note!(S, i, string("POST ¦ ", join(id, " "), " ", d0, " ", d1))
+  end
+  # ===================================================================
 
   append!(U,S)
   # Done!

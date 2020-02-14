@@ -88,18 +88,19 @@ function sync!(S::GphysData;
   if do_end
     t_end = get_sync_t(t, end_times)
     t_end > t_start || error("No time overlap with given start & end times!")
-    tstr = string(u2d(t_end*μs))
+    t_str = string(u2d(t_end*μs))
     if v > 0
       @info(@sprintf("Synchronizing %.2f seconds of data\n", (t_end - t_start)*μs))
       if v > 1
         @info(string("t_start = ", u2d(t_start*μs)))
-        @info(string("t_end = ", tstr))
+        @info(string("t_end = ", t_str))
     end
     elseif v > 0
       @info(string("Synchronizing to start at ", u2d(t_start*μs)))
     end
   else
     t_end = z
+    t_str = "none"
   end
 
   # Loop over non-timeseries data
@@ -112,11 +113,10 @@ function sync!(S::GphysData;
     Lj = length(j)
     if Lj ≥ Lt
       dflag[i] = true
+      note!(S, i, string("processing ¦ sync!(S, s = \"", sstr, "\", t = \"", t_str, "\") ¦ synchronize, :x unchanged"))
       continue
-    elseif do_end
-      note!(S, i, @sprintf("sync!, s = %s, t = %s, removed %i samples (out of time range) from :x", sstr, tstr, Lj))
     else
-      note!(S, i, @sprintf("sync! s = %s, t = none, removed %i samples (out of time range) from :x", sstr, Lj))
+      note!(S, i, string("processing ¦ sync!(S, s = \"", sstr, "\", t = \"", t_str, "\") ¦ synchronize, deleted ", Lj, " samples from :x"))
     end
     ti = collect(1:Lt)
     deleteat!(S.x[i], j)
@@ -179,12 +179,8 @@ function sync!(S::GphysData;
 
         # Correct for length aberration if necessary
         S.t[i][end,1] = length(S.x[i])
-
-        desc_str = string("sync!, s = ", sstr, ", t = ", tstr)
-      else
-        desc_str = string("sync!, s = ", sstr, ", t = none")
       end
-
+      desc_str = string("processing ¦ sync!(S, s = \"", sstr, "\", t = \"", t_str, "\") ¦ synchronize")
       if length(sync_str) > 0
         desc_str *= string(", ", join(sync_str, ";"))
       end

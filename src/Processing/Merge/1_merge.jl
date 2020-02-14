@@ -31,7 +31,7 @@ function merge!(S::Y; v::Int64=KW.v, purge_only::Bool=false) where Y<:GphysData
   UID = unique(getfield(S, :id))
   cnt = 0
   N_warn = 0
-  note_head = string(SeisIO.timestamp(), ": ")
+  note_head = string(SeisIO.timestamp(), " ¦ ")
   to_delete = Array{Int64,1}(undef, 0)
   while cnt < length(UID)
     cnt = cnt + 1
@@ -124,10 +124,10 @@ function merge!(S::Y; v::Int64=KW.v, purge_only::Bool=false) where Y<:GphysData
           rmul!(getindex(X, i), scalefac)
         end
         if getindex(SRC, i) != getindex(SRC, Ω)
-          push!(notes, string(note_head, "+src: ", getindex(SRC, i)))
+          push!(notes, string(note_head, "+source ¦ ", getindex(SRC, i)))
         end
         if getindex(NAME, i) != getindex(NAME, Ω)
-          push!(notes, string(note_head, "alternate name: ", getindex(NAME, i)))
+          push!(notes, string(note_head, "alt name ¦ ", getindex(NAME, i)))
         end
         append!(notes, getindex(NOTES, i))
         merge!(misc, getindex(MISC, i))
@@ -277,7 +277,7 @@ function merge!(S::Y; v::Int64=KW.v, purge_only::Bool=false) where Y<:GphysData
       broadcast!(+, W, W, δts)
       setindex!(T, w_time(W, Δ), Ω)
       setindex!(X, X_Ω, Ω)
-      note!(S, Ω, string("merge!, combined channels ",
+      note!(S, Ω, string("¦ processing ¦ merge! ¦ combined channels ",
                           replace(repr(subgrp), ","=>""),
                           " (N = ", N, ") into :t, :x"))
       append!(to_delete, rest)

@@ -21,7 +21,8 @@ function unscale!(S::GphysData;
     if (S.gain[i] != 1.0) && (i in chans)
       T = eltype(S.x[i])
       rmul!(S.x[i], T(1.0/S.gain[i]))
-      note!(S, i, @sprintf("unscale!, gain = %.3e", S.gain[i]))
+      note!(S, i, string("processing ¦ unscale!(S) ¦ divided out gain = ",
+                          @sprintf("%.3e", S.gain[i])))
       S.gain[i] = 1.0
     end
   end

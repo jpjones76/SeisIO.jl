@@ -356,10 +356,10 @@ function seedlink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
     if mode == "TIME"
       m_str = string("TIME ", s, " ", t, "\r")
     else
-      m_str = string("FETCH\r")
+      m_str = "FETCH\r"
     end
   else
-    m_str = string("DATA\r")
+    m_str = "DATA\r"
   end
 
   if w
@@ -442,6 +442,7 @@ function seedlink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
           if w
             write(fid, copy(io))
           end
+          track_on!(S)
           (v > 1) && printstyled(stdout, now(), ": Processing packets ", color=:green)
           while !eof(io)
             pkt_id = String(read(io, 8))
@@ -450,6 +451,33 @@ function seedlink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
           end
           (v > 1) && @printf(stdout, "\b\b...done current packet dump.\n")
           seed_cleanup!(S, BUF)
+          k = track_off!(S)
+
+          # ===========================================================
+          # Source logging
+          for i in 1:length(k)
+            if k[i]
+              if haskey(S.misc[i], "SL_logged")
+                # Check that :src is still SeedLink
+                (S.src[i] == u) || (S.src[i] = u)
+              else
+                id = split_id(S.id[i])
+                if isempty(id[3])
+                  id[3] = "??"
+                end
+                # this can be sent directly to a SeedLink server later
+                sl_str = string("commands ¦ SELECT ", id[3], id[4], ".D\r\n",
+                                "STATION ", id[2], " ", id[1], "\r\n",
+                                m_str, "\n")
+
+                S.src[i] = string(u)                    # Set :src to SeedLink
+                note!(S, i, string( "+source ¦ ", u ))  # Log source to :notes
+                note!(S, i, sl_str)                     # Log commands to :notes
+                S.misc[i]["SL_logged"] = true           # Flag i as SL_logged
+              end
+            end
+            # ===========================================================
+          end
         end
 
         # SeedLink (non-standard) keep-alive gets sent every kai seconds
