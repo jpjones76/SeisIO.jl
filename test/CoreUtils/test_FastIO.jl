@@ -3,7 +3,9 @@ printstyled("  FastIO\n", color=:light_green)
 # create testfile
 testfile = "test.dat"
 io = open(testfile, "w")
-write(io, rand(UInt8, 1000))
+x = rand(UInt8, 1000)
+x[255] = 0x0a
+write(io, x)
 close(io)
 
 function fastio_test!(io::IO)
@@ -48,6 +50,12 @@ function fastio_test!(io::IO)
       @test X[i]==Y[i]
     end
   end
+
+  seekstart(io)
+  s1 = readline(io)
+  seekstart(io)
+  s2 = readline(io)
+  @test s1 == s2
   return nothing
 end
 

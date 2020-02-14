@@ -10,10 +10,10 @@ printstyled("  ls\n", color=:light_green)
 
 cfile = path*"/SampleFiles/Restricted/03_02_27_20140927.euc.ch"
 @test any([occursin("test", i) for i in ls()])
-coreutils_flist = [ "test_FastIO.jl",
-                    "test_calculus.jl",
+coreutils_flist = [ "test_calculus.jl",
                     "test_get_svn.jl",
                     "test_ls.jl",
+                    "test_FastIO.jl",
                     "test_poly.jl",
                     "test_read_utils.jl",
                     "test_time.jl",
@@ -41,7 +41,7 @@ for (n,v) in enumerate(S)
   files = String[splitdir(i)[2] for i in ls(v)]
   # if Sys.iswindows() == false
     expected = S_expect[n]
-    @test files == expected
+    @test sort(files) == sort(expected)
   # end
   [@test isfile(f) for f in ls(v)]
 end
