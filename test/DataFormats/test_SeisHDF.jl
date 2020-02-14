@@ -33,23 +33,29 @@ read_hdf5!(S1, hdf, ts, te, id = id)
 S2 = read_hdf5(hdf, ts, te, id = id)
 @test S1 == S2
 S2 = read_asdf(hdf, id, ts, te, true, 0)
+@test S1.src[1] == abspath(hdf)
+S1.src = S2.src
 @test S1 == S2
 
 # check file wildcards
 S2 = read_hdf5(hdf_pat, ts, te, id = id)
+S1.src = S2.src
 @test S1 == S2
 
 # check the default id
 S2 = read_hdf5(hdf_pat, ts, te)
+S1.src = S2.src
 @test S1 == S2
 
 # check that FDSN-style wildcards work
 S2 = read_asdf(hdf, idr, ts, te, true, 0)
+S1.src = S2.src
 @test S1 == S2
 
 # Check channel matching
 S2 = SeisData(SeisChannel(id="CI.SDD..HHZ"))
 read_asdf!(S2, hdf, idr, ts, te, true, 0)
+S1.src = S2.src
 @test S1 == S2
 
 S2 = SeisData(SeisChannel(id="CI.SDD..HHZ",
@@ -115,7 +121,7 @@ for i in 1:S3.n
 end
 redirect_stdout(out) do
   write_hdf5( hdf_out1, S3, ovr=true, v=3 )
-  push!(S3, SeisChannel(id="YY.ZZTOP.00.LEG", fs=50.0))
+  push!(S3, SeisChannel(id="YY.ZZTOP.00.LEG", fs=50.0, x=randn(1024)))
 
   # This should work but throw a warning
   write_hdf5( hdf_out1, S3, v=3 )
