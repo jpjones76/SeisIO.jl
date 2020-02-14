@@ -195,6 +195,23 @@ fast_readline(io::IOStream) = ccall(:jl_readuntil, Ref{String}, (Ptr{Cvoid}, UIn
 fast_unsafe_read(io::IO, p::Ptr{UInt8}, nb::Integer) = unsafe_read(io, p, nb)
 fast_unsafe_read(io::IOStream, p::Ptr{UInt8}, nb::Integer) = ccall(:ios_readall, Csize_t, (Ptr{Cvoid}, Ptr{Cvoid}, Csize_t), io, p, nb)
 
+# =====================================================================
+# fastwrite
+
+# literally just the Julia functions without the lock macros
+# fastwrite(io::IO, b::UInt8) = write(io, b)
+# function fastwrite(io::IOStream, b::UInt8)
+#     iswritable(io) || throw(ArgumentError("write failed, IOStream is not writeable"))
+#     ccall(:ios_putc, Cint, (Cint, Ptr{Cvoid}), b, io.ios)
+# end
+#
+# fast_unsafe_write(io::IO, p::Ptr{UInt8}, nb::Integer) = unsafe_write(io, p, nb)
+# function fast_unsafe_write(io::IOStream, p::Ptr{UInt8}, nb::Integer)
+#     iswritable(s) || throw(ArgumentError("write failed, IOStream is not writeable"))
+#     ccall(:ios_write, Csize_t, (Ptr{Cvoid}, Ptr{Cvoid}, Csize_t), io.ios, p, nb)
+# end
+
+# =====================================================================
 export
   FastReadInt,
   FastReads,
