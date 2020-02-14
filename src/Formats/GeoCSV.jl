@@ -283,7 +283,7 @@ function read_geocsv_tspair!(S::SeisData, io::IO)
         if reading_data == true
 
           # finish current SeisChannel
-          T = vcat(T, [i zero(Int64)])
+          T = vcat(T, [i-1 zero(Int64)])
           setfield!(C, :loc, loc)
           setfield!(C, :t, T)
           setfield!(C, :x, X)
@@ -392,7 +392,7 @@ function read_geocsv_tspair!(S::SeisData, io::IO)
     end
 
   end
-  T = vcat(T, [i zero(Int64)])
+  T = vcat(T, [i-1 zero(Int64)])
   setfield!(C, :loc, loc)
   setfield!(C, :t, T)
   setfield!(C, :x, X)
