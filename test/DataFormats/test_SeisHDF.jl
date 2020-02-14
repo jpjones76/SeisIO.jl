@@ -166,7 +166,7 @@ scan3 = scan_hdf5(hdf_out1, level="trace")
 
 # ASDF write test 4: file with multiple stations and channels
 if has_restricted
-  S = read_data("sac", path*"/SampleFiles/Restricted/20140927000000*SAC")
+  S = verified_read_data("sac", path*"/SampleFiles/Restricted/20140927000000*SAC")
   redirect_stdout(out) do
     write_hdf5( hdf_out1, S, v=3 )
   end

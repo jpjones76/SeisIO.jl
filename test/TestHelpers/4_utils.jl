@@ -26,13 +26,36 @@ function safe_rm(file::String)
   return nothing
 end
 
-# Basic sanity check: does :t match :x
-function basic_checks(S::GphysData)
+# test that each field has the right number of entries
+function sizetest(S::GphysData, nt::Integer)
+  @test ≈(S.n, nt)
+  @test ≈(maximum([length(getfield(S,i)) for i in datafields]), nt)
+  @test ≈(minimum([length(getfield(S,i)) for i in datafields]), nt)
+  return nothing
+end
+
+# Basic sanity checks
+function basic_checks(S::GphysData; allow_empty::Bool=false)
+  # are we in scoping hell again?
+  @test isempty(S) == false
+
+  # does each field have the right number of entries?
+  sizetest(S, S.n)
+
   for i = 1:S.n
-    if S.fs[i] == 0.0
-      @test size(S.t[i],1) == length(S.x[i])
+    if allow_empty == false
+      # were data read in?
+      @test isempty(S.x[i]) == false
+
+      # does :t indexing match :x?
+      @test length(S.x[i]) == (S.fs[i] == 0.0 ? size(S.t[i],1) : length(S.x[i]))
+
+    elseif isempty(S.x[i]) == false
+      # does :t indexing match :x?
+      @test length(S.x[i]) == (S.fs[i] == 0.0 ? size(S.t[i],1) : length(S.x[i]))
     else
-      @test S.t[i][end,1] == length(S.x[i])
+      # an empty :x should never occur without an empty :t
+      @test isempty(S.t[i])
     end
   end
   return nothing
@@ -86,14 +109,6 @@ function remove_low_gain!(S::GphysData)
         end
     end
     return nothing
-end
-
-# test that each field has the right number of entries
-function sizetest(S::GphysData, nt::Int)
-  @test ≈(S.n, nt)
-  @test ≈(maximum([length(getfield(S,i)) for i in datafields]), nt)
-  @test ≈(minimum([length(getfield(S,i)) for i in datafields]), nt)
-  return nothing
 end
 
 # Test that data are time synched correctly within a SeisData structure

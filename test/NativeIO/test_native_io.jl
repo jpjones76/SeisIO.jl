@@ -112,6 +112,7 @@ SeisIO.KW.comp = 0x01
 S = randSeisEvent()
 C = SeisChannel()
 nx = SeisIO.KW.n_zip*2
+C.fs = 1.0
 C.t = [1 0; nx 0]
 C.x = randn(nx)
 n = S.data.n
@@ -119,7 +120,7 @@ push!(S.data, C)
 @test S.data.n == n+1
 C = SeisChannel()
 nx = 4
-C.t = [1 0; nx 0]
+C.t = hcat(collect(1:4), Int64.(cumsum(rand(UInt32,4))))
 C.x = randn(nx)
 push!(S.data, C)
 wseis(savfile1, S)
@@ -129,7 +130,7 @@ R = rseis(savfile1, v=2)[1]
 # read_data("seisio", ...)
 S1 = read_data(savfile1)
 @test convert(SeisData, S.data) == S1
-S1 = read_data("seisio", savfile1)
+S1 = verified_read_data("seisio", savfile1)
 @test convert(SeisData, S.data) == S1
 S2 = rseis(savfile3)
 S1 = read_data(savfile3)
@@ -148,24 +149,24 @@ S1 = read_data("test.se*")
 # Type unit tests with read_data("seisio", ...)
 C = randSeisChannel()
 wseis(savfile1, C)
-S1 = read_data("seisio", savfile1)
+S1 = verified_read_data("seisio", savfile1)
 @test S1[1] == C
 C = convert(EventChannel, randSeisChannel())
 wseis(savfile1, C)
-S1 = read_data("seisio", savfile1)
+S1 = verified_read_data("seisio", savfile1)
 @test S1[1] == convert(SeisChannel, C)
 S = randSeisData()
 wseis(savfile1, S)
-S1 = read_data("seisio", savfile1)
+S1 = verified_read_data("seisio", savfile1)
 @test S1 == S
 S = convert(EventTraceData, S)
 wseis(savfile1, S)
-S1 = read_data("seisio", savfile1)
+S1 = verified_read_data("seisio", savfile1)
 @test S1 == convert(SeisData, S)
 Ev = randSeisEvent()
 L = GeoLoc(lat=45.560504, lon=-122.617020, el=51.816, az=180.0, inc=0.0)
 wseis(savfile1, L, Ev)
-S1 = read_data("seisio", savfile1)
+S1 = verified_read_data("seisio", savfile1)
 @test S1 == convert(SeisData, Ev.data)
 
 rm(savfile1)

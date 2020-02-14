@@ -24,12 +24,12 @@ printstyled("    in read_data\n", color=:light_green)
 if safe_isfile(vfname)
   redirect_stdout(out) do
     SUDS.suds_support()
-    S = read_data("suds", vfname, v=3, full=true)
-    S = read_data("suds", eq_wvm1_file, v=3, full=true)
-    S = read_data("suds", eq_wvm2_file, v=3, full=true)
-    S = read_data("suds", lsm_file, v=3, full=true)
-    S = read_data("suds", rot_file, v=3, full=true)
-    S = read_data("suds", "SampleFiles/SUDS/eq_wvm*sud", v=3, full=true)
+    S = verified_read_data("suds", vfname, v=3, full=true)
+    S = verified_read_data("suds", eq_wvm1_file, v=3, full=true)
+    S = verified_read_data("suds", eq_wvm2_file, v=3, full=true)
+    S = verified_read_data("suds", lsm_file, v=3, full=true)
+    S = verified_read_data("suds", rot_file, v=3, full=true)
+    S = verified_read_data("suds", "SampleFiles/SUDS/eq_wvm*sud", v=3, full=true)
   end
 end
 
@@ -37,7 +37,7 @@ printstyled("    equivalence to SAC readsuds\n", color=:light_green)
 # Volcano-seismic event supplied by W. McCausland
 if has_restricted
   S = SUDS.read_suds(vfname, full=true)
-  S2 = read_data("sac", sac_fstr, full=true)
+  S2 = verified_read_data("sac", sac_fstr, full=true)
   for n = 1:S2.n
     id = S2.id[n]
     if startswith(id, ".")
@@ -57,7 +57,7 @@ end
 # SUDS sample files
 # from eq_wvm1.sud
 S = SUDS.read_suds(eq_wvm1_file)
-S1 = read_data("sac", eq_wvm1_pat)
+S1 = verified_read_data("sac", eq_wvm1_pat)
 for n = 1:S1.n
   i = findid(S1.id[n], S)
   if i > 0
@@ -69,7 +69,7 @@ end
 
 # from eq_wvm2.sud
 S = SUDS.read_suds(eq_wvm2_file)
-S1 = read_data("sac", eq_wvm2_pat)
+S1 = verified_read_data("sac", eq_wvm2_pat)
 for n = 1:S1.n
   i = findid(S1.id[n], S)
   if i > 0
@@ -82,7 +82,7 @@ end
 # from lsm.sud
 S = SeisData()
 SUDS.read_suds!(S, lsm_file)
-S1 = read_data("sac", lsm_pat)
+S1 = verified_read_data("sac", lsm_pat)
 for n = 1:S1.n
   i = findid(S1.id[n], S)
   if i > 0
@@ -94,7 +94,7 @@ end
 
 # from rot.sud
 S = SUDS.read_suds(rot_file)
-S1 = read_data("sac", rot_pat)
+S1 = verified_read_data("sac", rot_pat)
 for n = 1:S1.n
   i = findid(S1.id[n], S)
   if i > 0
@@ -162,7 +162,7 @@ for (j, data_code) in enumerate([0x32, 0x63, 0x64, 0x66, 0x74])
   close(io)
 
   if j < 5
-    S = read_data("suds", f_out)
+    S = verified_read_data("suds", f_out)
     if data_code == 0x63
       @test isapprox(S.x[1], real(x))
     else

@@ -9,7 +9,7 @@ uwf3 = joinpath(path, "SampleFiles/UW/02062915175o")
 uwf4 = joinpath(path, "SampleFiles/UW/00012502123W")
 uwf5 = joinpath(path, "SampleFiles/UW/02062915205o")
 
-S = read_data("uw", uwf0)
+S = verified_read_data("uw", uwf0)
 S1 = SeisData()
 uwdf!(S1, joinpath(path, "SampleFiles/UW/00012502123W"))
 [@test S.src[i] == abspath(uwf0) for i in 1:S.n]

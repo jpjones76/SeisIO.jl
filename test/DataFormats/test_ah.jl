@@ -9,9 +9,9 @@ printstyled("  AH (Ad Hoc)\n", color=:light_green)
 
 printstyled("    v1\n", color=:light_green)
 redirect_stdout(out) do
-  S = read_data("ah1", ah1_file, v=3)
-  S = read_data("ah1", ah1_file, full=true)
-  S = read_data("ah1", ah1_fstr, full=true, v=3)
+  S = verified_read_data("ah1", ah1_file, v=3)
+  S = verified_read_data("ah1", ah1_file, full=true)
+  S = verified_read_data("ah1", ah1_fstr, full=true, v=3)
   @test S.n == 4
   @test S.fs[1] == 4.0
   @test isapprox(S.gain[1], 64200.121094)
@@ -27,7 +27,7 @@ redirect_stdout(out) do
   @test eltype(S.x[1]) == Float32
   @test isapprox(S.x[1][1:4], [-731.41247559, -724.41247559, -622.41247559, -470.4125061])
 
-  C = read_data("ah1", ahc_file, v=3, full=true)[1]
+  C = verified_read_data("ah1", ahc_file, v=3, full=true)[1]
 
   # Station
   @test isapprox(C.loc.lat, 36.5416984)
@@ -53,7 +53,7 @@ redirect_stdout(out) do
   @test startswith(C.misc["data_comment"], "Streckeisen STS-1V/VBB Seismometer")
   @test startswith(C.misc["event_comment"], "null")
 
-  C = read_data("ah1", ah_resp, full=true, vl=true)[1]
+  C = verified_read_data("ah1", ah_resp, full=true, vl=true)[1]
   @test isapprox(C.loc.lat, 53.058060)
   @test isapprox(C.loc.lon, 70.282799)
   @test isapprox(C.loc.el, 300.0)
@@ -70,9 +70,9 @@ redirect_stdout(out) do
   @test any([occursin("ahtedit",s) for s in C.notes])
 
   printstyled("    v2\n", color=:light_green)
-  S = read_data("ah2", ah2_file, v=3)
-  S = read_data("ah2", ah2_file, v=3, full=true)
-  S = read_data("ah2", ah2_fstr, v=3, full=true, vl=true)
+  S = verified_read_data("ah2", ah2_file, v=3)
+  S = verified_read_data("ah2", ah2_file, v=3, full=true)
+  S = verified_read_data("ah2", ah2_fstr, v=3, full=true, vl=true)
   @test S.n == 4
   @test S.fs[1] == 4.0
   @test isapprox(S.gain[1], 64200.121094)

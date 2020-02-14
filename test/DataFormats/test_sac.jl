@@ -8,21 +8,21 @@ sac_pat     = path*"/SampleFiles/SAC/*.sac"
 
 printstyled("  SAC\n", color=:light_green)
 printstyled("    read\n", color=:light_green)
-@test_throws ErrorException read_data("sac", uw_file)
+@test_throws ErrorException verified_read_data("sac", uw_file)
 
-SAC1 = read_data("sac", sac_file)[1]
+SAC1 = verified_read_data("sac", sac_file)[1]
 @test ≈(SAC1.fs, 100.0)
 @test ≈(length(SAC1.x), 1000)
 
-SAC2 = read_data("sac", sac_file, full=true)[1]
+SAC2 = verified_read_data("sac", sac_file, full=true)[1]
 @test ≈(1/SAC1.fs, SAC2.misc["delta"])
 @test ≈(length(SAC1.x), SAC2.misc["npts"])
 
 printstyled("    wildcard read\n", color=:light_green)
-SAC = read_data("sac", sac_pat, full=true)
+SAC = verified_read_data("sac", sac_pat, full=true)
 
 printstyled("    bigendian read\n", color=:light_green)
-SAC3 = read_data("sac", sac_be_file, full=true)[1]
+SAC3 = verified_read_data("sac", sac_be_file, full=true)[1]
 @test ≈(1/SAC3.fs, SAC3.misc["delta"])
 @test ≈(length(SAC3.x), SAC3.misc["npts"])
 

@@ -13,7 +13,7 @@ if has_restricted
   redirect_stdout(out) do
     fname = path*"/SampleFiles/Restricted/2014092709*.cnt"
     cfile = path*"/SampleFiles/Restricted/03_02_27_20140927.euc.ch"
-    S = read_data("win32", fname, cf=cfile, v=3, vl=true)
+    S = verified_read_data("win32", fname, cf=cfile, v=3, vl=true)
 
     # test that verbose logging works
     printstyled("    verbose logging\n", color=:light_green)
@@ -60,7 +60,7 @@ if has_restricted
 
     U = SeisData()
     for f in testfiles
-      T = read_data("sac", f)[1]
+      T = verified_read_data("sac", f)[1]
       push!(U, T)
     end
 
@@ -122,7 +122,7 @@ if has_restricted
   cfile = path*"/SampleFiles/Restricted/03_02_27_20140927*ch"
   S = SeisData()
   redirect_stdout(out) do
-    read_data!(S, "win32", fname, cf=cfile, v=3)
+    verified_read_data!(S, "win32", fname, cf=cfile, v=3)
   end
   i = findid("V.ONTA.23.EHH", S)
   @test length(S.x[i]) == 60*S.fs[i]
@@ -131,7 +131,7 @@ if has_restricted
 
   # ...and 24-bit bigendian Int...
   fname = path*"/SampleFiles/Restricted/2014092712000302.cnt"
-  read_data!(S, "win32", fname, cf=cfile)
+  verified_read_data!(S, "win32", fname, cf=cfile)
   @test length(S.x[1]) == round(Int64, 60*S.fs[1]) == S.t[1][end,1]
   ii = findlast(S.id.=="V.ONTA.23.EHH")
   @test maximum(S.x[ii]) == 14896.0
@@ -143,7 +143,7 @@ if has_restricted
   # ...and 32-bit bigendian Int ...
   cfile = path*"/SampleFiles/Restricted/chandata_20140927.txt"
   fname = path*"/SampleFiles/Restricted/2014092712370207VM.cnt"
-  read_data!(S, "win32", fname, cf=cfile)
+  verified_read_data!(S, "win32", fname, cf=cfile)
 else
   printstyled("  win32 data format not tested (files not found)\n", color=:red)
 end

@@ -8,9 +8,9 @@ test_mseed_file   = string(path, "/SampleFiles/SEED/test.mseed")
 test_mseed_pat    = string(path, "/SampleFiles/SEED/t*.mseed")
 mseed_vals_file   = string(path, "/SampleFiles/SEED/test_mseed_vals.txt")
 
-@test_throws ErrorException read_data("mseed", test_sac_file)
+@test_throws ErrorException verified_read_data("mseed", test_sac_file)
 
-S = read_data("mseed", test_mseed_file, v=0)
+S = verified_read_data("mseed", test_mseed_file, v=0)
 @test isequal(S.id[1], "NL.HGN.00.BHZ")
 @test ≈(S.fs[1], 40.0)
 @test ≈(S.gain[1], 1.0)
@@ -18,9 +18,9 @@ S = read_data("mseed", test_mseed_file, v=0)
 @test ≈(S.x[1][1:5], [ 2787, 2776, 2774, 2780, 2783 ])
 
 # Test breaks if memory-resident SeisIOBuf structure SEED is not reset
-S1 = read_data("mseed", test_mseed_file, v=0)
+S1 = verified_read_data("mseed", test_mseed_file, v=0)
 if Sys.iswindows() == false
-  S2 = read_data("mseed", test_mseed_pat, v=0)
+  S2 = verified_read_data("mseed", test_mseed_pat, v=0)
   @test S2.src[1] == abspath(test_mseed_pat)
   S2.src = S1.src
   @test S == S1 == S2
@@ -42,8 +42,12 @@ if safe_isdir(path*"/SampleFiles/Restricted")
     for f in files
       println(stdout, "attempting to read ", f)
       S = SeisData()
-      read_data!(S, "mseed", f, v=3)
-      @test isempty(S) == false
+      ae = any([occursin(i, f) for i in ("blkt2000", "detection.record", "text-encoded", "timing.500s")])
+      if ae
+        verified_read_data!(S, "mseed", f, v=3, allow_empty=true)
+      else
+        verified_read_data!(S, "mseed", f, v=2)
+      end
 
       # Test that our encoders return the expected values
       (tmp, fname) = splitdir(f)
@@ -84,7 +88,7 @@ if safe_isdir(path*"/SampleFiles/Restricted")
 
         Y = Array{DateTime,1}(undef,0)
         for f in fnames
-          seis = read_data("sac", f)[1]
+          seis = verified_read_data("sac", f)[1]
           push!(Y, u2d(seis.t[1,2]*1.0e-6))
         end
         #[round(u2d(i*1.0e-6), Second) for i in t]

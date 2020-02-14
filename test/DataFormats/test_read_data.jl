@@ -51,26 +51,26 @@ for n = 1:nf
     opt = files[n,3]
     printstyled(string("    ", n, "/", nf, " ", f_call, "\n"), color=:light_green)
     if opt == "pa-full"
-      S = read_data("passcal", fname, full=true)
-      S = read_data("passcal", fwild, full=true)
+      S = verified_read_data("passcal", fname, full=true)
+      S = verified_read_data("passcal", fwild, full=true)
       S = read_data(fname)
       S = read_data(fname, full=true)
     elseif opt == "win"
-      S = read_data(f_call, fwild, cf=cfile)
+      S = verified_read_data(f_call, fwild, cf=cfile)
       S = read_data(fwild, cf=cfile)
     elseif opt == "slist"
-      S = read_data("geocsv.slist", fname)
-      S = read_data("geocsv.slist", fwild)
+      S = verified_read_data("geocsv.slist", fname)
+      S = verified_read_data("geocsv.slist", fwild)
       S = read_data(fwild)
     elseif opt == "lo-mem"
-      S = read_data(f_call, fname, nx_new=nx_new, nx_add=nx_add)
-      S = read_data(f_call, fwild, nx_new=nx_new, nx_add=nx_add)
+      S = verified_read_data(f_call, fname, nx_new=nx_new, nx_add=nx_add)
+      S = verified_read_data(f_call, fwild, nx_new=nx_new, nx_add=nx_add)
     elseif opt == "full"
-      S = read_data(f_call, fname, full=true)
-      S = read_data(f_call, fwild, full=true)
+      S = verified_read_data(f_call, fname, full=true)
+      S = verified_read_data(f_call, fwild, full=true)
       S = read_data(fwild, full=true)
     else
-      S = read_data(f_call, fname)
+      S = verified_read_data(f_call, fname)
       if f_call == "uw"
         fwild = fname[1:end-3]*"*"*"W"
       end
@@ -80,5 +80,27 @@ for n = 1:nf
   end
 end
 
-@test_throws ErrorException read_data("deez", "nutz.sac")
+# Test for reading a String array of file names
+pref = path * "/SampleFiles/"
+files = pref .* ["SAC/test_be.sac", "SAC/test_le.sac"]
+S = verified_read_data("sac", files, vl=true)
+for f in files
+  for i in 1:S.n
+    @test any([occursin(realpath(f), n) for n in S.notes[i]])
+  end
+end
+
+# Check that other array methods work
+S1 = SeisData()
+S2 = SeisData()
+read_data!(S1, "sac", files, vl=true)
+read_data!(S2, files, vl=true)
+S3 = read_data(files, vl=true)
+@test S == S1 == S2 == S3
+
+# Does a string array read the same way as a wildcard read?
+compare_SeisData(S, verified_read_data("sac", pref .* "SAC/test*sac", vl=true))
+
+@test_throws ErrorException verified_read_data("deez", "nutz.sac")
 resize!(x, 65535)
+nothing

@@ -6,14 +6,14 @@ geocsv_pat  = string(path, "/SampleFiles/ASCII/geo-tspair.*")
 slist_pat   = string(path, "/SampleFiles/ASCII/*.slist")
 
 printstyled("  Lennartz ASCII\n", color=:light_green)
-C = read_data("lennartz", lenn_file, vl=true)[1]
+C = verified_read_data("lennartz", lenn_file, vl=true)[1]
 @test ≈(C.fs, 62.5)
 
 printstyled("    wildcard support\n", color=:light_green)
-S = read_data("lennartz", lenn_pat)
+S = verified_read_data("lennartz", lenn_pat)
 
 printstyled("  GeoCSV timeseries\n", color=:light_green)
-S = read_data("geocsv", geocsv_file, vl=true)
+S = verified_read_data("geocsv", geocsv_file, vl=true)
 @test S.n == 8
 if Sys.iswindows()
   println("    IDs = ", join(S.id, ","))
@@ -25,17 +25,17 @@ if i > 0
 end
 
 printstyled("    wildcard support\n", color=:light_green)
-S = read_data("geocsv", geocsv_pat)
+S = verified_read_data("geocsv", geocsv_pat)
 
 printstyled("  slist\n", color=:light_green)
-S = read_data("slist", slist_file, vl=true)
+S = verified_read_data("slist", slist_file, vl=true)
 nx = length(S.x[1])
 @test S.id[1] == "YY.ERTA..EHZ"
 @test ≈(S.fs[1], 62.5)
 @test isapprox(C.x[1:nx], S.x[1])
 
 printstyled("    wildcard support\n", color=:light_green)
-S = read_data("slist", slist_pat)
+S = verified_read_data("slist", slist_pat)
 @test S.id[1] == "YY.ERTA..EHZ"
 @test ≈(S.fs[1], 62.5)
 @test isapprox(C.x[1:nx], S.x[1])

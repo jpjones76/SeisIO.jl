@@ -5,7 +5,7 @@ bstr = [path * "/SampleFiles/Bottle/B024*",
 
 printstyled("  Bottle (UNAVCO strain data)\n", color=:light_green)
 for i = 1:4
-  S = read_data("bottle", bstr[i], nx_new=14400, nx_add=14400, vl=true)
+  S = verified_read_data("bottle", bstr[i], nx_new=14400, nx_add=14400, vl=true)
   fill_pbo!(S)
   if i == 4
     @test S.name[1] == "quarry203bwa2007"
