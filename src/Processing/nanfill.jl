@@ -1,5 +1,18 @@
 export nanfill!
 
+# replace NaNs with the mean
+function nanfill!(x::Array{T,1}) where T<: Real
+  J = findall(isnan.(x))
+  if !isempty(J)
+    if length(J) == length(x)
+      fill!(x, zero(T))
+    else
+      x[J] .= T(mean(findall(isnan.(x).==false)))
+    end
+  end
+  return length(J)
+end
+
 """
   nanfill!(S::SeisData)
   nanfill!(C::SeisChannel)

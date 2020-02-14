@@ -58,16 +58,3 @@ function gapfill!(x::Array{T,1}, t::Array{Int64,2}, fs::Float64; m::Bool=true) w
   end
   return nothing
 end
-
-# replace NaNs with the mean
-function nanfill!(x::Array{T,1}) where T<: Real
-  J = findall(isnan.(x))
-  if !isempty(J)
-    if length(J) == length(x)
-      fill!(x, zero(T))
-    else
-      x[J] .= T(mean(findall(isnan.(x).==false)))
-    end
-  end
-  return nothing
-end
