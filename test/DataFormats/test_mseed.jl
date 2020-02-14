@@ -21,6 +21,8 @@ S = read_data("mseed", test_mseed_file, v=0)
 S1 = read_data("mseed", test_mseed_file, v=0)
 if Sys.iswindows() == false
   S2 = read_data("mseed", test_mseed_pat, v=0)
+  @test S2.src[1] == abspath(test_mseed_pat)
+  S2.src = S1.src
   @test S == S1 == S2
 end
 
@@ -62,6 +64,7 @@ if safe_isdir(path*"/SampleFiles/Restricted")
         @test ev_rec == "2004,7,28,20,28,6,185,80.0,0.39999998,18.0,dilatation,1,3,2,1,4,0,2,0,Z_SPWWSS"
 
       elseif occursin("SHW.UW", f)
+        println("testing read accuracy of SHW.UW with ", f)
         @test size(S.t[1],1) >= 158
         @test size(S.t[2],1) >= 8
         @test string(u2d(S.t[1][1,2]*1.0e-6)) == "1980-03-22T20:45:18.349"
