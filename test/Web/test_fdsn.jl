@@ -157,6 +157,7 @@ else
     @test isequal(getfield(S1,f), getfield(S,f))
   end
   for i in 1:S.n
+    (isempty(S.x[i]) || isempty(S1.x[i])) && continue
     x1 = S1.x[i]
     x2 = S.x[i]
     if (any(isnan.(x1)) == false) && (any(isnan.(x2)) == false)
@@ -168,14 +169,16 @@ else
   writesac(S)
   wseis("sacreq.seis", S)
   S2 = rseis("sacreq.seis")[1]
-  for f in (:id, :loc, :fs, :gain, :resp, :units, :misc)
-    @test isequal(getfield(S2,f), getfield(S,f))
-  end
-  for i in 1:S.n
-    x1 = S.x[i]
-    x2 = S2.x[i]
-    if (any(isnan.(x1)) == false) && (any(isnan.(x2)) == false)
-      @test x1 ≈ x2
+  if !(isempty(S) || isempty(S2))
+    for f in (:id, :loc, :fs, :gain, :resp, :units, :misc)
+      @test isequal(getfield(S2,f), getfield(S,f))
+    end
+    for i in 1:S.n
+      x1 = S.x[i]
+      x2 = S2.x[i]
+      if (any(isnan.(x1)) == false) && (any(isnan.(x2)) == false)
+        @test x1 ≈ x2
+      end
     end
   end
 
