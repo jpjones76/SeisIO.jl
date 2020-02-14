@@ -79,7 +79,6 @@ R = R[1]
 @test R.st.dur == 70.0
 @test R.misc["methodID"] == "smi:ISC/methodID=Best_double_couple"
 @test R.misc["pax_desc"] == "azimuth, plunge, length"
-@test split(R.src, ",")[2] == "GCMT"
 @test R.misc["planes_desc"] == "strike, dip, rake"
 @test R.misc["derivedOriginID"] == "600126955"
 
@@ -92,6 +91,8 @@ write_qml(xf, H, R)
 H1, R1 = read_qml(xf)
 H1 = H1[1]
 R1 = R1[1]
+@test H1.src == abspath(xf)
+@test R1.src == abspath(xf)
 compare_SeisHdr(H1, H)
 compare_SeisSrc(R1, R)
 
@@ -114,6 +115,8 @@ H1 = H1[2:end]
 R1 = R1[2:end]
 H, R = read_qml(xml_evfile1)
 for i in 1:length(R)
+  @test H1[i].src == abspath(xf)
+  @test R1[i].src == abspath(xf)
   compare_SeisHdr(H1[i], H[i])
   compare_SeisSrc(R1[i], R[i])
 end

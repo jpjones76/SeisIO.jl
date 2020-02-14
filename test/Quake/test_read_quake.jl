@@ -11,6 +11,10 @@ printstyled("    QML\n", color=:light_green)
 H, R = read_qml(qml_file)
 Ev1 = SeisEvent(hdr = H[1], source = R[1])
 Ev2 = read_quake("qml", qml_file)
+@test Ev2.hdr.src == abspath(qml_file)
+@test Ev2.source.src == abspath(qml_file)
+Ev2.hdr.src = Ev1.hdr.src
+Ev2.source.src = Ev1.source.src
 @test Ev1 == Ev2
 
 printstyled("    SUDS\n", color=:light_green)
