@@ -31,14 +31,6 @@ function blk_012!(io::IO, nb::Int64, v::Int64)
   if v > 1
     N = stream_int(sio, 4)
     println(", N_SPANS = ", N)
-    if v > 2
-      @inbounds for i = 1:N
-        ts = string_field(sio)
-        te = string_field(sio)
-        seq_no = stream_int(sio, 6)
-        println("ts = ", ts, ", te = ", te, ", seq #", seq_no)
-      end
-    end
   end
   close(sio)
   return nothing
