@@ -45,6 +45,8 @@ SAC1.id = "VU.CDV..NUL"
 SAC1.name = "VU.CDV..NUL"
 writesac(SAC1)
 @test safe_isfile("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")
+writesac(SAC1, fname="POTATO.SAC")
+@test safe_isfile("POTATO.SAC")
 
 # testing custom naming formats
 writesac(SAC1, fname="test_write_1.sac")
