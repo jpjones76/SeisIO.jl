@@ -1,5 +1,5 @@
 module SeisHDF
-using Dates, HDF5, SeisIO, SeisIO.Quake
+using Dates, HDF5, SeisIO, SeisIO.FastIO, SeisIO.Quake
 
 # imports
 include("SeisHDF/imports.jl")

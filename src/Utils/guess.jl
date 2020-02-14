@@ -9,7 +9,7 @@ function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Int64)
   # SeisIO Native ------------------------------------------------------------
   seekstart(io)
   try
-    @assert read(io, 6) == UInt8[0x53, 0x45, 0x49, 0x53, 0x49, 0x4f]
+    @assert fastread(io, 6) == UInt8[0x53, 0x45, 0x49, 0x53, 0x49, 0x4f]
     return ["seisio"]
   catch err
     (v > 2) && @warn(string("Test for SeisIO native format threw error:", err))
@@ -18,7 +18,7 @@ function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Int64)
   # AH-2 --------------------------------------------------------------------
   seekstart(io)
   try
-    mn = (swap ? bswap : identity)(read(io, Int32))
+    mn = (swap ? bswap : identity)(fastread(io, Int32))
     @assert mn == 1100
     push!(str, "ah2")
   catch err
@@ -28,14 +28,14 @@ function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Int64)
   # Bottle ------------------------------------------------------------------
   seekstart(io)
   try
-    ms = (swap ? bswap : identity)(read(io, Int16))
+    ms = (swap ? bswap : identity)(fastread(io, Int16))
     @assert ms == 349
-    skip(io, 2)
-    @assert (swap ? bswap : identity)(read(io, Int32)) == 40
-    @assert (swap ? bswap : identity)(read(io, Float64)) > 0.0
-    @assert (swap ? bswap : identity)(read(io, Float32)) > 0.0f0
-    @assert (swap ? bswap : identity)(read(io, Int32)) > 0
-    @assert (swap ? bswap : identity)(read(io, Int32)) in (0, 1, 2)
+    fastskip(io, 2)
+    @assert (swap ? bswap : identity)(fastread(io, Int32)) == 40
+    @assert (swap ? bswap : identity)(fastread(io, Float64)) > 0.0
+    @assert (swap ? bswap : identity)(fastread(io, Float32)) > 0.0f0
+    @assert (swap ? bswap : identity)(fastread(io, Int32)) > 0
+    @assert (swap ? bswap : identity)(fastread(io, Int32)) in (0, 1, 2)
     push!(str, "bottle")
   catch err
     (v > 2) && @warn(string("Test for Bottle threw error:", err))
@@ -68,11 +68,11 @@ function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Int64)
   # SUDS --------------------------------------------------------------------
   seekstart(io)
   try
-    @assert read(io, UInt8) == 0x53
-    @assert iscntrl(Char(read(io, UInt8))) == false
-    sid = (swap ? bswap : identity)(read(io, Int16))
-    nbs = (swap ? bswap : identity)(read(io, Int32))
-    nbx = (swap ? bswap : identity)(read(io, Int32))
+    @assert fastread(io) == 0x53
+    @assert iscntrl(Char(fastread(io))) == false
+    sid = (swap ? bswap : identity)(fastread(io, Int16))
+    nbs = (swap ? bswap : identity)(fastread(io, Int32))
+    nbx = (swap ? bswap : identity)(fastread(io, Int32))
     @assert zero(Int16) ≤ sid < Int16(34) # should be in range 1:33
     @assert nbs > zero(Int32)
     @assert nbx ≥ zero(Int32)
@@ -86,11 +86,11 @@ function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Int64)
   seekstart(io)
   try
     # Sequence number is numeric
-    seq = Char.(read(io, 6))
+    seq = Char.(fastread(io, 6))
     @assert(all(isnumeric.(seq)))
 
     # Next character is one of 'D', 'R', 'M', 'Q'
-    @assert read(io, UInt8) in (0x44, 0x52, 0x4d, 0x51)
+    @assert fastread(io) in (0x44, 0x52, 0x4d, 0x51)
     push!(str, "mseed")
 
 
@@ -101,7 +101,7 @@ function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Int64)
   # # FDSN station XML ---------------------------------------------------------
   # seekstart(io)
   # try
-  #   @assert occursin("FDSNStationXML", String(read(io, 255)))
+  #   @assert occursin("FDSNStationXML", String(fastread(io, 255)))
   #   push!(str, "sxml")
   # catch err
   #   (v > 2) && @warn(string("test for station XML threw error:", err))
@@ -130,17 +130,17 @@ function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Int64)
   # AH-1 --------------------------------------------------------------------
   seekstart(io)
   try
-    skip(io, 12)
-    mn = (swap ? bswap : identity)(read(io, Int32))
+    fastskip(io, 12)
+    mn = (swap ? bswap : identity)(fastread(io, Int32))
     @assert mn == 6
-    skip(io, 8)
-    mn = (swap ? bswap : identity)(read(io, Int32))
+    fastskip(io, 8)
+    mn = (swap ? bswap : identity)(fastread(io, Int32))
     @assert mn == 8
-    seek(io, 700)
-    mn = (swap ? bswap : identity)(read(io, Int32))
+    fastseek(io, 700)
+    mn = (swap ? bswap : identity)(fastread(io, Int32))
     @assert mn == 80
-    seek(io, 784)
-    mn = (swap ? bswap : identity)(read(io, Int32))
+    fastseek(io, 784)
+    mn = (swap ? bswap : identity)(fastread(io, Int32))
     @assert mn == 202
     push!(str, "ah1")
 
@@ -153,9 +153,9 @@ function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Int64)
   try
     autoswap = should_bswap(io)
     seekstart(io)
-    delta = (autoswap ? bswap : identity)(read(io, Float32))
+    delta = (autoswap ? bswap : identity)(fastread(io, Float32))
     @assert delta ≥ 0.0f0
-    seek(io, 280)
+    fastseek(io, 280)
     tt = (autoswap ? bswap : identity).(read!(io, zeros(Int32, 5)))
     @assert tt[1] > 1900
     @assert 0 < tt[2] < 367
@@ -171,14 +171,14 @@ function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Int64)
   # SEGY --------------------------------------------------------------------
   seekstart(io)
   try
-    seek(io, 3212)
+    fastseek(io, 3212)
     shorts = (swap ? bswap : identity).(read!(io, zeros(Int16, 12)))
     @assert shorts[3] > zero(Int16)               # sample interval in μs
     @assert shorts[5] ≥ zero(Int16)               # number of samples per trace
     @assert shorts[7] in one(Int16):Int16(8)      # data format code
-    seek(io, 3501)
-    @assert (swap ? bswap : identity)(read(io, UInt16)) in 0x0000:0x0200    # SEGY version number
-    @assert (swap ? bswap : identity)(read(io, Int16)) ≥ zero(Int16)        # trace length; 0 = variable
+    fastseek(io, 3501)
+    @assert (swap ? bswap : identity)(fastread(io, UInt16)) in 0x0000:0x0200    # SEGY version number
+    @assert (swap ? bswap : identity)(fastread(io, Int16)) ≥ zero(Int16)        # trace length; 0 = variable
     push!(str, "segy")
 
   catch err
@@ -188,17 +188,17 @@ function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Int64)
   # UW ----------------------------------------------------------------------
   seekstart(io)
   try
-    N = (swap ? bswap : identity)(read(io, Int16))
+    N = (swap ? bswap : identity)(fastread(io, Int16))
     @assert N ≥ zero(Int16)
-    [@assert (swap ? bswap : identity)(read(io, Int32)) ≥ zero(Int32) for i = 1:4]
-    skip(io, 26)
-    @assert read(io, UInt8) in (0x20, 0x31, 0x32)
-    seekend(io)
-    skip(io, -4)
-    nstructs = (swap ? bswap : identity)(read(io, Int32))
+    [@assert (swap ? bswap : identity)(fastread(io, Int32)) ≥ zero(Int32) for i = 1:4]
+    fastskip(io, 26)
+    @assert fastread(io) in (0x20, 0x31, 0x32)
+    fastseekend(io)
+    fastskip(io, -4)
+    nstructs = (swap ? bswap : identity)(fastread(io, Int32))
     (v > 2) && println("nstructs = ", nstructs)
     @assert nstructs ≥ zero(Int32)
-    @assert (12*nstructs)+4 < position(io)
+    @assert (12*nstructs)+4 < fastpos(io)
     push!(str, "uw")
 
   catch err
@@ -209,16 +209,16 @@ function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Int64)
   seekstart(io)
   try
     date_arr = zeros(Int64, 6)
-    skip(io, 4)
-    date_hex = read(io, 8)
+    fastskip(io, 4)
+    date_hex = fastread(io, 8)
     t_new = datehex2μs!(date_arr, date_hex)
     (v > 2) && println(u2d(t_new*1.0e-6))
     @assert t_new > 0
-    skip(io, 4)
-    nb = (swap ? bswap : identity)(read(io, UInt32))
-    @assert (nb + position(io)) ≤ sz
-    skip(io, 4)
-    V = (swap ? bswap : identity)(read(io, UInt16))
+    fastskip(io, 4)
+    nb = (swap ? bswap : identity)(fastread(io, UInt32))
+    @assert (nb + fastpos(io)) ≤ sz
+    fastskip(io, 4)
+    V = (swap ? bswap : identity)(fastread(io, UInt16))
     C = UInt8(V >> 12)
     N = V & 0x0fff
     @assert C in 0x00:0x04
@@ -232,22 +232,22 @@ function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Int64)
   # PASSCAL -----------------------------------------------------------------
   seekstart(io)
   try
-    seek(io, 114)
-    nx = (swap ? bswap : identity)(read(io, Int16))
-    dt = (swap ? bswap : identity)(read(io, Int16))
-    seek(io, 156)
-    yy = (swap ? bswap : identity)(read(io, Int16))
-    jj = (swap ? bswap : identity)(read(io, Int16))
+    fastseek(io, 114)
+    nx = (swap ? bswap : identity)(fastread(io, Int16))
+    dt = (swap ? bswap : identity)(fastread(io, Int16))
+    fastseek(io, 156)
+    yy = (swap ? bswap : identity)(fastread(io, Int16))
+    jj = (swap ? bswap : identity)(fastread(io, Int16))
     @assert yy in Int16(1950):Int16(3000)
     @assert jj in one(Int16):Int16(366)
 
     if dt == typemax(Int16)
-      seek(io, 200)
-      dt = (swap ? bswap : identity)(read(io, Int32))
+      fastseek(io, 200)
+      dt = (swap ? bswap : identity)(fastread(io, Int32))
     end
     if nx == typemax(Int16)
-      seek(io, 228)
-      nx = (swap ? bswap : identity)(read(io, Int32))
+      fastseek(io, 228)
+      nx = (swap ? bswap : identity)(fastread(io, Int32))
     end
     @assert dt > zero(Int32)
     @assert nx > zero(Int32)

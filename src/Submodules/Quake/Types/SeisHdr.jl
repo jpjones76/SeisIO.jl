@@ -105,15 +105,15 @@ function write(io::IO, H::SeisHdr)
 end
 
 read(io::IO, ::Type{SeisHdr}) = SeisHdr(
-  String(read(io, read(io, Int64))),
-  (read(io, UInt8), String(read(io, read(io, Int64)))),
+  String(fastread(io, fastread(io, Int64))),
+  (fastread(io), String(fastread(io, fastread(io, Int64)))),
   read(io, EQLoc),
   read(io, EQMag),
   read_misc(io, BUF.buf),
   read_string_vec(io, BUF.buf),
-  u2d(read(io, Int64)*μs),
-  String(read(io, read(io, Int64))),
-  String(read(io, read(io, Int64)))
+  u2d(fastread(io, Int64)*μs),
+  String(fastread(io, fastread(io, Int64))),
+  String(fastread(io, fastread(io, Int64)))
   )
 
 summary(H::SeisHdr) = string(typeof(H), ", ",
@@ -134,4 +134,4 @@ function show(io::IO, H::SeisHdr)
   println(io, " NOTES: ", length(H.notes), " entries")
   return nothing
 end
-show(S::SeisHdr) = show(stdout, S)
+show(H::SeisHdr) = show(stdout, H)

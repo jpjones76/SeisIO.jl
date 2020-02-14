@@ -168,18 +168,18 @@ end
 
 function read(io::IO, ::Type{SeisSrc})
   u = getfield(BUF, :buf)
-  return SeisSrc( String(read(io, read(io, Int64))),                    # :id
-                  String(read(io, read(io, Int64))),                    # :eid
-                  read(io, Float64),                                    # :m0
-                  read!(io, Array{Float64, 1}(undef, read(io, Int64))), # :mt
-                  read!(io, Array{Float64, 1}(undef, read(io, Int64))), # :dm
-                  read(io, Int64),                                      # :npol
-                  read(io, Float64),                                    # :gap
+  return SeisSrc( String(fastread(io, fastread(io, Int64))),            # :id
+                  String(fastread(io, fastread(io, Int64))),            # :eid
+                  fastread(io, Float64),                                    # :m0
+                  read!(io, Array{Float64, 1}(undef, fastread(io, Int64))), # :mt
+                  read!(io, Array{Float64, 1}(undef, fastread(io, Int64))), # :dm
+                  fastread(io, Int64),                                      # :npol
+                  fastread(io, Float64),                                    # :gap
                   read!(io, Array{Float64, 2}(undef,
-                    read(io, Int64), read(io, Int64))),                 # :pax
+                    fastread(io, Int64), fastread(io, Int64))),         # :pax
                   read!(io, Array{Float64, 2}(undef,
-                    read(io, Int64), read(io, Int64))),                 # :planes
-                  String(read(io, read(io, Int64))),                    # :src
+                    fastread(io, Int64), fastread(io, Int64))),         # :planes
+                  String(fastread(io, fastread(io, Int64))),            # :src
                   read(io, SourceTime),                                 # :st
                   read_misc(io, u),                                     # :misc
                   read_string_vec(io, u) )                              # :notes

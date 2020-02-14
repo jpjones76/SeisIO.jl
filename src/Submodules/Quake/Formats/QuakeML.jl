@@ -148,12 +148,13 @@ function parse_qml(evt::XMLElement)
       end
 
     end
+    src_str = ssrc * "," * auth
     setfield!(S, :planes, np)
     setfield!(S, :pax, pax)
     setfield!(S, :mt, mt)
     setfield!(S, :dm, dm)
-    setfield!(S, :src, ssrc * "," * auth)
-
+    setfield!(S, :src, src_str)
+    note!(S, "+origin ¦ " * src_str)
     push!(MT, S)
   end
 
@@ -374,6 +375,7 @@ function parse_qml(evt::XMLElement)
   setfield!(H, :typ, eqtype)
   setfield!(H, :src, evt_src)
   setfield!(R, :eid, String(evt_id))
+  note!(H, "+origin ¦ " * evt_src)
 
   # Post-process: ensure these are empty if not initialized
   if R.mt == zeros(Float64,6)
@@ -427,7 +429,16 @@ function read_qml(fpat::String)
   EvSrc = Array{SeisSrc,1}()
   for file in files
     xdoc  = parse_file(file)
+    k = length(EvCat)
     event_xml!(EvCat, EvSrc, xdoc)
+    L = length(EvCat)
+    fstr = abspath(file)
+    for i in k+1:L
+      setfield!(EvCat[i], :src, fstr)
+      note!(EvCat[i], "+source ¦ " * fstr)
+      setfield!(EvSrc[i], :src, fstr)
+      note!(EvSrc[i], "+source ¦ " * fstr)
+    end
     free(xdoc)
   end
   return EvCat, EvSrc
@@ -535,8 +546,10 @@ function write_qml!(io::IO, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1}, v::Int
     H = HDR[i]
     (v > 0) && println("Writing event ", H.id)
 
-    write(io, "<event publicID=\"")
-    print(io, H.src)
+    i_id = findfirst([occursin("origin", n) for n in H.notes])
+    id_str = String(split(i_id == nothing ? " ¦  ¦ " : H.notes[i_id], " ¦ ")[end])
+    write(io, "    <event publicID=\"")
+    print(io, id_str)
     write(io, "\">\n")
     if isempty(H.loc)
       (v > 0) && println("  Skipped location (H.loc empty)")
@@ -644,7 +657,9 @@ function write_qml!(io::IO, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1}, v::Int
       j = Ri[i]
       R = SRC[j]
 
-      foc_orig, foc_auth, xx = split_id(R.src, c=",")
+      i_src = findfirst([occursin("origin", n) for n in R.notes])
+      src_str = String(split(i_src == nothing ? " ¦  ¦ " : R.notes[i_src], " ¦ ")[end])
+      foc_orig, foc_auth, xx = split_id(src_str, c=",")
       write(io, "      <focalMechanism publicID=\"")
       write(io, foc_orig)
       write(io, "\">\n")
@@ -807,19 +822,19 @@ function write_qml(fname::String, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1}; 
     io = open(fname, "a+")
 
     # test whether file can be appended
-    seekend(io)
-    skip(io, -30)
+    fastseekend(io)
+    fastskip(io, -30)
     test_str = String(read(io))
     if test_str == "</eventParameters>\n</quakeml>\n"
 
       # behavior for files that are QuakeXML as produced by SeisIO
-      skip(io, -30)
+      fastskip(io, -30)
     else
       try
 
         # file exists and is readable QuakeXML but not produced by SeisIO
         seekstart(io)
-        fstart = String(read(io, 5))
+        fstart = String(fastread(io, 5))
         if fstart == "<?xml"
           close(io)
           append!(H0, HDR)

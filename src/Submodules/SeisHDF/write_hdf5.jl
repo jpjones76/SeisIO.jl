@@ -67,7 +67,7 @@ function write_hdf5(file::String, S::GphysData;
   v         ::Int64     = KW.v              # verbosity
   )
 
-  chans = mkchans(chans, S.n)
+  chans = mkchans(chans, S)
   if fmt == "asdf"
     write_asdf(file, S, chans, add=add, len=len, ovr=ovr, tag=tag, v=v)
   else
@@ -98,7 +98,7 @@ function write_hdf5(file::String, W::SeisEvent;
   )
 
   S = getfield(W, :data)
-  chans = mkchans(chans, S.n)
+  chans = mkchans(chans, S)
   if fmt == "asdf"
     H = getfield(W, :hdr)
     R = getfield(W, :source)

@@ -19,7 +19,7 @@ end
 
 function read(io::IO, ::Type{PhaseCat})
   PC = PhaseCat()
-  L = read(io, Int64)
+  L = fastread(io, Int64)
   if L != zero(Int64)
     u = getfield(BUF, :buf)
     checkbuf!(u, 65535)

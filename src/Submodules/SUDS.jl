@@ -1,8 +1,11 @@
 module SUDS
-using SeisIO, SeisIO.Quake
-import SeisIO: check_for_gap!, checkbuf!, checkbuf_8!, BUF, KW, sμ
-import SeisIO.Formats: formats, FmtVer, FormatDesc, HistVec
+using SeisIO, SeisIO.FastIO, SeisIO.Quake
 
+#=
+  Submodule for SUDS data format accessories.
+=#
+
+include("SUDS/imports.jl")
 include("SUDS/SUDSbuf.jl")
 include("SUDS/suds_const.jl")
 include("SUDS/suds_structs.jl")

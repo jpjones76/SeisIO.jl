@@ -3,13 +3,13 @@ function read_legacy(io::IO, ver::Float32)
   L = getfield(BUF, :int64_buf)
 
   # read begins ------------------------------------------------------
-  N     = read(io, Int64)
+  N     = fastread(io, Int64)
   checkbuf_strict!(L, 2*N)
-  readbytes!(io, Z, 3*N)
+  fast_readbytes!(io, Z, 3*N)
   c1    = copy(Z[1:N])
   c2    = copy(Z[N+1:2*N])
   y     = code2typ.(getindex(Z, 2*N+1:3*N))
-  cmp   = read(io, Bool)
+  cmp   = fastread(io) % Bool
   read!(io, L)
   nx    = getindex(L, N+1:2*N)
   cmp && checkbuf_8!(Z, maximum(nx))
@@ -37,15 +37,15 @@ function read_legacy(io::IO, ver::Float32)
       et = Complex{T == PZResp ? Float32 : Float64}
 
       # skip :c, it was never used
-      skip(io, T == PZResp ? 4 : 8)
+      fastskip(io, T == PZResp ? 4 : 8)
 
       # read poles
-      np = read(io, Int64)
+      np = fastread(io, Int64)
       p = zeros(et, np)
       read!(io, p)
 
       # read zeros
-      nz = read(io, Int64)
+      nz = fastread(io, Int64)
       z = zeros(et, nz)
       read!(io, z)
 
@@ -60,7 +60,7 @@ function read_legacy(io::IO, ver::Float32)
     setfield!(S, :t, [read!(io, Array{Int64, 2}(undef, getindex(L, i), 2)) for i = 1:N])
     setfield!(S, :x,
     FloatArray[cmp ?
-    (readbytes!(io, Z, getindex(nx, i)); Blosc.decompress(getindex(y,i), Z)) :
+    (fast_readbytes!(io, Z, getindex(nx, i)); Blosc.decompress(getindex(y,i), Z)) :
     read!(io, Array{getindex(y,i), 1}(undef, getindex(nx, i))) for i = 1:N])
   elseif ver < 0.53
     #=  Read process for 0.51 and 0.52 is identical; 0.52 added two Types <:
@@ -80,23 +80,23 @@ function read_legacy(io::IO, ver::Float32)
       if T in (PZResp, PZResp64, GenResp)
         push!(R, read(io, T))
       elseif T == MultiStageResp
-        K = read(io, Int64)
-        codes = read(io, K)
+        K = fastread(io, Int64)
+        codes = fastread(io, K)
         M = MultiStageResp(K)
         A = Array{RespStage,1}(undef, 0)
         for j = 1:K
           c = codes[j]
           if c == 0x03
-            units_out = String(read(io, read(io, Int64)))
-            units_in = String(read(io, read(io, Int64)))
+            units_out = String(fastread(io, fastread(io, Int64)))
+            units_in = String(fastread(io, fastread(io, Int64)))
             M.i[j] = units_in
             M.o[j] = units_out
             if j == 2
               M.i[1] = units_out
             end
             CR = CoeffResp(
-                       read!(io, Array{Float64,1}(undef, read(io, Int64))),
-                       read!(io, Array{Float64,1}(undef, read(io, Int64)))
+                       read!(io, Array{Float64,1}(undef, fastread(io, Int64))),
+                       read!(io, Array{Float64,1}(undef, fastread(io, Int64)))
                        )
             push!(A, CR)
           else
@@ -130,7 +130,7 @@ function read_legacy(io::IO, ver::Float32)
     setfield!(S, :t, [read!(io, Array{Int64, 2}(undef, getindex(L, i), 2)) for i = 1:N])
     setfield!(S, :x,
     FloatArray[cmp ?
-    (readbytes!(io, Z, getindex(nx, i)); Blosc.decompress(getindex(y,i), Z)) :
+    (fast_readbytes!(io, Z, getindex(nx, i)); Blosc.decompress(getindex(y,i), Z)) :
     read!(io, Array{getindex(y,i), 1}(undef, getindex(nx, i))) for i = 1:N])
   end
   return S

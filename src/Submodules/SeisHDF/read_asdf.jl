@@ -89,11 +89,7 @@ function read_asdf!(  S::GphysData,
             end
 
             if xi == 0
-              ct = Array{Int64, 2}(undef, 2, 2)
-              setindex!(ct, one(Int64), 1)
-              setindex!(ct, ni, 2)
-              setindex!(ct, div(t2, 1000), 3)
-              setindex!(ct, zero(Int64), 4)
+              ct = mk_t(ni, div(t2, 1000))
               setindex!(getfield(S, :t), ct, j)
             end
 
@@ -108,7 +104,7 @@ function read_asdf!(  S::GphysData,
   end
 
   # Ensure data source is logged accurately
-  fill!(S.src, realpath(hdf))
+  # fill!(S.src, realpath(hdf))
 
   # merge in the XML that we read
   sxml_mergehdr!(S, SX, app=false, nofs=true, v=v)

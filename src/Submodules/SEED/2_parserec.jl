@@ -1,3 +1,7 @@
+rebuffer!(io::IO) = readbytes!(io, BUF.dh_arr, 48)
+rebuffer!(io::IOStream) = ccall(:ios_readall, Csize_t,
+  (Ptr{Cvoid}, Ptr{Cvoid}, Csize_t), io.ios, pointer(BUF.dh_arr, 1), 48)
+
 function hdrswap!(BUF::SeisIOBuf)
   u16 = getfield(BUF, :u16)
   @inbounds for i = 1:5
@@ -58,26 +62,28 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
   te = 0
 
   # Fixed section of data header (48 bytes)
-  pos = position(sid)
-  read!(sid, BUF.seq)
-  read!(sid, BUF.hdr)
+  pos = fastpos(sid)
+  rebuffer!(sid)
+  seekstart(BUF.dh_buf)
+  read!(BUF.dh_buf, BUF.seq)
+  read!(BUF.dh_buf, BUF.hdr)
   if v > 2
       println(stdout, join(map(Char,BUF.seq), map(Char,BUF.hdr)))
   end
-  u16[1]          = read(sid, UInt16)
-  u16[2]          = read(sid, UInt16)
-  hh              = read(sid, UInt8)
-  mm              = read(sid, UInt8)
-  ss              = read(sid, UInt8)
-  skip(sid, 1)
-  u16[3]          = read(sid, UInt16)
-  BUF.n          = read(sid, UInt16)
-  BUF.r1         = read(sid, Int16)
-  BUF.r2         = read(sid, Int16)
-  read!(sid, flags)
-  BUF.tc         = read(sid, Int32)
-  u16[4]          = read(sid, UInt16)
-  u16[5]          = read(sid, UInt16)
+  u16[1]          = read(BUF.dh_buf, UInt16)
+  u16[2]          = read(BUF.dh_buf, UInt16)
+  hh              = read(BUF.dh_buf, UInt8)
+  mm              = read(BUF.dh_buf, UInt8)
+  ss              = read(BUF.dh_buf, UInt8)
+  skip(BUF.dh_buf, 1)
+  u16[3]          = read(BUF.dh_buf, UInt16)
+  BUF.n           = read(BUF.dh_buf, UInt16)
+  BUF.r1          = read(BUF.dh_buf, Int16)
+  BUF.r2          = read(BUF.dh_buf, Int16)
+  read!(BUF.dh_buf, flags)
+  BUF.tc          = read(BUF.dh_buf, Int32)
+  u16[4]          = read(BUF.dh_buf, UInt16)
+  u16[5]          = read(BUF.dh_buf, UInt16)
 
   if getfield(BUF, :swap) == true
     hdrswap!(BUF)
@@ -159,13 +165,13 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
   @inbounds for i = 0x01:0x01:nblk
 
     # DND DND DND
-    skip(sid, u16[6])
+    fastskip(sid, u16[6])
     nsk = nsk - u16[6]
-    u16[5] = UInt16(position(sid) - pos)
+    u16[5] = UInt16(fastpos(sid) - pos)
     # DND DND DND
 
-    bt            = read(sid, UInt16)
-    u16[6]        = read(sid, UInt16)
+    bt            = fastread(sid, UInt16)
+    u16[6]        = fastread(sid, UInt16)
     if getfield(BUF, :swap) == true
       bt = bswap(bt)
       setindex!(u16, bswap(u16[6]), 6)
@@ -173,7 +179,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
 
     # debug
     if v > 2
-      printstyled(string("Position = ", position(sid), "\n"), color=:light_green)
+      printstyled(string("Position = ", fastpos(sid), "\n"), color=:light_green)
       printstyled(string("Blockette type to read: ", bt, "\n"), color=:light_yellow)
       println(stdout, "Relative position u16[5] = ", u16[5], " bytes from record begin")
       println(stdout, "We are nsk = ", nsk, " bytes to data begin")
@@ -197,7 +203,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
     else
       v > 1 && println(stdout, id, ": no support for Blockette Type ", bt, "; skipped.")
       blk_len = (u16[6] == 0x0000 ? nsk : u16[6])
-      skip(sid, blk_len - 0x0004)
+      fastskip(sid, blk_len - 0x0004)
     end
     nsk = nsk - blk_len
     if u16[6] != 0x0000
@@ -209,7 +215,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
   # Data parsing: originally adapted from rdmseed.m by Francois Beauducel
   # (not very similar anymore)
   if nsk > 0x0000
-    skip(sid, Int(nsk))
+    fastskip(sid, nsk)
   end
 
   # Get data format
@@ -218,7 +224,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
 
   # debug output
   if v > 2
-    printstyled(string("Position = ", position(sid), "\n"), color=:light_green)
+    printstyled(string("Position = ", fastpos(sid), "\n"), color=:light_green)
     println(stdout, "To parse: nx = ", n, " sample blockette, ",
     "compressed size = ", nb, " bytes, fmt = ", fmt)
   end
@@ -234,8 +240,6 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
     push!(D["seed_ascii"], SEED_Char(sid, BUF, nb))
   elseif fmt in UInt8[0x01, 0x03, 0x04, 0x05]
     SEED_Unenc!(sid, S, c, xi, nb, n)
-  # elseif fmt == 0x05
-  #   SEED_Float64!(sid, S, c, xi, nb)
   elseif fmt == 0x0d || fmt == 0x0e
     SEED_Geoscope!(sid, BUF)
   elseif fmt == 0x10
@@ -247,7 +251,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
   else
     warn_str = string("readmseed, unsupported format = ", fmt, ", ", nb, " bytes skipped.")
     @warn(warn_str); note!(S, c, warn_str)
-    skip(sid, nb)
+    fastskip(sid, nb)
     return nothing
   end
 
@@ -296,7 +300,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
       check_for_gap!(S, c, τ, n, v)
     end
 
-    v > 2 && printstyled(string("Position = ", position(sid), "\n"), color=:light_green)
+    v > 2 && printstyled(string("Position = ", fastpos(sid), "\n"), color=:light_green)
   end
   return nothing
 end

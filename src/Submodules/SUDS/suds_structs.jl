@@ -1,10 +1,10 @@
 function read_struct_tag!(io::IO, v::Int64=0)
-  s = read(io, UInt8)
+  s = fastread(io)
   s == 0x53 || (close(io); error("damaged or scrambled SUDS file; can't continue."))
-  m = read(io, UInt8)
-  SB.sid = read(io, Int16)
-  SB.nbs = read(io, Int32)
-  SB.nbx = read(io, Int32)
+  m = fastread(io)
+  SB.sid = fastread(io, Int16)
+  SB.nbs = fastread(io, Int32)
+  SB.nbx = fastread(io, Int32)
 
   (v > 0) && println("suds_structtag: machine code = ", Char(m),
                       ", ID = ",          SB.sid,
@@ -16,7 +16,7 @@ function read_struct_tag!(io::IO, v::Int64=0)
 end
 
 function staident!(io::IO, v::Int64=0)
-  read!(io, SB.hdr)
+  fastread!(io, SB.hdr)
   fill!(SB.id, 0x00)
 
   # Set ID string
@@ -48,9 +48,9 @@ function staident!(io::IO, v::Int64=0)
 end
 
 function read_chansetentry!(S::GphysData, io::IO, v::Int64)
-  SB.C.inst    = read(io, Int32)
-  SB.C.stream  = read(io, Int16)
-  SB.C.chno    = read(io, Int16)
+  SB.C.inst    = fastread(io, Int32)
+  SB.C.stream  = fastread(io, Int16)
+  SB.C.chno    = fastread(io, Int16)
   staident!(io, 0)
   if v > 2
     println("id = ",          SB.id_str,
@@ -71,16 +71,16 @@ end
 # STATIONCOMP:  Generic station component information
 function read_5!(S::GphysData, io::IO, v::Int64, full::Bool)
   staident!(io, 0)
-  SB.S05.az             = read(io, Int16)    # azimuth, N°E
-  SB.S05.inc            = read(io, Int16)    # incidence, from vertical
-  SB.S05.lat            = read(io, Float64)  # latitude, N = +
-  SB.S05.lon            = read(io, Float64)  # longitude, E = +
-  SB.S05.ele            = read(io, Float32)  # elevation, meters
-  read!(io, SB.S05.codes)
-  read!(io, SB.S05.gain)
-  read!(io, SB.S05.a2d)
-  SB.t_i32              = read(io, Int32)    # date/time values became effective
-  read!(io, SB.S05.t_corr)
+  SB.S05.az             = fastread(io, Int16)    # azimuth, N°E
+  SB.S05.inc            = fastread(io, Int16)    # incidence, from vertical
+  SB.S05.lat            = fastread(io, Float64)  # latitude, N = +
+  SB.S05.lon            = fastread(io, Float64)  # longitude, E = +
+  SB.S05.ele            = fastread(io, Float32)  # elevation, meters
+  fastread!(io, SB.S05.codes)
+  fastread!(io, SB.S05.gain)
+  fastread!(io, SB.S05.a2d)
+  SB.t_i32              = fastread(io, Int32)    # date/time values became effective
+  fastread!(io, SB.S05.t_corr)
 
   # Post-read processing
   SB.data_type  = SB.S05.codes[9]
@@ -141,16 +141,16 @@ end
 
 # MUXDATA:  Header for (possibly) multiplexed data
 function read_6!(S::GphysData, io::IO, v::Int64, full::Bool)
-  SB.T.net      = read(io, UInt16)
-  skip(io, 2)
-  SB.t_f64      = read(io, Float64)
-  SB.t_i16      = read(io, Int16)
-  SB.T.n_ch     = read(io, Int16)
-  SB.fs         = read(io, Float32)
-  SB.data_type  = read(io, UInt8)
-  skip(io, 3)
-  SB.T.ns       = read(io, Int32)
-  SB.nz         = read(io, Int32)
+  SB.T.net      = fastread(io, UInt16)
+  fastskip(io, 2)
+  SB.t_f64      = fastread(io, Float64)
+  SB.t_i16      = fastread(io, Int16)
+  SB.T.n_ch     = fastread(io, Int16)
+  SB.fs         = fastread(io, Float32)
+  SB.data_type  = fastread(io)
+  fastskip(io, 3)
+  SB.T.ns       = fastread(io, Int32)
+  SB.nz         = fastread(io, Int32)
 
   if v > 1
     println("net = ",         Char(SB.T.net & 0x00ff), Char(SB.T.net >> 8),
@@ -172,16 +172,16 @@ end
                    Normally followed by waveform data =#
 function read_7!(S::GphysData, io::IO, v::Int64, full::Bool)
   staident!(io, 0)
-  SB.t_f64       = read(io, Float64)
-  SB.t_i16       = read(io, Int16)
-  SB.data_type   = read(io, UInt8)
-  SB.T.desc      = read(io, UInt8)
-  skip(io, 4)
-  SB.nz          = read(io, Int32)
-  SB.fs          = read(io, Float32)
-  skip(io, 16)
-  SB.t_f64      += read(io, Float64)
-  SB.rc          = read(io, Float32)
+  SB.t_f64       = fastread(io, Float64)
+  SB.t_i16       = fastread(io, Int16)
+  SB.data_type   = fastread(io)
+  SB.T.desc      = fastread(io)
+  fastskip(io, 4)
+  SB.nz          = fastread(io, Int32)
+  SB.fs          = fastread(io, Float32)
+  fastskip(io, 16)
+  SB.t_f64      += fastread(io, Float64)
+  SB.rc          = fastread(io, Float32)
 
   if v > 2
     tl = SB.t_i16
@@ -201,17 +201,17 @@ end
 # FEATURE:  Observed phase arrival time, amplitude, and period
 function read_10!(S::GphysData, io::IO, v::Int64, full::Bool)
   staident!(io, 0)
-  SB.P.pc           = read(io, Int16)
-  SB.P.onset        = read(io, UInt8)
-  SB.P.fm           = read(io, UInt8)
-  SB.P.snr          = read(io, Int16)
-  skip(io, 4)
-  SB.P.gr           = read(io, Int16)
-  SB.t_f64          = read(io, Float64)
-  SB.P.amp          = read(io, Float32)
-  SB.t_f32          = read(io, Float32)
-  SB.t_i32          = read(io, Int32)
-  skip(io, 4)
+  SB.P.pc           = fastread(io, Int16)
+  SB.P.onset        = fastread(io)
+  SB.P.fm           = fastread(io)
+  SB.P.snr          = fastread(io, Int16)
+  fastskip(io, 4)
+  SB.P.gr           = fastread(io, Int16)
+  SB.t_f64          = fastread(io, Float64)
+  SB.P.amp          = fastread(io, Float32)
+  SB.t_f32          = fastread(io, Float32)
+  SB.t_i32          = fastread(io, Int32)
+  fastskip(io, 4)
 
   phase = pick_types[SB.P.pc]
   (v > 1) && println(
@@ -241,20 +241,20 @@ end
 
 #  ORIGIN: Information about a specific solution for a given event
 function read_14!(S::GphysData, io::IO, v::Int64, full::Bool)
-  SB.H.evno         = read(io, Int32)
-  SB.H.auth         = read(io, Int16)
-  read!(io, SB.H.chars)
-  SB.H.reg          = read(io, Int32)
-  SB.H.ot           = read(io, Float64)
-  SB.H.lat          = read(io, Float64)
-  SB.H.lon          = read(io, Float64)
-  read!(io, SB.H.floats)
-  read!(io, SB.H.model)
-  SB.H.gap          = read(io, Int16)
-  SB.H.d_min        = read(io, Float32)
-  read!(io, SB.H.shorts)
-  read!(io, SB.H.mag)
-  SB.t_i32          = read(io, Int32)
+  SB.H.evno         = fastread(io, Int32)
+  SB.H.auth         = fastread(io, Int16)
+  fastread!(io, SB.H.chars)
+  SB.H.reg          = fastread(io, Int32)
+  SB.H.ot           = fastread(io, Float64)
+  SB.H.lat          = fastread(io, Float64)
+  SB.H.lon          = fastread(io, Float64)
+  fastread!(io, SB.H.floats)
+  fastread!(io, SB.H.model)
+  SB.H.gap          = fastread(io, Int16)
+  SB.H.d_min        = fastread(io, Float32)
+  fastread!(io, SB.H.shorts)
+  fastread!(io, SB.H.mag)
+  SB.t_i32          = fastread(io, Int32)
   if v > 1
     println("evno = ",      SB.H.evno,
             ", auth = ",    SB.H.auth,
@@ -278,15 +278,15 @@ end
 
 # COMMENT:  Comment tag to be followed by the bytes of comment
 function read_20!(S::GphysData, io::IO, v::Int64, full::Bool)
-  read!(io, SB.comm_i)
-  L = read(io, Int16)
-  skip(io, 2)
+  fastread!(io, SB.comm_i)
+  L = fastread(io, Int16)
+  fastskip(io, 2)
   if v > 1
     println("structure ref. ID = ",   SB.comm_i[1],
             ", item in struct ID = ", SB.comm_i[2],
             ", L = ", L)
   end
-  SB.comm_s = String(copy(read(io, L)))
+  SB.comm_s = String(copy(fastread(io, L)))
   (v > 2) && (printstyled("comment: \n", color=:green); println(SB.comm_s); printstyled("--\n", color=:green))
   return nothing
 end
@@ -294,8 +294,8 @@ end
 # TRIGGERS:  Earthquake detector trigger statistics
 function read_25!(S::GphysData, io::IO, v::Int64, full::Bool)
   staident!(io, 0)
-  shorts    = read!(io, zeros(Int16, 6))
-  trig_time = read(io, Float64)
+  shorts    = fastread(io, Int16, 6)
+  trig_time = fastread(io, Float64)
   if v > 1
     println("id = ",          SB.id_str,
             ", inst code = ", Int16(SB.hdr[12]) << 8 | Int16(SB.hdr[11]),
@@ -307,13 +307,13 @@ end
 
 # TRIGSETTING:  Settings for earthquake trigger system
 function read_26!(S::GphysData, io::IO, v::Int64, full::Bool)
-  net       = read!(io, zeros(UInt8, 4))
-  btime     = read(io, Float64)
-  shorts    = read!(io, zeros(Int16, 6))
-  t_sweep   = read(io, Float32)
-  t_aper    = read(io, Float32)
-  alg       = read(io, UInt8)
-  skip(io, 3)
+  net       = fastread(io, UInt8, 4)
+  btime     = fastread(io, Float64)
+  shorts    = fastread(io, Int16, 6)
+  t_sweep   = fastread(io, Float32)
+  t_aper    = fastread(io, Float32)
+  alg       = fastread(io)
+  fastskip(io, 3)
   if v > 1
     println("net = ", String(copy(net)),
             ", btime = ", u2d(btime),
@@ -328,13 +328,13 @@ end
 
 # EVENTSETTING:  Settings for earthquake trigger system
 function read_27!(S::GphysData, io::IO, v::Int64, full::Bool)
-  net       = read!(io, zeros(UInt8, 4))
-  btime     = read(io, Float64)
-  shorts    = read!(io, zeros(Int16, 4))
-  dur_min   = read(io, Float32)
-  dur_max   = read(io, Float32)
-  alg       = read(io, UInt8)
-  skip(io, 3)
+  net       = fastread(io, UInt8, 4)
+  btime     = fastread(io, Float64)
+  shorts    = fastread(io, Int16, 4)
+  dur_min   = fastread(io, Float32)
+  dur_max   = fastread(io, Float32)
+  alg       = fastread(io)
+  fastskip(io, 3)
   if v > 1
     println("net = ", String(copy(net)),
             ", btime = ", u2d(btime),
@@ -349,12 +349,12 @@ end
 
 # DETECTOR
 function read_28!(S::GphysData, io::IO, v::Int64, full::Bool)
-  alg           = read(io, UInt8)
-  event_type    = read(io, UInt8)
-  net_node_id   = read!(io, Array{UInt8,1}(undef, 10))
-  version       = read(io, Float32)
-  event_num     = read(io, Int32)
-  skip(io, 4)
+  alg           = fastread(io)
+  event_type    = fastread(io)
+  net_node_id   = fastread(io, UInt8, 10)
+  version       = fastread(io, Float32)
+  event_num     = fastread(io, Int32)
+  fastskip(io, 4)
 
   if v > 1
     println("algorithm = ", Char(alg),
@@ -370,13 +370,13 @@ end
 
 # ATODINFO
 function read_29!(S::GphysData, io::IO, v::Int64, full::Bool)
-  io_addr       = read(io, Int16)
-  dev_id        = read(io, Int16)
-  dev_flags     = read(io, UInt16)
-  ext_bufs      = read(io, Int16)
-  ext_mux       = read(io, Int16)
-  timing_src    = read(io, UInt8)
-  trig_src      = read(io, UInt8)
+  io_addr       = fastread(io, Int16)
+  dev_id        = fastread(io, Int16)
+  dev_flags     = fastread(io, UInt16)
+  ext_bufs      = fastread(io, Int16)
+  ext_mux       = fastread(io, Int16)
+  timing_src    = fastread(io)
+  trig_src      = fastread(io)
 
   if v > 1
     println("io_addr = ", io_addr,
@@ -395,12 +395,12 @@ end
 # TIMECORRECTION:  Time correction information
 function read_30!(S::GphysData, io::IO, v::Int64, full::Bool)
   staident!(io, 0)
-  SB.tc          = read(io, Float64)
-  SB.rc          = read(io, Float32)
-  SB.sync_code   = Char(read(io, UInt8))
-  skip(io,1)
-  SB.t_i32       = read(io, Int32)
-  skip(io, 2)
+  SB.tc          = fastread(io, Float64)
+  SB.rc          = fastread(io, Float32)
+  SB.sync_code   = Char(fastread(io))
+  fastskip(io,1)
+  SB.t_i32       = fastread(io, Int32)
+  fastskip(io, 2)
 
   if v > 1
     println("tc = ",          SB.tc,
@@ -426,18 +426,18 @@ end
                     added by R. Banfill, Jan 1991 =#
 function read_31!(S::GphysData, io::IO, v::Int64, full::Bool)
   staident!(io, 0)
-  serial    = read(io, Int16)
-  ncmp      = read(io, Int16)
-  chno      = read(io, Int16)
-  sens_type = read(io, UInt8)
-  data_type = read(io, UInt8)
-  void_samp = read(io, Int32)
-  floats    = read!(io, zeros(Float32,10))
-  t_eff     = read(io, Int32)
-  pre_evt   = read(io, Float32)
-  trig_num  = read(io, Int16)
-  study     = read(io, 6)
-  sn_serial = read(io, Int16)
+  serial    = fastread(io, Int16)
+  ncmp      = fastread(io, Int16)
+  chno      = fastread(io, Int16)
+  sens_type = fastread(io)
+  data_type = fastread(io)
+  void_samp = fastread(io, Int32)
+  floats    = fastread(io, Float32, 10)
+  t_eff     = fastread(io, Int32)
+  pre_evt   = fastread(io, Float32)
+  trig_num  = fastread(io, Int16)
+  study     = fastread(io, 6)
+  sn_serial = fastread(io, Int16)
   if v > 1
     println("id = ",            SB.id_str,
             ", inst code = ",   Int16(SB.hdr[12]) << 8 | Int16(SB.hdr[11]),
@@ -460,12 +460,12 @@ end
 
 # CHANSET:  Associate stations and components with sets...???
 function read_32!(S::GphysData, io::IO, v::Int64, full::Bool)
-  SB.C.typ        = read(io, Int16)
-  SB.C.n          = read(io, Int16)
-  read!(io, SB.C.sta)
-  skip(io, 1)
-  SB.C.tu         = read(io, Int32)
-  SB.C.td         = read(io, Int32)
+  SB.C.typ        = fastread(io, Int16)
+  SB.C.n          = fastread(io, Int16)
+  fastread!(io, SB.C.sta)
+  fastskip(io, 1)
+  SB.C.tu         = fastread(io, Int32)
+  SB.C.td         = fastread(io, Int32)
   if v > 1
     println("type = ",    SB.C.typ,
             ", n = ",     SB.C.n,

@@ -140,18 +140,18 @@ function write(io::IO, S::SeisChannel)
 end
 
 read(io::IO, ::Type{SeisChannel}) = SeisChannel(
-  String(read(io, read(io, Int64))),                                    # id
-  String(read(io, read(io, Int64))),                                    # name
-  read(io, code2loctyp(read(io, UInt8))),                              # loc
-  read(io, Float64),                                                    # fs
-  read(io, Float64),                                                    # gain
-  read(io, code2resptyp(read(io, UInt8))),                              # resp
-  String(read(io, read(io, Int64))),                                    # units
-  String(read(io, read(io, Int64))),                                    # src
-  read_misc(io, getfield(BUF, :buf)),                                   # misc
-  read_string_vec(io, getfield(BUF, :buf)),                             # notes
-  read!(io, Array{Int64, 2}(undef, read(io, Int64), 2)),                # t
-  read!(io, Array{code2typ(read(io,UInt8)),1}(undef, read(io, Int64))), # x
+  String(fastread(io, fastread(io, Int64))),                          # id
+  String(fastread(io, fastread(io, Int64))),                          # name
+  read(io, code2loctyp(fastread(io))),                                # loc
+  fastread(io, Float64),                                              # fs
+  fastread(io, Float64),                                              # gain
+  read(io, code2resptyp(fastread(io))),                               # resp
+  String(fastread(io, fastread(io, Int64))),                          # units
+  String(fastread(io, fastread(io, Int64))),                          # src
+  read_misc(io, getfield(BUF, :buf)),                                 # misc
+  read_string_vec(io, getfield(BUF, :buf)),                           # notes
+  read!(io, Array{Int64, 2}(undef, fastread(io, Int64), 2)),          # t
+  read!(io, Array{code2typ(read(io,UInt8)), 1}(undef, fastread(io, Int64))), # x
   )
 
 convert(::Type{SeisData}, C::SeisChannel) = SeisData(C)

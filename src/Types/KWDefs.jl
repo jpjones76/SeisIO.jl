@@ -63,7 +63,7 @@ end
 """
     SeisIO.KW
 
-An immutable structure containing default keyword argument values in SeisIO.
+A mutable structure containing default keyword argument values in SeisIO.
 Arguments that accept keywords in SeisIO.KW use the default values when a
 keyword isn't specified.
 
@@ -112,10 +112,8 @@ keyword isn't specified.
 | pha      | "P"        | String             | phases to get (comma-separated |
 |          |            |                    |   list; use "ttall" for all)   |
 
-### Substructures
-
-    SeisIO.KW.SL: Seedlink-specific keyword defaults. SeedLink also uses some
-general keywords.
+### SeisIO.KW.SL
+Seedlink-specific keyword default values. SeedLink also uses some general keywords.
 
 | Name        | Default | Type            | Description                       |
 |:------------|:--------|:----------------|:----------------------------------|
@@ -126,7 +124,8 @@ general keywords.
 | refresh     | 20      | Real            | base refresh interval [s]         |
 | xonerr      | true    | Bool            | exit on error?                    |
 
-SeisIO.KW.Filt: Defaults parameters for time-series filtering.
+### SeisIO.KW.Filt
+Default keyword values for time-series filtering.
 
 | Name  | Default       | Type    | Description                         |
 |:------|:--------------|:--------|:------------------------------------|

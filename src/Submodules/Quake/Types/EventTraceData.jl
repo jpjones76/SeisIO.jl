@@ -196,8 +196,8 @@ function write(io::IO, S::EventTraceData)
 
   # Write begins -----------------------------------------------------
   write(io, N)
-  p = position(io)
-  skip(io, 19*N+1)
+  p = fastpos(io)
+  fastskip(io, 19*N+1)
   write_string_vec(io, S.id)                                          # id
   write_string_vec(io, S.name)                                        # name
   i = 0                                                               # loc
@@ -254,13 +254,13 @@ function write(io::IO, S::EventTraceData)
     end
     setindex!(codes, typ2code(eltype(x)), 2*N+i)
   end
-  q = position(io)
+  q = fastpos(io)
 
-  seek(io, p)
+  fastseek(io, p)
   write(io, codes)
   write(io, cmp)
   write(io, L)
-  seek(io, q)
+  fastseek(io, q)
   return nothing
 end
 
@@ -268,9 +268,9 @@ end
 function read(io::IO, ::Type{EventTraceData})
   Z = getfield(BUF, :buf)
   L = getfield(BUF, :int64_buf)
-  N     = read(io, Int64)
+  N     = fastread(io, Int64)
   checkbuf_strict!(L, 2*N)
-  readbytes!(io, Z, 3*N)
+  fast_readbytes!(io, Z, 3*N)
   c1    = copy(Z[1:N])
   c2    = copy(Z[N+1:2*N])
   y     = code2typ.(getindex(Z, 2*N+1:3*N))
@@ -300,7 +300,7 @@ function read(io::IO, ::Type{EventTraceData})
     [read_string_vec(io, Z) for i = 1:N],
     [read!(io, Array{Int64, 2}(undef, getindex(L, i), 2)) for i = 1:N],
     FloatArray[cmp ?
-      (readbytes!(io, Z, getindex(nx, i)); Blosc.decompress(getindex(y,i), Z)) :
+      (fast_readbytes!(io, Z, getindex(nx, i)); Blosc.decompress(getindex(y,i), Z)) :
       read!(io, Array{getindex(y,i), 1}(undef, getindex(nx, i)))
       for i = 1:N]
     )

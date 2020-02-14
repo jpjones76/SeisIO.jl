@@ -140,12 +140,12 @@ function read_seed_resp!(S::GphysData, fpat::String;
     io = open(file, "r")
     chip = false
     while !eof(io)
-      c = read(io, UInt8)
+      c = fastread(io)
 
       # comment line ------------------------------
       if c == 0x23
         while c != 0x0a
-          c = read(io, UInt8)
+          c = fastread(io)
         end
       end
 
@@ -158,12 +158,12 @@ function read_seed_resp!(S::GphysData, fpat::String;
         String(reinterpret(UInt8, [blk]))[1:6] = bbbFff, where bbb is
         blockette # and ff is field #
         =#
-        blk  = UInt64(read(io, UInt8))
-        blk |= UInt64(read(io, UInt8)) << 8
-        blk |= UInt64(read(io, UInt8)) << 16
-        blk |= UInt64(read(io, UInt8)) << 24
-        blk |= UInt64(read(io, UInt8)) << 32
-        blk |= UInt64(read(io, UInt8)) << 40
+        blk  = UInt64(fastread(io))
+        blk |= UInt64(fastread(io)) << 8
+        blk |= UInt64(fastread(io)) << 16
+        blk |= UInt64(fastread(io)) << 24
+        blk |= UInt64(fastread(io)) << 32
+        blk |= UInt64(fastread(io)) << 40
         read_state = 0x01
 
         # Coefficient parsing ==================================================
@@ -173,11 +173,11 @@ function read_seed_resp!(S::GphysData, fpat::String;
           for n = 1:NN
             # To first non-whitespace
             if n > 1
-              skip(io, 7)
+              fastskip(io, 7)
             end
-            c = read(io, UInt8)
+            c = fastread(io)
             while c == 0x20
-              c = read(io, UInt8)
+              c = fastread(io)
             end
             j = get_coeff_n(io, c, buf)
             c = skip_whitespace(io, c)
@@ -186,7 +186,7 @@ function read_seed_resp!(S::GphysData, fpat::String;
             while c != 0x0a
               buf[k] = c
               k += 1
-              c = read(io, UInt8)
+              c = fastread(io)
             end
             store_dbl!(X, buf, k, j)
           end
@@ -207,9 +207,9 @@ function read_seed_resp!(S::GphysData, fpat::String;
           for n = 1:N
             # coefficient number
             if n > 1
-              skip(io, 10)
+              fastskip(io, 10)
             else
-              skip(io, 3)
+              fastskip(io, 3)
             end
             c = skip_whitespace(io, c)
             j = get_coeff_n(io, c, buf)
@@ -220,7 +220,7 @@ function read_seed_resp!(S::GphysData, fpat::String;
             while c != 0x20
               buf[k] = c
               k += 1
-              c = read(io, UInt8)
+              c = fastread(io)
             end
             xr = buf_to_double(buf, k)
 
@@ -230,7 +230,7 @@ function read_seed_resp!(S::GphysData, fpat::String;
             while c != 0x20
               buf[k] = c
               k += 1
-              c = read(io, UInt8)
+              c = fastread(io)
             end
             xi = buf_to_double(buf, k)
 
@@ -259,9 +259,9 @@ function read_seed_resp!(S::GphysData, fpat::String;
           for n = 1:N
             # To first non-whitespace
             if n > 1
-              skip(io, 10)
+              fastskip(io, 10)
             else
-              skip(io, 3)
+              fastskip(io, 3)
             end
             c = skip_whitespace(io, c)
             j = get_coeff_n(io, c, buf)
@@ -272,7 +272,7 @@ function read_seed_resp!(S::GphysData, fpat::String;
             while c != 0x20
               buf[k] = c
               k += 1
-              c = read(io, UInt8)
+              c = fastread(io)
             end
 
             # Store
@@ -287,7 +287,7 @@ function read_seed_resp!(S::GphysData, fpat::String;
         else
           # To separator
           while c != 0x3a
-            c = read(io, UInt8)
+            c = fastread(io)
           end
 
           # To first non-whitespace
@@ -302,7 +302,7 @@ function read_seed_resp!(S::GphysData, fpat::String;
           buf[i] = c
           i += 1
           eof(io) && break
-          c = read(io, UInt8)
+          c = fastread(io)
         end
         i -= 1
 

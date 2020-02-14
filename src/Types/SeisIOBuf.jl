@@ -130,6 +130,10 @@ mutable struct SeisIOBuf
   # For parsing dates
   date_buf::Array{Int32,1}
 
+  # For mini-SEED data header
+  dh_arr::Array{UInt8, 1}
+  dh_buf::Base.GenericIOBuffer{Array{UInt8,1}}
+
   # Blockette containers
   B201::Blk201
   B500::Blk500
@@ -180,6 +184,10 @@ mutable struct SeisIOBuf
         # dedicated array for parsing dates
         Array{Int32,1}(undef, 7),           # date_buf::Array{Int32,1}
 
+        # dedicated array for mini-SEED data header
+        Array{UInt8,1}(undef, 48),          # dh_arr::Array{UInt8,1}
+        IOBuffer(),                         # dh_buf::Base.GenericIOBuffer{Array{UInt8,1}}
+
         # blockette fields
         Blk201(),                           # Blk201:: Blk201
         Blk500(),                           # Blk500:: Blk500
@@ -190,3 +198,4 @@ mutable struct SeisIOBuf
 end
 
 const BUF = SeisIOBuf()
+BUF.dh_buf = IOBuffer(BUF.dh_arr)

@@ -18,13 +18,15 @@ type `?timespec` for more information about how these are interpreted.
 
 See also: timespec, parsetimewin, read_data
 """ read_hdf5!
-function read_hdf5!(S::GphysData, filestr::String, s::TimeSpec, t::TimeSpec;
+function read_hdf5!(S::GphysData, fpat::String, s::TimeSpec, t::TimeSpec;
   fmt ::String                = "asdf",                 # data format
   id  ::Union{String, Regex}  = "*",                    # id string
   msr ::Bool                  = true,                   # read multistage response?
   v   ::Int64                 = KW.v                    # verbosity
   )
 
+  N = S.n
+  filestr = abspath(fpat)
   one_file = safe_isfile(filestr)
 
   if fmt == "asdf"
@@ -40,6 +42,18 @@ function read_hdf5!(S::GphysData, filestr::String, s::TimeSpec, t::TimeSpec;
   else
     error("Unknown file format (possibly NYI)!")
   end
+
+  new_chan_src = view(S.src, N+1:S.n)
+  fill!(new_chan_src, filestr)
+  note!(S, N+1:S.n, string( " ¦ +source ¦ read_hdf5!(S, ",
+                            "\"", fmt, "\", ",
+                            "\"", s, "\", ",
+                            "\"", t, "\", ",
+                            "fmt=\"", fmt, "\", ",
+                            "id=\"", id, "\", ",
+                            "msr=", msr, ", ",
+                            "v=", KW.v, ")")
+        )
 
   return nothing
 end

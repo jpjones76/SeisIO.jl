@@ -79,15 +79,15 @@ end
 
 function read(io::IO, ::Type{EQMag})
   M = EQMag()
-  setfield!(M, :val, read(io, Float32))
-  setfield!(M, :gap, read(io, Float64))
-  setfield!(M, :nst, read(io, Int64))
+  setfield!(M, :val, fastread(io, Float32))
+  setfield!(M, :gap, fastread(io, Float64))
+  setfield!(M, :nst, fastread(io, Int64))
 
-  L = read(io, Int64)
-  setfield!(M, :scale, String(read(io, L)))
+  L = fastread(io, Int64)
+  setfield!(M, :scale, String(fastread(io, L)))
 
-  L = read(io, Int64)
-  setfield!(M, :src, String(read(io, L)))
+  L = fastread(io, Int64)
+  setfield!(M, :src, String(fastread(io, L)))
   return M
 end
 

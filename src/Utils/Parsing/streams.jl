@@ -6,16 +6,16 @@ function parse_digits(io::IO, c::UInt8, N::UInt8)
   m = 0x00000001
 
   while is_u8_digit(c)
-    eof(io) && break
+    fasteof(io) && break
     if i < N
       p = div(p, 0x0a)
       i += 0x01
       v += (c-0x30)*p
       m = p
     end
-    c = read(io, UInt8)
+    c = fastread(io)
   end
-  skip(io, -1)
+  fastskip(io, -1)
   return v, m
 end
 
@@ -23,7 +23,7 @@ function stream_int(io::IO, L::Int64)
   p = 10^(L-1)
   n = zero(Int64)
   @inbounds for i = 1:L
-    c = read(io, UInt8)
+    c = fastread(io)
     if is_u8_digit(c)
       n += p*(c-0x30)
     end
@@ -45,7 +45,7 @@ function stream_float(io::IO, c::UInt8)
   esgn = true
   read_exp = false
   while true
-    c = read(io, UInt8)
+    c = fastread(io)
     if is_u8_digit(c)
       if read_exp
         x,q = parse_digits(io, c, 0x04)
@@ -67,7 +67,7 @@ function stream_float(io::IO, c::UInt8)
 
     # '.'
     elseif c == 0x2e
-      c = read(io, UInt8)
+      c = fastread(io)
       d, u = parse_digits(io, c, 0x08)
 
     # 'E', 'F', 'e', 'f'
@@ -101,23 +101,23 @@ function stream_time(io::IO, T::Array{Y,1}) where Y<:Integer
   i = mark(io)
   k = 1
   while true
-    c = read(io, UInt8)
+    c = fastread(io)
 
     if c in (0x2d, 0x2e, 0x3a, 0x54)
-      L = position(io)-i-1
+      L = fastpos(io)-i-1
       reset(io)
       T[k] = stream_int(io, L)
-      skip(io, 1)
+      fastskip(io, 1)
       i = mark(io)
       k += 1
 
     # exit on any non-digit character except (',', '.', ':', 'T')
     elseif c < 0x30 || c > 0x39
-      L = position(io)-i-1
+      L = fastpos(io)-i-1
       if L > 0
         reset(io)
         T[k] = stream_int(io, L)
-        skip(io, 1)
+        fastskip(io, 1)
       end
       break
     end

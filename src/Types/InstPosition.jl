@@ -102,8 +102,8 @@ function write(io::IO, Loc::GenLoc)
   return nothing
 end
 
-read(io::IO, ::Type{GenLoc}) = GenLoc(String(read(io, read(io, Int64))),
-  read!(io, Array{Float64, 1}(undef, read(io, Int64))))
+read(io::IO, ::Type{GenLoc}) = GenLoc(String(fastread(io, fastread(io, Int64))),
+  read!(io, Array{Float64, 1}(undef, fastread(io, Int64))))
 
 isempty(Loc::GenLoc) = min(isempty(Loc.datum), isempty(Loc.loc))
 hash(Loc::GenLoc) = hash(Loc.datum, hash(Loc.loc))
@@ -183,13 +183,13 @@ function write(io::IO, Loc::GeoLoc)
 end
 
 read(io::IO, ::Type{GeoLoc}) = GeoLoc(
-  String(read(io, read(io, Int64))),
-  read(io, Float64),
-  read(io, Float64),
-  read(io, Float64),
-  read(io, Float64),
-  read(io, Float64),
-  read(io, Float64)
+  String(fastread(io, fastread(io, Int64))),
+  fastread(io, Float64),
+  fastread(io, Float64),
+  fastread(io, Float64),
+  fastread(io, Float64),
+  fastread(io, Float64),
+  fastread(io, Float64)
 )
 
 function isempty(Loc::GeoLoc)
@@ -298,15 +298,15 @@ function write(io::IO, Loc::UTMLoc)
 end
 
 read(io::IO, ::Type{UTMLoc}) = UTMLoc(
-  String(read(io, read(io, Int64))),
-  read(io, Int8),
-  read(io, Char),
-  read(io, UInt64),
-  read(io, UInt64),
-  read(io, Float64),
-  read(io, Float64),
-  read(io, Float64),
-  read(io, Float64)
+  String(fastread(io, fastread(io, Int64))),
+  fastread(io, Int8),
+  fastread(io, Char),
+  fastread(io, UInt64),
+  fastread(io, UInt64),
+  fastread(io, Float64),
+  fastread(io, Float64),
+  fastread(io, Float64),
+  fastread(io, Float64)
   )
 
 function isempty(Loc::UTMLoc)
@@ -419,15 +419,15 @@ function write(io::IO, Loc::XYLoc)
 end
 
 read(io::IO, ::Type{XYLoc}) = XYLoc(
-  String(read(io, read(io, Int64))),
-  read(io, Float64),
-  read(io, Float64),
-  read(io, Float64),
-  read(io, Float64),
-  read(io, Float64),
-  read(io, Float64),
-  read(io, Float64),
-  read(io, Float64)
+  String(fastread(io, fastread(io, Int64))),
+  fastread(io, Float64),
+  fastread(io, Float64),
+  fastread(io, Float64),
+  fastread(io, Float64),
+  fastread(io, Float64),
+  fastread(io, Float64),
+  fastread(io, Float64),
+  fastread(io, Float64)
   )
 
 function isempty(Loc::XYLoc)

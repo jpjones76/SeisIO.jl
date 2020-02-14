@@ -18,8 +18,8 @@ end
 
 function read_mseed_file!(S::SeisData, fname::String, v::Int64, nx_new::Int64, nx_add::Int64)
   io = open(fname, "r")
-  skip(io, 6)
-  c = read(io, UInt8)
+  fastskip(io, 6)
+  c = fastread(io)
   if c in (0x44, 0x52, 0x4d, 0x51)
     seekstart(io)
     parsemseed!(S, io, v, nx_new, nx_add)

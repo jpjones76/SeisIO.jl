@@ -7,25 +7,25 @@ function ah_time(t::Array{Int32,1}, ts::Float32)
 end
 
 function read_ah_str(io::IO, j::Int64)
-  n = bswap(read(io, Int32))
+  n = bswap(fastread(io, Int32))
   r = rem(n, 4)
   # these are all very short; a "for" loop is fastest
   for i = 1:n
     j += 1
-    BUF.buf[j] = read(io, UInt8)
+    BUF.buf[j] = fastread(io)
   end
-  r > 0 && skip(io, 4-r)
+  r > 0 && fastskip(io, 4-r)
   return j
 end
 
 function read_comm!(io::IO, buf::Array{UInt8,1}, full::Bool)
-  n = bswap(read(io, Int32))
+  n = bswap(fastread(io, Int32))
   r = rem(n, 4)
   j = 0
   k = 0
   if full
     checkbuf!(buf, n)
-    readbytes!(io, buf, n)
+    fast_readbytes!(io, buf, n)
     while k < n
       k += 1
       c = getindex(buf, k)
@@ -34,10 +34,10 @@ function read_comm!(io::IO, buf::Array{UInt8,1}, full::Bool)
         BUF.buf[j] = c
       end
     end
-    (r > 0) && skip(io, 4-r)
+    (r > 0) && fastskip(io, 4-r)
   else
     (r > 0) && (n += 4-r)
-    skip(io, n)
+    fastskip(io, n)
   end
   return j
 end
@@ -97,16 +97,16 @@ function read_ah2!(S::GphysData, ahfile::String;
   while !eof(io)
     loc = GeoLoc()
 
-    ver = bswap(read(io, Int32))
+    ver = bswap(fastread(io, Int32))
     ver == 1100 || error("Not a valid AH-2 file!")
-    len = bswap(read(io, UInt32))
+    len = bswap(fastread(io, UInt32))
 
     # Station header =========================================================
-    skip(io, 4)
+    fastskip(io, 4)
     js = read_ah_str(io, 0)
-    skip(io, 4)
+    fastskip(io, 4)
     jc = read_ah_str(io, js)
-    skip(io, 4)
+    fastskip(io, 4)
     jn = read_ah_str(io, jc)
     jrec = read_ah_str(io, jn)
     jsen = read_ah_str(io, jrec)
@@ -114,12 +114,12 @@ function read_ah2!(S::GphysData, ahfile::String;
     id = unsafe_string(pointer(BUF.id), j)
 
     # Fill SeisChannel header
-    setfield!(loc, :az, Float64(bswap(read(io, Float32))))
-    setfield!(loc, :inc, 90.0-bswap(read(io, Float32)))
-    setfield!(loc, :lat, bswap(read(io, Float64)))
-    setfield!(loc, :lon, bswap(read(io, Float64)))
-    setfield!(loc, :el, Float64(bswap(read(io, Float32))))
-    gain = bswap(read(io, Float32))
+    setfield!(loc, :az, Float64(bswap(fastread(io, Float32))))
+    setfield!(loc, :inc, 90.0-bswap(fastread(io, Float32)))
+    setfield!(loc, :lat, bswap(fastread(io, Float64)))
+    setfield!(loc, :lon, bswap(fastread(io, Float64)))
+    setfield!(loc, :el, Float64(bswap(fastread(io, Float32))))
+    gain = bswap(fastread(io, Float32))
 
     C = SeisChannel(id = id,
                     loc = loc,
@@ -131,13 +131,13 @@ function read_ah2!(S::GphysData, ahfile::String;
       C.misc["recorder"] = unsafe_string(pointer(BUF.buf, jn+1), jrec-jn)
       C.misc["sensor"] = unsafe_string(pointer(BUF.buf, jrec+1), jsen-jrec)
     end
-    A0 = bswap(read(io, Float32))
-    NP = bswap(read(io, Int32))
+    A0 = bswap(fastread(io, Float32))
+    NP = bswap(fastread(io, Int32))
     P = zeros(Complex{Float32}, NP)
-    read!(io, P)
-    NZ = bswap(read(io, Int32))
+    fastread!(io, P)
+    NZ = bswap(fastread(io, Int32))
     Z = zeros(Complex{Float32}, NZ)
-    read!(io, Z)
+    fastread!(io, Z)
     setfield!(C, :resp, PZResp(a0 = A0, p = P, z = Z))
     j = read_comm!(io, str, full)
     if full
@@ -146,35 +146,35 @@ function read_ah2!(S::GphysData, ahfile::String;
 
     # Event header ==========================================================
     if full
-      C.misc["ev_lat"] = bswap(read(io, Float64))
-      C.misc["ev_lon"] = bswap(read(io, Float64))
-      C.misc["ev_dep"] = bswap(read(io, Float32))
-      read!(io, ti)
-      t_s = read(io, Float32)
-      skip(io, 4)
+      C.misc["ev_lat"] = bswap(fastread(io, Float64))
+      C.misc["ev_lon"] = bswap(fastread(io, Float64))
+      C.misc["ev_dep"] = bswap(fastread(io, Float32))
+      fastread!(io, ti)
+      t_s = fastread(io, Float32)
+      fastskip(io, 4)
       j = read_comm!(io, str, full)
       C.misc["event_comment"] = unsafe_string(pointer(BUF.buf), j)
       C.misc["ot"] =  ah_time(ti, t_s)
       (v > 1) && println("ev_lat = ", C.misc["ev_lat"], ", ev_lon = ", C.misc["ev_lon"])
     else
-      skip(io, 48)
+      fastskip(io, 48)
       read_comm!(io, str, full)
     end
 
     # Data header ===========================================================
-    fmt   = bswap(read(io, Int32))
-    nx    = bswap(read(io, UInt32))
-    dt    = bswap(read(io, Float32))
-    Amax  = bswap(read(io, Float32))
-    read!(io, ti)
-    t_s   = read(io, Float32)
-    n     = bswap(read(io, Int32))
-    C.units = n > 0 ? unsafe_string(pointer(read(io, n))) : ""
-    n = bswap(read(io, Int32))
-    inunits = read(io, n)
-    n = bswap(read(io, Int32))
-    outunits = read(io, n)
-    skip(io, 4)
+    fmt   = bswap(fastread(io, Int32))
+    nx    = bswap(fastread(io, UInt32))
+    dt    = bswap(fastread(io, Float32))
+    Amax  = bswap(fastread(io, Float32))
+    fastread!(io, ti)
+    t_s   = fastread(io, Float32)
+    n     = bswap(fastread(io, Int32))
+    C.units = n > 0 ? unsafe_string(pointer(fastread(io, n))) : ""
+    n = bswap(fastread(io, Int32))
+    inunits = fastread(io, n)
+    n = bswap(fastread(io, Int32))
+    outunits = fastread(io, n)
+    fastskip(io, 4)
     j = read_comm!(io, str, full)
     if full
       C.misc["data_comment"] = unsafe_string(pointer(BUF.buf), j)
@@ -183,7 +183,7 @@ function read_ah2!(S::GphysData, ahfile::String;
       C.misc["Amax"] = Amax
       C.misc["ti"] = bswap.(copy(ti))
     end
-    skip(io, 4)
+    fastskip(io, 4)
     k = read_comm!(io, str, full)
     (v > 1) && println("nx = ", nx, ", dt = ", dt, ", Amax = ", Amax, ", k = ", k)
     if full
@@ -202,7 +202,7 @@ function read_ah2!(S::GphysData, ahfile::String;
       end
     end
 
-    nattr = bswap(read(io, Int32))
+    nattr = bswap(fastread(io, Int32))
     if nattr > 0
       UA = Dict{String, String}()
       for i = 1:nattr
@@ -231,7 +231,7 @@ function read_ah2!(S::GphysData, ahfile::String;
     # Data
     T = fmt == 1 ? Float32 : Float64
     x = Array{T, 1}(undef, nx)
-    read!(io, x)
+    fastread!(io, x)
     x .= bswap.(x)
     v > 2 && println("x = [", x[1], ", ", x[2], ", ", x[3], ", ", x[4], ", ... ", x[nx-3], ", ", x[nx-2], ", ", x[nx-1], ", ", x[nx], "]")
 
@@ -275,34 +275,34 @@ function read_ah1!(S::GphysData, ahfile::String;
     jn = read_ah_str(io, jc)
     j  = mk_ah_id(js, jc, jn)
     id = unsafe_string(pointer(BUF.id), j)
-    read!(io, pz_buf)
+    fastread!(io, pz_buf)
 
     # Event header ==========================================================
     if full
-      misc["ev_lat"] = bswap(read(io, Float32))
-      misc["ev_lon"] = bswap(read(io, Float32))
-      misc["ev_dep"] = bswap(read(io, Float32))
-      read!(io, ti)
-      t_s = read(io, Float32)
+      misc["ev_lat"] = bswap(fastread(io, Float32))
+      misc["ev_lon"] = bswap(fastread(io, Float32))
+      misc["ev_dep"] = bswap(fastread(io, Float32))
+      fastread!(io, ti)
+      t_s = fastread(io, Float32)
       j   = read_comm!(io, str, full)
       misc["event_comment"] = unsafe_string(pointer(BUF.buf), j)
       misc["ot"] =  ah_time(ti, t_s)
       (v > 1) && printstyled("ev_lat = ", misc["ev_lat"], ", ev_lon = ", misc["ev_lon"], ", ev_dep = ", misc["ev_dep"], ", ")
     else
-      skip(io, 36)
+      fastskip(io, 36)
       read_comm!(io, str, full)
     end
 
     # Data header ===========================================================
-    fmt   = bswap(read(io, Int32))
-    nx    = bswap(read(io, UInt32))
-    dt    = bswap(read(io, Float32))
+    fmt   = bswap(fastread(io, Int32))
+    nx    = bswap(fastread(io, UInt32))
+    dt    = bswap(fastread(io, Float32))
     (v > 1) && println("nx = ", nx, ", dt = ", dt)
     if full
-      misc["Amax"]  = bswap(read(io, Float32))
-      read!(io, ti)
-      t_s           = read(io, Float32)
-      misc["xmin"]  = bswap(read(io, Float32))
+      misc["Amax"]  = bswap(fastread(io, Float32))
+      fastread!(io, ti)
+      t_s           = fastread(io, Float32)
+      misc["xmin"]  = bswap(fastread(io, Float32))
       j             = read_comm!(io, str, full)
 
       # Log all processing to :notes
@@ -324,22 +324,22 @@ function read_ah1!(S::GphysData, ahfile::String;
       end
 
       # Set all "extras" in :misc
-      ne = bswap(read(io, UInt32))
+      ne = bswap(fastread(io, UInt32))
       if ne > 0
         misc["extras"] = zeros(Float32, ne)
-        read!(io, misc["extras"])
+        fastread!(io, misc["extras"])
         broadcast!(bswap, misc["extras"], misc["extras"])
       end
     else
-      skip(io, 4)
-      read!(io, ti)
-      t_s = read(io, Float32)
-      skip(io, 4)
+      fastskip(io, 4)
+      fastread!(io, ti)
+      t_s = fastread(io, Float32)
+      fastskip(io, 4)
       read_comm!(io, str, full)
       read_comm!(io, str, full)
-      ne = bswap(read(io, UInt32))
+      ne = bswap(fastread(io, UInt32))
       if ne > 0
-        skip(io, 0x00000004*ne)
+        fastskip(io, 0x00000004*ne)
       end
     end
 
@@ -380,7 +380,7 @@ function read_ah1!(S::GphysData, ahfile::String;
                     Array{fmt == one(Int32) ? Float32 : Float64, 1}(undef, nx))
 
     x = getfield(C, :x)
-    read!(io, x)
+    fastread!(io, x)
     broadcast!(bswap, x, x)
     (v > 2) && println("x[1:5] = ", x[1:5])
 

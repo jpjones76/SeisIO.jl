@@ -135,8 +135,8 @@ function write(io::IO, R::GenResp)
 end
 
 read(io::IO, ::Type{GenResp}) = GenResp(
-  String(read(io, read(io, Int64))),
-  read!(io, Array{Complex{Float64},2}(undef, read(io, Int64), read(io, Int64)))
+  String(fastread(io, fastread(io, Int64))),
+  read!(io, Array{Complex{Float64},2}(undef, fastread(io, Int64), fastread(io, Int64)))
   )
 
 isempty(R::GenResp) = min(isempty(R.desc), isempty(R.resp))
@@ -282,17 +282,17 @@ function write(io::IO, R::Union{PZResp,PZResp64})
 end
 
 read(io::IO, ::Type{PZResp}) = PZResp(
-  read(io, Float32),
-  read(io, Float32),
-  read!(io, Array{Complex{Float32},1}(undef, read(io, Int64))),
-  read!(io, Array{Complex{Float32},1}(undef, read(io, Int64)))
+  fastread(io, Float32),
+  fastread(io, Float32),
+  read!(io, Array{Complex{Float32},1}(undef, fastread(io, Int64))),
+  read!(io, Array{Complex{Float32},1}(undef, fastread(io, Int64)))
   )
 
 read(io::IO, ::Type{PZResp64}) = PZResp64(
-  read(io, Float64),
-  read(io, Float64),
-  read!(io, Array{Complex{Float64},1}(undef, read(io, Int64))),
-  read!(io, Array{Complex{Float64},1}(undef, read(io, Int64)))
+  fastread(io, Float64),
+  fastread(io, Float64),
+  read!(io, Array{Complex{Float64},1}(undef, fastread(io, Int64))),
+  read!(io, Array{Complex{Float64},1}(undef, fastread(io, Int64)))
   )
 
 isempty(R::Union{PZResp,PZResp64}) = min(
@@ -383,8 +383,8 @@ function write(io::IO, R::CoeffResp)
 end
 
 read(io::IO, ::Type{CoeffResp}) = CoeffResp(
-  read!(io, Array{Float64,1}(undef, read(io, Int64))),
-  read!(io, Array{Float64,1}(undef, read(io, Int64)))
+  read!(io, Array{Float64,1}(undef, fastread(io, Int64))),
+  read!(io, Array{Float64,1}(undef, fastread(io, Int64)))
   )
 
 isempty(R::CoeffResp) = min(
@@ -537,8 +537,8 @@ function write(io::IO, R::MultiStageResp)
 end
 
 function read(io::IO, ::Type{MultiStageResp})
-  N         = read(io, Int64)
-  codes     = read(io, N)
+  N         = fastread(io, Int64)
+  codes     = fastread(io, N)
   A  = Array{RespStage,1}(undef, N)
   fill!(A, nothing)
   for i = 1:N

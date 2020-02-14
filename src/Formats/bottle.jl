@@ -83,13 +83,13 @@ function read_bottle!(S::GphysData, fstr::String, v::Int64, nx_new::Int64, nx_ad
     io = open(file, "r")
 
     # Read header ============================================================
-    skip(io, 8)
-    t0 = round(Int64, read(io, Float64)*1.0e6)
-    dt = read(io, Float32)
-    nx = read(io, Int32)
-    ty = read(io, Int32)
-    nv = read(io, Int32)
-    skip(io, 8)
+    fastskip(io, 8)
+    t0 = round(Int64, fastread(io, Float64)*1.0e6)
+    dt = fastread(io, Float32)
+    nx = fastread(io, Int32)
+    ty = fastread(io, Int32)
+    nv = fastread(io, Int32)
+    fastskip(io, 8)
     fs = 1.0/dt
     v > 2 && println("t0 = ", t0, ", fs = ", fs, ", nx = ", nx, ", ty = ", ty, ", nv = ", nv)
 
@@ -97,7 +97,7 @@ function read_bottle!(S::GphysData, fstr::String, v::Int64, nx_new::Int64, nx_ad
     T = ty == 0 ? Int16 : ty == 1 ? Int32 : Float32
     nb = nx*sizeof(T)
     checkbuf_8!(buf, nb)
-    readbytes!(io, buf, nb)
+    fast_readbytes!(io, buf, nb)
     close(io)
 
     # Try to create an ID from the file name =================================
@@ -129,7 +129,6 @@ function read_bottle!(S::GphysData, fstr::String, v::Int64, nx_new::Int64, nx_ad
       setfield!(C, :name, fname)
       setfield!(C, :fs, fs)
       setfield!(C, :units, units)
-      setfield!(C, :src, fstr)
       setfield!(C, :t, t)
       setfield!(C, :x, x)
       push!(S, C)

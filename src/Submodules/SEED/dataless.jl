@@ -51,15 +51,15 @@ function parse_dataless!(S::SeisData, io::IO, s::TimeSpec, t::TimeSpec, v::Int64
   skipping = false
   site_name = ""
 
-  while !eof(io)
-    p = position(io)
+  while !fasteof(io)
+    p = fastpos(io)
     read!(io, BUF.seq)
     BUF.k = 8
     v > 0 && println("seq = ", String(copy(BUF.seq)), ":")
 
     if BUF.seq[7] == 0x20
       v > 0 && println(" "^16, "(empty; skipped 4096 B)")
-      skip(io, 4088)
+      fastskip(io, 4088)
       BUF.k = 0
 
     # ========================================================================
@@ -69,7 +69,7 @@ function parse_dataless!(S::SeisData, io::IO, s::TimeSpec, t::TimeSpec, v::Int64
         #= Buried in the SEED manual: (bottom of page 32) "If there are less
             than seven bytes remaining, the record *must* be flushed." =#
         if BUF.k > 4089
-          skip(io, 4096-BUF.k)
+          fastskip(io, 4096-BUF.k)
           BUF.k = 0
           break
         end
@@ -82,7 +82,7 @@ function parse_dataless!(S::SeisData, io::IO, s::TimeSpec, t::TimeSpec, v::Int64
           if v > 0
             printstyled(string(" "^16, "no blockettes left, skipping rest of record (δp = ", δp, " B); last sequence was ", String(copy(BUF.seq)), "\n"), color=:yellow, bold=true)
           end
-          skip(io, δp)
+          fastskip(io, δp)
           BUF.k = 0
           break
         elseif blk == 52
@@ -182,7 +182,7 @@ function parse_dataless!(S::SeisData, io::IO, s::TimeSpec, t::TimeSpec, v::Int64
           # send more test files if you want more blockette types covered!
           else
             @warn("unsupported blockette type -- trying to skip.")
-            skip(io, nb)
+            fastskip(io, nb)
           end
         end
       end
@@ -210,8 +210,8 @@ function read_dataless(fname::String;
 
   S = SeisData()
   io = open(fname, "r")
-  skip(io, 6)
-  c = read(io, UInt8)
+  fastskip(io, 6)
+  c = fastread(io)
   if c in (0x41, 0x53, 0x54, 0x56) # 'A', 'S', 'T', 'V'
     seekstart(io)
     parse_dataless!(S, io, s, t, v, units)
@@ -220,6 +220,5 @@ function read_dataless(fname::String;
     error("Not a SEED volume!")
   end
   fstr = realpath(fname)
-  fill!(S.src, fstr)
   return S
 end

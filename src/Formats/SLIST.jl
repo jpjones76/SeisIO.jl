@@ -1,14 +1,13 @@
-# FIX
-
-function read_slist!(S::SeisData, f::String; lennartz::Bool=false)
-  fname = realpath(f)
-  nx = countlines(fname) - 1
+function read_slist!(S::SeisData, fname::String; lennartz::Bool=false)
   i = 1
-  X = Array{Float32,1}(undef, nx)
 
   # file read
   io = open(fname, "r")
   h_line = readline(io)
+  mark(io)
+  nx = countlines(io)
+  reset(io)
+  X = Array{Float32,1}(undef, nx)  
   while i ≤ nx
     v = stream_float(io, 0x00)
     setindex!(X, v, i)
@@ -32,7 +31,7 @@ function read_slist!(S::SeisData, f::String; lennartz::Bool=false)
                     1.0,
                     PZResp(),
                     "",
-                    fname,
+                    "",
                     Dict{String, Any}(),
                     String[],
                     mk_t(nx, ts),
@@ -47,7 +46,7 @@ function read_slist!(S::SeisData, f::String; lennartz::Bool=false)
                     1.0,
                     PZResp(),
                     "",
-                    fname,
+                    "",
                     Dict{String, Any}(),
                     String[],
                     mk_t(nx, 1000*(DateTime(lstrip(h[4])).instant.periods.value - div(dtconst, 1000))),

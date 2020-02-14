@@ -72,10 +72,10 @@ end
 
 function read(io::IO, ::Type{SourceTime})
   ST = SourceTime()
-  L = read(io, Int64)
-  setfield!(ST, :desc, String(read(io, L)))
+  L = fastread(io, Int64)
+  setfield!(ST, :desc, String(fastread(io, L)))
   for f in (:dur, :rise, :decay)
-    setfield!(ST, f, read(io, Float64))
+    setfield!(ST, f, fastread(io, Float64))
   end
   return ST
 end

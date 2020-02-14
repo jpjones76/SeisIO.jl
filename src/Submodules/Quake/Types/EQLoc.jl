@@ -149,12 +149,12 @@ function write(io::IO, Loc::EQLoc)
 end
 
 read(io::IO, ::Type{EQLoc}) = EQLoc(read!(io, Array{Float64,1}(undef, 12))...,
-  read(io, Int64),
-  read(io, UInt8),
-  String(read(io, read(io, Int64))),
-  String(read(io, read(io, Int64))),
-  String(read(io, read(io, Int64))),
-  String(read(io, read(io, Int64)))
+  fastread(io, Int64),
+  fastread(io),
+  String(fastread(io, fastread(io, Int64))),
+  String(fastread(io, fastread(io, Int64))),
+  String(fastread(io, fastread(io, Int64))),
+  String(fastread(io, fastread(io, Int64)))
   )
 
 function isempty(Loc::EQLoc)

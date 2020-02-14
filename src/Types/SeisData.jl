@@ -171,17 +171,17 @@ function read(io::IO, ::Type{SeisData})
   L = getfield(BUF, :int64_buf)
 
   # read begins ------------------------------------------------------
-  N     = read(io, Int64)
+  N     = fastread(io, Int64)
   checkbuf_strict!(L, 2*N)
-  readbytes!(io, Z, 3*N)
+  fast_readbytes!(io, Z, 3*N)
   c1    = copy(Z[1:N])
   c2    = copy(Z[N+1:2*N])
   y     = code2typ.(getindex(Z, 2*N+1:3*N))
-  cmp   = read(io, Bool)
+  cmp   = fastread(io)
   read!(io, L)
   nx    = getindex(L, N+1:2*N)
 
-  if cmp
+  if cmp == 0x01
     checkbuf_8!(Z, maximum(nx))
   end
 
@@ -189,16 +189,16 @@ function read(io::IO, ::Type{SeisData})
     read_string_vec(io, Z),
     read_string_vec(io, Z),
     InstrumentPosition[read(io, code2loctyp(getindex(c1, i))) for i = 1:N],
-    read!(io, Array{Float64, 1}(undef, N)),
-    read!(io, Array{Float64, 1}(undef, N)),
+    fastread(io, Float64, N),
+    fastread(io, Float64, N),
     InstrumentResponse[read(io, code2resptyp(getindex(c2, i))) for i = 1:N],
     read_string_vec(io, Z),
     read_string_vec(io, Z),
     [read_misc(io, Z) for i = 1:N],
     [read_string_vec(io, Z) for i = 1:N],
     [read!(io, Array{Int64, 2}(undef, getindex(L, i), 2)) for i = 1:N],
-    FloatArray[cmp ?
-      (readbytes!(io, Z, getindex(nx, i)); Blosc.decompress(getindex(y,i), Z)) :
+    FloatArray[cmp == 0x01 ?
+      (fast_readbytes!(io, Z, getindex(nx, i)); Blosc.decompress(getindex(y,i), Z)) :
       read!(io, Array{getindex(y,i), 1}(undef, getindex(nx, i)))
       for i = 1:N])
 end
@@ -227,8 +227,8 @@ function write(io::IO, S::SeisData)
 
   # write begins ------------------------------------------------------
   write(io, N)
-  p = position(io)
-  skip(io, 19*N+1)
+  p = fastpos(io)
+  fastskip(io, 19*N+1)
 
   write_string_vec(io, S.id)                                          # id
   write_string_vec(io, S.name)                                        # name
@@ -283,13 +283,13 @@ function write(io::IO, S::SeisData)
     end
     setindex!(codes, typ2code(eltype(x)), 2*N+i)
   end
-  q = position(io)
+  q = fastpos(io)
 
-  seek(io, p)
+  fastseek(io, p)
   write(io, codes)
   write(io, cmp)
   write(io, L)
-  seek(io, q)
+  fastseek(io, q)
   # write ends ------------------------------------------------------
   return nothing
 end

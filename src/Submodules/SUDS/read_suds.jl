@@ -29,7 +29,7 @@ function read_suds(fname::String;
     # Attempt to skip unsupported structures
     if SB.sid in unsupported
       nsk = SB.nbs + SB.nbx
-      skip(sid, nsk)
+      fastskip(sid, nsk)
       (v > 1) && @warn(string("SUDS struct #", SB.sid, " unsupported; skipped ", nsk, " B"))
       continue
     end
@@ -96,7 +96,7 @@ function read_suds(fname::String;
           t0 = 0
         else
           nsk = SB.nbs + SB.nbx
-          skip(sid, nsk)
+          fastskip(sid, nsk)
           SB.data_type = 0x00
           t0 = 0
           continue
@@ -116,7 +116,7 @@ function read_suds(fname::String;
       # read and reinterpret data
       (v > 2) && println(stdout, "reading ", SB.nbx, " B")
       checkbuf_8!(BUF.buf, SB.nbx)
-      readbytes!(sid, BUF.buf, SB.nbx)
+      fast_readbytes!(sid, BUF.buf, SB.nbx)
       (y, sz) = suds_decode(BUF.buf, SB.data_type)
       nx = div(SB.nbx, sz)
 
@@ -235,18 +235,24 @@ function readsudsevt(fname::String;
               )
 
   # Create header
+  filename = abspath(fname)
   H = SeisHdr(id    = string(SB.H.evno),
               loc   = Loc,
               mag   = Mag,
               ot    = u2d(SB.H.ot),
-              src   = fname
+              src   = filename
               )
-  H.misc["auth"]  = src_auth
-  H.misc["reg"]   = SB.H.reg
-  H.misc["model"] = String(copy(SB.H.model))
+  H.misc["auth"]    = src_auth
+  H.misc["reg"]     = SB.H.reg
+  H.misc["model"]   = String(copy(SB.H.model))
+  note!(H, "+source ¦ " * filename)
+
+  # Create source
+  R = SeisSrc(src   = filename)
+  note!(R, "+source ¦ " * filename)
 
   # Create event container
-  Ev = SeisEvent(hdr = H, data = TD)
+  Ev = SeisEvent(hdr = H, data = TD, source = R)
 
   return Ev
 end

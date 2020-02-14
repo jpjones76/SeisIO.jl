@@ -5,10 +5,10 @@ export sachdr, writesac, writesacpz
 
 # Bytes 305:308 as a littleendian Int32 should read 0x06 0x00 0x00 0x00; compare each end to 0x0a to allow older SAC versions (if version in same place?)
 function should_bswap(io::IO)
-  skip(io, 304)
-  u = read(io, UInt8)
-  skip(io, 2)
-  v = read(io, UInt8)
+  fastskip(io, 304)
+  u = fastread(io)
+  fastskip(io, 2)
+  v = fastread(io)
   q::Bool = (
     # Least significant byte in u
     if 0x00 < u < 0x0a && v == 0x00
@@ -65,16 +65,16 @@ function fill_sac(si::Int64, nx::Int32, ts::Int64, id::Array{String,1})
 end
 
 function read_sac_stream(f::IO, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Array{UInt8,1}, full::Bool, swap::Bool)
-  read!(f, fv)
-  read!(f, iv)
-  read!(f, cv)
+  fastread!(f, fv)
+  fastread!(f, iv)
+  fastread!(f, cv)
   if swap == true
     fv .= bswap.(fv)
     iv .= bswap.(iv)
   end
   nx = getindex(iv, 10)
   x = Array{Float32,1}(undef, nx)
-  read!(f, x)
+  fastread!(f, x)
   if swap == true
     x .= bswap.(x)
   end
@@ -207,8 +207,6 @@ function read_sac_file!(S::SeisData, fname::String, fv::Array{Float32,1}, iv::Ar
   q = should_bswap(f)
   seekstart(f)
   C = read_sac_stream(f, fv, iv, cv, full, q)
-  setfield!(C, :src, fname)
-  note!(C, string("+src: ", fname))
   close(f)
   push!(S,C)
   return nothing
@@ -429,9 +427,7 @@ function add_pzchan!(S::GphysData, D::Dict{String, Any}, file::String)
     setfield!(C, :gain, gain)
     setfield!(C, :resp, resp)
     setfield!(C, :units, units)
-    setfield!(C, :src, file)
     setfield!(C, :misc, D)
-    note!(C, "+src : read_sacpz " * file * ")")
     push!(S, C)
   else
     ts = Dates.DateTime(get(D, "START", "1970-01-01T00:00:00")).instant.periods.value*1000 - dtconst

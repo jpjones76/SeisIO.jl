@@ -49,8 +49,8 @@ function do_trace(f::IO,
   # First part of trace header is quite standard
   checkbuf!(ints, 29)
   checkbuf!(shorts, 62)
-  checkbuf_8!(buf, length(buf))
-  readbytes!(f, buf, 180)
+  checkbuf_8!(buf, max(180, length(buf)))
+  fast_readbytes!(f, buf, 180)
 
   intbuf = reinterpret(Int32, buf)
   copyto!(ints, 1, intbuf, 1, 7)
@@ -63,14 +63,14 @@ function do_trace(f::IO,
   copyto!(shorts, 7, shortbuf, 45, 46)
 
   if passcal
-    readbytes!(f, buf, 40)
+    fast_readbytes!(f, buf, 40)
 
-    scale_fac     = read(f, Float32)
-    inst_no       = read(f, UInt16)
-    shorts[62]    = read(f, Int16)
-    ints[21]      = read(f, Int32)
-    ints[22]      = read(f, Int32)
-    ints[23]      = read(f, Int32)
+    scale_fac     = fastread(f, Float32)
+    inst_no       = fastread(f, UInt16)
+    shorts[62]    = fastread(f, Int16)
+    ints[21]      = fastread(f, Int32)
+    ints[22]      = fastread(f, Int32)
+    ints[23]      = fastread(f, Int32)
 
     setindex!(shorts, shortbuf[10], 53)
     copyto!(shorts, 54, shortbuf, 13, 8)
@@ -91,7 +91,7 @@ function do_trace(f::IO,
     T     = (fmt == one(Int16) ? Int32 : Int16)
     nb    = checkbuf!(buf, nx, T)
 
-    readbytes!(f, buf, nb)
+    fast_readbytes!(f, buf, nb)
 
     # trace processing
     y = reinterpret(T, buf)
@@ -159,14 +159,14 @@ function do_trace(f::IO,
     dt = fh[1]
     nx = fh[2]
     fmt = fh[3]
-    readbytes!(f, buf, 38)
-    ints[26]      = read(f, Int32)
-    shorts[60]    = read(f, Int16)
-    ints[27]      = read(f, Int32)
-    shorts[61]    = read(f, Int16)
-    shorts[62]    = read(f, Int16)
-    ints[28]      = read(f, Int32)
-    ints[29]      = read(f, Int32)
+    fast_readbytes!(f, buf, 38)
+    ints[26]      = fastread(f, Int32)
+    shorts[60]    = fastread(f, Int16)
+    ints[27]      = fastread(f, Int32)
+    shorts[61]    = fastread(f, Int16)
+    shorts[62]    = fastread(f, Int16)
+    ints[28]      = fastread(f, Int32)
+    ints[29]      = fastread(f, Int32)
 
     copyto!(ints, 20, intbuf, 1, 5)
     copyto!(shorts, 53, shortbuf, 11, 2)
@@ -175,7 +175,7 @@ function do_trace(f::IO,
 
     T = getindex(segy_ftypes, fmt)
     nb = checkbuf!(buf, nx, T)
-    readbytes!(f, buf, nb)
+    fast_readbytes!(f, buf, nb)
 
     # trace processing
     x = Array{Float32,1}(undef, nx)
@@ -257,12 +257,6 @@ function do_trace(f::IO,
   # Trace info
   ts = mktime(shorts[41], shorts[42], shorts[43], shorts[45], shorts[45], zero(Int16)) +
         shorts[53] + 1000*sum(shorts[15:17])
-  t = Array{Int64,2}(undef,2,2)
-  setindex!(t, one(Int64), 1)
-  setindex!(t, Int64(nx), 2)
-  setindex!(t, ts, 3)
-  setindex!(t, zero(Int64), 4)
-
   loc = GeoLoc()
   loc.lat = lat
   loc.lon = lon
@@ -274,15 +268,12 @@ function do_trace(f::IO,
   setfield!(C, :loc, loc)
   setfield!(C, :gain, gain)
   setfield!(C, :fs, fs)
-  setfield!(C, :src, src)
-  setfield!(C, :t, t)
+  mk_t!(C, length(x), ts)
   setfield!(C, :x, x)
-  # unsafe_copyto!(getfield(C, :x), 1, x, 1, nx)
 
   if full == true
     setfield!(C, :misc, misc)
   end
-  note!(C, string("+src: ", src))
   return C
 end
 
@@ -294,7 +285,7 @@ function read_segy_file(fname::String,
                         swap::Bool,
                         full::Bool)
   f = open(fname, "r")
-  trace_fh = Array{Int16,1}(undef,3)
+  trace_fh = Array{Int16, 1}(undef, 3)
   if passcal == true
     S = SeisData(do_trace(f, buf, shorts, ints, true, full, fname, swap, trace_fh))
     resize!(buf, 65535)
@@ -304,28 +295,28 @@ function read_segy_file(fname::String,
     checkbuf!(shorts, 62)
     S = SeisData()
 
-    # File header
-    filehdr       = read(f, 3200)
-    jobid         = bswap(read(f, Int32))
-    lineid        = bswap(read(f, Int32))
-    reelid        = bswap(read(f, Int32))
-    readbytes!(f, buf, 48)
+    # File headers
+    filehdr       = fastread(f, 3200)
+    jobid         = fastread_i32(f, b=true)
+    lineid        = fastread_i32(f, b=true)
+    reelid        = fastread_i32(f, b=true)
+    fast_readbytes!(f, buf, 48)
     fillx_i16_be!(shorts, buf, 24, 0)
-    skip(f, 240)
+    fastskip(f, 240)
 
     # My sample files have the Int16s in little endian order...?
     for i = 25:27
-      shorts[i] = read(f, Int16)
+      shorts[i] = fastread(f, Int16)
     end
-    skip(f, 94)
+    fastskip(f, 94)
 
     # Process file header
     nh = max(zero(Int16), getindex(shorts, 27))
     if full == false
-      skip(f, 3200*nh)
+      fastskip(f, 3200*nh)
     else
       exthdr = Array{String,1}(undef, nh)
-      for i = 1:nh; exthdr[i] = read(f, 3200); end
+      for i = 1:nh; exthdr[i] = fastread(f, 3200); end
       fhd = Dict{String,Any}(
               zip(String["ntr", "naux", "filedt", "origdt", "filenx",
                          "orignx", "fmt", "cdpfold", "trasort", "vsum",

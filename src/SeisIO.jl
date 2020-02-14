@@ -1,6 +1,6 @@
 __precompile__()
 module SeisIO
-using Blosc, Dates, DSP, FFTW, LightXML, LinearAlgebra, Printf, Sockets
+using Blosc, Dates, DSP, FFTW, LightXML, LinearAlgebra, Markdown, Printf, Sockets
 using DelimitedFiles: readdlm
 using Glob: glob
 using HTTP: request, Messages.statustext
@@ -19,13 +19,14 @@ include("constants.jl")
 include("CoreUtils/ls.jl")
 include("CoreUtils/time.jl")
 include("CoreUtils/namestrip.jl")
-include("CoreUtils/read_utils.jl")
 include("CoreUtils/typ2code.jl")
-include("CoreUtils/file_io.jl")
 include("CoreUtils/poly.jl")
 include("CoreUtils/calculus.jl")
-include("CoreUtils/mkchans.jl")
 include("CoreUtils/svn.jl")
+include("CoreUtils/IO/FastIO.jl")
+include("CoreUtils/IO/read_utils.jl")
+include("CoreUtils/IO/string_vec_and_misc.jl")
+using .FastIO
 
 # =========================================================
 # Types and methods

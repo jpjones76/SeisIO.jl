@@ -178,7 +178,9 @@ function uwpf(pickfile::String; v::Int64=KW.v)
 
     setfield!(R, :pax, PAX)
     setfield!(R, :planes, NP)
-    setfield!(R, :src, join(getindex(M, 20:22), " "))
+    pf_str = abspath(pickfile)
+    setfield!(R, :src, pf_str)
+    note!(R, "+source ¦ " * pf_str)
 
     # Add rest to a dictionary
     mech_lines = Array{String, 1}(undef, 0)
@@ -227,8 +229,10 @@ function uwpf(pickfile::String; v::Int64=KW.v)
   # Done reading
   close(pf)
   H = SeisHdr()
+  src_str = abspath(pickfile)
   setfield!(H, :loc, LOC)
-  setfield!(H, :src, pickfile)
+  setfield!(H, :src, src_str)
+  note!(H, "+source ¦ " * src_str)
   if MAG != -5.0f0
     setfield!(H, :mag, EQMag(val = MAG, scale = "Md", src = "SPONG"))
   end

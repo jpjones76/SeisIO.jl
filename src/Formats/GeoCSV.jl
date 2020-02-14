@@ -83,30 +83,30 @@ function mkhdr(io::IO, c::UInt8, k_buf::Array{UInt8,1}, v_buf::Array{UInt8,1})
 
   # skip space after a new line
   while c == 0x20
-    c = read(io, UInt8)
+    c = fastread(io)
   end
 
   while c != 0x0a
     if c == 0x23
-      c = read(io, UInt8)
+      c = fastread(io)
       while c == 0x20
-        c = read(io, UInt8)
+        c = fastread(io)
       end
     # transition at 0x3a
     elseif c == 0x3a && k == true
       k = false
-      c = read(io, UInt8)
+      c = fastread(io)
       while c == 0x20
-        c = read(io, UInt8)
+        c = fastread(io)
       end
     elseif k
       i += o
       setindex!(k_buf, c, i)
-      c = read(io, UInt8)
+      c = fastread(io)
     else
       j += o
       setindex!(v_buf, c, j)
-      c = read(io, UInt8)
+      c = fastread(io)
     end
   end
   return i,j
@@ -147,8 +147,8 @@ function read_geocsv_slist!(S::SeisData, io::IO)
   # Time structure
   tm = TmStruct()
 
-  while !eof(io)
-    c = read(io, UInt8)
+  while !fasteof(io)
+    c = fastread(io)
 
     # new line ----------------------------------
     if c == 0x0a
@@ -209,7 +209,7 @@ function read_geocsv_slist!(S::SeisData, io::IO)
         t_old = oo
         reading_data = true
         while is_u8_digit(c) == false
-          c = read(io, UInt8)
+          c = fastread(io)
         end
       end
       x = stream_float(io, c)
@@ -267,8 +267,8 @@ function read_geocsv_tspair!(S::SeisData, io::IO)
   # 0x03    fractional-second
   # 0x04    data
 
-  while !eof(io)
-    c = read(io, UInt8)
+  while !fasteof(io)
+    c = fastread(io)
 
     # new line ----------------------------------
     if c == 0x0a

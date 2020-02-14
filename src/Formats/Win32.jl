@@ -10,7 +10,7 @@ function findhex(hexID::UInt16, hexIDs::Array{UInt16,1})
   return k
 end
 
-function win32_cfile!( fname::String,
+function win32_cfile!(  fname::String,
                         hex_bytes::Array{UInt8,1},
                         hexIDs::Array{UInt16,1},
                         S::SeisData,
@@ -19,9 +19,9 @@ function win32_cfile!( fname::String,
                         nx_new::Int64
                       )
 
-  open(fname, "r") do cf_io
-    while !eof(cf_io)
-      chan_line = readline(cf_io)
+  open(fname, "r") do io
+    while !fasteof(io)
+      chan_line = fast_readline(io)
       occursin(r"^\s*(?:#|$)", chan_line) && continue
 
       # chan_info fills S
@@ -121,25 +121,25 @@ function readwin32(dfilestr::String, cfilestr::String;
 
   @inbounds for fname in files
     v > 0 && println("Processing ", fname)
-    open(fname, "r") do fid
-      skip(fid, 4)
-      while !eof(fid)
+    open(fname, "r") do io
+      fastskip(io, 4)
+      while !eof(io)
 
         # Start time
-        read!(fid, date_hex)
+        read!(io, date_hex)
         t_new = datehex2μs!(date_arr, date_hex)
-        skip(fid, 4)
+        fastskip(io, 4)
 
         # Bytes to read
-        lsecb = Int64(ntoh(read(fid, UInt32)))
+        lsecb = Int64(ntoh(fastread(io, UInt32)))
         τ = 0
 
         while τ < lsecb
-          orgID = read(fid, UInt8)
-          netID = read(fid, UInt8)
-          hexID = read(fid, UInt16)
+          orgID = fastread(io)
+          netID = fastread(io)
+          hexID = fastread(io, UInt16)
           k = findhex(hexID, hexIDs)
-          V = ntoh(read(fid, UInt16))
+          V = ntoh(fastread(io, UInt16))
           C = Int64(V >> 12)
           N = Int64(V & 0x0fff)
           Nh = N
@@ -161,13 +161,7 @@ function readwin32(dfilestr::String, cfilestr::String;
               resize!(S.x[k], nx)
             end
             setindex!(getfield(S, :fs), Float64(Nh), k)
-            t = getindex(getfield(S, :t), k)
-            T = Array{Int64,2}(undef, 2, 2)
-            setindex!(T, one(Int64), 1)
-            setindex!(T, Int64(nx), 2)
-            setindex!(T, t_new-jst_const, 3)
-            setindex!(T, zero(Int64), 4)
-            setindex!(getfield(S, :t), T, k)
+            setindex!(getfield(S, :t), mk_t(nx, t_new-jst_const), k)
             setindex!(gapEnd, Int64[], k)
             setindex!(gapStart, Int64[], k)
             setindex!(locID, bytes2hex([orgID & 0xff | (netID << 4) & 0xf0]), k)
@@ -179,21 +173,21 @@ function readwin32(dfilestr::String, cfilestr::String;
           end
 
           # Parse data
-          x[1] = bswap(read(fid, Int32))
+          x[1] = bswap(fastread(io, Int32))
           if C == 0
-            readbytes!(fid, buf, B)
+            fast_readbytes!(io, buf, B)
             fillx_i4!(x, buf, B, 1)
           elseif C == 1
-            readbytes!(fid, buf, N)
+            fast_readbytes!(io, buf, N)
             fillx_i8!(x, buf, N, 1)
           elseif C == 2
-            readbytes!(fid, buf, 2*N)
+            fast_readbytes!(io, buf, 2*N)
             fillx_i16_be!(x, buf, N, 1)
           elseif C == 3
-            readbytes!(fid, buf, 3*N)
+            fast_readbytes!(io, buf, 3*N)
             fillx_i24_be!(x, buf, N, 1)
           else
-            readbytes!(fid, buf, 4*N)
+            fast_readbytes!(io, buf, 4*N)
             fillx_i32_be!(x, buf, N, 1)
           end
 
@@ -224,7 +218,7 @@ function readwin32(dfilestr::String, cfilestr::String;
           xi[k] = ii + Nh
         end
       end
-      close(fid)
+      close(io)
     end
   end
 
@@ -263,7 +257,6 @@ function readwin32(dfilestr::String, cfilestr::String;
     end
     id = string(net, ".", sta, ".", locID[i], ".", bb, "H", cc)
     setindex!(getfield(S, :id), id, i)
-    setindex!(getfield(S, :src), dfilestr, i)
 
     # Fill gaps with mean of data
     J = length(gapStart[i])
@@ -278,8 +271,6 @@ function readwin32(dfilestr::String, cfilestr::String;
       end
     end
   end
-  note!(S, "+src: " * dfilestr)
-  note!(S, "channel file: " * cfilestr)
   if !isempty(κ)
     deleteat!(S, κ)
     v > 0 && println("Deleted ", length(κ), " empty channels after read.")

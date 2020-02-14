@@ -1,5 +1,5 @@
 module Quake
-using Blosc, Dates, DSP, LightXML, LinearAlgebra, Printf, SeisIO, Sockets
+using Blosc, Dates, DSP, LightXML, LinearAlgebra, Printf, SeisIO, SeisIO.FastIO, Sockets
 using HTTP: request, Messages.statustext
 Blosc.set_compressor("lz4")
 Blosc.set_num_threads(Sys.CPU_THREADS)

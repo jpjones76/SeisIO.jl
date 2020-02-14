@@ -9,14 +9,14 @@ function uwdf(datafile::String;
   fid = open(fname, "r")
 
   # Process master header
-  N             = Int64(bswap(read(fid, Int16)))
-  mast_fs       = bswap(read(fid, Int32))
-  mast_lmin     = bswap(read(fid, Int32))
-  mast_lsec     = bswap(read(fid, Int32))
-  mast_nx       = bswap(read(fid, Int32))
-  skip(fid, 24)
-  extra         = read(fid, 10)
-  skip(fid, 80)
+  N             = Int64(bswap(fastread(fid, Int16)))
+  mast_fs       = bswap(fastread(fid, Int32))
+  mast_lmin     = bswap(fastread(fid, Int32))
+  mast_lsec     = bswap(fastread(fid, Int32))
+  mast_nx       = bswap(fastread(fid, Int32))
+  fastskip(fid, 24)
+  extra         = fastread(fid, 10)
+  fastskip(fid, 80)
 
   if v > 2
     println("mast_header:")
@@ -30,9 +30,9 @@ function uwdf(datafile::String;
 
 
   # Seek EOF to get number of structures
-  seekend(fid)
-  skip(fid, -4)
-  nstructs = bswap(read(fid, Int32))
+  fastseekend(fid)
+  fastskip(fid, -4)
+  nstructs = bswap(fastread(fid, Int32))
   v>0 && println(stdout, "nstructs = ", nstructs)
   structs_os = (-12*nstructs)-4
   tc_os = 0
@@ -45,30 +45,30 @@ function uwdf(datafile::String;
 
   # Read in UW2 data structures from record end
   if uw2
-    seekend(fid)
-    skip(fid, structs_os)
+    fastseekend(fid)
+    fastskip(fid, structs_os)
     for j = 1:nstructs
-      structtag     = read(fid, UInt8)
-      skip(fid, 3)
-      M             = bswap(read(fid, Int32))
-      byteoffset    = bswap(read(fid, Int32))
+      structtag     = fastread(fid)
+      fastskip(fid, 3)
+      M             = bswap(fastread(fid, Int32))
+      byteoffset    = bswap(fastread(fid, Int32))
       if structtag == 0x43 # 'C'
         N = Int64(M)
       elseif structtag == 0x54 # 'T'
-        fpos        = position(fid)
-        seek(fid, byteoffset)
+        fpos        = fastpos(fid)
+        fastseek(fid, byteoffset)
         chno = Array{Int32, 1}(undef, M)
         corr = Array{Int32, 1}(undef, M)
         n = 0
         @inbounds while n < M
           n += 1
-          chno[n]   = read(fid, Int32)
-          corr[n]   = read(fid, Int32)
+          chno[n]   = fastread(fid, Int32)
+          corr[n]   = fastread(fid, Int32)
         end
         chno .= (bswap.(chno) .+ 1)
         corr .= bswap.(corr)
         tc_os = -8*M
-        seek(fid, fpos)
+        fastseek(fid, fpos)
       end
     end
   end
@@ -87,32 +87,32 @@ function uwdf(datafile::String;
   S = SeisData()
 
   if uw2
-    seekend(fid)
-    skip(fid, -56*N + structs_os + tc_os)
+    fastseekend(fid)
+    fastskip(fid, -56*N + structs_os + tc_os)
     I32 = Array{Int32, 2}(undef, 5, N)    # chlen, offset, lmin, lsec (μs), fs,   unused: expan1
     I16 = Array{Int16, 2}(undef, 3, N)    # lta, trig, bias                       unused: fill
     U8  = Array{UInt8, 2}(undef, 24, N)   # name(8), tmp(4), compflg(4), chid(4), expan2(4)
     i = 0
     @inbounds while i < N
       i = i + 1
-      I32[1,i] = bswap(read(fid, Int32))
-      I32[2,i] = bswap(read(fid, Int32))
-      I32[3,i] = bswap(read(fid, Int32))
-      I32[4,i] = bswap(read(fid, Int32))
-      I32[5,i] = bswap(read(fid, Int32))
+      I32[1,i] = bswap(fastread(fid, Int32))
+      I32[2,i] = bswap(fastread(fid, Int32))
+      I32[3,i] = bswap(fastread(fid, Int32))
+      I32[4,i] = bswap(fastread(fid, Int32))
+      I32[5,i] = bswap(fastread(fid, Int32))
       if full == true
-        skip(fid, 4)
-        I16[1,i] = bswap(read(fid, Int16))
-        I16[2,i] = bswap(read(fid, Int16))
-        I16[3,i] = bswap(read(fid, Int16))
-        skip(fid, 2)
+        fastskip(fid, 4)
+        I16[1,i] = bswap(fastread(fid, Int16))
+        I16[2,i] = bswap(fastread(fid, Int16))
+        I16[3,i] = bswap(fastread(fid, Int16))
+        fastskip(fid, 2)
       else
-        skip(fid, 12)
+        fastskip(fid, 12)
       end
       j = 0
       while j < 24
         j = j + 1
-        U8[j,i] = read(fid, UInt8)
+        U8[j,i] = fastread(fid)
       end
     end
 
@@ -136,7 +136,7 @@ function uwdf(datafile::String;
       end
     end
 
-    seek(fid, getindex(I32, 2, 1))
+    fastseek(fid, getindex(I32, 2, 1))
     buf = getfield(BUF, :buf)
     checkbuf_8!(buf, 4*maximum(I32[1,:]))
     id = BUF.id
@@ -148,7 +148,7 @@ function uwdf(datafile::String;
     os = 0
     @inbounds while i < N
       i += 1
-      skip(fid, os)
+      fastskip(fid, os)
       nx = getindex(I32, 1, i)
 
       # Generate ID
@@ -181,7 +181,7 @@ function uwdf(datafile::String;
       setfield!(C, :id, unsafe_string(pointer(id), j))
       setfield!(C, :fs, Float64(getindex(I32, 5, i))*1.0e-3)
       setfield!(C, :units, "m/s")
-      setfield!(C, :src, fname)
+      # setfield!(C, :src, fname)
       if full == true
         D = getfield(C, :misc)
         D["lta"]    = I16[1,i]
@@ -197,17 +197,17 @@ function uwdf(datafile::String;
           D["extra"]      = String(extra)
 
           # Go back to master header; grab what we skipped
-          p = position(fid)
-          seek(fid, 18)         # we have the first few fields already
-          D["mast_tape_no"]   = bswap(read(fid, Int16))
-          D["mast_event_no"]  = bswap(read(fid, Int16))
-          D["flags"]          = bswap.(read!(fid, Array{Int16, 1}(undef, 10)))
-          skip(fid, 10)         # we have "extra" already
-          comment             = read(fid,80)
+          p = fastpos(fid)
+          fastseek(fid, 18)         # we have the first few fields already
+          D["mast_tape_no"]   = bswap(fastread(fid, Int16))
+          D["mast_event_no"]  = bswap(fastread(fid, Int16))
+          D["flags"]          = bswap.(fastread!(fid, Array{Int16, 1}(undef, 10)))
+          fastskip(fid, 10)         # we have "extra" already
+          comment             = fastread(fid, 80)
           D["comment"]        = String(comment[comment.!=0x00])
 
           # Return to where we were
-          seek(fid, p)
+          fastseek(fid, p)
         end
       end
 
@@ -227,13 +227,13 @@ function uwdf(datafile::String;
       x = Array{Float32,1}(undef, nx)
       fmt = getindex(U8, 9, i)
       if fmt == 0x53
-        readbytes!(fid, buf, 2*nx)
+        fast_readbytes!(fid, buf, 2*nx)
         fillx_i16_be!(x, buf, nx, 0)
       elseif fmt == 0x4c
-        readbytes!(fid, buf, 4*nx)
+        fast_readbytes!(fid, buf, 4*nx)
         fillx_i32_be!(x, buf, nx, 0)
       else
-        readbytes!(fid, buf, 4*nx)
+        fast_readbytes!(fid, buf, 4*nx)
         x .= bswap.(reinterpret(Float32, buf))[1:nx]
       end
       setfield!(C, :x, x)
@@ -242,10 +242,10 @@ function uwdf(datafile::String;
       push!(S,C)
 
       if i < N
-        os = getindex(I32, 2, i+1) - position(fid)
+        os = getindex(I32, 2, i+1) - fastpos(fid)
       end
     end
-    note!(S, string("+src: readuw(", fname, ")"))
+    # note!(S, " ¦ +source | readuw(", abspath(fname, ")"))
   end
   close(fid)
   return S

@@ -77,14 +77,14 @@ function write(io::IO, Pha::SeisPha)
 end
 
 read(io::IO, ::Type{SeisPha}) =
-  SeisPha(read(io, Float64),
-          read(io, Float64),
-          read(io, Float64),
-          read(io, Float64),
-          read(io, Float64),
-          read(io, Float64),
-          read(io, Float64),
-          read(io, Float64),
+  SeisPha(fastread(io, Float64),
+          fastread(io, Float64),
+          fastread(io, Float64),
+          fastread(io, Float64),
+          fastread(io, Float64),
+          fastread(io, Float64),
+          fastread(io, Float64),
+          fastread(io, Float64),
           read(io, Char),
           read(io, Char)
           )

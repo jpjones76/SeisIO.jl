@@ -91,8 +91,8 @@ function read_rec(io::IO, ver::Float32, c::UInt32, b::UInt64)
       end
     end
   end
-  @warn("Non-SeisIO data at byte ", position(io), "; skipped.")
-  seek(io, b)
+  @warn("Non-SeisIO data at byte ", fastpos(io), "; skipped.")
+  fastseek(io, b)
   return nothing
 end
 
@@ -143,14 +143,14 @@ function rseis(patts::Union{String,Array{String,1}};
     io  = open(f, "r")
 
     # All SeisIO files begin with "SEISIO"
-    if read(io, 6) != UInt8[0x53, 0x45, 0x49, 0x53, 0x49, 0x4f]
+    if fastread(io, 6) != UInt8[0x53, 0x45, 0x49, 0x53, 0x49, 0x4f]
       @warn string("Skipped ", f, ": not a SeisIO file!")
       close(io)
       continue
     end
 
-    ver = read(io, Float32)
-    L   = read(io, Int64)
+    ver = fastread(io, Float32)
+    L   = fastread(io, Int64)
     C   = read!(io, Array{UInt32,1}(undef, L))
     B   = read!(io, Array{UInt64,1}(undef, L))
 
@@ -173,10 +173,10 @@ function rseis(patts::Union{String,Array{String,1}};
       end
       for n in chans
         if n in 1:L
-          seek(io, getindex(B, n))
+          fastseek(io, getindex(B, n))
           R = read_rec(io, ver, getindex(C, n), getindex(B, n == L ? n : n+1))
           push!(A, R)
-          (v > 1) && println("Read ", typeof(last(A)), " object from ", f, ", bytes ", getindex(B, n), ":", ((n == L) ? position(io) : getindex(B, n+1)))
+          (v > 1) && println("Read ", typeof(last(A)), " object from ", f, ", bytes ", getindex(B, n), ":", ((n == L) ? fastpos(io) : getindex(B, n+1)))
         else
           (v > 0) && println(n > L ? "No" : "Skipped", " record ", n, " in ", f)
         end
@@ -213,14 +213,14 @@ function wseis(fname::String, S...)
     write(io, "SEISIO")
     write(io, vSeisIO)
     write(io, L)
-    p = position(io)
+    p = fastpos(io)
     skip(io, sizeof(C) + sizeof(B))
 
     # Write all objects
     i = 0
     @inbounds while i < L
       i = i + 1
-      setindex!(B, UInt64(position(io)), i)
+      setindex!(B, UInt64(fastpos(io)), i)
       seis = getindex(S, i)
       write(io, seis)
       T = typeof(seis)
@@ -269,24 +269,24 @@ function wseis(fname::String, S...)
 
     # Write TOC.
     # format: array of object types, array of byte indices
-    seek(io, p)
+    fastseek(io, p)
     write(io, C)
     write(io, B)
 
     # File index added 2017-02-23; changed 2019-05-27
     # index format: ID hash, TS, TE, P, positions
-    seekend(io)
+    fastseekend(io)
     b = zeros(Int64, 4)
     if isempty(ID)
-      fill!(b, position(io))
+      fill!(b, fastpos(io))
     else
-      setindex!(b, Int64(position(io)), 1)
+      setindex!(b, Int64(fastpos(io)), 1)
       write(io, ID)
-      setindex!(b, Int64(position(io)), 2)
+      setindex!(b, Int64(fastpos(io)), 2)
       write(io, TS)
-      setindex!(b, Int64(position(io)), 3)
+      setindex!(b, Int64(fastpos(io)), 3)
       write(io, TE)
-      setindex!(b, Int64(position(io)), 4)
+      setindex!(b, Int64(fastpos(io)), 4)
       write(io, P)
     end
     write(io, b)
