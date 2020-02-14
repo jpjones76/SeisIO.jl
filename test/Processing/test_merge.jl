@@ -115,7 +115,7 @@ i = findid(id, S)
 
 # Do the notes log the extra source?
 @test findfirst([occursin("New channel 1", i) for i in S.notes[i]]) != nothing
-@test findfirst([occursin("+src: test channel 1", i) for i in S.notes[i]]) != nothing
+@test findfirst([occursin("test channel 1", i) for i in S.notes[i]]) != nothing
 
 # Are dictionaries merging correctly?
 @test haskey(S.misc[i], "P")
@@ -267,7 +267,7 @@ i = findid(id, S)
 
 # Do the notes log the extra source?
 @test findfirst([occursin("New channel 1", i) for i in S.notes[i]]) != nothing
-@test findfirst([occursin("+src: test channel 1", i) for i in S.notes[i]]) != nothing
+@test findfirst([occursin("test channel 1", i) for i in S.notes[i]]) != nothing
 
 # Are dictionaries merging correctly?
 @test haskey(S.misc[i], "P")
@@ -539,7 +539,7 @@ i = findid(id, S)
 
 # Do the notes log the extra source?
 @test findfirst([occursin("New channel 1", j) for j in S.notes[i]]) != nothing
-@test findfirst([occursin("+src: test channel 1", j) for j in S.notes[i]]) != nothing
+@test findfirst([occursin("test channel 1", j) for j in S.notes[i]]) != nothing
 
 # Are dictionaries merging correctly?
 @test haskey(S.misc[i], "P")
@@ -564,7 +564,7 @@ i = findid(id, S)
 
 # Do the notes log the extra source?
 @test findfirst([occursin("New channel 1", j) for j in S.notes[i]]) != nothing
-@test findfirst([occursin("+src: test channel 1", j) for j in S.notes[i]]) != nothing
+@test findfirst([occursin("test channel 1", j) for j in S.notes[i]]) != nothing
 
 # Are dictionaries merging correctly?
 @test haskey(S.misc[i], "P")

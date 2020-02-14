@@ -43,6 +43,13 @@ else
   warn("All channels deleted; can't test equality.")
 end
 
+printstyled("    source logging\n", color=:light_green)
+redirect_stdout(out) do
+  processing_log(S, 1)
+  processing_log(S[1])
+  processing_log(S)
+end
+
 printstyled("    equivalence with DSP.filtfilt\n", color=:light_green)
 for i = 1:10
   C = randSeisChannel(s=true)

@@ -7,28 +7,28 @@ U = deepcopy(S)
 S1 = deepcopy(S)
 C = deepcopy(U[1])
 
-printstyled("  conversion to m/s\n", color=:light_green)
+printstyled("    conversion to m/s\n", color=:light_green)
 redirect_stdout(out) do
   convert_seis!(S, v=3)
   @test S.units[1] == S.units[2] == S.units[3] == "m/s"
   @test S.x[3] == U.x[3]
 end
 
-printstyled("  conversion to m/s2\n", color=:light_green)
+printstyled("    conversion to m/s2\n", color=:light_green)
 redirect_stdout(out) do
   convert_seis!(S, v=2, units_out="m/s2")
   @test S.units[1] == S.units[2] == S.units[3] == "m/s2"
   @test isapprox(S.x[1], U.x[1])
 end
 
-printstyled("  conversion to m\n", color=:light_green)
+printstyled("    conversion to m\n", color=:light_green)
 redirect_stdout(out) do
   convert_seis!(S1, v=2, units_out="m")
   @test S1.units[1] == S1.units[2] == S1.units[3] == "m"
   @test isapprox(S1.x[2], U.x[2])
 end
 
-printstyled("  conversion from m to m/s2 and back to m\n", color=:light_green)
+printstyled("    conversion from m to m/s2 and back to m\n", color=:light_green)
 redirect_stdout(out) do
   for j = 1:100
     S = randSeisData(3, s=1.0)
@@ -52,7 +52,7 @@ redirect_stdout(out) do
   end
 end
 
-printstyled("    at Float32 precision\n", color=:light_green)
+printstyled("    Float32 precision\n", color=:light_green)
 redirect_stdout(out) do
   S = rseis(convert_file)[1]
   U = deepcopy(S)
@@ -64,7 +64,7 @@ redirect_stdout(out) do
 end
 
 
-printstyled("    at Float64 precision\n", color=:light_green)
+printstyled("    Float64 precision\n", color=:light_green)
 redirect_stdout(out) do
   S = rseis(convert_file)[1]
   for i = 1:S.n
@@ -101,3 +101,15 @@ redirect_stdout(out) do
 end
 C.units = "{unknown}"
 @test_throws ErrorException convert_seis!(C, units_out="m")
+
+printstyled("    logging\n", color=:light_green)
+redirect_stdout(out) do
+  processing_log(S)
+  source_log(S)
+
+  processing_log(S,1)
+  source_log(S,1)
+
+  processing_log(S[1])
+  source_log(S[1])
+end
