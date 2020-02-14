@@ -8,7 +8,7 @@
 * **Quanterra geophone responses** (X): a few permanent North American short-period stations have tremendous (two orders of magnitude) scaling problems with `translate_resp` and `remove_resp`. All have the property SensorDescription = "HS-1-LT/Quanterra 330 Linear Phase Composite".
   * This description may be shorthand for "Geospace Technologies HS-1-LT geophone with Kinemetrics Quanterra Q330 digitizer", but no "HS-1-LT" exists on the [Geospace Technologies product website](https://www.geospace.com/sensors/).
   * Test: from the output of `get_data("FDSN", ...)`, check channel ``i`` with ``S.misc[i]["SensorDescription"] == "HS-1-LT/Quanterra 330 Linear Phase Composite"``.
-* **HDF5 variations in I/O speed** (X): see JuliaIO/HDF5.jl#609. Other combinations of library versions and Julia language versions may also produce this slowdown.  
+* **HDF5 variations in I/O speed** (X): see https://github.com/JuliaIO/HDF5.jl/issues/609. Other combinations of library versions and Julia language versions may also produce this slowdown.  
 * **SCEC connection issues** (X): see gist at https://gist.github.com/jpjones76/0175e762bea8c37d99b97ef3cb056068
   + We try to fix this as new browser versions are released. However, a permanent fix would need to be implemented server-side by SCEC.
 * **SEED blockette support** (O): SEED blockettes outside the scope of SeisIO (e.g., "status" and "health") are not read into memory.
