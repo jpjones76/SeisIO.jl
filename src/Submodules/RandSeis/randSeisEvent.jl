@@ -68,10 +68,13 @@ function randSeisSrc(; mw::Float32=0.0f0)
     vcat(360.0.*(rand(Float64, 2, 3).-0.5),
           (rand(-1:2:1)*m0).*[rand() -1.0*rand() rand()]))          # :pax
   setfield!(R, :planes, 360.0.*(rand(Float64, 3, 2).-0.5))          # :planes
-  setfield!(R, :src, "randSeisSrc")                                 # :src
+  setfield!(R, :src, R.id * ",randSeisSrc")                         # :src
   # setfield!(R, :src, join([join([randstring(12), " ",
   #                           randstring(20)]) for i=1:5], ","
   #                         ))                                        # :src
+  # source :src
+  note!(R, "+origin ¦ " * R.src)
+
   setfield!(R, :st, SourceTime( randstring(2^rand(6:8)),            # :st
                                 rand(Float64),
                                 rand(Float64),
@@ -146,9 +149,12 @@ function randSeisHdr()
   pop_rand_dict!(H.misc, rand(4:24))                                # :misc
   [note!(H, randstring(rand(16:256))) for i = 1:rand(1:6)]          # :notes
   setfield!(H, :ot, now())                                          # :ot
-  setfield!(H, :src, "randSeisHdr")                                 # :src
+  # setfield!(H, :src, "randSeisHdr")                                 # :src
   setfield!(H, :typ, typ)                                           # :typ
 
+  # header :src
+  H.src = "randSeisHdr:" * H.id
+  note!(H, "+origin ¦ " * H.src)
   return H
 end
 

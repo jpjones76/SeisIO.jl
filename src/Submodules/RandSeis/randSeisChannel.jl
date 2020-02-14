@@ -86,7 +86,6 @@ function pop_chan_tail!(Ch::SeisChannel)
   setfield!(Ch, :gain,  rand()*10^rand(0:10))         # gain
   setfield!(Ch, :loc, randLoc())                      # loc
   pop_rand_dict!(Ch.misc, rand(4:24))                 # misc
-  note!(Ch, "Created by function populate_chan!.")    # notes
 end
 
 # Populate a channel with irregularly-sampled (campaign-style) data
@@ -111,6 +110,7 @@ function populate_irr!(Ch::SeisChannel; nx::Int64=0)
   Ch.t      = hcat(collect(1:1:L), ts.+sort(rand(UnitRange{Int64}(1:Ls), L)))
   Ch.x      = (rand(L) .- (rand(Bool) == true ? 0.5 :  0.0)).*(10 .^ (rand(1:10, L)))
   pop_chan_tail!(Ch)
+  note!(Ch, "+source ¦ " * Ch.src)
   return nothing
 end
 
@@ -147,6 +147,7 @@ function populate_chan!(Ch::SeisChannel; s::Bool=false, nx::Int64=0)
   Ch.t = rand_t(Lx)                                                   # t
 
   pop_chan_tail!(Ch)
+  note!(Ch, "+source ¦ " * Ch.src)
   return nothing
 end
 
