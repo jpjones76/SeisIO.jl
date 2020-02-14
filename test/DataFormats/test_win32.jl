@@ -13,7 +13,20 @@ if has_restricted
   redirect_stdout(out) do
     fname = path*"/SampleFiles/Restricted/2014092709*.cnt"
     cfile = path*"/SampleFiles/Restricted/03_02_27_20140927.euc.ch"
-    S = read_data("win32", fname, cf=cfile, v=3)
+    S = read_data("win32", fname, cf=cfile, v=3, vl=true)
+
+    # test that verbose logging works
+    printstyled("    verbose logging\n", color=:light_green)
+    for i in 1:S.n
+      notes = S.notes[i]
+      @test length(notes) == 60
+      for n in notes
+        @test occursin("jst = true", n)
+        @test occursin("nx_new = 8640000", n)
+        @test occursin("nx_add = 360000", n)
+        @test occursin("v = 3", n)
+      end
+    end
 
     # There should be 8 channels
     @test S.n==8

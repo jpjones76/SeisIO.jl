@@ -5,7 +5,7 @@ bstr = [path * "/SampleFiles/Bottle/B024*",
 
 printstyled("  Bottle (UNAVCO strain data)\n", color=:light_green)
 for i = 1:4
-  S = read_data("bottle", bstr[i], nx_new=14400, nx_add=14400)
+  S = read_data("bottle", bstr[i], nx_new=14400, nx_add=14400, vl=true)
   fill_pbo!(S)
   if i == 4
     @test S.name[1] == "quarry203bwa2007"
@@ -15,6 +15,10 @@ for i = 1:4
   end
 end
 
+printstyled("    source logging\n", color=:light_green)
 redirect_stdout(out) do
   S = SeisIO.read_bottle(bstr[4], 0, 14400, 14400)
+  source_log(S, 1)
+  source_log(S[1])
+  source_log(S)
 end
