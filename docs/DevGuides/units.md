@@ -1,10 +1,13 @@
-SeisIO `:units` String API
+SeisIO `:units` strings
 
 # Units use case-sensitive UCUM
 Please see the relevant guidelines:
 * [Unified Code for Units of Measure](https://en.wikipedia.org/wiki/Unified_Code_for_Units_of_Measure) and references therein
 * [BIPM](https://www.bipm.org/utils/common/pdf/si-brochure/SI-Brochure-9.pdf)
 * [NIST SI guidelines](https://www.nist.gov/pml/special-publication-811/nist-guide-si-chapter-6-rules-and-style-conventions-printing-and-using), chapters 5-7
+
+## Units do not use Fortran strings
+Because it is not 1970
 
 ## Allowed non-SI units
 Allowed non-SI unit strings are found in these tables:
