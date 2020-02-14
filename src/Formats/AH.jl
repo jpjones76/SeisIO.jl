@@ -207,7 +207,7 @@ function read_ah2!(S::GphysData, ahfile::String;
       UA = Dict{String, String}()
       for i = 1:nattr
         j1 = read_ah_str(io, 0)
-        j2 = read_ah_str(io, j)
+        j2 = read_ah_str(io, j1)
         k = unsafe_string(pointer(BUF.buf), j1)
         V = unsafe_string(pointer(BUF.buf, j1+1), j2-j1)
         UA[k] = V
