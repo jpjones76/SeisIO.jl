@@ -35,7 +35,7 @@ function get_seis_channels(S::GphysData;
     for j = L:-1:1
       if id[j] == '.'
         j > L-2 && break
-        if (id[j+2] in seis_inst_codes)
+        if (id[j+2] in seis_inst_codes) && (length(S.x[i]) > 0)
           keep[n] = true
           break
         end

@@ -37,7 +37,8 @@ function resample!(S::GphysData;
   f0 = fs == 0.0 ? minimum(S.fs[chans[S.fs[chans] .> 0.0]]) : fs
 
   # This setup is very similar to filtfilt!
-  N = nx_max(S)
+  N = nx_max(S, chans)
+  (N == 0) && return
   T = unique([eltype(i) for i in S.x[chans]])
   nT = length(T)
 
@@ -122,9 +123,13 @@ function resample!(S::GphysData;
         deleteat!(S.x[i], si+ny:ei)
         gap_inds[k+1]  = ceil(Int, ei*rate)
       end
+      fs = S.fs[i]
       copyto!(S.t[i], 1, gap_inds, 1, n_seg+1)
       setindex!(S.fs, f0, i)
-      note!(S, i, string("resample!, fs=", repr("text/plain", f0, context=:compact=>true)))
+      sss = string("processing ¦ resample!(S, fs=",
+                  repr("text/plain", f0, context=:compact=>true), ") ¦ ",
+                  "resampled from ", fs, " to ", f0, "Hz")
+      note!(S, i, sss)
     end
   end
   return nothing
@@ -137,6 +142,7 @@ function resample!(C::GphysChannel, f0::Float64)
 
   # This setup is very similar to filtfilt!
   N = nx_max(C)
+  (N == 0) && return
   ty = eltype(C.x)
   Y = Array{ty,1}(undef, N+1)
   Z = similar(Y)
@@ -190,8 +196,11 @@ function resample!(C::GphysChannel, f0::Float64)
     end
     copyto!(C.t, 1, gap_inds, 1, n_seg+1)
   end
+  fs = C.fs
   setfield!(C, :fs, f0)
-  note!(C, string("resample!, fs=", repr("text/plain", f0, context=:compact=>true)))
+  note!(C, string("processing ¦ resample!(C, fs=",
+            repr("text/plain", f0, context=:compact=>true), ") ¦ ",
+            "resampled from ", fs, " to ", f0, "Hz"))
   return nothing
 end
 

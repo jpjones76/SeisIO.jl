@@ -180,8 +180,15 @@ function filtfilt!(S::GphysData;
   if chans == Int64[]
     chans = 1:S.n
   end
-
+  notestr = string("processing ¦ filtfilt!(S, fl = ", fl,
+    ", fh = ", fh,
+    ", np = ", np,
+    ", rp = ", rp,
+    ", rs = ", rs,
+    ", rt = ", rt,
+    ", dm = ", dm, ") ¦ convolved :x with a ", np, "-pole ", dm, " ", rt, " filter")
   N = nx_max(S, chans)
+  (N == 0) && return
 
   # Determine array structures
   T = unique([eltype(i) for i in S.x])
@@ -232,14 +239,6 @@ function filtfilt!(S::GphysData;
     for i = 1:nL
       do_filtfilt!(X[i], Y, yview, L[i], nx_last, b, a, zi, p)
     end
-
-    notestr = string("filtfilt!, fl = ", fl,
-                              ", fh = ", fh,
-                              ", np = ", np,
-                              ", rp = ", rp,
-                              ", rs = ", rs,
-                              ", rt = ", rt,
-                              ", dm = ", dm)
     note!(S, grp, notestr)
   end
   return nothing
@@ -256,6 +255,7 @@ function filtfilt!(C::GphysChannel;
   )
 
   N = nx_max(C)
+  (N == 0) && return
 
   # Determine array structures
   ty = eltype(C.x)
@@ -282,13 +282,13 @@ function filtfilt!(C::GphysChannel;
       do_filtfilt!(X[i], Y, yview, L[i], nx_last, b, a, zi, p)
     end
   end
-  notestr = string("filtfilt!, fl = ", fl,
+  notestr = string("processing ¦ filtfilt!(C, fl = ", fl,
                             ", fh = ", fh,
                             ", np = ", np,
                             ", rp = ", rp,
                             ", rs = ", rs,
                             ", rt = ", rt,
-                            ", dm = ", dm)
+                            ", dm = ", dm, ") ¦ convolved :x with a ", np, "-pole ", dm, " ", rt, " filter")
   note!(C, notestr)
   return nothing
 end

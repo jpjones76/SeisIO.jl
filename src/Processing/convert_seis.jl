@@ -41,7 +41,7 @@ function convert_seis!(S::GphysData;
   end
 
   # get seismic data channels
-  chans = mkchans(chans, S.n)
+  chans = mkchans(chans, S)
   filt_seis_chans!(chans, S)
 
   # now loop over all seismic channels
@@ -114,8 +114,10 @@ function convert_seis!(S::GphysData;
     S.units[i] = units_out
 
     # log processing
-    note!(S, i, string("convert_seis!, units_old = ", units_in))
-
+    # note!(S, i, string("¦ convert_seis!, units_old = ", units_in))
+    note!(S, i, string("processing ¦ convert_seis!(S, ",
+                        "units_out = ", units_out, ") ¦ ",
+                        "converted units from ", units_in, " to ", units_out))
     if v > 2
       println(stdout, "Done channel ", i)
     end
@@ -194,7 +196,9 @@ function convert_seis!(C::GphysChannel;
   C.units = units_out
 
   # log processing
-  note!(C, string("convert_seis!, units_old = ", units_in))
+  note!(C, string("processing ¦ convert_seis!(C, ",
+                  "units_out = ", units_out, ") ¦ ",
+                  "converted units from ", units_in, " to ", units_out))
 
   return nothing
 end

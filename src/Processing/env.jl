@@ -16,7 +16,7 @@ function env!(S::GphysData;
   v::Int64=KW.v)
 
   # preprocess data channels
-  chans = mkchans(chans, S.n)
+  chans = mkchans(chans, S)
   k = Int64[]
   for c in chans
     if S.fs[c] == 0.0
@@ -29,7 +29,9 @@ function env!(S::GphysData;
   GRPS = get_unique(S, ["eltype"], chans)
 
   # Initialize Y
-  Y = Array{Float64,1}(undef, 2*max(nx_max(S), 128))
+  Nx = nx_max(S, chans)
+  (Nx == 0) && return
+  Y = Array{Float64,1}(undef, 2*max(Nx, 128))
 
   # Arrays to hold data and windows
   @inbounds for grp in GRPS
@@ -93,7 +95,10 @@ function env!(S::GphysData;
 
       # update nx_last
       nx_last = nx
+
     end
+    # log processing to :notes
+    note!(S, grp, "processing ¦ env!(S) ¦ replaced :x with abs(H(:x))")
   end
   return nothing
 end
@@ -110,7 +115,9 @@ function env!(C::GphysChannel;
   else
     # Initialize R
     T = eltype(C.x)
-    R = Array{Complex{T}, 1}(undef, max(nx_max(C), 128))
+    Nx = nx_max(C)
+    (Nx == 0) && return
+    R = Array{Complex{T}, 1}(undef, max(Nx, 128))
 
     # Get views and window lengths of each segment
     c2 = T(2)
@@ -168,6 +175,9 @@ function env!(C::GphysChannel;
       nx_last = nx
     end
   end
+
+  # log processing to :notes
+  note!(C, "processing ¦ env!(C) ¦ replaced :x with abs(H(:x))")
   return nothing
 end
 

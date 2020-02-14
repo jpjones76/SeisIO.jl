@@ -53,7 +53,7 @@ function translate_resp!(S::GphysData,
                          wl::Float32=eps(Float32))
 
   # first ensure that there is something to do
-  chans = mkchans(chans, S.n)
+  chans = mkchans(chans, S)
   @inbounds for i in chans
     if S.resp[i] != resp_new
       break
@@ -75,6 +75,7 @@ function translate_resp!(S::GphysData,
 
   # initialize complex "work" vectors to the largest size we need
   Nx      = nx_max(S, chans)
+  (Nx == 0) && return
   N2      = nextpow(2, Nx)
   Xw      = Array{Complex{Float32},1}(undef, N2)
   ff_old  = Array{Complex{Float32},1}(undef, N2)
@@ -110,8 +111,9 @@ function translate_resp!(S::GphysData,
     if fs > 0.0f0 && resp_old != resp_new
 
       # we'll need this for logging
-      resp_str = string("translate_resp!, wl = ", wl, ", resp_old = ", typeof(resp_old),
-        "(a0=", resp_old.a0, ", f0=", resp_old.f0, ", p=", resp_old.p, ", z=", resp_old.z, ")")
+      resp_str = string("processing ¦ translate_resp!(S, wl = ", wl, ", resp_old = ", typeof(resp_old),
+        "(a0=", resp_old.a0, ", f0=", resp_old.f0, ", p=", resp_old.p, ", z=", resp_old.z,
+        ") ¦ instrument response translation")
 
       # for accelerometers, working *in* acceleration units, we check: are there any poles below the nyquist?
       if uu == "m/s2"
@@ -200,6 +202,7 @@ function translate_resp!(C::GphysChannel,
 
   # initialize complex "work" vectors to the largest size we need
   Nx      = nx_max(C)
+  (Nx == 0) && return
   N2      = nextpow(2, Nx)
   Xw      = zeros(Complex{Float32}, N2)
   ff_old  = Array{Complex{Float32},1}(undef, N2)
@@ -262,7 +265,11 @@ function translate_resp!(C::GphysChannel,
       copyto!(X[j], 1, xre, 1, Nx)
     end
   end
+  resp_str = string("processing ¦ translate_resp!(S, wl = ", wl, ", resp_old = ", typeof(C.resp),
+    "(a0=", C.resp.a0, ", f0=", C.resp.f0, ", p=", C.resp.p, ", z=", C.resp.z,
+    ") ¦ instrument response translation")
   C.resp = deepcopy(resp_new)
+  note!(C, resp_str)
   return nothing
 end
 
