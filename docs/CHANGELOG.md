@@ -1,3 +1,52 @@
+### 2020-02-13
+* Fixed a minor bug that could cause some frequency-domain processing routines
+to allocate larger arrays than necessary.
+* `get_data` calls during automated tests now use a retry script when servers
+return no data. This should prevent most web-related errors in ``test SeisIO``.
+* Writing station XML now correctly accepts a numeric list of channels `C` with
+KW `chans=C`.
+
+#### File I/O Improvements
+* File I/O is being rewritten to avoid Julia thread locking in 1.3. Most
+low-level I/O commands use new submodule SeisIO.FastIO. The following internal
+changes are now live on master:
+  * `eof` ⟹ `fasteof`
+  * `position` ⟹ `fastpos`
+  * `read` ⟹ `fastread`
+  * `readbytes!` ⟹ `fast_readbytes!`
+  * `seek` ⟹ `fastseek`
+  * `seekend` ⟹ `fastseekend`
+  * `skip` ⟹ `fastskip`
+* SeisIO.FastIO yields significant speed increases in both Julia v1.3 and
+earlier versions.
+* Write commands will change similarly in the coming days.
+* ASDF/HDF5 can have unrelated I/O slowdown, noted in [Issues](./ISSUES.md).
+For discussion of ASDF slowdown please see JuliaIO/HDF5.jl#609.
+
+### 2020-01-24
+* Deprecated mini-SEED support for little-endian Steim compression to ensure
+compliance with FDSN data standards; resolves issue #33.
+
+### 2019-12-24
+* `note!` extended to SeisHdr, SeisSrc objects in SeisIO.Quake
+
+#### The Logging Pass
+* Time-stamping now only writes time to a precision of seconds in logs.
+* `:tnote` has changed output structure slightly.
+* `:src` should now be set consistently with design goals in all functions.
+* `:notes` should now always log new data sources so that the commands to
+acquire the data can be reproduced.
+* The field separator in `:notes` has changed to ` ¦ ` (including spaces); was
+  `, `, which led to frequent ambiguities.
+* Automated notes now have at least three fields:
+  - timestamp, formatted YYYY:MM:DDThh-mm-ss
+  -
+* New functions for displaying tabulated logging:
+  - `processing_log` will tabulate and print all processing steps in `:notes`
+  to stdout.
+  - `source_log` will tabulate and print all data sources in `:notes` to stdout.
+* Data sources logged to `:notes` now have the second field set to `+source`
+
 ### 2019-11-20
 * Fixed issue #30
 * Various internal improvements:
