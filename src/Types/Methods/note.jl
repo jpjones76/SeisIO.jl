@@ -1,4 +1,4 @@
-export note!, clear_notes!
+export note!, clear_notes!, processing_log, source_log
 
 # ============================================================================
 # Annotation
@@ -30,8 +30,9 @@ function note!(S::GphysData, s::String)
   if !isempty(j)
     [push!(S.notes[i], tnote(s)) for i in j]
   else
+    tn = tnote(s)
     for i = 1:S.n
-      push!(S.notes[i], tnote(s))
+      push!(S.notes[i], tn)
     end
   end
   return nothing
@@ -44,9 +45,10 @@ function note!(S::GphysData, id::String, s::String)
   return nothing
 end
 
-function note!(S::GphysData, chans::Array{Int64,1}, s::String)
+function note!(S::GphysData, chans::Union{UnitRange,Array{Int64,1}}, s::String)
+  tn = tnote(s)
   for c in chans
-    note!(S, c, s)
+    push!(S.notes[c], tn)
   end
   return nothing
 end
@@ -92,4 +94,50 @@ function clear_notes!(S::GphysData, id::String)
   return nothing
 end
 
-clear_notes!(U::SeisChannel) = (U.notes = Array{String,1}(undef,1); U.notes[1] = tnote("notes cleared."); return nothing)
+clear_notes!(U::GphysChannel) = (U.notes = Array{String,1}(undef,1); U.notes[1] = tnote("notes cleared."); return nothing)
+
+function print_log(notes::Array{String,1}, k::String)
+  mm = 60
+  println("")
+  pl = string("| Time | ", titlecase(k), k == "processing" ? " | Description |\n|:-----|:---------|:------------|\n" : " |\n|:-----|:---------|\n")
+  ee = true
+  for i = 1:length(notes)
+    nn = split(notes[i], " ¦ ", keepempty=true, limit=4)
+    (length(nn) < 3) && continue
+    L = lastindex(nn[3])
+    if nn[2] == k
+      (ee == true) && (ee = false)
+      func_str = (L > mm) ? (nn[3][firstindex(nn[3]):prevind(nn[3], mm)] * "…") : nn[3]
+      if k == "processing"
+        pl *= string("| ", nn[1], "|`", func_str, "`|", nn[4], "|\n")
+      else
+        pl *= string("| ", nn[1], "|`", func_str, "`|\n")
+      end
+    end
+  end
+
+  if ee
+    pl *= (k == "processing") ? "|      | (none)   |             |\n" : "|      | (none)   |\n"
+  end
+  show(stdout, MIME("text/plain"), Markdown.parse(pl))
+  println("")
+  return nothing
+end
+function processing_log(S::GphysData)
+  for i in 1:S.n
+    println("\nChannel ", i)
+    print_log(S.notes[i], "processing")
+  end
+  return nothing
+end
+processing_log(S::GphysData, i::Int) = print_log(S.notes[i], "processing")
+processing_log(C::GphysChannel) = print_log(C.notes, "processing")
+function source_log(S::GphysData)
+  for i in 1:S.n
+    println("\nChannel ", i)
+    print_log(S.notes[i], "+source")
+  end
+  return nothing
+end
+source_log(S::GphysData, i::Int) = print_log(S.notes[i], "+source")
+source_log(C::GphysChannel) = print_log(C.notes, "+source")
