@@ -297,9 +297,9 @@ function read_segy_file(fname::String,
 
     # File headers
     filehdr       = fastread(f, 3200)
-    jobid         = fastread_i32(f, b=true)
-    lineid        = fastread_i32(f, b=true)
-    reelid        = fastread_i32(f, b=true)
+    jobid         = bswap(fastread(f, Int32))
+    lineid        = bswap(fastread(f, Int32))
+    reelid        = bswap(fastread(f, Int32))
     fast_readbytes!(f, buf, 48)
     fillx_i16_be!(shorts, buf, 24, 0)
     fastskip(f, 240)
