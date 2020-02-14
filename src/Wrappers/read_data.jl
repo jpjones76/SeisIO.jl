@@ -137,7 +137,7 @@ structure. For more complicated read operations on SeisIO files, use `rseis`.
 
 See also: SeisIO.KW, get_data, guess, rseis
 """ read_data!
-function read_data!(S::GphysData, fmt::String, fpat::String;
+function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,1}};
   full    ::Bool    = false,              # full SAC/SEGY hdr
   cf      ::String  = "",                 # win32 channel info file
   jst     ::Bool    = true,               # are sample times JST (UTC+9)?
@@ -149,8 +149,26 @@ function read_data!(S::GphysData, fmt::String, fpat::String;
   )
 
   N = S.n
-  filestr = abspath(fpat)
-  one_file = safe_isfile(filestr)
+  if isa(fpat, Array{String, 1})
+    one_file = false
+    files = String[]
+    for f in fpat
+      ff = abspath(f)
+      if safe_isfile(ff)
+        push!(files, realpath(ff)) # deal with symlinks
+      else
+        append!(files, ls(ff))
+      end
+    end
+    new_chan_src = files
+  else
+    filestr = abspath(fpat)
+    one_file = safe_isfile(filestr)
+    if one_file == false
+      files = ls(filestr)
+    end
+    new_chan_src = nothing
+  end
   if fmt != "seisio"
     opt_strings = Array{String,1}(undef, 0)
   end
@@ -165,7 +183,6 @@ function read_data!(S::GphysData, fmt::String, fpat::String;
     if one_file
       read_sac_file!(S, filestr, fv, iv, cv, full)
     else
-      files = ls(filestr)
       for fname in files
         read_sac_file!(S, fname, fv, iv, cv, full)
       end
@@ -175,7 +192,6 @@ function read_data!(S::GphysData, fmt::String, fpat::String;
     if one_file
       read_data_seisio!(S, filestr, v)
     else
-      files = ls(filestr)
       for fname in files
         read_data_seisio!(S, fname, v)
       end
@@ -187,7 +203,6 @@ function read_data!(S::GphysData, fmt::String, fpat::String;
     if one_file
       read_mseed_file!(S, filestr, v, nx_new, nx_add)
     else
-      files = ls(filestr)
       for fname in files
         read_mseed_file!(S, fname, v, nx_new, nx_add)
       end
@@ -204,7 +219,6 @@ function read_data!(S::GphysData, fmt::String, fpat::String;
     if one_file
       read_ah1!(S, filestr, v=v, full=full)
     else
-      files = ls(filestr)
       for fname in files
         read_ah1!(S, fname, v=v, full=full)
       end
@@ -215,7 +229,6 @@ function read_data!(S::GphysData, fmt::String, fpat::String;
     if one_file
       read_ah2!(S, filestr, v=v, full=full)
     else
-      files = ls(filestr)
       for fname in files
         read_ah2!(S, fname, v=v, full=full)
       end
@@ -232,7 +245,6 @@ function read_data!(S::GphysData, fmt::String, fpat::String;
     if one_file
       read_geocsv_file!(S, filestr, tspair)
     else
-      files = ls(filestr)
       for fname in files
         read_geocsv_file!(S, fname, tspair)
       end
@@ -242,7 +254,6 @@ function read_data!(S::GphysData, fmt::String, fpat::String;
     if one_file
       read_slist!(S, filestr, lennartz=true)
     else
-      files = ls(filestr)
       for fname in files
         read_slist!(S, fname, lennartz=true)
       end
@@ -258,7 +269,6 @@ function read_data!(S::GphysData, fmt::String, fpat::String;
     if one_file
       append!(S, read_segy_file(filestr, buf, shorts, ints, passcal, swap, full))
     else
-      files = ls(filestr)
       for fname in files
         append!(S, read_segy_file(fname, buf, shorts, ints, passcal, swap, full))
       end
@@ -270,7 +280,6 @@ function read_data!(S::GphysData, fmt::String, fpat::String;
     if one_file
       read_slist!(S, filestr)
     else
-      files = ls(filestr)
       for fname in files
         read_slist!(S, fname)
       end
@@ -280,7 +289,6 @@ function read_data!(S::GphysData, fmt::String, fpat::String;
     if one_file
       append!(S, SUDS.read_suds(filestr, full=full, v=v))
     else
-      files = ls(filestr)
       for fname in files
         append!(S, SUDS.read_suds(fname, full=full, v=v))
       end
@@ -291,7 +299,6 @@ function read_data!(S::GphysData, fmt::String, fpat::String;
     if one_file
       append!(S, UW.uwdf(filestr, v=v, full=full))
     else
-      files = ls(filestr)
       for fname in files
         append!(S, UW.uwdf(fname, v=v))
       end
@@ -299,7 +306,13 @@ function read_data!(S::GphysData, fmt::String, fpat::String;
     push!(opt_strings, string("full = ", full))
 
   elseif fmt == "win32" || fmt =="win"
-    readwin32!(S, filestr, cf, jst=jst, nx_new=nx_new, nx_add=nx_add, v=v)
+    if isa(fpat, Array{String, 1})
+      for f in fpat
+        readwin32!(S, f, cf, jst=jst, nx_new=nx_new, nx_add=nx_add, v=v)
+      end
+    else
+      readwin32!(S, filestr, cf, jst=jst, nx_new=nx_new, nx_add=nx_add, v=v)
+    end
     push!(opt_strings, string("cf = \"", abspath(cf), "\"",
                               ", jst = ", jst,
                               ", nx_new = ", nx_new,
@@ -319,23 +332,38 @@ function read_data!(S::GphysData, fmt::String, fpat::String;
       opts = join(opt_strings, ", ")
     end
 
-    new_chan_src = view(S.src, N+1:S.n)
-    fill!(new_chan_src, filestr)
-    if vl && (one_file == false)
-      files = ls(filestr)
-      for f in files
+    if new_chan_src == nothing
+      chan_view = view(S.src, N+1:S.n)
+      fill!(chan_view , filestr)
+      if vl && (one_file == false)
+        files = ls(filestr)
+        for f in files
+          note!(S, N+1:S.n, string( "+source ¦ read_data!(S, ",
+                                    "\"", fmt,  "\", ",
+                                    "\"", f, "\", ",
+                                    opts, ")" )
+                )
+        end
+      else
         note!(S, N+1:S.n, string( "+source ¦ read_data!(S, ",
                                   "\"", fmt,  "\", ",
-                                  "\"", f, "\", ",
+                                  "\"", filestr, "\", ",
                                   opts, ")" )
               )
       end
     else
-      note!(S, N+1:S.n, string( "+source ¦ read_data!(S, ",
-                                "\"", fmt,  "\", ",
-                                "\"", filestr, "\", ",
-                                opts, ")" )
-            )
+      for (j,i) in enumerate(N+1:S.n)
+        S.src[i] = new_chan_src[j]
+      end
+      if vl
+        for f in files
+          note!(S, N+1:S.n, string( "+source ¦ read_data!(S, ",
+                                    "\"", fmt,  "\", ",
+                                    "\"", f, "\", ",
+                                    opts, ")" )
+                )
+        end
+      end
     end
   end
 
@@ -344,7 +372,7 @@ function read_data!(S::GphysData, fmt::String, fpat::String;
 end
 
 @doc (@doc read_data!)
-function read_data(fmt::String, filestr::String;
+function read_data(fmt::String, filestr::Union{String, Array{String, 1}};
   full    ::Bool    = false,              # full SAC/SEGY hdr
   cf      ::String  = "",                 # win32 channel info file
   jst     ::Bool    = true,               # are sample times JST (UTC+9)?
@@ -369,7 +397,7 @@ function read_data(fmt::String, filestr::String;
   return S
 end
 
-function read_data(filestr::String;
+function read_data(filestr::Union{String, Array{String, 1}};
   full    ::Bool    = false,              # full SAC/SEGY hdr
   cf      ::String  = "",                 # win32 channel info file
   jst     ::Bool    = true,               # are sample times JST (UTC+9)?
@@ -379,11 +407,15 @@ function read_data(filestr::String;
   vl      ::Bool    = false               # verbose logging
   )
 
-  if safe_isfile(filestr)
-    g = guess(filestr)
+  if isa(filestr, String)
+    if safe_isfile(filestr)
+      g = guess(filestr)
+    else
+      files = ls(filestr)
+      g = guess(files[1])
+    end
   else
-    files = ls(filestr)
-    g = guess(files[1])
+    g = guess(filestr[1])
   end
   S = SeisData()
   read_data!(S, g[1], filestr,
@@ -399,7 +431,7 @@ function read_data(filestr::String;
   return S
 end
 
-function read_data!(S::GphysData, filestr::String;
+function read_data!(S::GphysData, filestr::Union{String, Array{String, 1}};
   full    ::Bool    = false,              # full SAC/SEGY hdr
   cf      ::String  = "",                 # win32 channel info file
   jst     ::Bool    = true,               # are sample times JST (UTC+9)?
@@ -409,11 +441,15 @@ function read_data!(S::GphysData, filestr::String;
   vl      ::Bool    = false               # verbose logging
   )
 
-  if safe_isfile(filestr)
-    g = guess(filestr)
+  if isa(filestr, String)
+    if safe_isfile(filestr)
+      g = guess(filestr)
+    else
+      files = ls(filestr)
+      g = guess(files[1])
+    end
   else
-    files = ls(filestr)
-    g = guess(files[1])
+    g = guess(filestr[1])
   end
 
   read_data!(S, g[1], filestr,
