@@ -109,3 +109,31 @@ if safe_isdir(path*"/SampleFiles/Restricted")
 else
   printstyled("  extended SEED tests skipped. (files not found; is this Appveyor?)\n", color=:green)
 end
+
+# Tests for unparseable blockette and data format
+mseed_out = "test2.mseed"
+io = open(test_mseed_file, "r")
+buf = read(io)
+close(io)
+
+buf[40] = 0x03                # 3 blockettes follow
+buf[53] = 0x13                # 19 = Steim-3
+buf[67:68] .= [0x00, 0x54]    # byte 84
+buf[85:86] .= [0x01, 0x90]    # [400]
+buf[87:88] .= [0x00, 0x00]    # next blockette at "byte 0" means we're done
+write(mseed_out, buf)
+
+S1 = read_data("mseed", test_mseed_file, v=0)[1]
+S2 = read_data("mseed", mseed_out, v=0)[1]
+
+# Check that skipping an unparseable data type on a new channel doesn't
+# affect channel start time or data read-in
+δx = length(S1.x)-length(S2.x)
+@test div(S2.t[1,2]-S1.t[1,2], round(Int64, 1.0e6/S1.fs)) == length(S1.x)-length(S2.x)
+@test S1.x[δx+1:end] == S2.x
+
+# Check that bytes skipped are accurately logged
+@test occursin("3968 bytes skipped", S2.notes[1])
+
+# Done
+rm(mseed_out)
