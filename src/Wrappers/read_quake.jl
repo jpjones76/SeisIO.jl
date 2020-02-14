@@ -31,15 +31,13 @@ function read_quake(fmt::String, fname::String;
   v       ::Int64   = KW.v                # verbosity level
   )
 
-  Ev = (
-    if fmt == "suds"
-      SUDS.readsudsevt(fname, full=full, v=v)
-    elseif fmt == "uw"
-      UW.readuwevt(fname, full=full, v=v)
-    elseif fmt in ("qml", "quakeml")
-      hdr, source = read_qml(fname)
-      SeisEvent(hdr = hdr[1], source = source[1])
-    end
-    )
+  if fmt == "suds"
+    Ev = SUDS.readsudsevt(fname, full=full, v=v)
+  elseif fmt == "uw"
+    Ev = UW.readuwevt(fname, full=full, v=v)
+  elseif fmt in ("qml", "quakeml")
+    hdr, source = read_qml(fname)
+    Ev = SeisEvent(hdr = hdr[1], source = source[1])
+  end
   return Ev
 end
