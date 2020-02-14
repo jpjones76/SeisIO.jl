@@ -24,7 +24,7 @@ S = FDSNsta("CC.VALT..,PB.B001..BS?,PB.B001..E??", msr=true)
 printstyled("      get_data(\"FDSN\", ..., autoname=true)\n", color=:light_green)
 req_f = "2019.001.00.00.00.000.UW.VLL..EHZ.R.mseed"
 req_ok = (try
-    S = get_data("FDSN", "UW.VLL..EHZ", src="IRIS", s="2019-01-01", t=3600, autoname=true)
+    S = check_get_data("FDSN", "UW.VLL..EHZ", src="IRIS", s="2019-01-01", t=3600, autoname=true)
     true
   catch
     @warn("Station VLL appears to be offline; test skipped.")
@@ -35,7 +35,7 @@ if req_ok
   rm(req_f)
 
   printstyled("        test match to IRIS filename convention\n", color=:light_green)
-  S = get_data("IRIS", "UW.VLL..EHZ", s="2019-01-01", t=3600, autoname=true)
+  S = check_get_data("IRIS", "UW.VLL..EHZ", s="2019-01-01", t=3600, autoname=true)
   @test safe_isfile(req_f)
 end
 
@@ -59,15 +59,21 @@ printstyled("    get_data\n", color=:light_green)
 
 
 printstyled("      GeoCSV output\n", color=:light_green)
-S = get_data("FDSN", "CC.JRO..BHZ,IU.COLA.00.*", src="IRIS", s=-600, t=0, fmt="geocsv", w=true)
-S = get_data("FDSN", "CC.JRO..BHZ,CC.VALT.*", src="IRIS", s=-300, t=0, fmt="geocsv.slist")
+S = check_get_data("FDSN", "CC.JRO..BHZ,IU.COLA.00.*", src="IRIS", s=-600, t=0, fmt="geocsv", w=true)
+S = check_get_data("FDSN", "CC.JRO..BHZ,CC.VALT.*", src="IRIS", s=-300, t=0, fmt="geocsv.slist")
 
 printstyled("      config file for channel spec\n", color=:light_green)
 
 S = SeisData()
-get_data!(S, "FDSN", fname, src="IRIS", s=-600, t=0, w=true)
-deleteat!(S, findall(S.fs.<25.0))
-filtfilt!(S, fl=0.01, fh=10.0)
+check_get_data!(S, "FDSN", fname, src="IRIS", s=-600, t=0, w=true)
+
+# Ensure we got data
+if (isempty(S) ? 0 : maximum([length(x) for x in S.x])) == 0
+  @warn("Request returned no data")
+else
+  deleteat!(S, findall(S.fs.<25.0))
+  filtfilt!(S, fl=0.01, fh=10.0)
+end
 
 # Ensure station headers are set
 ids = ["UW.HOOD..ENE", "CC.VALT..BHZ", "UW.TDH..EHZ", "UW.VLL.EHZ"]
@@ -97,17 +103,11 @@ if i > 0
   @test S.misc[i]["INSTTYPE"] == "ES-T-3339=Q330S+-6410"
 end
 
-# Ensure we got data
-L = [length(x) for x in S.x]
-if isempty(L) == false
-  @test (maximum(L) > 0)
-end
-
 # Check that msr=true works
 S = SeisData()
-get_data!(S, "FDSN", fname, src="IRIS", msr=true, s=-600, t=0)
+check_get_data!(S, "FDSN", fname, src="IRIS", msr=true, s=-600, t=0)
 if isempty(S)
-  warn("Empty request; check connectivity!")
+  @warn("Empty request; check connectivity!")
 else
   for i in 1:S.n
     @test typeof(S.resp[i]) == MultiStageResp
@@ -117,11 +117,11 @@ end
 # Try a string array for input
 printstyled("      string array for channel spec\n", color=:light_green)
 S = SeisData()
-get_data!(S, "FDSN", ["UW.HOOD..E??", "CC.VALT..???", "UW.XNXNX.99.QQQ"], src="IRIS", s=-600, t=0, opts="szsrecs=true")
+check_get_data!(S, "FDSN", ["UW.HOOD..E??", "CC.VALT..???", "UW.XNXNX.99.QQQ"], src="IRIS", s=-600, t=0, opts="szsrecs=true")
 
 # Try a single string
 printstyled("      string for channel spec\n", color=:light_green)
-S = get_data("FDSN", "CC.JRO..BHZ,IU.COLA.00.*", src="IRIS", s=-600, t=0, v=1,
+S = check_get_data("FDSN", "CC.JRO..BHZ,IU.COLA.00.*", src="IRIS", s=-600, t=0, v=1,
   demean=true,
   detrend=true,
   rr=true,
@@ -133,7 +133,7 @@ S = get_data("FDSN", "CC.JRO..BHZ,IU.COLA.00.*", src="IRIS", s=-600, t=0, v=1,
 printstyled("      multi-day request\n", color=:light_green)
 ts = "2018-01-31T00:00:00"
 te = "2018-02-02T00:00:00"
-S = get_data("FDSN","CI.ADO..BH?", s=ts, t=te)
+S = check_get_data("FDSN","CI.ADO..BH?", s=ts, t=te)
 id = "CI.ADO..BHE"
 i = findid(S, id)
 if i == 0
@@ -211,12 +211,12 @@ end
 printstyled("      request an unparseable format (sac.zip)\n", color=:light_green)
 
 redirect_stdout(out) do
-  get_data!(S, "FDSN", "UW.LON.."; src="IRIS", s=-600, t=0, v=3, fmt="sac.zip")
+  check_get_data!(S, "FDSN", "UW.LON.."; src="IRIS", s=-600, t=0, v=3, fmt="sac.zip")
 end
 
 # Potsdam test
 printstyled("      request from GFZ\n", color=:light_green)
-S = get_data("FDSN", "GE.BKB..BH?", src="GFZ", s="2011-03-11T06:00:00", t="2011-03-11T06:05:00", v=0, y=false)
+S = check_get_data("FDSN", "GE.BKB..BH?", src="GFZ", s="2011-03-11T06:00:00", t="2011-03-11T06:05:00", v=0, y=false)
 if isempty(S)
   @warn(string("No data from GFZ request; check connection!"))
 end
@@ -244,7 +244,7 @@ for i = 1:❄
 
   if rubric[i] != "SCEDC"
     printstyled("        trace data\n", color=:light_green)
-    S = get_data("FDSN", rubric[i,2], src=rubric[i,1], s=s, t=t, msr=true, w=true)
+    S = check_get_data("FDSN", rubric[i,2], src=rubric[i,1], s=s, t=t, msr=true, w=true)
     if isempty(S)
       printstyled("        No data; check headers & connection!\n", color=:red)
     end
