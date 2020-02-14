@@ -8,8 +8,7 @@ function tstr(t::DateTime)
   h = lpad(h, 2, "0")
   m = lpad(m, 2, "0")
   s = lpad(s, 2, "0")
-  μ = lpad(μ, 3, "0")
-  return string(Y, "-", M, "-", D, "T", h, ":", m, ":", s, ".", μ)
+  return string(Y, "-", M, "-", D, "T", h, ":", m, ":", s)
 end
 
 "Alias to Dates.unix2datetime"
