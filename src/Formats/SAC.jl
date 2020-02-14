@@ -197,8 +197,8 @@ function read_sac_stream(f::IO, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Ar
   return C
 end
 
-function read_sac_file!(S::SeisData, fname::String, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Array{UInt8,1}, full::Bool)
-  f = open(fname, "r")
+function read_sac_file!(S::SeisData, fname::String, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Array{UInt8,1}, full::Bool, mmap::Bool)
+  f = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   q = should_bswap(f)
   seekstart(f)
   C = read_sac_stream(f, fv, iv, cv, full, q)

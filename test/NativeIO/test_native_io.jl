@@ -43,6 +43,11 @@ R = rseis(savfile3)
 @test(R[4]==Ch)
 @test(S.misc[1] == R[1].data.misc[1] ==  R[2].misc[1])
 
+# with mmap
+printstyled("  read with mmap\n", color=:light_green)
+R1 = rseis(savfile3, mmap=true)
+@test R == R1
+
 # read one file with one record number
 printstyled("  read file with integer record number\n", color=:light_green)
 R = rseis("test.seis", c=1, v=1)

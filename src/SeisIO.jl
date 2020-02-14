@@ -1,6 +1,6 @@
 __precompile__()
 module SeisIO
-using Blosc, Dates, DSP, FFTW, LightXML, LinearAlgebra, Markdown, Printf, Sockets
+using Blosc, Dates, DSP, FFTW, LightXML, LinearAlgebra, Markdown, Mmap, Printf, Sockets
 using DelimitedFiles: readdlm
 using Glob: glob
 using HTTP: request, Messages.statustext

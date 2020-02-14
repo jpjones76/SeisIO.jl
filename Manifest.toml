@@ -29,9 +29,9 @@ version = "0.5.1"
 
 [[CMake]]
 deps = ["BinDeps"]
-git-tree-sha1 = "c67a8689dc5444adc5eb2be7d837100340ecba11"
+git-tree-sha1 = "50a8b41d2c562fccd9ab841085fc7d1e2706da82"
 uuid = "631607c0-34d2-5d66-819e-eb0f9aa2061a"
-version = "1.1.2"
+version = "1.2.0"
 
 [[CMakeWrapper]]
 deps = ["BinDeps", "CMake", "Libdl", "Parameters", "Test"]
@@ -47,9 +47,9 @@ version = "2.1.0"
 
 [[Conda]]
 deps = ["JSON", "VersionParsing"]
-git-tree-sha1 = "9a11d428dcdc425072af4aea19ab1e8c3e01c032"
+git-tree-sha1 = "7a58bb32ce5d85f8bf7559aa7c2842f9aecf52fc"
 uuid = "8f4d0f93-b110-5947-807f-2305c1781a2d"
-version = "1.3.0"
+version = "1.4.1"
 
 [[DSP]]
 deps = ["FFTW", "LinearAlgebra", "Polynomials", "Random", "Reexport", "SpecialFunctions", "Statistics"]
@@ -155,9 +155,9 @@ version = "0.12.0"
 
 [[Parsers]]
 deps = ["Dates", "Test"]
-git-tree-sha1 = "0139ba59ce9bc680e2925aec5b7db79065d60556"
+git-tree-sha1 = "d112c19ccca00924d5d3a38b11ae2b4b268dda39"
 uuid = "69de0a69-1ddd-5017-9359-2bf0b02dc9f0"
-version = "0.3.10"
+version = "0.3.11"
 
 [[Pkg]]
 deps = ["Dates", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]

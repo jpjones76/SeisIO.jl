@@ -14,6 +14,11 @@ SAC1 = verified_read_data("sac", sac_file)[1]
 @test ≈(SAC1.fs, 100.0)
 @test ≈(length(SAC1.x), 1000)
 
+# SAC with mmap
+printstyled("    with mmap\n", color=:light_green)
+SACm = read_data("sac", sac_file, mmap=true)[1]
+@test SAC1 == SACm
+
 SAC2 = verified_read_data("sac", sac_file, full=true)[1]
 @test ≈(1/SAC1.fs, SAC2.misc["delta"])
 @test ≈(length(SAC1.x), SAC2.misc["npts"])

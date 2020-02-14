@@ -1,3 +1,10 @@
+### 2020-02-14
+#### `read_data` improvements
+* A String array can now be passed as the filename argument.
+* MSEED, SAC, and SeisIO file formats can be memory-mapped before reading
+  (KW `mmap=true`), for a significant read speedup. **Caution**: Mmap signal
+  handling in Julia is unknown; we cannot guarantee that this KW is safe.
+
 ### 2020-02-13
 * Fixed a minor bug that could cause some frequency-domain processing routines
 to allocate larger arrays than necessary.
@@ -5,6 +12,10 @@ to allocate larger arrays than necessary.
 return no data. This should prevent most web-related errors in ``test SeisIO``.
 * Writing station XML now correctly accepts a numeric list of channels `C` with
 KW `chans=C`.
+* Fixed an off-by-one error that could occur in the last entry of `:t` when
+reading two-column (tspair) GeoCSV.
+* Reading SeisIO native format with `rseis` can now use memory mapping with
+KW `mmap=true`. **Caution**: we can't guarantee that Mmap for Julia is safe.
 
 #### File I/O Improvements
 * File I/O is being rewritten to avoid Julia thread locking in 1.3. Most
@@ -19,9 +30,8 @@ changes are now live on master:
   * `skip` ⟹ `fastskip`
 * SeisIO.FastIO yields significant speed increases in both Julia v1.3 and
 earlier versions.
-* Write commands will change similarly in the coming days.
 * ASDF/HDF5 can have unrelated I/O slowdown, noted in [Issues](./ISSUES.md).
-For discussion of ASDF slowdown please see JuliaIO/HDF5.jl#609.
+For discussion see https://github.com/JuliaIO/HDF5.jl/issues/609.
 
 ### 2020-01-24
 * Deprecated mini-SEED support for little-endian Steim compression to ensure

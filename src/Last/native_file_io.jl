@@ -120,15 +120,19 @@ function build_file_list(patts::Union{String,Array{String,1}})
 end
 
 """
-    rseis(fstr::String[, c=C::Array{Int64,1}, v=0::Int])
-Read SeisIO files matching file pattern ``fstr`` into memory.
-If an array of record indices is passed to keyword c, only those record indices
-are read from each file.
-Set v>0 to control verbosity.
+    rseis(fstr::String[, c::Array{Int64,1}=C, v::Int=0, mmap::Bool=false])
+
+Read SeisIO files matching file pattern ``fstr`` into memory. If an array of
+record indices is passed to keyword c, only those record indices are read from
+each file.
+
+* Set v>0 to control verbosity.
+* Set mmap=true to read files with mmap. Faster but potentially dangerous.
 """
 function rseis(patts::Union{String,Array{String,1}};
   c::Union{Int64,Array{Int64,1}}  = Int64[],
-  v::Int64                        = KW.v)
+  v::Int64                        = KW.v,
+  mmap::Bool                      = false)
 
   A     = []
   files = build_file_list(patts)
@@ -140,7 +144,7 @@ function rseis(patts::Union{String,Array{String,1}};
   nf = 0
   for f in files
     nf  = nf + 1
-    io  = open(f, "r")
+    io  = mmap ? IOBuffer(Mmap.mmap(f)) : open(f, "r")
 
     # All SeisIO files begin with "SEISIO"
     if fastread(io, 6) != UInt8[0x53, 0x45, 0x49, 0x53, 0x49, 0x4f]

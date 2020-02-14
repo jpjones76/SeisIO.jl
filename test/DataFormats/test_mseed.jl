@@ -17,6 +17,11 @@ S = verified_read_data("mseed", test_mseed_file, v=0)
 @test isequal(string(u2d(S.t[1][1,2]*1.0e-6)), "2003-05-29T02:13:22.043")
 @test ≈(S.x[1][1:5], [ 2787, 2776, 2774, 2780, 2783 ])
 
+# mseed with mmap
+printstyled("    with mmap\n", color=:light_green)
+Sm = read_data("mseed", test_mseed_file, v=0, mmap=true)
+@test Sm == S
+
 # Test breaks if memory-resident SeisIOBuf structure SEED is not reset
 S1 = verified_read_data("mseed", test_mseed_file, v=0)
 if Sys.iswindows() == false
