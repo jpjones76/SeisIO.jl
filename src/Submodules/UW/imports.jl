@@ -7,6 +7,7 @@ import SeisIO: BUF,
   fastseekend,
   fillx_i16_be!,
   fillx_i32_be!,
+  mk_t!,
   sμ
 import SeisIO.Quake: unsafe_convert
 import SeisIO.Formats: formats,

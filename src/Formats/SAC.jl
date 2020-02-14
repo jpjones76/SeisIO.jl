@@ -141,12 +141,7 @@ function read_sac_stream(f::IO, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Ar
   setfield!(C, :fs, Float64(1.0f0/getindex(fv,1)))
   setfield!(C, :gain, Float64(gain))
   setfield!(C, :loc, loc)
-  t = Array{Int64,2}(undef, 2, 2)
-  setindex!(t, one(Int64), 1)
-  setindex!(t, Int64(nx), 2)
-  setindex!(t, ts, 3)
-  setindex!(t, zero(Int64), 4)
-  setfield!(C, :t, t)
+  mk_t!(C, nx, ts)
   setfield!(C, :x, x)
 
   # Create dictionary if full headers are desired

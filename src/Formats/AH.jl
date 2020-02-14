@@ -217,13 +217,7 @@ function read_ah2!(S::GphysData, ahfile::String;
     end
 
     # Create C.t
-    t0 = ah_time(ti, t_s) #) + round(Int64, t_s*1.0e6)
-    t = Array{Int64, 2}(undef, 2, 2)
-    setindex!(t, one(Int64), 1)
-    setindex!(t, nx, 2)
-    setindex!(t, t0, 3)
-    setindex!(t, zero(Int64), 4)
-    setfield!(C, :t, t)
+    mk_t!(C, nx, ah_time(ti, t_s)) #) + round(Int64, t_s*1.0e6))
 
     # Set C.fs
     setfield!(C, :fs, 1.0/dt)

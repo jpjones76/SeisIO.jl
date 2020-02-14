@@ -288,12 +288,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
 
     # New channel
     if te == 0
-      t = Array{Int64, 2}(undef, 2, 2)
-      setindex!(t, one(Int64), 1)
-      setindex!(t, n, 2)
-      setindex!(t, τ, 3)
-      setindex!(t, zero(Int64), 4)
-      setindex!(getfield(S, :t), t, c)
+      setindex!(getfield(S, :t), mk_t(n, τ), c)
 
     # Existing channel
     else

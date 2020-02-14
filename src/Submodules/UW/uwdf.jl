@@ -217,11 +217,7 @@ function uwdf(datafile::String;
                 Int64(getindex(I32, 4, i)) +
                 getindex(timecorr, i) -
                 11676096000000000
-      setindex!(t, one(Int64), 1)
-      setindex!(t, nx, 2)
-      setindex!(t, ch_time, 3)
-      setindex!(t, zero(Int64), 4)
-      setfield!(C, :t, t)
+      mk_t!(C, nx, ch_time)
 
       # Generate X
       x = Array{Float32,1}(undef, nx)

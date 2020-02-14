@@ -114,12 +114,6 @@ function read_bottle!(S::GphysData, fstr::String, v::Int64, nx_new::Int64, nx_ad
     i = findid(id, S.id)
     if i == 0
 
-      # Create C.t
-      t = ones(Int64, 2, 2)
-      setindex!(t, nx, 2)
-      setindex!(t, t0, 3)
-      setindex!(t, zero(Int64), 4)
-
       # Create C.x
       x = Array{Float64,1}(undef, max(nx_new, nx))
       os = 1
@@ -129,7 +123,7 @@ function read_bottle!(S::GphysData, fstr::String, v::Int64, nx_new::Int64, nx_ad
       setfield!(C, :name, fname)
       setfield!(C, :fs, fs)
       setfield!(C, :units, units)
-      setfield!(C, :t, t)
+      mk_t!(C, nx, t0)
       setfield!(C, :x, x)
       push!(S, C)
     else

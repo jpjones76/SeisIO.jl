@@ -198,11 +198,7 @@ function read_geocsv_slist!(S::SeisData, io::IO)
         Array{Float32,1}(undef, x) s setindex!
         =#
         X = Float32[]; sizehint!(X, nx)
-        T = Array{Int64,2}(undef, 2, 2)
-        setindex!(T, one(Int64), 1)
-        setindex!(T, Int64(nx), 2)
-        setindex!(T, ts, 3)
-        setindex!(T, zero(Int64), 4)
+        T = mk_t(nx, ts)
 
         Δ = round(Int64, 1.0e6/getfield(C, :fs))
         Δ_gap = div(3*Δ,2)
