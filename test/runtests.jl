@@ -1,6 +1,9 @@
-@info("Please allow up to 20 minutes for all tests to execute.")
 import SeisIO
 import SeisIO: get_svn
+
+# =====================================================================
+# Setup
+@info("Please allow 20 minutes for all tests to execute.")
 cd(dirname(pathof(SeisIO))*"/../test")
 if isdir("SampleFiles") == false
   get_svn("https://github.com/jpjones76/SeisIO-TestData/trunk/SampleFiles", "SampleFiles")
@@ -10,23 +13,26 @@ include("test_helpers.jl")
 
 # Announce test begin
 test_start  = Dates.now()
-ltestname   = 48
+ltn         = 48
 printstyled(stdout,
-  string(test_start, ": tests begin, path = ", path, ", has_restricted = ", has_restricted, ", keep_log = ", keep_log, ", keep_samples = ", keep_samples, "\n"),
+  string(test_start, ": tests begin, path = ", path, ", has_restricted = ",
+    has_restricted, ", keep_log = ", keep_log, ", keep_samples = ",
+    keep_samples, "\n"),
   color=:light_green,
   bold=true)
 
+# =====================================================================
 # Run all tests
-# huehuehue grep "include(joinpath" runtests.jl | awk -F "(" '{print $3}' | awk -F "," {'print $1'}
+# grep "include(joinpath" runtests.jl | awk -F "(" '{print $3}' | awk -F "," {'print $1'}
 for d in ["CoreUtils", "Types", "RandSeis", "Utils", "NativeIO", "DataFormats", "Processing", "Quake", "Web"]
   ld = length(d)
-  ll = div(ltestname - ld - 2, 2)
+  ll = div(ltn - ld - 2, 2)
   lr = ll + (isodd(ld) ? 1 : 0)
   printstyled(string("="^ll, " ", d, " ", "="^lr, "\n"), color=:cyan, bold=true)
-  for i in readdir(path*"/"*d)
+  for i in readdir(joinpath(path, d))
     f = joinpath(d,i)
     if endswith(i, ".jl")
-      printstyled(lpad(" "*f, ltestname)*"\n", color=:cyan)
+      printstyled(lpad(" "*f, ltn)*"\n", color=:cyan)
       write(out, string("\n\ntest ", f, "\n\n"))
       flush(out)
       include(f)
@@ -34,11 +40,10 @@ for d in ["CoreUtils", "Types", "RandSeis", "Utils", "NativeIO", "DataFormats", 
   end
 end
 
+# =====================================================================
 # Cleanup
 include("cleanup.jl")
-if keep_samples == false
-  include("rm_samples.jl")
-end
+(keep_samples == true) || include("rm_samples.jl")
 if !keep_log
   try
     rm("runtests.log")
@@ -50,9 +55,10 @@ end
 # Announce tests end
 test_end = Dates.now()
 δt = 0.001*(test_end-test_start).value
-mm = round(Int, div(δt, 60))
-ss = rem(δt, 60)
 printstyled(string(test_end, ": tests end, elapsed time (mm:ss.μμμ) = ",
-                          @sprintf("%02i", mm), ":",
-                          @sprintf("%06.3f", ss), "\n"), color=:light_green, bold=true)
-printstyled("To run some data acquisition examples, execute this command: include(\"", path, "/examples.jl\").\n", color=:cyan, bold=true)
+                   @sprintf("%02i", round(Int, div(δt, 60))), ":",
+                   @sprintf("%06.3f", rem(δt, 60)), "\n"),
+            color=:light_green,
+            bold=true)
+printstyled("To run some data acquisition examples, execute: include(\"",
+            path, "/examples.jl\").\n", color=:cyan, bold=true)
