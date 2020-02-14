@@ -1,5 +1,5 @@
 using Compat, Dates, DSP, HDF5, Logging, Printf, SeisIO, Test
-using SeisIO.Quake, SeisIO.RandSeis, SeisIO.SeisHDF
+using SeisIO.FastIO, SeisIO.Quake, SeisIO.RandSeis, SeisIO.SeisHDF
 import Dates: DateTime, Hour, now
 import DelimitedFiles: readdlm
 import Random: rand, randperm, randstring

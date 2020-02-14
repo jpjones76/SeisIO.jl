@@ -10,7 +10,8 @@ printstyled("  ls\n", color=:light_green)
 
 cfile = path*"/SampleFiles/Restricted/03_02_27_20140927.euc.ch"
 @test any([occursin("test", i) for i in ls()])
-coreutils_flist = [ "test_calculus.jl",
+coreutils_flist = [ "test_FastIO.jl",
+                    "test_calculus.jl",
                     "test_get_svn.jl",
                     "test_ls.jl",
                     "test_poly.jl",
