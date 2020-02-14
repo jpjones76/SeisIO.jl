@@ -1,5 +1,6 @@
 # SeisIO.jl
 [![Build Status](https://travis-ci.org/jpjones76/SeisIO.jl.svg?branch=master)](https://travis-ci.org/jpjones76/SeisIO.jl) [![Build status](https://ci.appveyor.com/api/projects/status/ocilv0u1sy41m934/branch/master?svg=true)](https://ci.appveyor.com/project/jpjones76/seisio-jl/branch/master) [![codecov](https://codecov.io/gh/jpjones76/SeisIO.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/jpjones76/SeisIO.jl)[![Coverage Status](https://coveralls.io/repos/github/jpjones76/SeisIO.jl/badge.svg?branch=master)](https://coveralls.io/github/jpjones76/SeisIO.jl?branch=master) [![Documentation Status](https://readthedocs.org/projects/seisio/badge/?version=latest)](https://seisio.readthedocs.io/en/latest/?badge=latest)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 
 A minimalist, platform-agnostic package for univariate geophysical data.
 
@@ -13,6 +14,6 @@ Designed for speed, efficiency, and ease of use. Includes web clients, readers f
 * File formats: ASDF (r/w), Bottles, GeoCSV (slist, tspair), QuakeML (r/w), SAC (r/w), SEED (dataless, mini-SEED, resp), SEG Y (rev 0, rev 1, PASSCAL), SLIST, SUDS, StationXML (r/w), Win32, UW
 
 ## Publications | [Changelog](docs/CHANGELOG.md) | [Issues](docs/ISSUES.md)
-Jones, J.P.,  Okubo, K., Clements. T., \& Denolle, M. (2019). SeisIO: a fast, efficient geophysical data architecture for the Julia language, *Submitted to Seimol. Res. Lett.*
+Jones, J.P.,  Okubo, K., Clements. T., \& Denolle, M. (2019). SeisIO: a fast, efficient geophysical data architecture for the Julia language, *Accepted by Seimol. Res. Lett.*
 
 This work has been partially supported by a grant from the Packard Foundation.
