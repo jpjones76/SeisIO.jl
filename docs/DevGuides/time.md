@@ -39,7 +39,7 @@ These are redundant for irregularly-sampled data because `:x` contains vectors w
 ## `t[:,2]`: absolute sample times
 These are not delta-encoded for irregularly-sampled data: because `t` uses 64-bit integers, each sample time requires 8 bits of memory.
 
-# Converting to Absolute Time
+# 3. Converting to Absolute Time
 Internal functions for working with time matrices are in `CoreUtils/time.jl`. The most common functions needed to manipulate time matrices are covered by:
 
 `import SeisIO: t_expand, t_collapse, t_win, w_time, tx_float`
@@ -57,3 +57,12 @@ stx = string.(u2d.(tx.*1.0e-6))   # for a vector of Strings
 An equivalent one-liner to obtain a String vector with UTC times of each sample in channel `i` is
 
 `stx = string.(u2d.(SeisIO.t_expand(S.t[i], S.fs[i]).*1.0e-6))`
+
+# 4. Time Gap Definition
+In SeisIO, for time-series data with sampling rate Δ μs, a time gap is defined by two adjacent samples xᵢ, xᵢ₊₁ with sample times tᵢ, tᵢ₊₁ : |tᵢ - tᵢ₊₁ - Δ| > 0.5Δ.
+
+## Logging Gaps
+From the above definition, any deviation from the sample interval Δ that exceeds 0.5Δ should be logged to `:t`. Negative time gaps should also be logged.
+
+### Example
+If Δ = 20000 μs, tᵢ = 100000 μs, and tᵢ₊₁ = 108000 μs, record a gap of -12000 μs at sample i+1.
