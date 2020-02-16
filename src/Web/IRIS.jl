@@ -28,8 +28,6 @@ function irisws(cha::String, d0::String, d1::String;
   url = "http://service.iris.edu/irisws/timeseries/1/query?" *
           build_stream_query(c,d0,d1) * "&scale=AUTO&output=" * fmt
   v > 0 && println(url)
-  Ch.src = url
-  note!(Ch, "+source ¦ " * url)
   req_info_str = datareq_summ("IRISWS data", ID, d0, d1)
 
   # Do request
@@ -62,6 +60,8 @@ function irisws(cha::String, d0::String, d1::String;
     parse_err = true
     Ch.misc["data"] = String(R)
   end
+  Ch.src = url
+  note!(Ch, "+source ¦ " * url)
   return parse_err, Ch
 end
 
