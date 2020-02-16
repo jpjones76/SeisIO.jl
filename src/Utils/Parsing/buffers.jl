@@ -24,11 +24,11 @@ function buf_to_int(buf::Array{UInt8,1}, L::Int64)
 end
 
 function buf_to_int(buf::Array{UInt8,1}, i::Int64, j::Int64)
-  c = Int16(10)^Int16(i-j)
-  n = zero(Int16)
+  c = 10^(i-j)
+  n = 0
   for p = j:i
-    n += c * Int16(buf[p]-0x30)
-    c = div(c, Int16(10))
+    n += c * buf[p]-0x30
+    c = div(c, 10)
   end
   return n
 end
