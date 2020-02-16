@@ -2,8 +2,12 @@ fname = path*"/SampleFiles/fdsn.conf"
 sac_pz_file = path*"/SampleFiles/SAC/test_sac.pz"
 hood_reg = Float64[44.8, 46.0, -122.4, -121.0]
 rainier_rad = Float64[46.852886, -121.760374, 0.0, 0.1]
+h5file = "sacreq.h5"
+seisfile = "sacreq.seis"
 
 printstyled("  FDSN web requests\n", color=:light_green)
+
+safe_isfile(h5file) && safe_rm(h5file)
 
 # FDSNsta
 printstyled("    FDSNsta\n", color=:light_green)
@@ -150,8 +154,8 @@ else
   printstyled("        are data written identically?\n", color=:green)
 
   # write ASDF first, since this modifies the first sample start time in S
-  write_hdf5("sacreq.h5", S, add=true, ovr=true, len=Day(2))
-  S1 = read_hdf5("sacreq.h5", ts, te, msr=false)
+  write_hdf5(h5file, S, add=true, ovr=true, len=Day(2))
+  S1 = read_hdf5(h5file, ts, te, msr=false)
 
   for f in (:id, :loc, :fs, :gain, :resp, :units, :misc)
     @test isequal(getfield(S1,f), getfield(S,f))
@@ -167,8 +171,8 @@ else
 
   # Check that these data can be written and read faithfully in ASDF, SAC, and SeisIO
   writesac(S)
-  wseis("sacreq.seis", S)
-  S2 = rseis("sacreq.seis")[1]
+  wseis(seisfile, S)
+  S2 = rseis(seisfile)[1]
   if !(isempty(S) || isempty(S2))
     for f in (:id, :loc, :fs, :gain, :resp, :units, :misc)
       @test isequal(getfield(S2,f), getfield(S,f))
@@ -206,8 +210,8 @@ else
   end
 
   # clean up
-  rm("sacreq.seis")
-  rm("sacreq.h5")
+  safe_rm(seisfile)
+  safe_rm(h5file)
 end
 
 # A bad data format should produce a warning
