@@ -6,7 +6,7 @@ export note!, clear_notes!, processing_log, source_log
 # Adding a string to SeisData writes a note; if the string mentions a channel
 # name or ID, the note is restricted to the given channels(s), else it's
 # added to all channels
-"""
+@doc """
     note!(S::SeisData, i::Int64, s::String)
 
 Append `s` to channel `i` of `S` and time stamp.
@@ -14,15 +14,15 @@ Append `s` to channel `i` of `S` and time stamp.
     note!(S::SeisData, id::String, s::String)
 
 As above for the first channel in `S` whose id is an exact match to `id`.
-"""
-note!(S::T, i::Int64, s::String) where {T<:GphysData} = push!(S.notes[i], tnote(s))
 
-
-"""
-    note!(S::SeisData, s::String)
+  note!(S::SeisData, s::String)
 
 Append `s` to `S.notes` and time stamp. If `txt` contains a channel name or ID, only the channel mentioned is annotated; otherwise, all channels are annotated.
-"""
+
+See Also: clear_notes!, processing_log, source_log
+""" note!
+note!(S::T, i::Int64, s::String) where {T<:GphysData} = push!(S.notes[i], tnote(s))
+
 function note!(S::GphysData, s::String)
     J = [occursin(i, s) for i in S.name]
     K = [occursin(i, s) for i in S.id]
@@ -70,6 +70,8 @@ Clear all notes from channel `i` of `S` and leaves a note about this.
     clear_notes!(S::SeisData, id::String, s::String)
 
 As above for the first channel in `S` whose id is an exact match to `id`.
+
+See Also: note!, processing_log, source_log
 """
 function clear_notes!(S::GphysData)
   cstr = tnote("notes cleared.")
@@ -123,6 +125,16 @@ function print_log(notes::Array{String,1}, k::String)
   println("")
   return nothing
 end
+
+"""
+    processing_log(S::GphysData)
+    processing_log(S::GphysData, i::Int64)
+    processing_log(C::GphysChannel)
+
+Tabulate and print all processing steps in `:notes` to stdout in human-readable format.
+
+See Also: source_log, note!, clear_notes!
+"""
 function processing_log(S::GphysData)
   for i in 1:S.n
     println("\nChannel ", i)
@@ -132,6 +144,16 @@ function processing_log(S::GphysData)
 end
 processing_log(S::GphysData, i::Int) = print_log(S.notes[i], "processing")
 processing_log(C::GphysChannel) = print_log(C.notes, "processing")
+
+"""
+    source_log(S::GphysData)
+    source_log(S::GphysData, i::Int64)
+    source_log(C::GphysChannel)
+
+Tabulate and print all data sources logged in `:notes` to stdout in human-readable format.
+
+See Also: processing_log, note!, clear_notes!
+"""
 function source_log(S::GphysData)
   for i in 1:S.n
     println("\nChannel ", i)
