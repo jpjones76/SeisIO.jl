@@ -4,6 +4,7 @@ slist_file  = string(path, "/SampleFiles/ASCII/2m-62.5hz.slist")
 lenn_pat    = string(path, "/SampleFiles/ASCII/021516*c00")
 geocsv_pat  = string(path, "/SampleFiles/ASCII/geo-tspair.*")
 slist_pat   = string(path, "/SampleFiles/ASCII/*.slist")
+geoslist_f  = string(path, "/SampleFiles/ASCII/geo-slist.csv")
 
 printstyled("  Lennartz ASCII\n", color=:light_green)
 C = verified_read_data("lennartz", lenn_file, vl=true)[1]
@@ -24,6 +25,9 @@ if i > 0
   @test ==(S.loc[i], GeoLoc(lat=46.275269, lon=-122.218262, el=1219.0, inc=180.0))
 end
 
+printstyled("  GeoCSV slist\n", color=:light_green)
+S = verified_read_data("geocsv.slist", geoslist_f)
+
 printstyled("    wildcard support\n", color=:light_green)
 S = verified_read_data("geocsv", geocsv_pat)
 
@@ -39,3 +43,16 @@ S = verified_read_data("slist", slist_pat)
 @test S.id[1] == "YY.ERTA..EHZ"
 @test ≈(S.fs[1], 62.5)
 @test isapprox(C.x[1:nx], S.x[1])
+
+printstyled("  channel continuation (Issue 34)\n", color=:light_green)
+printstyled("    GeoCSV.tspair\n", color=:light_green)
+test_ascii_continuation(geocsv_file, "geocsv.tspair", "CC.JRO..BHZ", 50.0, 1, 1554777720010000)
+
+printstyled("    GeoCSV.slist\n", color=:light_green)
+test_ascii_continuation(geoslist_f, "geocsv.slist", "IU.ANMO.00.LHZ", 1.0, 3, 1551249000000000)
+
+printstyled("    slist\n", color=:light_green)
+test_ascii_continuation(slist_file, "slist", "YY.ERTA..EHZ", 62.5, 1, 1013790000000000)
+
+printstyled("    lennartz\n", color=:light_green)
+test_ascii_continuation(lenn_file, "lennartz", ".ERTA..c00", 62.5, 1, 1013790000000000)
