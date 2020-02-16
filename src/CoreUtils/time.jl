@@ -212,6 +212,48 @@ function endtime(t::Array{Int64,2}, fs::Float64)
   end
 end
 
+"""
+    t_extend(t::Array{Int64,2}, ts_new::Int64, nx_new::Int64, Δ::Int64)
+
+Extend time matrix `t` : `t[end,1]` = `nx_old`, where:
+* `ts_new` is the start time of the new segment in integer μs from the Unix epoch.
+* `nx_new` is the length of the new segment in samples.
+
+# Use
+## Known `nx_new` && No Gaps Possible
+Pass number of samples to be added as `nx_new`.
+
+Returns `t` extended by a segment equivalent to [1 ts; nx_new 0].
+
+## Unknown `nx_new` || Gaps Possible
+Pass 0 as `nx_new`.
+
+Returns `t` with the start of the new segment appended. The end of the
+segment should be appended as a final row later, of the form `[nx_total 0]`.
+"""
+function t_extend(t::Array{Int64,2}, ts::Int64, nx::Int64, Δ::Int64)
+  nt = size(t, 1)
+  n0 = 0
+  # Channel has some data already
+  if nt > 0
+    n0 = t[nt, 1]
+    t0 = endtime(t, Δ)
+    if t[nt, 2] == 0
+      t = t[1:nt-1,:]
+    end
+    if nx > 0
+      return vcat(t, [1+n0 ts-t0-Δ; nx+n0 0])
+    else
+      return vcat(t, [1+n0 ts-t0-Δ])
+    end
+  elseif nx == 0
+    return mk_t(nx, ts)[1:1,:]
+  else
+    return mk_t(nx, ts)
+  end
+end
+t_extend(T::Array{Int64,2}, ts::Int64, n::Int64, fs::Float64) = t_extend(T, ts, n, round(Int64, 1.0e6/fs))
+
 function t_expand(t::Array{Int64,2}, fs::Float64)
   fs == 0.0 && return t[:,2]
   t[end,1] == 1 && return [t[1,2]]

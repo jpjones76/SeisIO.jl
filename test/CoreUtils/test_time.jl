@@ -191,3 +191,38 @@ for (n,s) in enumerate(["2018-01-01T00:00:00.000001",
     @test loop_time(tstr2int(s), tstr2int("2018-03-02T00:00:02")) == 3
   end
 end
+
+printstyled(stdout, "    t_extend\n", color=:light_green)
+t = [1 12356; 1231 333; 14134 0]
+ts_new = 8348134123
+nx_new = 65536
+dt = 20000
+fs = 50.0
+t2 = t_extend(t, ts_new, 0, dt)
+t1 = t_extend(t, ts_new, nx_new, dt)
+ #     1       12356
+ #  1231         333
+ # 14135  8065441434
+ # 79670           0
+@test size(t1) == (4,2)
+@test t1[end,1] == 79670
+@test endtime(t1, dt) == t_expand(t1, fs)[end]
+@test t1[1:end-1,:] == t2
+
+t = [1 3301; 505 1200; 1024 3]
+ts_new = 1181381433
+nx_new = 3000
+t2 = t_extend(t, ts_new, 0, dt)
+t1 = t_extend(t, ts_new, nx_new, dt)
+# 1           3301
+# 505         1200
+# 1024           3
+# 1025  1160896929
+# 4024           0
+@test endtime(t1, dt) == t_expand(t1, fs)[end]
+@test t1[1:end-1,:] == t2
+
+t1 = Array{Int64,2}(undef, 0, 0)
+t2 = Array{Int64,2}(undef, 0, 2)
+@test t_extend(t1, ts_new, nx_new, dt) == t_extend(t2, ts_new, nx_new, dt) == [1 ts_new; nx_new 0]
+@test t_extend(t1, ts_new, 0, dt) == t_extend(t2, ts_new, 0, dt) == [1 ts_new]
