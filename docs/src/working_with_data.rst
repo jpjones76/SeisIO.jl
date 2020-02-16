@@ -154,3 +154,25 @@ Clear all notes from the first channel in ``S`` whose id field exactly matches `
 ``clear_notes!(S)``
 
 Clear all notes from every channel in ``S``.
+
+
+*******************
+Checking Your Work
+*******************
+If you need to check what's been done to a channel, or the sources present in the channel data, two commands are helpful:
+
+.. function:: processing_log(S::SeisData)
+.. function:: processing_log(S::SeisData, i::Int)
+:noindex:
+.. function:: processing_log(C::SeisChannel)
+   :noindex:
+
+Tabulate and print all processing steps in `:notes` to stdout in human-readable format.
+
+.. function:: source_log(S::SeisData)
+.. function:: source_log(S::SeisData, i::Int)
+:noindex:
+.. function:: source_log(C::SeisChannel)
+   :noindex:
+
+Tabulate and print all data sources in `:notes` to stdout.

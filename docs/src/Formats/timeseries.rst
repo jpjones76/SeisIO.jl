@@ -63,17 +63,28 @@ Supported Keywords
          | sac      |         |           |
          | segy     |         |           |
          | uw       |         |           |
+  mmap   | *        | Bool    | false     | use mmap to buffer file?
   nx_add | mseed    | Int64   | 360000    | minimum size increase of **:x**
   nx_new | mseed    | Int64   | 86400000  | length of **:x** for new channels
   jst    | win32    | Bool    | true      | are sample times JST (UTC+9)?
   swap   | seed     | Bool    | true      | byte swap?
   units  | resp     | Bool    | false     | fill in units of CoeffResp stages?
-  v      | (all)    | Int64   | 0         | verbosity
+  v      | *        | Int64   | 0         | verbosity
+  vl     | *        | Bool    | 0         | verbose source logging?
 
+* = all
 
-Performance Tip
-===============
-With mseed or win32 data, adjust `nx_new` and `nx_add` based on the sizes of
+Performance Tips
+================
+1. `mmap=true` improves read speed significantly but requires caution. Julia language handling of SIGBUS/SIGSEGV and associated risks is unknown and totally undocumented.
+
+As a practical example of the implications, we don't know what happens in Julia if there's a connection failure during memory-mapped file I/O. In many languages, this situation can corrupt files without additional signal handling.
+
+**Under no circumstances** should `mmap=true` be used to read files directly from a drive whose host device power management is independent of the destination computer's. This includes all work flows that involve directly connecting a data logger, DAS, or smartphone to a computer, then reading files into memory from the connected device. It is *not* a sufficient workaround to set devices to "always on".
+
+Note that win32 presently doesn't support memory-mapped files, as internal tests suggest that it offers no advantage.
+
+2. With mseed or win32 data, adjust `nx_new` and `nx_add` based on the sizes of
 the data vectors that you expect to read. If the largest has `Nmax` samples,
 and the smallest has `Nmin`, we recommend `nx_new=Nmin` and `nx_add=Nmax-Nmin`.
 

@@ -1,3 +1,10 @@
+### 2020-02-16
+* `read_data!` with an ASCII data format now continues existing channels that match channel ID, rather than starting new ones. Fixes issue #35.
+* Found, and fixed, an off-by-one error in start times of GeoCSV tspair time series.
+* Internal `buf_to_int()` now always allows ns precision.
+* `processing_log` and `source_log` now have docstrings.
+* Fixed a longstanding bug where `:src`, `:notes` were not logged by `get_data("IRIS", ..., fmt="sac")`.
+
 ### 2020-02-14
 #### `read_data` improvements
 * A String array can now be passed as the filename argument.

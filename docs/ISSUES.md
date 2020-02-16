@@ -28,7 +28,6 @@
   + SEG Y rev 2 is unsupported.
   + Seismic Unix ("SU") is unsupported. PASSCAL SEG Y is orders of magnitude more common, but the two variants are mutually unintelligible due to trace header differences.
 * **SUDS structures** (I,O): structures outside the scope of SeisIO are not read into memory.
-* **get_data() with ASCII formats** (B): multi-day requests will error due to no channel ID matching in geocsv parsers (issue #35).
 
 ## Issues Key
 * B = Bug, internal; fixable by SeisIO developers
