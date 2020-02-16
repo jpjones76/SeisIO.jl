@@ -75,12 +75,12 @@ function channel_guess(str::AbstractString, fs::Float64)
   return (str, units)
 end
 
-function read_bottle!(S::GphysData, fstr::String, v::Int64, nx_new::Int64, nx_add::Int64)
+function read_bottle!(S::GphysData, fstr::String, v::Int64, mmap::Bool, nx_new::Int64, nx_add::Int64)
   buf = BUF.buf
   files = ls(fstr)
 
   for file in files
-    io = open(file, "r")
+    io = mmap ? IOBuffer(Mmap.mmap(file)) : open(file, "r")
 
     # Read header ============================================================
     fastskip(io, 8)

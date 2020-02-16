@@ -1,12 +1,12 @@
-function uwdf(datafile::String;
+function uwdf(fname::String;
+              mmap::Bool=false,
               v::Int=KW.v,
               full::Bool=KW.full
               )
-  fname = realpath(datafile)
   D = Dict{String,Any}()
 
   # Open data file
-  fid = open(fname, "r")
+  fid = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
 
   # Process master header
   N             = Int64(bswap(fastread(fid, Int16)))
@@ -247,7 +247,8 @@ function uwdf(datafile::String;
   return S
 end
 
-uwdf!(S::GphysData, datafile::String;
+uwdf!(S::GphysData, fname::String;
+      mmap::Bool=false,
       v::Int=KW.v,
       full::Bool=KW.full
-      ) = (U = uwdf(datafile, v=v, full=full); append!(S, U))
+      ) = (U = uwdf(fname, mmap=mmap, v=v, full=full); append!(S, U))

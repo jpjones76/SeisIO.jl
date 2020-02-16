@@ -283,8 +283,10 @@ function read_segy_file(fname::String,
                         ints::Array{Int32,1},
                         passcal::Bool,
                         swap::Bool,
+                        mmap::Bool,
                         full::Bool)
-  f = open(fname, "r")
+
+  f = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   trace_fh = Array{Int16, 1}(undef, 3)
   if passcal == true
     S = SeisData(do_trace(f, buf, shorts, ints, true, full, fname, swap, trace_fh))

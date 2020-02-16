@@ -1,9 +1,10 @@
 function read_suds(fname::String;
+  mmap::Bool=false,
   full::Bool=false,
   v::Int64=KW.v,
   )
 
-  sid = open(fname, "r")
+  sid = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   S = SeisData()
 
   # Tracking channels and indices
