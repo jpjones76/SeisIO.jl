@@ -84,12 +84,8 @@ function mk_ah_id(js::Int64, jc::Int64, jn::Int64)
 end
 
 # AH-2
-function read_ah2!(S::GphysData, ahfile::String;
-  v::Int64=SeisIO.KW.v,
-  full::Bool=false
-  )
-
-  io = open(ahfile, "r")
+function read_ah2!(S::GphysData, ahfile::String, full::Bool, mmap::Bool, v::Int)
+  io = mmap ? IOBuffer(Mmap.mmap(ahfile)) : open(ahfile, "r")
   str = getfield(BUF, :sac_cv)
   ti = BUF.date_buf
   resize!(ti, 5)
@@ -242,13 +238,9 @@ function read_ah2!(S::GphysData, ahfile::String;
   return S
 end
 
-function read_ah1!(S::GphysData, ahfile::String;
-  v     ::Int64 = SeisIO.KW.v,
-  full  ::Bool  = false
-  )
+function read_ah1!(S::GphysData, ahfile::String, full::Bool, mmap::Bool, v::Int)
 
-  fullfile = realpath(ahfile)
-  io = open(ahfile, "r")
+  io = mmap ? IOBuffer(Mmap.mmap(ahfile)) : open(ahfile, "r")
   str = getfield(BUF, :sac_cv)
   ti  = getfield(BUF, :date_buf)
   pz_buf = getfield(BUF, :x)
