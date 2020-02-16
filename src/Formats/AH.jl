@@ -359,7 +359,7 @@ function read_ah1!(S::GphysData, ahfile::String, full::Bool, mmap::Bool, v::Int)
                     Float64(pz_buf[4]),
                     PZResp(pz_buf[5], 0.0f0, P, Z),
                     "",
-                    fullfile,
+                    ahfile,
                     misc,
                     notes,
                     mk_t(nx, ah_time(ti, t_s)),
