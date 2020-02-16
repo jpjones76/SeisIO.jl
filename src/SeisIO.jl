@@ -97,6 +97,9 @@ end
 include("Submodules/FormatGuide.jl")
 import .Formats: formats
 
+include("Submodules/ASCII.jl")
+using .ASCII
+
 include("Submodules/SEED.jl")
 using .SEED: mseed_support, parsemseed!, parserec!, read_dataless, read_mseed_file!, read_seed_resp!, read_seed_resp, RESP_wont_read, seed_cleanup!, seed_support
 export mseed_support, read_dataless, read_seed_resp!, read_seed_resp, RESP_wont_read, seed_support

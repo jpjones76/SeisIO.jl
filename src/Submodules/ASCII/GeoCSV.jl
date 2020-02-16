@@ -12,65 +12,69 @@ function get_sep(v_buf::Array{UInt8,1}, vi::Int8)
   return nothing
 end
 
-function assign_val!(C::SeisChannel,
-                      loc::GeoLoc,
-                      k_buf::Array{UInt8,1},
-                      v_buf::Array{UInt8,1},
-                      ki::Int8,
-                      vi::Int8)
-  z = zero(Int8)
-  o = one(Int8)
-  k::String = ""
-
-  # SID
-  if ki == 3
-    i = z
-    while i < vi
-      i += o
-      if getindex(v_buf,i) == 0x5f
-        setindex!(v_buf, 0x2e, i)
-      end
+function get_tstr_len(t_buf::Array{UInt8,1})
+  ip = 0
+  for i = 1:length(t_buf)
+    if t_buf[i] == 0x2e
+      ip = i
+      break
     end
-    v = String(v_buf[o:vi])
-    setfield!(C, :id, v)
-
-  else
-    k = String(k_buf[o:ki])
-    ptr = pointer(v_buf[o:vi])
-    loc_i = z
-
-    if k == "sample_rate_hz"
-      # setfield!(C, :fs, ccall(:strtod, Float64, (Cstring, Ptr), ptr, C_NULL))
-      setfield!(C, :fs, parse(Float64, unsafe_string(ptr)))
-    elseif k == "latitude_deg"
-      setfield!(loc, :lat, parse(Float64, unsafe_string(ptr)))
-    elseif k == "longitude_deg"
-      setfield!(loc, :lon, parse(Float64, unsafe_string(ptr)))
-    elseif k == "elevation_m"
-      setfield!(loc, :el, parse(Float64, unsafe_string(ptr)))
-    elseif k == "azimuth_deg"
-      setfield!(loc, :az, parse(Float64, unsafe_string(ptr)))
-    elseif k == "dip_deg"
-      setfield!(loc, :inc, 90.0-parse(Float64, unsafe_string(ptr)))
-    elseif k == "depth_m"
-      setfield!(loc, :dep, parse(Float64, unsafe_string(ptr)))
-    elseif k == "scale_factor"
-      # setfield!(C, :gain, ccall(:strtod, Float64, (Cstring, Ptr), ptr, C_NULL))
-      setfield!(C, :gain, parse(Float64, unsafe_string(ptr)))
-    elseif k == "scale_frequency_hz"
-      # C.misc[k] = ccall(:strtod, Float64, (Cstring, Ptr), ptr, C_NULL)
-      C.misc[k] = parse(Float64, unsafe_string(ptr))
-    elseif k == "scale_units"
-      setfield!(C, :units, lowercase(unsafe_string(ptr)))
+  end
+  (ip == 0) && (return 0)
+  ix = ip
+  for i = ip+1:ip+3
+    if is_u8_digit(t_buf[i])
+      ix += 1
     else
-      C.misc[k] = unsafe_string(ptr)
+      return ix
     end
+  end
+  return ix
+end
 
-    # if loc_i > z
-    #   # d = ccall(:strtod, Float64, (Cstring, Ptr), ptr, C_NULL)
-    #   d = parse(Float64, unsafe_string(ptr))
-    #   setindex!(loc, d, loc_i)
-    # end
+function geocsv_mkid(v_buf::Array{UInt8,1}, vi::Int8)
+  # SID
+  i = 0x00
+  while i < vi
+    i += 0x01
+    if getindex(v_buf, i) == 0x5f
+      setindex!(v_buf, 0x2e, i)
+    end
+  end
+  return String(v_buf[0x01:vi])
+end
+
+function geocsv_assign!(C::SeisChannel,
+                        k_buf::Array{UInt8,1},
+                        v_buf::Array{UInt8,1},
+                        ki::Int8,
+                        vi::Int8)
+  o = one(Int8)
+  k = String(k_buf[o:ki])
+  ptr = pointer(v_buf[o:vi])
+
+  if k == "sample_rate_hz"
+    setfield!(C, :fs, parse(Float64, unsafe_string(ptr)))
+  elseif k == "latitude_deg"
+    setfield!(C.loc, :lat, parse(Float64, unsafe_string(ptr)))
+  elseif k == "longitude_deg"
+    setfield!(C.loc, :lon, parse(Float64, unsafe_string(ptr)))
+  elseif k == "elevation_m"
+    setfield!(C.loc, :el, parse(Float64, unsafe_string(ptr)))
+  elseif k == "azimuth_deg"
+    setfield!(C.loc, :az, parse(Float64, unsafe_string(ptr)))
+  elseif k == "dip_deg"
+    setfield!(C.loc, :inc, 90.0-parse(Float64, unsafe_string(ptr)))
+  elseif k == "depth_m"
+    setfield!(C.loc, :dep, parse(Float64, unsafe_string(ptr)))
+  elseif k == "scale_factor"
+    setfield!(C, :gain, parse(Float64, unsafe_string(ptr)))
+  elseif k == "scale_frequency_hz"
+    C.misc[k] = parse(Float64, unsafe_string(ptr))
+  elseif k == "scale_units"
+    setfield!(C, :units, lowercase(unsafe_string(ptr)))
+  else
+    C.misc[k] = unsafe_string(ptr)
   end
   return nothing
 end
@@ -132,8 +136,7 @@ function read_geocsv_slist!(S::SeisData, io::IO)
   nx = zero(UInt64)
 
   C = SeisChannel()
-  loc = GeoLoc()
-  T = Array{Int64,2}(undef, 0, 2)
+  C.loc = GeoLoc()
   X = Array{Float32,1}(undef, 0)
 
   k_buf = Array{UInt8,1}(undef, 80)
@@ -160,27 +163,44 @@ function read_geocsv_slist!(S::SeisData, io::IO)
       if reading_data == true
 
       # '#' after newline
-        setfield!(C, :loc, loc)
-        setfield!(C, :t, T)
-        setfield!(C, :x, X)
+        C.t = vcat(C.t, [i-1 zero(Int64)])
+        append!(C.x, X)
         push!(S, C)
         C = SeisChannel()
-        loc = GeoLoc()
+        C.loc = GeoLoc()
         i = oo
         reading_data = false
       end
       (ki, vi) = mkhdr(io, c, k_buf, v_buf)
-      # println(String(k_buf[1:ki]), " = ", String(v_buf[1:vi]))
+
       if ki == Int8(9)
         sep = get_sep(v_buf, vi)
       elseif ki == Int8(12)
         if k_buf[1] == 0x73 && k_buf[2] == 0x61
           nx = buf_to_uint(v_buf, vi)
         else
-          assign_val!(C, loc, k_buf, v_buf, ki, vi)
+          geocsv_assign!(C, k_buf, v_buf, ki, vi)
+        end
+      elseif ki == Int8(3)
+        id = geocsv_mkid(v_buf, vi)
+        ii = findid(S, id)
+        if ii > 0
+          C = pull(S, ii)
+        else
+          C.id = id
+        end
+        Nt = size(C.t, 1)
+        if Nt > 0
+          t_old = endtime(C.t, round(Int64, 1.0e6/C.fs))
+          i = C.t[Nt, 1] + 1
+          if C.t[Nt, 2] == 0
+            C.t = C.t[1:Nt-1,:]
+          end
+        else
+          t_old = oo
         end
       else
-        assign_val!(C, loc, k_buf, v_buf, ki, vi)
+        geocsv_assign!(C, k_buf, v_buf, ki, vi)
       end
 
     # any other character after newline
@@ -198,11 +218,12 @@ function read_geocsv_slist!(S::SeisData, io::IO)
         Array{Float32,1}(undef, x) s setindex!
         =#
         X = Float32[]; sizehint!(X, nx)
-        T = mk_t(nx, ts)
-
         Δ = round(Int64, 1.0e6/getfield(C, :fs))
-        Δ_gap = div(3*Δ,2)
-        t_old = oo
+        if isempty(C.t)
+          C.t = [1 ts]
+        else
+          C.t = vcat(C.t, [i ts-t_old-Δ])
+        end
         reading_data = true
         while is_u8_digit(c) == false
           c = fastread(io)
@@ -213,9 +234,7 @@ function read_geocsv_slist!(S::SeisData, io::IO)
       i += 1
     end
   end
-  setfield!(C, :loc, loc)
-  setfield!(C, :t, T)
-  setfield!(C, :x, X)
+  append!(C.x, X)
   push!(S, C)
   return nothing
 end
@@ -240,8 +259,7 @@ function read_geocsv_tspair!(S::SeisData, io::IO)
   nx = zero(UInt64)
 
   C = SeisChannel()
-  loc = GeoLoc()
-  T = Array{Int64,2}(undef, 0, 2)
+  C.loc = GeoLoc()
   X = Array{Float32,1}(undef, 0)
 
   k_buf = Array{UInt8,1}(undef, 80)
@@ -283,13 +301,11 @@ function read_geocsv_tspair!(S::SeisData, io::IO)
         if reading_data == true
 
           # finish current SeisChannel
-          T = vcat(T, [i-1 zero(Int64)])
-          setfield!(C, :loc, loc)
-          setfield!(C, :t, T)
-          setfield!(C, :x, X)
+          C.t = vcat(C.t, [i-1 zero(Int64)])
+          append!(C.x, X)
           push!(S, C)
           C = SeisChannel()
-          loc = GeoLoc()
+          C.loc = GeoLoc()
           i = oo
           reading_data = false
         end
@@ -300,10 +316,28 @@ function read_geocsv_tspair!(S::SeisData, io::IO)
           if k_buf[1] == 0x73 && k_buf[2] == 0x61
             nx = buf_to_uint(v_buf, vi)
           else
-            assign_val!(C, loc, k_buf, v_buf, ki, vi)
+            geocsv_assign!(C, k_buf, v_buf, ki, vi)
+          end
+        elseif ki == Int8(3)
+          id = geocsv_mkid(v_buf, vi)
+          ii = findid(S, id)
+          if ii > 0
+            C = pull(S, ii)
+          else
+            C.id = id
+          end
+          Nt = size(C.t, 1)
+          if Nt > 0
+            t_old = endtime(C.t, round(Int64, 1.0e6/C.fs))
+            i = C.t[Nt, 1] + 1
+            if C.t[Nt, 2] == 0
+              C.t = C.t[1:Nt-1,:]
+            end
+          else
+            t_old = oo
           end
         else
-          assign_val!(C, loc, k_buf, v_buf, ki, vi)
+          geocsv_assign!(C, k_buf, v_buf, ki, vi)
         end
         read_state = 0x00
 
@@ -322,10 +356,8 @@ function read_geocsv_tspair!(S::SeisData, io::IO)
           Array{Float32,1}(undef, x) s setindex!
           =#
           X = Float32[]; sizehint!(X, nx)
-          T = Array{Int64,2}(undef, 0, 2)
           Δ = round(Int64, 1.0e6/getfield(C, :fs))
           Δ_gap = div(3*Δ,2)
-          t_old = oo
 
           # Flag that we're now reading data
           reading_data = true
@@ -341,7 +373,7 @@ function read_geocsv_tspair!(S::SeisData, io::IO)
       if c == 0x2e
         # only happens at a decimal in a time block
         ccall(:strptime, Cstring, (Cstring, Cstring, Ref{TmStruct}), t_ptr, "%FT%T", tm)
-        t = ccall(:mktime, Int64, (Ref{TmStruct},), tm) * 1000000
+        t = ccall(:timegm, Int64, (Ref{TmStruct},), tm)* 1000000
         read_state = 0x03
         continue
 
@@ -360,9 +392,9 @@ function read_geocsv_tspair!(S::SeisData, io::IO)
 
         if t-t_old > Δ_gap
           if t_old == oo
-            T = vcat(T, [i t-t_old])
+            C.t = vcat(C.t, [i t])
           else
-            T = vcat(T, [i t-t_old-Δ])
+            C.t = vcat(C.t, [i t-t_old-Δ])
           end
         end
         t_old = t
@@ -392,16 +424,14 @@ function read_geocsv_tspair!(S::SeisData, io::IO)
     end
 
   end
-  T = vcat(T, [i-1 zero(Int64)])
-  setfield!(C, :loc, loc)
-  setfield!(C, :t, T)
-  setfield!(C, :x, X)
+  C.t = vcat(C.t, [i-1 zero(Int64)])
+  append!(C.x, X)
   push!(S, C)
   return nothing
 end
 
-function read_geocsv_file!(S::SeisData, fname::String, tspair::Bool)
-  io = open(fname, "r")
+function read_geocsv_file!(S::SeisData, fname::String, mmap::Bool, tspair::Bool)
+  io = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   if tspair == true
     read_geocsv_tspair!(S, io)
   else
