@@ -222,45 +222,45 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
 
   elseif fmt == "ah1"
     if one_file
-      read_ah1!(S, filestr, v=v, full=full)
+      read_ah1!(S, filestr, full, mmap, v)
     else
       for fname in files
-        read_ah1!(S, fname, v=v, full=full)
+        read_ah1!(S, fname, full, mmap, v)
       end
     end
     push!(opt_strings, string("full = ", full))
 
   elseif fmt == "ah2"
     if one_file
-      read_ah2!(S, filestr, v=v, full=full)
+      read_ah2!(S, filestr, full, mmap, v)
     else
       for fname in files
-        read_ah2!(S, fname, v=v, full=full)
+        read_ah2!(S, fname, full, mmap, v)
       end
     end
     push!(opt_strings, string("full = ", full))
 
   elseif fmt == "bottle"
-    read_bottle!(S, filestr, v, nx_new, nx_add)
+    read_bottle!(S, filestr, v, mmap, nx_new, nx_add)
     push!(opt_strings, string("nx_new = ", nx_new,
                               ", nx_add = ", nx_add))
 
   elseif fmt in ("geocsv", "geocsv.tspair", "geocsv", "geocsv.slist")
     tspair = (fmt == "geocsv" || fmt == "geocsv.tspair")
     if one_file
-      read_geocsv_file!(S, filestr, tspair)
+      read_geocsv_file!(S, filestr, mmap, tspair)
     else
       for fname in files
-        read_geocsv_file!(S, fname, tspair)
+        read_geocsv_file!(S, fname, mmap, tspair)
       end
     end
 
   elseif fmt == "lennartz"
     if one_file
-      read_slist!(S, filestr, lennartz=true)
+      read_slist!(S, filestr, mmap, true)
     else
       for fname in files
-        read_slist!(S, fname, lennartz=true)
+        read_slist!(S, fname, mmap, true)
       end
     end
 
@@ -272,10 +272,10 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     checkbuf!(buf, 240)
 
     if one_file
-      append!(S, read_segy_file(filestr, buf, shorts, ints, passcal, swap, full))
+      append!(S, read_segy_file(filestr, buf, shorts, ints, passcal, swap, mmap, full))
     else
       for fname in files
-        append!(S, read_segy_file(fname, buf, shorts, ints, passcal, swap, full))
+        append!(S, read_segy_file(fname, buf, shorts, ints, passcal, swap, mmap, full))
       end
     end
     push!(opt_strings, string("full = ", full,
@@ -283,29 +283,29 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
 
   elseif fmt == "slist"
     if one_file
-      read_slist!(S, filestr)
+      read_slist!(S, filestr, mmap, false)
     else
       for fname in files
-        read_slist!(S, fname)
+        read_slist!(S, fname, mmap, false)
       end
     end
 
   elseif fmt == "suds"
     if one_file
-      append!(S, SUDS.read_suds(filestr, full=full, v=v))
+      append!(S, SUDS.read_suds(filestr, mmap=mmap, full=full, v=v))
     else
       for fname in files
-        append!(S, SUDS.read_suds(fname, full=full, v=v))
+        append!(S, SUDS.read_suds(fname, mmap=mmap, full=full, v=v))
       end
     end
     push!(opt_strings, string("full = ", full))
 
   elseif fmt == "uw"
     if one_file
-      append!(S, UW.uwdf(filestr, v=v, full=full))
+      append!(S, UW.uwdf(filestr, mmap=mmap, v=v, full=full))
     else
       for fname in files
-        append!(S, UW.uwdf(fname, v=v))
+        append!(S, UW.uwdf(fname, mmap=mmap, v=v))
       end
     end
     push!(opt_strings, string("full = ", full))
