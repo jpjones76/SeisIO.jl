@@ -2,9 +2,9 @@
 
 function irisws(cha::String, d0::String, d1::String;
                 fmt::String   = KW.fmt,
-                to::Int       = KW.to,
+                to::Int64     = KW.to,
                 opts::String  = KW.opts,
-                v::Int        = KW.v,
+                v::Integer    = KW.v,
                 w::Bool       = KW.w)
 
   # init
@@ -69,7 +69,7 @@ function IRISget(C::Array{String,1}, d0::String, d1::String;
                   fmt::String   = KW.fmt,
                   to::Int       = KW.to,
                   opts::String  = KW.opts,
-                  v::Int        = KW.v,
+                  v::Integer    = KW.v,
                   w::Bool       = KW.w)
 
   parse_err = false
@@ -91,7 +91,7 @@ function IRISget!(S::SeisData, C::Array{String,1}, d0::String, d1::String;
                   fmt::String   = KW.fmt,
                   to::Int       = KW.to,
                   opts::String  = KW.opts,
-                  v::Int        = KW.v,
+                  v::Integer    = KW.v,
                   w::Bool       = KW.w)
 
   (parse_err, U) = IRISget(C, d0, d1, fmt = fmt, to = to, opts = opts, v = v, w = w)
