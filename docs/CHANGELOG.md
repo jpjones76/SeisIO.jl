@@ -1,3 +1,16 @@
+### 2020-02-22
+* The Win32 reader now logs time gaps > 0.5Δ for sample interval Δ, rather than > 1.0 s, consistent with other file formats.
+* `read_data!` now extends existing data channels in all formats.
+  + By default, channel data in SeisData structure `S` are extended if the id of the data on file matches a channel id in `S`.
+  + Enforce stricter channel matching in most formats with KW `strict=true`.
+    - This keyword has no effect on ASCII formats and SUDS.
+    - In other formats, `strict=true`always matches on *at least* `:id`, `:fs`
+    - Depending on the metadata stored by a given file format, `strict=true` can require a match on `:id`, `:fs`, `:gain`,`:loc`, `:resp`, and `:units` to extend an existing channel.
+    - See the official documentation for the fields that must match in each file format when using `strict=true`.
+
+### 2020-02-21
+* `readuwevt` now respects the value of `full` passed by the user.
+
 ### 2020-02-16
 * `read_data!` with an ASCII data format now continues existing channels that match channel ID, rather than starting new ones. Fixes issue #35.
 * Found, and fixed, an off-by-one error in start times of GeoCSV tspair time series.
