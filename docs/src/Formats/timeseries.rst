@@ -78,7 +78,7 @@ Supported Keywords
 
 Performance Tips
 ================
-1. `mmap=true` improves read speed significantly but requires caution. Julia language handling of SIGBUS/SIGSEGV and associated risks is unknown and undocumented.
+1. `mmap=true` improves read speed for some formats, particularly ASCII readers, but requires caution. Julia language handling of SIGBUS/SIGSEGV and associated risks is unknown and undocumented.
 
 As a practical example of the implications, we don't know what happens in Julia if there's a connection failure during memory-mapped file I/O. In many languages, this situation can corrupt files without additional signal handling.
 
