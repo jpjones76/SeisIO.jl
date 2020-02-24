@@ -1,8 +1,9 @@
-function uwdf(fname::String;
-              mmap::Bool=false,
-              v::Int=KW.v,
-              full::Bool=KW.full
-              )
+function uwdf!( S::GphysData,
+                fname::String,
+                full::Bool,
+                mmap::Bool,
+                strict::Bool,
+                v::Integer)
   D = Dict{String,Any}()
 
   # Open data file
@@ -84,8 +85,6 @@ function uwdf(fname::String;
   end
 
   # Read UW2 channel headers ========================================
-  S = SeisData()
-
   if uw2
     fastseekend(fid)
     fastskip(fid, -56*N + structs_os + tc_os)
@@ -181,7 +180,6 @@ function uwdf(fname::String;
       setfield!(C, :id, unsafe_string(pointer(id), j))
       setfield!(C, :fs, Float64(getindex(I32, 5, i))*1.0e-3)
       setfield!(C, :units, "m/s")
-      # setfield!(C, :src, fname)
       if full == true
         D = getfield(C, :misc)
         D["lta"]    = I16[1,i]
@@ -235,20 +233,19 @@ function uwdf(fname::String;
       setfield!(C, :x, x)
 
       # Push to SeisData
-      push!(S,C)
+      add_chan!(S, C, strict)
 
       if i < N
         os = getindex(I32, 2, i+1) - fastpos(fid)
       end
     end
-    # note!(S, " ¦ +source | readuw(", abspath(fname, ")"))
   end
   close(fid)
-  return S
+  return nothing
 end
 
-uwdf!(S::GphysData, fname::String;
-      mmap::Bool=false,
-      v::Int=KW.v,
-      full::Bool=KW.full
-      ) = (U = uwdf(fname, mmap=mmap, v=v, full=full); append!(S, U))
+function uwdf(fname::String, full::Bool, mmap::Bool, strict::Bool, v::Integer)
+  S = SeisData()
+  uwdf!(S, fname, full, mmap, strict, v)
+  return S
+end

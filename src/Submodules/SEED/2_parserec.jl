@@ -54,7 +54,7 @@ function update_hdr!(BUF::SeisIOBuf)
 end
 
 ###############################################################################
-function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64, nx_add::Int64)
+function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, nx_new::Int64, nx_add::Int64, strict::Bool, v::Integer)
   # =========================================================================
   u16 = getfield(BUF, :u16)
   flags = getfield(BUF, :flags)
@@ -104,7 +104,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
     hdrswap!(BUF)
   end
 
-  if BUF.r1 != BUF.r1_old || BUF.r2 != BUF.r2_old
+  if (BUF.r1 != BUF.r1_old) || (BUF.r2 != BUF.r2_old)
     update_dt!(BUF)
   end
 
@@ -118,7 +118,11 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
     update_hdr!(BUF)
   end
   id = getfield(BUF, :id_str)
+  fs = 1.0/getfield(BUF, :dt)
   c = findid(id, S)
+  if strict
+    c = channel_match(S, c, fs)
+  end
 
   if c == 0
     if v > 2
@@ -131,7 +135,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
     C = SeisChannel()
     setfield!(C, :id, id)
     setfield!(C, :name, identity(id))
-    setfield!(C, :fs, 1.0/getfield(BUF, :dt))
+    setfield!(C, :fs, fs)
     setfield!(C, :x, x)
     push!(S, C)
     c = S.n
@@ -282,9 +286,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, v::Int64, nx_new::Int64
         Int64(mm)*60000000 +
         Int64(ss)*1000000 +
         Int64(u16[3])*100 +
-        δt# -
-        # te -
-        # Δ
+        δt
 
     # New channel
     if te == 0

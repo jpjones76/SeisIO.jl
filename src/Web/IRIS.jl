@@ -42,7 +42,7 @@ function irisws(cha::String, d0::String, d1::String;
         Ch.name = deepcopy(Ch.id)
       end
     elseif fmt == "miniseed"
-      parsemseed!(S, IOBuffer(R), v, KW.nx_add, KW.nx_add)
+      parsemseed!(S, IOBuffer(R), KW.nx_add, KW.nx_add, true, v)
       Ch = S[1]
       if isempty(Ch.loc)
         Ch.loc = GeoLoc()

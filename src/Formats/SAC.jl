@@ -197,13 +197,13 @@ function read_sac_stream(f::IO, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Ar
   return C
 end
 
-function read_sac_file!(S::SeisData, fname::String, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Array{UInt8,1}, full::Bool, mmap::Bool)
+function read_sac_file!(S::SeisData, fname::String, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Array{UInt8,1}, full::Bool, mmap::Bool, strict::Bool)
   f = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   q = should_bswap(f)
   seekstart(f)
   C = read_sac_stream(f, fv, iv, cv, full, q)
   close(f)
-  push!(S,C)
+  add_chan!(S, C, strict)
   return nothing
 end
 
@@ -265,7 +265,7 @@ function fill_sac_id(id_str::String)
   return id
 end
 
-function write_sac_channel(S::GphysData, i::Int64, v::Int64, xy::Bool, fn::String)
+function write_sac_channel(S::GphysData, i::Int64, xy::Bool, fn::String,  v::Integer)
   id = fill_sac_id(S.id[i])
   fs = S.fs[i]
   t = S.t[i]
@@ -338,10 +338,10 @@ Keywords:
 (Only works with GphysChannel objects)
 * `xy=true` writes generic x-y data with time as the independent variable.
 """
-function writesac(S::GphysData; fn::String="", xy::Bool=false, v::Int64=KW.v)
+function writesac(S::GphysData; fn::String="", xy::Bool=false, v::Integer=KW.v)
   reset_sacbuf()
   for i = 1:S.n
-    write_sac_channel(S, i, v, xy, fn)
+    write_sac_channel(S, i, xy, fn, v)
   end
   return nothing
 end
@@ -349,7 +349,7 @@ end
 function writesac(S::GphysChannel;
   fname::String="",
   xy::Bool=false,
-  v::Int64=KW.v)
+  v::Integer=KW.v)
 
   fstr = String(
     if fname == ""

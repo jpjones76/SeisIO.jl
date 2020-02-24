@@ -4,7 +4,7 @@ export FDSNsta
 # =============================================================================
 # No export
 
-function fdsn_chp(chans::Union{String,Array{String,1},Array{String,2}}; v::Int64 = KW.v)
+function fdsn_chp(chans::Union{String,Array{String,1},Array{String,2}}; v::Integer = KW.v)
   # Parse channel config
   if isa(chans, String)
     C = parse_chstr(chans, fdsn = true)
@@ -248,7 +248,7 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
     # Parse data (if we can)
     if parsable
       if fmt == "mseed" || fmt == "miniseed"
-        parsemseed!(S, io, v, KW.nx_add, KW.nx_add)
+        parsemseed!(S, io, KW.nx_add, KW.nx_add, true, v)
       elseif fmt == "geocsv" || fmt == "geocsv.tspair"
         read_geocsv_tspair!(S, io)
       elseif fmt == "geocsv.slist"

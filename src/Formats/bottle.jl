@@ -75,7 +75,7 @@ function channel_guess(str::AbstractString, fs::Float64)
   return (str, units)
 end
 
-function read_bottle!(S::GphysData, fstr::String, v::Int64, mmap::Bool, nx_new::Int64, nx_add::Int64)
+function read_bottle!(S::GphysData, fstr::String, nx_new::Int64, nx_add::Int64, mmap::Bool, strict::Bool, v::Integer)
   buf = BUF.buf
   files = ls(fstr)
 
@@ -112,6 +112,9 @@ function read_bottle!(S::GphysData, fstr::String, v::Int64, mmap::Bool, nx_new::
 
     # Load into S ============================================================
     i = findid(id, S.id)
+    if strict
+      i = channel_match(S, i, fs)
+    end
     if i == 0
 
       # Create C.x
@@ -120,7 +123,6 @@ function read_bottle!(S::GphysData, fstr::String, v::Int64, mmap::Bool, nx_new::
 
       C = SeisChannel()
       setfield!(C, :id, id)
-      setfield!(C, :name, fname)
       setfield!(C, :fs, fs)
       setfield!(C, :units, units)
       mk_t!(C, nx, t0)
@@ -161,10 +163,10 @@ function read_bottle!(S::GphysData, fstr::String, v::Int64, mmap::Bool, nx_new::
   return nothing
 end
 
-function read_bottle(fstr::String, v::Int64, nx_new::Int64, nx_add::Int64)
+function read_bottle(fstr::String, nx_new::Int64, nx_add::Int64, mmap::Bool, strict::Bool, v::Integer)
 
   S = SeisData()
-  read_bottle!(S, fstr, v, nx_new, nx_add)
+  read_bottle!(S, fstr, nx_new, nx_add, mmap, strict, v)
   return S
 end
 

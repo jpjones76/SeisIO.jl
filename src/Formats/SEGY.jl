@@ -35,10 +35,10 @@ function auto_coords(xy::Array{Int32, 1}, sc::Array{Int16, 1})
   return lat, lon
 end
 
+# buf::Array{UInt8,1},
+# shorts::Array{Int16,1},
+# ints::Array{Int32,1},
 function do_trace(f::IO,
-                  buf::Array{UInt8,1},
-                  shorts::Array{Int16,1},
-                  ints::Array{Int32,1},
                   passcal::Bool,
                   full::Bool,
                   src::String,
@@ -47,6 +47,10 @@ function do_trace(f::IO,
                   )
 
   # First part of trace header is quite standard
+  buf = BUF.buf
+  ints = BUF.int32_buf
+  shorts = BUF.int16_buf
+  checkbuf!(buf, 240)
   checkbuf!(ints, 29)
   checkbuf!(shorts, 62)
   checkbuf_8!(buf, max(180, length(buf)))
@@ -277,33 +281,37 @@ function do_trace(f::IO,
   return C
 end
 
-function read_segy_file(fname::String,
-                        buf::Array{UInt8,1},
-                        shorts::Array{Int16,1},
-                        ints::Array{Int32,1},
-                        passcal::Bool,
-                        swap::Bool,
-                        mmap::Bool,
-                        full::Bool)
+# buf::Array{UInt8,1},
+# shorts::Array{Int16,1},
+# ints::Array{Int32,1},
+function read_segy_file!( S::GphysData,
+                          fname::String,
+                          passcal::Bool,
+                          mmap::Bool,
+                          full::Bool,
+                          swap::Bool,
+                          strict::Bool)
 
   f = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   trace_fh = Array{Int16, 1}(undef, 3)
   if passcal == true
-    S = SeisData(do_trace(f, buf, shorts, ints, true, full, fname, swap, trace_fh))
-    resize!(buf, 65535)
+    # C = do_trace(f, buf, shorts, ints, true, full, fname, swap, trace_fh)
+    C = do_trace(f, true, full, fname, swap, trace_fh)
+    add_chan!(S, C, strict)
+    # resize!(buf, 65535)
     close(f)
   else
     shorts  = getfield(BUF, :int16_buf)
     checkbuf!(shorts, 62)
-    S = SeisData()
+    # S = SeisData()
 
     # File headers
     filehdr       = fastread(f, 3200)
     jobid         = bswap(fastread(f, Int32))
     lineid        = bswap(fastread(f, Int32))
     reelid        = bswap(fastread(f, Int32))
-    fast_readbytes!(f, buf, 48)
-    fillx_i16_be!(shorts, buf, 24, 0)
+    fast_readbytes!(f, BUF.buf, 48)
+    fillx_i16_be!(shorts, BUF.buf, 24, 0)
     fastskip(f, 240)
 
     # My sample files have the Int16s in little endian order...?
@@ -342,13 +350,16 @@ function read_segy_file(fname::String,
     nt = shorts[1]
     for i = 1:nt
       # "swap" is not used here
-      push!(S, do_trace(f, buf, shorts, ints, false, full, fname, true, trace_fh))
+      # C = do_trace(f, buf, shorts, ints, false, full, fname, true, trace_fh)
+      C = do_trace(f, false, full, fname, true, trace_fh)
+      j = add_chan!(S, C, strict)
       if full == true
-        merge!(S.misc[i], fhd)
+        merge!(S.misc[j], fhd)
       end
     end
+    close(f)
   end
-  close(f)
+  resize!(BUF.buf, 65535)
   return S
 end
 

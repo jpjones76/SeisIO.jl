@@ -75,11 +75,13 @@ As above, appending data to an existing SeisData object `S`.
 
     Using multiple channel files applies no redundancy checks of any kind.
 """ readwin32
-function readwin32(dfilestr::String, cfilestr::String;
-                    jst::Bool=true,
-                    nx_add::Int64=KW.nx_add,
-                    nx_new::Int64=KW.nx_new,
-                    v::Int64=KW.v
+function readwin32( dfilestr::String,
+                    cfilestr::String,
+                    jst::Bool,
+                    nx_new::Int64,
+                    nx_add::Int64,
+                    mmap::Bool,
+                    v::Integer
                     )
   S = SeisData()
 
@@ -93,7 +95,7 @@ function readwin32(dfilestr::String, cfilestr::String;
   else
     cfiles = ls(cfilestr)
     @inbounds for cfile in cfiles
-      v > 1 && println("Reading channel file ", fname)
+      v > 1 && println("Reading channel file ", cfile)
       win32_cfile!(cfile, hex_bytes, hexIDs, S, fc, hc, nx_new)
     end
   end
@@ -114,6 +116,7 @@ function readwin32(dfilestr::String, cfilestr::String;
   sums      = zeros(Int64, L)
   seisN     = zeros(Int64, L)
   OldTime   = zeros(Int64, L)
+  Δgap      = zeros(Int64, L)
   locID     = Array{String,1}(undef, L)
   xi        = zeros(Int64, L)
   gapStart  = Array{Array{Int64,1},1}(undef, L)
@@ -121,105 +124,105 @@ function readwin32(dfilestr::String, cfilestr::String;
 
   @inbounds for fname in files
     v > 0 && println("Processing ", fname)
-    open(fname, "r") do io
+    io = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
+    fastskip(io, 4)
+    while !eof(io)
+
+      # Start time
+      read!(io, date_hex)
+      t_new = datehex2μs!(date_arr, date_hex)
       fastskip(io, 4)
-      while !eof(io)
 
-        # Start time
-        read!(io, date_hex)
-        t_new = datehex2μs!(date_arr, date_hex)
-        fastskip(io, 4)
+      # Bytes to read
+      lsecb = Int64(ntoh(fastread(io, UInt32)))
+      τ = 0
 
-        # Bytes to read
-        lsecb = Int64(ntoh(fastread(io, UInt32)))
-        τ = 0
+      while τ < lsecb
+        orgID = fastread(io)
+        netID = fastread(io)
+        hexID = fastread(io, UInt16)
+        k = findhex(hexID, hexIDs)
+        V = ntoh(fastread(io, UInt16))
+        C = Int64(V >> 12)
+        N = Int64(V & 0x0fff)
+        Nh = N
 
-        while τ < lsecb
-          orgID = fastread(io)
-          netID = fastread(io)
-          hexID = fastread(io, UInt16)
-          k = findhex(hexID, hexIDs)
-          V = ntoh(fastread(io, UInt16))
-          C = Int64(V >> 12)
-          N = Int64(V & 0x0fff)
-          Nh = N
-
-          # Increment bytes read (this file), decrement N if not 4-bit
-          if C == 0
-            B = div(N, 2)
-          else
-            N -= 1
-            B = C*N
-          end
-          τ += 10 + B
-          ii = getindex(xi, k)
-
-          # Create new channel
-          if ii == 0
-            nx = 60*Nh*nf
-            if nx != lastindex(S.x[k])
-              resize!(S.x[k], nx)
-            end
-            setindex!(getfield(S, :fs), Float64(Nh), k)
-            setindex!(getfield(S, :t), mk_t(nx, t_new-jst_const), k)
-            setindex!(gapEnd, Int64[], k)
-            setindex!(gapStart, Int64[], k)
-            setindex!(locID, bytes2hex([orgID & 0xff | (netID << 4) & 0xf0]), k)
-            D = getindex(getfield(S, :misc), k)
-            D["orgID"] = orgID
-            D["netID"] = netID
-            D["hexID"] = hexID
-            D["locID"] = locID[k]
-          end
-
-          # Parse data
-          x[1] = bswap(fastread(io, Int32))
-          if C == 0
-            fast_readbytes!(io, buf, B)
-            fillx_i4!(x, buf, B, 1)
-          elseif C == 1
-            fast_readbytes!(io, buf, N)
-            fillx_i8!(x, buf, N, 1)
-          elseif C == 2
-            fast_readbytes!(io, buf, 2*N)
-            fillx_i16_be!(x, buf, N, 1)
-          elseif C == 3
-            fast_readbytes!(io, buf, 3*N)
-            fillx_i24_be!(x, buf, N, 1)
-          else
-            fast_readbytes!(io, buf, 4*N)
-            fillx_i32_be!(x, buf, N, 1)
-          end
-
-          # Account for time gaps
-          t_old = getindex(OldTime, k)
-          gap = t_new - t_old
-          if (gap > 1000000) && (t_old > 0)
-            gl = div((gap - 1000000),1000000)
-            (v > 0) && @warn(string("Time gap detected! (channel ", hexID, ", length ", @sprintf("%.1f",gl), "s, begin ", u2d(t_old*1.0e-6)))
-            P = Nh*gl
-            push!(gapStart[k], ii + 1)
-            push!(gapEnd[k], ii + P)
-            ii += P
-          end
-
-          y = getindex(getfield(S, :x), k)
-          xa = first(x)
-          for j in 2:Nh
-            xa += getindex(x,j)
-            setindex!(x, xa, j)
-          end
-          copyto!(y, ii+1, x, 1, Nh)
-
-          # Update counters
-          OldTime[k] = t_new
-          sums[k] += x[Nh]
-          seisN[k] += Nh
-          xi[k] = ii + Nh
+        # Increment bytes read (this file), decrement N if not 4-bit
+        if C == 0
+          B = div(N, 2)
+        else
+          N -= 1
+          B = C*N
         end
+        τ += 10 + B
+        ii = getindex(xi, k)
+
+        # Create new channel
+        if ii == 0
+          nx = 60*Nh*nf
+          if nx != lastindex(S.x[k])
+            resize!(S.x[k], nx)
+          end
+          setindex!(getfield(S, :fs), Float64(Nh), k)
+          setindex!(Δgap, div(3*div(1000000, Nh), 2), k)
+          setindex!(getfield(S, :t), mk_t(nx, t_new-jst_const), k)
+          setindex!(gapEnd, Int64[], k)
+          setindex!(gapStart, Int64[], k)
+          setindex!(locID, bytes2hex([orgID & 0xff | (netID << 4) & 0xf0]), k)
+          D = getindex(getfield(S, :misc), k)
+          D["orgID"] = orgID
+          D["netID"] = netID
+          D["hexID"] = hexID
+          D["locID"] = locID[k]
+        end
+
+        # Parse data
+        x[1] = bswap(fastread(io, Int32))
+        if C == 0
+          fast_readbytes!(io, buf, B)
+          fillx_i4!(x, buf, B, 1)
+        elseif C == 1
+          fast_readbytes!(io, buf, N)
+          fillx_i8!(x, buf, N, 1)
+        elseif C == 2
+          fast_readbytes!(io, buf, 2*N)
+          fillx_i16_be!(x, buf, N, 1)
+        elseif C == 3
+          fast_readbytes!(io, buf, 3*N)
+          fillx_i24_be!(x, buf, N, 1)
+        else
+          fast_readbytes!(io, buf, 4*N)
+          fillx_i32_be!(x, buf, N, 1)
+        end
+
+        # Account for time gaps
+        t_old = getindex(OldTime, k)
+        gap = t_new - t_old
+        if (gap > Δgap[k]) && (t_old > 0)
+          gl = div((gap - 1000000), 1000000)
+          (v > 0) && @warn(string("Time gap detected! (channel ", hexID, ", length ", @sprintf("%.1f", gl), "s, begin ", u2d(t_old*1.0e-6)))
+          P = Nh*gl
+          push!(gapStart[k], ii + 1)
+          push!(gapEnd[k], ii + P)
+          ii += P
+        end
+
+        y = getindex(getfield(S, :x), k)
+        xa = first(x)
+        for j in 2:Nh
+          xa += getindex(x,j)
+          setindex!(x, xa, j)
+        end
+        copyto!(y, ii+1, x, 1, Nh)
+
+        # Update counters
+        OldTime[k] = t_new
+        sums[k] += x[Nh]
+        seisN[k] += Nh
+        xi[k] = ii + Nh
       end
-      close(io)
     end
+    close(io)
   end
 
   # Post-process
@@ -279,13 +282,23 @@ function readwin32(dfilestr::String, cfilestr::String;
 end
 
 @doc (@doc readwin32)
-function readwin32!(S::SeisData, dfilestr::String, cfilestr::String;
-                    jst::Bool=true,
-                    nx_add::Int64=KW.nx_add,
-                    nx_new::Int64=KW.nx_new,
-                    v::Int64=KW.v
+function readwin32!(S::SeisData,
+                    dfilestr::String,
+                    cfilestr::String,
+                    jst::Bool,
+                    nx_new::Int64,
+                    nx_add::Int64,
+                    mmap::Bool,
+                    strict::Bool,
+                    v::Integer
                     )
-  U = readwin32(dfilestr, cfilestr, jst=jst, nx_add=nx_add, nx_new=nx_new)
-  append!(S,U)
+  U = readwin32(dfilestr, cfilestr, jst, nx_new, nx_add, mmap, v)
+  if S.n > 0
+    for i in 1:U.n
+      j = add_chan!(S, U[i], strict)
+    end
+  else
+    append!(S, U)
+  end
   return nothing
 end

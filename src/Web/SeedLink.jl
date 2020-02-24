@@ -318,7 +318,7 @@ function seedlink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
                     s::TimeSpec=0,
                     t::TimeSpec=300,
                     u::String="rtserve.iris.washington.edu",
-                    v::Int64=KW.v,
+                    v::Integer=KW.v,
                     w::Bool=KW.w,
                     x_on_err::Bool=KW.SL.x_on_err
                   )
@@ -458,7 +458,7 @@ function seedlink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
           while !eof(io)
             pkt_id = String(read(io, 8))
             (v > 1) && @printf(stdout, "%s, ", pkt_id)
-            parserec!(S, BUF, io, v, 65535, 65535)
+            parserec!(S, BUF, io, 65535, 65535, true, v)
           end
           (v > 1) && @printf(stdout, "\b\b...done current packet dump.\n")
           seed_cleanup!(S, BUF)
@@ -519,7 +519,7 @@ function seedlink!(S::SeisData, C::Union{String,Array{String,1},Array{String,2}}
                     refresh::Real=KW.SL.refresh,
                     s::TimeSpec=0,
                     t::TimeSpec=300,
-                    v::Int64=KW.v,
+                    v::Integer=KW.v,
                     u::String="rtserve.iris.washington.edu",
                     w::Bool=KW.w,
                     x_on_err::Bool=KW.SL.x_on_err)
@@ -538,7 +538,7 @@ function seedlink(sta::Array{String,1}, pat::Array{String,1};
   refresh::Real=KW.SL.refresh,
   s::TimeSpec=0,
   t::TimeSpec=300,
-  v::Int64=KW.v,
+  v::Integer=KW.v,
   u::String="rtserve.iris.washington.edu",
   w::Bool=KW.w,
   x_on_err::Bool=KW.SL.x_on_err)
@@ -556,7 +556,7 @@ function seedlink(C::Union{String,Array{String,1},Array{String,2}};
   refresh::Real=KW.SL.refresh,
   s::TimeSpec=0,
   t::TimeSpec=300,
-  v::Int64=KW.v,
+  v::Integer=KW.v,
   u::String="rtserve.iris.washington.edu",
   w::Bool=KW.w,
   x_on_err::Bool=KW.SL.x_on_err)

@@ -1,6 +1,6 @@
 export read_data, read_data!
 
-function read_data_seisio!(S::SeisData, filestr::String, v::Int64, mmap::Bool)
+function read_data_seisio!(S::SeisData, filestr::String, mmap::Bool, v::Integer)
   S_in = rseis(filestr, mmap=mmap)
   L = length(S_in)
   for i in 1:L
@@ -36,30 +36,18 @@ end
 Generic wrapper for reading file data.
 
     S = read_data(fmt, filestr [, keywords])
+    read_data!(S, fmt, filestr [, keywords])
 
-Read data in file format `fmt` matching file pattern `filestr` into a new
-SeisData object `S`.
+Read data in file format `fmt` matching file pattern `filestr` into SeisData object `S`.
 
     S = read_data(filestr [, keywords])
+    read_data!(S, filestr [, keywords])
 
-Read from files matching file pattern `filestr` into a new SeisData object `S`.
+Read from files matching file pattern `filestr` into SeisData object `S`.
 Calls `guess(filestr)` to identify the file type based on the first file
 matching pattern `filestr`. Much slower than manually specifying file type.
 
-This single-string syntax will not work with SACPZ or SEED RESP files; `guess`
-cannot detect them.
-
-    read_data!(S, fmt, filestr [, keywords])
-
-Read data in file format `fmt` matching file pattern `filestr` into an existing
-SeisData object `S`.
-
-    read_data!(S, filestr [, keywords])
-
-As above, but calls `guess(filestr)` to set the format based on the first file
-matching pattern `filestr`.
-
-## Supported Data Formats
+## Supported File Formats
 | Format                    | String          |
 | :---                      | :---            |
 | AH-1                      | ah1             |
@@ -82,21 +70,22 @@ matching pattern `filestr`.
 |KW      | Used By  | Type    | Default   | Meaning                         |
 |:---    |:---      |:---     |:---       |:---                             |
 |cf      | win32    | String  | ""        | win32 channel info filestr      |
-|full    | sac      | Bool    | false     | read full header into `:misc`?  |
+|full    | ah1, ah2 | Bool    | false     | read full header into `:misc`?  |
+|        | sac      |         |           |                                 |
 |        | segy     |         |           |                                 |
 |        | suds     |         |           |                                 |
 |        | uw       |         |           |                                 |
-|        | ah       |         |           |                                 |
 |mmap    | mseed    | Bool    | false     | use mmap to read files? [^1]    |
 |        | sac      |         |           |                                 |
 |        | seisio   |         |           |                                 |
-|nx_add  | mseed    | Int64   | 360000    | min. increase when resizing `:x`|
-|        | bottle   |         |           |                                 |
+|nx_add  | bottle   | Int64   | 360000    | min. increase when resizing `:x`|
+|        | mseed    |         |           |                                 |
 |        | win32    |         |           |                                 |
-|nx_new  | mseed    | Int64   | 86400000  | `length(C.x)` for new channels  |
-|        | bottle   |         |           |                                 |
+|nx_new  | bottle   | Int64   | 86400000  | `length(C.x)` for new channels  |
+|        | mseed    |         |           |                                 |
 |        | win32    |         |           |                                 |
 |jst     | win32    | Bool    | true      | are sample times JST (UTC+9)?   |
+|strict  | all      | Bool    | false     | strict channel matching?        |
 |swap    | mseed    | Bool    | true      | byte swap?                      |
 |        | passcal  |         |           |                                 |
 |        | segy     |         |           |                                 |
@@ -106,34 +95,19 @@ matching pattern `filestr`.
 [^1]: potentially dangerous; Julia SIGSEGV handling is unknown.
 [^2]: verbose logging adds one line to `:notes` for each file read.
 
-### Performance Tip
-For `mseed`, `win32`, or `bottle` formats, adjust `nx_new` and `nx_add` based
-on expected data vector lengths. If the largest data vector has `Nmax` samples,
-and the smallest has `Nmin`, we recommend `nx_new`≈`Nmin` and
-`nx_add`≈`Nmax - Nmin`.
+See official documentation for performance tips associated with KWs.
 
-Default values can be changed in SeisIO keywords, e.g.,
-```julia
-SeisIO.KW.nx_new = 60000
-SeisIO.KW.nx_add = 360000
-```
-
-The system-wide defaults are `nx_new=86400000` and `nx_add=360000`. Using these
-values with very small jobs greatly decreases performance.
-
-#### SeisIO native format
-
-`read_data("seisio", ...)` largely exists as a convenience wrapper; it reads
-only the first SeisIO object from each file that can be converted to a SeisData
-structure. For more complicated read operations on SeisIO files, use `rseis`.
+## SeisIO native format
+`read_data("seisio", ...)` is a convenience wrapper that reads only the first SeisIO object that can be converted to a SeisData structure from each file. For more complicated read operations on SeisIO files, use `rseis`.
 
 ## Examples
 1. `S = read_data("uw", "99011116541W", full=true)`
     + Read UW-format data file `99011116541W`
     + Store full header information in `:misc`
-2. `read_data!(S, "sac", "MSH80*.SAC")`
+2. `read_data!(S, "sac", "MSH80*.SAC", "strict=true")`
     + Read SAC-format files matching string pattern `MSH80*.SAC`
     + Read into existing SeisData object `S`
+    + Only continue a channel that matches on `:id`, `:fs`, and `:gain`
 3. `S = read_data("win32", "20140927*.cnt", cf="20140927*ch", nx_new=360000)`
     + Read win32-format data files with names matching pattern `2014092709*.cnt`
     + Use ASCII channel information filenames that match pattern `20140927*ch`
@@ -148,6 +122,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
   mmap    ::Bool    = false,              # use mmap? (DANGEROUS)
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
+  strict  ::Bool    = false,              # strict channel matching
   swap    ::Bool    = false,              # do byte swap?
   v       ::Int64   = KW.v,               # verbosity level
   vl      ::Bool    = false               # verbose logging
@@ -186,30 +161,29 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     checkbuf_strict!(iv, 40)
     checkbuf_strict!(cv, 192)
     if one_file
-      read_sac_file!(S, filestr, fv, iv, cv, full, mmap)
+      read_sac_file!(S, filestr, fv, iv, cv, full, mmap, strict)
     else
       for fname in files
-        read_sac_file!(S, fname, fv, iv, cv, full, mmap)
+        read_sac_file!(S, fname, fv, iv, cv, full, mmap, strict)
       end
     end
 
   elseif fmt == "seisio"
     if one_file
-      read_data_seisio!(S, filestr, v, mmap)
+      read_data_seisio!(S, filestr, mmap, v)
     else
       for fname in files
-        read_data_seisio!(S, fname, v, mmap)
+        read_data_seisio!(S, fname, mmap, v)
       end
     end
-
 
   elseif ((fmt == "miniseed") || (fmt == "mseed"))
     setfield!(BUF, :swap, swap)
     if one_file
-      read_mseed_file!(S, filestr, v, nx_new, nx_add, mmap)
+      read_mseed_file!(S, filestr, nx_new, nx_add, mmap, strict, v)
     else
       for fname in files
-        read_mseed_file!(S, fname, v, nx_new, nx_add, mmap)
+        read_mseed_file!(S, fname, nx_new, nx_add, mmap, strict, v)
       end
     end
     push!(opt_strings, string("swap = ", swap,
@@ -222,60 +196,61 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
 
   elseif fmt == "ah1"
     if one_file
-      read_ah1!(S, filestr, full, mmap, v)
+      read_ah1!(S, filestr, full, mmap, strict, v)
     else
       for fname in files
-        read_ah1!(S, fname, full, mmap, v)
+        read_ah1!(S, fname, full, mmap, strict, v)
       end
     end
     push!(opt_strings, string("full = ", full))
 
   elseif fmt == "ah2"
     if one_file
-      read_ah2!(S, filestr, full, mmap, v)
+      read_ah2!(S, filestr, full, mmap, strict, v)
     else
       for fname in files
-        read_ah2!(S, fname, full, mmap, v)
+        read_ah2!(S, fname, full, mmap, strict, v)
       end
     end
     push!(opt_strings, string("full = ", full))
 
   elseif fmt == "bottle"
-    read_bottle!(S, filestr, v, mmap, nx_new, nx_add)
+    read_bottle!(S, filestr, nx_new, nx_add, mmap, strict, v)
     push!(opt_strings, string("nx_new = ", nx_new,
                               ", nx_add = ", nx_add))
 
   elseif fmt in ("geocsv", "geocsv.tspair", "geocsv", "geocsv.slist")
     tspair = (fmt == "geocsv" || fmt == "geocsv.tspair")
     if one_file
-      read_geocsv_file!(S, filestr, mmap, tspair)
+      read_geocsv_file!(S, filestr, tspair, mmap)
     else
       for fname in files
-        read_geocsv_file!(S, fname, mmap, tspair)
+        read_geocsv_file!(S, fname, tspair, mmap)
       end
     end
 
   elseif fmt == "lennartz"
     if one_file
-      read_slist!(S, filestr, mmap, true)
+      read_slist!(S, filestr, true, mmap)
     else
       for fname in files
-        read_slist!(S, fname, mmap, true)
+        read_slist!(S, fname, true, mmap)
       end
     end
 
   elseif fmt == "segy" || fmt == "passcal"
     passcal = fmt == "passcal"
-    buf     = getfield(BUF, :buf)
-    shorts  = getfield(BUF, :int16_buf)
-    ints    = getfield(BUF, :int32_buf)
-    checkbuf!(buf, 240)
+    # buf     = getfield(BUF, :buf)
+    # shorts  = getfield(BUF, :int16_buf)
+    # ints    = getfield(BUF, :int32_buf)
+    # checkbuf!(buf, 240)
 
     if one_file
-      append!(S, read_segy_file(filestr, buf, shorts, ints, passcal, swap, mmap, full))
+      # read_segy_file!(S, filestr, buf, shorts, ints, passcal, swap, mmap, full, strict)
+      read_segy_file!(S, filestr, passcal, mmap, full, swap, strict)
     else
       for fname in files
-        append!(S, read_segy_file(fname, buf, shorts, ints, passcal, swap, mmap, full))
+        read_segy_file!(S, fname, passcal, mmap, full, swap, strict)
       end
     end
     push!(opt_strings, string("full = ", full,
@@ -283,10 +258,10 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
 
   elseif fmt == "slist"
     if one_file
-      read_slist!(S, filestr, mmap, false)
+      read_slist!(S, filestr, false, mmap)
     else
       for fname in files
-        read_slist!(S, fname, mmap, false)
+        read_slist!(S, fname, false, mmap)
       end
     end
 
@@ -302,10 +277,10 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
 
   elseif fmt == "uw"
     if one_file
-      append!(S, UW.uwdf(filestr, mmap=mmap, v=v, full=full))
+      UW.uwdf!(S, filestr, full, mmap, strict, v)
     else
       for fname in files
-        append!(S, UW.uwdf(fname, mmap=mmap, v=v))
+        UW.uwdf!(S, fname, full, mmap, strict, v)
       end
     end
     push!(opt_strings, string("full = ", full))
@@ -313,10 +288,10 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
   elseif fmt == "win32" || fmt =="win"
     if isa(fpat, Array{String, 1})
       for f in fpat
-        readwin32!(S, f, cf, jst=jst, nx_new=nx_new, nx_add=nx_add, v=v)
+        readwin32!(S, f, cf, jst, nx_new, nx_add, mmap, strict, v)
       end
     else
-      readwin32!(S, filestr, cf, jst=jst, nx_new=nx_new, nx_add=nx_add, v=v)
+      readwin32!(S, filestr, cf, jst, nx_new, nx_add, mmap, strict, v)
     end
     push!(opt_strings, string("cf = \"", abspath(cf), "\"",
                               ", jst = ", jst,
@@ -384,6 +359,7 @@ function read_data(fmt::String, filestr::Union{String, Array{String, 1}};
   mmap    ::Bool    = false,              # use mmap? (DANGEROUS)
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
+  strict  ::Bool    = false,              # strict channel matching
   swap    ::Bool    = false,              # do byte swap?
   v       ::Int64   = KW.v,               # verbosity level
   vl      ::Bool    = false               # verbose logging
@@ -397,6 +373,7 @@ function read_data(fmt::String, filestr::Union{String, Array{String, 1}};
     mmap    = mmap,
     nx_add  = nx_add,
     nx_new  = nx_new,
+    strict  = strict,
     swap    = swap,
     v       = v,
     vl      = vl
@@ -411,6 +388,7 @@ function read_data(filestr::Union{String, Array{String, 1}};
   mmap    ::Bool    = false,              # use mmap? (DANGEROUS)
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
+  strict  ::Bool    = false,              # strict channel matching
   v       ::Int64   = KW.v,               # verbosity level
   vl      ::Bool    = false               # verbose logging
   )
@@ -433,6 +411,7 @@ function read_data(filestr::Union{String, Array{String, 1}};
     mmap    = mmap,
     nx_add  = nx_add,
     nx_new  = nx_new,
+    strict  = strict,
     swap    = g[2],
     v       = v,
     vl      = vl
@@ -447,6 +426,7 @@ function read_data!(S::GphysData, filestr::Union{String, Array{String, 1}};
   mmap    ::Bool    = false,              # use mmap? (DANGEROUS)
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
+  strict  ::Bool    = false,              # strict channel matching
   v       ::Int64   = KW.v,               # verbosity level
   vl      ::Bool    = false               # verbose logging
   )
@@ -469,6 +449,7 @@ function read_data!(S::GphysData, filestr::Union{String, Array{String, 1}};
     mmap    = mmap,
     nx_add  = nx_add,
     nx_new  = nx_new,
+    strict  = strict,
     swap    = g[2],
     v       = v,
     vl      = vl

@@ -1,5 +1,6 @@
 import SeisIO: BUF,
   KW,
+  add_chan!,
   checkbuf!,
   checkbuf_8!,
   dtconst,

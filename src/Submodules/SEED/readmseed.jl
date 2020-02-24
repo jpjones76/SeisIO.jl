@@ -8,21 +8,21 @@ function seed_cleanup!(S::SeisData, BUF::SeisIOBuf)
   return nothing
 end
 
-function parsemseed!(S::SeisData, sid::IO, v::Int64, nx_new::Int64, nx_add::Int64)
-  while !eof(sid)
-    parserec!(S, BUF, sid, v, nx_new, nx_add)
+function parsemseed!(S::SeisData, io::IO, nx_new::Int64, nx_add::Int64, strict::Bool, v::Integer)
+  while !eof(io)
+    parserec!(S, BUF, io, nx_new, nx_add, strict, v)
   end
   seed_cleanup!(S, BUF)
   return S
 end
 
-function read_mseed_file!(S::SeisData, fname::String, v::Int64, nx_new::Int64, nx_add::Int64, mmap::Bool)
+function read_mseed_file!(S::SeisData, fname::String,  nx_new::Int64, nx_add::Int64, mmap::Bool, strict::Bool, v::Integer)
   io  = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   fastskip(io, 6)
   c = fastread(io)
   if c in (0x44, 0x52, 0x4d, 0x51)
     seekstart(io)
-    parsemseed!(S, io, v, nx_new, nx_add)
+    parsemseed!(S, io, nx_new, nx_add, strict, v)
     close(io)
   else
     error("Invalid file type!")
