@@ -33,6 +33,16 @@ function buf_to_int(buf::Array{UInt8,1}, i::Int64, j::Int64)
   return n
 end
 
+function buf_to_i16(buf::Array{UInt8,1}, i::Int16, j::Int16)
+  c = Int16(10)^(i-j)
+  n = zero(Int16)
+  for p = j:i
+    n += c * Int16(buf[p]-0x30)
+    c = div(c, Int16(10))
+  end
+  return n
+end
+
 # Factor of two faster than parse(Float64, str) for a string
 # Order of magnitude faster than parse(Float64, String[uu]) for a u8 array
 function buf_to_double(buf::Array{UInt8,1}, L::Int64)

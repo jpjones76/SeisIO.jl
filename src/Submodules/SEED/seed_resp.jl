@@ -11,24 +11,24 @@ function resp_unit_split(buf::Array{UInt8,1}, L::Int64)
   return String(buf[1:L])
 end
 
-# *** FIX ME ==> version in dataless.jl is better
 function parse_resp_date!(buf::Array{UInt8,1}, L::Int64, T::Array{Int16,1})
   is_u8_digit(buf[1]) || return typemax(Int64)
   fill!(T, zero(Int16))
-  i = 0
-  j = 1 # counter to start position in buf
-  k = 1 # counter to y,j,h,m,s
+  o = one(Int16)
+  i = zero(Int16)
+  j = o   # counter to start position in buf
+  k = o   # counter to y,j,h,m,s
   while i ≤ L
-    i += 1
+    i += o
     if i > L
-      T[k] = buf_to_int(buf, i-1, j)
-      T[k] = parse(Int16, String(buf[j:i-1]))
+      T[k] = buf_to_i16(buf, i-o, j)
+      T[k] = parse(Int16, String(buf[j:i-o]))
       break
     elseif buf[i] in (0x2c, 0x2e, 0x3a)
-      T[k] = buf_to_int(buf, i-1, j)
-      k += 1
-      k > 6 && break
-      j = i+1
+      T[k] = buf_to_i16(buf, i-o, j)
+      k += o
+      k > Int16(6) && break
+      j = i+o
     end
   end
   return mktime(T)
