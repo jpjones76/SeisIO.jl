@@ -14,7 +14,7 @@ end
 Read UW-format seismic pick file `pf` into SeisHdr object `H`, with seismic
 source description (focal mechanism) returned in SeisSrc object `R`.
 
-    uwpf!(W, pf[, v::Int64=KW.v])
+    uwpf!(W, pf[, v::Integer=KW.v])
 
 Read UW-format seismic pick info from pickfile `f` into SeisEvent object `W`.
 Overwrites W.source and W.hdr with pickfile information. Keyword `v` controls
@@ -25,7 +25,7 @@ verbosity.
     Reader has no safety check to guarantee that `pf` is from the same event.
 
 """ uwpf
-function uwpf(pickfile::String; v::Int64=KW.v)
+function uwpf(pickfile::String; v::Integer=KW.v)
   # Initialize variables that will fill SeisHdr structure
   D   = Dict{String, Any}()
   MAG = -5.0f0
@@ -251,7 +251,7 @@ function uwpf(pickfile::String; v::Int64=KW.v)
 end
 
 @doc (@doc uwpf)
-function uwpf!(S::SeisEvent, pickfile::String; v::Int64=KW.v)
+function uwpf!(S::SeisEvent, pickfile::String; v::Integer=KW.v)
   (H, R) = uwpf(pickfile, v=v)
 
   N   = getfield(getfield(S, :data), :n)
