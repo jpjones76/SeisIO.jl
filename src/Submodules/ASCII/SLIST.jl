@@ -1,4 +1,4 @@
-function read_slist!(S::SeisData, fname::String, mmap::Bool, lennartz::Bool)
+function read_slist!(S::GphysData, fname::String, lennartz::Bool, mmap::Bool)
   # file read
   io = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   hdr = readline(io)
