@@ -46,13 +46,13 @@ S = verified_read_data("slist", slist_pat)
 
 printstyled("  channel continuation (Issue 34)\n", color=:light_green)
 printstyled("    GeoCSV.tspair\n", color=:light_green)
-test_ascii_continuation(geocsv_file, "geocsv.tspair", "CC.JRO..BHZ", 50.0, 1, 1554777720010000)
+test_chan_ext(geocsv_file, "geocsv.tspair", "CC.JRO..BHZ", 50.0, 1, 1554777720010000)
 
 printstyled("    GeoCSV.slist\n", color=:light_green)
-test_ascii_continuation(geoslist_f, "geocsv.slist", "IU.ANMO.00.LHZ", 1.0, 3, 1551249000000000)
+test_chan_ext(geoslist_f, "geocsv.slist", "IU.ANMO.00.LHZ", 1.0, 3, 1551249000000000)
 
 printstyled("    slist\n", color=:light_green)
-test_ascii_continuation(slist_file, "slist", "YY.ERTA..EHZ", 62.5, 1, 1013790000000000)
+test_chan_ext(slist_file, "slist", "YY.ERTA..EHZ", 62.5, 1, 1013790000000000)
 
 printstyled("    lennartz\n", color=:light_green)
-test_ascii_continuation(lenn_file, "lennartz", ".ERTA..c00", 62.5, 1, 1013790000000000)
+test_chan_ext(lenn_file, "lennartz", ".ERTA..c00", 62.5, 1, 1013790000000000)

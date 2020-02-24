@@ -137,7 +137,7 @@ S = check_get_data("FDSN", "CC.JRO..BHZ,IU.COLA.00.*", src="IRIS", s=-600, t=0, 
 printstyled("      multi-day request\n", color=:light_green)
 ts = "2018-01-31T00:00:00"
 te = "2018-02-02T00:00:00"
-S = check_get_data("FDSN","CI.ADO..BH?", s=ts, t=te)
+S = get_data("FDSN","CI.ADO..BH?", s=ts, t=te)
 id = "CI.ADO..BHE"
 i = findid(S, id)
 if i == 0
@@ -251,7 +251,7 @@ for i = 1:❄
 
   if rubric[i] != "SCEDC"
     printstyled("        trace data\n", color=:light_green)
-    S = check_get_data("FDSN", rubric[i,2], src=rubric[i,1], s=s, t=t, msr=true, w=true)
+    S = get_data("FDSN", rubric[i,2], src=rubric[i,1], s=s, t=t, msr=true, w=true)
     if isempty(S)
       printstyled("        No data; check headers & connection!\n", color=:red)
     end

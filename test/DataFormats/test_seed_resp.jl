@@ -187,13 +187,10 @@ B052F22     Start date:  1995,080,17:16
 B052F23     End date:    1995,195
 =#
 
-for (i,t0) in enumerate([632188800000000,  # SeisIO.mktime(1990, 013, 0, 0, 0, 0)
-                         801792000000000,  # SeisIO.mktime(1995, 150, 0, 0, 0, 0)
-                         ])
+tt = [632188800000000, 801792000000000]
+for (i,t0) in enumerate(tt)
   nx = 20000
-  C = SeisChannel(id = "IU.ANMO..BHZ")
-  C.t = [1 t0; nx 0]
-  C.x = randn(nx)
+  C = SeisChannel(id = "IU.ANMO..BHZ", fs = 20.0, t = [1 t0; nx 0], x = randn(nx))
   S = SeisData(C)
   read_meta!(S, "resp", resp_file_1)
   j = findid(S, "IU.ANMO..BHZ")

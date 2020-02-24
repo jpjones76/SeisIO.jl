@@ -10,13 +10,13 @@ if has_restricted
   printstyled("  win32\n", color=:light_green)
   @info(string(timestamp(), ": win32 tests use an SSL-encrypted tarball."))
 
+  # test that verbose logging works
+  printstyled("    verbose logging\n", color=:light_green)
   redirect_stdout(out) do
     fname = path*"/SampleFiles/Restricted/2014092709*.cnt"
     cfile = path*"/SampleFiles/Restricted/03_02_27_20140927.euc.ch"
     S = verified_read_data("win32", fname, cf=cfile, v=3, vl=true)
 
-    # test that verbose logging works
-    printstyled("    verbose logging\n", color=:light_green)
     for i in 1:S.n
       notes = S.notes[i]
       @test length(notes) == 60
@@ -37,15 +37,14 @@ if has_restricted
     @test maximum(nx)==360000
 
     # Check against SAC files
-    printstyled("    checking read integrity against HiNet SAC files\n", color=:light_green)
-    testfiles = path*"/SampleFiles/Restricted/" .* ["20140927000000.V.ONTA.E.SAC",
-                                                    "20140927000000.V.ONTA.H.SAC",
-                                                    "20140927000000.V.ONTA.N.SAC",
-                                                    "20140927000000.V.ONTA.U.SAC",
-                                                    "20140927000000.V.ONTN.E.SAC",
-                                                    "20140927000000.V.ONTN.H.SAC",
-                                                    "20140927000000.V.ONTN.N.SAC",
-                                                    "20140927000000.V.ONTN.U.SAC"]
+    testfiles = path*"/SampleFiles/Restricted/".*["20140927000000.V.ONTA.E.SAC",
+                                                  "20140927000000.V.ONTA.H.SAC",
+                                                  "20140927000000.V.ONTA.N.SAC",
+                                                  "20140927000000.V.ONTA.U.SAC",
+                                                  "20140927000000.V.ONTN.E.SAC",
+                                                  "20140927000000.V.ONTN.H.SAC",
+                                                  "20140927000000.V.ONTN.N.SAC",
+                                                  "20140927000000.V.ONTN.U.SAC"]
 
     # SAC files prepared in SAC with these commands from day-long Ontake files
     # beginning at midnight Japan time converted to SAC with win32 precompiled
@@ -108,8 +107,6 @@ if has_restricted
       end
     end
   end
-
-
   # Converting the mean to single-point precision gives exactly the same
   # result as SAC conversion from win32; however, the average computed
   # over an hour will be slightly different.
@@ -117,7 +114,7 @@ if has_restricted
   # This can be verified using the script "ontake_test.jl" in ../../internal_tests/
 
   # Now test the other two bits types, 4-bit Int ...
-  printstyled("    testing Int4 and Int24 handling\n", color=:light_green)
+  printstyled("    Int4\n", color=:light_green)
   fname = path*"/SampleFiles/Restricted/2014092700000302.cnt"
   cfile = path*"/SampleFiles/Restricted/03_02_27_20140927*ch"
   S = SeisData()
@@ -130,17 +127,20 @@ if has_restricted
   @test minimum(S.x[i]) == -5026.0
 
   # ...and 24-bit bigendian Int...
+  printstyled("    Int24\n", color=:light_green)
   fname = path*"/SampleFiles/Restricted/2014092712000302.cnt"
   verified_read_data!(S, "win32", fname, cf=cfile)
-  @test length(S.x[1]) == round(Int64, 60*S.fs[1]) == S.t[1][end,1]
+  printstyled("     channel continuation\n", color=:light_green)
+  @test length(S.x[1]) == round(Int64, 120*S.fs[1]) == S.t[1][end,1]
   ii = findlast(S.id.=="V.ONTA.23.EHH")
   @test maximum(S.x[ii]) == 14896.0
   @test minimum(S.x[ii]) == -12651.0
   for id in unique(S.id)
-    @test length(findall(S.id.==id))==2
+    @test length(findall(S.id.==id))==1
   end
 
   # ...and 32-bit bigendian Int ...
+  printstyled("    Int32\n", color=:light_green)
   cfile = path*"/SampleFiles/Restricted/chandata_20140927.txt"
   fname = path*"/SampleFiles/Restricted/2014092712370207VM.cnt"
   verified_read_data!(S, "win32", fname, cf=cfile)

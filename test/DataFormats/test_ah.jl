@@ -1,3 +1,4 @@
+printstyled("  AH (Ad Hoc)\n", color=:light_green)
 ah1_file  = path*"/SampleFiles/AH/ah1.f"
 ah1_fstr  = path*"/SampleFiles/AH/ah1.*"
 ahc_file  = path*"/SampleFiles/AH/lhz.ah"
@@ -5,13 +6,14 @@ ah_resp   = path*"/SampleFiles/AH/BRV.TSG.DS.lE21.resp"
 ah2_file  = path*"/SampleFiles/AH/ah2.f"
 ah2_fstr  = path*"/SampleFiles/AH/ah2.*"
 
-printstyled("  AH (Ad Hoc)\n", color=:light_green)
-
 printstyled("    v1\n", color=:light_green)
 redirect_stdout(out) do
   S = verified_read_data("ah1", ah1_file, v=3)
   S = verified_read_data("ah1", ah1_file, full=true)
   S = verified_read_data("ah1", ah1_fstr, full=true, v=3)
+  @test S.n == 3
+
+  S = read_data("ah1", ah1_fstr, full=true, v=3, strict=true)
   @test S.n == 4
   @test S.fs[1] == 4.0
   @test isapprox(S.gain[1], 64200.121094)
@@ -27,7 +29,7 @@ redirect_stdout(out) do
   @test eltype(S.x[1]) == Float32
   @test isapprox(S.x[1][1:4], [-731.41247559, -724.41247559, -622.41247559, -470.4125061])
 
-  C = verified_read_data("ah1", ahc_file, v=3, full=true)[1]
+  C = verified_read_data("ah1", ahc_file, v=1, full=true)[1]
 
   # Station
   @test isapprox(C.loc.lat, 36.5416984)
@@ -40,7 +42,7 @@ redirect_stdout(out) do
   @test length(C.resp.z) == 3
 
   # Data
-  @test length(C.x) == 309
+  @test length(C.x) == 1079
   @test eltype(C.x) == Float32
   @test C.fs == 1.0
   @test u2d(C.t[1,2]*1.0e-6) == DateTime("1990-05-12T04:49:54.49")
@@ -68,11 +70,19 @@ redirect_stdout(out) do
   @test any([occursin("demeaned",s) for s in C.notes])
   @test any([occursin("modhead",s) for s in C.notes])
   @test any([occursin("ahtedit",s) for s in C.notes])
+end
+printstyled("      append existing channel\n", color=:light_green)
+test_chan_ext(ah1_file, "ah1", "nu.RSN..IPZ", 4.0, 1, 451291110190001)
+test_chan_ext(ah1_file, "ah1", "nu.RSC..IPZ", 4.0, 1, 451291320120000)
 
-  printstyled("    v2\n", color=:light_green)
+printstyled("    v2\n", color=:light_green)
+redirect_stdout(out) do
   S = verified_read_data("ah2", ah2_file, v=3)
   S = verified_read_data("ah2", ah2_file, v=3, full=true)
   S = verified_read_data("ah2", ah2_fstr, v=3, full=true, vl=true)
+  @test S.n == 1
+
+  S = read_data("ah2", ah2_fstr, v=3, full=true, strict=true, vl=true)
   @test S.n == 4
   @test S.fs[1] == 4.0
   @test isapprox(S.gain[1], 64200.121094)
@@ -87,5 +97,6 @@ redirect_stdout(out) do
   @test length(S.x[1]) == 720
   @test eltype(S.x[1]) == Float32
   @test isapprox(S.x[1][1:4], [-731.41247559, -724.41247559, -622.41247559, -470.4125061])
-
 end
+printstyled("      append existing channel\n", color=:light_green)
+test_chan_ext(ah2_file, "ah2", "nu.RS..IP", 4.0, 1, 451291320120000)
