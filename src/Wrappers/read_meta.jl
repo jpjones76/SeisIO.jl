@@ -90,7 +90,7 @@ function read_meta!(S::GphysData, fmt::String, filestr::String;
 
   # ===================================================================
   # logging
-  note!(S, N+1:S.n, string( " ¦ +meta ¦ read_meta!(S, ",
+  note!(S, N+1:S.n, string( "+meta ¦ read_meta!(S, ",
                             "msr=", msr,  ", ",
                             "s=\"", s,  "\", ",
                             "t=\"", t,  "\", ",
