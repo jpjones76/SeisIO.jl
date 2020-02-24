@@ -3,32 +3,6 @@ export GphysData, findid, findchan, prune, prune!, pull
 abstract type GphysData end
 
 """
-    findid(id::String, S::GphysData)
-    findid(S::GphysData, id::String)
-
-Get the index of the first channel in S where `id.==S.id` is true. Returns 0
-for failure.
-
-    findid(S::GphysData, T::GphysData)
-
-Get index corresponding to the first channel in T that matches each ID in S;
-equivalent to [findid(id,T) for id in S.id].
-"""
-function findid(id::Union{Regex,String}, S::T) where {T<:GphysData}
-  j=0
-  for i=1:length(S.id)
-    if S.id[i] == id
-      j=i
-      break
-    end
-  end
-  return j
-end
-findid(S::T, id::Union{String,Regex})  where {T<:GphysData} = findid(id, S)
-findid(S::T, U::T) where {T<:GphysData} = [findid(id, U) for id in getfield(S,:id)]
-# DND ...why the fuck is findfirst so fucking slow?!
-
-"""
     findchan(id::String, S::GphysData)
 
 Get all channel indices `i` in S with id ∈ S.id[i]
