@@ -116,7 +116,7 @@ function mkhdr(io::IO, c::UInt8, k_buf::Array{UInt8,1}, v_buf::Array{UInt8,1})
   return i,j
 end
 
-function read_geocsv_slist!(S::SeisData, io::IO)
+function read_geocsv_slist!(S::GphysData, io::IO)
   o = one(Int16)
   oo = one(Int64)
   z = zero(Int16)
@@ -239,7 +239,7 @@ function read_geocsv_slist!(S::SeisData, io::IO)
   return nothing
 end
 
-function read_geocsv_tspair!(S::SeisData, io::IO)
+function read_geocsv_tspair!(S::GphysData, io::IO)
   o = one(Int16)
   oo = one(Int64)
   z = zero(Int16)
@@ -430,7 +430,7 @@ function read_geocsv_tspair!(S::SeisData, io::IO)
   return nothing
 end
 
-function read_geocsv_file!(S::SeisData, fname::String, mmap::Bool, tspair::Bool)
+function read_geocsv_file!(S::GphysData, fname::String, tspair::Bool, mmap::Bool)
   io = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   if tspair == true
     read_geocsv_tspair!(S, io)
