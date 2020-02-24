@@ -23,24 +23,25 @@ Time-Series Data File Formats
 Supported File Formats
 **********************
 .. csv-table::
-  :header: File Format, String
+  :header: File Format, String, Strict Match
   :delim: |
-  :widths: 2, 1
+  :widths: 2, 1, 2
 
-  AH-1                      | ah1
-  AH-2                      | ah2
-  GeoCSV, time-sample pair  | geocsv
-  GeoCSV, sample list       | geocsv.slist
-  Lennartz ASCII            | lenartzascii
-  Mini-SEED                 | mseed
-  PASSCAL SEG Y             | passcal
-  SAC                       | sac
-  SEG Y (rev 0 or rev 1)    | segy
-  SEISIO                    | seisio
-  SLIST (ASCII sample list) | slist
-  SUDS                      | suds
-  UW data file              | uw
-  Win32                     | win32
+  AH-1                      | ah1           | id, fs, gain, loc, resp, units
+  AH-2                      | ah2           | id, fs, gain, loc, resp
+  Bottle (UNAVCO)           | bottle        | id, fs, gain
+  GeoCSV, time-sample pair  | geocsv        | id only
+  GeoCSV, sample list       | geocsv.slist  | id only
+  Lennartz ASCII            | lenartz       | id only
+  Mini-SEED                 | mseed         | id, fs
+  PASSCAL SEG Y             | passcal       | id, fs, gain, loc
+  SAC                       | sac           | id, fs, gain
+  SEG Y (rev 0 or rev 1)    | segy          | id, fs, gain, loc
+  SEISIO                    | seisio        | id, fs, gain, loc, resp, units
+  SLIST (ASCII sample list) | slist         | id only
+  SUDS                      | suds          | id only
+  UW data file              | uw            | id, fs, gain, units
+  Win32                     | win32         | id, fs, gain, loc, resp, units
 
 Strings are case-sensitive to prevent any performance impact from using matches
 and/or lowercase().
@@ -68,6 +69,7 @@ Supported Keywords
   nx_new | mseed    | Int64   | 86400000  | length of **:x** for new channels
   jst    | win32    | Bool    | true      | are sample times JST (UTC+9)?
   swap   | seed     | Bool    | true      | byte swap?
+  strict | *        | Bool    | true      | use strict channel matching?
   units  | resp     | Bool    | false     | fill in units of CoeffResp stages?
   v      | *        | Int64   | 0         | verbosity
   vl     | *        | Bool    | 0         | verbose source logging?
@@ -76,7 +78,7 @@ Supported Keywords
 
 Performance Tips
 ================
-1. `mmap=true` improves read speed significantly but requires caution. Julia language handling of SIGBUS/SIGSEGV and associated risks is unknown and totally undocumented.
+1. `mmap=true` improves read speed significantly but requires caution. Julia language handling of SIGBUS/SIGSEGV and associated risks is unknown and undocumented.
 
 As a practical example of the implications, we don't know what happens in Julia if there's a connection failure during memory-mapped file I/O. In many languages, this situation can corrupt files without additional signal handling.
 
@@ -97,8 +99,18 @@ Default values can be changed in SeisIO keywords, e.g.,
 The system-wide defaults are `nx_new=86400000` and `nx_add=360000`. Using these
 values with very small jobs will greatly decrease performance.
 
+3. `strict=true` may slow `read_data` based on the fields matched as part of
+the file format. In general, any file format that can match on more than id
+and fs will read slightly slower with this option.
+
+Channel Matching
+================
+By default, `read_data` continues a channel if data read from file matches the
+channel id (field **:id**). In some cases this is not enough to guarantee a good match. With ``strict=true``, `read_data` matches against fields **:id**, **:fs**, **:gain**, **:loc**, **:resp**, and **:units**. However, not all of these fields are stored natively in all file formats. Column "Strict Match" in the first table lists which fields are stored (and can be logically matched) in each data format with `strict=true`.
+
+********
 Examples
---------
+********
 
 1. ``S = read_data("uw", "99011116541W", full=true)``
     + Read UW-format data file ``99011116541W``
