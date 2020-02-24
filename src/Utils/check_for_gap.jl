@@ -1,5 +1,16 @@
 # check for gaps in channel i of struct S
-function check_for_gap!(S::GphysData, i::Integer, t0::Int64, nx::Integer, v::Int64)
+"""
+    check_for_gap!(S::GphysData, i::Integer, t0::Int64, nx::Integer, v::Integer)
+
+Check for gaps between the end of `S.t[i]` and time `t0`. Assumes the data
+segment being added is `nx` samples long.
+
+`t_extend` applies the same functionality in a more general sense to a
+two-dimensional time matrix `t`.
+
+See Also: t_extend, check_for_resize!
+"""
+function check_for_gap!(S::GphysData, i::Integer, t0::Int64, nx::Integer, v::Integer)
   Δ = round(Int64, sμ / getindex(getfield(S, :fs), i))
   t = getindex(getfield(S, :t), i)
   nt = size(t,1)

@@ -219,6 +219,10 @@ Extend time matrix `t` : `t[end,1]` = `nx_old`, where:
 * `ts_new` is the start time of the new segment in integer μs from the Unix epoch.
 * `nx_new` is the length of the new segment in samples.
 
+`check_for_gap!` is a more specfic case of `t_extend` that operates on a
+GphysData structure where `nx_new` is known and there are no time gaps possible
+in the new segment.
+
 # Use
 ## Known `nx_new` && No Gaps Possible
 Pass number of samples to be added as `nx_new`.
@@ -230,8 +234,10 @@ Pass 0 as `nx_new`.
 
 Returns `t` with the start of the new segment appended. The end of the
 segment should be appended as a final row later, of the form `[nx_total 0]`.
+
+See Also: check_for_gap!
 """
-function t_extend(t::Array{Int64,2}, ts::Int64, nx::Int64, Δ::Int64)
+function t_extend(t::Array{Int64,2}, ts::Integer, nx::Integer, Δ::Int64)
   nt = size(t, 1)
   n0 = 0
   # Channel has some data already
@@ -252,7 +258,7 @@ function t_extend(t::Array{Int64,2}, ts::Int64, nx::Int64, Δ::Int64)
     return mk_t(nx, ts)
   end
 end
-t_extend(T::Array{Int64,2}, ts::Int64, n::Int64, fs::Float64) = t_extend(T, ts, n, round(Int64, 1.0e6/fs))
+t_extend(T::Array{Int64,2}, ts::Integer, n::Integer, fs::Float64) = t_extend(T, ts, n, round(Int64, 1.0e6/fs))
 
 function t_expand(t::Array{Int64,2}, fs::Float64)
   fs == 0.0 && return t[:,2]
