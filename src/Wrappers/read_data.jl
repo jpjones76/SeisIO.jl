@@ -92,10 +92,10 @@ matching pattern `filestr`. Much slower than manually specifying file type.
 |v       | all      | Int64   | 0         | verbosity                       |
 |vl      | all      | Bool    | false     | verbose logging to :notes [^2]  |
 
-[^1]: potentially dangerous; Julia SIGSEGV handling is unknown.
+[^1]: potentially dangerous; Julia SIGSEGV handling is undocumented.
 [^2]: verbose logging adds one line to `:notes` for each file read.
 
-See official documentation for performance tips associated with KWs.
+See official SeisIO documentation for performance tips associated with KWs.
 
 ## SeisIO native format
 `read_data("seisio", ...)` is a convenience wrapper that reads only the first SeisIO object that can be converted to a SeisData structure from each file. For more complicated read operations on SeisIO files, use `rseis`.
@@ -124,7 +124,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
   strict  ::Bool    = false,              # strict channel matching
   swap    ::Bool    = false,              # do byte swap?
-  v       ::Int64   = KW.v,               # verbosity level
+  v       ::Integer = KW.v,               # verbosity level
   vl      ::Bool    = false               # verbose logging
   )
 
@@ -361,7 +361,7 @@ function read_data(fmt::String, filestr::Union{String, Array{String, 1}};
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
   strict  ::Bool    = false,              # strict channel matching
   swap    ::Bool    = false,              # do byte swap?
-  v       ::Int64   = KW.v,               # verbosity level
+  v       ::Integer = KW.v,               # verbosity level
   vl      ::Bool    = false               # verbose logging
   )
 
@@ -389,7 +389,7 @@ function read_data(filestr::Union{String, Array{String, 1}};
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
   strict  ::Bool    = false,              # strict channel matching
-  v       ::Int64   = KW.v,               # verbosity level
+  v       ::Integer = KW.v,               # verbosity level
   vl      ::Bool    = false               # verbose logging
   )
 
@@ -427,7 +427,7 @@ function read_data!(S::GphysData, filestr::Union{String, Array{String, 1}};
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
   strict  ::Bool    = false,              # strict channel matching
-  v       ::Int64   = KW.v,               # verbosity level
+  v       ::Integer = KW.v,               # verbosity level
   vl      ::Bool    = false               # verbose logging
   )
 
