@@ -30,11 +30,11 @@ function merge_ext!(S::EventTraceData, Ω::Int64, rest::Array{Int64, 1})
 end
 
 # Home of all extended merge! methods
-merge(S::EventTraceData; v::Int64=KW.v) = (U = deepcopy(S); merge!(U, v=v); return U)
-merge!(S::EventTraceData, U::EventTraceData; v::Int64=KW.v) = ([append!(getfield(S, f), getfield(U, f)) for f in tracefields]; S.n += U.n; merge!(S; v=v))
-merge!(S::EventTraceData, C::EventChannel; v::Int64=KW.v) = merge!(S, EventTraceData(C), v=v)
+merge(S::EventTraceData; v::Integer=KW.v) = (U = deepcopy(S); merge!(U, v=v); return U)
+merge!(S::EventTraceData, U::EventTraceData; v::Integer=KW.v) = ([append!(getfield(S, f), getfield(U, f)) for f in tracefields]; S.n += U.n; merge!(S; v=v))
+merge!(S::EventTraceData, C::EventChannel; v::Integer=KW.v) = merge!(S, EventTraceData(C), v=v)
 
-function merge(A::Array{EventTraceData,1}; v::Int64=KW.v)
+function merge(A::Array{EventTraceData,1}; v::Integer=KW.v)
   L::Int64 = length(A)
   n = sum([A[i].n for i = 1:L])
   T = EventTraceData(n)
@@ -42,10 +42,10 @@ function merge(A::Array{EventTraceData,1}; v::Int64=KW.v)
   merge!(T, v=v)
   return T
 end
-merge(S::EventTraceData, U::EventTraceData; v::Int64=KW.v) = merge(Array{EventTraceData,1}([S,U]), v=v)
-merge(S::EventTraceData, C::EventChannel; v::Int64=KW.v) = merge(S, EventTraceData(C), v=v)
-merge(C::EventChannel, S::EventTraceData; v::Int64=KW.v) = merge(EventTraceData(C), S, v=v)
-merge(C::EventChannel, D::EventChannel; v::Int64=KW.v) = (S = EventTraceData(C,D); merge!(S, v=v); return S)
+merge(S::EventTraceData, U::EventTraceData; v::Integer=KW.v) = merge(Array{EventTraceData,1}([S,U]), v=v)
+merge(S::EventTraceData, C::EventChannel; v::Integer=KW.v) = merge(S, EventTraceData(C), v=v)
+merge(C::EventChannel, S::EventTraceData; v::Integer=KW.v) = merge(EventTraceData(C), S, v=v)
+merge(C::EventChannel, D::EventChannel; v::Integer=KW.v) = (S = EventTraceData(C,D); merge!(S, v=v); return S)
 
 +(S::EventTraceData, C::EventChannel) = +(S, EventTraceData(C))
 +(C::EventChannel, S::EventTraceData) = +(S, EventTraceData(C))

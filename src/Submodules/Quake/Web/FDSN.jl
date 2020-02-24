@@ -16,10 +16,10 @@ function FDSNevq(ot::String;
   rad::Array{Float64,1} = KW.rad,
   reg::Array{Float64,1} = KW.reg,
   mag::Array{Float64,1} = KW.mag,
-  nev::Int64 = KW.nev,
+  nev::Integer = KW.nev,
   src::String = KW.src,
   to::Int = KW.to,
-  v::Int64 = KW.v)
+  v::Integer = KW.v)
 
   if isempty(reg) && !isempty(rad)
     if length(rad) == 4
@@ -133,7 +133,7 @@ function FDSNevt(ot::String, chans::Union{String,Array{String,1},Array{String,2}
   reg::Array{Float64,1} = KW.reg,
   src::String           = KW.src,
   to::Int64             = KW.to,
-  v::Int64              = KW.v,
+  v::Integer            = KW.v,
   w::Bool               = KW.w
   )
 

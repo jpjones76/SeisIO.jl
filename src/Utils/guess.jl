@@ -1,6 +1,6 @@
 export guess
 
-function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Int64)
+function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Integer)
   str = String[]
 
   # =========================================================================
@@ -287,7 +287,7 @@ Generally `swap=true` for big-Endian files, with two exceptions:
     false positives are possible with file formats outside the scope of SeisIO.
 
 """ guess
-function guess(file::String; v::Int64=KW.v)
+function guess(file::String; v::Integer=KW.v)
   safe_isfile(file) || error("File not found!")
 
   sz = stat(file).size

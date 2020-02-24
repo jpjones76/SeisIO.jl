@@ -1,7 +1,7 @@
 function read_suds(fname::String;
-  mmap::Bool=false,
   full::Bool=false,
-  v::Int64=KW.v,
+  mmap::Bool=false,
+  v::Integer=KW.v,
   )
 
   sid = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
@@ -196,15 +196,17 @@ read_suds!(
   S::GphysData,
   fname::String;
   full::Bool=false,
-  v::Int64=KW.v,
-  ) = (U = read_suds(fname, full=full, v=v); append!(S,U))
+  mmap::Bool=false,
+  v::Integer=KW.v,
+  ) = (U = read_suds(fname, full=full, mmap=mmap, v=v); append!(S,U))
 
 function readsudsevt(fname::String;
   full::Bool=false,
-  v::Int64=KW.v,
+  mmap::Bool=false,
+  v::Integer=KW.v,
   )
 
-  TD = read_suds(fname, full=full, v=v)
+  TD = read_suds(fname, full=full, mmap=mmap, v=v)
   src_auth = get(auth, Int32(SB.H.auth), "")
   m = SUDS.SB.H.shorts[6]
   mag_scale = try

@@ -50,7 +50,7 @@ Related functions: time, Dates.DateTime, parsetimewin
 function sync!(S::GphysData;
                 s="last"::Union{String,DateTime},
                 t="none"::Union{String,DateTime},
-                v::Int64=KW.v,
+                v::Integer=KW.v,
                 )
 
   # Dekete empty traces
@@ -194,7 +194,7 @@ end
 function sync!(C::SeisChannel;
                 s::DateTime,
                 t="none"::Union{String,DateTime},
-                v::Int64=KW.v )
+                v::Integer=KW.v )
   S = SeisData(C)
   sync!(S, s=s, t=t, v=v)
   return nothing
@@ -204,7 +204,7 @@ end
 function sync(S::GphysData;
                 s="last"::Union{String,DateTime},
                 t="none"::Union{String,DateTime},
-                v::Int64=KW.v )
+                v::Integer=KW.v )
 
   T = deepcopy(S)
   sync!(T, s=s, t=t, v=v)
@@ -214,7 +214,7 @@ end
 function sync(C::SeisChannel;
                 s::DateTime,
                 t="none"::Union{String,DateTime},
-                v::Int64=KW.v )
+                v::Integer=KW.v )
 
   U = deepcopy(C)
   S = SeisData(U)

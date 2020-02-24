@@ -13,7 +13,7 @@ the Hilbert transform).
 """ env!
 function env!(S::GphysData;
   chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
-  v::Int64=KW.v)
+  v::Integer=KW.v)
 
   # preprocess data channels
   chans = mkchans(chans, S)
@@ -104,7 +104,7 @@ function env!(S::GphysData;
 end
 
 function env!(C::GphysChannel;
-  v::Int64=KW.v
+  v::Integer=KW.v
   )
 
   C.fs == 0.0 && return
@@ -184,7 +184,7 @@ end
 @doc (@doc env!)
 function env(S::GphysData;
   chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
-  v::Int64=KW.v
+  v::Integer=KW.v
   )
 
   U = deepcopy(S)
@@ -193,7 +193,7 @@ function env(S::GphysData;
 end
 
 function env(C::GphysChannel;
-  v::Int64=KW.v
+  v::Integer=KW.v
   )
 
   U = deepcopy(C)

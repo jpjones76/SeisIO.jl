@@ -7,7 +7,7 @@ Write all data in SeisEvent structure `W` to auto-generated SAC files. Event
 header information is written from W.hdr; W.source is not used as there is no
 standard header position for event source information.
 """
-function writesac(S::SeisEvent; ts::Bool=false, v::Int64=KW.v)
+function writesac(S::SeisEvent; ts::Bool=false, v::Integer=KW.v)
   tdata = Array{Float32,1}(undef, 0)
   reset_sacbuf()
 
@@ -28,7 +28,7 @@ function writesac(S::SeisEvent; ts::Bool=false, v::Int64=KW.v)
 
   for i = 1:S.data.n
     BUF.sac_fv[8] = t_evt - S.data.t[i][1,2]*μs
-    write_sac_channel(S.data, i, v, false, "")
+    write_sac_channel(S.data, i, false, "", v)
   end
   return nothing
 end

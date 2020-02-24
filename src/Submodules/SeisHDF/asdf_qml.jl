@@ -40,7 +40,7 @@ function asdf_rqml(fpat::String)
 end
 
 function asdf_wqml!(hdf::HDF5File, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1},
-  ovr::Bool, v::Int64)
+  ovr::Bool, v::Integer)
   hq = Int8[]
   io = IOBuffer()
   H0 = SeisHdr[]
@@ -117,7 +117,7 @@ See also: write_qml
 """ asdf_wqml
 function asdf_wqml(hdf_out::String, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1};
   ovr::Bool=false,
-  v::Int64=0)
+  v::Integer=0)
   if isfile(hdf_out)
     hdf = h5open(hdf_out, "r+")
     fmt = read(attrs(hdf)["file_format"])
@@ -131,12 +131,12 @@ function asdf_wqml(hdf_out::String, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1}
   close(hdf)
   return nothing
 end
-asdf_wqml(hdf_out::String, H::SeisHdr, R::SeisSrc; ovr::Bool=false, v::Int64=0) = asdf_wqml(hdf_out, [H], [R], ovr=ovr, v=v)
-asdf_wqml(hdf_out::String, W::SeisEvent; ovr::Bool=false, v::Int64=0) = asdf_wqml(hdf_out, [W.hdr], [W.source], ovr=ovr, v=v)
+asdf_wqml(hdf_out::String, H::SeisHdr, R::SeisSrc; ovr::Bool=false, v::Integer=0) = asdf_wqml(hdf_out, [H], [R], ovr=ovr, v=v)
+asdf_wqml(hdf_out::String, W::SeisEvent; ovr::Bool=false, v::Integer=0) = asdf_wqml(hdf_out, [W.hdr], [W.source], ovr=ovr, v=v)
 
 function asdf_wqml(hdf_out::String, events::Array{SeisEvent,1};
   ovr::Bool=false,
-  v::Int64=0)
+  v::Integer=0)
 
   N = length(events)
   H = Array{SeisHdr, 1}(undef, N)

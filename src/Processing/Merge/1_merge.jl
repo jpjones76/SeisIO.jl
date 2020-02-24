@@ -10,7 +10,7 @@ Merge channels of two SeisData structures.
 If `prune_only=true`, the only action taken is deletion of empty and duplicate
 channels; `merge!(S, U, prune_only=true)` is identical to an in-place `S+U`.
 """ merge!
-function merge!(S::Y; v::Int64=KW.v, purge_only::Bool=false) where Y<:GphysData
+function merge!(S::Y; v::Integer=KW.v, purge_only::Bool=false) where Y<:GphysData
   # Required preprocessing
   prune!(S)
 

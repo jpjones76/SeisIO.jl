@@ -1,4 +1,4 @@
-function read_struct_tag!(io::IO, v::Int64=0)
+function read_struct_tag!(io::IO, v::Integer=0)
   s = fastread(io)
   s == 0x53 || (close(io); error("damaged or scrambled SUDS file; can't continue."))
   m = fastread(io)
@@ -15,7 +15,7 @@ function read_struct_tag!(io::IO, v::Int64=0)
   return nothing
 end
 
-function staident!(io::IO, v::Int64=0)
+function staident!(io::IO, v::Integer=0)
   fastread!(io, SB.hdr)
   fill!(SB.id, 0x00)
 
@@ -47,7 +47,7 @@ function staident!(io::IO, v::Int64=0)
   return nothing
 end
 
-function read_chansetentry!(S::GphysData, io::IO, v::Int64)
+function read_chansetentry!(S::GphysData, io::IO, v::Integer)
   SB.C.inst    = fastread(io, Int32)
   SB.C.stream  = fastread(io, Int16)
   SB.C.chno    = fastread(io, Int16)
@@ -63,13 +63,13 @@ function read_chansetentry!(S::GphysData, io::IO, v::Int64)
 end
 
 # #  STAT_IDENT:  Station identification
-# read_1!(S::GphysData, io::IO, v::Int64, full::Bool) = staident!(io, v)
+# read_1!(S::GphysData, io::IO, v::Integer, full::Bool) = staident!(io, v)
 #
 # #  STRUCTTAG:  Structure to identify structures when archived together
-# read_2!(S::GphysData, io::IO, v::Int64, full::Bool) = read_struct_tag!(io)
+# read_2!(S::GphysData, io::IO, v::Integer, full::Bool) = read_struct_tag!(io)
 
 # STATIONCOMP:  Generic station component information
-function read_5!(S::GphysData, io::IO, v::Int64, full::Bool)
+function read_5!(S::GphysData, io::IO, v::Integer, full::Bool)
   staident!(io, 0)
   SB.S05.az             = fastread(io, Int16)    # azimuth, N°E
   SB.S05.inc            = fastread(io, Int16)    # incidence, from vertical
@@ -140,7 +140,7 @@ function read_5!(S::GphysData, io::IO, v::Int64, full::Bool)
 end
 
 # MUXDATA:  Header for (possibly) multiplexed data
-function read_6!(S::GphysData, io::IO, v::Int64, full::Bool)
+function read_6!(S::GphysData, io::IO, v::Integer, full::Bool)
   SB.T.net      = fastread(io, UInt16)
   fastskip(io, 2)
   SB.t_f64      = fastread(io, Float64)
@@ -170,7 +170,7 @@ end
 
 #=  DESCRIPTRACE:  Descriptive information about a seismic trace.
                    Normally followed by waveform data =#
-function read_7!(S::GphysData, io::IO, v::Int64, full::Bool)
+function read_7!(S::GphysData, io::IO, v::Integer, full::Bool)
   staident!(io, 0)
   SB.t_f64       = fastread(io, Float64)
   SB.t_i16       = fastread(io, Int16)
@@ -199,7 +199,7 @@ function read_7!(S::GphysData, io::IO, v::Int64, full::Bool)
 end
 
 # FEATURE:  Observed phase arrival time, amplitude, and period
-function read_10!(S::GphysData, io::IO, v::Int64, full::Bool)
+function read_10!(S::GphysData, io::IO, v::Integer, full::Bool)
   staident!(io, 0)
   SB.P.pc           = fastread(io, Int16)
   SB.P.onset        = fastread(io)
@@ -240,7 +240,7 @@ function read_10!(S::GphysData, io::IO, v::Int64, full::Bool)
 end
 
 #  ORIGIN: Information about a specific solution for a given event
-function read_14!(S::GphysData, io::IO, v::Int64, full::Bool)
+function read_14!(S::GphysData, io::IO, v::Integer, full::Bool)
   SB.H.evno         = fastread(io, Int32)
   SB.H.auth         = fastread(io, Int16)
   fastread!(io, SB.H.chars)
@@ -277,7 +277,7 @@ function read_14!(S::GphysData, io::IO, v::Int64, full::Bool)
 end
 
 # COMMENT:  Comment tag to be followed by the bytes of comment
-function read_20!(S::GphysData, io::IO, v::Int64, full::Bool)
+function read_20!(S::GphysData, io::IO, v::Integer, full::Bool)
   fastread!(io, SB.comm_i)
   L = fastread(io, Int16)
   fastskip(io, 2)
@@ -292,7 +292,7 @@ function read_20!(S::GphysData, io::IO, v::Int64, full::Bool)
 end
 
 # TRIGGERS:  Earthquake detector trigger statistics
-function read_25!(S::GphysData, io::IO, v::Int64, full::Bool)
+function read_25!(S::GphysData, io::IO, v::Integer, full::Bool)
   staident!(io, 0)
   shorts    = fastread(io, Int16, 6)
   trig_time = fastread(io, Float64)
@@ -306,7 +306,7 @@ function read_25!(S::GphysData, io::IO, v::Int64, full::Bool)
 end
 
 # TRIGSETTING:  Settings for earthquake trigger system
-function read_26!(S::GphysData, io::IO, v::Int64, full::Bool)
+function read_26!(S::GphysData, io::IO, v::Integer, full::Bool)
   net       = fastread(io, UInt8, 4)
   btime     = fastread(io, Float64)
   shorts    = fastread(io, Int16, 6)
@@ -327,7 +327,7 @@ function read_26!(S::GphysData, io::IO, v::Int64, full::Bool)
 end
 
 # EVENTSETTING:  Settings for earthquake trigger system
-function read_27!(S::GphysData, io::IO, v::Int64, full::Bool)
+function read_27!(S::GphysData, io::IO, v::Integer, full::Bool)
   net       = fastread(io, UInt8, 4)
   btime     = fastread(io, Float64)
   shorts    = fastread(io, Int16, 4)
@@ -348,7 +348,7 @@ function read_27!(S::GphysData, io::IO, v::Int64, full::Bool)
 end
 
 # DETECTOR
-function read_28!(S::GphysData, io::IO, v::Int64, full::Bool)
+function read_28!(S::GphysData, io::IO, v::Integer, full::Bool)
   alg           = fastread(io)
   event_type    = fastread(io)
   net_node_id   = fastread(io, UInt8, 10)
@@ -369,7 +369,7 @@ function read_28!(S::GphysData, io::IO, v::Int64, full::Bool)
 end
 
 # ATODINFO
-function read_29!(S::GphysData, io::IO, v::Int64, full::Bool)
+function read_29!(S::GphysData, io::IO, v::Integer, full::Bool)
   io_addr       = fastread(io, Int16)
   dev_id        = fastread(io, Int16)
   dev_flags     = fastread(io, UInt16)
@@ -393,7 +393,7 @@ function read_29!(S::GphysData, io::IO, v::Int64, full::Bool)
 end
 
 # TIMECORRECTION:  Time correction information
-function read_30!(S::GphysData, io::IO, v::Int64, full::Bool)
+function read_30!(S::GphysData, io::IO, v::Integer, full::Bool)
   staident!(io, 0)
   SB.tc          = fastread(io, Float64)
   SB.rc          = fastread(io, Float32)
@@ -424,7 +424,7 @@ end
 
 #= INSTRUMENT: Instrument hardware settings, mainly PADS related
                     added by R. Banfill, Jan 1991 =#
-function read_31!(S::GphysData, io::IO, v::Int64, full::Bool)
+function read_31!(S::GphysData, io::IO, v::Integer, full::Bool)
   staident!(io, 0)
   serial    = fastread(io, Int16)
   ncmp      = fastread(io, Int16)
@@ -459,7 +459,7 @@ function read_31!(S::GphysData, io::IO, v::Int64, full::Bool)
 end
 
 # CHANSET:  Associate stations and components with sets...???
-function read_32!(S::GphysData, io::IO, v::Int64, full::Bool)
+function read_32!(S::GphysData, io::IO, v::Integer, full::Bool)
   SB.C.typ        = fastread(io, Int16)
   SB.C.n          = fastread(io, Int16)
   fastread!(io, SB.C.sta)
@@ -483,9 +483,6 @@ function read_32!(S::GphysData, io::IO, v::Int64, full::Bool)
   return nothing
 end
 
-# # CHANSETENTRY
-# read_33!(S::GphysData, io::IO, v::Int64, full::Bool) = read_chansetentry!(S, io, v)
-#
 function suds_support()
   println("\nCurrent support for SUDS structures\n")
   printstyled("CODE  STRUCTURE       \n", color=:green, bold=true)

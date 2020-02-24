@@ -30,7 +30,7 @@ function close_channel!(S::SeisData, C::SeisChannel, stg::Int64)
   return nothing
 end
 
-function parse_dataless!(S::SeisData, io::IO, s::TimeSpec, t::TimeSpec, v::Int64, units::Bool)
+function parse_dataless!(S::SeisData, io::IO, s::TimeSpec, t::TimeSpec, v::Integer, units::Bool)
   C = SeisChannel()
   R = MultiStageResp()
   resize!(BUF.hdr_old, 14)
@@ -205,7 +205,7 @@ end
 function read_dataless(fname::String;
   s::TimeSpec = "0001-01-01T00:00:00",
   t::TimeSpec = "9999-12-31T23:59:59",
-  v::Int64 = KW.v,
+  v::Integer = KW.v,
   units::Bool = false)
 
   S = SeisData()

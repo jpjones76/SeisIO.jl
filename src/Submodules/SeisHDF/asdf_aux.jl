@@ -19,7 +19,7 @@ function asdf_sxml(xbuf::IOBuffer, S::GphysData, chans::Array{Int64,1}, sta::HDF
 end
 
 
-function asdf_mktrace(S::GphysData, xml_buf::IO, chan_numbers::Array{Int64,1}, wav::HDF5Group, ts::Array{Int64,1}, te::Array{Int64,1}, len::Int64, v::Int64, tag::String)
+function asdf_mktrace(S::GphysData, xml_buf::IO, chan_numbers::Array{Int64,1}, wav::HDF5Group, ts::Array{Int64,1}, te::Array{Int64,1}, len::Int64, v::Integer, tag::String)
   nc = length(chan_numbers)
   netsta, cha, nsid = mk_netsta(S)
   trace_names = Array{Array{String,1},1}(undef, nc)
@@ -104,7 +104,7 @@ function asdf_mktrace(S::GphysData, xml_buf::IO, chan_numbers::Array{Int64,1}, w
   return nothing
 end
 
-function asdf_write_chan(S::GphysData, sta::HDF5Group, i::Int64, tag::String, eid::String, v::Int64)
+function asdf_write_chan(S::GphysData, sta::HDF5Group, i::Int64, tag::String, eid::String, v::Integer)
   fs = S.fs[i]
   tx = S.t[i]
   t = t_win(tx, fs)

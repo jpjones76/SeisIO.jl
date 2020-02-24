@@ -1,13 +1,13 @@
 # ===========================================================================
 # VOLUME CONTROL BLOCKETTES
-function blk_010!(io::IO, nb::Int64, v::Int64)
+function blk_010!(io::IO, nb::Int64, v::Integer)
   sio = blk_string_read(io, nb, v)
   v > 1 && println("")
   close(sio)
   return nothing
 end
 
-function blk_011!(io::IO, nb::Int64, v::Int64)
+function blk_011!(io::IO, nb::Int64, v::Integer)
   sio = blk_string_read(io, nb, v)
   if v > 1
     println("")
@@ -26,7 +26,7 @@ function blk_011!(io::IO, nb::Int64, v::Int64)
   return nothing
 end
 
-function blk_012!(io::IO, nb::Int64, v::Int64)
+function blk_012!(io::IO, nb::Int64, v::Integer)
   sio = blk_string_read(io, nb, v)
   if v > 1
     N = stream_int(sio, 4)
@@ -41,7 +41,7 @@ end
 # ABBREVIATION CONTROL HEADERS
 
 # [30] is out of scope for SeisIO
-function blk_030!(io::IO, nb::Int64, v::Int64)
+function blk_030!(io::IO, nb::Int64, v::Integer)
   sio = blk_string_read(io, nb, v)
   if v > 1
     desc = string_field(sio)
@@ -60,7 +60,7 @@ function blk_030!(io::IO, nb::Int64, v::Int64)
   return nothing
 end
 
-function blk_031!(io::IO, nb::Int64, v::Int64)
+function blk_031!(io::IO, nb::Int64, v::Integer)
   sio = blk_string_read(io, nb, v)
   k = stream_int(sio, 4)
   class = fastread(sio)
@@ -75,7 +75,7 @@ function blk_031!(io::IO, nb::Int64, v::Int64)
   return nothing
 end
 
-function blk_032!(io::IO, nb::Int64, v::Int64)
+function blk_032!(io::IO, nb::Int64, v::Integer)
   sio = blk_string_read(io, nb, v)
   if v > 1
     code = stream_int(sio, 2)
@@ -89,7 +89,7 @@ function blk_032!(io::IO, nb::Int64, v::Int64)
   return nothing
 end
 
-function blk_033!(io::IO, nb::Int64, v::Int64)
+function blk_033!(io::IO, nb::Int64, v::Integer)
   sio = blk_string_read(io, nb, v)
 
   code = stream_int(sio, 3)
@@ -103,7 +103,7 @@ function blk_033!(io::IO, nb::Int64, v::Int64)
   return nothing
 end
 
-function blk_034!(io::IO, nb::Int64, v::Int64)
+function blk_034!(io::IO, nb::Int64, v::Integer)
   sio = blk_string_read(io, nb, v)
 
   code = stream_int(sio, 3)
@@ -119,7 +119,7 @@ function blk_034!(io::IO, nb::Int64, v::Int64)
   return nothing
 end
 
-function blk_041!(io::IO, nb::Int64, v::Int64, units::Bool)
+function blk_041!(io::IO, nb::Int64, v::Integer, units::Bool)
   sio = blk_string_read(io, nb, v)
 
   resp_lookup_key = stream_int(sio, 4)
@@ -183,7 +183,7 @@ function blk_041!(io::IO, nb::Int64, v::Int64, units::Bool)
   return nothing
 end
 
-function blk_043!(io::IO, nb::Int64, v::Int64, units::Bool)
+function blk_043!(io::IO, nb::Int64, v::Integer, units::Bool)
   sio = blk_string_read(io, nb, v)
   resp_lookup_key = stream_int(sio, 4)
   skip_string!(sio)
@@ -239,7 +239,7 @@ function blk_043!(io::IO, nb::Int64, v::Int64, units::Bool)
   return nothing
 end
 
-function blk_044!(io::IO, nb::Int64, v::Int64, units::Bool)
+function blk_044!(io::IO, nb::Int64, v::Integer, units::Bool)
   sio = blk_string_read(io, nb, v)
 
   resp_lookup_key = stream_int(sio, 4)
@@ -290,7 +290,7 @@ function blk_044!(io::IO, nb::Int64, v::Int64, units::Bool)
   return nothing
 end
 
-function blk_047!(io::IO, nb::Int64, v::Int64)
+function blk_047!(io::IO, nb::Int64, v::Integer)
   sio = blk_string_read(io, nb, v)
   resp_lookup_key = stream_int(sio, 4)
   skip_string!(sio)
@@ -320,7 +320,7 @@ function blk_047!(io::IO, nb::Int64, v::Int64)
   return nothing
 end
 
-function blk_048!(io::IO, nb::Int64, v::Int64)
+function blk_048!(io::IO, nb::Int64, v::Integer)
   sio = blk_string_read(io, nb, v)
 
   resp_lookup_key = stream_int(sio, 4)
@@ -349,7 +349,7 @@ function blk_048!(io::IO, nb::Int64, v::Int64)
   return nothing
 end
 
-function blk_050(io::IO, nb::Int64, v::Int64)
+function blk_050(io::IO, nb::Int64, v::Integer)
   sio = blk_string_read(io, nb, v)
 
   # Station
@@ -400,7 +400,7 @@ end
 # STATION CONTROL BLOCKETTES
 
 # not necessary
-function blk_051!(io::IO, nb::Int64, v::Int64)
+function blk_051!(io::IO, nb::Int64, v::Integer)
   sio = blk_string_read(io, nb, v)
   if v > 1
      println("")
@@ -419,7 +419,7 @@ function blk_051!(io::IO, nb::Int64, v::Int64)
   return nothing
 end
 
-function blk_052!(io::IO, nb::Int64, C::SeisChannel, ts_req::Int64, te_req::Int64, v::Int64)
+function blk_052!(io::IO, nb::Int64, C::SeisChannel, ts_req::Int64, te_req::Int64, v::Integer)
   sio = blk_string_read(io, nb, v)
 
   # loc
@@ -497,7 +497,7 @@ function blk_052!(io::IO, nb::Int64, C::SeisChannel, ts_req::Int64, te_req::Int6
   return skipping
 end
 
-function blk_053(io::IO, nb::Int64, v::Int64, R::MultiStageResp, units::Bool)
+function blk_053(io::IO, nb::Int64, v::Integer, R::MultiStageResp, units::Bool)
   sio = blk_string_read(io, nb, v)
   tft = Char(fastread(sio))
   stage = stream_int(sio, 2)
@@ -559,7 +559,7 @@ function blk_053(io::IO, nb::Int64, v::Int64, R::MultiStageResp, units::Bool)
   return stage
 end
 
-function blk_054(io::IO, nb::Int64, v::Int64, R::MultiStageResp, units::Bool)
+function blk_054(io::IO, nb::Int64, v::Integer, R::MultiStageResp, units::Bool)
   sio = blk_string_read(io, nb, v)
 
   fastskip(sio, 1)
@@ -609,7 +609,7 @@ function blk_054(io::IO, nb::Int64, v::Int64, R::MultiStageResp, units::Bool)
   return stage
 end
 
-function blk_057(io::IO, nb::Int64, v::Int64, R::MultiStageResp)
+function blk_057(io::IO, nb::Int64, v::Integer, R::MultiStageResp)
   sio = blk_string_read(io, nb, v)
   stage = stream_int(sio, 2)
   fast_readbytes!(sio, BUF.hdr_old, 10)
@@ -641,7 +641,7 @@ function blk_057(io::IO, nb::Int64, v::Int64, R::MultiStageResp)
   return stage
 end
 
-function blk_058(io::IO, nb::Int64, v::Int64, C::SeisChannel)
+function blk_058(io::IO, nb::Int64, v::Integer, C::SeisChannel)
   sio = blk_string_read(io, nb, v)
   stage = stream_int(sio, 2)
   fast_readbytes!(sio, BUF.hdr_old, 12)
@@ -671,7 +671,7 @@ function blk_058(io::IO, nb::Int64, v::Int64, C::SeisChannel)
 end
 
 # Not in scope of SeisIO
-function blk_059!(io::IO, nb::Int64, v::Int64, C::SeisChannel, units::Bool)
+function blk_059!(io::IO, nb::Int64, v::Integer, C::SeisChannel, units::Bool)
   sio = blk_string_read(io, nb, v)
   v > 1 && println("")
   if units
@@ -692,7 +692,7 @@ function blk_059!(io::IO, nb::Int64, v::Int64, C::SeisChannel, units::Bool)
 end
 
 # Assign dictionary elements with response info in the 41-49 blockettes
-function blk_060(io::IO, nb::Int64, v::Int64, R::MultiStageResp)
+function blk_060(io::IO, nb::Int64, v::Integer, R::MultiStageResp)
   sio = blk_string_read(io, nb, v)
 
   nstg = stream_int(sio, 2)
@@ -732,7 +732,7 @@ function blk_060(io::IO, nb::Int64, v::Int64, R::MultiStageResp)
   return nstg
 end
 
-function blk_061(io::IO, nb::Int64, v::Int64, R::MultiStageResp, units::Bool)
+function blk_061(io::IO, nb::Int64, v::Integer, R::MultiStageResp, units::Bool)
   sio = blk_string_read(io, nb, v)
 
   stage = stream_int(sio, 2)

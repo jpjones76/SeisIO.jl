@@ -90,7 +90,7 @@ function skip_string!(sio::IO)
   return nothing
 end
 
-function blk_string_read(io::IO, nb::Int64, v::Int64)
+function blk_string_read(io::IO, nb::Int64, v::Integer)
   checkbuf!(BUF.buf, nb)
   if nb + BUF.k > 4096
     part1 = 4096-BUF.k

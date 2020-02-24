@@ -22,7 +22,7 @@ function get_pha!(Ev::SeisEvent;
                   pha::String   = KW.pha,
                   model::String = "iasp91",
                   to::Int64     = KW.to,
-                  v::Int64      = KW.v
+                  v::Integer    = KW.v
                   )
 
   # Check that distaz has been done

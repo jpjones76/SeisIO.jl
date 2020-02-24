@@ -33,7 +33,7 @@ Sums]. Zeitschrift für Angewandte Mathematik und Mechanik (in German). 54 (1):
 function convert_seis!(S::GphysData;
   chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
   units_out::String="m/s",
-  v::Int64=KW.v)
+  v::Integer=KW.v)
 
   # sanity check
   if units_out in ("m", "m/s", "m/s2") == false
@@ -128,7 +128,7 @@ end
 
 function convert_seis!(C::GphysChannel;
   units_out::String="m/s",
-  v::Int64=KW.v)
+  v::Integer=KW.v)
 
   # sanity check
   if (units_out in ("m", "m/s", "m/s2")) == false || (C.units in ("m", "m/s", "m/s2")) == false
@@ -207,7 +207,7 @@ end
 function convert_seis(S::GphysData;
   chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
   units_out::String="m/s",
-  v::Int64=KW.v)
+  v::Integer=KW.v)
 
   U = deepcopy(S)
   convert_seis!(U, chans=chans, units_out=units_out, v=v)
@@ -216,7 +216,7 @@ end
 
 function convert_seis(C::GphysChannel;
   units_out::String="m/s",
-  v::Int64=KW.v)
+  v::Integer=KW.v)
 
   U = deepcopy(C)
   convert_seis!(U, units_out=units_out, v=v)

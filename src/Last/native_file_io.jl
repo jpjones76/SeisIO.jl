@@ -131,8 +131,8 @@ each file.
 """
 function rseis(patts::Union{String,Array{String,1}};
   c::Union{Int64,Array{Int64,1}}  = Int64[],
-  v::Int64                        = KW.v,
-  mmap::Bool                      = false)
+  mmap::Bool                      = false,
+  v::Integer                      = KW.v)
 
   A     = []
   files = build_file_list(patts)

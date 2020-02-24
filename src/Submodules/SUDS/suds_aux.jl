@@ -4,7 +4,7 @@ function flush_suds!(S::GphysData,
   xt::Array{Int64,1},
   xz::Array{Int64,1},
   xj::Int64,
-  v::Int64)
+  v::Integer)
 
   (xj == 0) && return nothing
 

@@ -203,7 +203,7 @@ end
 
 Test whether `str` is a valid UCUM unit string.
 """
-function vucum(str::String; v::Int64=0)
+function vucum(str::String; v::Integer=0)
   rstr = identity(str)
   if any([occursin(c, rstr) for c in ('%', '^', '[', ']', '{', '}')])
     rstr = replace(rstr, "%" => "%25")

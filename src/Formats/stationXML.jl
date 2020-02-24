@@ -131,7 +131,7 @@ end
 function FDSN_sta_xml(xmlf::String;
                        s::String="0001-01-01T00:00:00",
                        t::String="9999-12-31T23:59:59",
-                       v::Int64=KW.v,
+                       v::Integer=KW.v,
                        msr::Bool=false)
 
   xdoc = LightXML.parse_string(xmlf)
@@ -391,7 +391,7 @@ function read_sxml(fpat::String;
                    s::String="0001-01-01T00:00:00",
                    t::String="9999-12-31T23:59:59",
                    msr::Bool=false,
-                   v::Int64=KW.v)
+                   v::Integer=KW.v)
 
   if safe_isfile(fpat)
     io = mmap ? IOBuffer(Mmap.mmap(fpat)) : open(fpat, "r")
@@ -424,7 +424,7 @@ end
 function sxml_mergehdr!(S::GphysData, T::GphysData;
                         nofs::Bool=false,
                         app::Bool=true,
-                        v::Int64=KW.v)
+                        v::Integer=KW.v)
 
 
   relevant_fields = nofs ? (:name, :loc, :gain, :resp, :units) : (:name, :loc, :fs, :gain, :resp, :units)
@@ -483,7 +483,7 @@ function read_station_xml!(S::GphysData, file::String;
                            msr::Bool=false,
                            s::String="0001-01-01T00:00:00",
                            t::String="9999-12-31T23:59:59",
-                           v::Int64=KW.v)
+                           v::Integer=KW.v)
 
   if sizeof(file) < 256
     io = open(file, "r")
@@ -501,7 +501,7 @@ function read_station_xml(file::String;
                  msr::Bool=false,
                  s::String="0001-01-01T00:00:00",
                  t::String="9999-12-31T23:59:59",
-                 v::Int64=KW.v)
+                 v::Integer=KW.v)
 
   S = SeisData()
   read_station_xml!(S, file, msr=msr, s=s, t=t, v=v)
