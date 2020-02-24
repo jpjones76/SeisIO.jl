@@ -83,14 +83,33 @@ function mk_ah_id(js::Int64, jc::Int64, jn::Int64)
   return j
 end
 
+mk_ah_chan(id::String, loc::GeoLoc, fs::Float64, resp::PZResp, ahfile::String, misc::Dict{String, Any}, notes::Array{String, 1}, nx::Integer, t0::Integer, x::FloatArray) =
+  SeisChannel(id,
+              "",
+              loc,
+              fs,
+              Float64(BUF.x[4]),
+              resp,
+              "",
+              ahfile,
+              misc,
+              notes,
+              mk_t(nx, t0),
+              x)
+
 # AH-2
-function read_ah2!(S::GphysData, ahfile::String, full::Bool, mmap::Bool, v::Int)
+function read_ah2!(S::GphysData, ahfile::String, full::Bool, mmap::Bool, strict::Bool, v::Integer)
   io = mmap ? IOBuffer(Mmap.mmap(ahfile)) : open(ahfile, "r")
   str = getfield(BUF, :sac_cv)
   ti = BUF.date_buf
   resize!(ti, 5)
+  if full
+    stamp = timestamp() * " ¦ "
+  end
 
   while !eof(io)
+    misc = Dict{String,Any}()
+    notes = Array{String,1}(undef, 0)
     loc = GeoLoc()
 
     ver = bswap(fastread(io, Int32))
@@ -104,54 +123,55 @@ function read_ah2!(S::GphysData, ahfile::String, full::Bool, mmap::Bool, v::Int)
     jc = read_ah_str(io, js)
     fastskip(io, 4)
     jn = read_ah_str(io, jc)
-    jrec = read_ah_str(io, jn)
-    jsen = read_ah_str(io, jrec)
     j = mk_ah_id(js, jc, jn)
     id = unsafe_string(pointer(BUF.id), j)
+    (v > 1) && println("id = ", id)
 
-    # Fill SeisChannel header
+    jrec = read_ah_str(io, jn)
+    jsen = read_ah_str(io, jrec)
+    if full
+      misc["recorder"] = unsafe_string(pointer(BUF.buf, jn+1), jrec-jn)
+      misc["sensor"] = unsafe_string(pointer(BUF.buf, jrec+1), jsen-jrec)
+    end
+
+    # location
     setfield!(loc, :az, Float64(bswap(fastread(io, Float32))))
     setfield!(loc, :inc, 90.0-bswap(fastread(io, Float32)))
     setfield!(loc, :lat, bswap(fastread(io, Float64)))
     setfield!(loc, :lon, bswap(fastread(io, Float64)))
     setfield!(loc, :el, Float64(bswap(fastread(io, Float32))))
-    gain = bswap(fastread(io, Float32))
 
-    C = SeisChannel(id = id,
-                    loc = loc,
-                    gain = Float64(gain)
-                    )
+    BUF.x[4] = bswap(fastread(io, Float32))     # gain
+    BUF.x[5] = bswap(fastread(io, Float32))     # A0
 
-    (v > 1) && println("id = ", C.id)
-    if full
-      C.misc["recorder"] = unsafe_string(pointer(BUF.buf, jn+1), jrec-jn)
-      C.misc["sensor"] = unsafe_string(pointer(BUF.buf, jrec+1), jsen-jrec)
-    end
-    A0 = bswap(fastread(io, Float32))
+    # poles
     NP = bswap(fastread(io, Int32))
     P = zeros(Complex{Float32}, NP)
     fastread!(io, P)
+
+    # zeros
     NZ = bswap(fastread(io, Int32))
     Z = zeros(Complex{Float32}, NZ)
     fastread!(io, Z)
-    setfield!(C, :resp, PZResp(a0 = A0, p = P, z = Z))
+
+    # station comment
     j = read_comm!(io, str, full)
     if full
-      C.misc["sta_comment"] = unsafe_string(pointer(BUF.buf), j)
+      misc["sta_comment"] = unsafe_string(pointer(BUF.buf), j)
     end
 
     # Event header ==========================================================
     if full
-      C.misc["ev_lat"] = bswap(fastread(io, Float64))
-      C.misc["ev_lon"] = bswap(fastread(io, Float64))
-      C.misc["ev_dep"] = bswap(fastread(io, Float32))
+      misc["ev_lat"] = bswap(fastread(io, Float64))
+      misc["ev_lon"] = bswap(fastread(io, Float64))
+      misc["ev_dep"] = bswap(fastread(io, Float32))
       fastread!(io, ti)
       t_s = fastread(io, Float32)
       fastskip(io, 4)
       j = read_comm!(io, str, full)
-      C.misc["event_comment"] = unsafe_string(pointer(BUF.buf), j)
-      C.misc["ot"] =  ah_time(ti, t_s)
-      (v > 1) && println("ev_lat = ", C.misc["ev_lat"], ", ev_lon = ", C.misc["ev_lon"])
+      misc["event_comment"] = unsafe_string(pointer(BUF.buf), j)
+      misc["ot"] =  ah_time(ti, t_s)
+      (v > 1) && println("ev_lat = ", misc["ev_lat"], ", ev_lon = ", misc["ev_lon"])
     else
       fastskip(io, 48)
       read_comm!(io, str, full)
@@ -165,22 +185,22 @@ function read_ah2!(S::GphysData, ahfile::String, full::Bool, mmap::Bool, v::Int)
     fastread!(io, ti)
     t_s   = fastread(io, Float32)
     n     = bswap(fastread(io, Int32))
-    C.units = n > 0 ? unsafe_string(pointer(fastread(io, n))) : ""
-    n = bswap(fastread(io, Int32))
-    inunits = fastread(io, n)
-    n = bswap(fastread(io, Int32))
-    outunits = fastread(io, n)
+    units = n > 0 ? unsafe_string(pointer(fastread(io, n))) : ""
+    n     = bswap(fastread(io, Int32))
+    u_i   = fastread(io, n)
+    n     = bswap(fastread(io, Int32))
+    u_o   = fastread(io, n)
     fastskip(io, 4)
-    j = read_comm!(io, str, full)
+    j     = read_comm!(io, str, full)
     if full
-      C.misc["data_comment"] = unsafe_string(pointer(BUF.buf), j)
-      C.misc["units_in"] = unsafe_string(pointer(inunits))
-      C.misc["units_out"] = unsafe_string(pointer(outunits))
-      C.misc["Amax"] = Amax
-      C.misc["ti"] = bswap.(copy(ti))
+      misc["data_comment"]  = unsafe_string(pointer(BUF.buf), j)
+      misc["units_in"]      = unsafe_string(pointer(u_i))
+      misc["units_out"]     = unsafe_string(pointer(u_o))
+      misc["Amax"]          = Amax
+      misc["ti"]            = bswap.(copy(ti))
     end
     fastskip(io, 4)
-    k = read_comm!(io, str, full)
+    k     = read_comm!(io, str, full)
     (v > 1) && println("nx = ", nx, ", dt = ", dt, ", Amax = ", Amax, ", k = ", k)
     if full
       # Log all processing to C.notes
@@ -192,7 +212,7 @@ function read_ah2!(S::GphysData, ahfile::String, full::Bool, mmap::Bool, v::Int)
         if c == 0x00
           i = j
         elseif c == 0x3b && j-i > 1
-          note!(C, unsafe_string(pointer(BUF.buf[i+1:j-1])) * ", recorded in .ah file log")
+          push!(notes, stamp * unsafe_string(pointer(BUF.buf, i+1), j-i-1) * ", recorded in .ah file log")
           i = j
         end
       end
@@ -209,25 +229,33 @@ function read_ah2!(S::GphysData, ahfile::String, full::Bool, mmap::Bool, v::Int)
         UA[k] = V
       end
       v > 1 && println("UA = ", UA)
-      merge!(C.misc, UA)
+      merge!(misc, UA)
     end
 
-    # Create C.t
-    mk_t!(C, nx, ah_time(ti, t_s)) #) + round(Int64, t_s*1.0e6))
+    # Determine if we have data from this channel already
+    fs = 1.0/dt
+    resp = PZResp(BUF.x[5], 0.0f0, P, Z)
+    units = units2ucum(units)
+    j = findid(S, id)
+    if strict
+      j = channel_match(S, j, fs, BUF.x[4], loc, resp, units)
+    end
 
-    # Set C.fs
-    setfield!(C, :fs, 1.0/dt)
-
-    # Data
-    T = fmt == 1 ? Float32 : Float64
-    x = Array{T, 1}(undef, nx)
+    t0 = ah_time(ti, t_s)
+    x = Array{fmt == one(Int32) ? Float32 : Float64, 1}(undef, nx)
     fastread!(io, x)
-    x .= bswap.(x)
-    v > 2 && println("x = [", x[1], ", ", x[2], ", ", x[3], ", ", x[4], ", ... ", x[nx-3], ", ", x[nx-2], ", ", x[nx-1], ", ", x[nx], "]")
-
-    # Cleanup
-    setfield!(C, :x, x)
-    push!(S, C)
+    broadcast!(bswap, x, x)
+    if j == 0
+      C = mk_ah_chan(id, loc, fs, resp, ahfile, misc, notes, nx, t0, x)
+      C.units = units
+      push!(S, C)
+      j = S.n
+    else
+      check_for_gap!(S, j, t0, nx, v)
+      append!(S.x[j], x)
+    end
+    (v > 1) && println("id = ", id, " channel ", j)
+    (v > 2) && println("x = [", x[1], ", ", x[2], ", ", x[3], ", ", x[4], ", ... ", x[nx-3], ", ", x[nx-2], ", ", x[nx-1], ", ", x[nx], "]")
   end
   close(io)
   resize!(str, 192)
@@ -238,14 +266,14 @@ function read_ah2!(S::GphysData, ahfile::String, full::Bool, mmap::Bool, v::Int)
   return S
 end
 
-function read_ah1!(S::GphysData, ahfile::String, full::Bool, mmap::Bool, v::Int)
+function read_ah1!(S::GphysData, ahfile::String, full::Bool, mmap::Bool, strict::Bool, v::Integer)
 
   io = mmap ? IOBuffer(Mmap.mmap(ahfile)) : open(ahfile, "r")
   str = getfield(BUF, :sac_cv)
   ti  = getfield(BUF, :date_buf)
   pz_buf = getfield(BUF, :x)
   if full
-    stamp = timestamp() * ": "
+    stamp = timestamp() * " ¦ "
   end
   resize!(ti, 5)
   resize!(pz_buf, 125)
@@ -345,33 +373,30 @@ function read_ah1!(S::GphysData, ahfile::String, full::Bool, mmap::Bool, v::Int)
       k += 4
     end
 
-    j = mk_ah_id(js, jc, jn)
-    C = SeisChannel(id,
-                    "",
-                    GeoLoc("",
-                           Float64(pz_buf[1]),
-                           Float64(pz_buf[2]),
-                           Float64(pz_buf[3]),
-                           0.0,
-                           0.0,
-                           0.0),
-                    1.0/dt,
-                    Float64(pz_buf[4]),
-                    PZResp(pz_buf[5], 0.0f0, P, Z),
-                    "",
-                    ahfile,
-                    misc,
-                    notes,
-                    mk_t(nx, ah_time(ti, t_s)),
-                    Array{fmt == one(Int32) ? Float32 : Float64, 1}(undef, nx))
+    # Determine if we have data from this channel already
+    fs = 1.0/dt
+    loc = GeoLoc("", Float64(BUF.x[1]), Float64(BUF.x[2]), Float64(BUF.x[3]), 0.0, 0.0, 0.0)
+    resp = PZResp(BUF.x[5], 0.0f0, P, Z)
+    j = findid(S, id)
+    if strict
+      j = channel_match(S, j, fs, BUF.x[4], loc, resp, "")
+    end
 
-    x = getfield(C, :x)
+    # Assign to SeisChannel, or append S[j]
+    t0 = ah_time(ti, t_s)
+    x = Array{fmt == one(Int32) ? Float32 : Float64, 1}(undef, nx)
     fastread!(io, x)
     broadcast!(bswap, x, x)
+    if j == 0
+      C = mk_ah_chan(id, loc, fs, resp, ahfile, misc, notes, nx, t0, x)
+      push!(S, C)
+      j = S.n
+    else
+      S.t[j] = t_extend(S.t[j], t0, nx, S.fs[j])
+      append!(S.x[j], x)
+    end
+    (v > 0) && println("id = ", id, " channel ", j, ", L = ", length(S.x[j]))
     (v > 2) && println("x[1:5] = ", x[1:5])
-
-    # Cleanup
-    push!(S, C)
   end
   close(io)
   resize!(BUF.sac_cv, 192)
