@@ -120,7 +120,7 @@ function build_file_list(patts::Union{String,Array{String,1}})
 end
 
 """
-    rseis(fstr::String[, c::Array{Int64,1}=C, v::Int=0, mmap::Bool=false])
+    rseis(fstr::String[, c::Array{Int64,1}=C, v::Integer=0, mmap::Bool=false])
 
 Read SeisIO files matching file pattern ``fstr`` into memory. If an array of
 record indices is passed to keyword c, only those record indices are read from

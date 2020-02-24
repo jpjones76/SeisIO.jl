@@ -174,6 +174,6 @@ const KW = KWDefs(
                       true, # si::Bool
                     "IRIS", # src::String
                         30, # to::Int64
-                         0, # v::Int (verbosity)
+                         0, # v::Int64 (verbosity)
                      false, # w::Bool (write to disk)
                      false) # y::Bool (syc)
