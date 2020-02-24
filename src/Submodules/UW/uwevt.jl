@@ -7,7 +7,7 @@ Read UW-format event data with file pattern stub `fpat` into SeisEvent `Ev`. `fs
 * A filename stub must be complete except for the last letter, e.g. "99062109485".
 * Wild cards for multi-file read are not supported by `readuw` because the data format is strictly event-oriented.
 """ readuwevt
-function readuwevt(filename::String; v::Int64=KW.v, full::Bool=false)
+function readuwevt(filename::String; v::Integer=KW.v, full::Bool=false)
 
   df = String("")
   pf = String("")
@@ -46,7 +46,8 @@ function readuwevt(filename::String; v::Int64=KW.v, full::Bool=false)
     v>0 && println(stdout, "Reading datafile ", df)
 
     W = SeisEvent()
-    setfield!(W, :data, unsafe_convert(EventTraceData, uwdf(df, v=v, full=true)))
+    S = uwdf(df, full, false, false, v)
+    setfield!(W, :data, unsafe_convert(EventTraceData, S))
 
     v>0 && println(stdout, "Done reading data file.")
 
@@ -66,10 +67,12 @@ function readuwevt(filename::String; v::Int64=KW.v, full::Bool=false)
       D_data = getindex(getfield(data, :misc), 1)
       D_hdr = getfield(hdr, :misc)
       for k in klist
-        D_hdr[k] = D_data[k]
-        delete!(D_data, k)
+        if haskey(D_data, k)
+          D_hdr[k] = D_data[k]
+          delete!(D_data, k)
+        end
       end
-      D_hdr["comment_df"] = D_data["comment"]
+      D_hdr["comment_df"] = get(D_data, "comment", "")
       delete!(D_data, "comment")
 
       # Convert all phase arrival times to travel times
