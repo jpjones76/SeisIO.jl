@@ -36,12 +36,16 @@ Supported Keywords
   :delim: |
   :widths: 1, 1, 1, 1, 4
 
+  mmap  | all      | Bool      | false     | use Mmap.mmap to buffer file?
   msr   | sxml     | Bool      | false     | read full MultiStageResp?
   s     | all      | TimeSpec  |           | Start time
   t     | all      | TimeSpec  |           | Termination (end) time
   units | resp     | Bool      | false     | fill in MultiStageResp units?
         | dataless |           |           |
   v     | all      | Int64     | 0         | verbosity
+
+
+**Note**: `mmap=true` improves read speed for ASCII formats but requires caution. Julia language handling of SIGBUS/SIGSEGV and associated risks is unknown and undocumented.
 
 ****************
 Writing Metadata
