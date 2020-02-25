@@ -452,8 +452,8 @@ If an ID in the pz file matches channel `i` at times in `S.t[i]`:
 * Information from the pz file is merged into :misc if the corresponding keys
 aren't in use.
 """ read_sacpz!
-function read_sacpz!(S::GphysData, file::String)
-  io = open(file, "r")
+function read_sacpz!(S::GphysData, file::String; mmap::Bool=false)
+  io = mmap ? IOBuffer(Mmap.mmap(file)) : open(file, "r")
   read_state = 0x00
   D = Dict{String, Any}()
   kv = Array{String, 1}(undef, 2)
@@ -462,12 +462,12 @@ function read_sacpz!(S::GphysData, file::String)
   while true
 
     # EOF
-    if eof(io)
+    if fasteof(io)
       add_pzchan!(S, D, file)
       break
     end
 
-    line = readline(io)
+    line = fast_readline(io)
 
     # Header section
     if startswith(line, "*")
@@ -490,7 +490,7 @@ function read_sacpz!(S::GphysData, file::String)
       for i = 1:N
         try
           mark(io)
-          zc = split(readline(io), limit=2, keepempty=false)
+          zc = split(fast_readline(io), limit=2, keepempty=false)
           D["Z"][i] = complex(parse(Float32, zc[1]), parse(Float32, zc[2]))
         catch
           D["Z"][i:N] .= zero(ComplexF32)
@@ -503,7 +503,7 @@ function read_sacpz!(S::GphysData, file::String)
       N = parse(Int64, split(line, limit=2, keepempty=false)[2])
       D["P"] = Array{Complex{Float32},1}(undef, N)
       for i = 1:N
-        pc = split(readline(io), limit=2, keepempty=false)
+        pc = split(fast_readline(io), limit=2, keepempty=false)
         D["P"][i] = complex(parse(Float32, pc[1]), parse(Float32, pc[2]))
       end
 
@@ -517,9 +517,9 @@ function read_sacpz!(S::GphysData, file::String)
 end
 
 @doc (@doc read_sacpz)
-function read_sacpz(file::String)
+function read_sacpz(file::String; mmap::Bool=false)
   S = SeisData()
-  read_sacpz!(S, file)
+  read_sacpz!(S, file, mmap=mmap)
   return S
 end
 

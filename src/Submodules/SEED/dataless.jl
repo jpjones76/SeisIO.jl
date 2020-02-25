@@ -203,13 +203,14 @@ function parse_dataless!(S::SeisData, io::IO, s::TimeSpec, t::TimeSpec, v::Integ
 end
 
 function read_dataless(fname::String;
+  mmap::Bool = false,
   s::TimeSpec = "0001-01-01T00:00:00",
   t::TimeSpec = "9999-12-31T23:59:59",
   v::Integer = KW.v,
   units::Bool = false)
 
   S = SeisData()
-  io = open(fname, "r")
+  io = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   fastskip(io, 6)
   c = fastread(io)
   if c in (0x41, 0x53, 0x54, 0x56) # 'A', 'S', 'T', 'V'
@@ -217,6 +218,7 @@ function read_dataless(fname::String;
     parse_dataless!(S, io, s, t, v, units)
     close(io)
   else
+    close(io)
     error("Not a SEED volume!")
   end
   fstr = realpath(fname)

@@ -26,6 +26,7 @@ SeisData object `S`.
 ### Keywords
 |KW      | Used By  | Type      | Default   | Meaning                         |
 |:---    |:---      |:---       |:---       |:---                             |
+| mmap   | all      | Bool      | false     | use mmap on files? (unsafe)     |
 | msr    | sxml     | Bool      | false     | read full MultiStageResp?       |
 | s      | all      | TimeSpec  |           | Start time                      |
 | t      | all      | TimeSpec  |           | Termination (end) time          |
@@ -41,6 +42,7 @@ files have reliable tests for uniqueness.
 See also: SeisIO.KW, get_data, read_data
 """ read_meta!
 function read_meta!(S::GphysData, fmt::String, filestr::String;
+  mmap    ::Bool      = false                     ,  # use Mmap.mmap? (unsafe)
   msr     ::Bool      = false                     ,  # read as MultiStageResp?
   s       ::TimeSpec  = "0001-01-01T00:00:00"     ,  # Start
   t       ::TimeSpec  = "9999-12-31T12:59:59"     ,  # End or Length (s)
@@ -53,34 +55,34 @@ function read_meta!(S::GphysData, fmt::String, filestr::String;
 
   if fmt == "dataless"
     if one_file
-      append!(S, read_dataless(filestr, s=s, t=t, v=v, units=units))
+      append!(S, read_dataless(filestr, mmap=mmap, s=s, t=t, v=v, units=units))
     else
       files = ls(filestr)
       for fname in files
-        append!(S, read_dataless(fname, s=s, t=t, v=v, units=units))
+        append!(S, read_dataless(fname, mmap=mmap, s=s, t=t, v=v, units=units))
       end
     end
 
   elseif fmt == "resp"
-    read_seed_resp!(S, filestr, units=units)
+    read_seed_resp!(S, filestr, mmap=mmap, units=units)
 
   elseif fmt == "sacpz"
     if one_file
-      read_sacpz!(S, filestr)
+      read_sacpz!(S, filestr, mmap=mmap)
     else
       files = ls(filestr)
       for fname in files
-        read_sacpz!(S, fname)
+        read_sacpz!(S, fname, mmap=mmap)
       end
     end
 
   elseif fmt == "sxml"
     if one_file
-      append!(S, read_sxml(filestr, s=s, t=t, v=v, msr=msr))
+      append!(S, read_sxml(filestr, mmap=mmap, s=s, t=t, v=v, msr=msr))
     else
       files = ls(filestr)
       for fname in files
-        append!(S, read_sxml(fname, s=s, t=t, v=v, msr=msr))
+        append!(S, read_sxml(fname, mmap=mmap, s=s, t=t, v=v, msr=msr))
       end
     end
 
@@ -104,6 +106,7 @@ end
 
 @doc (@doc read_meta!)
 function read_meta(fmt::String, filestr::String;
+  mmap    ::Bool      = true                      ,  # use Mmap.mmap? (unsafe)
   msr     ::Bool      = false                     ,  # read as MultiStageResp?
   s       ::TimeSpec  = "0001-01-01T00:00:00"     ,  # Start
   t       ::TimeSpec  = "9999-12-31T12:59:59"     ,  # End or Length (s)
