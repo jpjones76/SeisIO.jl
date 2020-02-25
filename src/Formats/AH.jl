@@ -260,9 +260,7 @@ function read_ah2!(S::GphysData, ahfile::String, full::Bool, mmap::Bool, strict:
   close(io)
   resize!(str, 192)
   resize!(ti, 7)
-  if length(BUF.buf) != 65535
-    resize!(BUF.buf, 65535)
-  end
+  resize!(BUF.buf, 65535)
   return S
 end
 
