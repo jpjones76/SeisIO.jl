@@ -45,7 +45,7 @@ R = rseis(savfile3)
 
 # with mmap
 printstyled("  read with mmap\n", color=:light_green)
-R1 = rseis(savfile3, mmap=true)
+R1 = rseis(savfile3, memmap=true)
 @test R == R1
 
 # read one file with one record number

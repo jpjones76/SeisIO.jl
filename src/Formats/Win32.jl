@@ -17,10 +17,10 @@ function win32_cfile!(  fname::String,
                         fc::Array{Float32,1},
                         hc::Array{Float32,1},
                         nx_new::Int64,
-                        mmap::Bool
+                        memmap::Bool
                       )
 
-  io = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
+  io = memmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   while !fasteof(io)
     chan_line = fast_readline(io)
     occursin(r"^\s*(?:#|$)", chan_line) && continue
@@ -80,7 +80,7 @@ function readwin32( dfilestr::String,
                     jst::Bool,
                     nx_new::Int64,
                     nx_add::Int64,
-                    mmap::Bool,
+                    memmap::Bool,
                     v::Integer
                     )
   S = SeisData()
@@ -91,12 +91,12 @@ function readwin32( dfilestr::String,
   fc        = Array{Float32,1}(undef,0)
   hc        = Array{Float32,1}(undef,0)
   if safe_isfile(cfilestr)
-    win32_cfile!(cfilestr, hex_bytes, hexIDs, S, fc, hc, nx_new, mmap)
+    win32_cfile!(cfilestr, hex_bytes, hexIDs, S, fc, hc, nx_new, memmap)
   else
     cfiles = ls(cfilestr)
     @inbounds for cfile in cfiles
       v > 1 && println("Reading channel file ", cfile)
-      win32_cfile!(cfile, hex_bytes, hexIDs, S, fc, hc, nx_new, mmap)
+      win32_cfile!(cfile, hex_bytes, hexIDs, S, fc, hc, nx_new, memmap)
     end
   end
   L = lastindex(hexIDs)
@@ -124,7 +124,7 @@ function readwin32( dfilestr::String,
 
   @inbounds for fname in files
     v > 0 && println("Processing ", fname)
-    io = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
+    io = memmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
     fastskip(io, 4)
     while !eof(io)
 
@@ -288,11 +288,11 @@ function readwin32!(S::SeisData,
                     jst::Bool,
                     nx_new::Int64,
                     nx_add::Int64,
-                    mmap::Bool,
+                    memmap::Bool,
                     strict::Bool,
                     v::Integer
                     )
-  U = readwin32(dfilestr, cfilestr, jst, nx_new, nx_add, mmap, v)
+  U = readwin32(dfilestr, cfilestr, jst, nx_new, nx_add, memmap, v)
   if S.n > 0
     for i in 1:U.n
       j = add_chan!(S, U[i], strict)

@@ -53,28 +53,34 @@ for n = 1:nf
     if opt == "pa-full"
       S = verified_read_data("passcal", fname, full=true)
       S = verified_read_data("passcal", fwild, full=true)
+      S = read_data("passcal", fwild, full=true, memmap=true)
       S = read_data(fname)
       S = read_data(fname, full=true)
     elseif opt == "win"
       S = verified_read_data(f_call, fwild, cf=cfile)
+      S = read_data(f_call, fwild, memmap=true, cf=cfile)
       S = read_data(fwild, cf=cfile)
     elseif opt == "slist"
       S = verified_read_data("geocsv.slist", fname)
       S = verified_read_data("geocsv.slist", fwild)
+      S = read_data("geocsv.slist", fwild, memmap=true)
       S = read_data(fwild)
     elseif opt == "lo-mem"
       S = verified_read_data(f_call, fname, nx_new=nx_new, nx_add=nx_add)
       S = verified_read_data(f_call, fwild, nx_new=nx_new, nx_add=nx_add)
+      S = read_data(f_call, fwild, nx_new=nx_new, nx_add=nx_add, memmap=true)
     elseif opt == "full"
       S = verified_read_data(f_call, fname, full=true)
       S = verified_read_data(f_call, fwild, full=true)
+      S = read_data(f_call, fwild, full=true, memmap=true)
       S = read_data(fwild, full=true)
     else
       S = verified_read_data(f_call, fname)
+      S = read_data(f_call, fname, memmap=true)
       if f_call == "uw"
         fwild = fname[1:end-3]*"*"*"W"
       end
-      S = read_data(f_call, fwild)
+      S = read_data(f_call, fwild, memmap=true)
       S = read_data(fwild)
     end
   end

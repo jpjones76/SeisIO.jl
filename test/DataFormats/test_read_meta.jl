@@ -8,10 +8,10 @@ dataless_wc   = path*"/SampleFiles/SEED/CC.*"
 sacpz_file    = path*"/SampleFiles/SAC/JRO.sacpz"
 sacpz_wc      = path*"/SampleFiles/SAC/JRO.sacp*"
 
-S1 = read_meta("sxml", sxml_file, s="2016-01-01T00:00:00", mmap=true, msr=true)
-S2 = read_meta("resp", resp_file, mmap=true, units=true)
-S3 = read_meta("dataless", dataless_file, mmap=true, s="2016-01-01T00:00:00", units=true)[56:58]
-S4 = read_meta("sacpz", sacpz_file, mmap=true)
+S1 = read_meta("sxml", sxml_file, s="2016-01-01T00:00:00", memmap=true, msr=true)
+S2 = read_meta("resp", resp_file, memmap=true, units=true)
+S3 = read_meta("dataless", dataless_file, memmap=true, s="2016-01-01T00:00:00", units=true)[56:58]
+S4 = read_meta("sacpz", sacpz_file, memmap=true)
 
 @test_throws ErrorException read_meta("dataless", sxml_file)
 @test_throws ErrorException read_meta("deez", "nutz.sac")

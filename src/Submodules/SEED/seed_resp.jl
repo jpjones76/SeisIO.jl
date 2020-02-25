@@ -84,7 +84,7 @@ end
 
 
 function read_seed_resp!(S::GphysData, fpat::String;
-  mmap::Bool=false,
+  memmap::Bool=false,
   units::Bool=false)
 
   buf   = BUF.buf
@@ -138,7 +138,7 @@ function read_seed_resp!(S::GphysData, fpat::String;
     id = UInt8[]
     units_in = ""             # Response in units lookup (041F06, 043F06, 044F06, 053F05, 054F05, 061F06, 062F05)
 
-    io = mmap ? IOBuffer(Mmap.mmap(file)) : open(file, "r")
+    io = memmap ? IOBuffer(Mmap.mmap(file)) : open(file, "r")
     chip = false
     while !eof(io)
       c = fastread(io)

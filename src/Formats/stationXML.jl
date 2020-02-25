@@ -387,27 +387,27 @@ Read FDSN StationXML file `xml_file` into SeisData object S.
 * `v`::Int64: verbosity.
 """
 function read_sxml(fpat::String;
-                   mmap::Bool=false,
+                   memmap::Bool=false,
                    s::String="0001-01-01T00:00:00",
                    t::String="9999-12-31T23:59:59",
                    msr::Bool=false,
                    v::Integer=KW.v)
 
   if safe_isfile(fpat)
-    io = mmap ? IOBuffer(Mmap.mmap(fpat)) : open(fpat, "r")
+    io = memmap ? IOBuffer(Mmap.mmap(fpat)) : open(fpat, "r")
     xsta = read(io, String)
     close(io)
     S = FDSN_sta_xml(xsta, s=s, t=t, msr=msr, v=v)
   else
     files = ls(fpat)
     if length(files) > 0
-      io = mmap ? IOBuffer(Mmap.mmap(files[1])) : open(files[1], "r")
+      io = memmap ? IOBuffer(Mmap.mmap(files[1])) : open(files[1], "r")
       xsta = read(io, String)
       close(io)
       S = FDSN_sta_xml(xsta, s=s, t=t, msr=msr, v=v)
       if length(files) > 1
         for i = 2:length(files)
-          io = mmap ? IOBuffer(Mmap.mmap(files[i])) : open(files[i], "r")
+          io = memmap ? IOBuffer(Mmap.mmap(files[i])) : open(files[i], "r")
           xsta = read(io, String)
           close(io)
           T = FDSN_sta_xml(xsta, s=s, t=t, msr=msr, v=v)

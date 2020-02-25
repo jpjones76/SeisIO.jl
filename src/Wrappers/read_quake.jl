@@ -28,7 +28,7 @@ See also: read_data, get_data, read_meta
 """ read_quake
 function read_quake(fmt::String, fname::String;
   full    ::Bool    = false,              # full header
-  v       ::Int64   = KW.v                # verbosity level
+  v       ::Integer = KW.v                # verbosity level
   )
 
   if fmt == "suds"

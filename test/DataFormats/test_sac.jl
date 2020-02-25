@@ -16,7 +16,7 @@ SAC1 = verified_read_data("sac", sac_file)[1]
 
 # SAC with mmap
 printstyled("    with mmap\n", color=:light_green)
-SACm = read_data("sac", sac_file, mmap=true)[1]
+SACm = read_data("sac", sac_file, memmap=true)[1]
 @test SAC1 == SACm
 
 SAC2 = verified_read_data("sac", sac_file, full=true)[1]

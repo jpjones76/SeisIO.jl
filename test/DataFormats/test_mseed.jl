@@ -19,7 +19,7 @@ S = verified_read_data("mseed", test_mseed_file, v=0)
 
 # mseed with mmap
 printstyled("    with mmap\n", color=:light_green)
-Sm = read_data("mseed", test_mseed_file, v=0, mmap=true)
+Sm = read_data("mseed", test_mseed_file, v=0, memmap=true)
 @test Sm == S
 
 # Test breaks if memory-resident SeisIOBuf structure SEED is not reset

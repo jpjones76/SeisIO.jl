@@ -287,12 +287,12 @@ end
 function read_segy_file!( S::GphysData,
                           fname::String,
                           passcal::Bool,
-                          mmap::Bool,
+                          memmap::Bool,
                           full::Bool,
                           swap::Bool,
                           strict::Bool)
 
-  f = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
+  f = memmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   trace_fh = Array{Int16, 1}(undef, 3)
   if passcal == true
     # C = do_trace(f, buf, shorts, ints, true, full, fname, swap, trace_fh)

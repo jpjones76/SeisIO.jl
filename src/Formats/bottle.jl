@@ -75,12 +75,12 @@ function channel_guess(str::AbstractString, fs::Float64)
   return (str, units)
 end
 
-function read_bottle!(S::GphysData, fstr::String, nx_new::Int64, nx_add::Int64, mmap::Bool, strict::Bool, v::Integer)
+function read_bottle!(S::GphysData, fstr::String, nx_new::Int64, nx_add::Int64, memmap::Bool, strict::Bool, v::Integer)
   buf = BUF.buf
   files = ls(fstr)
 
   for file in files
-    io = mmap ? IOBuffer(Mmap.mmap(file)) : open(file, "r")
+    io = memmap ? IOBuffer(Mmap.mmap(file)) : open(file, "r")
 
     # Read header ============================================================
     fastskip(io, 8)
@@ -163,10 +163,10 @@ function read_bottle!(S::GphysData, fstr::String, nx_new::Int64, nx_add::Int64, 
   return nothing
 end
 
-function read_bottle(fstr::String, nx_new::Int64, nx_add::Int64, mmap::Bool, strict::Bool, v::Integer)
+function read_bottle(fstr::String, nx_new::Int64, nx_add::Int64, memmap::Bool, strict::Bool, v::Integer)
 
   S = SeisData()
-  read_bottle!(S, fstr, nx_new, nx_add, mmap, strict, v)
+  read_bottle!(S, fstr, nx_new, nx_add, memmap, strict, v)
   return S
 end
 

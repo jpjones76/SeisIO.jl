@@ -26,13 +26,13 @@ SeisData object `S`.
 ### Keywords
 |KW      | Used By  | Type      | Default   | Meaning                         |
 |:---    |:---      |:---       |:---       |:---                             |
-| mmap   | all      | Bool      | false     | use mmap on files? (unsafe)     |
+| memmap | *        | Bool      | false     | use mmap on files? (unsafe)     |
 | msr    | sxml     | Bool      | false     | read full MultiStageResp?       |
-| s      | all      | TimeSpec  |           | Start time                      |
-| t      | all      | TimeSpec  |           | Termination (end) time          |
+| s      | *        | TimeSpec  |           | Start time                      |
+| t      | *        | TimeSpec  |           | Termination (end) time          |
 | units  | resp     | Bool      | false     | fill in MultiStageResp units?   |
 |        | dataless |           |           |                                 |
-| v      | all      | Int64     | 0         | verbosity                       |
+| v      | *        | Int64     | 0         | verbosity                       |
 
 ### Notes
 1. Unlike `read_data`, `read_meta` can't use `guess` for files of unknown type.
@@ -42,12 +42,12 @@ files have reliable tests for uniqueness.
 See also: SeisIO.KW, get_data, read_data
 """ read_meta!
 function read_meta!(S::GphysData, fmt::String, filestr::String;
-  mmap    ::Bool      = false                     ,  # use Mmap.mmap? (unsafe)
+  memmap  ::Bool      = false                     ,  # use Mmap.mmap? (unsafe)
   msr     ::Bool      = false                     ,  # read as MultiStageResp?
   s       ::TimeSpec  = "0001-01-01T00:00:00"     ,  # Start
   t       ::TimeSpec  = "9999-12-31T12:59:59"     ,  # End or Length (s)
   units   ::Bool      = false                     ,  # fill in units of CoeffResp stages?
-  v       ::Int64     = KW.v                      ,  # verbosity level
+  v       ::Integer   = KW.v                      ,  # verbosity level
   )
 
   N = S.n
@@ -55,34 +55,34 @@ function read_meta!(S::GphysData, fmt::String, filestr::String;
 
   if fmt == "dataless"
     if one_file
-      append!(S, read_dataless(filestr, mmap=mmap, s=s, t=t, v=v, units=units))
+      append!(S, read_dataless(filestr, memmap=memmap, s=s, t=t, v=v, units=units))
     else
       files = ls(filestr)
       for fname in files
-        append!(S, read_dataless(fname, mmap=mmap, s=s, t=t, v=v, units=units))
+        append!(S, read_dataless(fname, memmap=memmap, s=s, t=t, v=v, units=units))
       end
     end
 
   elseif fmt == "resp"
-    read_seed_resp!(S, filestr, mmap=mmap, units=units)
+    read_seed_resp!(S, filestr, memmap=memmap, units=units)
 
   elseif fmt == "sacpz"
     if one_file
-      read_sacpz!(S, filestr, mmap=mmap)
+      read_sacpz!(S, filestr, memmap=memmap)
     else
       files = ls(filestr)
       for fname in files
-        read_sacpz!(S, fname, mmap=mmap)
+        read_sacpz!(S, fname, memmap=memmap)
       end
     end
 
   elseif fmt == "sxml"
     if one_file
-      append!(S, read_sxml(filestr, mmap=mmap, s=s, t=t, v=v, msr=msr))
+      append!(S, read_sxml(filestr, memmap=memmap, s=s, t=t, v=v, msr=msr))
     else
       files = ls(filestr)
       for fname in files
-        append!(S, read_sxml(fname, mmap=mmap, s=s, t=t, v=v, msr=msr))
+        append!(S, read_sxml(fname, memmap=memmap, s=s, t=t, v=v, msr=msr))
       end
     end
 
@@ -106,15 +106,15 @@ end
 
 @doc (@doc read_meta!)
 function read_meta(fmt::String, filestr::String;
-  mmap    ::Bool      = true                      ,  # use Mmap.mmap? (unsafe)
+  memmap  ::Bool      = true                      ,  # use Mmap.mmap? (unsafe)
   msr     ::Bool      = false                     ,  # read as MultiStageResp?
   s       ::TimeSpec  = "0001-01-01T00:00:00"     ,  # Start
   t       ::TimeSpec  = "9999-12-31T12:59:59"     ,  # End or Length (s)
   units   ::Bool      = false                     ,  # fill in units of CoeffResp stages?
-  v       ::Int64     = KW.v                      ,  # verbosity level
+  v       ::Integer   = KW.v                      ,  # verbosity level
   )
 
   S = SeisData()
-  read_meta!(S, fmt, filestr, msr=msr, s=s, t=t, units=units, v=v)
+  read_meta!(S, fmt, filestr, memmap=memmap, msr=msr, s=s, t=t, units=units, v=v)
   return S
 end

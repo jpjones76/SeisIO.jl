@@ -16,8 +16,8 @@ function parsemseed!(S::SeisData, io::IO, nx_new::Int64, nx_add::Int64, strict::
   return S
 end
 
-function read_mseed_file!(S::SeisData, fname::String,  nx_new::Int64, nx_add::Int64, mmap::Bool, strict::Bool, v::Integer)
-  io  = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
+function read_mseed_file!(S::SeisData, fname::String,  nx_new::Int64, nx_add::Int64, memmap::Bool, strict::Bool, v::Integer)
+  io  = memmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   fastskip(io, 6)
   c = fastread(io)
   if c in (0x44, 0x52, 0x4d, 0x51)

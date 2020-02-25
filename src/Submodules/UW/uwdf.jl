@@ -1,13 +1,13 @@
 function uwdf!( S::GphysData,
                 fname::String,
                 full::Bool,
-                mmap::Bool,
+                memmap::Bool,
                 strict::Bool,
                 v::Integer)
   D = Dict{String,Any}()
 
   # Open data file
-  fid = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
+  fid = memmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
 
   # Process master header
   N             = Int64(bswap(fastread(fid, Int16)))
@@ -244,8 +244,8 @@ function uwdf!( S::GphysData,
   return nothing
 end
 
-function uwdf(fname::String, full::Bool, mmap::Bool, strict::Bool, v::Integer)
+function uwdf(fname::String, full::Bool, memmap::Bool, strict::Bool, v::Integer)
   S = SeisData()
-  uwdf!(S, fname, full, mmap, strict, v)
+  uwdf!(S, fname, full, memmap, strict, v)
   return S
 end

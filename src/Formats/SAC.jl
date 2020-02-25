@@ -197,8 +197,8 @@ function read_sac_stream(f::IO, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Ar
   return C
 end
 
-function read_sac_file!(S::SeisData, fname::String, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Array{UInt8,1}, full::Bool, mmap::Bool, strict::Bool)
-  f = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
+function read_sac_file!(S::SeisData, fname::String, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Array{UInt8,1}, full::Bool, memmap::Bool, strict::Bool)
+  f = memmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   q = should_bswap(f)
   seekstart(f)
   C = read_sac_stream(f, fv, iv, cv, full, q)
@@ -452,8 +452,8 @@ If an ID in the pz file matches channel `i` at times in `S.t[i]`:
 * Information from the pz file is merged into :misc if the corresponding keys
 aren't in use.
 """ read_sacpz!
-function read_sacpz!(S::GphysData, file::String; mmap::Bool=false)
-  io = mmap ? IOBuffer(Mmap.mmap(file)) : open(file, "r")
+function read_sacpz!(S::GphysData, file::String; memmap::Bool=false)
+  io = memmap ? IOBuffer(Mmap.mmap(file)) : open(file, "r")
   read_state = 0x00
   D = Dict{String, Any}()
   kv = Array{String, 1}(undef, 2)
@@ -517,9 +517,9 @@ function read_sacpz!(S::GphysData, file::String; mmap::Bool=false)
 end
 
 @doc (@doc read_sacpz)
-function read_sacpz(file::String; mmap::Bool=false)
+function read_sacpz(file::String; memmap::Bool=false)
   S = SeisData()
-  read_sacpz!(S, file, mmap=mmap)
+  read_sacpz!(S, file, memmap=memmap)
   return S
 end
 

@@ -64,7 +64,7 @@ Supported Keywords
          | sac      |         |           |
          | segy     |         |           |
          | uw       |         |           |
-  mmap   | *        | Bool    | false     | use mmap to buffer file?
+  memmap | *        | Bool    | false     | use mmap to buffer file?
   nx_add | mseed    | Int64   | 360000    | minimum size increase of **:x**
   nx_new | mseed    | Int64   | 86400000  | length of **:x** for new channels
   jst    | win32    | Bool    | true      | are sample times JST (UTC+9)?

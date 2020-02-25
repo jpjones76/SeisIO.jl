@@ -408,8 +408,8 @@ function read_geocsv_tspair!(S::GphysData, io::IO)
   return nothing
 end
 
-function read_geocsv_file!(S::GphysData, fname::String, tspair::Bool, mmap::Bool)
-  io = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
+function read_geocsv_file!(S::GphysData, fname::String, tspair::Bool, memmap::Bool)
+  io = memmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   if tspair == true
     read_geocsv_tspair!(S, io)
   else

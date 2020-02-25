@@ -36,7 +36,7 @@ Supported Keywords
   :delim: |
   :widths: 1, 1, 1, 1, 4
 
-  mmap  | all      | Bool      | false     | use Mmap.mmap to buffer file?
+  memmap| all      | Bool      | false     | use Mmap.mmap to buffer file?
   msr   | sxml     | Bool      | false     | read full MultiStageResp?
   s     | all      | TimeSpec  |           | Start time
   t     | all      | TimeSpec  |           | Termination (end) time

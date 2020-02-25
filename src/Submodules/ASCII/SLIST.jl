@@ -1,6 +1,6 @@
-function read_slist!(S::GphysData, fname::String, lennartz::Bool, mmap::Bool)
+function read_slist!(S::GphysData, fname::String, lennartz::Bool, memmap::Bool)
   # file read
-  io = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
+  io = memmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   hdr = readline(io)
   mark(io)
   nx = countlines(io)

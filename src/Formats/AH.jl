@@ -98,8 +98,8 @@ mk_ah_chan(id::String, loc::GeoLoc, fs::Float64, resp::PZResp, ahfile::String, m
               x)
 
 # AH-2
-function read_ah2!(S::GphysData, ahfile::String, full::Bool, mmap::Bool, strict::Bool, v::Integer)
-  io = mmap ? IOBuffer(Mmap.mmap(ahfile)) : open(ahfile, "r")
+function read_ah2!(S::GphysData, ahfile::String, full::Bool, memmap::Bool, strict::Bool, v::Integer)
+  io = memmap ? IOBuffer(Mmap.mmap(ahfile)) : open(ahfile, "r")
   str = getfield(BUF, :sac_cv)
   ti = BUF.date_buf
   resize!(ti, 5)
@@ -264,9 +264,9 @@ function read_ah2!(S::GphysData, ahfile::String, full::Bool, mmap::Bool, strict:
   return S
 end
 
-function read_ah1!(S::GphysData, ahfile::String, full::Bool, mmap::Bool, strict::Bool, v::Integer)
+function read_ah1!(S::GphysData, ahfile::String, full::Bool, memmap::Bool, strict::Bool, v::Integer)
 
-  io = mmap ? IOBuffer(Mmap.mmap(ahfile)) : open(ahfile, "r")
+  io = memmap ? IOBuffer(Mmap.mmap(ahfile)) : open(ahfile, "r")
   str = getfield(BUF, :sac_cv)
   ti  = getfield(BUF, :date_buf)
   pz_buf = getfield(BUF, :x)

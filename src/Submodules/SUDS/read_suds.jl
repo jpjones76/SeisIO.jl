@@ -1,10 +1,10 @@
 function read_suds(fname::String;
   full::Bool=false,
-  mmap::Bool=false,
+  memmap::Bool=false,
   v::Integer=KW.v,
   )
 
-  sid = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
+  sid = memmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   S = SeisData()
 
   # Tracking channels and indices
@@ -196,17 +196,17 @@ read_suds!(
   S::GphysData,
   fname::String;
   full::Bool=false,
-  mmap::Bool=false,
+  memmap::Bool=false,
   v::Integer=KW.v,
-  ) = (U = read_suds(fname, full=full, mmap=mmap, v=v); append!(S,U))
+  ) = (U = read_suds(fname, full=full, memmap=memmap, v=v); append!(S,U))
 
 function readsudsevt(fname::String;
   full::Bool=false,
-  mmap::Bool=false,
+  memmap::Bool=false,
   v::Integer=KW.v,
   )
 
-  TD = read_suds(fname, full=full, mmap=mmap, v=v)
+  TD = read_suds(fname, full=full, memmap=memmap, v=v)
   src_auth = get(auth, Int32(SB.H.auth), "")
   m = SUDS.SB.H.shorts[6]
   mag_scale = try
