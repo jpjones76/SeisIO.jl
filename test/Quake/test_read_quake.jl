@@ -23,6 +23,6 @@ Ev2 = read_quake("suds", suds_file)
 @test Ev1 == Ev2
 
 printstyled("    UW\n", color=:light_green)
-Ev1 = readuwevt(uw_file)
-Ev2 = read_quake("uw", uw_file)
+Ev1 = readuwevt(uw_file, full=true)
+Ev2 = read_quake("uw", uw_file, full=true)
 @test Ev1 == Ev2
