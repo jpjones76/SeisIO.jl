@@ -373,7 +373,7 @@ function read_geocsv_tspair!(S::GphysData, io::IO)
       if c == 0x2e
         # only happens at a decimal in a time block
         ccall(:strptime, Cstring, (Cstring, Cstring, Ref{TmStruct}), t_ptr, "%FT%T", tm)
-        t = ccall(:timegm, Int64, (Ref{TmStruct},), tm)* 1000000
+        t = (Sys.iswindows() ? ccall(:_mkgmtime, Int64, (Ref{TmStruct},), tm) : ccall(:timegm, Int64, (Ref{TmStruct},), tm))* 1000000
         read_state = 0x03
         continue
 
