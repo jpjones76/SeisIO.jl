@@ -25,6 +25,7 @@ function read_mseed_file!(S::SeisData, fname::String,  nx_new::Int64, nx_add::In
     parsemseed!(S, io, nx_new, nx_add, strict, v)
     close(io)
   else
+    close(io)
     error("Invalid file type!")
   end
   return nothing
