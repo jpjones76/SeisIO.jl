@@ -12,26 +12,6 @@ function get_sep(v_buf::Array{UInt8,1}, vi::Int8)
   return nothing
 end
 
-function get_tstr_len(t_buf::Array{UInt8,1})
-  ip = 0
-  for i = 1:length(t_buf)
-    if t_buf[i] == 0x2e
-      ip = i
-      break
-    end
-  end
-  (ip == 0) && (return 0)
-  ix = ip
-  for i = ip+1:ip+3
-    if is_u8_digit(t_buf[i])
-      ix += 1
-    else
-      return ix
-    end
-  end
-  return ix
-end
-
 function geocsv_mkid(v_buf::Array{UInt8,1}, vi::Int8)
   # SID
   i = 0x00
@@ -154,9 +134,7 @@ function read_geocsv_slist!(S::GphysData, io::IO)
     c = fastread(io)
 
     # new line ----------------------------------
-    if c == 0x0a
-      continue
-    end
+    (c == 0x0a) && continue
 
     # parse header ------------------------------
     if c == 0x23
