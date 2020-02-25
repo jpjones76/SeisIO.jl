@@ -16,46 +16,46 @@ function win32_cfile!(  fname::String,
                         S::SeisData,
                         fc::Array{Float32,1},
                         hc::Array{Float32,1},
-                        nx_new::Int64
+                        nx_new::Int64,
+                        mmap::Bool
                       )
 
-  open(fname, "r") do io
-    while !fasteof(io)
-      chan_line = fast_readline(io)
-      occursin(r"^\s*(?:#|$)", chan_line) && continue
+  io = mmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
+  while !fasteof(io)
+    chan_line = fast_readline(io)
+    occursin(r"^\s*(?:#|$)", chan_line) && continue
 
-      # chan_info fills S
-      chan_info = String.(split(chan_line))
+    # chan_info fills S
+    chan_info = String.(split(chan_line))
 
-      # Assign identifying info to placeholder arrays
-      hex2bytes!(hex_bytes, chan_info[1])
-      push!(hexIDs, reinterpret(UInt16, hex_bytes)[1])
-      push!(fc, one(Float32)/parse(Float32, chan_info[10]))
-      push!(hc, parse(Float32, chan_info[11]))
+    # Assign identifying info to placeholder arrays
+    hex2bytes!(hex_bytes, chan_info[1])
+    push!(hexIDs, reinterpret(UInt16, hex_bytes)[1])
+    push!(fc, one(Float32)/parse(Float32, chan_info[10]))
+    push!(hc, parse(Float32, chan_info[11]))
 
-      # Create new channel in S from chan_info
-      loc           = GeoLoc()
-      loc.lat       = parse(Float64, chan_info[14])
-      loc.lon       = parse(Float64, chan_info[15])
-      loc.el        = parse(Float64, chan_info[16])
+    # Create new channel in S from chan_info
+    loc           = GeoLoc()
+    loc.lat       = parse(Float64, chan_info[14])
+    loc.lon       = parse(Float64, chan_info[15])
+    loc.el        = parse(Float64, chan_info[16])
 
-      C = SeisChannel()
-      setfield!(C, :id, string(chan_info[4], ".", chan_info[5]))
-      if length(chan_info) > 18
-        setfield!(C, :name, chan_info[19])
-      end
-      setfield!(C, :units, chan_info[9])
-      setfield!(C, :gain,  Float64(parse(Float32, chan_info[13]) /
-                            (parse(Float32, chan_info[8]) *
-                              10.0f0^(parse(Float32, chan_info[12]) / 20.0f0))))
-      setfield!(C, :loc, loc)
-      setfield!(C, :x, Array{Float32,1}(undef, nx_new))
-      D = getfield(C, :misc)
-      D["lineDelay"]  = parse(Float32, chan_info[3]) / 1000.0f0
-      D["pCorr"]      = parse(Float32, chan_info[17])
-      D["sCorr"]      = parse(Float32, chan_info[18])
-      push!(S, C)
+    C = SeisChannel()
+    setfield!(C, :id, string(chan_info[4], ".", chan_info[5]))
+    if length(chan_info) > 18
+      setfield!(C, :name, chan_info[19])
     end
+    setfield!(C, :units, chan_info[9])
+    setfield!(C, :gain,  Float64(parse(Float32, chan_info[13]) /
+                          (parse(Float32, chan_info[8]) *
+                            10.0f0^(parse(Float32, chan_info[12]) / 20.0f0))))
+    setfield!(C, :loc, loc)
+    setfield!(C, :x, Array{Float32,1}(undef, nx_new))
+    D = getfield(C, :misc)
+    D["lineDelay"]  = parse(Float32, chan_info[3]) / 1000.0f0
+    D["pCorr"]      = parse(Float32, chan_info[17])
+    D["sCorr"]      = parse(Float32, chan_info[18])
+    push!(S, C)
   end
   return nothing
 end
@@ -91,12 +91,12 @@ function readwin32( dfilestr::String,
   fc        = Array{Float32,1}(undef,0)
   hc        = Array{Float32,1}(undef,0)
   if safe_isfile(cfilestr)
-    win32_cfile!(cfilestr, hex_bytes, hexIDs, S, fc, hc, nx_new)
+    win32_cfile!(cfilestr, hex_bytes, hexIDs, S, fc, hc, nx_new, mmap)
   else
     cfiles = ls(cfilestr)
     @inbounds for cfile in cfiles
       v > 1 && println("Reading channel file ", cfile)
-      win32_cfile!(cfile, hex_bytes, hexIDs, S, fc, hc, nx_new)
+      win32_cfile!(cfile, hex_bytes, hexIDs, S, fc, hc, nx_new, mmap)
     end
   end
   L = lastindex(hexIDs)
