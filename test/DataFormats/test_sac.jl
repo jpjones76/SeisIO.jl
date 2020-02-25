@@ -5,6 +5,9 @@ sac_pz_file = path*"/SampleFiles/SAC/test_sac.pz"
 sac_pz_wc   = path*"/SampleFiles/SAC/test_sac.*"
 uw_file     = path*"/SampleFiles/UW/00012502123W"
 sac_pat     = path*"/SampleFiles/SAC/*.sac"
+sac_pz_out1 = path*"/SampleFiles/SAC/local_sac_1.pz"
+sac_pz_out2 = path*"/SampleFiles/SAC/local_sac_2.pz"
+sac_pz_out3 = path*"/SampleFiles/SAC/local_sac_3.pz"
 
 printstyled("  SAC\n", color=:light_green)
 printstyled("    read\n", color=:light_green)
@@ -68,8 +71,8 @@ rm("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")
 printstyled("    SACPZ\n", color=:light_green)
 S = read_meta("sacpz", sac_pz_wc)
 S = read_meta("sacpz", sac_pz_file)
-writesacpz(S, "local_sac.pz")
-T = read_meta("sacpz", "local_sac.pz")
+writesacpz(S, sac_pz_out1)
+T = read_meta("sacpz", sac_pz_out1)
 for f in (:n, :id, :name, :loc, :fs, :gain, :units)
   @test isequal(getfield(S, f), getfield(T, f))
 end
@@ -83,8 +86,8 @@ for i = 1:U.n
   U.resp[i] = MultiStageResp(3)
   U.resp[i].stage[1] = S.resp[i]
 end
-writesacpz(U, "local_sac.pz")
-T = read_meta("sacpz", "local_sac.pz")
+writesacpz(U, sac_pz_out2)
+T = read_meta("sacpz", sac_pz_out2)
 for f in (:n, :id, :name, :loc, :fs, :gain, :units)
   @test isequal(getfield(S, f), getfield(T, f))
 end
@@ -94,10 +97,11 @@ for f in fieldnames(typeof(S.resp[1]))
   end
 end
 U[1] = SeisChannel(id = "UW.HOOD..ENE")
-writesacpz(U, "local_sac_2.pz")
-read_meta!(S, "sacpz", "local_sac_2.pz")
+writesacpz(U, sac_pz_out3)
+read_meta!(S, "sacpz", sac_pz_out3)
 for f in (:n, :id, :name, :loc, :fs, :gain, :units)
   @test isequal(getfield(S, f), getfield(T, f))
 end
-safe_rm("local_sac.pz")
-safe_rm("local_sac_2.pz")
+safe_rm(sac_pz_out1)
+safe_rm(sac_pz_out2)
+safe_rm(sac_pz_out3)
