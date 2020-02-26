@@ -9,8 +9,6 @@ function irisws(cha::String, d0::String, d1::String;
 
   # init
   parse_err = false
-  S = SeisData()
-  Ch = SeisChannel()
   parsable = false
   if fmt == "mseed"
     fmt = "miniseed"
@@ -22,9 +20,8 @@ function irisws(cha::String, d0::String, d1::String;
     c[3] = "--"
   end
   ID = join([c[1], c[2], strip(c[3],'-'), c[4]], '.')
-  setfield!(Ch, :id, ID)
 
-  # Build query URL
+  # Build query url
   url = "http://service.iris.edu/irisws/timeseries/1/query?" *
           build_stream_query(c,d0,d1) * "&scale=AUTO&output=" * fmt
   v > 0 && println(url)
@@ -34,34 +31,55 @@ function irisws(cha::String, d0::String, d1::String;
   (R, parsable) = get_http_req(url, req_info_str, to)
   if parsable
     if w
-      savereq(R, fmt, Ch.id, d0)
+      savereq(R, fmt, ID, d0)
     end
+
     if fmt == "sacbl"
       Ch = read_sac_stream(IOBuffer(R), BUF.sac_fv, BUF.sac_iv, BUF.sac_cv, false, false)
-      if isempty(Ch.name)
-        Ch.name = deepcopy(Ch.id)
-      end
     elseif fmt == "miniseed"
+      S = SeisData()
       parsemseed!(S, IOBuffer(R), KW.nx_add, KW.nx_add, true, v)
       Ch = S[1]
-      if isempty(Ch.loc)
-        Ch.loc = GeoLoc()
-      end
     elseif fmt == "geocsv"
+      S = SeisData()
       read_geocsv_tspair!(S, IOBuffer(R))
       Ch = S[1]
     else
-      # other parsers not yet written
-      @warn(string("Unsupported data format", req_info_str, "\nFORMAT = ", fmt,
-            "\n\nUnparsed request data in .misc[\"data\"]"))
-      Ch.misc["data"] = R
+      # other parsers not supported
+      parse_err = true
+      Ch = SeisChannel(id = string("XX.FMT..001"),
+                       misc = Dict{String,Any}(
+                         "url" => url,
+                         "raw" => read(IOBuffer(R))
+                       )
+                     )
+      note!(Ch, "unparseable format; raw bytes in :misc[\"raw\"]")
     end
+
   else
     parse_err = true
-    Ch.misc["data"] = String(R)
+    Ch = SeisChannel(id = string("XX.FAIL..001"),
+                     misc = Dict{String,Any}(
+                       "url" => url,
+                       "msg" => String(read(IOBuffer(R)))
+                       )
+                     )
+    note!(Ch, "request failed; response in :misc[\"msg\"]")
   end
-  Ch.src = url
+  setfield!(Ch, :src, url)
   note!(Ch, "+source ¦ " * url)
+
+  # fill :id and empty fields if no parse_err
+  if parse_err == false
+    setfield!(Ch, :id, ID)
+    if isempty(Ch.loc)
+      Ch.loc = GeoLoc()
+    end
+    if isempty(Ch.name)
+      Ch.name = deepcopy(ID)
+    end
+  end
+
   return parse_err, Ch
 end
 

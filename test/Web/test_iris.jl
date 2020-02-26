@@ -38,21 +38,32 @@ for i = 1:length(chans)
   end
 end
 
-# Test a bum data format
-printstyled("    bad data format\n", color=:light_green)
-sta_matrix = vcat(["UW" "LON" "" "BHZ"],["UW" "LON" "" "BHE"])
+# Test bad data formats
+printstyled("    bad requests and unparseable formats\n", color=:light_green)
+sta_matrix = vcat(["IU" "ANMO" "00" "BHZ"],["IU" "ANMO" "00" "BHE"])
 test_sta = deepcopy(sta_matrix)
+ts = "2005-01-01T00:00:00"
+te = "2005-01-02T00:00:00"
 redirect_stdout(out) do
-  T = get_data("IRIS", sta_matrix, s=-600, t=0, v=2, fmt="audio")
-  T = get_data("IRIS", sta_matrix, s=-600, t=0, v=2, fmt="ascii")
+  # this is an unparseable format
+  S = get_data("IRIS", sta_matrix, s=ts, t=te, v=2, fmt="audio")
+
+  # this is a bad request due to the wild card
+  get_data!(S, "IRIS", "IU.ANMO.*.*", s=ts, t=te, v=2, fmt="ascii")
+
+  @test S.n == 3
+
+  @test S.id[2] == "XX.FAIL..001"
+  @test any([occursin("request failed", n) for n in S.notes[2]])
+  @test haskey(S.misc[2], "msg")
+
+  @test S.id[1] == "XX.FMT..001"
+  @test any([occursin("unparseable format", n) for n in S.notes[1]])
+  @test haskey(S.misc[1], "raw")
 end
 
-# check that these aren't modified in-place by the request
+# check that these aren't modified in-place by the request (very old bug)
 @test sta_matrix == test_sta
-
-# Test a bad request
-printstyled("    bad request format\n", color=:light_green)
-T = get_data("IRIS", "DE.NENA.99.LUFTBALLOONS", src="IRIS", s=ts, t=te, fmt="mseed", v=0)
 
 printstyled("    complicated IRISWS request\n", color=:light_green)
 chans = ["UW.TDH..EHZ", "UW.VLL..EHZ", "CC.JRO..BHZ"] # HOOD is either offline or not on IRISws right now
@@ -61,7 +72,7 @@ en = -86100.0
 (d0,d1) = parsetimewin(st,en)
 S = get_data("IRIS", chans, s=d0, t=d1, y=true)
 if isempty(S)
-  @warn(string("No data for channels ", join(chans, ", "), "; test skipped."))  
+  @warn(string("No data for channels ", join(chans, ", "), "; test skipped."))
 else
   L = [length(S.x[i])/S.fs[i] for i = 1:S.n]
   t = [S.t[i][1,2] for i = 1:S.n]
