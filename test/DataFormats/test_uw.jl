@@ -45,7 +45,7 @@ W = readuwevt(uwf1)
 
 S = breaking_seis()
 n = S.n
-S += convert(SeisData, W.data)
+append!(S, convert(SeisData, W.data))
 @test S.n == n + W.data.n
 
 δt = 1.0e-6*(rem(W.hdr.ot.instant.periods.value*1000 - SeisIO.dtconst, 60000000))
