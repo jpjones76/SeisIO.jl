@@ -42,7 +42,7 @@ function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
                   src ::String            = KW.src,         # Source server
                   t   ::TimeSpec          = (-600),         # End or Length (s)
                   to  ::Int               = KW.to,          # Read timeout (s)
-                  v   ::Int64             = KW.v,           # Verbosity
+                  v   ::Integer           = KW.v,           # Verbosity
                   xf  ::String            = "FDSNsta.xml"   # XML filename
                  )
 
@@ -126,7 +126,7 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
   src       ::String            = KW.src,         # Source server
   t         ::TimeSpec          = (-600),         # End or Length (s)
   to        ::Int64             = KW.to,          # Read timeout (s)
-  v         ::Int64             = KW.v,           # Verbosity
+  v         ::Integer           = KW.v,           # Verbosity
   w         ::Bool              = KW.w,           # Write to disk?
   xf        ::String            = "FDSNsta.xml",  # XML filename
   y         ::Bool              = KW.y            # Sync?
@@ -138,29 +138,37 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
   d0, d1 = parsetimewin(s, t)
 
   # (1) Time-space query for station info
-  if si
-    S = FDSNsta(chans,
-                msr   = msr,
-                rad   = rad,
-                reg   = reg,
-                s     = d0,
-                src   = src,
-                t     = d1,
-                to    = to,
-                v     = v,
-                xf    = xf
-                )
-  end
+  S = (if si
+    FDSNsta(chans,
+            msr   = msr,
+            rad   = rad,
+            reg   = reg,
+            s     = d0,
+            src   = src,
+            t     = d1,
+            to    = to,
+            v     = v,
+            xf    = xf
+            )
+  else
+    SeisData()
+  end)
 
   # (1a) Can we autoname the file? True iff S.n == 1
   (S.n == 1) || (autoname = false)
 
   # (2) Build ID strings for data query
-  ID_str = Array{String,1}(undef,S.n)
-  for i = 1:S.n
-    ID_mat = split(S.id[i], ".")
-    ID_mat[isempty.(ID_mat)] .= wc
-    ID_str[i] = join(ID_mat, " ")
+  ID_str = Array{String,1}(undef, S.n)
+  if S.n > 0
+    for i in 1:S.n
+      ID_mat = split(S.id[i], ".")
+      ID_mat[isempty.(ID_mat)] .= wc
+      ID_str[i] = join(ID_mat, " ")
+    end
+  else
+    C = fdsn_chp(chans)[:,1:4]
+    C[isempty.(C)] .= "*"
+    ID_str = [join(C[i, :], " ") for i in 1:size(C,1)]
   end
   if v > 1
     printstyled("data query strings:\n", color=:light_green)
@@ -244,6 +252,7 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
       (R, parsable) = get_http_post(URL, QUERY, to)
       io = IOBuffer(R)
     end
+    (v > 1) && println("parsable = ", parsable)
 
     # Parse data (if we can)
     if parsable
@@ -256,19 +265,21 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
       else
         parse_err = true
         n_badreq += 1
-        S += SeisChannel(id = string("...YYY", n_badreq),
-                         misc = Dict{String,Any}( "url" => URL,
-                                                  "body" => QUERY,
-                                                  "data" => read(io) ) )
+        push!(S, SeisChannel(id = string("XX.FMT..", lpad(n_badreq, 3, "0")),
+                             misc = Dict{String,Any}( "url" => URL,
+                                                      "body" => QUERY,
+                                                      "raw" => read(io))))
+        note!(S, S.n, "unparseable format; raw bytes in :misc[\"raw\"]")
       end
     else
       # Should only happen with an error message (parsable to String) in io
       parse_err = true
       n_badreq += 1
-      S += SeisChannel(id = string("XX...", n_badreq),
-                       misc = Dict{String,Any}( "url" => URL,
-                                                "body" => QUERY,
-                                                "data" => readlines(io) ) )
+      push!(S, SeisChannel(id = string("XX.FAIL..", lpad(n_badreq, 3, "0")),
+                           misc = Dict{String,Any}("url" => URL,
+                                                   "body" => QUERY,
+                                                   "msg" => String(read(io)))))
+      note!(S, S.n, "request failed; response in :misc[\"msg\"]")
     end
     close(io)
     ts += ti
@@ -288,6 +299,7 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
 
   append!(U,S)
   # Done!
-  v > 0 && @info(tnote("Done FDSNget query."))
+  v > 0 && @info(string(timestamp(), ": done FDSNget query."))
+  v > 1 && @info(string("n_badreq = ", n_badreq))
   return parse_err
 end

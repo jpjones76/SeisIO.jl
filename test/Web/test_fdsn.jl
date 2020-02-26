@@ -9,6 +9,18 @@ printstyled("  FDSN web requests\n", color=:light_green)
 
 safe_isfile(h5file) && safe_rm(h5file)
 
+printstyled("    fdsn_chp\n", color=:light_green)
+
+# fdsn_chp
+c1 = "CC.VALT..,PB.B001..BS?,PB.B001..E??,XX.YYY.00.BHZ"
+c2 = ["CC.VALT..", "PB.B001..BS?", "PB.B001..E??", "XX.YYY.00.BHZ"]
+c3 = ["CC" "VALT" "" ""; "PB" "B001" "" "BS?"; "PB" "B001" "" "E??"; "XX" "YYY" "00" "BHZ"]
+try
+  @test (minreq!(SeisIO.fdsn_chp(c1)))[:,1:4] == SeisIO.fdsn_chp(c2)[:,1:4] == minreq!(SeisIO.fdsn_chp(c3))
+catch err
+  @warn("Inconsistent reslts from fdsn_chp!")
+end
+
 # FDSNsta
 printstyled("    FDSNsta\n", color=:light_green)
 S = FDSNsta("CC.VALT..,PB.B001..BS?,PB.B001..E??")
@@ -214,11 +226,26 @@ else
   safe_rm(h5file)
 end
 
-# A bad data format should produce a warning
-printstyled("      request an unparseable format (sac.zip)\n", color=:light_green)
-
+# A bad data format should produce warnings and "error" channels
+printstyled("      bad requests and unparseable formats\n", color=:light_green)
 redirect_stdout(out) do
-  check_get_data!(S, "FDSN", "UW.LON.."; src="IRIS", s=-600, t=0, v=3, fmt="sac.zip")
+  S = SeisData()
+  bad_id = "DE.NENA.99.LUFT"
+
+  # this should return a request error channel with ID = XX.FAIL..001
+  get_data!(S, "FDSN", bad_id, v=3, si=false, fmt="sac.zip")
+
+  # this should return a format error channel with ID = XX.FMT..001
+  get_data!(S, "FDSN", "UW.LON.."; src="IRIS", s=-600, t=0, v=3, fmt="sac.zip")
+
+  # Check that the info appears where it needs to
+  @test S.id[1] == "XX.FAIL..001"
+  @test any([occursin("request failed", n) for n in S.notes[1]])
+  @test haskey(S.misc[1], "msg")
+
+  @test S.id[S.n] == "XX.FMT..001"
+  @test any([occursin("unparseable format", n) for n in S.notes[S.n]])
+  @test haskey(S.misc[S.n], "raw")
 end
 
 # Potsdam test
