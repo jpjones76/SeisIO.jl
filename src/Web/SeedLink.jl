@@ -32,7 +32,7 @@ function sync_add(r::Task)
     spawns = get(task_local_storage(), :SPAWNS, ())
     if spawns != ()
         push!(spawns[1], r)
-        tls_r = get_task_tls(r)
+        tls_r = Base.get_task_tls(r)
         tls_r[:SUPPRESS_EXCEPTION_PRINTING] = true
     end
     r
