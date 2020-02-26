@@ -44,13 +44,7 @@ end
 # Cleanup
 include("cleanup.jl")
 (keep_samples == true) || include("rm_samples.jl")
-if !keep_log
-  try
-    rm("runtests.log")
-  catch err
-    @warn(string("can't remove runtests.log; threw err", err))
-  end
-end
+keep_log || safe_rm("runtests.log")
 
 # Announce tests end
 test_end = Dates.now()
@@ -60,5 +54,9 @@ printstyled(string(test_end, ": tests end, elapsed time (mm:ss.μμμ) = ",
                    @sprintf("%06.3f", rem(δt, 60)), "\n"),
             color=:light_green,
             bold=true)
-printstyled("To run some data acquisition examples, execute: include(\"",
-            path, "/examples.jl\").\n", color=:cyan, bold=true)
+tut_file = realpath(path * "/../tutorial/install.jl")
+ex_file = realpath(path * "/examples.jl")
+printstyled("To run the interactive tutorial in a browser, execute: include(\"",
+            tut_file, "\")\n", color=:cyan, bold=true)
+printstyled("To run some data acquisition examples from the Julia prompt, ",
+            "execute: include(\"", ex_file, "\")\n", color=:cyan)
