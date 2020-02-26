@@ -78,7 +78,7 @@ function IRISget(C::Array{String,1}, d0::String, d1::String;
   v > 0 && println("IRISWS data request begins...")
   for k = 1:K
     (p, Ch) = irisws(C[k], d0, d1, fmt = fmt, opts = opts, to = to, v = v, w = w)
-    S += Ch
+    push!(S, Ch)
     parse_err = max(parse_err, p)
   end
   return parse_err, S
