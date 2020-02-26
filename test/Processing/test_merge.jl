@@ -64,7 +64,7 @@ end
 printstyled(stdout,"    xtmerge!\n", color=:light_green)
 δ = 20000
 x = randn(12)
-t = sort(rand(typemin(Int64):δ:typemax(Int64), 12))
+t = sort(rand(typemin(Int64)+2δ:2δ:typemax(Int64)-2δ, 12))
 while length(unique(t)) < 12
   t = sort(rand(Int64, 12))
 end

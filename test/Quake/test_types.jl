@@ -21,18 +21,19 @@ end
 
 printstyled("  show\n", color=:light_green)
 redirect_stdout(out) do
-  show(SeisHdr())
-  show(SeisSrc())
-  show(SeisEvent())
-  show(EventTraceData())
-  show(EventChannel())
-  show(randSeisHdr())
-  show(randSeisEvent())
-  summary(randSeisEvent())
-  summary(randSeisHdr())
-  show(EQMag())
-  show(EQLoc())
-  show(SourceTime())
+  for i = 1:10
+    for T in (SeisHdr, SeisSrc, SeisEvent, EventTraceData, EventChannel, EQMag, EQLoc, SourceTime)
+      repr(T(), context=:compact=>true)
+      repr(T(), context=:compact=>false)
+      show(T())
+    end
+    summary(randSeisEvent())
+    summary(randSeisHdr())
+    summary(randSeisSrc())
+    show(randSeisEvent())
+    show(randSeisHdr())
+    show(randSeisSrc())
+  end
 end
 
 # EQMag
