@@ -1,44 +1,68 @@
-using SeisIO, SeisIO.Quake
+using SeisIO, SeisIO.Quake, SeisIO.SeisHDF
 import Printf
-# US FDSNget example: 5 stations, 2 networks, all channels, last 600 seconds
-println(stdout, "Beginning real \"use case\" examples...\n\n",
-  "Note: ALL data from these examples can be written to file; \n",
-  "type `wseis(object_name)` to save to native SeisIO format, \n",
-  "type `writesac(object_name)` to write to SAC files,\n",
-  "or rerun the data request with added keyword \"w=true\" to\n",
-  "write mseed.")
 
-println(stdout, "FDSN: see structure seis_fdsn")
+# US FDSN example: 5 stations, 2 networks, all channels, last 600 seconds
+println(stdout, "Some real data acquisition examples...\n\n")
+
+printstyled(stdout, "FDSN get_data\n", color=:green, bold=true)
 CHA = "CC.PALM, UW.HOOD, CC.TIMB, CC.HIYU, UW.TDH"
 s = -600
 t = u2d(time())
-println(stdout, "Command: seis_fdsn = get_data(\"FDSN\", \"", CHA, "\", src=\"IRIS\", s=", s, ", t=", t)
-seis_fdsn = get_data("FDSN", CHA, src="IRIS", s=s, t=t)
+printstyled(stdout, "Command: ", color=:green)
+println(stdout, "S_fdsn = get_data(\"FDSN\", \"", CHA, "\", src=\"IRIS\", s=", s, ", t=", t, ")")
+S_fdsn = get_data("FDSN", CHA, src="IRIS", s=s, t=t)
+printstyled(stdout, "Results: ", color=:green)
+println(stdout, "S_fdsn")
+show(S_fdsn)
 
-# IRISWS example: 6 channels, 30 minutes, synchronized, saved to SAC format"
-println(stdout, "IRISWS timeseries: see structure seis_iris")
-STA = ["CC.TIMB..EHE", "CC.TIMB..EHN", "CC.TIMB..EHZ", "UW.HOOD..HHE", "UW.HOOD..HHN", "UW.HOOD..HHZ"]
+# IRIS example: 6 channels, 30 minutes
+printstyled(stdout, "\n\nIRIS get_data\n", color=:green, bold=true)
+STA = ["CC.TIMB..BHE", "CC.TIMB..BHN", "CC.TIMB..BHZ", "UW.HOOD..HHE", "UW.HOOD..HHN", "UW.HOOD..HHZ"]
 st = -3600
 en = -1800
-println(stdout, "Command: seis_iris = get_data(\"IRIS\", ", STA, ", s=", st, ", t=", en)
-seis_iris = get_data("IRIS", STA, s=st, t=en)
+printstyled(stdout, "Command: ", color=:green)
+println(stdout, "S_iris = get_data(\"IRIS\", ", STA, ", s=", st, ", t=", en, ")")
+S_iris = get_data("IRIS", STA, s=st, t=en)
+printstyled(stdout, "Results: ", color=:green)
+println(stdout, "S_iris")
+show(S_iris)
 
 # The Tohoku-Oki great earthquake, from IRIS FDSN, recorded by boreholes in WA (USA)
-println(stdout, "FDSN event example: see structure seis_evt")
-println(stdout, "seis_evt = FDSNevt(\"201103110547\", \"PB.B004..EH?,PB.B004..BS?,PB.B001..BS?,PB.B001..EH?\")")
-seis_evt = FDSNevt("201103110547", "PB.B004..EH?,PB.B004..BS?,PB.B001..BS?,PB.B001..EH?")
-show(seis_evt)
+printstyled(stdout, "\n\nFDSNevt\n", color=:green, bold=true)
+printstyled(stdout, "Command: ", color=:green)
+println(stdout, "S_evt = FDSNevt(\"201103110547\", \"PB.B004..EH?,PB.B004..BS?,PB.B001..BS?,PB.B001..EH?\")")
+S_evt = FDSNevt("201103110547", "PB.B004..EH?,PB.B004..BS?,PB.B001..BS?,PB.B001..EH?")
+printstyled(stdout, "Results: ", color=:green)
+println(stdout, "S_evt")
+show(S_evt)
 
-# IRIS SeedLink session in TIME mode
-println(stdout, "SeedLink example (part 1): see structure seis_sl")
+# SeisComp3 SeedLink session, IRIS server, TIME mode
+printstyled(stdout, "\n\nSeedLink\n", color=:green, bold=true)
+
 sta = "UW.GRUT,UW.H1K,UW.MDW"
 s1 = -120
 t1 = 120
-println(stdout, "seis_sl = seedlink(\"", sta, "\", mode=\"TIME\", s=", s1, ", t=", t1, ")")
-seis_sl = seedlink(sta, mode="TIME", s=s1, t=t1)
+printstyled(stdout, "Commands: ", color=:green)
+println(stdout, "S_sl = seedlink(\"", sta, "\", mode=\"TIME\", s=", s1, ", t=", t1, ")")
+S_sl = seedlink(sta, mode="TIME", s=s1, t=t1)
 
-# IRIS SeedLink session in DATA mode, to same structure
-println(stdout, "SeedLink example (part 2): adds to structure seis_sl")
-println(stdout, "SeedLink!(seis_sl, \"SampleFiles/SL_long_test.conf\", mode=\"DATA\")")
-seedlink!(seis_sl, "SampleFiles/SL_long_test.conf", mode="DATA")
-println(stdout, "When finished, close connections with command \"for conn in seis_sl.c; close(conn); end\"")
+# DATA mode, same structure
+println(stdout, "          seedlink!(S_sl, \"SampleFiles/SL_long_test.conf\", mode=\"DATA\")")
+seedlink!(S_sl, "SampleFiles/SL_long_test.conf", mode="DATA")
+println(stdout, "          sleep(30)")
+sleep(30)
+println(stdout, "          for conn in S_sl.c; close(conn); end")
+for conn in S_sl.c; close(conn); end
+
+printstyled(stdout, "Results: ", color=:green)
+println(stdout, "S_sl")
+show(S_sl)
+
+printstyled(stdout, "\n\n\nNote: ", color=:white, bold=true)
+println(stdout, "ALL data from these examples can be written to file.")
+printstyled(stdout, "wseis(\"fname.seis\", S)", color=7)
+println(stdout, "       write S to low-level SeisIO native format in file fname.seis")
+printstyled(stdout, "writesac(S)", color=7)
+println(stdout, "                  write S to SAC files with auto-generated names")
+printstyled(stdout, "write_hdf5(\"fname.h5\", S)", color=7)
+println(stdout, "    write S to ASDF (HDF5) file \"fname.h5\"")
