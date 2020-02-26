@@ -13,7 +13,20 @@ Designed for speed, efficiency, and ease of use. Includes web clients, readers f
 * Web clients: SeedLink, FDSN (dataselect, event, station), IRIS (TauP, timeseries)
 * File formats: ASDF (r/w), Bottles, GeoCSV (slist, tspair), QuakeML (r/w), SAC (r/w), SEED (dataless, mini-SEED, resp), SEG Y (rev 0, rev 1, PASSCAL), SLIST, SUDS, StationXML (r/w), Win32, UW
 
+## Getting Started
+Start the tutorials in your browser from the Julia prompt with
+
+`cd(dirname(pathof(SeisIO))); include("../tutorial/install.jl")`
+
+To run SeisIO package tests and download sample data, execute
+
+`using Pkg, SeisIO; Pkg.test("SeisIO")`
+
+Sample data downloaded for the tests can be found thereafter at
+
+`cd(dirname(pathof(SeisIO))); sfdir = realpath("../test/SampleFiles/")`
+
 ## Publications | [Changelog](docs/CHANGELOG.md) | [Issues](docs/ISSUES.md)
-Jones, J.P.,  Okubo, K., Clements. T., \& Denolle, M. (2019). SeisIO: a fast, efficient geophysical data architecture for the Julia language, *Accepted by Seimol. Res. Lett.*
+Jones, J.P.,  Okubo, K., Clements. T., \& Denolle, M. (2020). SeisIO: a fast, efficient geophysical data architecture for the Julia language, *Accepted by Seimol. Res. Lett.*
 
 This work has been partially supported by a grant from the Packard Foundation.
