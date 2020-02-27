@@ -30,11 +30,70 @@ function read_data_seisio!(S::SeisData, filestr::String, memmap::Bool, v::Intege
   return nothing
 end
 
+# ## Supported File Formats
+# | Format                    | String          |
+# | :---                      | :---            |
+# | AH-1                      | ah1             |
+# | AH-2                      | ah2             |
+# | Bottle                    | bottle          |
+# | GeoCSV, time-sample pair  | geocsv          |
+# | GeoCSV, sample list       | geocsv.slist    |
+# | Lennartz SLIST            | lennartz        |
+# | Mini-SEED                 | mseed           |
+# | PASSCAL SEG Y             | passcal         |
+# | PC-SUDS                   | suds            |
+# | SAC                       | sac             |
+# | SEG Y (rev 0 or rev 1)    | segy            |
+# | SEISIO                    | seisio          |
+# | SLIST (ASCII sample list) | slist           |
+# | UW                        | uw              |
+# | Win32                     | win32           |
+#
+# ### Keywords
+# |KW      | Used By  | Type    | Default   | Meaning                         |
+# |:---    |:---      |:---     |:---       |:---                             |
+# |cf      | win32    | String  | ""        | win32 channel info filestr      |
+# |full    | ah1, ah2 | Bool    | false     | read full header into `:misc`?  |
+# |        | sac      |         |           |                                 |
+# |        | segy     |         |           |                                 |
+# |        | suds     |         |           |                                 |
+# |        | uw       |         |           |                                 |
+# |memmap  | *        | Bool    | false     | use mmap to read files? [^1]    |
+# |nx_add  | bottle   | Int64   | 360000    | min. increase when resizing `:x`|
+# |        | mseed    |         |           |                                 |
+# |        | win32    |         |           |                                 |
+# |nx_new  | bottle   | Int64   | 86400000  | `length(C.x)` for new channels  |
+# |        | mseed    |         |           |                                 |
+# |        | win32    |         |           |                                 |
+# |jst     | win32    | Bool    | true      | are sample times JST (UTC+9)?   |
+# |strict  | *        | Bool    | false     | strict channel matching?        |
+# |swap    | mseed    | Bool    | true      | byte swap?                      |
+# |        | passcal  |         |           |                                 |
+# |        | segy     |         |           |                                 |
+# |v       | *        | Int64   | 0         | verbosity                       |
+# |vl      | *        | Bool    | false     | verbose logging to :notes [^2]  |
+#
+# [^1]: potentially dangerous; Julia SIGSEGV handling is undocumented.
+# [^2]: verbose logging adds one line to `:notes` for each file read.
+#
+# See official SeisIO documentation for performance tips associated with KWs.
+#
+# ## SeisIO native format
+# `read_data("seisio", ...)` is a convenience wrapper that reads only the first SeisIO object that can be converted to a SeisData structure from each file. For more complicated read operations on SeisIO files, use `rseis`.
+#
+# ## Examples
+# 1. `S = read_data("uw", "99011116541W", full=true)`
+#     + Read UW-format data file `99011116541W`
+#     + Store full header information in `:misc`
+# 2. `read_data!(S, "sac", "MSH80*.SAC", "strict=true")`
+#     + Read SAC-format files matching string pattern `MSH80*.SAC`
+#     + Read into existing SeisData object `S`
+#     + Only continue a channel that matches on `:id`, `:fs`, and `:gain`
+# 3. `S = read_data("win32", "20140927*.cnt", cf="20140927*ch", nx_new=360000)`
+#     + Read win32-format data files with names matching pattern `2014092709*.cnt`
+#     + Use ASCII channel information filenames that match pattern `20140927*ch`
+#     + Assign new channels an initial size of `nx_new` samples
 @doc """
-    read_data
-
-Generic wrapper for reading file data.
-
     S = read_data(fmt, filestr [, keywords])
     read_data!(S, fmt, filestr [, keywords])
 
@@ -47,75 +106,16 @@ Read from files matching file pattern `filestr` into SeisData object `S`.
 Calls `guess(filestr)` to identify the file type based on the first file
 matching pattern `filestr`. Much slower than manually specifying file type.
 
-## Supported File Formats
-| Format                    | String          |
-| :---                      | :---            |
-| AH-1                      | ah1             |
-| AH-2                      | ah2             |
-| Bottle                    | bottle          |
-| GeoCSV, time-sample pair  | geocsv          |
-| GeoCSV, sample list       | geocsv.slist    |
-| Lennartz SLIST            | lennartz        |
-| Mini-SEED                 | mseed           |
-| PASSCAL SEG Y             | passcal         |
-| PC-SUDS                   | suds            |
-| SAC                       | sac             |
-| SEG Y (rev 0 or rev 1)    | segy            |
-| SEISIO                    | seisio          |
-| SLIST (ASCII sample list) | slist           |
-| UW                        | uw              |
-| Win32                     | win32           |
+* Formats: ah1, ah2, bottle, geocsv, geocsv.slist, lennartz, mseed, passcal, suds, sac, segy, seisio, slist, uw, win32
+* Keywords: cf, full, jst, memmap, nx_add, nx_new, strict, swap, v, vl
 
-### Keywords
-|KW      | Used By  | Type    | Default   | Meaning                         |
-|:---    |:---      |:---     |:---       |:---                             |
-|cf      | win32    | String  | ""        | win32 channel info filestr      |
-|full    | ah1, ah2 | Bool    | false     | read full header into `:misc`?  |
-|        | sac      |         |           |                                 |
-|        | segy     |         |           |                                 |
-|        | suds     |         |           |                                 |
-|        | uw       |         |           |                                 |
-|memmap  | *        | Bool    | false     | use mmap to read files? [^1]    |
-|nx_add  | bottle   | Int64   | 360000    | min. increase when resizing `:x`|
-|        | mseed    |         |           |                                 |
-|        | win32    |         |           |                                 |
-|nx_new  | bottle   | Int64   | 86400000  | `length(C.x)` for new channels  |
-|        | mseed    |         |           |                                 |
-|        | win32    |         |           |                                 |
-|jst     | win32    | Bool    | true      | are sample times JST (UTC+9)?   |
-|strict  | *        | Bool    | false     | strict channel matching?        |
-|swap    | mseed    | Bool    | true      | byte swap?                      |
-|        | passcal  |         |           |                                 |
-|        | segy     |         |           |                                 |
-|v       | *        | Int64   | 0         | verbosity                       |
-|vl      | *        | Bool    | false     | verbose logging to :notes [^2]  |
-
-[^1]: potentially dangerous; Julia SIGSEGV handling is undocumented.
-[^2]: verbose logging adds one line to `:notes` for each file read.
-
-See official SeisIO documentation for performance tips associated with KWs.
-
-## SeisIO native format
-`read_data("seisio", ...)` is a convenience wrapper that reads only the first SeisIO object that can be converted to a SeisData structure from each file. For more complicated read operations on SeisIO files, use `rseis`.
-
-## Examples
-1. `S = read_data("uw", "99011116541W", full=true)`
-    + Read UW-format data file `99011116541W`
-    + Store full header information in `:misc`
-2. `read_data!(S, "sac", "MSH80*.SAC", "strict=true")`
-    + Read SAC-format files matching string pattern `MSH80*.SAC`
-    + Read into existing SeisData object `S`
-    + Only continue a channel that matches on `:id`, `:fs`, and `:gain`
-3. `S = read_data("win32", "20140927*.cnt", cf="20140927*ch", nx_new=360000)`
-    + Read win32-format data files with names matching pattern `2014092709*.cnt`
-    + Use ASCII channel information filenames that match pattern `20140927*ch`
-    + Assign new channels an initial size of `nx_new` samples
+This function is fully described in the official documentation at https://seisio.readthedocs.io/ in section **Time-Series Data File Formats**.
 
 See also: SeisIO.KW, get_data, guess, rseis
 """ read_data!
 function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,1}};
-  full    ::Bool    = false,              # full SAC/SEGY hdr
   cf      ::String  = "",                 # win32 channel info file
+  full    ::Bool    = false,              # full SAC/SEGY hdr
   jst     ::Bool    = true,               # are sample times JST (UTC+9)?
   memmap  ::Bool    = false,              # use mmap? (DANGEROUS)
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels

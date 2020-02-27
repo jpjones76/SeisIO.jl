@@ -288,26 +288,18 @@ has_stream(sta::Array{String,2};
                           sl_info("STREAMS", u=u, port=port), gap=gap, to=to)
 
 @doc """
-    seedlink!(S, sta)
+    seedlink!(S, chans)
+    S = seedlink(chans)
 
 Begin acquiring seedlink data to SeisData structure `S`. New channels
-are added to `S` automatically based on `sta`. Connections are added
-to S.c.
+are added to `S` automatically based on `chans`. Connections are added
+to `S.c`. When finished, close connection manually with `close(S.c[n])` where n is connection #.
 
-    S = seedlink(sta)
+This function is fully described in the official documentation at https://seisio.readthedocs.io/ in subsection **SeedLink**.
 
-Create a new SeisData structure `S` to acquire seedlink data. Connection will be in S.c[1].
+Keywords: fmt, gap, kai, mode, opts, port, q, refresh, safety, si, to, v, w, x_on_err, y
 
-### INPUTS
-* `S`: SeisData object
-* `sta`: Array{String, 1} formatted NET.STA.LOC.CHA.DFLAG, e.g. ["UW.TDH..EHZ.D", "CC.HOOD..BH?.E"].
-Use "?" to match any single character; leave LOC and CHA fields blank to select all. Don't use "*" for wildcards,
-it isn't valid seedlink syntax.
-
-When finished, close connection manually with `close(S.c[n])` where n is connection #.
-
-* Standard keywords: fmt, opts, q, si, to, v, w, y
-* SL keywords: gap, kai, mode, port, refresh, safety, x_on_err
+See Also: get_data
 """ seedlink!
 function seedlink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
                     gap::Real=KW.SL.gap,

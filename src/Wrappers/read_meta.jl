@@ -1,43 +1,44 @@
 export read_meta, read_meta!
 
+# @doc """
+#     S = read_meta(fmt, filestr [, keywords])
+#     read_meta!(S, fmt, filestr [, keywords])
+#
+# Generic wrapper for reading channel metadata (i.e., instrument parameters, responses). Reads metadata in file format `fmt` matching file pattern `filestr` into `S`.
+#
+# ### Supported File Formats
+# | Format                    | String          |
+# | :---                      | :---            |
+# | Dataless SEED             | dataless        |
+# | FDSN Station XML          | sxml            |
+# | SACPZ                     | sacpz           |
+# | SEED RESP                 | resp            |
+#
+# ### Keywords
+# |KW      | Used By  | Type      | Default   | Meaning                         |
+# |:---    |:---      |:---       |:---       |:---                             |
+# | memmap | *        | Bool      | false     | use mmap on files? (unsafe)     |
+# | msr    | sxml     | Bool      | false     | read full MultiStageResp?       |
+# | s      | *        | TimeSpec  |           | Start time                      |
+# | t      | *        | TimeSpec  |           | Termination (end) time          |
+# | units  | resp     | Bool      | false     | fill in MultiStageResp units?   |
+# |        | dataless |           |           |                                 |
+# | v      | *        | Int64     | 0         | verbosity                       |
+#
+# ### Notes
+# 1. Unlike `read_data`, `read_meta` can't use `guess` for files of unknown type.
+# The reason is that most metadata formats are ASCII-based; generally only XML
+# files have reliable tests for uniqueness.
+#
+# See also: SeisIO.KW, get_data, read_data
+# """ read_meta!
 @doc """
-    read_meta
-
-Generic wrapper for reading metadata (i.e., instrument parameters, responses).
-
     S = read_meta(fmt, filestr [, keywords])
-
-Read metadata in file format `fmt` matching file pattern `filestr` into a new
-SeisData object `S`.
-
     read_meta!(S, fmt, filestr [, keywords])
 
-Read metadata in file format `fmt` matching file pattern `filestr` into existing
-SeisData object `S`.
+Generic wrapper for reading channel metadata (i.e., instrument parameters, responses). Reads metadata in file format `fmt` matching file pattern `filestr` into `S`.
 
-### Supported File Formats
-| Format                    | String          |
-| :---                      | :---            |
-| Dataless SEED             | dataless        |
-| FDSN Station XML          | sxml            |
-| SACPZ                     | sacpz           |
-| SEED RESP                 | resp            |
-
-### Keywords
-|KW      | Used By  | Type      | Default   | Meaning                         |
-|:---    |:---      |:---       |:---       |:---                             |
-| memmap | *        | Bool      | false     | use mmap on files? (unsafe)     |
-| msr    | sxml     | Bool      | false     | read full MultiStageResp?       |
-| s      | *        | TimeSpec  |           | Start time                      |
-| t      | *        | TimeSpec  |           | Termination (end) time          |
-| units  | resp     | Bool      | false     | fill in MultiStageResp units?   |
-|        | dataless |           |           |                                 |
-| v      | *        | Int64     | 0         | verbosity                       |
-
-### Notes
-1. Unlike `read_data`, `read_meta` can't use `guess` for files of unknown type.
-The reason is that most metadata formats are ASCII-based; generally only XML
-files have reliable tests for uniqueness.
+This function is fully described in the official documentation at https://seisio.readthedocs.io/ under subheading **Metadata File Formats**.
 
 See also: SeisIO.KW, get_data, read_data
 """ read_meta!
