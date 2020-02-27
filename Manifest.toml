@@ -135,8 +135,9 @@ deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
 [[MbedTLS]]
-deps = ["BinaryProvider", "Dates", "Libdl", "Random", "Sockets"]
-git-tree-sha1 = "85f5947b53c8cfd53ccfa3f4abae31faa22c2181"
+deps = ["BinaryProvider", "Dates", "Distributed", "Libdl", "Random", "Sockets", "Test"]
+git-tree-sha1 = "2d94286a9c2f52c63a16146bb86fd6cdfbf677c6"
+pinned = true
 uuid = "739be429-bea8-5141-9913-cc70e7f3736d"
 version = "0.6.8"
 
