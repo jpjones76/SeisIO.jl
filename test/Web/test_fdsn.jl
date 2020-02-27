@@ -261,11 +261,6 @@ end
 
 # ❄❄❄❄❄❄❄❄❄❄❄❄❄❄❄❄❄❄ (oh, California...)
 printstyled("    servers with special headers:\n", color=:light_green)
-ds = now()-Day(1)
-ds -= Millisecond(ds)
-s = string(ds)
-t = string(ds+Hour(1))
-
 rubric = [
   "NCEDC" "BK.MOD..BHE"
   "SCEDC" "CI.SDD..BHZ"
@@ -274,17 +269,19 @@ rubric = [
 
 for i = 1:❄
   printstyled("      ", rubric[i,1], ":\n", color=:light_green)
-  printstyled("        station info\n", color=:light_green)
-  S = FDSNsta(rubric[i,2], s=s, t=t, msr=true, src=rubric[i,1])
-  if isempty(S)
-    printstyled("        No data; check headers & connection!\n", color=:red)
-  end
-
-  if rubric[i] != "SCEDC"
+  ds = now()-Day(1)
+  ds -= Millisecond(ds)
+  s = string(ds)
+  t = string(ds+Hour(1))
+  try
+    printstyled("        station info\n", color=:light_green)
+    S = FDSNsta(rubric[i,2], s=s, t=t, msr=true, src=rubric[i,1])
     printstyled("        trace data\n", color=:light_green)
-    S = get_data("FDSN", rubric[i,2], src=rubric[i,1], s=s, t=t, msr=true, w=true)
+    get_data!(S, "FDSN", rubric[i,2], src=rubric[i,1], s=s, t=t, msr=true)
     if isempty(S)
       printstyled("        No data; check headers & connection!\n", color=:red)
     end
+  catch err
+    @warn(string("Request errored; error output below.\n\n", err))
   end
 end
