@@ -1,4 +1,4 @@
-using Compat, Dates, DSP, HDF5, Logging, Printf, SeisIO, Test
+using Dates, DSP, HDF5, Logging, Printf, SeisIO, Test
 using SeisIO.FastIO, SeisIO.Quake, SeisIO.RandSeis, SeisIO.SeisHDF
 import Dates: DateTime, Hour, now
 import DelimitedFiles: readdlm

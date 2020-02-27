@@ -10,4 +10,4 @@ function pkg_check(pkgs::Array{String,1})
   end
   return nothing
 end
-pkg_check(["Compat", "DSP", "HDF5"])
+pkg_check(["DSP", "HDF5"])
