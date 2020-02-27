@@ -1,5 +1,11 @@
 # SeisIO v0.5.0 Release: 2020-02-29
 
+### 2020-02-26
+* `get_data`: bad requests and unparseable formats are now logged correctly and
+saved to channels with special IDs in the output.
+  + Channel IDs that begin with "XX.FAIL" contain bad requests, with the response message stored as a String in `:misc["msg"]`.
+  + Channel IDs that begin with "XX.FMT" contain unparseable data. The raw response bytes are stored in `:misc["raw"]` as an Array{UInt8,1}, and can be dumped to file or parsed with external programs as needed.
+
 ### 2020-02-24
 * `read_meta` now also accepts KW `memmap`.
 
