@@ -1,8 +1,8 @@
 .. _readdata:
 
-#############################
-Time-Series Data File Formats
-#############################
+#################
+Time-Series Files
+#################
 .. function:: read_data!(S, fmt::String, filepat [, KWs])
 .. function:: S = read_data(fmt::String, filepat [, KWs])
 
@@ -15,9 +15,7 @@ Time-Series Data File Formats
 | Read files with names matching pattern ``filepat``. Supports wildcards.
 |
 | **KWs**
-| Keyword arguments; see also :ref:`SeisIO standard KWs<dkw>` or type ``?SeisIO.KW``.
-| Standard keywords: full, nx_add, nx_new, v
-| Other keywords: See below.
+| Keyword arguments; see also :ref:`SeisIO standard KWs<dkw>` or type ``?SeisIO.KW``. See table below for the list.
 
 **********************
 Supported File Formats
@@ -30,16 +28,16 @@ Supported File Formats
   AH-1                      | ah1           | id, fs, gain, loc, resp, units
   AH-2                      | ah2           | id, fs, gain, loc, resp
   Bottle (UNAVCO)           | bottle        | id, fs, gain
-  GeoCSV, time-sample pair  | geocsv        | id only
-  GeoCSV, sample list       | geocsv.slist  | id only
-  Lennartz ASCII            | lenartz       | id only
+  GeoCSV, time-sample pair  | geocsv        | id
+  GeoCSV, sample list       | geocsv.slist  | id
+  Lennartz ASCII            | lenartz       | id, fs
   Mini-SEED                 | mseed         | id, fs
   PASSCAL SEG Y             | passcal       | id, fs, gain, loc
   SAC                       | sac           | id, fs, gain
   SEG Y (rev 0 or rev 1)    | segy          | id, fs, gain, loc
   SEISIO                    | seisio        | id, fs, gain, loc, resp, units
-  SLIST (ASCII sample list) | slist         | id only
-  SUDS                      | suds          | id only
+  SLIST (ASCII sample list) | slist         | id, fs
+  SUDS                      | suds          | id
   UW data file              | uw            | id, fs, gain, units
   Win32                     | win32         | id, fs, gain, loc, resp, units
 
@@ -54,37 +52,45 @@ converted to a SeisData structure. For more complicated read operations,
 ******************
 Supported Keywords
 ******************
-.. csv-table::
-  :header: KW, Used By, Type, Default, Meaning
-  :delim: |
-  :widths: 1, 1, 1, 1, 4
 
-  cf     | win32    | String  | \"\"      | win32 channel info filestr
-  full   | ah1, ah2 | Bool    | false     | read full header into **:misc**?
-         | sac      |         |           |
-         | segy     |         |           |
-         | uw       |         |           |
-  memmap | *        | Bool    | false     | use mmap to buffer file?
-  nx_add | mseed    | Int64   | 360000    | minimum size increase of **:x**
-  nx_new | mseed    | Int64   | 86400000  | length of **:x** for new channels
-  jst    | win32    | Bool    | true      | are sample times JST (UTC+9)?
-  swap   | seed     | Bool    | true      | byte swap?
-  strict | *        | Bool    | true      | use strict channel matching?
-  units  | resp     | Bool    | false     | fill in units of CoeffResp stages?
-  v      | *        | Int64   | 0         | verbosity
-  vl     | *        | Bool    | 0         | verbose source logging?
++---------+---------+---------+-----------+----------------------------------+
+| Keyword | Used By | Type    | Default   | Meaning                          |
++=========+=========+=========+===========+==================================+
+| cf      | win32   | String  | \"\"      | win32 channel info filestr       |
++---------+---------+---------+-----------+----------------------------------+
+| full    | [#]_    | Bool    | false     | read full header into :misc?     |
++---------+---------+---------+-----------+----------------------------------+
+| memmap  | \*      | Bool    | false     | use Mmap.mmap to buffer file?    |
++---------+---------+---------+-----------+----------------------------------+
+| nx_add  | [#]_    | Int64   | 360000    | minimum size increase of x       |
++---------+---------+---------+-----------+----------------------------------+
+| nx_new  | [#]_    | Int64   | 86400000  | length(x) for new channels       |
++---------+---------+---------+-----------+----------------------------------+
+| jst     | win32   | Bool    | true      | are sample times JST (UTC+9)?    |
++---------+---------+---------+-----------+----------------------------------+
+| swap    | [#]_    | Bool    | true      | byte swap?                       |
++---------+---------+---------+-----------+----------------------------------+
+| strict  | \*      | Bool    | true      | use strict match?                |
++---------+---------+---------+-----------+----------------------------------+
+| v       | \*      | Int64   | 0         | verbosity                        |
++---------+---------+---------+-----------+----------------------------------+
+| vl      | \*      | Bool    | 0         | verbose source logging? [#]_     |
++---------+---------+---------+-----------+----------------------------------+
 
-* = all
+.. rubric:: Table Footnotes
+.. [#] used by ah1, ah2, sac, segy, suds, uw; information read into ``:misc`` varies by file format.
+.. [#] used by bottle, mseed, suds, win32
+.. [#] used by bottle, mseed, suds, win32
+.. [#] used by mseed, passcal, segy; swap is automatic for sac.
+.. [#] adds one line to ``:notes`` per file read. It is not guaranteed that files listed in ``S.notes[i]`` contain data for channel **i**; rather, all files listed are from the read operation(s) that populated **i**.
 
 Performance Tips
 ================
-1. `mmap=true` improves read speed for some formats, particularly ASCII readers, but requires caution. Julia language handling of SIGBUS/SIGSEGV and associated risks is unknown and undocumented.
+1. `mmap=true` improves read speed for some formats, particularly ASCII readers, but requires caution. In our benchmarks, the following significant (>3%) speed changes are observed:
 
-As a practical example of the implications, we don't know what happens in Julia if there's a connection failure during memory-mapped file I/O. In many languages, this situation can corrupt files without additional signal handling.
-
-**Under no circumstances** should `mmap=true` be used to read files directly from a drive whose host device power management is independent of the destination computer's. This includes all work flows that involve directly connecting a data logger, DAS, or smartphone to a computer, then reading files into memory from the connected device. It is *not* a sufficient workaround to set devices to "always on".
-
-Note that win32 presently doesn't support memory-mapped files, as internal tests suggest that it offers no advantage.
+* *Significant speedup*: ASCII formats, including metadata formats
+* *Slight speedup*: mini-SEED
+* *Significant slowdown*: SAC
 
 2. With mseed or win32 data, adjust `nx_new` and `nx_add` based on the sizes of
 the data vectors that you expect to read. If the largest has `Nmax` samples,
@@ -106,7 +112,7 @@ and fs will read slightly slower with this option.
 Channel Matching
 ================
 By default, `read_data` continues a channel if data read from file matches the
-channel id (field **:id**). In some cases this is not enough to guarantee a good match. With ``strict=true``, `read_data` matches against fields **:id**, **:fs**, **:gain**, **:loc**, **:resp**, and **:units**. However, not all of these fields are stored natively in all file formats. Column "Strict Match" in the first table lists which fields are stored (and can be logically matched) in each data format with `strict=true`.
+channel id (field **:id**). In some cases this is not enough to guarantee a good match. With ``strict=true``, `read_data` matches against fields **:id**, **:fs**, **:gain**, **:loc**, **:resp**, and **:units**. However, not all of these fields are stored natively in all file formats. Column "Strict Match" in the first table lists which fields are stored (and can be logically matched) in each format with `strict=true`.
 
 ********
 Examples
@@ -123,6 +129,11 @@ Examples
     + Use ASCII channel information filenames that match pattern ``20140927*ch``
     + Assign new channels an initial size of ``nx_new`` samples
 
+Memory Mapping
+==============
+`memmap=true` is considered unsafe because Julia language handling of SIGBUS/SIGSEGV and associated risks is undocumented as of SeisIO v0.4.1. Thus, for example, we don't know what a connection failure during memory-mapped file I/O does. In some languages, this situation without additional signal handling was notorious for corrupting files.
+
+**Under no circumstances** should `mmap=true` be used to read files directly from a drive whose host device power management is independent of the destination computer's. This includes all work flows that involve reading files directly into memory from a connected data logger. It is *not* a sufficient workaround to set a data logger to "always on".
 
 *****************************
 Format Descriptions and Notes
@@ -131,58 +142,18 @@ Additional format information can be accessed from the command line by typing
 ``SeisIO.formats("FMT")`` where FMT is the format name; ``keys(SeisIO.formats)``
 for a list.
 
-**AH** (Ad-Hoc) was developed as a machine-independent seismic data format
-based on External Data Representation (XDR).
-
-`GeoCSV\ <http://geows.ds.iris.edu/documents/GeoCSV.pdf>`_: an extension of
-"human-readable", tabular file format Comma-Separated Values (CSV).
-
-**Lennartz ASCII**: ASCII output of Lennartz portable digitizers, a variant of
-sample list (SLIST) ASCII.
-
-`PASSCAL\ <https://www.passcal.nmt.edu/content/seg-y-what-it-is>`_: A single-
-channel variant of SEG Y with no file header, developed by PASSCAL/New Mexico
-Tech and used with PASSCAL field equipment through the late 2000s.
-
-`SEED\ <https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf>`_: SEED stands for
-Standard for the Exchange of Earthquake Data; used by the International
-Federation of Digital Seismograph Networks (FDSN) as an omnibus seismic data
-standard. mini-SEED is a data-only variant that uses only data blockettes.
-
-`SAC\ <https://ds.iris.edu/files/sac-manual/manual/file_format.html>`_: the
-Seismic Analysis Code data format, originally developed for the eponymous
-command-line interpreter. Widely used, and supported in virtually every
-programming language.
-
-`SEG Y\ <http://wiki.seg.org/wiki/SEG_Y>`_: Society of Exploration Geophysicists
-data format. Common in the energy industry, developed and maintained by the SEG.
-Only SEG Y rev 0 and `rev 1\ <https://seg.org/Portals/0/SEG/News%20and%20Resources/Technical%20Standards/seg_y_rev1.pdf>`_
-with standard headers are supported.
-
-**SLIST**: An ASCII file with a one-line header and data written to file in
-ASCII string format.
-
-**UW**: the University of Washington data format has no online reference and is
-no longer in use. Created by the Pacific Northwest Seismic Network for event
-archival; used from the 1970s through early 2000s. A UW event is described by a
-pickfile and corresponding data file, whose names are identical except for the
-last character; for example, files 99062109485o and 99062109485W together
-describe event 99062109485. Unlike the win32 data format, the data file is
-self-contained; the pick file is not required to use raw trace data. However,
-like the win32 data format, instrument locations were stored in an external
-human-maintained text file. Only UW-2 data files are supported by SeisIO; we
-have never encountered a UW-1 data file except in Exabyte tapes from the 80s
-and have no reason to suspect that any are in circulation.
-
-`Win32\ <http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html>`_: data format developed
-by the Earthquake Research Institute (ERI), University of Tokyo, Japan. Data
-are typically divided into files that contain a minute of continuous
-data from several channels. Data within each file are stored by channel in
-one-second segments as variable-precision delta-encoded integers. Channel
-information is retrieved from an external channel information file. Although
-accurate channel files are needed to use win32 data, these files are not
-strictly controlled by any central authority. Inconsistencies in channel
-parameters, particularly gains, are known to exist.
+* **AH** (Ad-Hoc) was developed as a machine-independent seismic data format based on External Data Representation (XDR).
+* **Bottle** is a single-channel format maintained by UNAVCO (USA).
+* `GeoCSV\ <http://geows.ds.iris.edu/documents/GeoCSV.pdf>`_: an extension of "human-readable", tabular file format Comma-Separated Values (CSV).
+* **Lennartz**: a variant of sample list (SLIST) used by Lennartz portable digitizers.
+* `PASSCAL\ <https://www.passcal.nmt.edu/content/seg-y-what-it-is>`_: A single- channel variant of SEG Y with no file header, developed by PASSCAL/New Mexico Tech and used with PASSCAL field equipment through the late 2000s.
+* `SAC\ <https://ds.iris.edu/files/sac-manual/manual/file_format.html>`_: the Seismic Analysis Code data format, originally developed by LLNL for the eponymous command-line interpreter.
+* `SEED\ <https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf>`_: adopted by the International Federation of Digital Seismograph Networks (FDSN) as an omnibus seismic data standard. mini-SEED is a data-only variant that uses only data blockettes.
+* `SEG Y\ <http://wiki.seg.org/wiki/SEG_Y>`_: Society of Exploration Geophysicists data format. Common in the energy industry, developed and maintained by the SEG. Only SEG Y rev 0 and `rev 1\ <https://seg.org/Portals/0/SEG/News%20and%20Resources/Technical%20Standards/seg_y_rev1.pdf>`_ with standard headers are supported.
+* **SLIST**: An ASCII file with a one-line header and data written to file in ASCII string format.
+* **SUDS**: A competitor to SEED developed by the US Geological Survey (USGS), USA in the late 1980s. Rare in the United States, but adoption by the USGS Volcano Disaster Assistance Program (VDAP) in the early 1990s led to use at volcano observatories as late as the early 2010s.
+* **UW**: created in the 1970s by the Pacific Northwest Seismic Network (PNSN), USA, for event archival; used until the early 2000s. A UW event is described by a pickfile and a corresponding data file, whose filenames were identical except for the last character. The data file is self-contained; the pick file is not required to read raw trace data. However, station locations were stored in an external text file. Only UW-2 data files are supported by SeisIO; we have only seen UW-1 files in Exabyte tapes from the 1980s and have no reason to suspect that any are in circulation.
+* `Win32\ <http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html>`_: maintained by the National Research Institute for Earth Science and Disaster Prevention (NIED), Japan. Continuous data are divided into files that contain a minute of data from multiple channels stored in one-second segments. Channel information is in an external text file, which was previously not controlled by any central authority; inconsistencies between different versions of the same channel file (maintained by different institutions) may exist.
 
 ************************
 Other File I/O Functions

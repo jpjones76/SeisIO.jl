@@ -13,6 +13,7 @@ data from thousands of geophysical monitoring instruments. See
 .. function:: seedlink!(S, chans, patts, KWs)
 .. function:: S = seedlink(chans, KWs)
 
+Initiate a SeedLink session in DATA mode to feed data from channels ``chans`` with selection patterns ``patts`` to SeisData structure ``S``. A handle to a TCP connection is appended to ``S.c``. Data are periodically parsed until the connection is closed. One SeisData object can support multiple connections, provided that each connection's streams feed unique channels.
 
 | **chans**
 | Channel specification can use any of the following options:
@@ -23,20 +24,22 @@ data from thousands of geophysical monitoring instruments. See
 |
 | **patts**
 | Data selection patterns. See official SeedLink documentation; syntax is identical.
-|
-| **KWs**
-| Keyword arguments; see also :ref:`SeisIO standard KWs<dkw>` or type ``?SeisIO.KW``.
-| Standard keywords: fmt, opts, q, si, to, v, w, y
-| SL keywords: gap, kai, mode, port, refresh, safety, x\_on\_err
-| Other keywords:
-| ``u`` specifies the URL without "http://"
 
-Initiate a SeedLink session in DATA mode to feed data from channels ``chans`` with
-selection patterns ``patts`` to SeisData structure ``S``. A handle to a TCP
-connection is appended to ``S.c``.Data are periodically parsed until the
-connection is closed. One SeisData object can support multiple connections,
-provided that each connection's streams feed unique channels.
+Keywords
+========
+Pass keywords with `name=value` pairs.
 
+:ref:`Standard Keywords<dkw>`
+*****************************
+fmt, opts, q, si, to, v, w, y
+
+:ref:`SeedLink-Specific Keywords<slkw>`
+***************************************
+gap, kai, mode, port, refresh, safety, x\_on\_err
+
+Other Keywords
+**************
+``u`` specifies the URL, without "http://"
 
 Special Rules
 -------------

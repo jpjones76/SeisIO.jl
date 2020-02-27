@@ -5,6 +5,7 @@ XML Meta-Data
 #############
 
 SeisIO can read and write the following XML metadata formats:
+
 * QuakeML Version 1.2
 * StationXML Version 1.1
 
@@ -21,17 +22,15 @@ object.
 | ``s``: start time. Format "YYYY-MM-DDThh:mm:ss", e.g., "0001-01-01T00:00:00".
 | ``t``: termination (end) time. Format "YYYY-MM-DDThh:mm:ss".
 | ``msr``: (Bool) read instrument response info as MultiStageResp?
-
+|
+| **msr=true** processes XML files to give full response information
+| at every documented stage of the acquisition process: sampling, digitization,
+| FIR filtering, decimation, etc.
+|
 | **How often is MultiStageResp needed?**
-| Virtually never.
-
-By default, the **:resp** field of each channel contains a simple instrument
-response with poles, zeros, sensitivity (**:a0**), and sensitivity frequency
-(**:f0**). Very few use cases require more detail than this.
-
-The option **msr=true** processes XML files to give full response information
-at every documented stage of the acquisition process: sampling, digitization,
-FIR filtering, decimation, etc.
+| Almost never. By default, the **:resp** field of each channel contains a
+| simple instrument response with poles, zeros, sensitivity (**:a0**), and
+| sensitivity frequency (**:f0**). Very few use cases require more detail.
 
 .. function:: write_sxml(fname::String, S::GphysData[, chans=Cha])
 

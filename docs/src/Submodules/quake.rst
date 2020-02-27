@@ -202,7 +202,7 @@ Reading Earthquake Data Files
 Supported File Formats
 **********************
 .. csv-table::
-  :header: File Format, String
+  :header: File Format, String, Notes
   :delim: |
   :widths: 1, 1, 3
 

@@ -1,6 +1,6 @@
-#####################
-Metadata File Formats
-#####################
+##############
+Metadata Files
+##############
 .. function:: read_meta!(S, fmt::String, filepat [, KWs])
 .. function:: S = read_meta(fmt::String, filepat [, KWs])
 

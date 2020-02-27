@@ -21,15 +21,37 @@ real-time streaming, see :ref:`SeedLink<seedlink-section>`.
 | :ref:`Channels to retrieve<cid>` -- string, string array, or parameter file.
 | Type ``?chanspec`` at the Julia prompt for more info.
 |
-| **KWs**
-| Keyword arguments; see also :ref:`SeisIO standard KWs<dkw>` or type ``?SeisIO.KW``.
-| Standard keywords: fmt, nd, opts, rad, reg, si, to, v, w, y
-| Other keywords:
-| ``autoname``: Determine file names from channel ID?
-| ``msr``: get instrument responses as MultiStageResonse? (FDSN only)
-| ``s``: Start time
-| ``t``: Termination (end) time
-| ``xf``: XML file name for station XML
+
+Keywords
+========
+Pass keywords with `name=value` pairs.
+
+:ref:`Standard Keywords<dkw>`
+*****************************
+fmt, nd, opts, rad, reg, si, to, v, w, y
+
+Seismic Processing Keywords
+***************************
+Listed by order of operations
+
+1. ``unscale``: divide gain from data after download
+2. ``demean``: demean data after download
+3. ``detrend``: detrend data after download
+4. ``taper``: taper data after download
+5. ``ungap``: remove gaps in data after download
+6. ``rr``: remove seismic instrument response after download
+
+Other Keywords
+**************
+* ``autoname``: determine file names from channel ID?
+* ``msr``: get instrument responses as ``MultiStageResonse``? ("FDSN" only)
+* ``s``: start time
+* ``t``: termination (end) time
+* ``xf``: XML file name for output station XML
+
+**autoname** behavior
+---------------------
+Autoname only works if a filename is uniqely specified in the request channel string. A wildcard ("*" or "?") in a channel string deactivates ``autoname=true``.
 
 Examples
 ========
@@ -105,6 +127,6 @@ Bad Requests
 ============
 Failed data requests are saved to special channels whose IDs begin with "XX.FAIL". The HTTP response message is stored as a String in ``:misc["msg"]``; display to STDOUT with ``println(stdout, S.misc[i]["msg"])``.
 
-Unparseable data requests are saved to special channels whose IDs begin with "XX.FMT". The raw response bytes are stored as an Array{UInt8,1} in ``:misc["raw"]``m and can be dumped to file or parsed with external programs as needed.
+Unparseable data requests are saved to special channels whose IDs begin with "XX.FMT". The raw response bytes are stored as an Array{UInt8,1} in ``:misc["raw"]`` and can be dumped to file or parsed with external programs as needed.
 
 One special channel is created per bad request.

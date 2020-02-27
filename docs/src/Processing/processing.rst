@@ -313,9 +313,8 @@ Keywords
   rt  | \"Bandpass\"    | String  | response type (type of filter)
   dm  | \"Butterworth\" | String  | design mode (name of filter)
 
-:sup:`(a)`  Allowed types are Integer, UnitRange, and Array{Int64, 1}.
-:sup:`(b)`  By convention, the lower corner frequency (fl) is used in a Highpass
-filter, and fh is used in a Lowpass filter.
+| :sup:`(a)`  Allowed types are Integer, UnitRange, and Array{Int64, 1}.
+| :sup:`(b)`  By convention, the lower corner frequency (fl) is used in a
+| Highpass filter, and fh is used in a Lowpass filter.
 
-Default filtering KW values can be changed by adjusting the :ref:`shared keywords<dkw>`,
-e.g., SeisIO.KW.Filt.np = 2 changes the default number of poles to 2.
+Default filtering KW values can be changed by adjusting the :ref:`shared keywords<dkw>`, e.g., ``SeisIO.KW.Filt.np = 2`` changes the default number of poles to 2.
