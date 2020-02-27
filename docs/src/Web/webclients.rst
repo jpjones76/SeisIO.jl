@@ -100,3 +100,11 @@ Data Query Features
 * Stage zero gains are removed from trace data; all IRIS data will appear to have a gain of 1.0.
 * IRISWS disallows wildcards in channel IDs.
 * Channel spec *must* include the net, sta, cha fields; thus, CHA = "CC.VALT..BHZ" is OK; CHA = "CC.VALT" is not.
+
+Bad Requests
+============
+Failed data requests are saved to special channels whose IDs begin with "XX.FAIL". The HTTP response message is stored as a String in ``:misc["msg"]``; display to STDOUT with ``println(stdout, S.misc[i]["msg"])``.
+
+Unparseable data requests are saved to special channels whose IDs begin with "XX.FMT". The raw response bytes are stored as an Array{UInt8,1} in ``:misc["raw"]``m and can be dumped to file or parsed with external programs as needed.
+
+One special channel is created per bad request.
