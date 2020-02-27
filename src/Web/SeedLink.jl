@@ -1,4 +1,4 @@
-  export seedlink, seedlink!, sl_info, has_sta, has_stream
+export seedlink, seedlink!, sl_info, has_sta, has_stream
 
 # ========================================================================
 # Utility functions not for export
