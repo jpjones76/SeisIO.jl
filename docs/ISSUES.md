@@ -24,7 +24,6 @@ This document lists problems that are not our fault and can't be fixed by us. Gi
   + If SEG Y files use nonstandard trace headers, they're unreadable by public software.
     - Details: only six trace header quantities have mandatory positions and value types in SEG Y ≤ rev 1.0. All public software assumes "recommended" trace header positions, including ours.
 * **SEG Y subformats** (I)
-  + IBM Float is unsupported.
   + SEG Y rev 2 is unsupported.
   + Seismic Unix ("SU") is unsupported.
 * **SUDS structures** (I,O): structures outside the scope of SeisIO aren't read into memory.
