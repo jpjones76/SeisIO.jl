@@ -23,15 +23,13 @@ function should_bswap(io::IO)
   return q
 end
 
-function write_sac_file(fname::String, x::AbstractArray, tdata::Array{Float32,1}, xy::Bool)
+function write_sac_file(fname::String, x::AbstractArray{T,1}, tdata::AbstractArray{Float32,1}, xy::Bool) where T
   open(fname, "w") do io
     write(io, BUF.sac_fv)
     write(io, BUF.sac_iv)
     write(io, BUF.sac_cv)
     if eltype(x) == Float32
       write(io, x)
-    elseif eltype(x) <: Complex
-      write(io, Float32.(real.(x)))
     else
       write(io, Float32.(x))
     end
@@ -338,10 +336,10 @@ Keywords:
 (Only works with GphysChannel objects)
 * `xy=true` writes generic x-y data with time as the independent variable.
 """
-function writesac(S::GphysData; fn::String="", xy::Bool=false, v::Integer=KW.v)
+function writesac(S::GphysData; fname::String="", xy::Bool=false, v::Integer=KW.v)
   reset_sacbuf()
   for i = 1:S.n
-    write_sac_channel(S, i, xy, fn, v)
+    write_sac_channel(S, i, xy, fname, v)
   end
   return nothing
 end
@@ -362,7 +360,7 @@ function writesac(S::GphysChannel;
       end
     end
     )
-  writesac(SeisData(S), fn=fstr, xy=xy, v=v)
+  writesac(SeisData(S), fname=fstr, xy=xy, v=v)
   return nothing
 end
 
@@ -543,8 +541,8 @@ function writesacpz(S::GphysData, file::String)
     Y = typeof(S.resp[i])
     if Y == GenResp
       a0 = 1.0
-      P = S.resp[i][:,1]
-      Z = deepcopy(S.resp[i][:,2])
+      P = S.resp[i].resp[:,1]
+      Z = deepcopy(S.resp[i].resp[:,2])
     elseif Y in (PZResp, PZResp64)
       a0 = getfield(S.resp[i], :a0)
       P = getfield(S.resp[i], :p)
@@ -582,12 +580,18 @@ function writesacpz(S::GphysData, file::String)
     write(io, "* START             : ", t_start, 0x0a)
     write(io, "* END               : ", t_end, 0x0a)
     write(io, "* DESCRIPTION       : ", S.name[i], 0x0a)
-    write(io, "* LATITUDE          : ", @sprintf("%0.6f", S.loc[i].lat), 0x0a)
-    write(io, "* LONGITUDE         : ", @sprintf("%0.6f", S.loc[i].lon), 0x0a)
-    write(io, "* ELEVATION         : ", string(S.loc[i].el), 0x0a)
-    write(io, "* DEPTH             : ", string(S.loc[i].dep), 0x0a)
-    write(io, "* DIP               : ", string(S.loc[i].inc+90.0), 0x0a)
-    write(io, "* AZIMUTH           : ", string(S.loc[i].az), 0x0a)
+    loc = zeros(Float64, 6)
+    if typeof(S.loc[i]) == GeoLoc
+      for (j, f) in enumerate([:lat, :lon, :el, :dep, :inc, :az])
+        loc[j] = getfield(S.loc[i], f)
+      end
+    end
+    write(io, "* LATITUDE          : ", @sprintf("%0.6f", loc[1]), 0x0a)
+    write(io, "* LONGITUDE         : ", @sprintf("%0.6f", loc[2]), 0x0a)
+    write(io, "* ELEVATION         : ", string(loc[3]), 0x0a)
+    write(io, "* DEPTH             : ", string(loc[4]), 0x0a)
+    write(io, "* DIP               : ", string(loc[5]+90.0), 0x0a)
+    write(io, "* AZIMUTH           : ", string(loc[6]), 0x0a)
     write(io, "* SAMPLE RATE       : ", string(S.fs[i]), 0x0a)
 
     for j in ("INPUT UNIT", "OUTPUT UNIT", "INSTTYPE", "INSTGAIN", "COMMENT")
