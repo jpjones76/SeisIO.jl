@@ -97,3 +97,12 @@ for (i,j) in enumerate(bad_floats)
   end
   close(b)
 end
+
+printstyled("    buf_to_double\n", color=:light_green)
+expect = [1.23e45, 1.23e21, 1.234e35, 1.23e23]
+for (n, str) in enumerate(["1.23E45", "1.23e45", "1.23F21", "1.23f21", "1234E32", "1234e32", "123f21", "123F21"])
+  buf = Array{UInt8,1}(str)
+  L = length(str)
+  x = expect[ceil(Int64, n/2)]
+  @test x ≈ buf_to_double(buf, L)
+end
