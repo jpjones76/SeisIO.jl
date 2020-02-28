@@ -16,6 +16,10 @@ if has_restricted
     fname = path*"/SampleFiles/Restricted/2014092709*.cnt"
     cfile = path*"/SampleFiles/Restricted/03_02_27_20140927.euc.ch"
     S = verified_read_data("win32", fname, cf=cfile, v=3, vl=true)
+    files = ls(fname)
+    S2 = SeisData()
+    read_data!(S2, "win32", files, cf=cfile, v=3, vl=true)
+    compare_SeisData(S, S2)
 
     for i in 1:S.n
       notes = S.notes[i]

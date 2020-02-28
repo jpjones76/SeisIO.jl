@@ -162,7 +162,7 @@ function readwin32( dfilestr::String,
             resize!(S.x[k], nx)
           end
           setindex!(getfield(S, :fs), Float64(Nh), k)
-          setindex!(Δgap, div(3*div(1000000, Nh), 2), k)
+          setindex!(Δgap, div(1000000, 2*Nh), k)
           setindex!(getfield(S, :t), mk_t(nx, t_new-jst_const), k)
           setindex!(gapEnd, Int64[], k)
           setindex!(gapStart, Int64[], k)
@@ -196,9 +196,9 @@ function readwin32( dfilestr::String,
         # Account for time gaps
         t_old = getindex(OldTime, k)
         gap = t_new - t_old
-        if (gap > Δgap[k]) && (t_old > 0)
+        if ((gap - 1000000) > Δgap[k]) && (t_old > 0)
           gl = div((gap - 1000000), 1000000)
-          (v > 0) && @warn(string("Time gap detected! (channel ", hexID, ", length ", @sprintf("%.1f", gl), "s, begin ", u2d(t_old*1.0e-6)))
+          (v > 0) && @warn(string("Time gap detected! (channel ", hexID, ", length ", @sprintf("%.3f", gl*1.0e-6), "s, begin ", u2d(t_old*1.0e-6), ")"))
           P = Nh*gl
           push!(gapStart[k], ii + 1)
           push!(gapEnd[k], ii + P)
