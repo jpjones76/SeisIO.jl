@@ -71,9 +71,12 @@ function filt_seis_chans!(chans::Array{Int64,1}, S::GphysData)
     L = length(id)
     for j = L:-1:1
       if id[j] == '.'
-        j > L-2 && deleteat!(chans, n)
+        if (j > L-2)
+          deleteat!(chans, n)
+          break
+        end
         if (id[j+2] in seis_inst_codes) == false
-            deleteat!(chans, n)
+          deleteat!(chans, n)
         end
         break
       elseif j == 1
