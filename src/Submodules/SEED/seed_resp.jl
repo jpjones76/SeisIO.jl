@@ -427,9 +427,7 @@ function read_seed_resp!(S::GphysData, fpat::String;
 
             # initialize stage seq_n
             if seq_n > 0
-              if length(C.resp.stage) < seq_n
-                append!(C.resp, MultiStageResp(6))
-              end
+              (length(C.resp.stage) < seq_n) && append!(C.resp, MultiStageResp(6))
             end
 
             # dump to seq_n_old
