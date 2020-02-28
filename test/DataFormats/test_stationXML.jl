@@ -87,6 +87,7 @@ S = read_sxml(xml_stfile)
 T = read_sxml(xml_stpat)
 @assert T.n > S.n
 @test findid(T.id[S.n+1], S.id) == 0
+@test_throws ErrorException read_sxml("nonexist.txt")
 
 printstyled("    read_meta\n", color=:light_green)
 S = read_meta("sxml", xml_stfile)
@@ -135,6 +136,7 @@ for i in 1:S.n
     end
   end
 end
+write_sxml(f_out, breaking_seis())
 
 printstyled("      check that output of write_sxml is re-read identically\n", color=:light_green)
 files = ls(xml_stpat)
