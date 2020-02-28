@@ -30,7 +30,6 @@ function merge!(S::Y; v::Integer=KW.v, purge_only::Bool=false) where Y<:GphysDat
 
   UID = unique(getfield(S, :id))
   cnt = 0
-  N_warn = 0
   note_head = string(SeisIO.timestamp(), " ¦ ")
   to_delete = Array{Int64,1}(undef, 0)
   while cnt < length(UID)
@@ -283,9 +282,6 @@ function merge!(S::Y; v::Integer=KW.v, purge_only::Bool=false) where Y<:GphysDat
       append!(to_delete, rest)
     end
     # Done with SUBGRPS
-  end
-  if N_warn > 0
-    @info(string("Total warnings: ", N_warn))
   end
   deleteat!(S, to_delete)
   sort!(S)
