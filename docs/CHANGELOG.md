@@ -1,4 +1,13 @@
 # SeisIO v0.5.0 Release: 2020-02-29
+### 2020-02-27
+* `read_hdf5` no longer errors when start or end time is a DateTime.
+* `convert_seis` now correctly errors when `units_out` is invalid.
+* `writesacpz` no longer errors when trying to write generic `:resp` or `:loc` objects to SACPZ format.
+* `SEG Y` improvements
+  + IBM-Float is now supported.
+  + Station names are now set in channel IDs from a more appropriate header.
+  + `:gain` is once again correctly set.
+  + `:units` are now set from the appropriate trace header.
 
 ### 2020-02-26
 * `get_data`: bad requests and unparseable formats are now logged correctly and
