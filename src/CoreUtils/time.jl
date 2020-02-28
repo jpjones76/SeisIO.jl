@@ -240,7 +240,8 @@ See Also: check_for_gap!
 function t_extend(t::Array{Int64,2}, ts::Integer, nx::Integer, Δ::Int64)
   nt = size(t, 1)
   n0 = 0
-  # Channel has some data already
+
+  # channel has some data already
   if nt > 0
     n0 = t[nt, 1]
     t0 = endtime(t, Δ)
@@ -248,12 +249,21 @@ function t_extend(t::Array{Int64,2}, ts::Integer, nx::Integer, Δ::Int64)
       t = t[1:nt-1,:]
     end
     if nx > 0
-      return vcat(t, [1+n0 ts-t0-Δ; nx+n0 0])
+      if ts-t0 > 3*div(Δ,2)
+        t = vcat(t, [1+n0 ts-t0-Δ; nx+n0 0])
+      else
+        t = vcat(t, [nx+n0 0])
+      end
     else
-      return vcat(t, [1+n0 ts-t0-Δ])
+      t = vcat(t, [1+n0 ts-t0-Δ])
     end
+    return t
+
+  # extend t to end at ts (counterintuitive syntax)
   elseif nx == 0
     return mk_t(nx, ts)[1:1,:]
+
+  # behavior for a new channel
   else
     return mk_t(nx, ts)
   end

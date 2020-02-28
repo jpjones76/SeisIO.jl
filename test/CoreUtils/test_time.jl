@@ -193,6 +193,33 @@ for (n,s) in enumerate(["2018-01-01T00:00:00.000001",
 end
 
 printstyled(stdout, "    t_extend\n", color=:light_green)
+nx = 6000
+Δ = 10000
+g = 300000
+fs = 100.0
+t0 = 1411776000000000
+t = [1 t0; nx 0]
+ts = t[1,2] + nx*Δ
+t2 = [1 ts; nx 0]
+
+# should have only 2 rows
+@test t_extend(t, ts, nx, fs) == [1 t0; 2nx 0]
+
+# should have a gap of Δ at point nx+1
+@test t_extend(t, ts + Δ, nx, fs) == [1 t0; nx+1 Δ; 2nx 0]
+
+# should correctly log the gaps at nx and nx+1
+t1 = [1 t0; nx g]
+@test t_extend(t1, ts + Δ, nx, fs) == [1 t0; nx g; nx+1 Δ; 2nx 0]
+
+# should only extend the expected length of nx to incorporate new start time
+for ts1 in ts : 100Δ : ts + nx
+  @test t_extend(t, ts1, 0, fs) == [1 t[1,2]; nx + div(ts1-endtime(t, Δ), Δ) 0]
+end
+
+# should initialize a new starter time array at ts
+@test t_extend(Array{Int64,2}(undef,0,2), ts, 0, fs) == [1 ts]
+
 t = [1 12356; 1231 333; 14134 0]
 ts_new = 8348134123
 nx_new = 65536
