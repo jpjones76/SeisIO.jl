@@ -60,6 +60,7 @@ for n = 1:nf
       S = verified_read_data(f_call, fwild, cf=cfile)
       S = read_data(f_call, fwild, memmap=true, cf=cfile)
       S = read_data(fwild, cf=cfile)
+      S = read_data(f_call, [fwild], cf=cfile)
     elseif opt == "slist"
       S = verified_read_data("geocsv.slist", fname)
       S = verified_read_data("geocsv.slist", fwild)
