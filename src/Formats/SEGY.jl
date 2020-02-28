@@ -10,6 +10,18 @@ function ibmfloat(x::UInt32)
   y = (sgn == 0x00 ? 1.0 : -1.0) * 16.0^exp * signed(fra >> 8)/16777216
   return y
 end
+#=
+  This is actual IBM hexadecimal float, and correctly parses the examples from
+  https://en.wikipedia.org/wiki/IBM_hexadecimal_floating_point ; see tests.
+
+  The version in JuliaSeis is wrong because IBM float has a range too wide for
+  IEEE single float in Julia.
+
+  The description in the SEG Y manual does something strange with the last bit.
+
+  My last line is computationally expensive; working out the radix shift and
+  using >> would be much better.
+=#
 
 function trid(i::Int16; fs=2000.0::Float64, fc=10.0::Float64)
   S = ["DH", "HZ", "H1", "H2", "HZ", "HT", "HR"]
@@ -187,6 +199,10 @@ function do_trace(f::IO,
     copyto!(shorts, 55, shortbuf, 15, 5)
 
     T = getindex(segy_ftypes, fmt)
+    if (T == Any)
+      close(f)
+      error(string("Trace data code = ", fmt, "  unsupported!"))
+    end
     nb = checkbuf!(buf, nx, T)
     fast_readbytes!(f, buf, nb)
 
@@ -202,10 +218,8 @@ function do_trace(f::IO,
       x .= bswap.(reinterpret(Float32, buf))[1:nx]
     elseif T == UInt32
       y = Array{UInt32,1}(undef, nx)
-      fillx_u32_le!(y, buf, nx, 0)
+      fillx_u32_le!(y, buf, nx, 0) # _le because ibmfloat bswaps
       x = ibmfloat.(y)
-    else
-      error("Trace data Type unsupported!")
     end
 
     shorts  .= ntoh.(shorts)
@@ -394,10 +408,8 @@ function segyhdr(fname::String; passcal::Bool=false, swap::Bool=false)
       @printf(stdout, "%20s: %s\n", k, string(get(D, k, "")))
     end
   else
-    W = displaysize(stdout)[2]-2
+    p = 1; w = 32; W = displaysize(stdout)[2]-2
     S = fill("", length(seis.misc[1])+1)
-    p = 1
-    w = 32
     printstyled(stdout, @sprintf("%20s: %s\n", "SEG-Y FILE", realpath(fname)), color=:green, bold=true)
     for i = 1:seis.n
       if p > 1
