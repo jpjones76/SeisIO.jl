@@ -134,8 +134,7 @@ function readwin32( dfilestr::String,
       fastskip(io, 4)
 
       # Bytes to read
-      lsecb = Int64(ntoh(fastread(io, UInt32)))
-      τ = 0
+      lsecb = Int64(ntoh(fastread(io, UInt32))); τ = 0
 
       while τ < lsecb
         orgID = fastread(io)
@@ -144,8 +143,7 @@ function readwin32( dfilestr::String,
         k = findhex(hexID, hexIDs)
         V = ntoh(fastread(io, UInt16))
         C = Int64(V >> 12)
-        N = Int64(V & 0x0fff)
-        Nh = N
+        N = Int64(V & 0x0fff); Nh = N
 
         # Increment bytes read (this file), decrement N if not 4-bit
         if C == 0
@@ -267,9 +265,7 @@ function readwin32( dfilestr::String,
       μ = sums[i] / seisN[i]
       gs = gapStart[i]
       ge = gapEnd[i]
-      n = 0
-      while n < J
-        n += 1
+      for n in 1:J
         fill!(view(χ, gs[n]:ge[n]), μ)
       end
     end
