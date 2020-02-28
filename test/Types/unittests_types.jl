@@ -17,6 +17,8 @@ redirect_stdout(out) do
   show(stdout, L1)
   @test !(L1 == L2)
   @test sizeof(L1) > 104
+  repr(L1, context=:compact=>true)
+  repr(L1, context=:compact=>false)
 
   L = UTMLoc()
   show(stdout, L)
@@ -26,6 +28,8 @@ redirect_stdout(out) do
   @test sizeof(L) == 114
   L2 = UTMLoc(datum="NAD83")
   @test isequal(L, L2) == false
+  repr(L, context=:compact=>true)
+  repr(L, context=:compact=>false)
 
   L = XYLoc()
   show(stdout, L)
@@ -38,6 +42,8 @@ redirect_stdout(out) do
   @test sizeof(L) > 136
   L2 = XYLoc()
   @test isequal(L, L2) == false
+  repr(L, context=:compact=>true)
+  repr(L, context=:compact=>false)
 
   L = EQLoc()
   show(stdout, L)
@@ -45,6 +51,8 @@ redirect_stdout(out) do
   @test hash(L) == hash(EQLoc())
   @test L == EQLoc()
   @test sizeof(L) > 114
+  repr(L, context=:compact=>true)
+  repr(L, context=:compact=>false)
 end
 
 # Seismic phases
