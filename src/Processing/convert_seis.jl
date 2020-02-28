@@ -36,7 +36,7 @@ function convert_seis!(S::GphysData;
   v::Integer=KW.v)
 
   # sanity check
-  if units_out in ("m", "m/s", "m/s2") == false
+  if (units_out in ("m", "m/s", "m/s2")) == false
     error("units_out must be in (\"m\", \"m/s\", \"m/s2\")!")
   end
 
