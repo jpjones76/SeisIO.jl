@@ -38,6 +38,7 @@ function breaking_seis()
   S.resp[3].stage[2] = PZResp()
   S.resp[3].gain[1] = 3.5e15
   S.resp[3].fs[1] = 15.0
+  S.resp[3].stage[1].a = randn(Float64, 120)
   S.resp[3].stage[1].b = randn(Float64, 120)
   S.resp[3].i[1] = "{counts}"
   S.resp[3].o[1] = "m/s"
