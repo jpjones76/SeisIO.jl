@@ -101,6 +101,7 @@ redirect_stdout(out) do
 end
 C.units = "{unknown}"
 @test_throws ErrorException convert_seis!(C, units_out="m")
+@test_throws ErrorException convert_seis!(SeisData(C), units_out="foo")
 
 printstyled("    logging\n", color=:light_green)
 redirect_stdout(out) do
