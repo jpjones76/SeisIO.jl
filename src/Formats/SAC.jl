@@ -484,14 +484,13 @@ function read_sacpz!(S::GphysData, file::String; memmap::Bool=false)
     # Zeros section
     elseif startswith(line, "ZEROS")
       N = parse(Int64, split(line, limit=2, keepempty=false)[2])
-      D["Z"] = Array{Complex{Float32},1}(undef, N)
+      D["Z"] = zeros(Complex{Float32}, N)
       for i = 1:N
         try
           mark(io)
           zc = split(fast_readline(io), limit=2, keepempty=false)
           D["Z"][i] = complex(parse(Float32, zc[1]), parse(Float32, zc[2]))
         catch
-          D["Z"][i:N] .= zero(ComplexF32)
           reset(io)
         end
       end

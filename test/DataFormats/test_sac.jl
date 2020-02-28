@@ -47,7 +47,7 @@ writesac(S) # change 2019-07-15 to cover writesac on GphysData
 safe_rm("1981.088.10.38.14.009..CDV...R.SAC")
 
 fn = "81.088.10.38.14.009..CDV...R.SAC"
-writesac(S, fname=fn)
+writesac(S, fname=fn, xy=true)
 @test safe_isfile(fn)
 safe_rm(fn)
 
@@ -111,6 +111,7 @@ for f in (:n, :id, :name, :loc, :fs, :gain, :units)
 end
 S = breaking_seis()[1:3]
 S.resp[1].resp = rand(ComplexF64, 12, 2)
+S.resp[3].stage[2] = nothing
 writesacpz(S, sac_pz_out4)
 
 safe_rm(sac_pz_out1)
