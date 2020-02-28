@@ -1,5 +1,5 @@
 segy_file_1   = string(path, "/SampleFiles/SEGY/03.334.12.09.00.0362.1")
-segy_file_2   = string(path, "/SampleFiles/Restricted/test_rev_1.segy")
+segy_file_2   = string(path, "/SampleFiles/SEGY/test_rev1.segy")
 segy_file_3   = string(path, "/SampleFiles/SEGY/04.322.18.06.46.92C3.1.coords1.segy")
 segy_file_4   = string(path, "/SampleFiles/SEGY/04.322.18.06.46.92C3.1.coords2.segy")
 segy_be_file  = string(path, "/SampleFiles/SEGY/02.104.00.00.08.7107.2")
@@ -90,6 +90,29 @@ if has_restricted
   redirect_stdout(out) do
     segyhdr(segy_file_2)
   end
+
+  printstyled("      encoding accuracy\n", color=:light_green)
+  x = collect(1:1:8)
+  for i in [1,2,3,5,8]
+    fname = string(path, "/SampleFiles/SEGY/test_rev1_", i, ".segy")
+    S = read_data("segy", fname)
+    @test isapprox(S.x[1], x)
+  end
+
+  printstyled("      header accuracy\n", color=:light_green)
+  S = read_data("segy", segy_file_2)
+  @test S.n == 36
+  @test length(unique([i[1:6] for i in S.id])) == 12
+  for i in 1:S.n
+    @test S.fs[i] ≈ 2000.0
+    @test S.gain[i] ≈ 320.0
+    @test S.units[i] == "m/s"
+    @test length(S.x[i]) == 32000
+    @test size(S.t[i], 1) == 2
+  end
+  @test length(findall([endswith(i, "GHZ") for i in S.id])) == 12
+  @test length(findall([endswith(i, "GH1") for i in S.id])) == 12
+  @test length(findall([endswith(i, "GH2") for i in S.id])) == 12
 else
   printstyled("    Skipped SEG Y rev 1\n", color=:red)
 end
