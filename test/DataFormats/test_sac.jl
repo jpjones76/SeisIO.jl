@@ -5,9 +5,10 @@ sac_pz_file = path*"/SampleFiles/SAC/test_sac.pz"
 sac_pz_wc   = path*"/SampleFiles/SAC/test_sac.*"
 uw_file     = path*"/SampleFiles/UW/00012502123W"
 sac_pat     = path*"/SampleFiles/SAC/*.sac"
-sac_pz_out1 = path*"/SampleFiles/SAC/local_sac_1.pz"
-sac_pz_out2 = path*"/SampleFiles/SAC/local_sac_2.pz"
-sac_pz_out3 = path*"/SampleFiles/SAC/local_sac_3.pz"
+sac_pz_out1 = path*"/local_sac_1.pz"
+sac_pz_out2 = path*"/local_sac_2.pz"
+sac_pz_out3 = path*"/local_sac_3.pz"
+sac_pz_out4 = path*"/local_sac_4.pz"
 
 printstyled("  SAC\n", color=:light_green)
 printstyled("    read\n", color=:light_green)
@@ -40,9 +41,15 @@ redirect_stdout(out) do
 end
 
 printstyled("    write\n", color=:light_green)
-writesac(SeisData(SAC2)) # change 2019-07-15 to cover writesac on GphysData
+S = SeisData(SAC2)
+writesac(S) # change 2019-07-15 to cover writesac on GphysData
 @test safe_isfile("1981.088.10.38.14.009..CDV...R.SAC")
-rm("1981.088.10.38.14.009..CDV...R.SAC")
+safe_rm("1981.088.10.38.14.009..CDV...R.SAC")
+
+fn = "81.088.10.38.14.009..CDV...R.SAC"
+writesac(S, fname=fn)
+@test safe_isfile(fn)
+safe_rm(fn)
 
 SAC1.id = "VU.CDV..NUL"
 SAC1.name = "VU.CDV..NUL"
@@ -102,6 +109,11 @@ read_meta!(S, "sacpz", sac_pz_out3)
 for f in (:n, :id, :name, :loc, :fs, :gain, :units)
   @test isequal(getfield(S, f), getfield(T, f))
 end
+S = breaking_seis()[1:3]
+S.resp[1].resp = rand(ComplexF64, 12, 2)
+writesacpz(S, sac_pz_out4)
+
 safe_rm(sac_pz_out1)
 safe_rm(sac_pz_out2)
 safe_rm(sac_pz_out3)
+safe_rm(sac_pz_out4)
