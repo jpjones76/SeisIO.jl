@@ -38,7 +38,7 @@ S1.src = S2.src
 @test S1 == S2
 
 # check file wildcards
-S2 = read_hdf5(hdf_pat, ts, te, id = id)
+S2 = read_hdf5(hdf_pat, DateTime(ts), DateTime(te), id = id)
 S1.src = S2.src
 @test S1 == S2
 
@@ -100,6 +100,8 @@ io = h5open(hdf_evt)
 # HDF write
 printstyled("    write_hdf5\n", color=:light_green)
 @test_throws ErrorException write_hdf5(hdf_out1, S1, fmt="MatlabLol")
+S2 = deepcopy(S1) + SeisChannel(id="XX.SDD..YYZ", fs=40.0)
+write_hdf5(hdf_out1, S2)
 safe_rm(hdf_out1)
 
 # ASDF write test 1: can we write to a new file?
