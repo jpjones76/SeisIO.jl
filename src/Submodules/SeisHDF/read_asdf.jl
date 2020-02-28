@@ -84,7 +84,7 @@ function read_asdf!(  S::GphysData,
       for idₜ in traces
         if idₜ == "StationXML"
           sxml = String(UInt8.(read(sta[idₜ])))
-          read_station_xml!(SX, sxml, msr=msr, s=s, t=t, v=v)
+          read_station_xml!(SX, sxml, msr=msr, s=d0, t=d1, v=v)
         elseif occursin(idr, idₜ)
           tr = sta[idₜ]
           nₜ = length(tr)
