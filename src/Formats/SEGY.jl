@@ -1,6 +1,16 @@
 export segyhdr
 # ============================================================================
 # Utility functions not for export
+function ibmfloat(x::UInt32)
+  local fra = ntoh(x)
+  local sgn = UInt8((fra & 0x80000000)>>31)
+  fra <<= 1
+  local exp = Int16(fra >> 25) - Int16(64)
+  fra <<= 7
+  y = (sgn == 0x00 ? 1.0 : -1.0) * 16.0^exp * signed(fra >> 8)/16777216
+  return y
+end
+
 function trid(i::Int16; fs=2000.0::Float64, fc=10.0::Float64)
   S = ["DH", "HZ", "H1", "H2", "HZ", "HT", "HR"]
   return string(getbandcode(fs, fc=fc), S[i])
@@ -50,6 +60,8 @@ function do_trace(f::IO,
   buf = BUF.buf
   ints = BUF.int32_buf
   shorts = BUF.int16_buf
+  lat = 0.0
+  lon = 0.0
   checkbuf!(buf, 240)
   checkbuf!(ints, 29)
   checkbuf!(shorts, 62)
@@ -62,7 +74,7 @@ function do_trace(f::IO,
   copyto!(ints, 16, intbuf, 19, 4)
 
   shortbuf = reinterpret(Int16, buf)
-  copyto!(shorts, 1, shortbuf, 1, 4)
+  copyto!(shorts, 1, shortbuf, passcal ? 1 : 15, 4)
   copyto!(shorts, 5, shortbuf, 35, 2)
   copyto!(shorts, 7, shortbuf, 45, 46)
 
@@ -160,9 +172,6 @@ function do_trace(f::IO,
 
   else
     (dt, nx, fmt) = fh
-    dt = fh[1]
-    nx = fh[2]
-    fmt = fh[3]
     fast_readbytes!(f, buf, 38)
     ints[26]      = fastread(f, Int32)
     shorts[60]    = fastread(f, Int16)
@@ -192,7 +201,9 @@ function do_trace(f::IO,
     elseif T == Float32
       x .= bswap.(reinterpret(Float32, buf))[1:nx]
     elseif T == UInt32
-      fillx_u32_be!(x, buf, nx, 0)
+      y = Array{UInt32,1}(undef, nx)
+      fillx_u32_le!(y, buf, nx, 0)
+      x = ibmfloat.(y)
     else
       error("Trace data Type unsupported!")
     end
@@ -203,16 +214,12 @@ function do_trace(f::IO,
     δ       = getindex(shorts, 21)
     fs      = 1.0e6 / Float64(δ)
 
-    # not sure about this; where did this formula come from...?
-    gain    = Float64(ints[25]) * 10.0^(Float64(shorts[53] +
-                                                shorts[23] +
-                                                shorts[24])/10.0) # *2.0^shorts[47]
-    lat     = 0.0
-    lon     = 0.0
+    # not sure about meaning of "dB" in gain constants
+    gain    = Float64(ints[25]) * 10.0^(shorts[55] + (shorts[23] + shorts[24])/10.0)
     el      = Float64(ints[9]) * Float64(abs(z))^(z<Int16(0) ? -1.0 : 1.0)
 
     # Create ID
-    sta = string(shorts[55])
+    sta = string(reinterpret(UInt16, shorts[57]))
     cha = Int16(10) < shorts[1] < Int16(18) ? trid(shorts[1]-Int16(10), fs=fs) : "YYY"
     id = "." * sta[1:min(lastindex(sta),5)] * ".." * cha
 
@@ -274,7 +281,9 @@ function do_trace(f::IO,
   setfield!(C, :fs, fs)
   mk_t!(C, length(x), ts)
   setfield!(C, :x, x)
-
+  if passcal == false
+    setfield!(C, :units, get(segy_units, Int16(shorts[56]), ""))
+  end
   if full == true
     setfield!(C, :misc, misc)
   end
@@ -326,7 +335,7 @@ function read_segy_file!( S::GphysData,
       fastskip(f, 3200*nh)
     else
       exthdr = Array{String,1}(undef, nh)
-      for i = 1:nh; exthdr[i] = fastread(f, 3200); end
+      [exthdr[i] = fastread(f, 3200) for i in 1:nh]
       fhd = Dict{String,Any}(
               zip(String["ntr", "naux", "filedt", "origdt", "filenx",
                          "orignx", "fmt", "cdpfold", "trasort", "vsum",
@@ -401,18 +410,19 @@ function segyhdr(fname::String; passcal::Bool=false, swap::Bool=false)
       D = getindex(getfield(seis, :misc),1)
       for (j,k) in enumerate(sort(collect(keys(D))))
         if k == "exthdr" || k == "filehdr"
-          val = get(seis.misc[i], k, repr(nothing))
-          if val == "nothing" || isempty(val)
+          val = get(seis.misc[i], k, "")
+          if isempty(val)
             s = "(empty)"
           else
             s = length(val) > 8 ? String(val[1:8])*"…" : String(val)
           end
         else
-          s = string(get(seis.misc[i], k, repr(nothing)))
+          s = string(get(seis.misc[i], k, ""))
         end
-        S[j+1] *= @sprintf("%20s: %s%s", k, s, " "^(10-length(s)))
+        filler = " "^max(0, 10-length(s))
+        S[j+1] *= @sprintf("%20s: %s%s", k, s, filler)
       end
-      if p+2*w > W || i == seis.n
+      if (p+2*w > W) || (i == seis.n)
         printstyled(stdout, S[1]*"\n", color=:yellow, bold=true)
         [println(S[j]) for j=2:length(S)]
         println("")
