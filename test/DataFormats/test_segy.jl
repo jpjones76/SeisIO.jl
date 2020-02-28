@@ -6,6 +6,81 @@ segy_be_file  = string(path, "/SampleFiles/SEGY/02.104.00.00.08.7107.2")
 segy_fpat     = string(path, "/SampleFiles/SEGY/02.104.00.00.08.7107.2")
 
 printstyled("  SEG Y\n", color=:light_green)
+printstyled("    Helper functions\n", color=:light_green)
+printstyled("      IBM-float\n", color=:light_green)
+
+#=
+  These bit representations are from Wikipedia's page on IBM-float,
+  https://en.wikipedia.org/wiki/IBM_hexadecimal_floating_point
+=#
+y = [-118.625, +7.2370051e75, +5.397605e-79, 0.0, 0.1]
+for (i, str) in enumerate( ["11000010011101101010000000000000",
+                            "01111111111111111111111111111111",
+                            "00000000000100000000000000000000",
+                            "00000000000000000000000000000000",
+                            "01000000000110011001100110011010"] )
+  u = hton(parse(UInt32, str, base=2))
+  @test isapprox(ibmfloat(u), y[i], rtol=10*eps(Float32))
+end
+
+printstyled("      auto_coords\n", color=:light_green)
+sc = Int16[1,1]
+lat0 = -39.4209
+lon0 = -71.94061
+ele = 2856.3
+xy = [round(Int32, lon0*1.0e4), round(Int32, lat0*1.0e4)]
+y,x = auto_coords(xy, sc)
+@test latlon2xy(y,x) == xy
+
+xy2 = latlon2xy(lat0, lon0)
+auto_coords(xy2, sc)
+@test isapprox([auto_coords(xy2, sc)...], [lat0, lon0], rtol=eps(Float32))
+
+S1 = read_data(segy_file_3)
+S2 = read_data(segy_file_4)
+@test abs(S1.loc[1].lat-S2.loc[1].lat) < 1.0e-4
+@test abs(S1.loc[1].lon-S2.loc[1].lon) < 1.0e-4
+@test abs(S1.loc[1].el-S2.loc[1].el) < 1.0e-4
+@test S1.x[1] == S2.x[1]
+
+printstyled("      trid\n", color=:light_green)
+@test trid(Int16(2), fs=S1.fs[1]) == "EHZ"
+@test trid(Int16(2), fs=S1.fs[1], fc=1/30) == "HHZ"
+
+printstyled("    SEG Y rev 1\n", color=:light_green)
+if has_restricted
+  SEG = verified_read_data("segy", segy_file_2)
+  redirect_stdout(out) do
+    segyhdr(segy_file_2)
+  end
+
+  printstyled("      data integrity\n", color=:light_green)
+  x = collect(1:1:8)
+  for i in [1,2,3,5,8]
+    fname = string(path, "/SampleFiles/SEGY/test_rev1_", i, ".segy")
+    S = read_data("segy", fname)
+    @test isapprox(S.x[1], x)
+  end
+  @test_throws ErrorException read_data("segy", string(path, "/SampleFiles/SEGY/test_rev1_4.segy"))
+
+  printstyled("      header accuracy\n", color=:light_green)
+  S = read_data("segy", segy_file_2)
+  @test S.n == 36
+  @test length(unique([i[1:6] for i in S.id])) == 12
+  for i in 1:S.n
+    @test S.fs[i] ≈ 2000.0
+    @test S.gain[i] ≈ 320.0
+    @test S.units[i] == "m/s"
+    @test length(S.x[i]) == 32000
+    @test size(S.t[i], 1) == 2
+  end
+  @test length(findall([endswith(i, "GHZ") for i in S.id])) == 12
+  @test length(findall([endswith(i, "GH1") for i in S.id])) == 12
+  @test length(findall([endswith(i, "GH2") for i in S.id])) == 12
+else
+  printstyled("    Skipped SEG Y rev 1\n", color=:red)
+end
+
 printstyled("    PASSCAL/NMT SEG Y\n", color=:light_green)
 SEG = verified_read_data("passcal", segy_file_1, full=true)
 
@@ -83,61 +158,3 @@ SEG = verified_read_data("passcal", segy_fpat, full=true, swap=true)
 @test Float64(SEG.misc[1]["min"]) == minimum(SEG.x[1]) == -54454.0
 @test ≈(SEG.x[1][1:5], [-615.0, -3994.0, -4647.0, -895.0, 190.0])
 @test length(SEG.x[1]) == SEG.misc[1]["num_samps"] == 180027
-
-if has_restricted
- printstyled("    SEG Y rev 1\n", color=:light_green)
-  SEG = verified_read_data("segy", segy_file_2)
-  redirect_stdout(out) do
-    segyhdr(segy_file_2)
-  end
-
-  printstyled("      encoding accuracy\n", color=:light_green)
-  x = collect(1:1:8)
-  for i in [1,2,3,5,8]
-    fname = string(path, "/SampleFiles/SEGY/test_rev1_", i, ".segy")
-    S = read_data("segy", fname)
-    @test isapprox(S.x[1], x)
-  end
-
-  printstyled("      header accuracy\n", color=:light_green)
-  S = read_data("segy", segy_file_2)
-  @test S.n == 36
-  @test length(unique([i[1:6] for i in S.id])) == 12
-  for i in 1:S.n
-    @test S.fs[i] ≈ 2000.0
-    @test S.gain[i] ≈ 320.0
-    @test S.units[i] == "m/s"
-    @test length(S.x[i]) == 32000
-    @test size(S.t[i], 1) == 2
-  end
-  @test length(findall([endswith(i, "GHZ") for i in S.id])) == 12
-  @test length(findall([endswith(i, "GH1") for i in S.id])) == 12
-  @test length(findall([endswith(i, "GH2") for i in S.id])) == 12
-else
-  printstyled("    Skipped SEG Y rev 1\n", color=:red)
-end
-
-printstyled("    Helper functions\n", color=:light_green)
-printstyled("      auto_coords\n", color=:light_green)
-sc = Int16[1,1]
-lat0 = -39.4209
-lon0 = -71.94061
-ele = 2856.3
-xy = [round(Int32, lon0*1.0e4), round(Int32, lat0*1.0e4)]
-y,x = auto_coords(xy, sc)
-@test latlon2xy(y,x) == xy
-
-xy2 = latlon2xy(lat0, lon0)
-auto_coords(xy2, sc)
-@test isapprox([auto_coords(xy2, sc)...], [lat0, lon0], rtol=eps(Float32))
-
-S1 = read_data(segy_file_3)
-S2 = read_data(segy_file_4)
-@test abs(S1.loc[1].lat-S2.loc[1].lat) < 1.0e-4
-@test abs(S1.loc[1].lon-S2.loc[1].lon) < 1.0e-4
-@test abs(S1.loc[1].el-S2.loc[1].el) < 1.0e-4
-@test S1.x[1] == S2.x[1]
-
-printstyled("      trid\n", color=:light_green)
-@test trid(Int16(2), fs=S1.fs[1]) == "EHZ"
-@test trid(Int16(2), fs=S1.fs[1], fc=1/30) == "HHZ"
