@@ -1,5 +1,34 @@
 export read_data, read_data!
 
+note_fsrc!(S::GphysData, N::Array{Int64,1}, fmt::String, filestr::String, opts::String) = note!(S, N, string( "+source ¦ read_data!(S, ",
+                          "\"", fmt,  "\", ",
+                          "\"", filestr, "\", ",
+                          opts, ")" ))
+
+function src_track!(S::GphysData, j::Int64, nx::Array{Int64,1}, last_src::Array{Int64,1})
+  n = length(nx)
+
+  # Check existing channels for changes
+  for i in 1:n
+    if length(S.x[i]) > nx[i]
+      last_src[i] = j
+      nx[i] = length(S.x[i])
+    end
+  end
+
+  # Add new channels
+  if n < S.n
+    δn = S.n - n
+    append!(nx, zeros(Int64, δn))
+    append!(last_src, zeros(Int64, δn))
+    for i in n+1:S.n
+      nx[i] = length(S.x[i])
+      last_src[i] = j
+    end
+  end
+  return nothing
+end
+
 function read_data_seisio!(S::SeisData, filestr::String, memmap::Bool, v::Integer)
   S_in = rseis(filestr, memmap=memmap)
   L = length(S_in)
@@ -30,69 +59,6 @@ function read_data_seisio!(S::SeisData, filestr::String, memmap::Bool, v::Intege
   return nothing
 end
 
-# ## Supported File Formats
-# | Format                    | String          |
-# | :---                      | :---            |
-# | AH-1                      | ah1             |
-# | AH-2                      | ah2             |
-# | Bottle                    | bottle          |
-# | GeoCSV, time-sample pair  | geocsv          |
-# | GeoCSV, sample list       | geocsv.slist    |
-# | Lennartz SLIST            | lennartz        |
-# | Mini-SEED                 | mseed           |
-# | PASSCAL SEG Y             | passcal         |
-# | PC-SUDS                   | suds            |
-# | SAC                       | sac             |
-# | SEG Y (rev 0 or rev 1)    | segy            |
-# | SEISIO                    | seisio          |
-# | SLIST (ASCII sample list) | slist           |
-# | UW                        | uw              |
-# | Win32                     | win32           |
-#
-# ### Keywords
-# |KW      | Used By  | Type    | Default   | Meaning                         |
-# |:---    |:---      |:---     |:---       |:---                             |
-# |cf      | win32    | String  | ""        | win32 channel info filestr      |
-# |full    | ah1, ah2 | Bool    | false     | read full header into `:misc`?  |
-# |        | sac      |         |           |                                 |
-# |        | segy     |         |           |                                 |
-# |        | suds     |         |           |                                 |
-# |        | uw       |         |           |                                 |
-# |memmap  | *        | Bool    | false     | use mmap to read files? [^1]    |
-# |nx_add  | bottle   | Int64   | 360000    | min. increase when resizing `:x`|
-# |        | mseed    |         |           |                                 |
-# |        | win32    |         |           |                                 |
-# |nx_new  | bottle   | Int64   | 86400000  | `length(C.x)` for new channels  |
-# |        | mseed    |         |           |                                 |
-# |        | win32    |         |           |                                 |
-# |jst     | win32    | Bool    | true      | are sample times JST (UTC+9)?   |
-# |strict  | *        | Bool    | false     | strict channel matching?        |
-# |swap    | mseed    | Bool    | true      | byte swap?                      |
-# |        | passcal  |         |           |                                 |
-# |        | segy     |         |           |                                 |
-# |v       | *        | Int64   | 0         | verbosity                       |
-# |vl      | *        | Bool    | false     | verbose logging to :notes [^2]  |
-#
-# [^1]: potentially dangerous; Julia SIGSEGV handling is undocumented.
-# [^2]: verbose logging adds one line to `:notes` for each file read.
-#
-# See official SeisIO documentation for performance tips associated with KWs.
-#
-# ## SeisIO native format
-# `read_data("seisio", ...)` is a convenience wrapper that reads only the first SeisIO object that can be converted to a SeisData structure from each file. For more complicated read operations on SeisIO files, use `rseis`.
-#
-# ## Examples
-# 1. `S = read_data("uw", "99011116541W", full=true)`
-#     + Read UW-format data file `99011116541W`
-#     + Store full header information in `:misc`
-# 2. `read_data!(S, "sac", "MSH80*.SAC", "strict=true")`
-#     + Read SAC-format files matching string pattern `MSH80*.SAC`
-#     + Read into existing SeisData object `S`
-#     + Only continue a channel that matches on `:id`, `:fs`, and `:gain`
-# 3. `S = read_data("win32", "20140927*.cnt", cf="20140927*ch", nx_new=360000)`
-#     + Read win32-format data files with names matching pattern `2014092709*.cnt`
-#     + Use ASCII channel information filenames that match pattern `20140927*ch`
-#     + Assign new channels an initial size of `nx_new` samples
 @doc """
     S = read_data(fmt, filestr [, keywords])
     read_data!(S, fmt, filestr [, keywords])
@@ -126,8 +92,15 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
   vl      ::Bool    = false               # verbose logging
   )
 
-  N = S.n
-  if isa(fpat, Array{String, 1})
+  # Variables for tracking changes
+  N             = S.n
+  fpat_is_array = isa(fpat, Array{String, 1})
+  fmt_is_seisio = (fmt == "seisio")
+  opt_strings   = String[]
+  last_src      = zeros(Int64, S.n)
+  nx            = [length(S.x[i]) for i in 1:S.n]
+
+  if fpat_is_array
     one_file = false
     files = String[]
     for f in fpat
@@ -138,17 +111,12 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
         append!(files, ls(ff))
       end
     end
-    new_chan_src = files
   else
     filestr = abspath(fpat)
     one_file = safe_isfile(filestr)
     if one_file == false
       files = ls(filestr)
     end
-    new_chan_src = nothing
-  end
-  if fmt != "seisio"
-    opt_strings = Array{String,1}(undef, 0)
   end
 
   if fmt == "sac"
@@ -161,17 +129,19 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     if one_file
       read_sac_file!(S, filestr, fv, iv, cv, full, memmap, strict)
     else
-      for fname in files
+      for (j, fname) in enumerate(files)
         read_sac_file!(S, fname, fv, iv, cv, full, memmap, strict)
+        src_track!(S, j, nx, last_src)
       end
     end
 
-  elseif fmt == "seisio"
+  elseif fmt_is_seisio
     if one_file
       read_data_seisio!(S, filestr, memmap, v)
     else
-      for fname in files
+      for (j, fname) in enumerate(files)
         read_data_seisio!(S, fname, memmap, v)
+        src_track!(S, j, nx, last_src)
       end
     end
 
@@ -180,8 +150,9 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     if one_file
       read_mseed_file!(S, filestr, nx_new, nx_add, memmap, strict, v)
     else
-      for fname in files
+      for (j, fname) in enumerate(files)
         read_mseed_file!(S, fname, nx_new, nx_add, memmap, strict, v)
+        src_track!(S, j, nx, last_src)
       end
     end
     push!(opt_strings, string("swap = ", swap,
@@ -196,8 +167,9 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     if one_file
       read_ah1!(S, filestr, full, memmap, strict, v)
     else
-      for fname in files
+      for (j, fname) in enumerate(files)
         read_ah1!(S, fname, full, memmap, strict, v)
+        src_track!(S, j, nx, last_src)
       end
     end
     push!(opt_strings, string("full = ", full))
@@ -206,8 +178,9 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     if one_file
       read_ah2!(S, filestr, full, memmap, strict, v)
     else
-      for fname in files
+      for (j, fname) in enumerate(files)
         read_ah2!(S, fname, full, memmap, strict, v)
+        src_track!(S, j, nx, last_src)
       end
     end
     push!(opt_strings, string("full = ", full))
@@ -222,8 +195,9 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     if one_file
       read_geocsv_file!(S, filestr, tspair, memmap)
     else
-      for fname in files
+      for (j, fname) in enumerate(files)
         read_geocsv_file!(S, fname, tspair, memmap)
+        src_track!(S, j, nx, last_src)
       end
     end
 
@@ -231,8 +205,9 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     if one_file
       read_slist!(S, filestr, true, memmap)
     else
-      for fname in files
+      for (j, fname) in enumerate(files)
         read_slist!(S, fname, true, memmap)
+        src_track!(S, j, nx, last_src)
       end
     end
 
@@ -247,8 +222,9 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
       # read_segy_file!(S, filestr, buf, shorts, ints, passcal, swap, memmap, full, strict)
       read_segy_file!(S, filestr, passcal, memmap, full, swap, strict)
     else
-      for fname in files
+      for (j, fname) in enumerate(files)
         read_segy_file!(S, fname, passcal, memmap, full, swap, strict)
+        src_track!(S, j, nx, last_src)
       end
     end
     push!(opt_strings, string("full = ", full,
@@ -258,8 +234,9 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     if one_file
       read_slist!(S, filestr, false, memmap)
     else
-      for fname in files
+      for (j, fname) in enumerate(files)
         read_slist!(S, fname, false, memmap)
+        src_track!(S, j, nx, last_src)
       end
     end
 
@@ -267,8 +244,9 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     if one_file
       append!(S, SUDS.read_suds(filestr, memmap=memmap, full=full, v=v))
     else
-      for fname in files
+      for (j, fname) in enumerate(files)
         append!(S, SUDS.read_suds(fname, memmap=memmap, full=full, v=v))
+        src_track!(S, j, nx, last_src)
       end
     end
     push!(opt_strings, string("full = ", full))
@@ -277,16 +255,20 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     if one_file
       UW.uwdf!(S, filestr, full, memmap, strict, v)
     else
-      for fname in files
+      for (j, fname) in enumerate(files)
         UW.uwdf!(S, fname, full, memmap, strict, v)
+        src_track!(S, j, nx, last_src)
       end
     end
     push!(opt_strings, string("full = ", full))
 
   elseif fmt == "win32" || fmt =="win"
     if isa(fpat, Array{String, 1})
-      for f in fpat
+      for (j, f) in enumerate(fpat)
         readwin32!(S, f, cf, jst, nx_new, nx_add, memmap, strict, v)
+
+        # here the list of files is already expanded, so this is accurate
+        src_track!(S, j, nx, last_src)
       end
     else
       readwin32!(S, filestr, cf, jst, nx_new, nx_add, memmap, strict, v)
@@ -302,7 +284,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
 
   # ===================================================================
   # logging
-  if fmt != "seisio"
+  if !fmt_is_seisio
     if length(opt_strings) == 0
       opts = string("v = ", v, ", vl = ", vl)
     else
@@ -310,37 +292,46 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
       opts = join(opt_strings, ", ")
     end
 
-    if new_chan_src == nothing
-      chan_view = view(S.src, N+1:S.n)
-      fill!(chan_view , filestr)
-      if vl && (one_file == false)
-        files = ls(filestr)
-        for f in files
-          note!(S, N+1:S.n, string( "+source ¦ read_data!(S, ",
-                                    "\"", fmt,  "\", ",
-                                    "\"", f, "\", ",
-                                    opts, ")" )
-                )
+    # Update all channels
+    to_note = Int64[]
+    if fpat_is_array
+      for i in 1:S.n
+        if last_src[i] > 0
+          S.src[i] = files[last_src[i]]
+          push!(to_note, i)
         end
-      else
-        note!(S, N+1:S.n, string( "+source ¦ read_data!(S, ",
-                                  "\"", fmt,  "\", ",
-                                  "\"", filestr, "\", ",
-                                  opts, ")" )
-              )
       end
     else
-      for (j,i) in enumerate(N+1:S.n)
-        S.src[i] = new_chan_src[j]
-      end
-      if vl
-        for f in files
-          note!(S, N+1:S.n, string( "+source ¦ read_data!(S, ",
-                                    "\"", fmt,  "\", ",
-                                    "\"", f, "\", ",
-                                    opts, ")" )
-                )
+
+      # Update existing channels first
+      for i in 1:N
+        if length(S.x[i]) > nx[i]
+          S.src[i] = filestr
+          push!(to_note, i)
         end
+      end
+
+      # Do new channels
+      chan_view = view(S.src, N+1:S.n)
+      fill!(chan_view , filestr)
+
+      # Note new source
+      append!(to_note, collect(N+1:S.n))
+
+      # note filestr used in read
+      if vl == false
+          note_fsrc!(S, to_note, fmt, filestr, opts)
+
+      # For verbose logging, note all files used in the read
+      elseif one_file == false
+        files = ls(filestr)
+      end
+    end
+
+    # For verbose logging, any changed channel logs all files to :notes
+    if vl && (one_file == false)
+      for f in files
+        note_fsrc!(S, to_note, fmt, f, opts)
       end
     end
   end

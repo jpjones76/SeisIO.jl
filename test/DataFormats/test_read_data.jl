@@ -108,6 +108,22 @@ S3 = read_data(files, vl=true)
 # Does a string array read the same way as a wildcard read?
 compare_SeisData(S, verified_read_data("sac", pref .* "SAC/test*sac", vl=true))
 
+# source logging
+printstyled("    logging\n", color=:light_green)
+uwf1 = joinpath(path, "SampleFiles/UW/99011116541")
+uwf4 = joinpath(path, "SampleFiles/UW/00012502123W")
+rp1 = realpath(uwf1*"W")
+rp2 = realpath(uwf4)
+
+S = read_data("uw", [uwf1*"W", uwf4])
+for i in 1:S.n
+  if length(S.t[i]) == 6
+    @test S.src[i] == rp2
+  else
+    @test S.src[i] == (S.t[i][1,2] ≥ 946684800000000 ? rp2 : rp1)
+  end
+end
+
 @test_throws ErrorException verified_read_data("deez", "nutz.sac")
 resize!(x, 65535)
 nothing
