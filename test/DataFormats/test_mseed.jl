@@ -10,7 +10,7 @@ mseed_vals_file   = string(path, "/SampleFiles/SEED/test_mseed_vals.txt")
 
 @test_throws ErrorException verified_read_data("mseed", test_sac_file)
 
-S = verified_read_data("mseed", test_mseed_file, v=0)
+S = verified_read_data("mseed", test_mseed_file, v=0, strict=false)
 @test isequal(S.id[1], "NL.HGN.00.BHZ")
 @test ≈(S.fs[1], 40.0)
 @test ≈(S.gain[1], 1.0)
@@ -23,9 +23,9 @@ Sm = read_data("mseed", test_mseed_file, v=0, memmap=true)
 @test Sm == S
 
 # Test breaks if memory-resident SeisIOBuf structure SEED is not reset
-S1 = verified_read_data("mseed", test_mseed_file, v=0)
+S1 = verified_read_data("mseed", test_mseed_file, v=0, strict=false)
 if Sys.iswindows() == false
-  S2 = verified_read_data("mseed", test_mseed_pat, v=0)
+  S2 = verified_read_data("mseed", test_mseed_pat, v=0, strict=false)
   @test S2.src[1] == abspath(test_mseed_pat)
   S2.src = S1.src
   @test S == S1 == S2
@@ -49,9 +49,9 @@ if safe_isdir(path*"/SampleFiles/Restricted")
       S = SeisData()
       ae = any([occursin(i, f) for i in ("blkt2000", "detection.record", "text-encoded", "timing.500s")])
       if ae
-        verified_read_data!(S, "mseed", f, v=3, allow_empty=true)
+        verified_read_data!(S, "mseed", f, v=3, allow_empty=true, strict=false)
       else
-        verified_read_data!(S, "mseed", f, v=2)
+        verified_read_data!(S, "mseed", f, v=2, strict=false)
       end
 
       # Test that our encoders return the expected values

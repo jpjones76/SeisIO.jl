@@ -4,6 +4,7 @@ function verified_read_data!(S::GphysData, fmt::String, fpat::Union{String, Arra
   jst     ::Bool    = true,               # are sample times JST (UTC+9)?
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
+  strict  ::Bool    = true,
   swap    ::Bool    = false,              # do byte swap?
   v       ::Int64   = KW.v,               # verbosity level
   vl      ::Bool    = false,              # verbose logging
@@ -16,6 +17,7 @@ function verified_read_data!(S::GphysData, fmt::String, fpat::Union{String, Arra
     jst     = jst,
     nx_add  = nx_add,
     nx_new  = nx_new,
+    strict  = strict,
     swap    = swap,
     v       = v,
     vl      = vl
@@ -31,6 +33,7 @@ function verified_read_data(fmt::String, fpat::Union{String, Array{String,1}};
   jst     ::Bool    = true,               # are sample times JST (UTC+9)?
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
+  strict  ::Bool    = true,
   swap    ::Bool    = false,              # do byte swap?
   v       ::Int64   = KW.v,               # verbosity level
   vl      ::Bool    = false,              # verbose logging
@@ -43,6 +46,7 @@ function verified_read_data(fmt::String, fpat::Union{String, Array{String,1}};
     jst     = jst,
     nx_add  = nx_add,
     nx_new  = nx_new,
+    strict  = strict,
     swap    = swap,
     v       = v,
     vl      = vl

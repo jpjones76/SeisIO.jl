@@ -10,7 +10,7 @@ printstyled("    v1\n", color=:light_green)
 redirect_stdout(out) do
   S = verified_read_data("ah1", ah1_file, v=3)
   S = verified_read_data("ah1", ah1_file, full=true)
-  S = verified_read_data("ah1", ah1_fstr, full=true, v=3)
+  S = verified_read_data("ah1", ah1_fstr, full=true, v=3, strict=false)
   @test S.n == 3
 
   S = read_data("ah1", ah1_fstr, full=true, v=3, strict=true)
@@ -79,7 +79,7 @@ printstyled("    v2\n", color=:light_green)
 redirect_stdout(out) do
   S = verified_read_data("ah2", ah2_file, v=3)
   S = verified_read_data("ah2", ah2_file, v=3, full=true)
-  S = verified_read_data("ah2", ah2_fstr, v=3, full=true, vl=true)
+  S = verified_read_data("ah2", ah2_fstr, v=3, full=true, vl=true, strict=false)
   @test S.n == 1
 
   S = read_data("ah2", ah2_fstr, v=3, full=true, strict=true, vl=true)
