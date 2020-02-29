@@ -96,9 +96,13 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
   N             = S.n
   fpat_is_array = isa(fpat, Array{String, 1})
   fmt_is_seisio = (fmt == "seisio")
-  opt_strings   = String[]
+  opt_strings   = ""
+  # opt_strings   = Array{String, 1}(undef, 0)
   last_src      = zeros(Int64, S.n)
-  nx            = [length(S.x[i]) for i in 1:S.n]
+  nx            = Array{Int64, 1}(undef, S.n)
+  for i in 1:S.n
+    nx[i] = length(S.x[i])
+  end
 
   if fpat_is_array
     one_file = false
@@ -106,7 +110,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     for f in fpat
       ff = abspath(f)
       if safe_isfile(ff)
-        push!(files, realpath(ff)) # deal with symlinks
+        push!(files, abspath(ff)) # deal with symlinks
       else
         append!(files, ls(ff))
       end
@@ -120,17 +124,11 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
   end
 
   if fmt == "sac"
-    fv = getfield(BUF, :sac_fv)
-    iv = getfield(BUF, :sac_iv)
-    cv = getfield(BUF, :sac_cv)
-    checkbuf_strict!(fv, 70)
-    checkbuf_strict!(iv, 40)
-    checkbuf_strict!(cv, 192)
     if one_file
-      read_sac_file!(S, filestr, fv, iv, cv, full, memmap, strict)
+      read_sac_file!(S, filestr, full, memmap, strict)
     else
       for (j, fname) in enumerate(files)
-        read_sac_file!(S, fname, fv, iv, cv, full, memmap, strict)
+        read_sac_file!(S, fname, full, memmap, strict)
         src_track!(S, j, nx, last_src)
       end
     end
@@ -155,9 +153,9 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
         src_track!(S, j, nx, last_src)
       end
     end
-    push!(opt_strings, string("swap = ", swap,
-                              ", nx_new = ", nx_new,
-                              ", nx_add = ", nx_add))
+    opt_strings = string("swap = ", swap,
+                          ", nx_new = ", nx_new,
+                          ", nx_add = ", nx_add)
 
 # ============================================================================
 # Data formats that aren't SAC, SEISIO, or SEED begin here and are alphabetical
@@ -172,7 +170,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
         src_track!(S, j, nx, last_src)
       end
     end
-    push!(opt_strings, string("full = ", full))
+    opt_strings = string("full = ", full)
 
   elseif fmt == "ah2"
     if one_file
@@ -183,12 +181,12 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
         src_track!(S, j, nx, last_src)
       end
     end
-    push!(opt_strings, string("full = ", full))
+    opt_strings = string("full = ", full)
 
   elseif fmt == "bottle"
     read_bottle!(S, filestr, nx_new, nx_add, memmap, strict, v)
-    push!(opt_strings, string("nx_new = ", nx_new,
-                              ", nx_add = ", nx_add))
+    opt_strings = string("nx_new = ", nx_new,
+                              ", nx_add = ", nx_add)
 
   elseif fmt in ("geocsv", "geocsv.tspair", "geocsv", "geocsv.slist")
     tspair = (fmt == "geocsv" || fmt == "geocsv.tspair")
@@ -227,8 +225,8 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
         src_track!(S, j, nx, last_src)
       end
     end
-    push!(opt_strings, string("full = ", full,
-                              ", swap = ", swap))
+    opt_strings = string("full = ", full,
+                              ", swap = ", swap)
 
   elseif fmt == "slist"
     if one_file
@@ -249,7 +247,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
         src_track!(S, j, nx, last_src)
       end
     end
-    push!(opt_strings, string("full = ", full))
+    opt_strings, string("full = ", full)
 
   elseif fmt == "uw"
     if one_file
@@ -260,7 +258,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
         src_track!(S, j, nx, last_src)
       end
     end
-    push!(opt_strings, string("full = ", full))
+    opt_strings = string("full = ", full)
 
   elseif fmt == "win32" || fmt =="win"
     if isa(fpat, Array{String, 1})
@@ -273,10 +271,10 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     else
       readwin32!(S, filestr, cf, jst, nx_new, nx_add, memmap, strict, v)
     end
-    push!(opt_strings, string("cf = \"", abspath(cf), "\"",
+    opt_strings = string("cf = \"", abspath(cf), "\"",
                               ", jst = ", jst,
                               ", nx_new = ", nx_new,
-                              ", nx_add = ", nx_add))
+                              ", nx_add = ", nx_add)
 
   else
     error("Unknown file format!")
@@ -285,12 +283,16 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
   # ===================================================================
   # logging
   if !fmt_is_seisio
-    if length(opt_strings) == 0
-      opts = string("v = ", v, ", vl = ", vl)
+    if isempty(opt_strings)
+      opt_strings = string("v = ", v, ", vl = ", vl)
     else
-      push!(opt_strings, string("v = ", v, ", vl = ", vl))
-      opts = join(opt_strings, ", ")
+      opt_strings *= string(", v = ", v, ", vl = ", vl)
     end
+    # if isempty(opt_strings)
+    # else
+    #   opt_strings = string("v = ", v, ", vl = ", vl))
+    #   opt_strings = join(opt_strings, ", ")
+    # end
 
     # Update all channels
     to_note = Int64[]
@@ -320,7 +322,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
 
       # note filestr used in read
       if vl == false
-          note_fsrc!(S, to_note, fmt, filestr, opts)
+          note_fsrc!(S, to_note, fmt, filestr, opt_strings)
 
       # For verbose logging, note all files used in the read
       elseif one_file == false
@@ -331,7 +333,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     # For verbose logging, any changed channel logs all files to :notes
     if vl && (one_file == false)
       for f in files
-        note_fsrc!(S, to_note, fmt, f, opts)
+        note_fsrc!(S, to_note, fmt, f, opt_strings)
       end
     end
   end
