@@ -1,5 +1,5 @@
 # SeisIO v1.0.0 Release: 2020-03-01
-### 2020-03-01
+### 2020-02-29
 * Deprecated `findid(S1, S2)` for two GphysData objects; wasn't useful
 * The [Format Reader Guide](../DevGuides/formats.md) was rewritten to include a full API.
 
