@@ -209,9 +209,10 @@ function read_ah2!(S::GphysData, ahfile::String, full::Bool, memmap::Bool, stric
       while j < k
         j += 1
         c = BUF.buf[j]
-        if c == 0x00
-          i = j
-        elseif c == 0x3b && j-i > 1
+        # if c == 0x00
+        #   i = j
+        # else
+        if c == 0x3b && j-i > 1
           push!(notes, stamp * unsafe_string(pointer(BUF.buf, i+1), j-i-1) * ", recorded in .ah file log")
           i = j
         end
