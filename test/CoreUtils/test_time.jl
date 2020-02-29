@@ -253,3 +253,32 @@ t1 = Array{Int64,2}(undef, 0, 0)
 t2 = Array{Int64,2}(undef, 0, 2)
 @test t_extend(t1, ts_new, nx_new, dt) == t_extend(t2, ts_new, nx_new, dt) == [1 ts_new; nx_new 0]
 @test t_extend(t1, ts_new, 0, dt) == t_extend(t2, ts_new, 0, dt) == [1 ts_new]
+
+# These were in test_time_utils.jl
+buf = BUF.date_buf
+dstr = "2019-06-01T03:50:04.02"
+dt = DateTime(dstr)
+t = round(Int64, d2u(dt)*1.0e6)
+nx = 12345
+
+# Tests for mk_t
+printstyled("    mk_t\n", color=:light_green)
+C = randSeisChannel(s=true)
+C.x = randn(nx)
+mk_t!(C, nx, t)
+@test C.t == [1 t; nx 0]
+@test C.t == mk_t(nx, t)
+
+# Tests for t_arr
+printstyled("    t_arr!\n", color=:light_green)
+t_arr!(buf, t)
+@test buf[1:6] == Int32[2019, 152, 3, 50, 4, 20]
+t = round(Int64, d2u(DateTime("2020-03-01T13:49:00.3"))*1.0e6)
+t_arr!(buf, t)
+@test buf[1:6] == Int32[2020, 61, 13, 49, 0, 300]
+t = round(Int64, d2u(DateTime("2020-03-01T13:49:00.030"))*1.0e6)
+t_arr!(buf, t)
+@test buf[1:6] == Int32[2020, 61, 13, 49, 0, 30]
+t = round(Int64, d2u(DateTime("2020-03-01T13:49:00.003"))*1.0e6)
+t_arr!(buf, t)
+@test buf[1:6] == Int32[2020, 61, 13, 49, 0, 3]

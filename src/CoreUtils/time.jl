@@ -19,7 +19,7 @@ d2u(k::DateTime) = Dates.datetime2unix(k)
 @doc """
     timestamp()
 
-Return current time formatted YYYY-mm-ddTHH:MM:SS.nnn.
+Return current time formatted YYYY-mm-ddTHH:MM:SS.
 """ timestamp
 timestamp() = tstr(Dates.unix2datetime(time()))
 timestamp(t::DateTime) = tstr(t)
@@ -28,7 +28,7 @@ timestamp(t::String) = tstr(Dates.DateTime(t))
 tnote(s::String) = string(timestamp(), " ¦ ", s)
 
 """
-  m,d = j2md(y,j)
+    m,d = j2md(y,j)
 
 Convert Julian day j of year y to month m, day d
 """
@@ -59,7 +59,7 @@ function j2md(y::T, j::T) where T<:Integer
 end
 
 """
-  j = md2j(y,m,d)
+    j = md2j(y, m, d)
 
 Convert month `m`, day `d` of year `y` to Julian day (day of year)
 """
@@ -90,35 +90,35 @@ md2j(y::AbstractString, m::AbstractString, d::AbstractString) = md2j(parse(Int, 
 @doc """
 # Time Specification
 
-Most functions that allow time specifiation use two reserved key words to track
+Most functions that allow time specification use two reserved keywords to track
 time:
 * `s`: Start (begin) time
 * `t`: Termination (end) time
 
 The values passed to keywords `s` and `t` can be real numbers, DateTime objects,
-or ASCII strings. Strings must follow the format "yyyy-mm-ddTHH:MM:SS.nnn", e.g.
-`s="2016-03-23T11:17:00.333"`. Exact behavior depends on the types of s and t:
+or ASCII strings; details and specific requirements are given in the time API (https://github.com/jpjones76/SeisIO.jl/blob/master/docs/DevGuides/time.md).
 
-| **s** | **t** | **Behavior**                         |
-|:------|:------|:-------------------------------------|
-| DT    | DT    | Sort                                 |
-| R     | DT    | Add `s` seconds to `t`, then sort    |
-| DT    | R     | Add `t` seconds to `s`, then sort    |
-| S     | R, DT | Convert `s` → DateTime, then sort    |
-| R, DT | S     | Convert `t` → DateTime, then sort    |
-| R     | R     | `s` and `t` are seconds from `now()` |
+## **parsetimewin Behavior**
+In all cases, parsetimewin outputs a pair of strings, sorted so that the first string corresponds to the earlier start time.
 
-(above, R = Real, DT = DateTime, S = String, I = Integer)
+| typeof(s) | typeof(t) | Behavior                                          |
+|:------    |:------    |:-------------------------------------             |
+| DateTime  | DateTime  | sort                                              |
+| DateTime  | Real      | add *t* seconds to *s*, then sort                 |
+| DateTime  | String    | convert *t* => DateTime, then sort                |
+| DateTime  | String    | convert *t* => DateTime, then sort                |
+| Real      | DateTime  | add *s* seconds to *t*, then sort                 |
+| Real      | Real      | treat *s*, *t* as seconds from current time; sort |
+| String    | DateTime  | convert *s* => DateTime, then sort                |
+| String    | Real      | convert *s* => DateTime, then sort                |
 
-## Relative Timekeeping
-Numeric time values are interpreted *relative to the start of the current minute*.
-Thus, if `-s` or `-t` is 0, the data request begins (or ends) at the start of
-the minute in which the request is submitted.
+### Timekeeping with Real values
+Numeric time values are interpreted relative to the start of the current minute. Thus, if `-s` or `-t` is 0, the data request begins (or ends) at the start of the minute in which the request is submitted.
 """ timespec
 timespec() = nothing
 
 """
-d0, d1 = parsetimewin(s, t)
+    (str0, str1) = parsetimewin(ts1::TimeSpec, ts2::TimeSpec)
 
 Convert times `s` and `t` to strings and sorts s.t. d0 < d1.
 
@@ -183,11 +183,9 @@ end
 # =========================================================
 # Time windowing functions
 """
-    endtime(t::Array{Int64,2}, Δ::Int64)
+    t = endtime(T::Array{Int64,2}, Δ::Int64)
 
-Compute the time of the last sample in SeisIO time matrix `t` sampled at
-(integer μs sampling interval) Δ. Result is measured from the Unix epoch in
-integer μs.
+Compute the time of the last sample in *T* sampled at interval *Δ* [μs] or frequency *fs* [Hz]. Output is integer μs measured from the Unix epoch.
 """
 function endtime(t::Array{Int64,2}, Δ::Int64)
   if isempty(t)
@@ -213,27 +211,17 @@ function endtime(t::Array{Int64,2}, fs::Float64)
 end
 
 """
-    t_extend(t::Array{Int64,2}, ts_new::Int64, nx_new::Int64, Δ::Int64)
+    t_extend(T::Array{Int64,2}, t_new::Int64, n_new::Int64, Δ::Int64)
 
-Extend time matrix `t` : `t[end,1]` = `nx_old`, where:
-* `ts_new` is the start time of the new segment in integer μs from the Unix epoch.
-* `nx_new` is the length of the new segment in samples.
+Extend SeisIO time matrix *T* sampled at interval *Δ* μs or frequency *fs* Hz. For matrix *Tᵢ*:
+* *t_new* is the start time of the next segment in data vector *Xᵢ*
+* *n_new* is the expected number of samples in the next segment of *Xᵢ*
 
-`check_for_gap!` is a more specfic case of `t_extend` that operates on a
-GphysData structure where `nx_new` is known and there are no time gaps possible
+`check_for_gap!` acts as a more specfic case of `t_extend` that operates on a
+GphysData structure where `n_new` is known and no time gaps are possible
 in the new segment.
 
-# Use
-## Known `nx_new` && No Gaps Possible
-Pass number of samples to be added as `nx_new`.
-
-Returns `t` extended by a segment equivalent to [1 ts; nx_new 0].
-
-## Unknown `nx_new` || Gaps Possible
-Pass 0 as `nx_new`.
-
-Returns `t` with the start of the new segment appended. The end of the
-segment should be appended as a final row later, of the form `[nx_total 0]`.
+This function has a mini-API in the time API (https://github.com/jpjones76/SeisIO.jl/blob/master/docs/DevGuides/time.md).
 
 See Also: check_for_gap!
 """
@@ -375,4 +363,29 @@ function tx_float(t::Array{Int64,2}, fs::Float64)
   end
   cumsum!(tt, tt)
   return tt
+end
+
+function mk_t(nx::Integer, ts::Int64)
+  t = Array{Int64, 2}(undef, 2, 2)
+  setindex!(t, one(Int64), 1)
+  setindex!(t, nx, 2)
+  setindex!(t, ts, 3)
+  setindex!(t, zero(Int64), 4)
+  return t
+end
+
+@doc """
+    t_arr!(B::Array{Int32,1}, t::Int64)
+
+Convert `t` to [year, day of year, hour, minute, second, frac_second], overwriting the first 6 values in `B` with the result.
+""" t_arr!
+function t_arr!(tbuf::Array{Int32, 1}, t::Int64)
+  dt = u2d(t*μs)
+  tbuf[1] = Int32(year(dt))
+  tbuf[2] = md2j(tbuf[1], Int32(month(dt)), Int32(day(dt)))
+  tbuf[3] = Int32(hour(dt))
+  tbuf[4] = Int32(minute(dt))
+  tbuf[5] = Int32(second(dt))
+  tbuf[6] = Int32(millisecond(dt))
+  return nothing
 end
