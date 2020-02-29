@@ -2,7 +2,7 @@ printstyled(stdout,"  extended methods\n", color=:light_green)
 
 printstyled(stdout,"    getindex\n", color=:light_green)
 (S,T) = mktestseis()
-@test findid(T, S) == [0, 0, 4, 5]
+# @test findid(T, S) == [0, 0, 4, 5]
 
 printstyled(stdout,"    getindex + Int on SeisData ==> SeisChannel\n", color=:light_green)
 C = S[1]
@@ -137,7 +137,7 @@ sizetest(T, 1)
 V = sort(V)
 
 deleteat!(X,1)
-@test findid(V,X) == [2,3,1]
+# @test findid(V,X) == [2,3,1]
 Y = sort(X)
 @test V == Y
 
