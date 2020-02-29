@@ -24,3 +24,7 @@ Seismology alone has ~10^2 file formats. Before adding support for a new one, as
   - A two-step processing of buffering, then converting to SeisData, is often much faster than reading directly to `:x`.
 * `check_for_gap` can check for time gaps and modify `:t`.
 * `mk_t` can initialize new time matrices.
+
+# 4. Other Requirements
+## Never sort a GphysData structure in a reader
+`read_data` will break, and so will your reader
