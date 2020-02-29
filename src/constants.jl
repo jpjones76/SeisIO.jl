@@ -30,7 +30,7 @@ const regex_chars = String[Sys.iswindows() ? "/" : "\\", "\$", "(", ")", "+", "?
 "\\W", "\\X", "\\Z", "\\a", "\\b", "\\c", "\\d", "\\e", "\\f", "\\n", "\\n",
 "\\p", "\\r", "\\s", "\\t", "\\w", "\\x", "\\x", "\\z", "]", "^", "{", "|", "}"]
 const show_os = 8
-const sac_keys = (  String[ "delta", "depmin", "depmax", "scale", "odelta",
+const sac_float_k = String[ "delta", "depmin", "depmax", "scale", "odelta",
                             "b", "e", "o", "a", "internal1",
                             "t0", "t1", "t2", "t3", "t4",
                             "t5", "t6", "t7", "t8", "t9",
@@ -43,18 +43,18 @@ const sac_keys = (  String[ "delta", "depmin", "depmax", "scale", "odelta",
                             "dist", "az", "baz", "gcarc", "internal2",
                             "internal3", "depmen", "cmpaz", "cmpinc", "xminimum",
                             "xmaximum", "yminimum", "ymaximum", "unused1", "unused2",
-                            "unused3", "unused4", "unused5", "unused6", "unused7" ],
-                    String[ "nzyear", "nzjday", "nzhour", "nzmin", "nzsec",
+                            "unused3", "unused4", "unused5", "unused6", "unused7" ]
+const sac_int_k = String[   "nzyear", "nzjday", "nzhour", "nzmin", "nzsec",
                             "nzmsec", "nvhdr", "norid", "nevid", "npts",
                             "internal4", "nwfid", "nxsize", "nysize", "unused8",
                             "iftype", "idep", "iztype", "unused9", "iinst",
                             "istreg", "ievreg", "ievtyp", "iqual", "isynth",
                             "imagtyp", "imagsrc", "unused10", "unused11", "unused12",
                             "unused13", "unused14", "unused15", "unused16", "unused17",
-                            "leven", "lpspol", "lovrok", "lcalda", "unused18" ],
-                    String[ "kstnm", "kevnm", "khole", "ko", "ka", "kt0", "kt1", "kt2",
+                            "leven", "lpspol", "lovrok", "lcalda", "unused18" ]
+const sac_string_k = String["kstnm", "kevnm", "khole", "ko", "ka", "kt0", "kt1", "kt2",
                             "kt3", "kt4", "kt5", "kt6", "kt7", "kt8", "kt9", "kf", "kuser0",
-                            "kuser1", "kuser2", "kcmpnm", "knetwk", "kdatrd", "kinst" ] )
+                            "kuser1", "kuser2", "kcmpnm", "knetwk", "kdatrd", "kinst" ]
 const sac_nul_c = UInt8[0x2d, 0x31, 0x32, 0x33, 0x34, 0x35, 0x20, 0x20]
 const sac_nul_f = -12345.0f0
 const sac_nul_i = Int32(-12345)

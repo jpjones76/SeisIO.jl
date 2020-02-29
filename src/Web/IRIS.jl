@@ -35,7 +35,7 @@ function irisws(cha::String, d0::String, d1::String;
     end
 
     if fmt == "sacbl"
-      Ch = read_sac_stream(IOBuffer(R), BUF.sac_fv, BUF.sac_iv, BUF.sac_cv, false, false)
+      Ch = read_sac_stream(IOBuffer(R), false, false)
     elseif fmt == "miniseed"
       S = SeisData()
       parsemseed!(S, IOBuffer(R), KW.nx_add, KW.nx_add, true, v)

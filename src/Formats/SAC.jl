@@ -62,7 +62,10 @@ function fill_sac(si::Int64, nx::Int32, ts::Int64, id::Array{String,1})
   return fname
 end
 
-function read_sac_stream(f::IO, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Array{UInt8,1}, full::Bool, swap::Bool)
+function read_sac_stream(f::IO, full::Bool, swap::Bool)
+  fv = BUF.sac_fv
+  iv = BUF.sac_iv
+  cv = BUF.sac_cv
   fastread!(f, fv)
   fastread!(f, iv)
   fastread!(f, cv)
@@ -74,14 +77,10 @@ function read_sac_stream(f::IO, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Ar
   x = Array{Float32,1}(undef, nx)
   fastread!(f, x)
   if swap == true
-    x .= bswap.(x)
+    broadcast!(bswap, x, x)
   end
 
   # floats
-  gain = Float64(getindex(fv, 4))
-  if gain == Float64(sac_nul_f)
-    gain = one(Float64)
-  end
   loc = GeoLoc()
   j = 0
   lf = (:lat, :lon, :el, :az, :inc)
@@ -107,99 +106,97 @@ function read_sac_stream(f::IO, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Ar
 
   # chars
   id = zeros(UInt8, 15)
-  i = 1
-  while i < 193
+  i = 0x01
+  while i < 0xc1
     c = getindex(cv, i)
-    if c == sac_nul_start && i < 188
-      val = getindex(cv, i+1:i+5)
+    if (c == sac_nul_start) && (i < 0xbc)
+      val = getindex(cv, i+0x01:i+0x05)
       if val == sac_nul_Int8
-        cv[i:i+5] .= 0x20
+        cv[i:i+0x05] .= 0x20
       end
     elseif c == 0x00
       setindex!(cv, i, 0x20)
     end
     # fill ID
-    if i == 1
-      i = fill_id!(id, cv, i, 8, 4, 8)
-    elseif i == 17
-      i = fill_id!(id, cv, i, 24, 10, 11)
-    elseif i == 161
-      i = fill_id!(id, cv, i, 168, 13, 15)
-    elseif i == 169
-      i = fill_id!(id, cv, i, 176, 1, 2)
+    if i == 0x01
+      i = fill_id!(id, cv, i, 0x08, 0x04, 0x08)
+    elseif i == 0x11
+      i = fill_id!(id, cv, i, 0x18, 0x0a, 0x0b)
+    elseif i == 0xa1
+      i = fill_id!(id, cv, i, 0xa8, 0x0d, 0x0f)
+    elseif i == 0xa9
+      i = fill_id!(id, cv, i, 0xb0, 0x01, 0x02)
     else
-      i = i+1
+      i = i+0x01
     end
   end
-  deleteat!(id, id.==0x00)
+  for i in 15:-1:1
+    if id[i] == 0x00
+      deleteat!(id, i)
+    end
+  end
 
   # Create a seischannel
-  C = SeisChannel()
-  setfield!(C, :id, String(id))
-  setfield!(C, :fs, Float64(1.0f0/getindex(fv,1)))
-  setfield!(C, :gain, Float64(gain))
-  setfield!(C, :loc, loc)
-  mk_t!(C, nx, ts)
-  setfield!(C, :x, x)
+  D = Dict{String,Any}()
+  C = SeisChannel(unsafe_string(pointer(id)),
+                "",
+                loc,
+                Float64(1.0f0/getindex(fv, 1)),
+                fv[4] == sac_nul_f ? 1.0 : Float64(fv[4]),
+                PZResp(),
+                "",
+                "",
+                D,
+                Array{String,1}(undef, 0),
+                mk_t(nx, ts),
+                x)
 
   # Create dictionary if full headers are desired
   if full == true
-    D = getfield(C, :misc)
-
-    fk = getindex(sac_keys, 1)
-    ik = getindex(sac_keys, 2)
-    ck = getindex(sac_keys, 3)
-
     # Parse floats
-    z = zero(Int16)
-    o = one(Int16)
-    k = ""
-    m = z
-    while m < Int16(70)
-      m += o
+    m = 0x00
+    while m < 0x46
+      m += 0x01
       if fv[m] != sac_nul_f
-        k = getindex(fk, m)
-        D[k] = getindex(fv, m)
+        D[sac_float_k[m]] = getindex(fv, m)
       end
     end
 
     # Parse ints
-    m = z
-    while m < Int16(40)
-      m += o
+    m = 0x00
+    while m < 0x28
+      m += 0x01
       if iv[m] != sac_nul_i
-        k = getindex(ik, m)
-        D[k] = getindex(iv, m)
+        D[sac_int_k[m]] = getindex(iv, m)
       end
     end
 
-    m = z
-    j = o
-    while j < Int16(24)
-      n = Int16(j == 2 ? 16 : 8)
+    m = 0x00
+    j = 0x01
+    while j < 0x18
+      n = j == 0x02 ? 0x10 : 0x08
       p = m + n
       ii = m
       while ii < p
-        ii += o
+        ii += 0x01
         if getindex(cv,ii) != 0x20
-          k = getindex(ck, j)
-          D[k] = String(getindex(cv, m+o:p))
+          D[sac_string_k[j]] = unsafe_string(pointer(cv, m+0x01), n)
           break
         end
       end
       m += n
-      j += o
+      j += 0x01
     end
   end
 
   return C
 end
 
-function read_sac_file!(S::SeisData, fname::String, fv::Array{Float32,1}, iv::Array{Int32,1}, cv::Array{UInt8,1}, full::Bool, memmap::Bool, strict::Bool)
+function read_sac_file!(S::SeisData, fname::String, full::Bool, memmap::Bool, strict::Bool)
   f = memmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   q = should_bswap(f)
   seekstart(f)
-  C = read_sac_stream(f, fv, iv, cv, full, q)
+  C = read_sac_stream(f, full, q)
   close(f)
   add_chan!(S, C, strict)
   return nothing
