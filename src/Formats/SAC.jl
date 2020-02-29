@@ -42,7 +42,7 @@ end
 
 function fill_sac(si::Int64, nx::Int32, ts::Int64, id::Array{String,1})
   @assert nx ≤ typemax(Int32)
-  t_arr!(BUF.sac_iv, ts, digits=3)
+  t_arr!(BUF.sac_iv, ts)
 
   # Ints
   BUF.sac_iv[10] = Int32(nx)
