@@ -100,3 +100,25 @@ redirect_stdout(out) do
 end
 printstyled("      append existing channel\n", color=:light_green)
 test_chan_ext(ah2_file, "ah2", "nu.RS..IP", 4.0, 1, 451291320120000)
+
+printstyled("      custom user attributes\n", color=:light_green)
+tmp_ah = "tmp.ah"
+io = open(ah2_file, "r")
+buf = read(io, 10636)
+skip(io, 4)
+append!(buf, reinterpret(UInt8, [bswap(Int32(1))]))
+append!(buf, reinterpret(UInt8, [bswap(Int32(6))]))
+append!(buf, codeunits("PEBKAC\0\0"))
+append!(buf, reinterpret(UInt8, [bswap(Int32(41))]))
+append!(buf, codeunits("problem exists between keyboard and chair\0\0\0"))
+append!(buf, read(io))
+close(io)
+
+ah_out = open(tmp_ah, "w")
+write(ah_out, buf)
+close(ah_out)
+
+S = read_data("ah2", tmp_ah, strict=true)
+@test haskey(S.misc[4], "PEBKAC")
+@test S.misc[4]["PEBKAC"] == "problem exists between keyboard and chair"
+safe_rm(tmp_ah)
