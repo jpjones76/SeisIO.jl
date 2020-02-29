@@ -95,7 +95,6 @@ mutable struct SeisIOBuf
   hdr_old::Vector{UInt8}
   id::Array{UInt8,1}
   id_str::String
-  u16::Vector{UInt16}
   #=  order of u16:
   1 year
   2 jdy
@@ -116,16 +115,17 @@ mutable struct SeisIOBuf
   n::UInt16
 
   # Data-related
-  x::Array{Float32,1}       # Data buffer
-  flags::Array{UInt8,1}     # Flags (Stored as four UInt8s)
-  x32::Array{UInt32,1}      # Unsigned 32-bit steim-encoded data
-  buf::Array{UInt8,1}       # Buffer for reading UInt8 data
-  int16_buf::Array{Int16,1} # Buffer for int16s in headers
-  int32_buf::Array{Int32,1} # Buffer for int16s in headers
-  int64_buf::Array{Int64,1} # Buffer for int64s; used in rseis/wseis
+  x::Array{Float32,1}         # Data buffer
+  buf::Array{UInt8,1}         # Buffer for reading UInt8 data
+  uint16_buf::Array{UInt16,1} # Used in SEG Y and SEED
+  uint32_buf::Array{UInt32,1} # Unsigned 32-bit steim-encoded data
+  int16_buf::Array{Int16,1}   # Buffer for int16s in headers
+  int32_buf::Array{Int32,1}   # Buffer for int32s in headers
+  int64_buf::Array{Int64,1}   # Buffer for int64s; used in rseis/wseis
   sac_fv::Array{Float32,1}
   sac_iv::Array{Int32,1}
   sac_cv::Array{UInt8,1}
+  flags::Array{UInt8,1}       # SEED flags (Stored as four UInt8s)
 
   # For parsing dates
   date_buf::Array{Int32,1}
@@ -147,16 +147,15 @@ mutable struct SeisIOBuf
         zero(Int32),                        # tc
         false,                              # swap
 
-        # calibiration blockettes (all use the same parser)
+        # SEED calibiration blockettes (all use the same parser)
         UInt16[0x012c, 0x0136, 0x0140, 0x0186],
 
-        # header
+        # SEED header
         Array{UInt8,1}(undef,8),            # seq::Vector{UInt8}
         Array{UInt8,1}(undef,12),           # hdr::Vector{UInt8}
         Array{UInt8,1}(undef,12),           # hdr_old::Vector{UInt8}
         Array{UInt8,1}(undef,15),           # id::Array{UInt8,1}
         "",                                 # id_str::String
-        Array{UInt16,1}(undef,6),           # u16::Vector{UInt16}
 
         # computed
         0.0,                                # dt::Float64
@@ -171,15 +170,16 @@ mutable struct SeisIOBuf
 
         # data-related arrays
         Array{Float32,1}(undef, 65535),     # x::Array{Float32,1}
-        Array{UInt8,1}(undef, 4),           # flags::Array{UInt8,1}
-        Array{UInt32,1}(undef, 16384),      # x32::Array{UInt32,1}
         Array{UInt8,1}(undef, 65535),       # buf::Array{UInt8,1}
+        Array{UInt16,1}(undef, 6),          # uint16_buf::Array{UInt16,1}
+        Array{UInt32,1}(undef, 16384),      # uint32_buf::Array{UInt32,1}
         Array{Int16,1}(undef, 62),          # int16_buf::Array{Int16,1}
-        Array{Int32,1}(undef, 29),          # int32_buf::Array{Int32,1}
+        Array{Int32,1}(undef, 100),         # int32_buf::Array{Int32,1}
         Array{Int64,1}(undef, 8),           # int64_buf::Array{Int64,1}
         Array{Float32,1}(undef, 70),        # sac_fv::Array{Float32,1}
         Array{Int32,1}(undef, 40),          # sac_iv::Array{Int32,1}
         Array{UInt8,1}(undef, 192),         # sac_cv::Array{UInt8,1}
+        Array{UInt8,1}(undef, 4),           # flags::Array{UInt8,1}
 
         # dedicated array for parsing dates
         Array{Int32,1}(undef, 7),           # date_buf::Array{Int32,1}

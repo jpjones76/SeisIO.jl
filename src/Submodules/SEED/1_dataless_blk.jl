@@ -458,8 +458,8 @@ function blk_052!(io::IO, nb::Int64, C::SeisChannel, ts_req::Int64, te_req::Int6
   skip_string!(sio)
 
   # ts, te
-  ts = parse_resp_date(sio, BUF.u16)
-  te = parse_resp_date(sio, BUF.u16)
+  ts = parse_resp_date(sio, BUF.uint16_buf)
+  te = parse_resp_date(sio, BUF.uint16_buf)
   if te == -56504908800000000
     te = 19880899199000000
   end
@@ -675,8 +675,8 @@ function blk_059!(io::IO, nb::Int64, v::Integer, C::SeisChannel, units::Bool)
   sio = blk_string_read(io, nb, v)
   v > 1 && println("")
   if units
-    ts = parse_resp_date(sio, BUF.u16)
-    te = parse_resp_date(sio, BUF.u16)
+    ts = parse_resp_date(sio, BUF.uint16_buf)
+    te = parse_resp_date(sio, BUF.uint16_buf)
     if te == -56504908800000000
       te = 19880899199000000
     end

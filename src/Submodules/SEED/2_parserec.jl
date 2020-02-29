@@ -3,7 +3,7 @@ rebuffer!(io::IOStream) = ccall(:ios_readall, Csize_t,
   (Ptr{Cvoid}, Ptr{Cvoid}, Csize_t), io.ios, pointer(BUF.dh_arr, 1), 48)
 
 function hdrswap!(BUF::SeisIOBuf)
-  u16 = getfield(BUF, :u16)
+  u16 = getfield(BUF, :uint16_buf)
   @inbounds for i = 1:5
     u16[i] = bswap(u16[i])
   end
@@ -56,7 +56,7 @@ end
 ###############################################################################
 function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, nx_new::Int64, nx_add::Int64, strict::Bool, v::Integer)
   # =========================================================================
-  u16 = getfield(BUF, :u16)
+  u16 = getfield(BUF, :uint16_buf)
   flags = getfield(BUF, :flags)
   xi = 0
   te = 0

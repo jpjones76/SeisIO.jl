@@ -80,7 +80,7 @@ end
 function SEED_Steim!(io::IO, BUF::SeisIOBuf, nb::UInt16)
   x = getfield(BUF, :x)
   buf = getfield(BUF, :buf)
-  ff = getfield(BUF, :x32)
+  ff = getfield(BUF, :uint32_buf)
   nc = Int64(div(nb, 0x0040))
   ni = div(nb, 0x0004)
   fast_readbytes!(io, buf, nb)
