@@ -24,4 +24,4 @@ appropriate description for the file format.
 whether or not the reader is in a submodule.
 
 ### Types
-Please read [adding_types.md](../../docs/API/adding_types.md).
+Please read [adding_types.md](../../docs/DevGuides/adding_types.md).

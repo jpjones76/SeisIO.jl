@@ -3,6 +3,7 @@ Code for data processing or analysis must conform to additional specifications f
 # Don't assume ideal objects
 Your code must handle (or skip, as needed) channels in `GphysData` subtypes (and/or `GphysChannel` subtypes) with undesirable features. Examples from our tests include:
 * irregularly-sampled data (`S.fs[i] == 0.0`), such as campaign-style GPS, SO₂ flux, and rain gauge measurements.
+* channels with a time gap before the last sample (`S.t[end, 2] != 0`)
 * data with (potentially very many) time gaps of arbitrary lengths.
   - Example: one of the mini-SEED test files comes from Steve Malone's [rebuilt Mt. St. Helens data](https://ds.iris.edu/ds/newsletter/vol16/no2/422/very-old-mount-st-helens-data-arrives-at-the-dmc/). Because the network was physically dangerous to maintain, each SEED volume spans several months with >100 time gaps, ranging in size from a few samples to a week and a half. Such gaps are _very_ common in records that predate the establishment of dedicated scientific data centers.
 * segments and channels with very few data points (e.g. a channel `i` with `length(S.x[i]) < 10`)
@@ -34,3 +35,9 @@ Please see the [logging API](./logging.md)
 
 # No unpublished algorithms in SeisIO core
 Place research-level code in separate packages
+
+<!-- `ii = get_unique(S::GphysData, A::Array{String,1}, chans::ChanSpec)`
+
+Get groups of channel indices in `S` that match the strings in `A`. `A` must contain either string field names in `S` (like "fs" or "gain"), or strings describing functions applicable to `S.x` (like "eltype" or "length").
+
+Returns an array of Integer arrays; each subarray contains the indices of one group. -->

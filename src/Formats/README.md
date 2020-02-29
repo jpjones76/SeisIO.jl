@@ -9,7 +9,7 @@ relatively small .jl file.
 `($format_name).jl`. Usually this is an acronym or abbreviation.
 
 ## Adding File Formats
-Please read [data_formats.md](../../docs/API/data_formats.md).
+Please read [formats.md](../../docs/DevGuides/formats.md).
 
 ## Adding Types
-Please read [adding_types.md](../../docs/API/adding_types.md).
+Please read [adding_types.md](../../docs/Guides/adding_types.md).

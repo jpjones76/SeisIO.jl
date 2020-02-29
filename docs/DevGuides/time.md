@@ -20,7 +20,7 @@ All data described herein are univariate and discretely sampled.
 | Δ   | sampling interval [μs]    | Int64                                     |
 | δt  | time gap or time jump     | Int64                                     |
 
-## **Terms**
+## **Definitions of Terms**
 * **Unix epoch** or **epoch time**: 1970-01-01T00:00:00 (UTC)
 * **single-channel structure**: a structure that can contain only discrete univariate data from a single channel of a single instrument. The guidelines below apply to single-channel structures by assuming a channel index subscript value of *i* = 1.
 * **multichannel structure**: a structure that can contain discrete univariate data from multile channels of multiple instruments.
@@ -37,7 +37,7 @@ All data described herein are univariate and discretely sampled.
     * Sample times are generally much more precise than ±0.5 *Δᵢ* with modern digital recording equipment.
     * Time gaps with absolute deviations ≤ 0.5 *Δᵢ* from sampling interval *Δᵢ* are discarded by SeisIO readers.
 
-## **Definition of SeisIO time matrix**
+## **Definition of SeisIO Time Matrix**
 A two-column Array{Int64,2}, in which:
 * `Tᵢ[:,1]` are indices *j* in *Xᵢ*
 * `Tᵢ[:,2]` are time values in μs

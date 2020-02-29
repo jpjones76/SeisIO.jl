@@ -1,4 +1,12 @@
-# SeisIO v0.5.0 Release: 2020-02-29
+# SeisIO v1.0.0 Release: 2020-03-01
+### 2020-03-01
+* Deprecated `findid(S1, S2)` for two GphysData objects; wasn't useful
+* The [Format Reader Guide](../DevGuides/formats.md) was rewritten to include a full API.
+
+### 2020-02-28
+* Greatly improved how `read_data!` logs and tracks new data sources.
+* The [Time Guide and API](../DevGuides/time.md) was rewritten to include full API and formal definitions of all terms.
+
 ### 2020-02-27
 * `read_hdf5` no longer errors when start or end time is a DateTime.
 * `convert_seis` now correctly errors when `units_out` is invalid.
@@ -8,6 +16,7 @@
   + Station names are now set in channel IDs from a more appropriate header.
   + `:gain` is once again correctly set.
   + `:units` are now set from the appropriate trace header.
+  + Files are now closed when an unsupported data encoding throws an error.
 
 ### 2020-02-26
 * `get_data`: bad requests and unparseable formats are now logged correctly and
@@ -19,7 +28,7 @@ saved to channels with special IDs in the output.
 * `read_meta` now also accepts KW `memmap`.
 
 ### 2020-02-22
-* The Win32 reader now logs time gaps > 0.5Δ for sample interval Δ, rather than > 1.0 s, consistent with other file formats.
+* Gaps between one-second blocks of data sampled at interval Δ are now only logged if δt > 1.5Δ, rather than δt > Δ. This is now strictly consistent with other file formats.
 * `read_data!` now extends existing data channels in all formats.
   + By default, channel data in SeisData structure `S` are extended if the id of the data on file matches a channel id in `S`.
   + Enforce stricter channel matching in most formats with KW `strict=true`.
