@@ -74,9 +74,9 @@ function do_trace(f::IO,
   shorts = BUF.int16_buf
   lat = 0.0
   lon = 0.0
-  checkbuf!(buf, 240)
-  checkbuf!(ints, 29)
-  checkbuf!(shorts, 62)
+  # checkbuf!(buf, 240)
+  # checkbuf!(ints, 29)
+  # checkbuf!(shorts, 62)
   checkbuf_8!(buf, max(180, length(buf)))
   fast_readbytes!(f, buf, 180)
 
@@ -325,7 +325,7 @@ function read_segy_file!( S::GphysData,
     close(f)
   else
     shorts  = getfield(BUF, :int16_buf)
-    checkbuf!(shorts, 62)
+    # checkbuf!(shorts, 62)
     # S = SeisData()
 
     # File headers

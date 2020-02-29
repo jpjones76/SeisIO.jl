@@ -107,7 +107,7 @@ function readwin32( dfilestr::String,
   jst_const = (jst == true ? 32400000000 : 0)
   date_hex  = zeros(UInt8, 8)
   date_arr  = zeros(Int64, 6)
-  checkbuf!(BUF.int32_buf, 100)
+  # checkbuf!(BUF.int32_buf, 100)
   checkbuf!(BUF.buf, 1000)
   buf       = getfield(BUF, :buf)
   x         = view(BUF.int32_buf, 1:100)
