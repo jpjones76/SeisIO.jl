@@ -9,7 +9,7 @@ Divide out the gains of all channels `i` where `S.fs[i] > 0.0`. Specify
 
 """ unscale!
 function unscale!(S::GphysData;
-  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  chans::ChanSpec=Int64[],
   irr::Bool=false)
 
   if chans == Int64[]
@@ -37,7 +37,7 @@ end
 
 @doc (@doc unscale!)
 function unscale(S::GphysData;
-  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  chans::ChanSpec=Int64[],
   irr::Bool=false)
 
   U = deepcopy(S)

@@ -819,7 +819,7 @@ Use keyword `chans=Cha` to restrict station XML write to `Cha`. This keyword
 can accept an Integer, UnitRange, or Array{Int64,1} as its argument.
 """
 function write_sxml(str::String, S::GphysData;
-  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[])
+  chans::ChanSpec=Int64[])
 
   chans = mkchans(chans, S, keepempty=true)
   fid = open(str, "w")

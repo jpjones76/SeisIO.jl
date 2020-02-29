@@ -1,5 +1,6 @@
 import LightXML: free, parse_string
-import SeisIO: KW,
+import SeisIO: ChanSpec,
+  KW,
   TimeSpec,
   check_for_gap!,
   dtconst,

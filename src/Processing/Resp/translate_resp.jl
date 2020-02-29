@@ -49,7 +49,7 @@ responses read from a SACPZ or SEED RESP file already use rad/s.
 """ translate_resp!
 function translate_resp!(S::GphysData,
                          resp_new::Union{PZResp, PZResp64};
-                         chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+                         chans::ChanSpec=Int64[],
                          wl::Float32=eps(Float32))
 
   # first ensure that there is something to do
@@ -177,7 +177,7 @@ end
 @doc (@doc translate_resp!)
 function translate_resp( S::GphysData,
                     resp_new::Union{PZResp, PZResp64};
-                    chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+                    chans::ChanSpec=Int64[],
                     wl::Float32=eps(Float32))
 
   U = deepcopy(S)
@@ -284,12 +284,12 @@ end
 
 @doc (@doc translate_resp!)
 remove_resp!(S::GphysData;
-             chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+             chans::ChanSpec=Int64[],
              wl::Float32=eps(Float32)) = translate_resp!(S, flat_resp, chans=chans, wl=wl)
 
 @doc (@doc translate_resp!)
 remove_resp(S::GphysData;
-            chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+            chans::ChanSpec=Int64[],
             wl::Float32=eps(Float32)) = translate_resp(S, flat_resp, chans=chans, wl=wl)
 
 remove_resp!(Ch::GphysChannel;

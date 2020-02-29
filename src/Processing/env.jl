@@ -12,7 +12,7 @@ the Hilbert transform).
 * v=V: verbosity.
 """ env!
 function env!(S::GphysData;
-  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  chans::ChanSpec=Int64[],
   v::Integer=KW.v)
 
   # preprocess data channels
@@ -183,7 +183,7 @@ end
 
 @doc (@doc env!)
 function env(S::GphysData;
-  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  chans::ChanSpec=Int64[],
   v::Integer=KW.v
   )
 

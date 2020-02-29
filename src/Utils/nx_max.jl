@@ -13,7 +13,7 @@ function nx_max(S::GphysData)
   return N
 end
 
-function nx_max(S::GphysData, C::Union{Integer, UnitRange, Array{Int64,1}})
+function nx_max(S::GphysData, C::ChanSpec)
   N = 0
   window_lengths = Array{Int64,1}(undef,0)
   t = Array{Int64,2}(undef,0,0)

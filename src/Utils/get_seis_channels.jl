@@ -18,7 +18,7 @@ like detrend! and taper! are sane) include D, G, H, J, L, M, N, P, Z.
 get_inst_codes
 """
 function get_seis_channels(S::GphysData;
-  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[])
+  chans::ChanSpec=Int64[])
 
   if chans == Int64[]
     chans = Int64.(collect(1:S.n))
@@ -47,8 +47,8 @@ function get_seis_channels(S::GphysData;
 end
 
 @doc """
-    filt_seis_chans!(chans::Union{Integer, UnitRange, Array{Int64,1}}, S::GphysData)
-    filt_seis_chans(chans::Union{Integer, UnitRange, Array{Int64,1}}, S::GphysData)
+    filt_seis_chans!(chans::ChanSpec, S::GphysData)
+    filt_seis_chans(chans::ChanSpec, S::GphysData)
 
 Filter a channel list `chans` to channels in `S` that contain seismic data.
 

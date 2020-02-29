@@ -36,7 +36,7 @@ end
 
 @doc(@doc ungap!)
 function ungap!(S::GphysData;
-  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  chans::ChanSpec=Int64[],
   m::Bool=true,
   tap::Bool=false)
 
@@ -67,6 +67,6 @@ ungap(S::GphysChannel; m::Bool=true, tap::Bool=false) = (T = deepcopy(S); ungap!
 
 @doc(@doc ungap!)
 ungap(S::GphysData;
-  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  chans::ChanSpec=Int64[],
   m::Bool=true,
   tap::Bool=false) = (T = deepcopy(S); ungap!(T, chans=chans, m=m, tap=tap); return T)

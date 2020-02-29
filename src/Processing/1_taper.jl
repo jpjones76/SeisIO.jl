@@ -125,7 +125,7 @@ end
 # and passing/editing views into the taper.
 
 function taper!(S::GphysData;
-  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  chans::ChanSpec=Int64[],
   t_max::Real=10.0,
   α::Real=0.05,
   N_min::Int64=10)
@@ -230,7 +230,7 @@ function taper(C::GphysChannel; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10
   return U
 end
 function taper(S::GphysData;
-  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  chans::ChanSpec=Int64[],
   t_max::Real=10.0,
   α::Real=0.05,
   N_min::Int64=10)

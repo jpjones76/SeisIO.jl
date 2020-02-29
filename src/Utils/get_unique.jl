@@ -4,7 +4,7 @@
 # X, a set of views corresponding to each H
 # Get sets of channels where all channels in inds[i] have matching properties
 # as specified in A
-function get_unique(S::T, A::Array{String,1}, chans::Union{Integer, UnitRange, Array{Int64,1}}) where {T<:GphysData}
+function get_unique(S::T, A::Array{String,1}, chans::ChanSpec) where {T<:GphysData}
   J = lastindex(A)
   N = getfield(S, :n)
   H = Array{UInt64,1}(undef, length(chans))

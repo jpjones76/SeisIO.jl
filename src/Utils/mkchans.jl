@@ -1,6 +1,6 @@
 export mkchans
 
-function mkchans(chans::Union{Integer, UnitRange, Array{Int64,1}}, S::GphysData; f::Symbol=:x, keepempty::Bool=false)
+function mkchans(chans::ChanSpec, S::GphysData; f::Symbol=:x, keepempty::Bool=false)
   chan_list = (if chans == Int64[]
     Int64.(collect(1:S.n))
   elseif typeof(chans) <: UnitRange

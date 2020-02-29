@@ -58,7 +58,7 @@ If `ovr=true` is specified, but `add=false`, `write_hdf5` *only* overwrites
 See also: read_hdf5
 """ write_hdf5
 function write_hdf5(file::String, S::GphysData;
-  chans     ::Union{Integer, UnitRange, Array{Int64,1}} = Int64[], # channels
+  chans     ::ChanSpec = Int64[], # channels
   add       ::Bool      = false,            # add traces
   fmt       ::String    = "asdf",           # data format
   len       ::Period    = Day(1),           # length of added traces
@@ -91,7 +91,7 @@ function write_hdf5(file::String, C::GphysChannel;
 end
 
 function write_hdf5(file::String, W::SeisEvent;
-  chans     ::Union{Integer, UnitRange, Array{Int64,1}} = Int64[], # channels
+  chans     ::ChanSpec = Int64[], # channels
   fmt       ::String    = "asdf",           # data format
   tag       ::String    = "",               # trace tag (ASDF)
   v         ::Int64     = KW.v              # verbosity

@@ -166,7 +166,7 @@ filter, and fh is used in a Lowpass filter.
 See also: DSP.jl documentation
 """ filtfilt!
 function filtfilt!(S::GphysData;
-    chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+    chans::ChanSpec=Int64[],
     fl::Float64=KW.Filt.fl,
     fh::Float64=KW.Filt.fh,
     np::Int=KW.Filt.np,

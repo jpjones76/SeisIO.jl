@@ -14,7 +14,7 @@ Remove the mean from data in `C`.
 Ignores NaNs.
 """ demean!
 function demean!(S::GphysData;
-  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  chans::ChanSpec=Int64[],
   irr::Bool=false)
 
   if chans == Int64[]
@@ -69,7 +69,7 @@ end
 
 @doc (@doc demean!)
 demean(S::GphysData,
-  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  chans::ChanSpec=Int64[],
   irr::Bool=false) = (U = deepcopy(S); demean!(U, chans=chans, irr=irr); return U)
 demean(C::GphysChannel) = (U = deepcopy(C); demean!(U); return U)
 
@@ -131,7 +131,7 @@ To remove a higher-order polynomial fit than a linear trend, choose n>1.
     detrend! does *not* check for data gaps; if this is problematic, call ungap!(S, m=true) first!
 """ detrend!
 function detrend!(S::GphysData;
-  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  chans::ChanSpec=Int64[],
   n::Int64=1)
 
   if chans == Int64[]
@@ -156,6 +156,6 @@ end
 
 @doc (@doc detrend!)
 detrend(S::GphysData;
-  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  chans::ChanSpec=Int64[],
   n::Int64=1) = (U = deepcopy(S); detrend!(U, chans=chans, n=n); return U)
 detrend(C::GphysChannel; n::Int64=1) = (U = deepcopy(C); detrend!(U, n=n); return U)

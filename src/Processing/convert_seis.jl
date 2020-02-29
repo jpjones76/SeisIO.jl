@@ -6,8 +6,7 @@ export convert_seis, convert_seis!
     convert_seis!(C[, units_out=UU, v=V])
     convert_seis(CC, units_out=UU, v=V)
 
-    Converts all seismic data channels in `S` to velocity seismograms,
-differentiating or integrating as needed.
+Convert all seismic data channels in `S` to velocity seismograms, differentiating or integrating as needed.
 
 ### Keywords
 * `units_out=UU` specifies output units.
@@ -24,14 +23,11 @@ differentiating or integrating as needed.
     `convert_seis!` becomes less reversible as seismograms lengthen, particularly at Float32 precision.
 
 ### References
-[^1] Neumaier, A. (1974). "Rundungsfehleranalyse einiger Verfahren zur Summation
-endlicher Summen" [Rounding Error Analysis of Some Methods for Summing Finite
-Sums]. Zeitschrift für Angewandte Mathematik und Mechanik (in German). 54 (1):
-39–51. doi:10.1002/zamm.19740540106.
+[^1] Neumaier, A. (1974). "Rundungsfehleranalyse einiger Verfahren zur Summation endlicher Summen" [Rounding Error Analysis of Some Methods for Summing Finite Sums]. Zeitschrift für Angewandte Mathematik und Mechanik (in German). 54 (1): 39–51. doi:10.1002/zamm.19740540106.
 
 """ convert_seis!
 function convert_seis!(S::GphysData;
-  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  chans::ChanSpec=Int64[],
   units_out::String="m/s",
   v::Integer=KW.v)
 
@@ -205,7 +201,7 @@ end
 
 @doc (@doc convert_seis!)
 function convert_seis(S::GphysData;
-  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  chans::ChanSpec=Int64[],
   units_out::String="m/s",
   v::Integer=KW.v)
 

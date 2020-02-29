@@ -27,7 +27,7 @@ channels `i` with `S.fs[i] > 0.0` are resampled.
 Resample `C.x` to `fs`.
 """ resample!
 function resample!(S::GphysData;
-  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  chans::ChanSpec=Int64[],
   fs::Float64=0.0)
 
   if chans == Int64[]
@@ -206,7 +206,7 @@ end
 
 @doc (@doc resample!)
 function resample(S::GphysData;
-  chans::Union{Integer, UnitRange, Array{Int64,1}}=Int64[],
+  chans::ChanSpec=Int64[],
   fs::Float64=0.0)
 
   U = deepcopy(S)
