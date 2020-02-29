@@ -1,7 +1,3 @@
-nx = 256
-os = 3
-buf = getfield(BUF, :buf)
-x = getfield(BUF, :int32_buf)
 nx_add = 1400000
 nx_new = 36000
 pref = path * "/SampleFiles/"
@@ -21,24 +17,6 @@ files = String[ "UW/00012502123W"               "uw"            "_"
                 "SAC/test_be.sac"               "sac"           "_"
                 "ASCII/geo-tspair.csv"          "geocsv"        "_"
                 ]
-checkbuf_8!(buf, 65536)
-checkbuf_8!(buf, 4*(os + nx))
-checkbuf!(x, os + nx)
-
-# test fillx_i16_le!
-y = rand(Int16, nx)
-copyto!(buf, 1, reinterpret(UInt8, y), 1, 2*nx)
-fillx_i16_le!(x, buf, nx, os)
-@test x[1+os:nx+os] == y
-
-# test fillx_i32_le!
-y = rand(Int32, nx)
-copyto!(buf, 1, reinterpret(UInt8, y), 1, 4*nx)
-fillx_i32_le!(x, buf, nx, os)
-@test x[1+os:nx+os] == y
-
-fillx_i32_be!(x, buf, nx, os)
-@test x[1+os:nx+os] == bswap.(y)
 
 # Do not run on Appveyor; it can't access restricted files, so this breaks
 printstyled("  read_data\n", color=:light_green)
@@ -125,5 +103,4 @@ for i in 1:S.n
 end
 
 @test_throws ErrorException verified_read_data("deez", "nutz.sac")
-resize!(x, 65535)
 nothing
