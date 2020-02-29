@@ -1,7 +1,7 @@
 export read_sxml, write_sxml
 
 function full_resp(xe::XMLElement)
-  resp = MultiStageResp(12)
+  resp = MultiStageResp(24)
   ns = 0
   nmax = 0
   gain = one(Float64)
@@ -26,9 +26,6 @@ function full_resp(xe::XMLElement)
     elseif name(r) == "Stage"
       ns = parse(Int64, attribute(r, "number"))
       nmax = max(ns, nmax)
-      if ns > length(resp.fs)
-        append!(resp, MultiStageResp(6))
-      end
       resp_code = 0x00
       c = one(Float64)
       a0 = one(Float64)
@@ -456,9 +453,6 @@ function sxml_mergehdr!(S::GphysData, T::GphysData;
       end
       note!(S, c, string("sxml_mergehdr!, overwrote ", relevant_fields))
       S.misc[c] = merge(T.misc[i], S.misc[c])
-      if i in k
-        @warn(string("Already used ID = ", T.id[i], " to overwrite a channel header!"))
-      end
 
       # Flag k for delete from T
       push!(k, i)
