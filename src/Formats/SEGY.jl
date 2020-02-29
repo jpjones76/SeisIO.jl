@@ -57,9 +57,6 @@ function auto_coords(xy::Array{Int32, 1}, sc::Array{Int16, 1})
   return lat, lon
 end
 
-# buf::Array{UInt8,1},
-# shorts::Array{Int16,1},
-# ints::Array{Int32,1},
 function do_trace(f::IO,
                   passcal::Bool,
                   full::Bool,
@@ -74,9 +71,6 @@ function do_trace(f::IO,
   shorts = BUF.int16_buf
   lat = 0.0
   lon = 0.0
-  # checkbuf!(buf, 240)
-  # checkbuf!(ints, 29)
-  # checkbuf!(shorts, 62)
   checkbuf_8!(buf, max(180, length(buf)))
   fast_readbytes!(f, buf, 180)
 
@@ -304,9 +298,6 @@ function do_trace(f::IO,
   return C
 end
 
-# buf::Array{UInt8,1},
-# shorts::Array{Int16,1},
-# ints::Array{Int32,1},
 function read_segy_file!( S::GphysData,
                           fname::String,
                           passcal::Bool,
@@ -318,15 +309,11 @@ function read_segy_file!( S::GphysData,
   f = memmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   trace_fh = Array{Int16, 1}(undef, 3)
   if passcal == true
-    # C = do_trace(f, buf, shorts, ints, true, full, fname, swap, trace_fh)
     C = do_trace(f, true, full, fname, swap, trace_fh)
     add_chan!(S, C, strict)
-    # resize!(buf, 65535)
     close(f)
   else
     shorts  = getfield(BUF, :int16_buf)
-    # checkbuf!(shorts, 62)
-    # S = SeisData()
 
     # File headers
     filehdr       = fastread(f, 3200)

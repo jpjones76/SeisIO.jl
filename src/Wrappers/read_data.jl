@@ -97,7 +97,6 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
   fpat_is_array = isa(fpat, Array{String, 1})
   fmt_is_seisio = (fmt == "seisio")
   opt_strings   = ""
-  # opt_strings   = Array{String, 1}(undef, 0)
   last_src      = zeros(Int64, S.n)
   nx            = Array{Int64, 1}(undef, S.n)
   for i in 1:S.n
@@ -211,13 +210,8 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
 
   elseif fmt == "segy" || fmt == "passcal"
     passcal = fmt == "passcal"
-    # buf     = getfield(BUF, :buf)
-    # shorts  = getfield(BUF, :int16_buf)
-    # ints    = getfield(BUF, :int32_buf)
-    # checkbuf!(buf, 240)
 
     if one_file
-      # read_segy_file!(S, filestr, buf, shorts, ints, passcal, swap, memmap, full, strict)
       read_segy_file!(S, filestr, passcal, memmap, full, swap, strict)
     else
       for (j, fname) in enumerate(files)
@@ -288,11 +282,6 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     else
       opt_strings *= string(", v = ", v, ", vl = ", vl)
     end
-    # if isempty(opt_strings)
-    # else
-    #   opt_strings = string("v = ", v, ", vl = ", vl))
-    #   opt_strings = join(opt_strings, ", ")
-    # end
 
     # Update all channels
     to_note = Int64[]

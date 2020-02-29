@@ -196,8 +196,6 @@ function FDSN_sta_xml(xmlf::String;
                   cc = has_attribute(c, "code") ? attribute(c, "code") : ""
 
                   if cha_s ≤ t && cha_t ≥ s
-                    # println(cha_s, " ≤ ", t, " && ", cha_t, " ≥ ", s)
-
                     c_id = "...."
                     c_name = identity(s_name)
                     c_units = ""
@@ -348,8 +346,8 @@ function FDSN_sta_xml(xmlf::String;
                                     units = c_units,
                                     resp  = c_resp )
                     C.misc["ClockDrift"] = c_drift
-                    C.misc["startDate"] = cha_s #Dates.DateTime(cha_s).instant.periods.value*1000 - dtconst
-                    C.misc["endDate"] = cha_t #Dates.DateTime(cha_t).instant.periods.value*1000 - dtconst
+                    C.misc["startDate"] = cha_s
+                    C.misc["endDate"] = cha_t
                     if !isempty(c_sensor)
                       C.misc["SensorDescription"] = c_sensor
                     end
