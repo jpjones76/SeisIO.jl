@@ -58,11 +58,7 @@ function FDSNevq(ot::String;
   oti = round(Int64, ot2*sμ)
 
   # multi-server query (most FDSN servers do NOT have an event service)
-  if lowercase(src) == "all"
-    sources = String["EMSC", "INGV", "IRIS", "LMU", "NCEDC", "NIEP", "ORFEUS", "SCEDC", "USGS", "USP"]
-  else
-    sources = split(src,",")
-  end
+  sources = String.(strip.(split(lowercase(src) == "all" ? "EMSC, INGV, IRIS, LMU, NCEDC, NIEP, ORFEUS, SCEDC, USGS, USP" : src, ",")))
   sources = [strip(i) for i in sources]
   EvCat = Array{SeisHdr,1}(undef, 0)
   EvSrc = Array{SeisSrc,1}(undef, 0)

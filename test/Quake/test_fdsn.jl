@@ -15,13 +15,13 @@ printstyled("    single-server query without nev specified\n", color=:light_gree
 @test length(H) == length(R)
 @test length(H) > 1000
 
-printstyled("    multi-server query\n", color=:light_green)
-open("FDSNevq.log", "w") do out
-  redirect_stdout(out) do
-    ot = replace(split(string(now()),'.')[1], r"[-,:,A-Z,a-z]" => "")
-    (H,R) = FDSNevq(ot, mag=[3.0, 9.9], evw=[-86400.0, 0.0], src="all", nev=10, v=2)
-  end
-end
+# printstyled("    multi-server query\n", color=:light_green)
+# open("FDSNevq.log", "w") do out
+#   redirect_stdout(out) do
+#     ot = replace(split(string(now()),'.')[1], r"[-,:,A-Z,a-z]" => "")
+#     (H,R) = FDSNevq(ot, mag=[3.0, 9.9], evw=[-86400.0, 0.0], src="all", nev=10, v=2)
+#   end
+# end
 
 printstyled("    radius search (rad=)\n", color=:light_green)
 (H,R) = FDSNevq("20190101000000", rad=rainier_rad, evw=[31536000.0, 31536000.0], mag=[0.0, 2.9], nev=100, src="IRIS", v=0)
