@@ -239,7 +239,7 @@ function wseis(fname::String, S...)
         end
       end
 
-      # Add to id, time index
+      # Add to id, time index; log to notes
       if T <: GphysChannel
         push!(ID, hash(getfield(seis, :id)))
         push!(P, i)
@@ -250,6 +250,7 @@ function wseis(fname::String, S...)
           push!(TE, fs == zero(Float64) ? t[end,2] : sum(t, dims=1)[2] +
             round(Int64, sμ*lastindex(seis.x)/fs))
         end
+        fwrite_note!(seis, "wseis", fname, "")
       elseif T <: GphysData
         append!(ID, hash.(getfield(seis, :id)))
         append!(P, ones(Int64, seis.n).*i)
@@ -265,9 +266,12 @@ function wseis(fname::String, S...)
             setindex!(te, fs == zero(Float64) ? t[end,2] : sum(t, dims=1)[2] +
               round(Int64, sμ*lastindex(seis.x)/fs), i)
           end
+          fwrite_note!(seis, k, "wseis", fname, "")
         end
         append!(TS, ts)
         append!(TE, te)
+      elseif T in (SeisHdr, SeisSrc)
+        fwrite_note_quake!(seis, "wseis", fname, "")
       end
     end
 

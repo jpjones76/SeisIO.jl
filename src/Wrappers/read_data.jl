@@ -1,34 +1,5 @@
 export read_data, read_data!
 
-note_fsrc!(S::GphysData, N::Array{Int64,1}, fmt::String, filestr::String, opts::String) = note!(S, N, string( "+source ¦ read_data!(S, ",
-                          "\"", fmt,  "\", ",
-                          "\"", filestr, "\", ",
-                          opts, ")" ))
-
-function src_track!(S::GphysData, j::Int64, nx::Array{Int64,1}, last_src::Array{Int64,1})
-  n = length(nx)
-
-  # Check existing channels for changes
-  for i in 1:n
-    if length(S.x[i]) > nx[i]
-      last_src[i] = j
-      nx[i] = length(S.x[i])
-    end
-  end
-
-  # Add new channels
-  if n < S.n
-    δn = S.n - n
-    append!(nx, zeros(Int64, δn))
-    append!(last_src, zeros(Int64, δn))
-    for i in n+1:S.n
-      nx[i] = length(S.x[i])
-      last_src[i] = j
-    end
-  end
-  return nothing
-end
-
 function read_data_seisio!(S::SeisData, filestr::String, memmap::Bool, v::Integer)
   S_in = rseis(filestr, memmap=memmap)
   L = length(S_in)
@@ -75,7 +46,7 @@ matching pattern `filestr`. Much slower than manually specifying file type.
 * Formats: ah1, ah2, bottle, geocsv, geocsv.slist, lennartz, mseed, passcal, suds, sac, segy, seisio, slist, uw, win32
 * Keywords: cf, full, jst, memmap, nx_add, nx_new, strict, swap, v, vl
 
-This function is fully described in the official documentation at https://seisio.readthedocs.io/ in section **Time-Series Data File Formats**.
+This function is fully described in the official documentation at https://seisio.readthedocs.io/ in section **Time-Series Files**.
 
 See also: SeisIO.KW, get_data, guess, rseis
 """ read_data!
@@ -109,7 +80,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     for f in fpat
       ff = abspath(f)
       if safe_isfile(ff)
-        push!(files, abspath(ff)) # deal with symlinks
+        push!(files, ff)
       else
         append!(files, ls(ff))
       end
@@ -128,7 +99,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     else
       for (j, fname) in enumerate(files)
         read_sac_file!(S, fname, full, memmap, strict)
-        src_track!(S, j, nx, last_src)
+        track_src!(S, j, nx, last_src)
       end
     end
 
@@ -138,7 +109,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     else
       for (j, fname) in enumerate(files)
         read_data_seisio!(S, fname, memmap, v)
-        src_track!(S, j, nx, last_src)
+        track_src!(S, j, nx, last_src)
       end
     end
 
@@ -149,7 +120,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     else
       for (j, fname) in enumerate(files)
         read_mseed_file!(S, fname, nx_new, nx_add, memmap, strict, v)
-        src_track!(S, j, nx, last_src)
+        track_src!(S, j, nx, last_src)
       end
     end
     opt_strings = string("swap = ", swap,
@@ -166,7 +137,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     else
       for (j, fname) in enumerate(files)
         read_ah1!(S, fname, full, memmap, strict, v)
-        src_track!(S, j, nx, last_src)
+        track_src!(S, j, nx, last_src)
       end
     end
     opt_strings = string("full = ", full)
@@ -177,7 +148,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     else
       for (j, fname) in enumerate(files)
         read_ah2!(S, fname, full, memmap, strict, v)
-        src_track!(S, j, nx, last_src)
+        track_src!(S, j, nx, last_src)
       end
     end
     opt_strings = string("full = ", full)
@@ -194,17 +165,17 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     else
       for (j, fname) in enumerate(files)
         read_geocsv_file!(S, fname, tspair, memmap)
-        src_track!(S, j, nx, last_src)
+        track_src!(S, j, nx, last_src)
       end
     end
 
   elseif fmt == "lennartz"
     if one_file
-      read_slist!(S, filestr, true, memmap)
+      read_slist!(S, filestr, true, memmap, strict)
     else
       for (j, fname) in enumerate(files)
-        read_slist!(S, fname, true, memmap)
-        src_track!(S, j, nx, last_src)
+        read_slist!(S, fname, true, memmap, strict)
+        track_src!(S, j, nx, last_src)
       end
     end
 
@@ -216,7 +187,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     else
       for (j, fname) in enumerate(files)
         read_segy_file!(S, fname, passcal, memmap, full, swap, strict)
-        src_track!(S, j, nx, last_src)
+        track_src!(S, j, nx, last_src)
       end
     end
     opt_strings = string("full = ", full,
@@ -224,11 +195,11 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
 
   elseif fmt == "slist"
     if one_file
-      read_slist!(S, filestr, false, memmap)
+      read_slist!(S, filestr, false, memmap, strict)
     else
       for (j, fname) in enumerate(files)
-        read_slist!(S, fname, false, memmap)
-        src_track!(S, j, nx, last_src)
+        read_slist!(S, fname, false, memmap, strict)
+        track_src!(S, j, nx, last_src)
       end
     end
 
@@ -238,7 +209,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     else
       for (j, fname) in enumerate(files)
         append!(S, SUDS.read_suds(fname, memmap=memmap, full=full, v=v))
-        src_track!(S, j, nx, last_src)
+        track_src!(S, j, nx, last_src)
       end
     end
     opt_strings, string("full = ", full)
@@ -249,7 +220,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     else
       for (j, fname) in enumerate(files)
         UW.uwdf!(S, fname, full, memmap, strict, v)
-        src_track!(S, j, nx, last_src)
+        track_src!(S, j, nx, last_src)
       end
     end
     opt_strings = string("full = ", full)
@@ -260,7 +231,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
         readwin32!(S, f, cf, jst, nx_new, nx_add, memmap, strict, v)
 
         # here the list of files is already expanded, so this is accurate
-        src_track!(S, j, nx, last_src)
+        track_src!(S, j, nx, last_src)
       end
     else
       readwin32!(S, filestr, cf, jst, nx_new, nx_add, memmap, strict, v)
@@ -311,7 +282,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
 
       # note filestr used in read
       if vl == false
-          note_fsrc!(S, to_note, fmt, filestr, opt_strings)
+          fread_note!(S, to_note, "read_data!", fmt, filestr, opt_strings)
 
       # For verbose logging, note all files used in the read
       elseif one_file == false
@@ -322,7 +293,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     # For verbose logging, any changed channel logs all files to :notes
     if vl && (one_file == false)
       for f in files
-        note_fsrc!(S, to_note, fmt, f, opt_strings)
+        fread_note!(S, to_note, "read_data!", fmt, f, opt_strings)
       end
     end
   end

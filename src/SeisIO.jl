@@ -58,6 +58,14 @@ for i in ls(path*"/Types/Methods/")
 end
 
 # =========================================================
+# Logging
+for i in ls(path*"/Logging/*")
+  if endswith(i, ".jl")
+    include(i)
+  end
+end
+
+# =========================================================
 # Utilities that may require SeisIO types to work
 for i in ls(path*"/Utils/")
   if endswith(i, ".jl")
@@ -95,19 +103,22 @@ end
 # =========================================================
 # Submodules
 include("Submodules/FormatGuide.jl")
-import .Formats: formats
+using .Formats
 
 include("Submodules/ASCII.jl")
 using .ASCII
 
 include("Submodules/SEED.jl")
-using .SEED: mseed_support, parsemseed!, parserec!, read_dataless, read_mseed_file!, read_seed_resp!, read_seed_resp, RESP_wont_read, seed_cleanup!, seed_support
+using .SEED
+using .SEED: parserec!, read_seed_resp!, seed_cleanup!
 export mseed_support, read_dataless, read_seed_resp!, read_seed_resp, RESP_wont_read, seed_support
 
+# We need these types for the native file format
 include("Submodules/Quake.jl")
-using .Quake:read_qml
-import .Quake:convert, merge_ext!
+using .Quake
+import .Quake: convert, fwrite_note_quake!, merge_ext!
 export read_qml, write_qml
+
 include("Submodules/RandSeis.jl")
 
 include("Submodules/SeisHDF.jl")
@@ -115,8 +126,8 @@ using .SeisHDF: read_hdf5, read_hdf5!, scan_hdf5, write_hdf5
 export read_hdf5, read_hdf5!, scan_hdf5, write_hdf5
 
 include("Submodules/SUDS.jl")
+
 include("Submodules/UW.jl")
-using .UW: formats
 
 # =========================================================
 # Wrappers
@@ -126,8 +137,6 @@ for i in ls(path*"/Wrappers/")
   end
 end
 
-# We need these types for the native file format
-using .Quake: EQLoc, EQMag, EventChannel, EventTraceData, PhaseCat, SeisEvent, SeisHdr, SeisPha, SeisSrc, SourceTime
 formats["list"] = collect(keys(formats))
 
 # Last steps

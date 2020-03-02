@@ -44,6 +44,7 @@ printstyled("    write\n", color=:light_green)
 S = SeisData(SAC2)
 writesac(S) # change 2019-07-15 to cover writesac on GphysData
 @test safe_isfile("1981.088.10.38.14.009..CDV...R.SAC")
+@test any([occursin("wrote to file 1981.088.10.38.14.009..CDV...R.SAC", S.notes[1][i]) for i in 1:length(S.notes[1])])
 safe_rm("1981.088.10.38.14.009..CDV...R.SAC")
 
 fn = "81.088.10.38.14.009..CDV...R.SAC"

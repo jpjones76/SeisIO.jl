@@ -74,6 +74,17 @@ function write_hdf5(file::String, S::GphysData;
     error("Unknown file format (possibly NYI)!")
   end
 
+# log write operation
+  opts = string(", chans=", chans,
+                ", add=", add,
+                ", fmt=\"", fmt,
+                "\", len=", len,
+                ", ovr=", ovr,
+                ", tag=\"", tag,
+                "\", v=", v)
+  for i in chans
+    fwrite_note!(S, i, "write_hdf5", file, opts)
+  end
   return nothing
 end
 

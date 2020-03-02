@@ -54,8 +54,6 @@ function note!(S::GphysData, chans::Union{UnitRange,Array{Int64,1}}, s::String)
 end
 
 note!(S::GphysChannel, s::String) = push!(S.notes, tnote(s))
-# note!(R::SeisSrc, s::String) = push!(R.notes, tnote(s))
-# note!(H::SeisHdr, s::String) = push!(H.notes, tnote(s))
 
 # DND, these methods prevent memory reuse
 """
