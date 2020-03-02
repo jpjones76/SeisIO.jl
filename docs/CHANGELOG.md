@@ -1,4 +1,16 @@
-# SeisIO v1.0.0 Release: 2020-03-01
+# SeisIO v1.0.0 Release: 2020-03-02
+### 2020-03-02
+* `read_meta`  
+  + Now logs all reads to *:notes* in entries that contain "+meta" in the second field
+  + Now accepts string arrays for the file pattern argument.
+* `wseis` now logs all writes to *:notes* for all objects written.
+* `write_hdf5` now logs all writes to *:notes* in all channels written.
+* `strict=true` now works with SLIST and Lennartz SLIST files.
+* `writesac`
+  + Now logs all writes to *:notes* in channels written.
+  + Now accepts channel ranges and numeric channel number arrays with KW `chans=`.
+* The (potentially very long) tests to download data from the NCEDC and SCEDC servers have been removed, as has the dreaded `servers="all"` test in the Quake submodule. These changes shorten package tests by 3-5 minutes and eliminate most of the timeout errors in Appveyor and Travis-CI.
+
 ### 2020-02-29
 * Deprecated `findid(S1, S2)` for two GphysData objects; wasn't useful
 * The [Format Reader Guide](../DevGuides/formats.md) was rewritten to include a full API.
