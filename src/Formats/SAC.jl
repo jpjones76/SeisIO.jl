@@ -283,6 +283,7 @@ function write_sac_channel(S::GphysData, i::Int64, xy::Bool, fn::String,  v::Int
     end
   end
 
+  fname = ""
   if (xy == true || fs == 0.0)
     si = 1
     nx = Int32(length(S.x[i]))
@@ -320,7 +321,8 @@ function write_sac_channel(S::GphysData, i::Int64, xy::Bool, fn::String,  v::Int
       v > 0  && println(stdout, now(), ": Wrote SAC ts file ", fname, " from channel ", i, " segment ", j)
     end
   end
-
+  fwrite_note!(S, i, "writesac", fname, string(", xy=", xy, ", fname=\"", fn, "\", v=", v))
+  return nothing
 end
 
 """
@@ -333,9 +335,11 @@ Keywords:
 (Only works with GphysChannel objects)
 * `xy=true` writes generic x-y data with time as the independent variable.
 """
-function writesac(S::GphysData; fname::String="", xy::Bool=false, v::Integer=KW.v)
+function writesac(S::GphysData; chans::ChanSpec=Int64[], fname::String="", xy::Bool=false, v::Integer=KW.v)
   reset_sacbuf()
-  for i = 1:S.n
+
+  chans = mkchans(chans, S)
+  for i in chans
     write_sac_channel(S, i, xy, fname, v)
   end
   return nothing
@@ -358,6 +362,7 @@ function writesac(S::GphysChannel;
     end
     )
   writesac(SeisData(S), fname=fstr, xy=xy, v=v)
+  # *** test: are write notes logged faithfully?
   return nothing
 end
 

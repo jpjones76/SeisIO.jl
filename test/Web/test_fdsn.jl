@@ -82,13 +82,24 @@ printstyled("      config file for channel spec\n", color=:light_green)
 
 S = SeisData()
 check_get_data!(S, "FDSN", fname, src="IRIS", s=-600, t=0, w=true)
-
 # Ensure we got data
 if (isempty(S) ? 0 : maximum([length(x) for x in S.x])) == 0
   @warn("Request returned no data")
 else
+  printstyled("        writesac with channel range on this request\n", color=:light_green)
+  if S.n > 3
+    writesac(S, chans=1:2)
+    for i in 1:2
+      @test any([(occursin("writesac", n) && occursin(S.id[i], n)) for n in S.notes[i]])
+    end
+  end
+
+  printstyled("        bandpass filtering of this request\n", color=:light_green)
   deleteat!(S, findall(S.fs.<25.0))
   filtfilt!(S, fl=0.01, fh=10.0)
+  for i in 1:2
+    @test any([occursin("processing", n) for n in S.notes[i]])
+  end
 end
 
 # Ensure station headers are set

@@ -13,7 +13,7 @@ printstyled("    SAC\n", color=:light_green)
 for i = 1:length(chans)
   cha = chans[i]
   S = get_data("IRIS", cha, src="IRIS", s=ts, t=te, fmt="sacbl", v=0, w=true)
-  sleep(5)
+  sleep(1)
   T = get_data("IRIS", cha, src="IRIS", s=ts, t=te, fmt="mseed", v=0, w=true)
 
   if S.n == 0 || T.n == 0
