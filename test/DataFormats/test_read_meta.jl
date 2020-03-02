@@ -1,11 +1,12 @@
 printstyled("  read_meta equivalencies\n", color=:light_green)
 printstyled("    full (XML, RESP, dataless)\n", color=:light_green)
 
+fname         = "JRO.sacpz"
 sxml_file     = path*"/SampleFiles/XML/fdsnws-station_2019-09-11T06_26_58Z.xml"
 resp_file     = path*"/SampleFiles/SEED/JRO.resp"
 dataless_file = path*"/SampleFiles/SEED/CC.dataless"
 dataless_wc   = path*"/SampleFiles/SEED/CC.*"
-sacpz_file    = path*"/SampleFiles/SAC/JRO.sacpz"
+sacpz_file    = path*"/SampleFiles/SAC/"*fname
 sacpz_wc      = path*"/SampleFiles/SAC/JRO.sacp*"
 
 S1 = read_meta("sxml", sxml_file, s="2016-01-01T00:00:00", memmap=true, msr=true)
@@ -188,10 +189,10 @@ end
 # test here to track +meta logging
 printstyled("    logging to :notes\n", color=:light_green)
 for i in 1:S1.n
-  @test any([occursin(abspath(sacpz_file), n) for n in S1.notes[i]])
+  @test any([occursin(fname, n) for n in S1.notes[i]])
 end
 for i in 1:S2.n
-  @test any([occursin(realpath(sacpz_file), n) for n in S2.notes[i]])
+  @test any([occursin(fname, n) for n in S2.notes[i]])
 end
 for i in 1:S3.n
   @test any([occursin(realpath(dataless_file), n) for n in S3.notes[i]])
