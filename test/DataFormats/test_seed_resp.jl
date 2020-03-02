@@ -5,10 +5,12 @@ rtol = eps(Float32)
 
 printstyled("  SEED RESP\n", color=:light_green)
 printstyled("    single-record file\n", color=:light_green)
-S = read_seed_resp(resp_file_0, units=true)
+S = SeisData()
+read_seed_resp!(S, [resp_file_0], false, true)
 
 printstyled("    multi-record file\n", color=:light_green)
-S = read_seed_resp(resp_file_1, units=true)
+S = SeisData()
+read_seed_resp!(S, [resp_file_1], true, true)
 
 # Channel 1 =================================================================
 # Station info
@@ -316,3 +318,11 @@ end
 @test R.gain[4] ≈ 1.0
 @test R.fg[4] ≈ 0.0
 @test R.fs[4] ≈ 10.0
+
+printstyled("    logging to :notes\n", color=:light_green)
+for i in 1:S.n
+  @test any([occursin("RESP.obspy.cat", n) for n in S.notes[i]])
+  if length(S.notes[i]) > 1
+    @test any([occursin("RESP.cat", n) for n in S.notes[i]])
+  end
+end

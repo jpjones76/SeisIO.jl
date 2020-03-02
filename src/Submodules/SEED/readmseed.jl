@@ -1,5 +1,3 @@
-# export readmseed, readmseed!
-
 function seed_cleanup!(S::SeisData, BUF::SeisIOBuf)
   trunc_x!(S)
   fill!(getfield(BUF, :hdr_old), zero(UInt8))

@@ -1,5 +1,3 @@
-export RESP_wont_read
-
 function resp_unit_split(buf::Array{UInt8,1}, L::Int64)
   i = 1
   while i+2 < L
@@ -46,7 +44,6 @@ function close_resp_channel!(S::SeisData, C::SeisChannel, ts::Int64, te::Int64, 
     if ts ≤ t0 < te
       S.resp[i] = C.resp
       S.gain[i] = C.gain
-      note!(S, i, string("seed_resp, ", fname, ", overwrote :gain, :resp"))
     end
   else
     # ObsPy does this but I don't think it's safe; stage fs is not stored uniformly.
@@ -56,15 +53,6 @@ function close_resp_channel!(S::SeisData, C::SeisChannel, ts::Int64, te::Int64, 
     end
     push!(S, C)
   end
-
-  # fill!(delay, zero(Float64))
-  # fill!(fg, zero(Float64))
-  # fill!(fs_in, zero(Float64))
-  # fill!(gain, zero(Float64))
-  # fill!(corr, zero(Float64))
-  # fill!(fac, zero(Int64))
-  # fill!(os, zero(Int64))
-
   return nothing
 end
 
@@ -83,24 +71,16 @@ function add_stage!(C::SeisChannel, n::Int64, tfc::UInt8)
 end
 
 
-function read_seed_resp!(S::GphysData, fpat::String;
-  memmap::Bool=false,
-  units::Bool=false)
+function read_seed_resp!(S::GphysData, files::Array{String,1}, memmap::Bool, units::Bool)
 
   buf   = BUF.buf
   C     = SeisChannel(resp = MultiStageResp(12))
   R     = C.resp
   blk   = zero(UInt64)
+  hhash = zeros(UInt64, S.n)
+  opts  = string("memmap=", memmap, ", units=", units, ")")
 
   # Containers for parts of the response
-  # nstg    = 12
-  # delay = zeros(Float64, nstg)        # Estimated delay (seconds) (047F08, 057F07)
-  # corr  = zeros(Float64, nstg)        # Correction applied (seconds) (047F09, 057F08)
-  # fg    = zeros(Float64, nstg)        # Frequency of gain (058F05)
-  # fs_in = zeros(Float64, nstg)        # Input sample rate (047F05, 057F04)
-  # gain  = zeros(Float64, nstg)        # Gain (058F04)
-  # fac   = zeros(Int64,   nstg)        # Decimation factor (047F06, 057F05)
-  # os    = zeros(Int64,   nstg)        # Decimation offset (047F07, 057F06)
   seq_n = zero(Int64)                 # Stage sequence number (053F04, 054F04, 057F03, 058F03, 060F04, 061F03, 062F04)
   seq_n_old = zero(Int64)             # Last sequence number
   d_arr = zeros(Int16, 6)             # Date
@@ -115,11 +95,6 @@ function read_seed_resp!(S::GphysData, fpat::String;
   # Unit strings containers
   units_out = ""            # Response out units lookup (041F07, 043F07, 044F07, 053F06, 054F06, 061F07, 062F06)
 
-  if safe_isfile(fpat)
-    files = [fpat]
-  else
-    files = ls(fpat)
-  end
   for (nf, file) in enumerate(files)
 
     # Counters, etc.
@@ -525,14 +500,8 @@ function read_seed_resp!(S::GphysData, fpat::String;
       units_in = ""
       nmax = zero(Int64)
     end
+    track_hdr!(S, hhash, "resp", file, opts)
   end
-  return S
-end
-
-function read_seed_resp(fpat::String;
-  units::Bool=false)
-  S = SeisData()
-  read_seed_resp!(S, fpat, units=units)
   return S
 end
 

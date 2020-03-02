@@ -15,6 +15,7 @@ S4 = read_meta("sacpz", sacpz_file, memmap=true)
 
 @test_throws ErrorException read_meta("dataless", sxml_file)
 @test_throws ErrorException read_meta("deez", "nutz.sac")
+@test_throws ErrorException read_meta("deez", sxml_file)
 
 C = Array{Char,2}(undef, 10, 3)
 fill!(C, ' ')
@@ -182,4 +183,16 @@ for f in SeisIO.datafields
   if (f in (:src, :notes)) == false
     @test isequal(getfield(S1,f), getfield(S2,f))
   end
+end
+
+# test here to track +meta logging
+printstyled("    logging to :notes\n", color=:light_green)
+for i in 1:S1.n
+  @test any([occursin(abspath(sacpz_file), n) for n in S1.notes[i]])
+end
+for i in 1:S2.n
+  @test any([occursin(realpath(sacpz_file), n) for n in S2.notes[i]])
+end
+for i in 1:S3.n
+  @test any([occursin(realpath(dataless_file), n) for n in S3.notes[i]])
 end

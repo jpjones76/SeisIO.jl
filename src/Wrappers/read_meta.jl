@@ -1,48 +1,16 @@
 export read_meta, read_meta!
 
-# @doc """
-#     S = read_meta(fmt, filestr [, keywords])
-#     read_meta!(S, fmt, filestr [, keywords])
-#
-# Generic wrapper for reading channel metadata (i.e., instrument parameters, responses). Reads metadata in file format `fmt` matching file pattern `filestr` into `S`.
-#
-# ### Supported File Formats
-# | Format                    | String          |
-# | :---                      | :---            |
-# | Dataless SEED             | dataless        |
-# | FDSN Station XML          | sxml            |
-# | SACPZ                     | sacpz           |
-# | SEED RESP                 | resp            |
-#
-# ### Keywords
-# |KW      | Used By  | Type      | Default   | Meaning                         |
-# |:---    |:---      |:---       |:---       |:---                             |
-# | memmap | *        | Bool      | false     | use mmap on files? (unsafe)     |
-# | msr    | sxml     | Bool      | false     | read full MultiStageResp?       |
-# | s      | *        | TimeSpec  |           | Start time                      |
-# | t      | *        | TimeSpec  |           | Termination (end) time          |
-# | units  | resp     | Bool      | false     | fill in MultiStageResp units?   |
-# |        | dataless |           |           |                                 |
-# | v      | *        | Int64     | 0         | verbosity                       |
-#
-# ### Notes
-# 1. Unlike `read_data`, `read_meta` can't use `guess` for files of unknown type.
-# The reason is that most metadata formats are ASCII-based; generally only XML
-# files have reliable tests for uniqueness.
-#
-# See also: SeisIO.KW, get_data, read_data
-# """ read_meta!
 @doc """
     S = read_meta(fmt, filestr [, keywords])
     read_meta!(S, fmt, filestr [, keywords])
 
 Generic wrapper for reading channel metadata (i.e., instrument parameters, responses). Reads metadata in file format `fmt` matching file pattern `filestr` into `S`.
 
-This function is fully described in the official documentation at https://seisio.readthedocs.io/ under subheading **Metadata File Formats**.
+This function is fully described in the official documentation at https://seisio.readthedocs.io/ under subheading **Metadata Files**.
 
 See also: SeisIO.KW, get_data, read_data
 """ read_meta!
-function read_meta!(S::GphysData, fmt::String, filestr::String;
+function read_meta!(S::GphysData, fmt::String, fpat::String;
   memmap  ::Bool      = false                     ,  # use Mmap.mmap? (unsafe)
   msr     ::Bool      = false                     ,  # read as MultiStageResp?
   s       ::TimeSpec  = "0001-01-01T00:00:00"     ,  # Start
@@ -52,56 +20,52 @@ function read_meta!(S::GphysData, fmt::String, filestr::String;
   )
 
   N = S.n
-  one_file = safe_isfile(filestr)
+  files = Array{String, 1}(undef, 0)
+  hashes = zeros(UInt64, S.n)
+  fpat_is_array = isa(fpat, Array{String, 1})
+  opts = string("msr=", msr,  ", ",
+                "s=\"", s,  "\", ",
+                "t=\"", t,  "\", ",
+                "units=", units, ", ",
+                "v=", KW.v, ")" )
 
-  if fmt == "dataless"
-    if one_file
-      append!(S, read_dataless(filestr, memmap=memmap, s=s, t=t, v=v, units=units))
-    else
-      files = ls(filestr)
-      for fname in files
-        append!(S, read_dataless(fname, memmap=memmap, s=s, t=t, v=v, units=units))
+  if fpat_is_array
+    one_file = false
+    for f in fpat
+      ff = abspath(f)
+      if safe_isfile(ff)
+        push!(files, ff)
+      else
+        append!(files, ls(ff))
       end
     end
-
-  elseif fmt == "resp"
-    read_seed_resp!(S, filestr, memmap=memmap, units=units)
-
-  elseif fmt == "sacpz"
-    if one_file
-      read_sacpz!(S, filestr, memmap=memmap)
-    else
-      files = ls(filestr)
-      for fname in files
-        read_sacpz!(S, fname, memmap=memmap)
-      end
-    end
-
-  elseif fmt == "sxml"
-    if one_file
-      append!(S, read_sxml(filestr, memmap=memmap, s=s, t=t, v=v, msr=msr))
-    else
-      files = ls(filestr)
-      for fname in files
-        append!(S, read_sxml(fname, memmap=memmap, s=s, t=t, v=v, msr=msr))
-      end
-    end
-
   else
-    error("Unknown file format!")
+    filestr = abspath(fpat)
+    one_file = safe_isfile(filestr)
+    if one_file == false
+      append!(files, ls(filestr))
+    else
+      push!(files, filestr)
+    end
   end
+  isempty(files) && error("No valid files to read!")
 
-  # ===================================================================
-  # logging
-  note!(S, N+1:S.n, string( "+meta ¦ read_meta!(S, ",
-                            "msr=", msr,  ", ",
-                            "s=\"", s,  "\", ",
-                            "t=\"", t,  "\", ",
-                            "units=", units, ", ",
-                            "v=", KW.v, ")" )
-        )
-
-  # ===================================================================
+  if fmt == "resp"
+    read_seed_resp!(S, files, memmap, units)
+  else
+    for fname in files
+      if fmt == "dataless"
+        append!(S, read_dataless(fname, memmap=memmap, s=s, t=t, v=v, units=units))
+      elseif fmt == "sacpz"
+        read_sacpz!(S, fname, memmap=memmap)
+      elseif fmt == "sxml"
+        append!(S, read_sxml(fname, memmap=memmap, s=s, t=t, v=v, msr=msr))
+      else
+        error("Unknown file format!")
+      end
+      track_hdr!(S, hashes, fmt, fname, opts)
+    end
+  end
   return nothing
 end
 

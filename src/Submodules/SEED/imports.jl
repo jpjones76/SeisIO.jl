@@ -21,6 +21,7 @@ import SeisIO: BUF,
   mktime,
   stream_int,
   sμ,
+  track_hdr!,
   trunc_x!,
   y2μs,
   μs
