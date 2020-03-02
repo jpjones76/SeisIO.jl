@@ -9,6 +9,6 @@ include("UW/uwevt.jl")
 include("UW/desc.jl")
 
 # exports
-export readuwevt, uwdf, uwdf!, uwpf, uwpf!, formats
+export formats, readuwevt, uwdf, uwdf!, uwpf, uwpf!
 
 end

@@ -2,6 +2,7 @@ module Formats
 
 using Dates:Date
 import Base:show
+export formats
 
 mutable struct FmtVer
   v::Union{Number, String}
