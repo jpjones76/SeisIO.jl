@@ -10,7 +10,7 @@ This function is fully described in the official documentation at https://seisio
 
 See also: SeisIO.KW, get_data, read_data
 """ read_meta!
-function read_meta!(S::GphysData, fmt::String, fpat::String;
+function read_meta!(S::GphysData, fmt::String, fpat::Union{String, Array{String,1}};
   memmap  ::Bool      = false                     ,  # use Mmap.mmap? (unsafe)
   msr     ::Bool      = false                     ,  # read as MultiStageResp?
   s       ::TimeSpec  = "0001-01-01T00:00:00"     ,  # Start
@@ -70,7 +70,7 @@ function read_meta!(S::GphysData, fmt::String, fpat::String;
 end
 
 @doc (@doc read_meta!)
-function read_meta(fmt::String, filestr::String;
+function read_meta(fmt::String, fpat::Union{String, Array{String,1}};
   memmap  ::Bool      = true                      ,  # use Mmap.mmap? (unsafe)
   msr     ::Bool      = false                     ,  # read as MultiStageResp?
   s       ::TimeSpec  = "0001-01-01T00:00:00"     ,  # Start
@@ -80,6 +80,6 @@ function read_meta(fmt::String, filestr::String;
   )
 
   S = SeisData()
-  read_meta!(S, fmt, filestr, memmap=memmap, msr=msr, s=s, t=t, units=units, v=v)
+  read_meta!(S, fmt, fpat, memmap=memmap, msr=msr, s=s, t=t, units=units, v=v)
   return S
 end
