@@ -1,4 +1,4 @@
-function read_slist!(S::GphysData, fname::String, lennartz::Bool, memmap::Bool)
+function read_slist!(S::GphysData, fname::String, lennartz::Bool, memmap::Bool, strict::Bool)
   # file read
   io = memmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   hdr = readline(io)
@@ -34,7 +34,10 @@ function read_slist!(S::GphysData, fname::String, lennartz::Bool, memmap::Bool)
 
   # Check for existing channel with same fs
   i = findid(S, id)
-  if (i > 0) && (fs == S.fs[i])
+  if strict
+    i = channel_match(S, i, fs)
+  end
+  if (i > 0)
     T = S.t[i]
     Nt = size(T, 1)
 
