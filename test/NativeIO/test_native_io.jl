@@ -10,6 +10,7 @@ uw_file   = path * "/SampleFiles/UW/02062915175o"
 printstyled("  SeisData\n", color=:light_green)
 S = breaking_seis()
 wseis(savfile1, S)
+@test all([any([occursin("wrote to file " * savfile1, n) for n in S.notes[i]]) for i in 1:S.n])
 R = rseis(savfile1)[1]
 @test(R==S)
 S.notes[2][1] = string(String(Char.(0x00:0x7e)), String(Char.(0x80:0xff)))
@@ -20,6 +21,7 @@ R = rseis(savfile1)[1]
 printstyled("  SeisHdr\n", color=:light_green)
 H = randSeisHdr()
 wseis(savfile2, H)
+@test any([occursin("wrote to file " * savfile2, n) for n in H.notes])
 H2 = rseis(savfile2)[1]
 @test(H==H2)
 

@@ -144,6 +144,10 @@ redirect_stdout(out) do
   S4 = read_hdf5(hdf, ts, te)
   write_hdf5(hdf_out1, S4, ovr=true, add=true)
 end
+
+# There should be 4 successful writes at this point
+@test sum([occursin("wrote to file " * hdf_out1, S3.notes[1][i]) for i in 1:length(S3.notes[1])]) == 4
+
 @test scan_hdf5(hdf_out1, level="trace") == [
   "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-08T00:00:00__2019-07-08T02:00:00__hhz",
   "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-08T00:00:00__2019-07-08T23:59:59.975__hhz",
