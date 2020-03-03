@@ -32,13 +32,6 @@ object.
 | simple instrument response with poles, zeros, sensitivity (**:a0**), and
 | sensitivity frequency (**:f0**). Very few use cases require more detail.
 
-.. function:: write_sxml(fname::String, S::GphysData[, chans=Cha])
-
-Write station XML from the fields of **S** to file **fname**.
-
-Use keyword **chans=Cha** to restrict station XML write to **Cha**. This
-keyword can accept an Integer, UnitRange, or Array{Int64,1} argument.
-
 *******
 QuakeML
 *******
@@ -72,26 +65,3 @@ each per event:
 
 Non-essential QuakeML data are saved to `misc` in each SeisHdr or SeisSrc object
 as appropriate.
-
-.. function:: write_qml(fname, SHDR::Array{SeisHdr,1}, SSRC::Array{SeisSrc,1}; v::Int64=0)
-.. function:: write_qml(fname, SHDR::SeisHdr, SSRC::SeisSrc; v::Int64=0)
-    :noindex:
-
-.. function:: write_qml(fname, SHDR::SeisHdr; v::Int64=0)
-.. function:: write_qml(fname, SHDR::Array{SeisHdr,1}; v::Int64=0)
-    :noindex:
-
-Write QML to **fname** from **SHDR**.
-
-If **fname** exists, and is QuakeML, SeisIO appends the existing XML. If the
-file is NOT QuakeML, an error is thrown; the file isn't overwritten.
-
-.. function:: write_qml(fname, SHDR::SeisHdr, SSRC::SeisSrc; v::Int64=0)
-    :noindex:
-.. function:: write_qml(fname, SHDR::Array{SeisHdr,1}, SSRC::Array{SeisSrc,1}; v::Int64=0)
-    :noindex:
-
-Write QML to **fname** from **SHDR** and **SSRC**.
-
-**Warning**: to write data from a SeisSrc object R in SSRC, it must be true
-that R.eid == H.id for some H in SHDR.

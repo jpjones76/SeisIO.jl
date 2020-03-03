@@ -9,12 +9,15 @@ TCP/IP-based data transmission protocol that allows near-real-time access to
 data from thousands of geophysical monitoring instruments. See
 :ref:`data keywords list <dkw>` and :ref:`channel id syntax <cid>` for options.
 
-.. function:: seedlink!(S, chans, KWs)
-.. function:: seedlink!(S, chans, patts, KWs)
-.. function:: S = seedlink(chans, KWs)
+.. function:: seedlink!(S, mode, chans, KWs)
+.. function:: seedlink!(S, mode, chans, patts, KWs)
+.. function:: S = seedlink(mode, chans, KWs)
 
 Initiate a SeedLink session in DATA mode to feed data from channels ``chans`` with selection patterns ``patts`` to SeisData structure ``S``. A handle to a TCP connection is appended to ``S.c``. Data are periodically parsed until the connection is closed. One SeisData object can support multiple connections, provided that each connection's streams feed unique channels.
 
+| **mode**
+| SeedLink mode ("DATA", "FETCH", or "TIME"; case-sensitive).
+|
 | **chans**
 | Channel specification can use any of the following options:
 |
@@ -31,11 +34,29 @@ Pass keywords with `name=value` pairs.
 
 :ref:`Standard Keywords<dkw>`
 *****************************
-fmt, opts, q, si, to, v, w, y
+s, t, v, w
 
-:ref:`SeedLink-Specific Keywords<slkw>`
-***************************************
-gap, kai, mode, port, refresh, safety, x\_on\_err
+.. _slkw:
+
+SeedLink Keywords
+*****************
+Change these with SeisIO.KW.SL.[key] = value, e.g., SeisIO.KW.SL.refresh = 30.
+
+.. csv-table::
+  :header: kw, def, type, meaning
+  :delim: ;
+  :widths: 8, 8, 8, 24
+
+  u; "rtserve.iris.washington.edu"; S; base SeedLink service URL, no "http://"
+  gap; 3600; R; a stream with no data in >gap seconds is considered offline
+  kai; 600; R; keepalive interval (s)
+  port; 18000; I; port number
+  refresh; 20; R; base refresh interval (s) [#]_
+  x\_on\_err; true; Bool; exit on error?
+
+.. rubric:: Table Footnotes
+
+.. [#] This value is a base value; a small amount is added to this number by each new SeedLink session to minimize the risk of congestion
 
 Other Keywords
 **************

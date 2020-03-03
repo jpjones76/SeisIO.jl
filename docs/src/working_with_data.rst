@@ -161,14 +161,14 @@ Checking Your Work
 *******************
 If you need to check what's been done to a channel, or the sources present in the channel data, two commands are helpful:
 
-.. function:: processing_log(S::SeisData)
-.. function:: processing_log(S::SeisData, i::Int)
-.. function:: processing_log(C::SeisChannel)
+.. function:: show_processing(S::SeisData)
+.. function:: show_processing(S::SeisData, i::Int)
+.. function:: show_processing(C::SeisChannel)
 
 Tabulate and print all processing steps in `:notes` to stdout in human-readable format.
 
-.. function:: source_log(S::SeisData)
-.. function:: source_log(S::SeisData, i::Int)
-.. function:: source_log(C::SeisChannel)
+.. function:: show_src(S::SeisData)
+.. function:: show_src(S::SeisData, i::Int)
+.. function:: show_src(C::SeisChannel)
 
 Tabulate and print all data sources in `:notes` to stdout.

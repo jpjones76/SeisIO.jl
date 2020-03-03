@@ -46,10 +46,3 @@ Supported Keywords
 
 
 **Note**: `mmap=true` improves read speed for ASCII formats but requires caution. Julia language handling of SIGBUS/SIGSEGV and associated risks is unknown and undocumented.
-
-****************
-Writing Metadata
-****************
-.. function:: writesacpz(S::GphysData, pzfile::String)
-
-Write fields from SeisIO struct `S` to sacpz file `pzfile`.

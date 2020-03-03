@@ -23,7 +23,7 @@ Intro
 Files
 *****
 .. toctree::
-   :caption: Reading Files
+   :caption: Reading
    :maxdepth: 2
 
    src/Formats/timeseries.rst
@@ -35,17 +35,26 @@ Files
 Web
 ***
 .. toctree::
-   :caption: Downloading Data
+   :caption: Downloading
    :maxdepth: 2
 
    src/Web/webclients.rst
    src/Web/seedlink.rst
 
+*******
+Writing
+*******
+.. toctree::
+  :caption: Writing
+  :maxdepth: 2
+
+  src/writing.rst
+
 **********
 Processing
 **********
 .. toctree::
-  :caption: Data Processing
+  :caption: Processing
   :maxdepth: 2
 
   src/Processing/processing.rst

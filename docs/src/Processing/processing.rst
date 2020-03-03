@@ -304,14 +304,14 @@ Keywords
   :delim: |
   :widths: 1, 2, 1, 4
 
-  chans | []          | :sup:`(a)` | channel numbers to filter
-  fl  | 1.0           | Float64 | lower corner frequency [Hz] \ :sup:`(b)`
-  fh  | 15.0          | Float64 | upper corner frequency [Hz] \ :sup:`(b)`
-  np  | 4             | Int64   | number of poles
-  rp  | 10            | Int64   | pass-band ripple (dB)
-  rs  | 30            | Int64   | stop-band ripple (dB)
-  rt  | \"Bandpass\"    | String  | response type (type of filter)
-  dm  | \"Butterworth\" | String  | design mode (name of filter)
+  chans | []            | :sup:`(a)` | channel numbers to filter
+  fl  | 1.0             | Float64    | lower corner frequency [Hz] \ :sup:`(b)`
+  fh  | 15.0            | Float64    | upper corner frequency [Hz] \ :sup:`(b)`
+  np  | 4               | Int64      | number of poles
+  rp  | 10              | Int64      | pass-band ripple (dB)
+  rs  | 30              | Int64      | stop-band ripple (dB)
+  rt  | \"Bandpass\"    | String     | response type (type of filter)
+  dm  | \"Butterworth\" | String     | design mode (name of filter)
 
 | :sup:`(a)`  Allowed types are Integer, UnitRange, and Array{Int64, 1}.
 | :sup:`(b)`  By convention, the lower corner frequency (fl) is used in a

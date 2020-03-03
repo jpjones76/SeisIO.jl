@@ -94,15 +94,14 @@ Returns a SeisEvent.
 
 Phase Onset Query
 *****************
-.. function:: get_pha(:math:`\Delta`::Float64, z::Float64)
+.. function:: get_pha!(S::Data[, keywords])
 
-Command-line interface to IRIS online implementation of the TauP travel time
-calculator [1-2]. Returns a matrix of strings. Specify :math:`\Delta` in decimal degrees
-and z in km with + = down.
+Keywords:
 
-| Shared keywords keywords: pha, to, v
-| Other keywords:
-| ``-model``: velocity model (defaults to "iasp91")
+* pha: comma-separated String of phases ("P, S, SP")
+* model: velocity model ("iasp91")
+* to: timeout in seconds
+* v: verbosity
 
 **References**
 

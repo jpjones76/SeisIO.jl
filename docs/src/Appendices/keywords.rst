@@ -54,26 +54,3 @@ default for nev to 2.
 .. [#] Not used with IRISWS.
 .. [#] **-v=0** = quiet; 1 = verbose, 2 = debug; 3 = verbose debug
 .. [#] If **-w=true**, a file name is automatically generated from the request parameters, in addition to parsing data to a SeisData structure. Files are created from the raw download even if data processing fails, in contrast to get_data(... wsac=true).
-
-.. _slkw:
-
-*****************
-SeedLink Keywords
-*****************
-Change these with SeisIO.KW.SL.[key] = value, e.g., SeisIO.KW.SL.refresh = 30.
-
-.. csv-table::
-  :header: kw, def, type, meaning
-  :delim: ;
-  :widths: 8, 8, 8, 24
-
-  gap; 3600; R; a stream with no data in >gap seconds is considered offline
-  kai; 600; R; keepalive interval (s)
-  mode; \"DATA\"; I; \"TIME\", \"DATA\", or \"FETCH\"
-  port; 18000; I; port number
-  refresh; 20; R; base refresh interval (s) [#]_
-  x\_on\_err; true; Bool; exit on error?
-
-.. rubric:: Table Footnotes
-
-.. [#] This value is modified slightly by each SeedLink session to minimize the risk of congestion
