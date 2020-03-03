@@ -31,9 +31,10 @@ redirect_stdout(out) do
   summary(randSeisData())
 
   # invoke help-only functions
-  @test seed_support() == nothing
+  seed_support()
+  mseed_support()
+  dataless_support()
+  resp_wont_read()
   @test chanspec() == nothing
-  @test mseed_support() == nothing
   @test timespec() == nothing
-  @test RESP_wont_read() == nothing
 end
