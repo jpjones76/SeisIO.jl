@@ -1,15 +1,32 @@
 # SeisIO v1.0.0 Release: 2020-03-02
 ### 2020-03-02
+* All file writes should now be logged to *:notes* in appropriate channels and structures.
+* `show_writes` tabulates and prints all data writes in `:notes` to stdout.
+* renamed `source_log` and `processing_log` to `show_src` and `show_processing`.
 * `read_meta`  
-  + Now logs all reads to *:notes* in entries that contain "+meta" in the second field
-  + Now accepts string arrays for the file pattern argument.
+  + Now logs all reads to *:notes* in entries that contain *"+meta"* in the second field
+  + Now accepts a string array for the file pattern argument.
+* `read_sxml` is no longer exported; use `read_meta("sxml", ... )`, instead.
 * `wseis` now logs all writes to *:notes* for all objects written.
 * `write_hdf5` now logs all writes to *:notes* in all channels written.
 * `strict=true` now works with SLIST and Lennartz SLIST files.
 * `writesac`
   + Now logs all writes to *:notes* in channels written.
   + Now accepts channel ranges and numeric channel number arrays with KW `chans=`.
+  * KW "xy=true" deprecated
+  * No longer writes irregular channels
+  + No longer allows writing SAC x-y files
+`writesacpz`
+  + Now accepts a channel list as a keyword argument, specified with *chans=*.
+  + For consistency with other write methods, the required arguments have reversed positions; `writesacpz(S, fname)` is now `writesacpz(fname, S)`
+* `seedlink`
+  + now requires MODE ("TIME", "FETCH", or "DATA") as the first string argument, for consistency with other web clients; it's no longer a keyword.
+  + keyword *u=* (base URL) now has a default value in SeisIO.KW.SL, and
+  can be changed with `SeisIO.KW.SL.u=URL` for string *URL*.
+  + the docstring has been edited to list the correct keywords available.
+* `Quake.get_pha!` docstring corrected
 * The (potentially very long) tests to download data from the NCEDC and SCEDC servers have been removed, as has the dreaded `servers="all"` test in the Quake submodule. These changes shorten package tests by 3-5 minutes and eliminate most of the timeout errors in Appveyor and Travis-CI.
+* `examples.jl` no longer errors on the SeedLink examples when invoked outside the "tests" directory.
 
 ### 2020-02-29
 * Deprecated `findid(S1, S2)` for two GphysData objects; wasn't useful
@@ -56,7 +73,7 @@ saved to channels with special IDs in the output.
 * `read_data!` with an ASCII data format now continues existing channels that match channel ID, rather than starting new ones. Fixes issue #35.
 * Found, and fixed, an off-by-one error in start times of GeoCSV tspair time series.
 * Internal `buf_to_int()` now always allows ns precision.
-* `processing_log` and `source_log` now have docstrings.
+* `show_processing` and `show_src` now have docstrings.
 * Fixed a longstanding bug where `:src`, `:notes` were not logged by `get_data("IRIS", ..., fmt="sac")`.
 
 ### 2020-02-14
@@ -109,9 +126,9 @@ acquire the data can be reproduced.
   - timestamp, formatted YYYY:MM:DDThh-mm-ss
   -
 * New functions for displaying tabulated logging:
-  - `processing_log` will tabulate and print all processing steps in `:notes`
+  - `show_processing` will tabulate and print all processing steps in `:notes`
   to stdout.
-  - `source_log` will tabulate and print all data sources in `:notes` to stdout.
+  - `show_src` will tabulate and print all data sources in `:notes` to stdout.
 * Data sources logged to `:notes` now have the second field set to `+source`
 
 ### 2019-11-20
