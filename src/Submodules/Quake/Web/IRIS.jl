@@ -1,17 +1,15 @@
 export get_pha!
 
 """
-    T = get_pha(Δ::Float64, z::Float64)
+    get_pha!(Ev::SeisEvent[, keywords])
 
-Command-line interface to IRIS online travel time calculator, which calls TauP [1-2].
-Returns a matrix of strings.
+Command-line interface to IRIS online travel time calculator, which calls TauP [1-2]. Returns a matrix of strings.
 
-Specify Δ in decimal degrees, z in km treating down as +.
-
-Standard keywords: pha, to, v
-
-Additional keywords:
+Keywords:
+* pha: comma-separated String of phases ("P, S, SP")
 * model: velocity model ("iasp91")
+* to: timeout in seconds
+* v: verbosity
 
 ### References
 [1] TauP manual: http://www.seis.sc.edu/downloads/TauP/taup.pdf
