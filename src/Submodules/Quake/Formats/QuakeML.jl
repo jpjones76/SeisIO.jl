@@ -864,10 +864,23 @@ function write_qml(fname::String, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1}; 
     new_qml!(io)
   end
 
+  opts = string(", v=", v)
   if isempty(H0) && isempty(R0)
     write_qml!(io, HDR, SRC, v)
+    for h in HDR
+      fwrite_note_quake!(h, "asdf_wqml", fname, opts)
+    end
+    for r in SRC
+      fwrite_note_quake!(r, "asdf_wqml", fname, opts)
+    end
   else
     write_qml!(io, H0, R0, v)
+    for h in H0
+      fwrite_note_quake!(h, "asdf_wqml", fname, opts)
+    end
+    for r in R0
+      fwrite_note_quake!(r, "asdf_wqml", fname, opts)
+    end
   end
   close(io)
   return nothing
