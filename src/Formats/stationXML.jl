@@ -1,4 +1,4 @@
-export read_sxml, write_sxml
+export write_sxml
 
 function full_resp(xe::XMLElement)
   resp = MultiStageResp(24)
@@ -810,12 +810,16 @@ Write station XML from the fields of `S` to file `fname`.
 Use keyword `chans=Cha` to restrict station XML write to `Cha`. This keyword
 can accept an Integer, UnitRange, or Array{Int64,1} as its argument.
 """
-function write_sxml(str::String, S::GphysData;
+function write_sxml(fname::String, S::GphysData;
   chans::ChanSpec=Int64[])
 
   chans = mkchans(chans, S, keepempty=true)
-  fid = open(str, "w")
-  mk_xml!(fid, S, chans)
-  close(fid)
+  io = open(fname, "w")
+  mk_xml!(io, S, chans)
+  close(io)
+
+  for i in chans
+    fwrite_note!(S, i, "write_sxml", fname, string(", chans=", i))
+  end
   return nothing
 end
