@@ -28,7 +28,7 @@ function writesac(S::SeisEvent; ts::Bool=false, v::Integer=KW.v)
 
   for i = 1:S.data.n
     BUF.sac_fv[8] = t_evt - S.data.t[i][1,2]*μs
-    write_sac_channel(S.data, i, false, "", v)
+    write_sac_channel(S.data, i, "", v)
   end
   return nothing
 end
