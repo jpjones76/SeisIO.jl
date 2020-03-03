@@ -48,9 +48,16 @@ writesac(S) # change 2019-07-15 to cover writesac on GphysData
 safe_rm("1981.088.10.38.14.009..CDV...R.SAC")
 
 fn = "81.088.10.38.14.009..CDV...R.SAC"
-writesac(S, fname=fn, xy=true)
+writesac(S, fname=fn)
 @test safe_isfile(fn)
 safe_rm(fn)
+printstyled("      check write logging\n", color=:light_green)
+@test any([occursin("write", n) for n in S.notes[1]])
+redirect_stdout(out) do
+  write_log(S, 1)
+  write_log(S[1])
+  write_log(S)
+end
 
 SAC1.id = "VU.CDV..NUL"
 SAC1.name = "VU.CDV..NUL"
@@ -70,7 +77,7 @@ writesac(SAC1, fname="test_write_2", v=1)
 rm("test_write_2.sac")
 
 redirect_stdout(out) do
-  writesac(SAC1, xy=true, v=1)
+  writesac(SAC1, v=1)
 end
 @test safe_isfile("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")
 rm("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")

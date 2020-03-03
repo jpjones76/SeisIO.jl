@@ -23,7 +23,7 @@ function should_bswap(io::IO)
   return q
 end
 
-function write_sac_file(fname::String, x::AbstractArray{T,1}, tdata::AbstractArray{Float32,1}, xy::Bool) where T
+function write_sac_file(fname::String, x::AbstractArray{T,1}) where T
   open(fname, "w") do io
     write(io, BUF.sac_fv)
     write(io, BUF.sac_iv)
@@ -32,9 +32,6 @@ function write_sac_file(fname::String, x::AbstractArray{T,1}, tdata::AbstractArr
       write(io, x)
     else
       write(io, Float32.(x))
-    end
-    if xy
-      write(io, tdata)
     end
   end
   return nothing
@@ -62,20 +59,20 @@ function fill_sac(si::Int64, nx::Int32, ts::Int64, id::Array{String,1})
   return fname
 end
 
-function read_sac_stream(f::IO, full::Bool, swap::Bool)
+function read_sac_stream(io::IO, full::Bool, swap::Bool)
   fv = BUF.sac_fv
   iv = BUF.sac_iv
   cv = BUF.sac_cv
-  fastread!(f, fv)
-  fastread!(f, iv)
-  fastread!(f, cv)
+  fastread!(io, fv)
+  fastread!(io, iv)
+  fastread!(io, cv)
   if swap == true
     fv .= bswap.(fv)
     iv .= bswap.(iv)
   end
   nx = getindex(iv, 10)
   x = Array{Float32,1}(undef, nx)
-  fastread!(f, x)
+  fastread!(io, x)
   if swap == true
     broadcast!(bswap, x, x)
   end
@@ -193,11 +190,11 @@ function read_sac_stream(f::IO, full::Bool, swap::Bool)
 end
 
 function read_sac_file!(S::SeisData, fname::String, full::Bool, memmap::Bool, strict::Bool)
-  f = memmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
-  q = should_bswap(f)
-  seekstart(f)
-  C = read_sac_stream(f, full, q)
-  close(f)
+  io = memmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
+  q = should_bswap(io)
+  seekstart(io)
+  C = read_sac_stream(io, full, q)
+  close(io)
   add_chan!(S, C, strict)
   return nothing
 end
@@ -260,11 +257,10 @@ function fill_sac_id(id_str::String)
   return id
 end
 
-function write_sac_channel(S::GphysData, i::Int64, xy::Bool, fn::String,  v::Integer)
+function write_sac_channel(S::GphysData, i::Int64, fn::String,  v::Integer)
   id = fill_sac_id(S.id[i])
   fs = S.fs[i]
   t = S.t[i]
-  tdata = Array{Float32,1}(undef, 0)
 
   # Floats, all segments
   BUF.sac_fv[1] = (fs == 0.0 ? 0.0f0 : Float32(1.0/fs))
@@ -284,22 +280,8 @@ function write_sac_channel(S::GphysData, i::Int64, xy::Bool, fn::String,  v::Int
   end
 
   fname = ""
-  if (xy == true || fs == 0.0)
-    si = 1
-    nx = Int32(length(S.x[i]))
-    @assert nx ≤ typemax(Int32)
-    ts = t[1,2]
-    tdata = Float32.(μs*(t_expand(t, fs) .- ts))
-    if fn == ""
-      fname = fill_sac(si, nx, ts, id)
-    else
-      fill_sac(si, nx, ts, id); fname = fn
-    end
-    BUF.sac_fv[7] += sum(t[2:end,2])*μs
-    BUF.sac_iv[16] = Int32(4)
-    BUF.sac_iv[36] = zero(Int32)
-    write_sac_file(fname, S.x[i], tdata, true)
-    v > 0  && println(stdout, now(), ": Wrote SAC xy file ", fname, " from channel ", i)
+  if fs == 0.0
+    v > 0  && @warn(string("Can't write irregular channels (fs = 0.0) to file; skipped channel ", i))
   else
     W = t_win(S.t[i], fs)
     inds = x_inds(S.t[i])
@@ -317,37 +299,35 @@ function write_sac_channel(S::GphysData, i::Int64, xy::Bool, fn::String,  v::Int
         fname = fn
       end
       vx = view(S.x[i], si:ei)
-      write_sac_file(fname, vx, tdata, false)
+      write_sac_file(fname, vx)
       v > 0  && println(stdout, now(), ": Wrote SAC ts file ", fname, " from channel ", i, " segment ", j)
+      fwrite_note!(S, i, "writesac", fname, string(", fname=\"", fn, "\", v=", v))
     end
   end
-  fwrite_note!(S, i, "writesac", fname, string(", xy=", xy, ", fname=\"", fn, "\", v=", v))
   return nothing
 end
 
 """
-    writesac(S::Union{SeisData}[; ts=false, v=0])
+    writesac(S::Union{SeisData}[; fname="", v=0])
 
 Write all data in SeisData structure `S` to auto-generated SAC files.
 
 Keywords:
-* `fname=FF` uses filename FF, rather than creating file names automatically.
-(Only works with GphysChannel objects)
-* `xy=true` writes generic x-y data with time as the independent variable.
+* `fname=FF` uses filename FF, rather than creating file names automatically. (Only works with GphysChannel objects). Leave blank for automatic naming.
+* `v` is verbosity.
 """
-function writesac(S::GphysData; chans::ChanSpec=Int64[], fname::String="", xy::Bool=false, v::Integer=KW.v)
+function writesac(S::GphysData; chans::ChanSpec=Int64[], fname::String="", v::Integer=KW.v)
   reset_sacbuf()
 
   chans = mkchans(chans, S)
   for i in chans
-    write_sac_channel(S, i, xy, fname, v)
+    write_sac_channel(S, i, fname, v)
   end
   return nothing
 end
 
 function writesac(S::GphysChannel;
   fname::String="",
-  xy::Bool=false,
   v::Integer=KW.v)
 
   fstr = String(
@@ -361,8 +341,7 @@ function writesac(S::GphysChannel;
       end
     end
     )
-  writesac(SeisData(S), fname=fstr, xy=xy, v=v)
-  # *** test: are write notes logged faithfully?
+  writesac(SeisData(S), fname=fstr, v=v)
   return nothing
 end
 
@@ -523,14 +502,15 @@ function read_sacpz(file::String; memmap::Bool=false)
 end
 
 @doc """
-    writesacpz(S::GphysData, pzfile::String)
+    writesacpz(S::GphysData, pzfile::String[, chans::ChanSpec=CC])
 
 Write fields from SeisIO struct `S` into sacpz file `pzfile`. Uses information
-from fields :fs, :gain, :loc, :misc, :name, :resp, :units.
+from fields :fs, :gain, :loc, :misc, :name, :resp, :units. Specify `chans=CC` to only write channels `CC`.
 """ writesacpz
-function writesacpz(S::GphysData, file::String)
+function writesacpz(S::GphysData, file::String; chans::ChanSpec=Int64[])
+  cc = mkchans(chans, S, keepempty=true)
   io = open(file, "w")
-  for i in 1:S.n
+  for i in cc
     id = split_id(S.id[i])
     created   = get(S.misc[i], "CREATED", string(u2d(time())))
     ts_str    = isempty(S.t[i]) ? "1970-01-01T00:00:00" : string(u2d(S.t[i][1,2]*1.0e-6))
@@ -638,6 +618,7 @@ function writesacpz(S::GphysData, file::String)
 
     write(io, "CONSTANT\t", CONST, 0x0a)
     write(io, 0x0a, 0x0a)
+    fwrite_note!(S, i, "writesacpz", file, string(", chans=\"", i))
   end
   close(io)
   return nothing
