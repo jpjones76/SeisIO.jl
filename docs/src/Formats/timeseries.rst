@@ -131,7 +131,7 @@ Examples
 
 Memory Mapping
 ==============
-`memmap=true` is considered unsafe because Julia language handling of SIGBUS/SIGSEGV and associated risks is undocumented as of SeisIO v0.4.1. Thus, for example, we don't know what a connection failure during memory-mapped file I/O does. In some languages, this situation without additional signal handling was notorious for corrupting files.
+`memmap=true` is considered unsafe because Julia language handling of SIGBUS/SIGSEGV and associated risks is undocumented as of SeisIO v1.0.0. Thus, for example, we don't know what a connection failure during memory-mapped file I/O does. In some languages, this situation without additional signal handling was notorious for corrupting files.
 
 **Under no circumstances** should `mmap=true` be used to read files directly from a drive whose host device power management is independent of the destination computer's. This includes all work flows that involve reading files directly into memory from a connected data logger. It is *not* a sufficient workaround to set a data logger to "always on".
 
