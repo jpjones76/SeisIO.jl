@@ -93,11 +93,19 @@ function write_hdf5(file::String, C::GphysChannel;
   fmt       ::String    = "asdf",           # data format
   len       ::Period    = Day(1),           # length of added traces
   ovr       ::Bool      = false,            # overwrite trace data
+  tag       ::String    = "",               # trace tag (ASDF)
   v         ::Int64     = KW.v              # verbosity
   )
 
   S = SeisData(C)
-  write_hdf5(file, S, fmt=fmt, ovr=ovr, v=v)
+  write_hdf5(file, S, fmt=fmt, ovr=ovr, tag=tag, v=v)
+  opts = string(", add=", add,
+                ", fmt=\"", fmt,
+                "\", len=", len,
+                ", ovr=", ovr,
+                ", tag=\"", tag,
+                "\", v=", v)
+  fwrite_note!(C, "write_hdf5", file, opts)
   return nothing
 end
 
@@ -119,5 +127,13 @@ function write_hdf5(file::String, W::SeisEvent;
     error("Unknown file format (possibly NYI)!")
   end
 
+  # logging
+  opts = string(".data, chans=", chans,
+                ", fmt=\"", fmt,
+                ", tag=\"", tag,
+                "\", v=", v)
+  for i in chans
+    fwrite_note!(W.data, i, "write_hdf5", file, opts)
+  end
   return nothing
 end

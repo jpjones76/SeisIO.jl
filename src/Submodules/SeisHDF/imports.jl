@@ -15,4 +15,7 @@ import SeisIO: ChanSpec,
   sxml_mergehdr!,
   t_win,
   trunc_x!
-import SeisIO.Quake: event_xml!, new_qml!, write_qml!
+import SeisIO.Quake: event_xml!,
+  fwrite_note_quake!,
+  new_qml!,
+  write_qml!

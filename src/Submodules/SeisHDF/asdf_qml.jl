@@ -113,7 +113,7 @@ As above, for the `:hdr` and `:source` fields of `evt`.
 
     To write data from `R ∈ SSRC`, it must be true that `R.eid == H.id` for some `H ∈ SHDR`.
 
-See also: write_qml
+See also: `write_qml`
 """ asdf_wqml
 function asdf_wqml(hdf_out::String, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1};
   ovr::Bool=false,
@@ -129,6 +129,15 @@ function asdf_wqml(hdf_out::String, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1}
   end
   asdf_wqml!(hdf, HDR, SRC, ovr, v)
   close(hdf)
+
+  # logging
+  opts = string(", ovr=\"", ovr, "\", v=", v)
+  for h in HDR
+    fwrite_note_quake!(h, "asdf_wqml", hdf_out, opts)
+  end
+  for r in SRC
+    fwrite_note_quake!(r, "asdf_wqml", hdf_out, opts)
+  end
   return nothing
 end
 asdf_wqml(hdf_out::String, H::SeisHdr, R::SeisSrc; ovr::Bool=false, v::Integer=0) = asdf_wqml(hdf_out, [H], [R], ovr=ovr, v=v)

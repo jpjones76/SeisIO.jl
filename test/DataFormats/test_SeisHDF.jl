@@ -146,7 +146,7 @@ redirect_stdout(out) do
 end
 
 # There should be 4 successful writes at this point
-@test sum([occursin("wrote to file " * hdf_out1, S3.notes[1][i]) for i in 1:length(S3.notes[1])]) == 4
+@test sum([occursin("wrote to file " * hdf_out1, S3.notes[1][i]) for i in 1:length(S3.notes[1])]) == 5
 
 @test scan_hdf5(hdf_out1, level="trace") == [
   "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-08T00:00:00__2019-07-08T02:00:00__hhz",
@@ -371,6 +371,16 @@ compare_events(EvCat[3], Ev3)
 if Sys.iswindows() == false
   printstyled("          multi-file read\n", color=:light_green)
   write_hdf5(hdf_out4, Ev1)
+
+  # Check logging
+  @test sum([occursin("wrote to file ", Ev1.data.notes[1][i]) for i in 1:length(Ev1.data.notes[1])]) == 2
+  @test any([occursin("wrote to file " * hdf_out3, Ev1.data.notes[1][i]) for i in 1:length(Ev1.data.notes[1])])
+  @test any([occursin("wrote to file " * hdf_out4, Ev1.data.notes[1][i]) for i in 1:length(Ev1.data.notes[1])])
+  @test any([occursin("wrote to file " * hdf_out3, Ev1.hdr.notes[i]) for i in 1:length(Ev1.hdr.notes)])
+  @test any([occursin("wrote to file " * hdf_out4, Ev1.hdr.notes[i]) for i in 1:length(Ev1.hdr.notes)])
+  @test any([occursin("wrote to file " * hdf_out3, Ev1.source.notes[i]) for i in 1:length(Ev1.source.notes)])
+  @test any([occursin("wrote to file " * hdf_out4, Ev1.source.notes[i]) for i in 1:length(Ev1.source.notes)])
+
   EC2 = read_asdf_evt("test[3-4].h5", msr=true)
   inds = [1, 2, 3, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 1]
   for i in 1:length(EC2)
