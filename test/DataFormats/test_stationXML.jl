@@ -171,3 +171,6 @@ for f in datafields
   (f in (:id, :src, :notes)) && continue
   @test getfield(S1,f) == getfield(Sr,f)
 end
+
+printstyled("      extension to GphysChannel\n", color=:light_green)
+write_sxml(f_out, S[1])

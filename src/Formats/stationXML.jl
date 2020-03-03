@@ -804,8 +804,9 @@ end
 
 """
     write_sxml(fname::String, S::GphysData[, chans=Cha])
+    write_sxml(fname::String, C::GphysChannel)
 
-Write station XML from the fields of `S` to file `fname`.
+Write station XML from the fields of `S` or `C` to file `fname`.
 
 Use keyword `chans=Cha` to restrict station XML write to `Cha`. This keyword
 can accept an Integer, UnitRange, or Array{Int64,1} as its argument.
@@ -823,3 +824,4 @@ function write_sxml(fname::String, S::GphysData;
   end
   return nothing
 end
+write_sxml(fname::String, C::GphysChannel) = write_sxml(fname, SeisData(C), chans=1)
