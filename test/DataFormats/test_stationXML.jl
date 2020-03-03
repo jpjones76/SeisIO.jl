@@ -148,7 +148,7 @@ for file in files
   sort!(Sr)
 
   for f in datafields
-    (f in (:id, :src)) && continue
+    (f in (:id, :src, :notes)) && continue
     @test getfield(S,f) == getfield(Sr,f)
   end
 end
@@ -168,6 +168,6 @@ sort!(S1)
 Sr = read_sxml(f_out, msr=true)
 sort!(Sr)
 for f in datafields
-  (f in (:id, :src)) && continue
+  (f in (:id, :src, :notes)) && continue
   @test getfield(S1,f) == getfield(Sr,f)
 end
