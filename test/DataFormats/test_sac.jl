@@ -55,9 +55,9 @@ safe_rm(fn)
 printstyled("      check write logging\n", color=:light_green)
 @test any([occursin("write", n) for n in S.notes[1]])
 redirect_stdout(out) do
-  write_log(S, 1)
-  write_log(S[1])
-  write_log(S)
+  show_writes(S, 1)
+  show_writes(S[1])
+  show_writes(S)
 end
 
 SAC1.id = "VU.CDV..NUL"

@@ -45,9 +45,9 @@ end
 
 printstyled("    source logging\n", color=:light_green)
 redirect_stdout(out) do
-  processing_log(S, 1)
-  processing_log(S[1])
-  processing_log(S)
+  show_processing(S, 1)
+  show_processing(S[1])
+  show_processing(S)
 end
 
 printstyled("    equivalence with DSP.filtfilt\n", color=:light_green)

@@ -1,4 +1,4 @@
-export processing_log, source_log, write_log
+export show_processing, show_src, show_writes
 
 function print_log(notes::Array{String,1}, k::String)
   mm = 60
@@ -29,58 +29,58 @@ function print_log(notes::Array{String,1}, k::String)
 end
 
 """
-    processing_log(S::GphysData)
-    processing_log(S::GphysData, i::Int64)
-    processing_log(C::GphysChannel)
+    show_processing(S::GphysData)
+    show_processing(S::GphysData, i::Int64)
+    show_processing(C::GphysChannel)
 
 Tabulate and print all processing steps in `:notes` to stdout in human-readable format.
 
-See Also: source_log, note!, clear_notes!
+See Also: show_src, note!, clear_notes!
 """
-function processing_log(S::GphysData)
+function show_processing(S::GphysData)
   for i in 1:S.n
     println("\nChannel ", i)
     print_log(S.notes[i], "processing")
   end
   return nothing
 end
-processing_log(S::GphysData, i::Int) = print_log(S.notes[i], "processing")
-processing_log(C::GphysChannel) = print_log(C.notes, "processing")
+show_processing(S::GphysData, i::Int) = print_log(S.notes[i], "processing")
+show_processing(C::GphysChannel) = print_log(C.notes, "processing")
 
 """
-    source_log(S::GphysData)
-    source_log(S::GphysData, i::Int64)
-    source_log(C::GphysChannel)
+    show_src(S::GphysData)
+    show_src(S::GphysData, i::Int64)
+    show_src(C::GphysChannel)
 
 Tabulate and print all data sources logged in `:notes` to stdout in human-readable format.
 
-See Also: processing_log, note!, clear_notes!
+See Also: show_processing, note!, clear_notes!
 """
-function source_log(S::GphysData)
+function show_src(S::GphysData)
   for i in 1:S.n
     println("\nChannel ", i)
     print_log(S.notes[i], "+source")
   end
   return nothing
 end
-source_log(S::GphysData, i::Int) = print_log(S.notes[i], "+source")
-source_log(C::GphysChannel) = print_log(C.notes, "+source")
+show_src(S::GphysData, i::Int) = print_log(S.notes[i], "+source")
+show_src(C::GphysChannel) = print_log(C.notes, "+source")
 
 """
-    write_log(S::GphysData)
-    write_log(S::GphysData, i::Int64)
-    write_log(C::GphysChannel)
+    show_writes(S::GphysData)
+    show_writes(S::GphysData, i::Int64)
+    show_writes(C::GphysChannel)
 
 Tabulate and print all data writes logged in `:notes` to stdout in human-readable format.
 
-See Also: `processing_log`, `note!`, `clear_notes!`
+See Also: `show_processing`, `note!`, `clear_notes!`
 """
-function write_log(S::GphysData)
+function show_writes(S::GphysData)
   for i in 1:S.n
     println("\nChannel ", i)
     print_log(S.notes[i], "write")
   end
   return nothing
 end
-write_log(S::GphysData, i::Int) = print_log(S.notes[i], "write")
-write_log(C::GphysChannel) = print_log(C.notes, "write")
+show_writes(S::GphysData, i::Int) = print_log(S.notes[i], "write")
+show_writes(C::GphysChannel) = print_log(C.notes, "write")

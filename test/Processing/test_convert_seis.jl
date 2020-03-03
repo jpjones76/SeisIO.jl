@@ -105,12 +105,12 @@ C.units = "{unknown}"
 
 printstyled("    logging\n", color=:light_green)
 redirect_stdout(out) do
-  processing_log(S)
-  source_log(S)
+  show_processing(S)
+  show_src(S)
 
-  processing_log(S,1)
-  source_log(S,1)
+  show_processing(S,1)
+  show_src(S,1)
 
-  processing_log(S[1])
-  source_log(S[1])
+  show_processing(S[1])
+  show_src(S[1])
 end
