@@ -9,6 +9,7 @@ sac_pz_out1 = path*"/local_sac_1.pz"
 sac_pz_out2 = path*"/local_sac_2.pz"
 sac_pz_out3 = path*"/local_sac_3.pz"
 sac_pz_out4 = path*"/local_sac_4.pz"
+sac_pz_out5 = path*"/local_sac_5.pz"
 
 printstyled("  SAC\n", color=:light_green)
 printstyled("    read\n", color=:light_green)
@@ -84,9 +85,10 @@ rm("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")
 
 # SACPZ
 printstyled("    SACPZ\n", color=:light_green)
+printstyled("      read\n", color=:light_green)
 S = read_meta("sacpz", sac_pz_wc)
 S = read_meta("sacpz", sac_pz_file)
-writesacpz(S, sac_pz_out1)
+writesacpz(sac_pz_out1, S)
 T = read_meta("sacpz", sac_pz_out1)
 for f in (:n, :id, :name, :loc, :fs, :gain, :units)
   @test isequal(getfield(S, f), getfield(T, f))
@@ -101,7 +103,9 @@ for i = 1:U.n
   U.resp[i] = MultiStageResp(3)
   U.resp[i].stage[1] = S.resp[i]
 end
-writesacpz(U, sac_pz_out2)
+
+printstyled("      write\n", color=:light_green)
+writesacpz(sac_pz_out2, U)
 T = read_meta("sacpz", sac_pz_out2)
 for f in (:n, :id, :name, :loc, :fs, :gain, :units)
   @test isequal(getfield(S, f), getfield(T, f))
@@ -112,7 +116,7 @@ for f in fieldnames(typeof(S.resp[1]))
   end
 end
 U[1] = SeisChannel(id = "UW.HOOD..ENE")
-writesacpz(U, sac_pz_out3)
+writesacpz(sac_pz_out3, U)
 read_meta!(S, "sacpz", sac_pz_out3)
 for f in (:n, :id, :name, :loc, :fs, :gain, :units)
   @test isequal(getfield(S, f), getfield(T, f))
@@ -120,9 +124,13 @@ end
 S = breaking_seis()[1:3]
 S.resp[1].resp = rand(ComplexF64, 12, 2)
 S.resp[3].stage[2] = nothing
-writesacpz(S, sac_pz_out4)
+writesacpz(sac_pz_out4, S)
+
+printstyled("        extension to GphysChannel\n", color=:light_green)
+writesacpz(sac_pz_out5, S[1])
 
 safe_rm(sac_pz_out1)
 safe_rm(sac_pz_out2)
 safe_rm(sac_pz_out3)
 safe_rm(sac_pz_out4)
+safe_rm(sac_pz_out5)

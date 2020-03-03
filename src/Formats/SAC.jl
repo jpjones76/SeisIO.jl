@@ -502,12 +502,12 @@ function read_sacpz(file::String; memmap::Bool=false)
 end
 
 @doc """
-    writesacpz(S::GphysData, pzfile::String[, chans::ChanSpec=CC])
+    writesacpz(pzfile::String, S::GphysData[, chans::ChanSpec=CC])
 
 Write fields from SeisIO struct `S` into sacpz file `pzfile`. Uses information
 from fields :fs, :gain, :loc, :misc, :name, :resp, :units. Specify `chans=CC` to only write channels `CC`.
 """ writesacpz
-function writesacpz(S::GphysData, file::String; chans::ChanSpec=Int64[])
+function writesacpz(file::String, S::GphysData; chans::ChanSpec=Int64[])
   cc = mkchans(chans, S, keepempty=true)
   io = open(file, "w")
   for i in cc
@@ -623,3 +623,4 @@ function writesacpz(S::GphysData, file::String; chans::ChanSpec=Int64[])
   close(io)
   return nothing
 end
+writesacpz(fname::String, C::GphysChannel) = writesacpz(fname, SeisData(C), chans=1)
