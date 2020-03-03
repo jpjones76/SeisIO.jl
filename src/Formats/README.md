@@ -1,8 +1,7 @@
-# Formats
-This directory is meant for simple formats that can be handled by a
-relatively small .jl file.
+# **Formats Directory**
+This directory is for simple formats that can be handled by a small .jl file.
 
-## Expected Code Coverage
+## Minimum Code Coverage
 95% per file.
 
 ## File Naming
@@ -12,4 +11,4 @@ relatively small .jl file.
 Please read [formats.md](../../docs/DevGuides/formats.md).
 
 ## Adding Types
-Please read [adding_types.md](../../docs/Guides/adding_types.md).
+Please read [adding_types.md](../../docs/DevGuides/adding_types.md).
