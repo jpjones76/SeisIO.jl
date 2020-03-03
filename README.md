@@ -13,7 +13,7 @@ Designed for speed, efficiency, and ease of use. Includes web clients, readers f
 * Web clients: SeedLink, FDSN (dataselect, event, station), IRIS (TauP, timeseries)
 * File formats: ASDF (r/w), Bottles, GeoCSV (slist, tspair), QuakeML (r/w), SAC (r/w), SEED (dataless, mini-SEED, resp), SEG Y (rev 0, rev 1, PASSCAL), SLIST, SUDS, StationXML (r/w), Win32, UW
 
-## Getting Started
+## Getting Started | [Formats](docs/FORMATS.md) | [Web Clients](docs/WEB.md)
 Start the tutorials in your browser from the Julia prompt with
 
 `cd(dirname(pathof(SeisIO))); include("../tutorial/install.jl")`
