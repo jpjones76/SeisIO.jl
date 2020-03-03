@@ -55,18 +55,18 @@ printstyled("    produce expected errors and warnings\n", color=:light_green)
 redirect_stdout(out) do
   S1 = SeisData()
 
-  @test_throws ErrorException seedlink!(S1, [sta[1]], ["*****.X"])
+  @test_throws ErrorException seedlink!(S1, "DATA", [sta[1]], ["*****.X"])
 
-  S2 = seedlink([sta[1]], pat, x_on_err=false)
+  S2 = seedlink("DATA", [sta[1]], pat, x_on_err=false)
   write(S2.c[1], "BYE\r")
   close(S2.c[1])
-  @test_throws ErrorException seedlink!(S2, [replace(sta[1], "SEP" => "XOX")], ["?????.D"])
+  @test_throws ErrorException seedlink!(S2, "DATA", [replace(sta[1], "SEP" => "XOX")], ["?????.D"])
 
-  S3 = seedlink([replace(sta[1], "SEP" => "XOX")], ["*****.X"], x_on_err=false)
+  S3 = seedlink("DATA", [replace(sta[1], "SEP" => "XOX")], ["*****.X"], x_on_err=false)
   write(S3.c[1], "BYE\r")
   close(S3.c[1])
 
-  S4 = seedlink(hcat(sta_matrix, "***", "***", "X"), x_on_err=false)
+  S4 = seedlink("DATA", hcat(sta_matrix, "***", "***", "X"), x_on_err=false)
   write(S4.c[1], "BYE\r")
   close(S4.c[1])
 end
@@ -76,18 +76,18 @@ printstyled("    DATA mode\n", color=:light_green)
 printstyled("      link 1: command-line station list\n", color=:light_green)
 T = SeisData()
 redirect_stdout(out) do
-  seedlink!(T, sta, mode="DATA", refresh=9.9, kai=7.0, v=1)
+  seedlink!(T, "DATA", sta, refresh=9.9, kai=7.0, v=1)
 end
 
 printstyled("      link 2: station file\n", color=:light_green)
 redirect_stdout(out) do
-  seedlink!(T, config_file, mode="DATA", refresh=13.3, v=3)
+  seedlink!(T, "DATA", config_file, refresh=13.3, v=3)
 end
 wait_on_data!(T, tmax=50.0)
 
 # FETCH mode (indistinguishable from DATA mode for most users)
 printstyled("    FETCH mode\n", color=:light_green)
-V = seedlink("GE.ISP..BH?.D", refresh=10.0, mode="FETCH", v=1)
+V = seedlink("FETCH", "GE.ISP..BH?.D", refresh=10.0, v=1)
 printstyled("      link initialized\n", color=:light_green)
 wait_on_data!(V, tmax=50.0)
 
@@ -101,16 +101,16 @@ dt = en-st
 (d0,d1) = parsetimewin(st,en)
 
 U = SeisData()
-seedlink!(U, sta, mode="TIME", refresh=10.0, s=d0, t=d1, w=true)
+seedlink!(U, "TIME", sta, refresh=10.0, s=d0, t=d1, w=true)
 printstyled("      first link initialized\n", color=:light_green)
 
 # Seedlink with a config file
-seedlink!(U, config_file, refresh=10.0, mode="TIME", s=d0, t=d1)
+seedlink!(U, "TIME", config_file, refresh=10.0, s=d0, t=d1)
 printstyled("      second link initialized\n", color=:light_green)
 
 # Seedlink with a config string
 redirect_stdout(out) do
-  seedlink!(U, "CC.VALT..???, UW.ELK..EHZ", mode="TIME", refresh=10.0, kai=19.0, s=d0, t=d1, v=3)
+  seedlink!(U, "TIME", "CC.VALT..???, UW.ELK..EHZ", refresh=10.0, kai=19.0, s=d0, t=d1, v=3)
 end
 printstyled("      third link initialized\n", color=:light_green)
 wait_on_data!(U, tmax=50.0)

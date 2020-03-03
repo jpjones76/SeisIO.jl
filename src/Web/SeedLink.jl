@@ -288,28 +288,25 @@ has_stream(sta::Array{String,2};
                           sl_info("STREAMS", u=u, port=port), gap=gap, to=to)
 
 @doc """
-    seedlink!(S, chans)
-    S = seedlink(chans)
+    seedlink!(S, mode, chans)
+    S = seedlink(mode, chans)
 
-Begin acquiring seedlink data to SeisData structure `S`. New channels
-are added to `S` automatically based on `chans`. Connections are added
-to `S.c`. When finished, close connection manually with `close(S.c[n])` where n is connection #.
+Begin acquiring seedlink data to SeisData structure `S` using mode `mode`. New channels are added to `S` automatically based on `chans`. Connections are added to `S.c`. When finished, close connection manually with `close(S.c[n])` where n is connection #.
 
 This function is fully described in the official documentation at https://seisio.readthedocs.io/ in subsection **SeedLink**.
 
-Keywords: fmt, gap, kai, mode, opts, port, q, refresh, safety, si, to, v, w, x_on_err, y
+Keywords: gap, kai, port, refresh, s, t, u, v, w, x_on_err
 
 See Also: get_data
 """ seedlink!
-function seedlink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
+function seedlink!(S::SeisData, mode::String, sta::Array{String,1}, patts::Array{String,1};
                     gap::Real=KW.SL.gap,
                     kai::Real=KW.SL.kai,
-                    mode::String=KW.SL.mode,
                     port::Int64=KW.SL.port,
                     refresh::Real=KW.SL.refresh,
+                    u::String=KW.SL.u,
                     s::TimeSpec=0,
                     t::TimeSpec=300,
-                    u::String="rtserve.iris.washington.edu",
                     v::Integer=KW.v,
                     w::Bool=KW.w,
                     x_on_err::Bool=KW.SL.x_on_err
@@ -503,10 +500,9 @@ function seedlink!(S::SeisData, sta::Array{String,1}, patts::Array{String,1};
 
   return S
 end
-function seedlink!(S::SeisData, C::Union{String,Array{String,1},Array{String,2}};
+function seedlink!(S::SeisData, mode::String, C::Union{String,Array{String,1},Array{String,2}};
                     gap::Real=KW.SL.gap,
                     kai::Real=KW.SL.kai,
-                    mode::String=KW.SL.mode,
                     port::Int64=KW.SL.port,
                     refresh::Real=KW.SL.refresh,
                     s::TimeSpec=0,
@@ -517,15 +513,14 @@ function seedlink!(S::SeisData, C::Union{String,Array{String,1},Array{String,2}}
                     x_on_err::Bool=KW.SL.x_on_err)
 
   sta, pat = sl_cparse(C)
-  seedlink!(S, sta, pat, u=u, port=port, mode=mode, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
+  seedlink!(S, mode, sta, pat, u=u, port=port, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
   return S
 end
 
 @doc (@doc seedlink!)
-function seedlink(sta::Array{String,1}, pat::Array{String,1};
+function seedlink(mode::String, sta::Array{String,1}, pat::Array{String,1};
   gap::Real=KW.SL.gap,
   kai::Real=KW.SL.kai,
-  mode::String=KW.SL.mode,
   port::Int64=KW.SL.port,
   refresh::Real=KW.SL.refresh,
   s::TimeSpec=0,
@@ -536,14 +531,13 @@ function seedlink(sta::Array{String,1}, pat::Array{String,1};
   x_on_err::Bool=KW.SL.x_on_err)
 
   S = SeisData()
-  seedlink!(S, sta, pat, u=u, port=port, mode=mode, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
+  seedlink!(S, mode, sta, pat, u=u, port=port, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
   return S
 end
 
-function seedlink(C::Union{String,Array{String,1},Array{String,2}};
+function seedlink(mode::String, C::Union{String,Array{String,1},Array{String,2}};
   gap::Real=KW.SL.gap,
   kai::Real=KW.SL.kai,
-  mode::String=KW.SL.mode,
   port::Int64=KW.SL.port,
   refresh::Real=KW.SL.refresh,
   s::TimeSpec=0,
@@ -555,6 +549,6 @@ function seedlink(C::Union{String,Array{String,1},Array{String,2}};
 
   S = SeisData()
   sta, pat = sl_cparse(C)
-  seedlink!(S, sta, pat, u=u, port=port, mode=mode, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
+  seedlink!(S, mode, sta, pat, u=u, port=port, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
   return S
 end

@@ -3,17 +3,17 @@ mutable struct SLDefs
   port::Int64
   gap::Int64
   kai::Int64
-  mode::String
   refresh::Real
+  u::String
   x_on_err::Bool
 
   SLDefs( port::Int64,
           gap::Int64,
           kai::Int64,
-          mode::String,
           refresh::Real,
+          u::String,
           x_on_err::Bool
-          ) = new(port, gap, kai, mode, refresh, x_on_err)
+          ) = new(port, gap, kai, refresh, u, x_on_err)
 end
 
 mutable struct FiltDefs
@@ -115,14 +115,14 @@ keyword isn't specified.
 ### SeisIO.KW.SL
 Seedlink-specific keyword default values. SeedLink also uses some general keywords.
 
-| Name        | Default | Type            | Description                       |
-|:------------|:--------|:----------------|:----------------------------------|
-| gap         | 3600    | Real            | max. gap since last packet [s]    |
-| kai         | 600     | Real            | keepalive interval [s]            |
-| mode        | "DATA"  | String          | TIME, DATA, or FETCH              |
-| port        | 18000   | Int64           | port number                       |
-| refresh     | 20      | Real            | base refresh interval [s]         |
-| xonerr      | true    | Bool            | exit on error?                    |
+| Name    | Default | Type    | Description                                 |
+|:--------|:--------|:--------|:----------------------------------          |
+| gap     | 3600    | Real    | max. gap since last packet [s]              |
+| kai     | 600     | Real    | keepalive interval [s]                      |
+| port    | 18000   | Int64   | port number                                 |
+| refresh | 20      | Real    | base refresh interval [s]                   |
+| u       | (iris)  | String  | Default URL ("rtserve.iris.washington.edu") |
+| xonerr  | true    | Bool    | exit on error?                              |
 
 ### SeisIO.KW.Filt
 Default keyword values for time-series filtering.
@@ -141,39 +141,39 @@ Default keyword values for time-series filtering.
 
 """
 const KW = KWDefs(
-           SLDefs(18000,    # port::Int64
-                   3600,    # gap::Int64
-                    600,    # kai::Int64
-                 "DATA",    # mode::String
-                   20.0,    # refresh::Real
-                   true ),  # x_on_err::Bool
+                  SLDefs(18000,    # port::Int64
+                          3600,    # gap::Int64
+                           600,    # kai::Int64
+                          20.0,    # refresh::Real
+ "rtserve.iris.washington.edu",    # u::String
+                          true ),  # x_on_err::Bool
 
-           FiltDefs(1.0,    # fl::Float64
-                   15.0,    # fh::Float64
-                      4,    # np::Int64
-                      8,    # rp::Int64
-                     30,    # rs::Int64
-             "Bandpass",    # rt::String
-          "Butterworth" ),  # dm::String
+                  FiltDefs(1.0,    # fl::Float64
+                          15.0,    # fh::Float64
+                             4,    # np::Int64
+                             8,    # rp::Int64
+                            30,    # rs::Int64
+                    "Bandpass",    # rt::String
+                 "Butterworth" ),  # dm::String
 
-                     0x00,  # comp::Bool
-               [600, 600],  # evw::Real
-               "miniseed",  # fmt::String
-                    false,  # full::Bool
-        Float64[6.0, 9.9],  # mag::Array{Float64,1}
-                        1,  # nd::Real
-                        0,  # nev::Int64
-                   100000,  # n_zip::Int64
-                   360000,  # nx_add::Int64
-                  8640000,  # nx_new::Int64
-                        "", # opts::String
-                       "P", # pha::String
-                      true, # prune::Bool
-                 Float64[], # rad: Array{Float64,1}
-                 Float64[], # reg: Array{Float64,1}
-                      true, # si::Bool
-                    "IRIS", # src::String
-                        30, # to::Int64
-                         0, # v::Int64 (verbosity)
-                     false, # w::Bool (write to disk)
-                     false) # y::Bool (syc)
+                            0x00,  # comp::Bool
+                      [600, 600],  # evw::Real
+                      "miniseed",  # fmt::String
+                           false,  # full::Bool
+               Float64[6.0, 9.9],  # mag::Array{Float64,1}
+                               1,  # nd::Real
+                               0,  # nev::Int64
+                          100000,  # n_zip::Int64
+                          360000,  # nx_add::Int64
+                         8640000,  # nx_new::Int64
+                              "",  # opts::String
+                             "P",  # pha::String
+                            true,  # prune::Bool
+                       Float64[],  # rad: Array{Float64,1}
+                       Float64[],  # reg: Array{Float64,1}
+                            true,  # si::Bool
+                          "IRIS",  # src::String
+                              30,  # to::Int64
+                               0,  # v::Int64 (verbosity)
+                           false,  # w::Bool (write to disk)
+                           false)  # y::Bool (syc)

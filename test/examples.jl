@@ -4,6 +4,11 @@ import Printf
 # US FDSN example: 5 stations, 2 networks, all channels, last 600 seconds
 println(stdout, "Some real data acquisition examples...\n\n")
 
+println(stdout, "preliminary: change directory")
+path = Base.source_dir()
+println(stdout, "cd(", path, ")")
+cd(path)
+
 printstyled(stdout, "FDSN get_data\n", color=:green, bold=true)
 CHA = "CC.PALM, UW.HOOD, CC.TIMB, CC.HIYU, UW.TDH"
 s = -600
@@ -38,19 +43,21 @@ show(S_evt)
 
 # SeisComp3 SeedLink session, IRIS server, TIME mode
 printstyled(stdout, "\n\nSeedLink\n", color=:green, bold=true)
-
 sta = "UW.GRUT,UW.H1K,UW.MDW"
 s1 = -120
 t1 = 120
-printstyled(stdout, "Commands: ", color=:green)
-println(stdout, "S_sl = seedlink(\"", sta, "\", mode=\"TIME\", s=", s1, ", t=", t1, ")")
-S_sl = seedlink(sta, mode="TIME", s=s1, t=t1)
 
-# DATA mode, same structure
-println(stdout, "          seedlink!(S_sl, \"SampleFiles/SL_long_test.conf\", mode=\"DATA\")")
-seedlink!(S_sl, "SampleFiles/SL_long_test.conf", mode="DATA")
+printstyled(stdout, "Commands: ", color=:green)
+
+println(stdout, "S_sl = seedlink(\"TIME\", \"", sta, "\", s=", s1, ", t=", t1, ")")
+S_sl = seedlink("TIME", sta, s=s1, t=t1)
+
+println(stdout, "          seedlink!(S_sl, \"DATA\", \"SampleFiles/SL_long_test.conf\")")
+seedlink!(S_sl, "DATA", "SampleFiles/SL_long_test.conf")
+
 println(stdout, "          sleep(30)")
 sleep(30)
+
 println(stdout, "          for conn in S_sl.c; close(conn); end")
 for conn in S_sl.c; close(conn); end
 
