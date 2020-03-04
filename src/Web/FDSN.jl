@@ -41,7 +41,7 @@ function FDSNsta(chans::ChanOpts="*";
                   s   ::TimeSpec          = 0,              # Start
                   src ::String            = KW.src,         # Source server
                   t   ::TimeSpec          = (-600),         # End or Length (s)
-                  to  ::Int               = KW.to,          # Read timeout (s)
+                  to  ::Int64             = KW.to,          # Read timeout (s)
                   v   ::Integer           = KW.v,           # Verbosity
                   xf  ::String            = "FDSNsta.xml"   # XML filename
                  )
