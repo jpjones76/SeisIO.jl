@@ -1,7 +1,11 @@
 *.mem
 *.cov
+
 internal_tests/
 paper/
 dev/
+
 test/SampleFiles/samples.tar.gz
 test/SampleFiles/Restricted/
+
+Manifest.toml

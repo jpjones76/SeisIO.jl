@@ -3,8 +3,8 @@
 |:-----           |:-----         | :-----       |:-----         |:-----       |
 | AH-1            | read_data     |              | ah1           |             |
 | AH-2            | read_data     |              | ah2           |             |
-| ASDF event      | read_asdf_evt | write_hdf5   | asdf          | w           |
-| ASDF timeseries | read_hdf5     | write_hdf5   | asdf          | w           |
+| ASDF event      | read_asdf_evt | write_hdf5   | asdf          | k           |
+| ASDF timeseries | read_hdf5     | write_hdf5   | asdf          | k           |
 | Bottle          | read_data     |              | bottle        |             |
 | Dataless SEED   | read_meta     |              | dataless      |             |
 | GeoCSV slist    | read_data     |              | geocsv.slist  |             |
@@ -38,7 +38,7 @@
   + Example: *read_meta!(S, "sacpz", "tmp.sac.pz")*
 
 ## Notes Guide
+* **k**: write_hdf5 uses fmt as a keyword that defaults to "asdf"; this will become more relevant when support expands to other hdf5 (sub)formats
 * **i**: incomplete
   + SEG Y rev 2 read support is NYI; send us test files if you need it!
 * **o**: out-of-scope blockettes/structures are skipped
-* **w**: write_hdf5 uses fmt as a keyword that defaults to "asdf"; this will become more relevant when support expands to other hdf5 (sub)formats
