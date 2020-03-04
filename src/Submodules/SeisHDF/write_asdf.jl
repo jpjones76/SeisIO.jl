@@ -1,11 +1,12 @@
-function write_asdf( hdf_out::String, S::GphysData, chan_numbers::Array{Int64,1} ;
-  add           ::Bool      = false,            # add traces
-  evid          ::String    = "",               # event ID
-  ovr           ::Bool      = false,            # overwrite trace data
-  len           ::Period    = Day(1),           # length of added traces
-  tag           ::String    = "",               # trace tag
-  v             ::Int64     = KW.v              # verbosity
-  )
+function write_asdf( hdf_out::String,
+                     S::GphysData,
+                     chan_numbers::Array{Int64,1},
+                     add::Bool,
+                     evid::String,
+                     ovr::Bool,
+                     len::Period,
+                     tag::String,
+                     v::Integer)
 
   # "add" implies "ovr"
   if add == true

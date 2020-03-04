@@ -18,14 +18,14 @@ stored.
 | len         | Period    | Day(1)    | Length of new traces added to file    |
 | ovr         | Bool      | false     | Overwrite data in existing traces?    |
 | tag         | String    | ""        | Tag for trace names in ASDF volumes   |
-| v           | Int64     | 0         | verbosity                             |
+| v           | Integer   | 0         | verbosity                             |
 
 #### SeisEvent
 |KW           | Type      | Default   | Meaning                               |
 |:---         |:---       |:---       |:---                                   |
 | chans       | ChanSpec  | 1:S.data.n| Channels to write to file             |
 | tag         | String    | ""        | Tag for trace names in ASDF volumes   |
-| v           | Int64     | 0         | verbosity                             |
+| v           | Integer   | 0         | verbosity                             |
 
 ## Write Methods
 ### Add (add = true)
@@ -59,17 +59,18 @@ See also: `read_hdf5`
 """ write_hdf5
 function write_hdf5(file::String, S::GphysData;
   chans     ::ChanSpec = Int64[], # channels
-  add       ::Bool      = false,            # add traces
   fmt       ::String    = "asdf",           # data format
-  len       ::Period    = Day(1),           # length of added traces
+  add       ::Bool      = false,            # add traces
   ovr       ::Bool      = false,            # overwrite trace data
+  len       ::Period    = Day(1),           # length of added traces
   tag       ::String    = "",               # trace tag (ASDF)
-  v         ::Int64     = KW.v              # verbosity
+  v         ::Integer   = KW.v              # verbosity
   )
 
   chans = mkchans(chans, S)
   if fmt == "asdf"
-    write_asdf(file, S, chans, add=add, len=len, ovr=ovr, tag=tag, v=v)
+    # write_asdf(file, S, chans, add=add, len=len, ovr=ovr, tag=tag, v=v)
+    write_asdf(file, S, chans, add, "", ovr, len, tag, v)
   else
     error("Unknown file format (possibly NYI)!")
   end
@@ -94,7 +95,7 @@ function write_hdf5(file::String, C::GphysChannel;
   len       ::Period    = Day(1),           # length of added traces
   ovr       ::Bool      = false,            # overwrite trace data
   tag       ::String    = "",               # trace tag (ASDF)
-  v         ::Int64     = KW.v              # verbosity
+  v         ::Integer   = KW.v              # verbosity
   )
 
   S = SeisData(C)
@@ -113,7 +114,7 @@ function write_hdf5(file::String, W::SeisEvent;
   chans     ::ChanSpec = Int64[], # channels
   fmt       ::String    = "asdf",           # data format
   tag       ::String    = "",               # trace tag (ASDF)
-  v         ::Int64     = KW.v              # verbosity
+  v         ::Integer   = KW.v              # verbosity
   )
 
   S = getfield(W, :data)
@@ -121,7 +122,8 @@ function write_hdf5(file::String, W::SeisEvent;
   if fmt == "asdf"
     H = getfield(W, :hdr)
     R = getfield(W, :source)
-    write_asdf(file, S, chans, evid=H.id, tag=tag, v=v)
+    # write_asdf(file, S, chans, evid=H.id, tag=tag, v=v)
+    write_asdf(file, S, chans, false, H.id, false, Day(1), tag, v)
     asdf_wqml(file, [H], [R], v=v)
   else
     error("Unknown file format (possibly NYI)!")
