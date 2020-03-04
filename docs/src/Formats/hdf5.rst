@@ -1,6 +1,6 @@
-#################
-HDF5 File Formats
-#################
+##########
+HDF5 Files
+##########
 Of the increasingly popular HDF5-based formats for geophysical data, only ASDF
 is supported at present. Support for other (sub)formats is planned.
 
@@ -34,9 +34,3 @@ Supported Keywords
 one); an asterisk ('*') is a wildcard for zero or more characters.
 
 Writing to HDF5 volumes is supported through *write_hdf5*, described in :ref:`Writing to File<write>`.
-
-.. function:: scan_hdf5(fname::String)
-.. function:: scan_hdf5(fname::String, level="trace")
-
-Scans supported seismic HDF5 formats and returns a list of strings describing
-the waveform contents. If level="trace", output is more verbose.

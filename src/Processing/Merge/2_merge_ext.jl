@@ -12,7 +12,7 @@ merge!(S::SeisData, C::SeisChannel; v::Integer=KW.v) = merge!(S, SeisData(C), v=
 Merge an array of SeisData objects, creating a single output with the merged
 input data.
 
-See also: merge!
+See also: `merge!`
 """
 function merge(A::Array{SeisData,1}; v::Integer=KW.v)
   L::Int64 = length(A)
@@ -30,11 +30,11 @@ merge(C::SeisChannel, D::SeisChannel; v::Integer=KW.v) = (S = SeisData(C,D); mer
 """
     purge!(S::SeisData)
 
-Remove empty and duplicated channels in S; alias to merge!(S, purge_only=true)
+Remove empty and duplicated channels in S; alias to `merge!(S, purge_only=true)`
 
     purge(S::SeisData)
 
-"Safe" purge to a new SeisData object. Alias to merge(S, purge_only=true)
+"Safe" purge to a new SeisData object. Alias to `merge(S, purge_only=true)``
 """
 purge!(S::T, v::Integer=KW.v) where {T<:GphysData} = merge!(S, purge_only=true, v=v)
 function purge(S::T, v::Integer=KW.v) where {T<:GphysData}

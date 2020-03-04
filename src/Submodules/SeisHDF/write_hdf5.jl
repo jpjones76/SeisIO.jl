@@ -55,7 +55,7 @@ If `ovr=true` is specified, but `add=false`, `write_hdf5` *only* overwrites
 
     `add=true`/`ovr=true` changes `:t` on file to begin at an exact sample time.
 
-See also: read_hdf5
+See also: `read_hdf5`
 """ write_hdf5
 function write_hdf5(file::String, S::GphysData;
   chans     ::ChanSpec = Int64[], # channels

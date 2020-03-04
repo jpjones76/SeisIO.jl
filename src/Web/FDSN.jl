@@ -32,7 +32,7 @@ Other keywords:
 * t: Termination (end) time
 * xf: Name of XML file to save station metadata
 
-See also: chanspec, parsetimewin, get_data!, SeisIO.KW
+See also: `chanspec`, `parsetimewin`, `get_data!`, `SeisIO.KW`
 """
 function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
                   msr ::Bool              = false,          # MultiStageResp

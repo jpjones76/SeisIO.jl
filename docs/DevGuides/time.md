@@ -313,13 +313,14 @@ In all cases, parsetimewin outputs a pair of strings, sorted so that the first s
 
 | typeof(s) | typeof(t) | Behavior                                          |
 |:------    |:------    |:-------------------------------------             |
-| DateTime  | DateTime  | sort                                              |
-| DateTime  | Real      | add *t* seconds to *s*, then sort                 |
-| DateTime  | String    | convert *t* => DateTime, then sort                |
-| DateTime  | String    | convert *t* => DateTime, then sort                |
-| Real      | DateTime  | add *s* seconds to *t*, then sort                 |
-| Real      | Real      | treat *s*, *t* as sec from current minute; sort   |
-| String    | DateTime  | convert *s* => DateTime, then sort                |
-| String    | Real      | convert *s* => DateTime, then sort                |
+| DateTime  | DateTime  | convert to String, then sort                      |
+| DateTime  | Real      | add *t* seconds to *s*, convert to String, sort   |
+| DateTime  | String    | convert *s* to String, then sort                  |
+| Real      | DateTime  | add *s* seconds to *t*, convert to String, sort   |
+| Real      | Real      | treat as relative, convert to String, sort        |
+| Real      | String    | add *s* seconds to *t*, convert to String, sort   |
+| String    | DateTime  | convert *t* to String, then sort                  |
+| String    | Real      | add *t* seconds to *s*, convert to String, sort   |
+| String    | String    | sort                                              |
 
-Note the behavior with (Real, Real): *s* and *t* are converted to seconds from the start of the current minute.
+Special behavior with (Real, Real): *s* and *t* are converted to seconds from the start of the current minute.

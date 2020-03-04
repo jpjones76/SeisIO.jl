@@ -1,14 +1,14 @@
 .. _write:
 
-###############
-Writing to File
-###############
+##############
+Write Suppport
+##############
 The table below sumamrizes the current write options for SeisIO. Each function is described in detail in this chapter.
 
 .. csv-table::
-  :header: Structure/Description, Output Format, Function
+  :header: Structure/Description, Output Format, Function, Submodule
   :delim: |
-  :widths: 2, 2, 1
+  :widths: 2, 2, 1, 1
 
   GphysChannel                          | ASDF                  | write_hdf5
   GphysChannel                          | SAC timeseries        | writesac
@@ -32,8 +32,9 @@ The table below sumamrizes the current write options for SeisIO. Each function i
   any SeisIO structure                  | SeisIO file           | wseis
   primitive data type or array          | ASDF AuxiliaryData    | asdf_waux
 
-Methods for SeisEvent, SeisHdr, or SeisSrc structures require loading the Quake submodule with *using SeisIO.Quake*.
+Methods for SeisEvent, SeisHdr, or SeisSrc are part of submodule SeisIO.Quake. *asdf_waux* and *asdf_wqml* are part of :ref:`SeisIO.SeisHDF.<seishdf>`.
 
+.....
 
 ***************
 Write Functions
@@ -43,11 +44,9 @@ HDF5/ASDF
 =========
 .. function:: write_hdf5(fname, S)
 
-Write data from **S** to file **fname** in a seismic HDF5 format. The default
-file format is ASDF.
+Write data from **S** to file **fname** in a seismic HDF5 format. The default file format is ASDF.
 
-With ASDF files, if typeof(S) == SeisEvent, **S.hdr** and **S.source** are
-written (appended) to the "QuakeML " element.
+With ASDF files, if typeof(S) == SeisEvent, **S.hdr** and **S.source** are written (appended) to the "QuakeML " element.
 
 Supported Keywords
 ******************
@@ -64,8 +63,7 @@ Supported Keywords
 
 Write Method: Add (**add=true**)
 --------------------------------
-Initializes new traces (filled with NaNs) of length = **len** as needed, and
-overwrite with data in appropriate places.
+Initializes new traces (filled with NaNs) of length = **len** as needed, and overwrite with data in appropriate places.
 
 **add=true** follows these steps in this order:
 1. Determine times of all data in **S[chans]** and all traces in "Waveforms/".
@@ -74,10 +72,7 @@ overwrite with data in appropriate places.
 + Merge the header data in **S[chans]** into the relevant station XML.
 + Overwrite the relevant segment(s) of the trace.
 
-Unless **len** exactly matches the time boundaries of each segment in **S**,
-new traces will contain more data than **S**, with the extra samples initialized
-to NaNs. Presumably these will be replaced with real data in subsequent
-overwrites.
+Unless **len** exactly matches the time boundaries of each segment in **S**, new traces will contain more data than **S**, with the extra samples initialized to NaNs. Presumably these will be replaced with real data in subsequent overwrites.
 
 Write Method: Overwrite (**ovr = true**)
 ----------------------------------------
@@ -87,26 +82,7 @@ If **ovr=true** is specified, but **add=false**, **write_hdf5** *only* overwrite
 * If no traces in **hdf_out** overlap segments in **S**, **hdf_out** isn't modified.
 * Station XML is merged in channels that are partly overwritten.
 
-.. function:: asdf_wqml(fname, H, R[, keywords])
-.. function:: asdf_wqml(fname, EV[, KWs])
-
-Write to ASDF "QuakeML " group in file *fname*. In the above function calls, **H** can be a SeisHdr or Array{SeisHdr, 1}; **R** can be a SeisSource or Array{SeisSource, 1}; **EV** can be a SeisEvent or Array{SeisEvent, 1}.
-
-Supported Keywords
-******************
-.. csv-table::
-  :header: KW, Type, Default, Meaning
-  :delim: |
-  :widths: 1, 1, 1, 4
-
-  ovr   | Bool      | false     | Overwrite data in existing traces?
-  v     | Integer   | 0         | verbosity
-
-
-.. function:: asdf_waux(fname, path, X)
-
-Write *X* to AuxiliaryData/path in file *fname*. If an object already exists at
-AuxiliaryData/path, it will be deleted and overwritten with *X*.
+.....
 
 XML Metadata
 ============
@@ -115,8 +91,7 @@ XML Metadata
 
 Write station XML from the fields of **S** to file **fname**. Specify channel numbers to write in a GphysData object with *chans=CC*.
 
-Use keyword **chans=Cha** to restrict station XML write to **Cha**. This
-keyword can accept an Integer, UnitRange, or Array{Int64,1} argument.
+Use keyword **chans=Cha** to restrict station XML write to **Cha**. This keyword can accept an Integer, UnitRange, or Array{Int64,1} argument.
 
 .. function:: write_qml(fname, H, R[, v=V])
 .. function:: write_qml(fname, H, R[, v=V])
@@ -128,16 +103,16 @@ keyword can accept an Integer, UnitRange, or Array{Int64,1} argument.
 
 Write QML to **fname** from SeisHdr (or Array{SeisHdr, 1})**H**, and (optionally) SeisSrc (or Array{SeisSrc, 1})**R**
 
-If **fname** exists, and is QuakeML, SeisIO appends the existing XML. If the
-file is NOT QuakeML, an error is thrown; the file isn't overwritten.
+If **fname** exists, and is QuakeML, SeisIO appends the existing XML. If the file is NOT QuakeML, an error is thrown; the file isn't overwritten.
 
+.....
 
 Other Formats
 =============
 
 .. function:: writesac(S[, chans=CC, fname=FF, v=V])
 
-Write SAC data to SAC files with auto-generated names. With any GphysChannel subtype, specifying *fname=FF* sets the filename to FF. Specify channel numbers to write in a GphysData object with *chans=CC*.
+Write SAC data to SAC files with auto-generated names. Specify channel numbers to write in a GphysData object with *chans=CC*. With any GphysChannel subtype, specifying *fname=FF* sets the filename to FF.
 
 .. function:: writesacpz(pzf, S[, chans=CC])
 

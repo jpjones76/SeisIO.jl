@@ -47,7 +47,7 @@ Keywords:
 * `α`: Taper edge area; as for a Tukey window, the first and last 100*α% of
 samples in each window are tapered, up to `t_max` seconds of data.
 
-See also: DSP.Windows.tukey
+See also: `DSP.Windows.tukey`
 """ taper!
 function taper!(C::GphysChannel; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
   if !(C.fs > 0.0)

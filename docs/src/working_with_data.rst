@@ -159,7 +159,7 @@ Clear all notes from every channel in ``S``.
 *******************
 Checking Your Work
 *******************
-If you need to check what's been done to a channel, or the sources present in the channel data, two commands are helpful:
+If you need to check what's been done to a channel, or the sources present in the channel data, these commands are helpful:
 
 .. function:: show_processing(S::SeisData)
 .. function:: show_processing(S::SeisData, i::Int)
@@ -172,3 +172,9 @@ Tabulate and print all processing steps in `:notes` to stdout in human-readable 
 .. function:: show_src(C::SeisChannel)
 
 Tabulate and print all data sources in `:notes` to stdout.
+
+.. function:: show_writes(S::SeisData)
+.. function:: show_writes(S::SeisData, i::Int)
+.. function:: show_writes(C::SeisChannel)
+
+Tabulate and print all write operations in `:notes` to stdout in human-readable format.

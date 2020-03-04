@@ -19,7 +19,7 @@ As above for the first channel in `S` whose id is an exact match to `id`.
 
 Append `s` to `S.notes` and time stamp. If `txt` contains a channel name or ID, only the channel mentioned is annotated; otherwise, all channels are annotated.
 
-See Also: clear_notes!, show_processing, show_src
+See also: `clear_notes!`, `show_processing`, `show_src`, `show_writes`
 """ note!
 note!(S::T, i::Int64, s::String) where {T<:GphysData} = push!(S.notes[i], tnote(s))
 
@@ -69,7 +69,7 @@ Clear all notes from channel `i` of `S` and leaves a note about this.
 
 As above for the first channel in `S` whose id is an exact match to `id`.
 
-See Also: note!, show_processing, show_src
+See also: `note!`, `show_processing`, `show_src`
 """
 function clear_notes!(S::GphysData)
   cstr = tnote("notes cleared.")

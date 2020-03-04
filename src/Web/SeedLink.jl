@@ -297,7 +297,7 @@ This function is fully described in the official documentation at https://seisio
 
 Keywords: gap, kai, port, refresh, s, t, u, v, w, x_on_err
 
-See Also: get_data
+See also: `get_data!`
 """ seedlink!
 function seedlink!(S::SeisData, mode::String, sta::Array{String,1}, patts::Array{String,1};
                     gap::Real=KW.SL.gap,

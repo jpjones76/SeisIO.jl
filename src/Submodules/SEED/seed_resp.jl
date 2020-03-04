@@ -504,18 +504,3 @@ function read_seed_resp!(S::GphysData, files::Array{String,1}, memmap::Bool, uni
   end
   return S
 end
-
-"""
-    RESP_wont_read()
-
-The following is a list of breaking SEED RESP issues that we've encountered
-in real data. Files with these issues don't read correctly into any known
-program (e.g., ObsPy, SAC, SeisIO).
-
-| Network | Station(s)    | Problem(s)
-| :----   | :----         | :----
-| CN      | (broadbands)  | B058F05-06 contain units; should be B053F05-06
-"""
-function RESP_wont_read()
-  return nothing
-end

@@ -173,17 +173,14 @@ As PZResp, but fields use Float64 precision.
 
     PZResp(X::Array{Complex{T},2} [, rev=true])
 
-Convert X to a PZResp64 (if `T == Float64`) or PZResp (default) object. Assumes
-format X = [p z], i.e., poles are in X[:,1] and zeros in X[:,2]; specify `rev=true`
-if the column assignments are X = [z p].
-
-### See Also
-resp_a0!, update_resp_a0!, DSP.ZeroPoleGain
+Convert X to a PZResp64 (if `T == Float64`) or PZResp (default) object. Assumes format X = [p z], i.e., poles are in X[:,1] and zeros in X[:,2]; specify `rev=true` if the column assignments are X = [z p].
 
 ### External References
 Seed v2.4 manual, http://www.fdsn.org/pdf/SEEDManual_V2.4.pdf
 IRIS Resp format, https://ds.iris.edu/ds/nodes/dmc/data/formats/resp/
 Julia DSP filter Types, https://juliadsp.github.io/DSP.jl/stable/filters/
+
+See also: `resp_a0!`, `update_resp_a0!`, `DSP.ZeroPoleGain`
 """ PZResp
 mutable struct PZResp <: InstrumentResponse
   a0::Float32

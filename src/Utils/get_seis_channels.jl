@@ -14,8 +14,7 @@ Channel codes less than two characters long (e.g. "Z" in "AA.BBB.CC.Z") are igno
 SEED channel codes of seismic and seismoacoustic data (for which operations
 like detrend! and taper! are sane) include D, G, H, J, L, M, N, P, Z.
 
-### See Also
-get_inst_codes
+See also: `inst_codes`
 """
 function get_seis_channels(S::GphysData;
   chans::ChanSpec=Int64[])
@@ -61,8 +60,7 @@ Channel codes less than two characters long (e.g. "Z" in "AA.BBB.CC.Z") are igno
 SEED channel codes of seismic and seismoacoustic data (for which operations
 like detrend! and taper! are sane) include D, G, H, J, L, M, N, P, Z.
 
-### See Also
-get_inst_codes
+See also: `inst_codes`
 """ filt_seis_chans!
 function filt_seis_chans!(chans::Array{Int64,1}, S::GphysData)
 

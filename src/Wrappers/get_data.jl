@@ -7,12 +7,12 @@ export get_data!, get_data
 Wrapper to web requests for time-series data. Request data using `method` from channels `chans` using keywords `KWs`, storing the output in `S`.
 
 * Methods: IRIS, FDSN
-* Channels: See `?chanspec` for ways to specify channels of interest
+* Channels: See `?chanspec`
 * Keywords: autoname, demean, detrend, fmt, msr, nd, opts, rad, reg, rr, s, si, src, t, taper, to, ungap, unscale, v, w, xf, y
 
 This function is fully described in the official documentation at https://seisio.readthedocs.io/ under subheading **Web Requests**.
 
-See also: chanspec, parsetimewin, seis_www, SeisIO.KW
+See also: `chanspec`, `parsetimewin`, `seis_www`, `SeisIO.KW`
 """ get_data
 function get_data(method_in::String, C="*"::Union{String, Array{String,1}, Array{String,2}};
         autoname::Bool = false           ,  # Auto-generate file names?

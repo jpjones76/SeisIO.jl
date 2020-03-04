@@ -126,28 +126,3 @@ Server List
   +--------+---------------------------------------+
   | USP    | http://sismo.iag.usp.br               |
   +--------+---------------------------------------+
-
-  .. function:: seis_www()
-
-  Type ``?seis_www`` in Julia to print the above info. to stdout.
-
-.. _time_syntax:
-
-************
-Time Syntax
-************
-Specify time inputs for web queries as a DateTime, Real, or String. The latter must take the form YYYY-MM-DDThh:mm:ss.nnn, where ``T`` is the uppercase character `T` and ``nnn`` denotes milliseconds; incomplete time strings treat missing fields as 0.
-
-.. csv-table::
-  :header: type(s), type(t), behavior
-  :delim: ;
-  :widths: 8, 8, 24
-
-  DT; DT; Sort only
-  R; DT; Add ``s`` seconds to ``t``
-  DT; R; Add ``t`` seconds to ``s``
-  S; R; Convert ``s`` to DateTime, add ``t``
-  R; S; Convert ``t`` to DateTime, add ``s``
-  R; R; Add ``s, t`` seconds to ``now()``
-
-(above, R = Real, DT = DateTime, S = String, I = Integer)

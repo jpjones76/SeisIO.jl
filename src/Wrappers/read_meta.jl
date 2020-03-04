@@ -8,7 +8,7 @@ Generic wrapper for reading channel metadata (i.e., instrument parameters, respo
 
 This function is fully described in the official documentation at https://seisio.readthedocs.io/ under subheading **Metadata Files**.
 
-See also: SeisIO.KW, get_data, read_data
+See also: `SeisIO.KW`, `get_data`, `read_data`
 """ read_meta!
 function read_meta!(S::GphysData, fmt::String, fpat::Union{String, Array{String,1}};
   memmap  ::Bool      = false                     ,  # use Mmap.mmap? (unsafe)

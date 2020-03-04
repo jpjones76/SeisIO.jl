@@ -5,13 +5,9 @@ Utility Functions
 #################
 This appendix covers utility functions that belong in no other category.
 
-.. function:: ?RESP_wont_read
-
 .. function:: d2u(DT::DateTime)
 
 Aliased to ``Dates.datetime2unix``.
-
-Keyword ``hc_new`` specifies the new critical damping constant. Keyword ``C`` specifies an array of channel numbers on which to operate; by default, every channel with fs > 0.0 is affected.
 
 .. function:: fctoresp(fc, c)
 
@@ -69,16 +65,12 @@ Remove unwanted characters from S.
 
 .. function:: parsetimewin(s, t)
 
-Convert times **s** and **t** to strings :math:`\alpha, \omega` sorted :math:`\alpha < \omega`.
-**s** and **t** can be real numbers, DateTime objects, or ASCII strings.
-Expected string format is "yyyy-mm-ddTHH:MM:SS.nnn", e.g. 2016-03-23T11:17:00.333.
-
-"Safe" synchronize of start and end times of all trace data in SeisData structure ``S`` to a new structure ``U``.
+Convert times **s** and **t** to strings :math:`\alpha, \omega` sorted :math:`\alpha < \omega`. **s** and **t** can be real numbers, DateTime objects, or ASCII strings. Expected string format is "yyyy-mm-ddTHH:MM:SS.nnn", e.g. 2016-03-23T11:17:00.333.
 
 .. function:: resp_a0!(R::InstrumentResponse)
 .. function:: resp_a0!(S::GphysData)
 
-Updates sensitivity :a0 of PZResp/PZResp64 responses.
+Update sensitivity :a0 of PZResp/PZResp64 responses.
 
 .. function:: resptofc(R)
 

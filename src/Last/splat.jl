@@ -24,7 +24,7 @@ end
 
 Merge multiple SeisData structures at once.
 
-See also: merge!
+See also: `merge!`
 """
 function mseis!(S...)
   U = Union{SeisData, SeisChannel, SeisEvent, EventTraceData, EventChannel}

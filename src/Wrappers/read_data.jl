@@ -48,7 +48,7 @@ matching pattern `filestr`. Much slower than manually specifying file type.
 
 This function is fully described in the official documentation at https://seisio.readthedocs.io/ in section **Time-Series Files**.
 
-See also: SeisIO.KW, get_data, guess, rseis
+See also: `SeisIO.KW`, `get_data`, `guess`, `rseis`
 """ read_data!
 function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,1}};
   cf      ::String  = "",                 # win32 channel info file

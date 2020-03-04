@@ -74,8 +74,8 @@ keyword isn't specified.
 | comp     | 0x00       | UInt8              | compress data on write?[^1]    |
 | fmt      | "miniseed" | String             | request data format            |
 | full     | false      | Bool               | read full headers?             |
-| nd       | 1          | Real               | number of days per subrequest  |
 | n_zip    | 100000     | Int64              | compress if length(x) > n_zip  |
+| nd       | 1          | Real               | number of days per subrequest  |
 | nx_add   | 360000     | Int64              | minimum length increase of an  |
 |          |            |                    |  undersized data array         |
 | nx_new   | 8640000    | Int64              | number of samples allocated    |

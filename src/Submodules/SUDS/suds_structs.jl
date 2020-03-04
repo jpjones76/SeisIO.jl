@@ -483,6 +483,14 @@ function read_32!(S::GphysData, io::IO, v::Integer, full::Bool)
   return nothing
 end
 
+"""
+    suds_support()
+
+Dump info to STDOUT on support for each SUDS structure type.
+* **Green** structures are fully supported and read into memory.
+* **Yellow** structures can be dumped to stdout by invoking *read_data("suds", ...)* with high verbosity (v=2).
+* **Red** structures are unsupported and have not been seen in available test data.
+"""
 function suds_support()
   println("\nCurrent support for SUDS structures\n")
   printstyled("CODE  STRUCTURE       \n", color=:green, bold=true)

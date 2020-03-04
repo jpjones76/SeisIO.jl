@@ -35,7 +35,7 @@ end
 
 Tabulate and print all processing steps in `:notes` to stdout in human-readable format.
 
-See Also: show_src, note!, clear_notes!
+See also: `show_src`, `note!`, `clear_notes!`
 """
 function show_processing(S::GphysData)
   for i in 1:S.n
@@ -54,7 +54,7 @@ show_processing(C::GphysChannel) = print_log(C.notes, "processing")
 
 Tabulate and print all data sources logged in `:notes` to stdout in human-readable format.
 
-See Also: show_processing, note!, clear_notes!
+See also: `show_processing`, `note!`, `clear_notes!`
 """
 function show_src(S::GphysData)
   for i in 1:S.n
@@ -73,7 +73,7 @@ show_src(C::GphysChannel) = print_log(C.notes, "+source")
 
 Tabulate and print all data writes logged in `:notes` to stdout in human-readable format.
 
-See Also: `show_processing`, `note!`, `clear_notes!`
+See also: `show_processing`, `note!`, `clear_notes!`
 """
 function show_writes(S::GphysData)
   for i in 1:S.n

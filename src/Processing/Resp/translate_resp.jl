@@ -21,31 +21,21 @@ in `S`. Replaces field `:resp` with the appropriate (all-pass) response.
 Translate the instrument response of seismic data in SeisChannel object `Ch` to
 `resp_new`. Replaces field `:resp` with `resp_new`.
 
-    remove_resp!(Ch, wl=γ])
-    remove_resp(Ch, wl=γ])
+    remove_resp!(Ch[, chans=CC, wl=γ])
+    remove_resp(Ch[, chans=CC, wl=γ])
 
 Remove (flatten to DC) the instrument response of seismic data in `Ch`.
 Replaces field `:resp` with the appropriate (all-pass) response.
 
-Keywords:
-* **chans=CC** restricts response translation to channel(s) `CC`. `chans` can be
-an Integer, UnitRange, or Array{Int64,1}. By default, all seismic data channels
-have their responses translated to `resp_new`.
+### Keywords
+* **chans=CC** restricts response translation to channel(s) `CC`. By default, all seismic data channels have responses translated to `resp_new`.
 * **wl=γ** sets the waterlevel to γ (default: `γ` = eps(Float32) ≈ ~1f-7)
 
 ### Interaction with the :resp field
-
-`translate_resp` and `remove_resp` only work on a channel `i` that satisfies
-`S.resp[i] <: PZResp, PZResp64, MultiStageResp`. In the last case,
-`S.resp[i].stage[1]` must be a PZResp or PZResp64, only the first stage of
-the response is changed, and the stage gain is ignored; instead, the
-sensitivity `S.resp[i].stage[1].a0` is used.
+`translate_resp` and `remove_resp` only work on a channel `i` that satisfies `S.resp[i] <: PZResp, PZResp64, MultiStageResp`. In the last case, `S.resp[i].stage[1]` must be a PZResp or PZResp64, only the first stage of the response is changed, and the stage gain is ignored; instead, the sensitivity `S.resp[i].stage[1].a0` is used.
 
 ### Poles and zeros should be rad/s
-
-Always check when loading from an unsupported data format. Responses read
-from station XML are corrected to rad/s automatically (most use rad/s);
-responses read from a SACPZ or SEED RESP file already use rad/s.
+Always check when loading from an unsupported data format. Responses read from station XML are corrected to rad/s automatically (most use rad/s); responses read from a SACPZ or SEED RESP file already use rad/s.
 """ translate_resp!
 function translate_resp!(S::GphysData,
                          resp_new::Union{PZResp, PZResp64};

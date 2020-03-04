@@ -16,7 +16,7 @@ type `?timespec` for more information about how these are interpreted.
 
 [^1] A question mark ('?') is a wildcard for a single character; an asterisk ('*') is a wildcard for zero or more characters
 
-See also: timespec, parsetimewin, read_data
+See also: `timespec`, `parsetimewin`, `read_data`
 """ read_hdf5!
 function read_hdf5!(S::GphysData, fpat::String, s::TimeSpec, t::TimeSpec;
   fmt ::String                = "asdf",                 # data format

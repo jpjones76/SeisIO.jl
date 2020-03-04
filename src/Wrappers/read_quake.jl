@@ -9,7 +9,7 @@ Read data in file format `fmt` from `file` into SeisEvent object `Ev`.
 
 Note: because earthquake data are usually discrete, self-contained files, no "in-place" version of `read_quake` exists, and  `read_quake` doesn't support wildcards in the file string.
 
-See also: read_data, get_data, read_meta, UW.readuwevt
+See also: `read_data`, `get_data`, `read_meta`, `UW.readuwevt`
 """ read_quake
 function read_quake(fmt::String, fname::String;
   full    ::Bool    = false,              # full header

@@ -7,10 +7,9 @@ Update normalization factor `R.a0` from `R.z`, `R.p`, and `R.f0`.
 
     resp_a0!(S::GphysData)
 
-Call resp_a0! on each response in S with typeof(S.resp[i]) ∈ [PZResp, PZResp64].
+Call `resp_a0!` on each response in S with typeof(S.resp[i]) ∈ [PZResp, PZResp64].
 
-### See Also
-PZResp, PZResp64
+See also: `PZResp`, `PZResp64`
 """ resp_a0!
 function resp_a0!(resp::Union{PZResp, PZResp64})
   T = typeof(resp.a0)

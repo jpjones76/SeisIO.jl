@@ -23,7 +23,7 @@ If a function assumes or requires specific preprocessing steps, the best practic
 
 ## Tips for selecting the right data
 In an object that contains data from more than one instrument type, finding the right channels to process is non-trivial. For this reason, whenever possible, SeisIO follows [SEED channel naming conventions](http://www.fdsn.org/seed_manual/SEEDManual_V2.4_Appendix-A.pdf) for the `:id` field. Thus, there are at least two ways to identify channels of interest:
-1. Get the single-character "channel instrument code" for channel `i` (`get_inst_codes` does this efficiently). Compare to [standard SEED instrument codes](https://ds.iris.edu/ds/nodes/dmc/data/formats/seed-channel-naming/) and build a channel list, as `get_seis_channels` does.
+1. Get the single-character "channel instrument code" for channel `i` (`inst_codes` does this efficiently). Compare to [standard SEED instrument codes](https://ds.iris.edu/ds/nodes/dmc/data/formats/seed-channel-naming/) and build a channel list, as `get_seis_channels` does.
   - This method can break on instruments whose IDs don't follow the SEED standard.
   - Channel code `Y` is opaque and therefore ambiguous; beware matching on it.
 2. Check `:units`. See the [units guide](./units.md). This is usually safe, but can be problematic in two situations:

@@ -1,11 +1,8 @@
 Supported processing operations are described below.
 
-In most cases, a "safe" version of each function can be invoked to create a
-new object with the processed output.
+In most cases, a "safe" version of each function can be invoked to create a new object with the processed output.
 
-Any function that can logically operate on a single-channel object will do so. Any
-function that operates on a SeisData object can be applied to the :data field of a
-SeisEvent object.
+Any function that can logically operate on a single-channel object will do so. Any function that operates on a SeisData object can be applied to the :data field of a SeisEvent object.
 
 ###############
 Basic Functions

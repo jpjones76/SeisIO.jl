@@ -7,8 +7,7 @@ Attempt to guess critical frequency of seismic instrument response R.
 Assumes broadband sensors behave roughly like geophones (i.e., as harmonic
 oscillators with a single lower corner frequency) at low frequencies.
 
-### See Also
-fctoresp, PZResp
+See also: `fctoresp`, `PZResp`
 """
 
 function resptofc(R::Union{PZResp, PZResp64})

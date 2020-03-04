@@ -122,7 +122,7 @@ timespec() = nothing
 
 Convert times `s` and `t` to strings and sorts s.t. d0 < d1.
 
-See also: ?timespec
+See also: `?timespec`
 """
 function parsetimewin(s::DateTime, t::DateTime)
   if s < t
@@ -223,7 +223,7 @@ in the new segment.
 
 This function has a mini-API in the time API (https://github.com/jpjones76/SeisIO.jl/blob/master/docs/DevGuides/time.md).
 
-See Also: check_for_gap!
+See also: `check_for_gap!`
 """
 function t_extend(t::Array{Int64,2}, ts::Integer, nx::Integer, Δ::Int64)
   nt = size(t, 1)

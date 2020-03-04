@@ -8,22 +8,22 @@ SeisIO
 ######
 SeisIO is a collection of utilities for reading and downloading geophysical timeseries data.
 
-*****
-Intro
-*****
 .. toctree::
-   :caption: Introduction
+   :caption: Intro
    :maxdepth: 2
 
    src/intro.rst
    src/tutorial.rst
    src/working_with_data.rst
 
-*****
-Files
-*****
 .. toctree::
-   :caption: Reading
+   :caption: Help
+   :maxdepth: 2
+
+   src/help.rst
+
+.. toctree::
+   :caption: Reading Files
    :maxdepth: 2
 
    src/Formats/timeseries.rst
@@ -31,9 +31,6 @@ Files
    src/Formats/hdf5.rst
    src/Formats/xml.rst
 
-***
-Web
-***
 .. toctree::
    :caption: Downloading
    :maxdepth: 2
@@ -41,43 +38,35 @@ Web
    src/Web/webclients.rst
    src/Web/seedlink.rst
 
-*******
-Writing
-*******
 .. toctree::
-  :caption: Writing
+  :caption: Writing Files
   :maxdepth: 2
 
   src/writing.rst
 
-**********
-Processing
-**********
 .. toctree::
   :caption: Processing
   :maxdepth: 2
 
   src/Processing/processing.rst
 
-**********
-Submodules
-**********
 .. toctree::
   :caption: Submodules
   :maxdepth: 2
 
+  src/Submodules/list.rst
   src/Submodules/quake.rst
   src/Submodules/randseis.rst
+  src/Submodules/seishdf.rst
+  src/Submodules/uw.rst
 
-**********
-Appendices
-**********
 .. toctree::
    :caption: Appendices
    :maxdepth: 2
 
-   src/Appendices/function_list.rst
-   src/Appendices/seisio_file_format.rst
+   src/Appendices/time_syntax.rst
    src/Appendices/web_syntax.rst
    src/Appendices/keywords.rst
    src/Appendices/examples.rst
+   src/Appendices/function_list.rst
+   src/Appendices/seisio_file_format.rst

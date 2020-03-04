@@ -60,20 +60,3 @@ Updating
 ========
 From the Julia prompt: press ``]`` to enter the Pkg environment, then type
 ``update``. Once updates finish, restart Julia to use them.
-
-
-Getting Help
-============
-In addition to these documents, a number of help documents can be called at the
-Julia prompt. These commands are a useful starting point:
-
-::
-
-  ?chanspec           # how to specify channels in web requests
-  ?get_data           # how to download data
-  ?read_data          # how to read data from file
-  ?timespec           # how to specify times in web requests and data processing
-  ?seed_support       # how much of the SEED data standard is supported?
-  ?seis_www           # list strings for data sources in web requests
-  ?SeisData           # information about SeisIO data types
-  ?SeisIO.KW          # SeisIO shared keywords and their meanings
