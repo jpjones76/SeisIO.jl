@@ -89,7 +89,7 @@ function pop_chan_tail!(Ch::SeisChannel)
 end
 
 # Populate a channel with irregularly-sampled (campaign-style) data
-function populate_irr!(Ch::SeisChannel; nx::Int64=0)
+function populate_irr!(Ch::SeisChannel, nx::Int64)
   chan = "OY"*randstring('A':'Z',1)
   net = ur2()
   sta = uppercase(randstring('A':'Z', rand(1:5)))
@@ -115,7 +115,7 @@ function populate_irr!(Ch::SeisChannel; nx::Int64=0)
 end
 
 # Populate a channel with regularly-sampled (time-series) data
-function populate_chan!(Ch::SeisChannel; s::Bool=false, nx::Int64=0)
+function populate_chan!(Ch::SeisChannel, s::Bool, nx::Int64)
 
   bcodes  = Char['V', 'L', 'M', 'M', 'B', 'S', 'S', 'S', 'S', 'S', 'S', 'H', 'S', 'E', 'E', 'C']
 
@@ -167,9 +167,9 @@ Generate a random channel of regularly-sampled seismic data.
 function randSeisChannel(; c::Bool=false, s::Bool=false, nx::Int64=0)
   Ch = SeisChannel()
   if c == true
-    populate_irr!(Ch, nx=nx)
+    populate_irr!(Ch, nx)
   else
-    populate_chan!(Ch, s=s, nx=nx)
+    populate_chan!(Ch, s, nx)
   end
   return Ch
 end
