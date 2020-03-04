@@ -1,9 +1,11 @@
-function irisws(cha::String, d0::String, d1::String;
-                fmt::String   = KW.fmt,
-                to::Int64     = KW.to,
-                opts::String  = KW.opts,
-                v::Integer    = KW.v,
-                w::Bool       = KW.w)
+function irisws(cha::String,
+                 d0::String,
+                 d1::String,
+                fmt::String,
+               opts::String,
+                 to::Int64,
+                  v::Integer,
+                  w::Bool)
 
   # init
   parse_err = false
@@ -81,36 +83,28 @@ function irisws(cha::String, d0::String, d1::String;
   return parse_err, Ch
 end
 
-function IRISget(C::Array{String,1}, d0::String, d1::String;
-                  fmt::String   = KW.fmt,
-                  to::Int       = KW.to,
-                  opts::String  = KW.opts,
-                  v::Integer    = KW.v,
-                  w::Bool       = KW.w)
-
-  parse_err = false
-  S = SeisData()
-  K = size(C,1)
-  v > 0 && println("IRISWS data request begins...")
-  for k = 1:K
-    (p, Ch) = irisws(C[k], d0, d1, fmt = fmt, opts = opts, to = to, v = v, w = w)
-    push!(S, Ch)
-    parse_err = max(parse_err, p)
-  end
-  return parse_err, S
-end
-
 # Programming note: if this method is the default, and S is only modified
 # within the for loop, then S is copied to a local scope and the newly-added
 # data are deleted upon return
-function IRISget!(S::SeisData, C::Array{String,1}, d0::String, d1::String;
-                  fmt::String   = KW.fmt,
-                  to::Int       = KW.to,
-                  opts::String  = KW.opts,
-                  v::Integer    = KW.v,
-                  w::Bool       = KW.w)
+function IRISget!(S::GphysData,
+                  C::Array{String, 1},
+                 d0::String,
+                 d1::String,
+                fmt::String,
+               opts::String,
+                 to::Int64,
+                  v::Integer,
+                  w::Bool)
 
-  (parse_err, U) = IRISget(C, d0, d1, fmt = fmt, to = to, opts = opts, v = v, w = w)
-  append!(S,U)
+  parse_err = false
+  U = SeisData()
+  K = size(C, 1)
+  v > 0 && println("IRISWS data request begins...")
+  for k = 1:K
+    (p, Ch) = irisws(C[k], d0, d1, fmt, opts, to, v, w)
+    push!(U, Ch)
+    parse_err = max(parse_err, p)
+  end
+  append!(S, U)
   return parse_err
 end
