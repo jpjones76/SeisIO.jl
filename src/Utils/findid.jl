@@ -48,7 +48,6 @@ function findid(id::Union{Regex,String}, S::T) where {T<:GphysData}
   return j
 end
 findid(S::T, id::Union{String,Regex})  where {T<:GphysData} = findid(id, S)
-# findid(S::T, U::T) where {T<:GphysData} = [findid(id, U) for id in getfield(S,:id)]
 # DND ...why the fuck is findfirst so fucking slow?!
 
 findid(C::TC, S::TS) where {TC<:GphysChannel, TS<:GphysData} = findid(getfield(C, :id), S)

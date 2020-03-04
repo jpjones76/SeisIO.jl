@@ -27,29 +27,6 @@ function id_to_regex(cid::Array{UInt8,1})
   return Regex(String(cid))
 end
 
-# function id_to_regex(id::AbstractString)
-#   # replace: '.' => '\', '?' => '.'
-#   cid = copy(codeunits(id))
-#   replace!(cid, 0x2e=>0x5c, 0x3f=>0x2e)
-#   L = length(cid)
-#   i = L
-#   while i > 0
-#     # replace: '*' => '.*'
-#     if cid[i] == 0x2a
-#       splice!(cid, i:i-1, 0x2e)
-#       i -= 1
-#     # now replace: '\' => '\.'
-#     elseif cid[i] == 0x5c
-#       if i == L
-#         push!(cid, 0x2e)
-#       else
-#         splice!(cid, i:i, [0x5c, 0x2e])
-#       end
-#     end
-#     i -= 1
-#   end
-#   return Regex(String(cid))
-# end
 id_to_regex(id::AbstractString) = id_to_regex(copy(codeunits(id)))
 
 function netsta_to_regex(id::AbstractString)
