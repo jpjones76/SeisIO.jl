@@ -1,7 +1,7 @@
 # export readuwevt, uwpf, uwpf!
 #
 """
-    writesac(W::SeisEvent[; ts=false, v=0])
+    writesac(W::SeisEvent[, v=0])
 
 Write all data in SeisEvent structure `W` to auto-generated SAC files. Event
 header information is written from W.hdr; W.source is not used as there is no
