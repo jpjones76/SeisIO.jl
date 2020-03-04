@@ -47,7 +47,7 @@ printstyled("    has_sta\n", color=:light_green)
 ta[1] = @async has_sta(sta[1], u="rtserve.iris.washington.edu")[1]
 ta[2] = @async has_sta(sta[1]*trl, u="rtserve.iris.washington.edu")[1]
 ta[3] = @async has_sta(sta, u="rtserve.iris.washington.edu")[1]
-ta[4] = @async has_sta(parse_charr(sta), u="rtserve.iris.washington.edu")[1]
+ta[4] = @async has_sta(parse_charr(sta, '.', false), u="rtserve.iris.washington.edu")[1]
 SL_wait(ta, 1)
 
 # Attempting to produce errors

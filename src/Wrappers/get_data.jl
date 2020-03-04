@@ -52,28 +52,13 @@ function get_data(method_in::String, C="*"::Union{String, Array{String,1}, Array
   # Condense requests as much as possible
   if method_in == "FDSN"
     if isa(C, String)
-      C = parse_chstr(C, fdsn = true)
+      C = parse_chstr(C, ',', true, false)
     elseif isa(C, Array{String,1})
-      C = parse_charr(C, fdsn = true)
+      C = parse_charr(C, '.', true)
     end
     R = minreq(C)
-    parse_err = FDSNget!(S, C,
-                          autoname=autoname,
-                          fmt=fmt,
-                          msr=msr,
-                          nd=nd,
-                          opts=opts,
-                          rad=rad,
-                          reg=reg,
-                          s=s,
-                          si=si,
-                          src=src,
-                          t=t,
-                          to=to,
-                          v=v,
-                          w=w,
-                          xf=xf,
-                          y=y)
+    parse_err = FDSNget!(S, C, s, t,
+      autoname, fmt, msr, nd, opts, rad, reg, si, src, to, v, w, xf, y)
   elseif method_in == "IRIS"
     if isa(C, String)
       R = String[strip(String(j)) for j in split(C, ',')]
@@ -86,7 +71,7 @@ function get_data(method_in::String, C="*"::Union{String, Array{String,1}, Array
     else
       R = deepcopy(C)
     end
-    parse_err = IRISget!(S, R, α, ω, fmt = fmt, opts = opts, to = to, v = v, w = w)
+    parse_err = IRISget!(S, R, α, ω, fmt, opts, to, v, w)
   end
 
   # DND DND DND
@@ -160,7 +145,7 @@ function get_data(method_in::String, C="*"::Union{String, Array{String,1}, Array
 end
 
 @doc (@doc get_data)
-function get_data!(S::SeisData, method_in::String, C="*"::Union{String,Array{String,1},Array{String,2}};
+function get_data!(S::SeisData, method_in::String, C::ChanOpts="*";
         autoname::Bool = false           ,  # Auto-generate file names?
           demean::Bool = false           ,  # Demean data after download?
          detrend::Bool = false           ,  # Detrend data after download?

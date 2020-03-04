@@ -16,11 +16,11 @@ function timed_wait!(conn::TCPSocket, to::Real, b::Bool)
   return nothing
 end
 
-function sl_cparse(C::Union{String,Array{String,1},Array{String,2}})
+function sl_cparse(C::ChanOpts)
   if isa(C, String)
-    sta,pat = parse_sl(parse_chstr(C))
+    sta,pat = parse_sl(parse_chstr(C, ',', false, false))
   elseif ndims(C) == 1
-    sta,pat = parse_sl(parse_charr(C))
+    sta, pat = parse_sl(parse_charr(C, '.', false))
   else
     sta, pat = parse_sl(C)
   end
@@ -204,7 +204,7 @@ function has_sta(C::String;
   port::Int64   = KW.SL.port
   )
 
-  sta, pat = parse_sl(parse_chstr(C))
+  sta, pat = parse_sl(parse_chstr(C, ',', false, false))
 
   # This exists to convert SeedLink syntax (SSS NN) to FDSN (NN.SSS)
   for i = 1:length(sta)
@@ -500,7 +500,7 @@ function seedlink!(S::SeisData, mode::String, sta::Array{String,1}, patts::Array
 
   return S
 end
-function seedlink!(S::SeisData, mode::String, C::Union{String,Array{String,1},Array{String,2}};
+function seedlink!(S::SeisData, mode::String, C::ChanOpts;
                     gap::Real=KW.SL.gap,
                     kai::Real=KW.SL.kai,
                     port::Int64=KW.SL.port,
@@ -535,7 +535,7 @@ function seedlink(mode::String, sta::Array{String,1}, pat::Array{String,1};
   return S
 end
 
-function seedlink(mode::String, C::Union{String,Array{String,1},Array{String,2}};
+function seedlink(mode::String, C::ChanOpts;
   gap::Real=KW.SL.gap,
   kai::Real=KW.SL.kai,
   port::Int64=KW.SL.port,

@@ -1,5 +1,6 @@
 # TO DO: Comment parse_chstr.jl, even I can't figure out what I've done here anymore
-function parse_charr(chan_in::Array{String,1}; d='.'::Char, fdsn=false::Bool)
+# function parse_charr(chan_in::Array{String,1}; d='.'::Char, fdsn=false::Bool)
+function parse_charr(chan_in::Array{String, 1}, d::Char, fdsn::Bool)
     N = length(chan_in)
     chan_data = Array{String,2}(undef, 0, 5)
 
@@ -17,11 +18,12 @@ function parse_charr(chan_in::Array{String,1}; d='.'::Char, fdsn=false::Bool)
     return fdsn == true ? minreq!(String.(chan_data)) : map(String, chan_data)
 end
 
-function parse_chstr(chan_in::String; d=','::Char, fdsn=false::Bool, SL=false::Bool)
+function parse_chstr(chan_in::String, d::Char, fdsn::Bool, SL::Bool)
+# function parse_chstr(chan_in::String; d=','::Char, fdsn=false::Bool, SL=false::Bool)
   chan_out = Array{String, 2}(undef, 0, 5)
   if safe_isfile(chan_in)
     return parse_chstr(join([strip(j, ['\r','\n']) for j in
-      filter(i -> !startswith(i, ['#','*']), open(readlines, chan_in))],','))
+      filter(i -> !startswith(i, ['#','*']), open(readlines, chan_in))],','), ',', false, false)
   else
     chan_data = [strip(String(j)) for j in split(chan_in, d)]
     for j = 1:length(chan_data)

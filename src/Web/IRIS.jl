@@ -15,7 +15,7 @@ function irisws(cha::String,
   end
 
   # parse channel string cha
-  c = (parse_chstr(cha)[1,:])[1:min(end,4)]
+  c = (parse_chstr(cha, ',', false, false)[1,:])[1:min(end,4)]
   if isempty(c[3])
     c[3] = "--"
   end
