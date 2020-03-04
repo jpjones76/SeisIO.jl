@@ -4,12 +4,12 @@ export FDSNsta
 # =============================================================================
 # No export
 
-function fdsn_chp(chans::Union{String,Array{String,1},Array{String,2}}; v::Integer = KW.v)
+function fdsn_chp(chans::ChanOpts, v::Integer)
   # Parse channel config
   if isa(chans, String)
-    C = parse_chstr(chans, fdsn = true)
-  elseif isa(chans, Array{String,1})
-    C = parse_charr(chans, fdsn = true)
+    C = parse_chstr(chans, ',', true, false)
+  elseif isa(chans, Array{String, 1})
+    C = parse_charr(chans, '.', true)
   else
     C = copy(chans)
   end
@@ -34,7 +34,7 @@ Other keywords:
 
 See also: `chanspec`, `parsetimewin`, `get_data!`, `SeisIO.KW`
 """
-function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
+function FDSNsta(chans::ChanOpts="*";
                   msr ::Bool              = false,          # MultiStageResp
                   rad ::Array{Float64,1}  = KW.rad,         # Search radius
                   reg ::Array{Float64,1}  = KW.reg,         # Search region
@@ -71,7 +71,7 @@ function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
     (isempty(reg) && isempty(rad)) && error("No query! Please specify a search radius, a rectangular search region, or some channels.")
     BODY *= string("* * * * ", d0, " ", d1, "\n")
   else
-    C = fdsn_chp(chans, v=v)
+    C = fdsn_chp(chans, v)
     Nc = size(C,1)
     for i = 1:Nc
       str = ""
@@ -96,7 +96,7 @@ function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
   io = open(xf, "r")
   xsta = read(io, String)
   close(io)
-  S = FDSN_sta_xml(xsta, msr=msr, v=v)
+  S = FDSN_sta_xml(xsta, msr, d0, d1, v)
 
   # ===================================================================
   # Logging
@@ -113,24 +113,41 @@ function FDSNsta(chans="*"::Union{String,Array{String,1},Array{String,2}};
   return S
 end
 
-function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,2}};
-  autoname  ::Bool              = false,          # Auto-generate file names?
-  fmt       ::String            = KW.fmt,         # Request format
-  msr       ::Bool              = false,          # MultiStageResp
-  nd        ::Real              = KW.nd,          # Number of days per request
-  opts      ::String            = KW.opts,        # User-defined options
-  rad       ::Array{Float64,1}  = KW.rad,         # Search radius
-  reg       ::Array{Float64,1}  = KW.reg,         # Search region
-  s         ::TimeSpec          = 0,              # Start
-  si        ::Bool              = KW.si,          # Station info?
-  src       ::String            = KW.src,         # Source server
-  t         ::TimeSpec          = (-600),         # End or Length (s)
-  to        ::Int64             = KW.to,          # Read timeout (s)
-  v         ::Integer           = KW.v,           # Verbosity
-  w         ::Bool              = KW.w,           # Write to disk?
-  xf        ::String            = "FDSNsta.xml",  # XML filename
-  y         ::Bool              = KW.y            # Sync?
-  )
+function FDSNget!(U::SeisData,
+              chans::ChanOpts,
+                  s::TimeSpec,
+                  t::TimeSpec,
+           autoname::Bool,
+                fmt::String,
+                msr::Bool,
+                 nd::Real,
+               opts::String,
+                rad::Array{Float64,1},
+                reg::Array{Float64,1},
+                 si::Bool,
+                src::String,
+                 to::Int64,
+                  v::Integer,
+                  w::Bool,
+                 xf::String,
+                  y::Bool)
+  # autoname  ::Bool              = false,          # Auto-generate file names?
+  # fmt       ::String            = KW.fmt,         # Request format
+  # msr       ::Bool              = false,          # MultiStageResp
+  # nd        ::Real              = KW.nd,          # Number of days per request
+  # opts      ::String            = KW.opts,        # User-defined options
+  # rad       ::Array{Float64,1}  = KW.rad,         # Search radius
+  # reg       ::Array{Float64,1}  = KW.reg,         # Search region
+  # s         ::TimeSpec          = 0,              # Start
+  # si        ::Bool              = KW.si,          # Station info?
+  # src       ::String            = KW.src,         # Source server
+  # t         ::TimeSpec          = (-600),         # End or Length (s)
+  # to        ::Int64             = KW.to,          # Read timeout (s)
+  # v         ::Integer           = KW.v,           # Verbosity
+  # w         ::Bool              = KW.w,           # Write to disk?
+  # xf        ::String            = "FDSNsta.xml",  # XML filename
+  # y         ::Bool              = KW.y            # Sync?
+  # )
 
   parse_err = false
   n_badreq = 0
@@ -166,7 +183,7 @@ function FDSNget!(U::SeisData, chans::Union{String,Array{String,1},Array{String,
       ID_str[i] = join(ID_mat, " ")
     end
   else
-    C = fdsn_chp(chans)[:,1:4]
+    C = fdsn_chp(chans, v)[:,1:4]
     C[isempty.(C)] .= "*"
     ID_str = [join(C[i, :], " ") for i in 1:size(C,1)]
   end

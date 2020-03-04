@@ -3,6 +3,7 @@ import Base: ==, -, *, +, append!, convert, copy, delete!, deleteat!,
   push!, read, setindex!, show, size, sizeof, sort!, sort, summary, write
 import DSP: filtfilt
 import ..SeisIO: BUF,
+  ChanOpts,
   FDSNget!,
   FiltDefs,
   FloatArray,

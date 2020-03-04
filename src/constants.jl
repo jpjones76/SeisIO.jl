@@ -13,6 +13,7 @@
 const ChanSpec    = Union{Integer, UnitRange, Array{Int64, 1}}
 const FloatArray  = Union{Array{Float64, 1}, Array{Float32, 1}}
 const TimeSpec    = Union{Real, DateTime, String}
+const ChanOpts    = Union{String, Array{String, 1}, Array{String, 2}}
 const bad_chars = Dict{String, Any}(
   "File" => (0x22, 0x24, 0x2a, 0x2f, 0x3a, 0x3c, 0x3e, 0x3f, 0x40, 0x5c, 0x5e, 0x7c, 0x7e, 0x7f),
   "HTML" => (0x22, 0x26, 0x27, 0x3b, 0x3c, 0x3e, 0xa9, 0x7f),

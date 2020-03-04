@@ -116,7 +116,7 @@ Other keywords:
 
 See also: distaz!, FDSNevq, FDSNsta, SeisKW
 """
-function FDSNevt(ot::String, chans::Union{String,Array{String,1},Array{String,2}};
+function FDSNevt(ot::String, chans::ChanOpts;
   len::Real             = 120.0,
   evw::Union{Array{Real,1},Array{Float64,1},Array{Int64,1}} = KW.evw,
   fmt::String           = KW.fmt,
@@ -133,7 +133,7 @@ function FDSNevt(ot::String, chans::Union{String,Array{String,1},Array{String,2}
   w::Bool               = KW.w
   )
 
-  C = fdsn_chp(chans, v=v)
+  C = fdsn_chp(chans, v)
 
   # Create header
   v > 0 && println(stdout, now(), ": event query begins.")
@@ -155,7 +155,8 @@ function FDSNevt(ot::String, chans::Union{String,Array{String,1},Array{String,2}
   t = u2d(d2u(s) + 60*len)                      # End time is len minutes later
   (d0, d1) = parsetimewin(s,t)
   S = SeisData()
-  FDSNget!(S, C, fmt=fmt, nd=nd, rad=rad, reg=reg, s=d0, si=true, src=src, t=d1, to=to, v=v, w=w)
+  # FDSNget!(S, C, fmt=fmt, nd=nd, rad=rad, reg=reg, s=d0, si=true, src=src, t=d1, to=to, v=v, w=w)
+  FDSNget!(S, C, d0, d1, false, fmt, false, nd, "", rad, reg, true, src, to, v, w, "FDSNsta.xml", false)
 
   v > 1 && println(stdout, now(), ": channels initialized.")
   v > 2 && println(stdout, S)
