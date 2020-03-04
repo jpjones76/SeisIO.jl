@@ -13,6 +13,7 @@ function irisws(cha::String,
   if fmt == "mseed"
     fmt = "miniseed"
   end
+  fname = ""
 
   # parse channel string cha
   c = (parse_chstr(cha, ',', false, false)[1,:])[1:min(end,4)]
@@ -31,7 +32,7 @@ function irisws(cha::String,
   (R, parsable) = get_http_req(url, req_info_str, to)
   if parsable
     if w
-      savereq(R, fmt, ID, d0)
+      fname = savereq(R, fmt, ID, d0)
     end
 
     if fmt == "sacbl"
@@ -79,7 +80,9 @@ function irisws(cha::String,
       Ch.name = deepcopy(ID)
     end
   end
-
+  if parsable && w
+    push!(Ch.notes, string(timestamp(), " ¦ write ¦ get_data(\"IRIS\", ... w=true) ¦ wrote raw download to file ", fname))
+  end
   return parse_err, Ch
 end
 

@@ -115,8 +115,8 @@ end
 
 function FDSNget!(U::SeisData,
               chans::ChanOpts,
-                  s::TimeSpec,
-                  t::TimeSpec,
+                 d0::String,
+                 d1::String,
            autoname::Bool,
                 fmt::String,
                 msr::Bool,
@@ -131,28 +131,11 @@ function FDSNget!(U::SeisData,
                   w::Bool,
                  xf::String,
                   y::Bool)
-  # autoname  ::Bool              = false,          # Auto-generate file names?
-  # fmt       ::String            = KW.fmt,         # Request format
-  # msr       ::Bool              = false,          # MultiStageResp
-  # nd        ::Real              = KW.nd,          # Number of days per request
-  # opts      ::String            = KW.opts,        # User-defined options
-  # rad       ::Array{Float64,1}  = KW.rad,         # Search radius
-  # reg       ::Array{Float64,1}  = KW.reg,         # Search region
-  # s         ::TimeSpec          = 0,              # Start
-  # si        ::Bool              = KW.si,          # Station info?
-  # src       ::String            = KW.src,         # Source server
-  # t         ::TimeSpec          = (-600),         # End or Length (s)
-  # to        ::Int64             = KW.to,          # Read timeout (s)
-  # v         ::Integer           = KW.v,           # Verbosity
-  # w         ::Bool              = KW.w,           # Write to disk?
-  # xf        ::String            = "FDSNsta.xml",  # XML filename
-  # y         ::Bool              = KW.y            # Sync?
-  # )
 
   parse_err = false
   n_badreq = 0
   wc = "*"
-  d0, d1 = parsetimewin(s, t)
+  fname = ""
 
   # (1) Time-space query for station info
   S = (if si
@@ -311,6 +294,12 @@ function FDSNget!(U::SeisData,
       id[3] = "--"
     end
     note!(S, i, string("POST ¦ ", join(id, " "), " ", d0, " ", d1))
+    if w
+      wstr = string(timestamp(), " ¦ write ¦ get_data(\"FDSN\" ... w=true) ¦ wrote raw download to file ", fname)
+      for i in 1:S.n
+        push!(S.notes[i], wstr)
+      end
+    end
   end
   # ===================================================================
 

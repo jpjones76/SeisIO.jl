@@ -134,7 +134,7 @@ function savereq(D::Array{UInt8,1}, ext::String, id::String, s::String)
   f = open(fname, "w")
   write(f, D)
   close(f)
-  return nothing
+  return fname
 end
 
 """
