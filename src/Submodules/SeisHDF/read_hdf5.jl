@@ -12,7 +12,7 @@ type `?timespec` for more information about how these are interpreted.
 | id    | String    | "*"       | id pattern, formated nn.sss.ll.ccc          |
 |       |           |           |  (net.sta.loc.cha); FDSN wildcards [^1]     |
 | msr   | Bool      | true      | read full (MultiStageResp) instrument resp? |
-| v     | Int64     | 0         | verbosity                                   |
+| v     | Integer   | 0         | verbosity                                   |
 
 [^1] A question mark ('?') is a wildcard for a single character; an asterisk ('*') is a wildcard for zero or more characters
 
@@ -22,7 +22,7 @@ function read_hdf5!(S::GphysData, fpat::String, s::TimeSpec, t::TimeSpec;
   fmt ::String                = "asdf",                 # data format
   id  ::Union{String, Regex}  = "*",                    # id string
   msr ::Bool                  = true,                   # read multistage response?
-  v   ::Int64                 = KW.v                    # verbosity
+  v   ::Integer               = KW.v                    # verbosity
   )
 
   N = S.n
@@ -63,7 +63,7 @@ function read_hdf5(filestr::String, s::TimeSpec, t::TimeSpec;
   fmt ::String                = "asdf",                 # data format
   id  ::Union{String, Regex}  = "*",                    # id string
   msr ::Bool                  = true,                   # read multistage response?
-  v   ::Int64                 = KW.v                    # verbosity
+  v   ::Integer               = KW.v                    # verbosity
   )
 
   S = SeisData()

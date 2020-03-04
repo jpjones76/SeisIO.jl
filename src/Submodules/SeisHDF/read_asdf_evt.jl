@@ -35,13 +35,13 @@ SeisEvent structures. Matches any event ID in any matching file.
 |KW         | Type    | Default | Meaning                                     |
 |:---       |:---     |:---     |:---                                         |
 | msr       | Bool    | true    | read full (MultiStageResp) instrument resp? |
-| v         | Int64   | 0       | verbosity                                   |
+| v         | Integer | 0       | verbosity                                   |
 
 See also: `timespec`, `parsetimewin`, `read_data`, `read_hdf5`
 """ read_asdf_evt
 function read_asdf_evt(filestr::String, event_id::Union{String, Regex};
   msr       ::Bool                  = true,                   # read multistage response?
-  v         ::Int64                 = KW.v                    # verbosity
+  v         ::Integer               = KW.v                    # verbosity
   )
 
   one_file = safe_isfile(filestr)

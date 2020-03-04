@@ -55,7 +55,7 @@ mutable struct KWDefs
   si::Bool
   src::String
   to::Int64
-  v::Int64
+  v::Integer
   w::Bool
   y::Bool
 end
@@ -93,7 +93,7 @@ keyword isn't specified.
 |          |            |                    |   dep in km with down = +      |
 | si       | true       | Bool               | autofill request station info? |
 | to       | 30         | Int64              | timeout (s) for web requests   |
-| v        | 0          | Int64              | verbosity                      |
+| v        | 0          | Integer            | verbosity                      |
 | w        | false      | Bool               | write requests to disc?        |
 | y        | false      | Bool               | sync after web requests?       |
 
@@ -174,6 +174,6 @@ const KW = KWDefs(
                             true,  # si::Bool
                           "IRIS",  # src::String
                               30,  # to::Int64
-                               0,  # v::Int64 (verbosity)
+                               0,  # v::Integer (verbosity)
                            false,  # w::Bool (write to disk)
                            false)  # y::Bool (syc)
