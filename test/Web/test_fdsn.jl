@@ -160,7 +160,7 @@ S = check_get_data("FDSN", "CC.JRO..BHZ,IU.COLA.00.*", src="IRIS", s=-600, t=0, 
 printstyled("      multi-day request\n", color=:light_green)
 ts = "2018-01-31T00:00:00"
 te = "2018-02-02T00:00:00"
-S = get_data("FDSN","CI.ADO..BH?", s=ts, t=te)
+S = get_data("FDSN", "CI.ADO..BH?", s=ts, t=te)
 id = "CI.ADO..BHE"
 i = findid(S, id)
 if i == 0
@@ -175,6 +175,12 @@ else
   end
 
   printstyled("        are data written identically?\n", color=:green)
+
+  # get rid of bad request channels
+  k = Int64[]
+  append!(k, findall([startswith(id, "XX.FAIL") for id in S.id]))
+  append!(k, findall([startswith(id, "XX.FMT") for id in S.id]))
+  isempty(k) || deleteat!(S, k)
 
   # write ASDF first, since this modifies the first sample start time in S
   write_hdf5(h5file, S, add=true, ovr=true, len=Day(2))
