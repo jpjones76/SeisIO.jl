@@ -125,11 +125,7 @@ function full_resp(xe::XMLElement)
   return gain, units, resp
 end
 
-function FDSN_sta_xml(xmlf::String;
-                       s::String="0001-01-01T00:00:00",
-                       t::String="9999-12-31T23:59:59",
-                       v::Integer=KW.v,
-                       msr::Bool=false)
+function FDSN_sta_xml(xmlf::String, msr::Bool, s::String, t::String, v::Integer)
 
   xdoc = LightXML.parse_string(xmlf)
   xroot = LightXML.root(xdoc)
@@ -370,42 +366,26 @@ function FDSN_sta_xml(xmlf::String;
   return S
 end
 
-"""
-    S = read_sxml(xml_file [, KWs ])
-
-Read FDSN StationXML file `xml_file` into SeisData object S.
-
-### Keywords
-* `s`::String: start time. Format "YYYY-MM-DDThh:mm:ss", e.g., "0001-01-01T00:00:00".
-* `t`::String: termination (end) time. Format "YYYY-MM-DDThh:mm:ss".
-* `msr`::Bool: read instrument response info as MultiStageResp? (Default: false)
-* `v`::Int64: verbosity.
-"""
-function read_sxml(fpat::String;
-                   memmap::Bool=false,
-                   s::String="0001-01-01T00:00:00",
-                   t::String="9999-12-31T23:59:59",
-                   msr::Bool=false,
-                   v::Integer=KW.v)
+function read_sxml(fpat::String, s::String, t::String, memmap::Bool, msr::Bool, v::Integer)
 
   if safe_isfile(fpat)
     io = memmap ? IOBuffer(Mmap.mmap(fpat)) : open(fpat, "r")
     xsta = read(io, String)
     close(io)
-    S = FDSN_sta_xml(xsta, s=s, t=t, msr=msr, v=v)
+    S = FDSN_sta_xml(xsta, msr, s, t, v)
   else
     files = ls(fpat)
     if length(files) > 0
       io = memmap ? IOBuffer(Mmap.mmap(files[1])) : open(files[1], "r")
       xsta = read(io, String)
       close(io)
-      S = FDSN_sta_xml(xsta, s=s, t=t, msr=msr, v=v)
+      S = FDSN_sta_xml(xsta, msr, s, t, v)
       if length(files) > 1
         for i = 2:length(files)
           io = memmap ? IOBuffer(Mmap.mmap(files[i])) : open(files[i], "r")
           xsta = read(io, String)
           close(io)
-          T = FDSN_sta_xml(xsta, s=s, t=t, msr=msr, v=v)
+          T = FDSN_sta_xml(xsta, msr, s, t, v)
           append!(S, T)
         end
       end
@@ -416,11 +396,7 @@ function read_sxml(fpat::String;
   return S
 end
 
-function sxml_mergehdr!(S::GphysData, T::GphysData;
-                        nofs::Bool=false,
-                        app::Bool=true,
-                        v::Integer=KW.v)
-
+function sxml_mergehdr!(S::GphysData, T::GphysData, app::Bool, nofs::Bool, v::Integer)
 
   relevant_fields = nofs ? (:name, :loc, :gain, :resp, :units) : (:name, :loc, :fs, :gain, :resp, :units)
   k = Int64[]
@@ -471,12 +447,7 @@ function sxml_mergehdr!(S::GphysData, T::GphysData;
   return nothing
 end
 
-function read_station_xml!(S::GphysData, file::String;
-                           msr::Bool=false,
-                           s::String="0001-01-01T00:00:00",
-                           t::String="9999-12-31T23:59:59",
-                           v::Integer=KW.v)
-
+function read_station_xml!(S::GphysData, file::String, s::String, t::String, msr::Bool, v::Integer)
   if sizeof(file) < 256
     io = open(file, "r")
     xsta = read(io, String)
@@ -484,19 +455,15 @@ function read_station_xml!(S::GphysData, file::String;
   else
     xsta = file
   end
-  T = FDSN_sta_xml(xsta, msr=msr, s=s, t=t, v=v)
-  sxml_mergehdr!(S, T, v=v)
+  T = FDSN_sta_xml(xsta, msr, s, t, v)
+  sxml_mergehdr!(S, T, true, false, v)
   return nothing
 end
 
-function read_station_xml(file::String;
-                 msr::Bool=false,
-                 s::String="0001-01-01T00:00:00",
-                 t::String="9999-12-31T23:59:59",
-                 v::Integer=KW.v)
+function read_station_xml(file::String, s::String, t::String, msr::Bool, v::Integer)
 
   S = SeisData()
-  read_station_xml!(S, file, msr=msr, s=s, t=t, v=v)
+  read_station_xml!(S, file, s, t, msr, v)
   return S
 end
 

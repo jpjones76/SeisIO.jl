@@ -59,7 +59,7 @@ function read_meta!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
       elseif fmt == "sacpz"
         read_sacpz!(S, fname, memmap=memmap)
       elseif fmt == "sxml"
-        append!(S, read_sxml(fname, memmap=memmap, s=s, t=t, v=v, msr=msr))
+        append!(S, read_sxml(fname, s, t, memmap, msr, v))
       else
         error("Unknown file format!")
       end

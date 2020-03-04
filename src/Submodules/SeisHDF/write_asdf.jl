@@ -88,14 +88,14 @@ function write_asdf( hdf_out::String,
         # read old XML
         SX = SeisData()
         sxml = String(UInt8.(read(sta["StationXML"])))
-        read_station_xml!(SX, sxml, msr=true)
+        read_station_xml!(SX, sxml, "0001-01-01T00:00:00", "9999-12-31T23:59:59", true, v)
 
         # merge S headers into SX, overwriting SX
         SM = SeisData(length(chan_numbers))
         for f in (:id, :name, :loc, :fs, :gain, :resp, :units)
           setfield!(SM, f, deepcopy(getindex(getfield(S, f), chan_numbers)))
         end
-        sxml_mergehdr!(SX, SM, nofs=true, app=false)
+        sxml_mergehdr!(SX, SM, false, true, v)
 
         # remake channel list; SX ordering differs from S
         cc = Int64[]

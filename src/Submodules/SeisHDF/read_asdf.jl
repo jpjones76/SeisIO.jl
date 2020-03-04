@@ -84,7 +84,7 @@ function read_asdf!(  S::GphysData,
       for idₜ in traces
         if idₜ == "StationXML"
           sxml = String(UInt8.(read(sta[idₜ])))
-          read_station_xml!(SX, sxml, msr=msr, s=d0, t=d1, v=v)
+          read_station_xml!(SX, sxml, d0, d1, msr, v)
         elseif occursin(idr, idₜ)
           tr = sta[idₜ]
           nₜ = length(tr)
@@ -143,12 +143,8 @@ function read_asdf!(  S::GphysData,
     end
   end
 
-  # Ensure data source is logged accurately
-  # fill!(S.src, realpath(hdf))
-
   # merge in the XML that we read
-  sxml_mergehdr!(S, SX, app=false, nofs=true, v=v)
-
+  sxml_mergehdr!(S, SX, false, true, v)
   trunc_x!(S)
 
   # Done

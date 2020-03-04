@@ -30,8 +30,7 @@ io = open(xml_stfile, "r")
 xsta = read(io, String)
 close(io)
 
-# (ID, NAME, LOC, FS, GAIN, RESP, UNITS, MISC) = FDSN_sta_xml(xsta)
-S = FDSN_sta_xml(xsta)
+S = FDSN_sta_xml(xsta, false, "0001-01-01T00:00:00", "9999-12-31T23:59:59", 0)
 ID = S.id
 NAME = S.name
 LOC = S.loc
@@ -69,7 +68,7 @@ end
 # xr = get_elements_by_tagname(get_elements_by_tagname(get_elements_by_tagname(get_elements_by_tagname(xroot, "Network")[1], "Station")[1], "Channel")[1], "Response")[1];
 # stage = get_elements_by_tagname(xr, "Stage");
 printstyled("    with MultiStageResp\n", color=:light_green)
-S = FDSN_sta_xml(xsta, msr=true)
+S = FDSN_sta_xml(xsta, true, "0001-01-01T00:00:00", "9999-12-31T23:59:59", 0)
 r = S.resp[1]
 for f in fieldnames(MultiStageResp)
   @test length(getfield(r,f)) == 9
@@ -83,11 +82,11 @@ end
 @test r.stage[9].a == []
 
 printstyled("    read_sxml\n", color=:light_green)
-S = read_sxml(xml_stfile)
-T = read_sxml(xml_stpat)
+S = read_sxml(xml_stfile, "0001-01-01T00:00:00", "9999-12-31T23:59:59", false, false, 0)
+T = read_sxml(xml_stpat, "0001-01-01T00:00:00", "9999-12-31T23:59:59", false, false, 0)
 @assert T.n > S.n
 @test findid(T.id[S.n+1], S.id) == 0
-@test_throws ErrorException read_sxml("nonexist.txt")
+@test_throws ErrorException read_sxml("nonexist.txt", "0001-01-01T00:00:00", "9999-12-31T23:59:59", false, false, 0)
 
 printstyled("    read_meta\n", color=:light_green)
 S = read_meta("sxml", xml_stfile)
@@ -99,11 +98,11 @@ printstyled("    overwrite channel headers on time match\n", color=:light_green)
 redirect_stdout(out) do
   xml_stfile = path*"/SampleFiles/XML/fdsnws-station_2017-01-12T03-17-42Z.xml"
   S = SeisData()
-  read_station_xml!(S, xml_stfile, v=3)
+  read_station_xml!(S, xml_stfile, "0001-01-01T00:00:00", "9999-12-31T23:59:59", false, 3)
   n = S.n
-  read_station_xml!(S, xml_stfile, v=3)
+  read_station_xml!(S, xml_stfile, "0001-01-01T00:00:00", "9999-12-31T23:59:59", false, 3)
   @test S.n == n
-  S = read_station_xml(xml_stfile)
+  S = read_station_xml(xml_stfile, "0001-01-01T00:00:00", "9999-12-31T23:59:59", false, 0)
 end
 
 # XML writer
@@ -114,7 +113,7 @@ S.id[2] = "CC.VALT..BHE"
 S.id[3] = "YY.FAIL"
 S.name[2] = S.name[1]
 write_sxml(f_out, S)
-Sr = read_sxml(f_out)
+Sr = read_sxml(f_out, "0001-01-01T00:00:00", "9999-12-31T23:59:59", false, false, 0)
 sort!(S)
 sort!(Sr)
 for i in 1:S.n
@@ -141,9 +140,9 @@ write_sxml(f_out, breaking_seis())
 printstyled("      check that output of write_sxml is re-read identically\n", color=:light_green)
 files = ls(xml_stpat)
 for file in files
-  S = read_sxml(file, msr=true)
+  S = read_sxml(file, "0001-01-01T00:00:00", "9999-12-31T23:59:59", false, true, 0)
   write_sxml(f_out, S)
-  Sr = read_sxml(f_out, msr=true)
+  Sr = read_sxml(f_out, "0001-01-01T00:00:00", "9999-12-31T23:59:59", false, true, 0)
   sort!(S)
   sort!(Sr)
 
@@ -161,11 +160,11 @@ end
 printstyled("      checking channel list handling\n", color=:light_green)
 file = files[2]
 chans = 21:40
-S = read_sxml(file, msr=true)
+S = read_sxml(file, "0001-01-01T00:00:00", "9999-12-31T23:59:59", false, true, 0)
 write_sxml(f_out, S, chans=chans)
 S1 = S[chans]
 sort!(S1)
-Sr = read_sxml(f_out, msr=true)
+Sr = read_sxml(f_out, "0001-01-01T00:00:00", "9999-12-31T23:59:59", false, true, 0)
 sort!(Sr)
 for f in datafields
   (f in (:id, :src, :notes)) && continue
