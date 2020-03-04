@@ -44,8 +44,8 @@ S2 = read_data(segy_file_4)
 @test S1.x[1] == S2.x[1]
 
 printstyled("      trid\n", color=:light_green)
-@test trid(Int16(2), fs=S1.fs[1]) == "EHZ"
-@test trid(Int16(2), fs=S1.fs[1], fc=1/30) == "HHZ"
+@test trid(Int16(2), S1.fs[1], 1.0) == "EHZ"
+@test trid(Int16(2), S1.fs[1], 1/30) == "HHZ"
 
 printstyled("    SEG Y rev 1\n", color=:light_green)
 if has_restricted

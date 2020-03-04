@@ -23,7 +23,7 @@ end
   using >> would be much better.
 =#
 
-function trid(i::Int16; fs=2000.0::Float64, fc=10.0::Float64)
+function trid(i::Int16, fs::Float64, fc::Float64)
   S = ["DH", "HZ", "H1", "H2", "HZ", "HT", "HR"]
   return string(getbandcode(fs, fc=fc), S[i])
 end
@@ -228,7 +228,7 @@ function do_trace(f::IO,
 
     # Create ID
     sta = string(reinterpret(UInt16, shorts[57]))
-    cha = Int16(10) < shorts[1] < Int16(18) ? trid(shorts[1]-Int16(10), fs=fs) : "YYY"
+    cha = Int16(10) < shorts[1] < Int16(18) ? trid(shorts[1]-Int16(10), fs, 1.0) : "YYY"
     id = "." * sta[1:min(lastindex(sta),5)] * ".." * cha
 
   end
