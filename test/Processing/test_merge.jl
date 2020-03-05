@@ -63,10 +63,12 @@ end
 # ===========================================================================
 printstyled(stdout,"    xtmerge!\n", color=:light_green)
 δ = 20000
+tmax = div(typemax(Int64),2)-2δ
 x = randn(12)
-t = sort(rand(typemin(Int64)+2δ:2δ:typemax(Int64)-2δ, 12))
-while length(unique(t)) < 12
-  t = sort(rand(Int64, 12))
+t = sort(rand(0:2δ:tmax, 12))
+while (length(unique(t)) < 12)
+  push!(t, rand(0:2δ:tmax))
+  t = sort(unique(t))
 end
 x = vcat(x, x[1:6])
 t = vcat(t, t[1:6])
