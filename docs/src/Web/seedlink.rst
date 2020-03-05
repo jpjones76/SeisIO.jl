@@ -47,11 +47,12 @@ Change these with SeisIO.KW.SL.[key] = value, e.g., SeisIO.KW.SL.refresh = 30.
   :delim: ;
   :widths: 8, 8, 8, 24
 
-  u; "rtserve.iris.washington.edu"; S; base SeedLink service URL, no "http://"
   gap; 3600; R; a stream with no data in >gap seconds is considered offline
   kai; 600; R; keepalive interval (s)
   port; 18000; I; port number
   refresh; 20; R; base refresh interval (s) [#]_
+  seq; ""; S; Starting sequence hex value, like "5BE37A"
+  u; "rtserve.iris.washington.edu"; S; base SeedLink service URL, no "http://"
   x\_on\_err; true; Bool; exit on error?
 
 .. rubric:: Table Footnotes
