@@ -121,5 +121,5 @@ end
 
 read_asdf_evt(filestr::String;
   msr       ::Bool                  = true,                   # read multistage response?
-  v         ::Int64                 = KW.v                    # verbosity
+  v         ::Integer               = KW.v                    # verbosity
   ) = read_asdf_evt(filestr, "", msr=msr, v=v)

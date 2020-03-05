@@ -4,6 +4,7 @@ mutable struct SLDefs
   gap::Int64
   kai::Int64
   refresh::Real
+  seq::String
   u::String
   x_on_err::Bool
 
@@ -11,9 +12,10 @@ mutable struct SLDefs
           gap::Int64,
           kai::Int64,
           refresh::Real,
+          seq::String,
           u::String,
           x_on_err::Bool
-          ) = new(port, gap, kai, refresh, u, x_on_err)
+          ) = new(port, gap, kai, refresh, seq, u, x_on_err)
 end
 
 mutable struct FiltDefs
@@ -121,6 +123,7 @@ Seedlink-specific keyword default values. SeedLink also uses some general keywor
 | kai     | 600     | Real    | keepalive interval [s]                      |
 | port    | 18000   | Int64   | port number                                 |
 | refresh | 20      | Real    | base refresh interval [s]                   |
+| seq     | ""      | String  | starting sequence no. (hex), e.g., "5BE37A" |
 | u       | (iris)  | String  | Default URL ("rtserve.iris.washington.edu") |
 | xonerr  | true    | Bool    | exit on error?                              |
 
@@ -147,6 +150,7 @@ const KW = KWDefs(
                           3600,    # gap::Int64
                            600,    # kai::Int64
                           20.0,    # refresh::Real
+                            "",    # seq::String
  "rtserve.iris.washington.edu",    # u::String
                           true ),  # x_on_err::Bool
 

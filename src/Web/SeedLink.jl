@@ -188,7 +188,7 @@ function sl_info(level::String;                           # verbosity
 end
 
 """
-    has_sta(sta[, u=url, port=n])
+    has_sta(sta[, u=url, port=N])
 
 Check that streams exist at `url` for stations `sta`, formatted
 NET.STA. Use "?" to match any single character. Returns `true` for
@@ -302,6 +302,7 @@ See also: `get_data!`
 function seedlink!(S::SeisData, mode::String, sta::Array{String,1}, patts::Array{String,1};
                  gap::Real      = KW.SL.gap,        # max gap of live channels
                  kai::Real      = KW.SL.kai,        # keepalive interval [s]
+                 seq::String    = "",               # starting sequence number
                 port::Int64     = KW.SL.port,       # port number
              refresh::Real      = KW.SL.refresh,    # s between read attempts
                    u::String    = KW.SL.u,          # URL base, no "http://"
@@ -356,10 +357,11 @@ function seedlink!(S::SeisData, mode::String, sta::Array{String,1}, patts::Array
     if mode == "TIME"
       m_str = string("TIME ", s, " ", t, "\r")
     else
-      m_str = "FETCH\r"
+      m_str = string("FETCH", isempty(seq) ? "" : string(" SL", seq, " ", s), "\r")
     end
   else
-    m_str = "DATA\r"
+    # m_str = "DATA\r"
+    m_str = string("DATA", isempty(seq) ? "" : string(" SL", seq, " ", s), "\r")
   end
 
   if w
@@ -503,6 +505,7 @@ end
 function seedlink!(S::SeisData, mode::String, C::ChanOpts;
                  gap::Real      = KW.SL.gap,        # max gap of live channels
                  kai::Real      = KW.SL.kai,        # keepalive interval [s]
+                 seq::String    = "",               # starting sequence number
                 port::Int64     = KW.SL.port,       # port number
              refresh::Real      = KW.SL.refresh,    # s between read attempts
                    u::String    = KW.SL.u,          # URL base, no "http://"
@@ -514,7 +517,7 @@ function seedlink!(S::SeisData, mode::String, C::ChanOpts;
                   )
 
   sta, pat = sl_cparse(C)
-  seedlink!(S, mode, sta, pat, u=u, port=port, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
+  seedlink!(S, mode, sta, pat, u=u, port=port, refresh=refresh, kai=kai, seq=seq, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
   return S
 end
 
@@ -522,6 +525,7 @@ end
 function seedlink(mode::String, sta::Array{String,1}, pat::Array{String,1};
                    gap::Real      = KW.SL.gap,        # max gap of live channels
                    kai::Real      = KW.SL.kai,        # keepalive interval [s]
+                   seq::String    = "",               # starting sequence number
                   port::Int64     = KW.SL.port,       # port number
                refresh::Real      = KW.SL.refresh,    # s between read attempts
                      u::String    = KW.SL.u,          # URL base, no "http://"
@@ -533,13 +537,14 @@ function seedlink(mode::String, sta::Array{String,1}, pat::Array{String,1};
                     )
 
   S = SeisData()
-  seedlink!(S, mode, sta, pat, u=u, port=port, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
+  seedlink!(S, mode, sta, pat, u=u, port=port, refresh=refresh, kai=kai, seq=seq, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
   return S
 end
 
 function seedlink(mode::String, C::ChanOpts;
                    gap::Real      = KW.SL.gap,        # max gap of live channels
                    kai::Real      = KW.SL.kai,        # keepalive interval [s]
+                   seq::String    = "",               # starting sequence number
                   port::Int64     = KW.SL.port,       # port number
                refresh::Real      = KW.SL.refresh,    # s between read attempts
                      u::String    = KW.SL.u,          # URL base, no "http://"
@@ -552,6 +557,6 @@ function seedlink(mode::String, C::ChanOpts;
 
   S = SeisData()
   sta, pat = sl_cparse(C)
-  seedlink!(S, mode, sta, pat, u=u, port=port, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
+  seedlink!(S, mode, sta, pat, u=u, port=port, refresh=refresh, kai=kai, seq=seq, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
   return S
 end
