@@ -72,8 +72,8 @@ function check_sta_exists(sta::Array{String,1}, xstr::String)
 end
 
 function check_stream_exists(S::Array{String,1}, xstr::String;
-                             gap::Real=KW.SL.gap,
-                             to::Int=KW.to
+                           gap::Real  = KW.SL.gap,
+                            to::Int64 = KW.to
                              )
 
   a = ["seedname","location","type"]
@@ -125,10 +125,10 @@ Returns formatted XML. `LEVEL` must be one of "ID", "CAPABILITIES",
 "STATIONS", "STREAMS", "GAPS", "CONNECTIONS", "ALL".
 
 """
-function sl_info(level::String;                                 # verbosity
-                to::Int64     = KW.to,                          # Timeout (s)
-                 u::String    = "rtserve.iris.washington.edu",  # url
-                 port::Int64  = KW.SL.port                      # port
+function sl_info(level::String;                           # verbosity
+                    to::Int64   = KW.to,                  # timeout [s]
+                     u::String  = KW.SL.u,                # url
+                   port::Int64  = KW.SL.port              # port #
                  )
   conn = connect(TCPSocket(), u, port)
   write(conn, string("INFO ", level, "\r"))
@@ -200,8 +200,8 @@ Returns a BitArray with one value per entry in `sta.`
 SeedLink keywords: gap, port
 """
 function has_sta(C::String;
-  u::String     = "rtserve.iris.washington.edu",
-  port::Int64   = KW.SL.port
+                 u::String  = KW.SL.u,    # url base, no "http://""
+              port::Int64   = KW.SL.port  # port number
   )
 
   sta, pat = parse_sl(parse_chstr(C, ',', false, false))
@@ -216,16 +216,16 @@ function has_sta(C::String;
   return check_sta_exists(sta, sl_info("STATIONS", u=u, port=port))
 end
 
-has_sta(sta::Array{String,1};
-  u::String     = "rtserve.iris.washington.edu",
-  port::Int64   = KW.SL.port
+has_sta( sta::Array{String,1};
+           u::String  = KW.SL.u,    # url base, no "http://""
+        port::Int64   = KW.SL.port  # port number
   ) = check_sta_exists(sta, sl_info("STATIONS", u=u, port=port))
 
-has_sta(sta::Array{String,2};
-  u::String   = "rtserve.iris.washington.edu",
-  port::Int64 = KW.SL.port
+has_sta( sta::Array{String,2};
+           u::String  = KW.SL.u,    # url base, no "http://""
+        port::Int64   = KW.SL.port  # port number
   ) = check_sta_exists([join(sta[i,:], '.') for i=1:size(sta,1)],
-                       sl_info("STATIONS", u=u, port=port))
+        sl_info("STATIONS", u=u, port=port))
 
 """
     has_stream(cha[, u=url, port=N, gap=G)
@@ -247,12 +247,12 @@ patterns (formatted LLCCC.D, e.g. ["??EHZ.D", "??BH?.?"]).
 SeedLink keywords: gap, port
 """
 function has_stream(sta::Array{String,1}, pat::Array{String,1};
-  u::String   = "rtserve.iris.washington.edu",
-  to::Int64   = KW.to                               ,  # Timeout (s)
-  port::Int64 = KW.SL.port,
-  gap::Real   = KW.SL.gap,
-  d::Char     = ' '
-  )
+                      u::String  = KW.SL.u,       # url base, no "http://"
+                     to::Int64   = KW.to,         # timeout[s]
+                   port::Int64   = KW.SL.port,    # port #
+                    gap::Real    = KW.SL.gap,     # max gap [s]
+                      d::Char    = ' '            # delimiter
+                      )
 
   L = length(sta)
   cha = Array{String,1}(undef, L)
@@ -264,28 +264,28 @@ function has_stream(sta::Array{String,1}, pat::Array{String,1};
   return check_stream_exists(cha, sl_info("STREAMS", u=u, port=port), gap=gap, to=to)
 end
 
-has_stream(sta::String;
-u::String   = "rtserve.iris.washington.edu",
-to::Int64   = KW.to                               ,  # Timeout (s)
-port::Int64 = KW.SL.port,
-gap::Real   = KW.SL.gap,
-d::Char     = ','
+has_stream( sta::String;
+              u::String   = KW.SL.u,     # url base, no "http://"
+             to::Int64    = KW.to,       # timeout [s]
+           port::Int64    = KW.SL.port,  # port number
+            gap::Real     = KW.SL.gap,   # max. gap [s]
+              d::Char     = ','
 ) = check_stream_exists(String.(split(sta, d)), sl_info("STREAMS", u=u, port=port), gap=gap, to=to)
 
-has_stream(sta::Array{String,1};
-  u::String   = "rtserve.iris.washington.edu",
-  to::Int64   = KW.to                               ,  # Timeout (s)
-  port::Int64 = KW.SL.port,
-  gap::Real   = KW.SL.gap
+has_stream( sta::Array{String,1};
+              u::String   = KW.SL.u,     # url base, no "http://"
+             to::Int64    = KW.to,       # timeout [s]
+           port::Int64    = KW.SL.port,  # port number
+            gap::Real     = KW.SL.gap    # max. gap [s]
   ) = check_stream_exists(sta, sl_info("STREAMS", u=u, port=port), gap=gap, to=to)
 
-has_stream(sta::Array{String,2};
-  u::String   = "rtserve.iris.washington.edu",
-  to::Int64   = KW.to                               ,  # Timeout (s)
-  port::Int64 = KW.SL.port,
-  gap::Real   = KW.SL.gap
+has_stream( sta::Array{String,2};
+              u::String   = KW.SL.u,     # url base, no "http://"
+             to::Int64    = KW.to,       # timeout [s]
+           port::Int64    = KW.SL.port,  # port number
+            gap::Real     = KW.SL.gap    # max. gap [s]
   ) = check_stream_exists([join(sta[i,:], '.') for i=1:size(sta,1)],
-                          sl_info("STREAMS", u=u, port=port), gap=gap, to=to)
+        sl_info("STREAMS", u=u, port=port), gap=gap, to=to)
 
 @doc """
     seedlink!(S, mode, chans)
@@ -300,16 +300,16 @@ Keywords: gap, kai, port, refresh, s, t, u, v, w, x_on_err
 See also: `get_data!`
 """ seedlink!
 function seedlink!(S::SeisData, mode::String, sta::Array{String,1}, patts::Array{String,1};
-                    gap::Real=KW.SL.gap,
-                    kai::Real=KW.SL.kai,
-                    port::Int64=KW.SL.port,
-                    refresh::Real=KW.SL.refresh,
-                    u::String=KW.SL.u,
-                    s::TimeSpec=0,
-                    t::TimeSpec=300,
-                    v::Integer=KW.v,
-                    w::Bool=KW.w,
-                    x_on_err::Bool=KW.SL.x_on_err
+                 gap::Real      = KW.SL.gap,        # max gap of live channels
+                 kai::Real      = KW.SL.kai,        # keepalive interval [s]
+                port::Int64     = KW.SL.port,       # port number
+             refresh::Real      = KW.SL.refresh,    # s between read attempts
+                   u::String    = KW.SL.u,          # URL base, no "http://"
+                   s::TimeSpec  = 0,                # start time
+                   t::TimeSpec  = 300,              # end (termination) time
+                   v::Integer   = KW.v,             # vervosity
+                   w::Bool      = KW.w,             # write directly to disk?
+            x_on_err::Bool      = KW.SL.x_on_err    # exit on error?
                   )
 
 
@@ -501,16 +501,17 @@ function seedlink!(S::SeisData, mode::String, sta::Array{String,1}, patts::Array
   return S
 end
 function seedlink!(S::SeisData, mode::String, C::ChanOpts;
-                    gap::Real=KW.SL.gap,
-                    kai::Real=KW.SL.kai,
-                    port::Int64=KW.SL.port,
-                    refresh::Real=KW.SL.refresh,
-                    s::TimeSpec=0,
-                    t::TimeSpec=300,
-                    v::Integer=KW.v,
-                    u::String="rtserve.iris.washington.edu",
-                    w::Bool=KW.w,
-                    x_on_err::Bool=KW.SL.x_on_err)
+                 gap::Real      = KW.SL.gap,        # max gap of live channels
+                 kai::Real      = KW.SL.kai,        # keepalive interval [s]
+                port::Int64     = KW.SL.port,       # port number
+             refresh::Real      = KW.SL.refresh,    # s between read attempts
+                   u::String    = KW.SL.u,          # URL base, no "http://"
+                   s::TimeSpec  = 0,                # start time
+                   t::TimeSpec  = 300,              # end (termination) time
+                   v::Integer   = KW.v,             # vervosity
+                   w::Bool      = KW.w,             # write directly to disk?
+            x_on_err::Bool      = KW.SL.x_on_err    # exit on error?
+                  )
 
   sta, pat = sl_cparse(C)
   seedlink!(S, mode, sta, pat, u=u, port=port, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
@@ -519,16 +520,17 @@ end
 
 @doc (@doc seedlink!)
 function seedlink(mode::String, sta::Array{String,1}, pat::Array{String,1};
-  gap::Real=KW.SL.gap,
-  kai::Real=KW.SL.kai,
-  port::Int64=KW.SL.port,
-  refresh::Real=KW.SL.refresh,
-  s::TimeSpec=0,
-  t::TimeSpec=300,
-  v::Integer=KW.v,
-  u::String="rtserve.iris.washington.edu",
-  w::Bool=KW.w,
-  x_on_err::Bool=KW.SL.x_on_err)
+                   gap::Real      = KW.SL.gap,        # max gap of live channels
+                   kai::Real      = KW.SL.kai,        # keepalive interval [s]
+                  port::Int64     = KW.SL.port,       # port number
+               refresh::Real      = KW.SL.refresh,    # s between read attempts
+                     u::String    = KW.SL.u,          # URL base, no "http://"
+                     s::TimeSpec  = 0,                # start time
+                     t::TimeSpec  = 300,              # end (termination) time
+                     v::Integer   = KW.v,             # vervosity
+                     w::Bool      = KW.w,             # write directly to disk?
+              x_on_err::Bool      = KW.SL.x_on_err    # exit on error?
+                    )
 
   S = SeisData()
   seedlink!(S, mode, sta, pat, u=u, port=port, refresh=refresh, kai=kai, s=s, t=t, x_on_err=x_on_err, v=v, w=w)
@@ -536,16 +538,17 @@ function seedlink(mode::String, sta::Array{String,1}, pat::Array{String,1};
 end
 
 function seedlink(mode::String, C::ChanOpts;
-  gap::Real=KW.SL.gap,
-  kai::Real=KW.SL.kai,
-  port::Int64=KW.SL.port,
-  refresh::Real=KW.SL.refresh,
-  s::TimeSpec=0,
-  t::TimeSpec=300,
-  v::Integer=KW.v,
-  u::String="rtserve.iris.washington.edu",
-  w::Bool=KW.w,
-  x_on_err::Bool=KW.SL.x_on_err)
+                   gap::Real      = KW.SL.gap,        # max gap of live channels
+                   kai::Real      = KW.SL.kai,        # keepalive interval [s]
+                  port::Int64     = KW.SL.port,       # port number
+               refresh::Real      = KW.SL.refresh,    # s between read attempts
+                     u::String    = KW.SL.u,          # URL base, no "http://"
+                     s::TimeSpec  = 0,                # start time
+                     t::TimeSpec  = 300,              # end (termination) time
+                     v::Integer   = KW.v,             # vervosity
+                     w::Bool      = KW.w,             # write directly to disk?
+              x_on_err::Bool      = KW.SL.x_on_err    # exit on error?
+                    )
 
   S = SeisData()
   sta, pat = sl_cparse(C)

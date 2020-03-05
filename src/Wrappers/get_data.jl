@@ -15,30 +15,30 @@ This function is fully described in the official documentation at https://seisio
 See also: `chanspec`, `parsetimewin`, `seis_www`, `SeisIO.KW`
 """ get_data
 function get_data(method_in::String, C::ChanOpts="*";
-        autoname::Bool = false           ,  # Auto-generate file names?
-          demean::Bool = false           ,  # Demean data after download?
-         detrend::Bool = false           ,  # Detrend data after download?
-           fmt::String = KW.fmt          ,  # File format
-             msr::Bool = false           ,  # Get multi-stage response?
-              nd::Real = KW.nd           ,  # Number of days per request
-          opts::String = KW.opts         ,  # Options string
- rad::Array{Float64,1} = KW.rad          ,  # Query radius
- reg::Array{Float64,1} = KW.reg          ,  # Query region
-           prune::Bool = KW.prune        ,  # Prune empty channels?
-              rr::Bool = false           ,  # Remove instrument response?
-           s::TimeSpec = 0               ,  # Start
-              si::Bool = KW.si           ,  # Fill station info?
-           src::String = KW.src          ,  # Data source
-           taper::Bool = false           ,  # Taper data after download?
-           t::TimeSpec = (-600)          ,  # End or Length (s)
-             to::Int64 = KW.to           ,  # Timeout (s)
-           ungap::Bool = false           ,  # Remove data gaps?
-         unscale::Bool = false           ,  # Unscale (divide by :gain)?
-            v::Integer = KW.v            ,  # Verbosity
-               w::Bool = KW.w            ,  # Write to disc?
-            xf::String = "FDSNsta.xml"   ,  # XML save file
-               y::Bool = KW.y               # Sync
-    )
+   autoname::Bool              = false         , # Auto-generate file names?
+     demean::Bool              = false         , # Demean after download?
+    detrend::Bool              = false         , # Detrend after download?
+        fmt::String            = KW.fmt        , # File format
+        msr::Bool              = false         , # Get multi-stage response?
+         nd::Real              = KW.nd         , # Number of days per request
+       opts::String            = KW.opts       , # Options string
+        rad::Array{Float64, 1} = KW.rad        , # Query radius
+        reg::Array{Float64, 1} = KW.reg        , # Query region
+      prune::Bool              = KW.prune      , # Prune empty channels?
+         rr::Bool              = false         , # Remove instrument response?
+          s::TimeSpec          = 0             , # Start
+         si::Bool              = KW.si         , # Fill station info?
+        src::String            = KW.src        , # Data source
+      taper::Bool              = false         , # Taper after download?
+          t::TimeSpec          = (-600)        , # End or Length (s)
+         to::Int64             = KW.to         , # Timeout (s)
+      ungap::Bool              = false         , # Remove time gaps?
+    unscale::Bool              = false         , # Unscale (divide by gain)?
+          v::Integer           = KW.v          , # Verbosity
+          w::Bool              = KW.w          , # Write to disc?
+         xf::String            = "FDSNsta.xml" , # XML save file
+          y::Bool              = KW.y          , # Sync
+          )
 
   # Parse time window
   α, ω = parsetimewin(s, t)
@@ -146,55 +146,55 @@ end
 
 @doc (@doc get_data)
 function get_data!(S::SeisData, method_in::String, C::ChanOpts="*";
-        autoname::Bool = false           ,  # Auto-generate file names?
-          demean::Bool = false           ,  # Demean data after download?
-         detrend::Bool = false           ,  # Detrend data after download?
-           fmt::String = KW.fmt          ,  # File format
-             msr::Bool = false           ,  # Get multi-stage response?
-              nd::Real = KW.nd           ,  # Number of days per request
-          opts::String = KW.opts         ,  # Options string
- rad::Array{Float64,1} = KW.rad          ,  # Query radius
- reg::Array{Float64,1} = KW.reg          ,  # Query region
-           prune::Bool = KW.prune        ,  # Prune empty channels?
-              rr::Bool = false           ,  # Remove instrument response?
-           s::TimeSpec = 0               ,  # Start
-              si::Bool = KW.si           ,  # Fill station info?
-           src::String = KW.src          ,  # Data source
-           taper::Bool = false           ,  # Taper data after download?
-           t::TimeSpec = (-600)          ,  # End or Length (s)
-             to::Int64 = KW.to           ,  # Timeout (s)
-           ungap::Bool = false           ,  # Remove data gaps?
-         unscale::Bool = false           ,  # Unscale (divide by :gain)?
-            v::Integer = KW.v            ,  # Verbosity
-               w::Bool = KW.w            ,  # Write to disc?
-            xf::String = "FDSNsta.xml"   ,  # XML save file
-               y::Bool = KW.y               # Sync
-     )
+   autoname::Bool              = false         , # Auto-generate file names?
+     demean::Bool              = false         , # Demean after download?
+    detrend::Bool              = false         , # Detrend after download?
+        fmt::String            = KW.fmt        , # File format
+        msr::Bool              = false         , # Get multi-stage response?
+         nd::Real              = KW.nd         , # Number of days per request
+       opts::String            = KW.opts       , # Options string
+        rad::Array{Float64, 1} = KW.rad        , # Query radius
+        reg::Array{Float64, 1} = KW.reg        , # Query region
+      prune::Bool              = KW.prune      , # Prune empty channels?
+         rr::Bool              = false         , # Remove instrument response?
+          s::TimeSpec          = 0             , # Start
+         si::Bool              = KW.si         , # Fill station info?
+        src::String            = KW.src        , # Data source
+      taper::Bool              = false         , # Taper after download?
+          t::TimeSpec          = (-600)        , # End or Length (s)
+         to::Int64             = KW.to         , # Timeout (s)
+      ungap::Bool              = false         , # Remove time gaps?
+    unscale::Bool              = false         , # Unscale (divide by gain)?
+          v::Integer           = KW.v          , # Verbosity
+          w::Bool              = KW.w          , # Write to disc?
+         xf::String            = "FDSNsta.xml" , # XML save file
+          y::Bool              = KW.y          , # Sync
+          )
 
   U = get_data(method_in, C,
-                autoname=autoname,
-                demean=demean,
+               autoname=autoname,
+                 demean=demean,
                 detrend=detrend,
-                fmt=fmt,
-                msr=msr,
-                nd=nd,
-                opts=opts,
-                prune=prune,
-                rad=rad,
-                reg=reg,
-                rr=rr,
-                s=s,
-                si=si,
-                src=src,
-                t=t,
-                taper=taper,
-                to=to,
-                ungap=ungap,
+                    fmt=fmt,
+                    msr=msr,
+                     nd=nd,
+                   opts=opts,
+                  prune=prune,
+                    rad=rad,
+                    reg=reg,
+                     rr=rr,
+                      s=s,
+                     si=si,
+                    src=src,
+                      t=t,
+                  taper=taper,
+                     to=to,
+                  ungap=ungap,
                 unscale=unscale,
-                v=v,
-                w=w,
-                xf=xf,
-                y=y)
+                      v=v,
+                      w=w,
+                     xf=xf,
+                      y=y)
   v > 2 && println(stdout, "S = \n", U)
   append!(S, U)
   return nothing

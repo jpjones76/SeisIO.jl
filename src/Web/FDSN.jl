@@ -34,16 +34,16 @@ Other keywords:
 
 See also: `chanspec`, `parsetimewin`, `get_data!`, `SeisIO.KW`
 """
-function FDSNsta(chans::ChanOpts="*";
-                  msr ::Bool              = false,          # MultiStageResp
-                  rad ::Array{Float64,1}  = KW.rad,         # Search radius
-                  reg ::Array{Float64,1}  = KW.reg,         # Search region
-                  s   ::TimeSpec          = 0,              # Start
-                  src ::String            = KW.src,         # Source server
-                  t   ::TimeSpec          = (-600),         # End or Length (s)
-                  to  ::Int64             = KW.to,          # Read timeout (s)
-                  v   ::Integer           = KW.v,           # Verbosity
-                  xf  ::String            = "FDSNsta.xml"   # XML filename
+function FDSNsta( chans::ChanOpts="*";
+                    msr::Bool              = false,          # MultiStageResp
+                    rad::Array{Float64,1}  = KW.rad,         # Search radius
+                    reg::Array{Float64,1}  = KW.reg,         # Search region
+                      s::TimeSpec          = 0,              # Start
+                    src::String            = KW.src,         # Source server
+                      t::TimeSpec          = (-600),         # End or Length (s)
+                     to::Int64             = KW.to,          # Read timeout (s)
+                      v::Integer           = KW.v,           # Verbosity
+                     xf::String            = "FDSNsta.xml"   # XML filename
                  )
 
   d0, d1 = parsetimewin(s, t)
@@ -140,15 +140,15 @@ function FDSNget!(U::SeisData,
   # (1) Time-space query for station info
   S = (if si
     FDSNsta(chans,
-            msr   = msr,
-            rad   = rad,
-            reg   = reg,
-            s     = d0,
-            src   = src,
-            t     = d1,
-            to    = to,
-            v     = v,
-            xf    = xf
+             msr = msr,
+             rad = rad,
+             reg = reg,
+               s = d0,
+             src = src,
+               t = d1,
+              to = to,
+               v = v,
+              xf = xf
             )
   else
     SeisData()
@@ -266,9 +266,9 @@ function FDSNget!(U::SeisData,
         parse_err = true
         n_badreq += 1
         push!(S, SeisChannel(id = string("XX.FMT..", lpad(n_badreq, 3, "0")),
-                             misc = Dict{String,Any}( "url" => URL,
+                             misc = Dict{String,Any}(  "url" => URL,
                                                       "body" => QUERY,
-                                                      "raw" => read(io))))
+                                                       "raw" => read(io))))
         note!(S, S.n, "unparseable format; raw bytes in :misc[\"raw\"]")
       end
     else
@@ -276,9 +276,9 @@ function FDSNget!(U::SeisData,
       parse_err = true
       n_badreq += 1
       push!(S, SeisChannel(id = string("XX.FAIL..", lpad(n_badreq, 3, "0")),
-                           misc = Dict{String,Any}("url" => URL,
+                           misc = Dict{String,Any}( "url" => URL,
                                                    "body" => QUERY,
-                                                   "msg" => String(read(io)))))
+                                                    "msg" => String(read(io)))))
       note!(S, S.n, "request failed; response in :misc[\"msg\"]")
     end
     close(io)
