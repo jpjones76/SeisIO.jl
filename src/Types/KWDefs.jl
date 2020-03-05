@@ -117,12 +117,14 @@ Seedlink-specific keyword default values. SeedLink also uses some general keywor
 
 | Name    | Default | Type    | Description                                 |
 |:--------|:--------|:--------|:----------------------------------          |
-| gap     | 3600    | Real    | max. gap since last packet [s]              |
+| gap     | 3600    | Real    | allowed time since last packet [s] [^1]     |
 | kai     | 600     | Real    | keepalive interval [s]                      |
 | port    | 18000   | Int64   | port number                                 |
 | refresh | 20      | Real    | base refresh interval [s]                   |
 | u       | (iris)  | String  | Default URL ("rtserve.iris.washington.edu") |
 | xonerr  | true    | Bool    | exit on error?                              |
+
+[^1]: A channel is considered non-transmitting (hence, excluded from the SeedLink session) if the time since last packet exceeds `gap` seconds.
 
 ### SeisIO.KW.Filt
 Default keyword values for time-series filtering.
