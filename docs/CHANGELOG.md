@@ -1,3 +1,18 @@
+# SeisIO v1.0.1 patch: 2020-03-05
+### 2020-03-04
+* *writesacpz* now has a GphysChannel method
+* *write_sxml* is extended to all GphysData subtypes
+* The merge tests no longer allow total timespan *δt > typemax(Int64)* when testing *xtmerge!*; this rare case (p ~ 0.003) caused an error.
+* The SeedLink test now accurately tracks the time spent for each trial SeedLink session.
+* The SeedLink client now accepts keyword *seq="* for starting sequence number, consistent with [SeisComp3 SeedLink protocols](https://www.seiscomp3.org/doc/seattle/2012.279/apps/seedlink.html).
+
+### 2020-03-03
+* SEED support functions *seed_support()*, *mseed_support()*, *dataless_support()*, and *resp_wont_read()* now dump all info. to stdout.
+* *Manifest.toml* is no longer tracked on GitHub, hopefully preventing dependency conflicts.
+* using *get_data(..., w=true)* now logs the raw download write to *:notes*
+* The FDSN tests now delete bad request channels before checking if data are written identically in SEED and SAC.
+* The *writesac* extension in SeisIO.Quake no longer allows keyword *ts=*; it was not actually used in the function body.
+
 # SeisIO v1.0.0 Release: 2020-03-02
 ### 2020-03-02
 * All file writes should now be logged to *:notes* in appropriate channels and structures.
