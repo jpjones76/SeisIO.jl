@@ -97,7 +97,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, nx_new::Int64, nx_add::
   jj = u16[2]
   if (jj > 0x0200 || ((jj == 0x0000 || jj == 0x0100) &&
       (yy > 0x0907 || yy < 0x707)) || yy>0x0bb8)
-	  setfield!(BUF, :swap, !BUF.swap)
+    setfield!(BUF, :swap, !BUF.swap)
     if ((BUF.swap == true) && (BUF.wo == 0x01))
       BUF.xs = true
     end
