@@ -42,7 +42,7 @@ Supported Keywords
   t     | all      | TimeSpec  |           | Termination (end) time
   units | resp     | Bool      | false     | fill in MultiStageResp units?
         | dataless |           |           |
-  v     | all      | Int64     | 0         | verbosity
+  v     | all      | Integer   | 0         | verbosity
 
 
 **Note**: `mmap=true` improves read speed for ASCII formats but requires caution. Julia language handling of SIGBUS/SIGSEGV and associated risks is unknown and undocumented.

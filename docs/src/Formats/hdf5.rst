@@ -28,7 +28,7 @@ Supported Keywords
   id    | String    | \"*.*..*\"| id pattern, formated nn.sss.ll.ccc
         |           |           |  (net.sta.loc.cha); FDSN-style wildcards \ :sup:`(a)`
   msr   | Bool      | true      | read full (MultiStageResp) instrument resp?
-  v     | Int64     | 0         | verbosity
+  v     | Integer   | 0         | verbosity
 
 :sup:`(a)`  A question mark ('?') is a wildcard for a single character (exactly
 one); an asterisk ('*') is a wildcard for zero or more characters.

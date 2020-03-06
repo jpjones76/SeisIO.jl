@@ -158,7 +158,7 @@ Supported Keywords
   :widths: 1, 1, 1, 1, 2
 
   full    | suds, uw  | Bool    | false     | read full header into *:misc*?
-  v       | all       | Int64   | 0         | verbosity
+  v       | all       | Integer | 0         | verbosity
 
 QuakeML Reader
 ==============

@@ -72,7 +72,7 @@ Supported Keywords
 +---------+---------+---------+-----------+----------------------------------+
 | strict  | \*      | Bool    | true      | use strict match?                |
 +---------+---------+---------+-----------+----------------------------------+
-| v       | \*      | Int64   | 0         | verbosity                        |
+| v       | \*      | Integer | 0         | verbosity                        |
 +---------+---------+---------+-----------+----------------------------------+
 | vl      | \*      | Bool    | 0         | verbose source logging? [#]_     |
 +---------+---------+---------+-----------+----------------------------------+
@@ -151,7 +151,7 @@ for a list.
 * `SEED\ <https://www.fdsn.org/seed_manual/SEEDManual_V2.4.pdf>`_: adopted by the International Federation of Digital Seismograph Networks (FDSN) as an omnibus seismic data standard. mini-SEED is a data-only variant that uses only data blockettes.
 * `SEG Y\ <http://wiki.seg.org/wiki/SEG_Y>`_: Society of Exploration Geophysicists data format. Common in the energy industry, developed and maintained by the SEG. Only SEG Y rev 0 and `rev 1\ <https://seg.org/Portals/0/SEG/News%20and%20Resources/Technical%20Standards/seg_y_rev1.pdf>`_ with standard headers are supported.
 * **SLIST**: An ASCII file with a one-line header and data written to file in ASCII string format.
-* **SUDS**: A competitor to SEED developed by the US Geological Survey (USGS), USA in the late 1980s. 
+* **SUDS**: A competitor to SEED developed by the US Geological Survey (USGS), USA in the late 1980s.
 * **UW**: created in the 1970s by the Pacific Northwest Seismic Network (PNSN), USA, for event archival; used until the early 2000s.
 * `Win32\ <http://eoc.eri.u-tokyo.ac.jp/WIN/Eindex.html>`_: maintained by the National Research Institute for Earth Science and Disaster Prevention (NIED), Japan. Continuous data are divided into files that contain a minute of data from multiple channels stored in one-second segments. Channel information is in an external text file, which was previously not controlled by any central authority; inconsistencies between different versions of the same channel file (maintained by different institutions) may exist.
 
