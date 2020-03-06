@@ -1,4 +1,8 @@
 # SeisIO v1.0.1 patch: 2020-03-05
+### 2020-03-05
+* `show_writes` now prints filename in addition to write operation
+* `merge!` is now logged in a way that `show_processing` catches
+
 ### 2020-03-04
 * *writesacpz* now has a GphysChannel method
 * *write_sxml* is extended to all GphysData subtypes
