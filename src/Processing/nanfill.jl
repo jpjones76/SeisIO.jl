@@ -24,8 +24,7 @@ function nanfill!(S::GphysData)
     if !isempty(S.x[i])
       nn = nanfill!(S.x[i])
       if nn > 0
-        note!(S, i, string("¦ processing ¦ nanfill!(S) ¦ replaced ",
-                           nn, "NaNs with the mean of all non-NaN values"))
+        proc_note!(S, i, "nanfill!(S)", "replaced NaNs with the mean of all non-NaN values")
       end
     end
   end
@@ -35,8 +34,7 @@ end
 function nanfill!(C::GphysChannel)
   nn = nanfill!(C.x)
   if nn > 0
-    note!(C, string("¦ processing ¦ nanfill!(C) ¦ replaced ",
-                    nn, "NaNs with the mean of all non-NaN values"))
+    proc_note!(C, "nanfill!(C)", "replaced NaNs with the mean of all non-NaN values")
   end
   return nothing
 end

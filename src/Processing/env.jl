@@ -25,6 +25,8 @@ function env!(S::GphysData;
   end
   deleteat!(chans, k)
 
+  proc_str = string("env!(S, chans=", chans, ")")
+
   # Get groups
   GRPS = get_unique(S, ["eltype"], chans)
 
@@ -98,7 +100,7 @@ function env!(S::GphysData;
 
     end
     # log processing to :notes
-    note!(S, grp, "processing ¦ env!(S) ¦ replaced :x with abs(H(:x))")
+    proc_note!(S, grp, proc_str, "replaced :x with abs(H(:x))")
   end
   return nothing
 end
@@ -177,7 +179,7 @@ function env!(C::GphysChannel;
   end
 
   # log processing to :notes
-  note!(C, "processing ¦ env!(C) ¦ replaced :x with abs(H(:x))")
+  proc_note!(C, "env!(C)", "replaced :x with abs(H(:x))")
   return nothing
 end
 

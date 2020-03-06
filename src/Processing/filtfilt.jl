@@ -180,13 +180,14 @@ function filtfilt!(S::GphysData;
   if chans == Int64[]
     chans = 1:S.n
   end
-  notestr = string("processing ¦ filtfilt!(S, fl = ", fl,
+  proc_str = string("filtfilt!(S, chans=", chans, ", fl = ", fl,
     ", fh = ", fh,
     ", np = ", np,
     ", rp = ", rp,
     ", rs = ", rs,
     ", rt = ", rt,
-    ", dm = ", dm, ") ¦ convolved :x with a ", np, "-pole ", dm, " ", rt, " filter")
+    ", dm = ", dm, ")")
+  desc_str = string("convolved :x with a ", np, "-pole ", dm, " ", rt, " filter")
   N = nx_max(S, chans)
   (N == 0) && return
 
@@ -239,7 +240,7 @@ function filtfilt!(S::GphysData;
     for i = 1:nL
       do_filtfilt!(X[i], Y, yview, L[i], nx_last, b, a, zi, p)
     end
-    note!(S, grp, notestr)
+    proc_note!(S, grp, proc_str, desc_str)
   end
   return nothing
 end
@@ -282,14 +283,15 @@ function filtfilt!(C::GphysChannel;
       do_filtfilt!(X[i], Y, yview, L[i], nx_last, b, a, zi, p)
     end
   end
-  notestr = string("processing ¦ filtfilt!(C, fl = ", fl,
+  proc_str = string("processing ¦ filtfilt!(C, fl = ", fl,
                             ", fh = ", fh,
                             ", np = ", np,
                             ", rp = ", rp,
                             ", rs = ", rs,
                             ", rt = ", rt,
-                            ", dm = ", dm, ") ¦ convolved :x with a ", np, "-pole ", dm, " ", rt, " filter")
-  note!(C, notestr)
+                            ", dm = ", dm, ")")
+  desc_str = string("convolved :x with a ", np, "-pole ", dm, " ", rt, " filter")
+  proc_note!(C, proc_str, desc_str)
   return nothing
 end
 

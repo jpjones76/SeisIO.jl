@@ -36,6 +36,9 @@ function resample!(S::GphysData;
 
   f0 = fs == 0.0 ? minimum(S.fs[chans[S.fs[chans] .> 0.0]]) : fs
 
+  proc_str = string("resample!(S, chans=", chans, ", fs=",
+              repr("text/plain", f0, context=:compact=>true), ")")
+
   # This setup is very similar to filtfilt!
   N = nx_max(S, chans)
   (N == 0) && return
@@ -126,11 +129,9 @@ function resample!(S::GphysData;
       fs = S.fs[i]
       copyto!(S.t[i], 1, gap_inds, 1, n_seg+1)
       setindex!(S.fs, f0, i)
-      sss = string("processing ¦ resample!(S, fs=",
-                  repr("text/plain", f0, context=:compact=>true), ") ¦ ",
-                  "resampled from ", fs, " to ", f0, "Hz")
-      note!(S, i, sss)
     end
+    desc_str = string("resampled from ", fs, " to ", f0, "Hz")
+    proc_note!(S, grp, proc_str, desc_str)
   end
   return nothing
 end
@@ -198,9 +199,8 @@ function resample!(C::GphysChannel, f0::Float64)
   end
   fs = C.fs
   setfield!(C, :fs, f0)
-  note!(C, string("processing ¦ resample!(C, fs=",
-            repr("text/plain", f0, context=:compact=>true), ") ¦ ",
-            "resampled from ", fs, " to ", f0, "Hz"))
+  proc_note!(C, string("resample!(C, fs=", f0, ")"),
+                string("resampled from ", fs, " to ", f0, "Hz"))
   return nothing
 end
 

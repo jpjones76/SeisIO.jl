@@ -16,13 +16,14 @@ function unscale!(S::GphysData;
     chans = 1:S.n
   end
 
+  proc_str = string("unscale!(S, chans=", chans, ")")
+
   @inbounds for i = 1:S.n
     (irr==false && S.fs[i]<=0.0) && continue
     if (S.gain[i] != 1.0) && (i in chans)
       T = eltype(S.x[i])
       rmul!(S.x[i], T(1.0/S.gain[i]))
-      note!(S, i, string("processing ¦ unscale!(S) ¦ divided out gain = ",
-                          @sprintf("%.3e", S.gain[i])))
+      proc_note!(S, i, proc_str, string("divided out gain = ", repr(S.gain[i], context=:compact=>true)))
       S.gain[i] = 1.0
     end
   end
@@ -30,7 +31,7 @@ function unscale!(S::GphysData;
 end
 function unscale!(C::GphysChannel)
   rmul!(C.x, eltype(C.x)(1.0/C.gain))
-  note!(C, "processing ¦ unscale!(C) ¦ divided out gain = " * @sprintf("%.3e", C.gain))
+  proc_note!(C, "unscale!(C)", string("divided out gain = ", repr(C.gain, context=:compact=>true)))
   C.gain = 1.0
   return nothing
 end

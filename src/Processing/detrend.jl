@@ -40,7 +40,7 @@ function demean!(S::GphysData;
           S.x[i][j] -= μ
         end
       end
-      note!(S, i, string("processing ¦ demean!(S)"))
+      proc_note!(S, i, string("demean!(S, chans=", i, ")"), "removed mean")
     end
   end
   return nothing
@@ -63,7 +63,7 @@ function demean!(C::GphysChannel)
       C.x[j] -= μ
     end
   end
-  note!(C, string("processing ¦ demean!(C)"))
+  proc_note!(C, "demean!(C)", "removed mean")
   return nothing
 end
 
@@ -140,17 +140,16 @@ function detrend!(S::GphysData;
 
   @inbounds for i in chans
     p = dtr!(S.x[i], S.t[i], S.fs[i], n)
-    note!(S, i, string("processing ¦ detrend!(S, n = ", n, ") ¦ ",
-    "detrended order ", n, " polynomial; polyfit result = ", p))
+    proc_note!(S, i, string("detrend!(S, chans=", i, ", n = ", n, ")"),
+      string("detrended order ", n, " polynomial; polyfit result = ", p))
   end
   return nothing
 end
 
 function detrend!(C::GphysChannel; n::Int64=1)
   p = dtr!(C.x, C.t, C.fs, n)
-  # note!(C, string("detrend!, n = ", n, ", polyfit result = ", p))
-  note!(C, string("processing ¦ detrend!(C, n = ", n, ") ¦ ",
-  "detrended order ", n, " polynomial; polyfit result = ", p))
+  proc_note!(C, string("detrend!(C, n = ", n, ")"),
+    string("detrended order ", n, " polynomial; polyfit result = ", p))
   return nothing
 end
 

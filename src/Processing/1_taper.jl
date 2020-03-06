@@ -113,10 +113,15 @@ function taper!(C::GphysChannel; t_max::Real=10.0, α::Real=0.05, N_min::Int64=1
       taper_seg!(Xr, W, L, μ, rev=true)
     end
   end
-  note!(C, string("processing ¦ taper!(C, ",
-                  "t_max = ", t_max, ", ",
-                  "α = ", α,  ", ",
-                  "N_min = ", N_min, ") ¦ cosine taper by segment") )
+  proc_note!(C, string("taper!(C, t_max = ",
+                              t_max,
+                              ", ",
+                              "α = ",
+                              α,
+                              ", ",
+                              "N_min = ",
+                              N_min,
+                              ")"), "cosine taper by segment")
   return nothing
 end
 
@@ -137,6 +142,7 @@ function taper!(S::GphysData;
   if chans == Int64[]
     chans = 1:S.n
   end
+  proc_str = string("taper!(S, chans=", chans, ", t_max = ", t_max, ", ", "α = ", α, ", ", "N_min = ", N_min, ")")
 
   α = min(α, 0.5)
   N_min = max(div(N_min,2), 0)
@@ -216,10 +222,7 @@ function taper!(S::GphysData;
   for i = 1:S.n
     if i in chans
       S.fs[i] == 0.0 && continue
-      note!(S, i, string( "processing ¦ taper!(S, ",
-                          "t_max = ", t_max, ", ",
-                          "α = ", α,  ", ",
-                          "N_min = ", N_min, ") ¦ cosine taper by segment" ) )
+      proc_note!(S, i, proc_str, "cosine taper by segment")
     end
   end
   return nothing

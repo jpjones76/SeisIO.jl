@@ -18,3 +18,9 @@ function fwrite_note!(C::GphysChannel, method::String, fname::String, opts::Stri
   push!(C.notes, wstr)
   return nothing
 end
+
+proc_note!(S::GphysData, nn::Array{Int64, 1}, method::String, desc::String) = note!(S, nn, string("processing ¦ ", method, " ¦ ", desc))
+
+proc_note!(S::GphysData, i::Int64, method::String, desc::String) = note!(S, i, string("processing ¦ ", method, " ¦ ", desc))
+
+proc_note!(C::GphysChannel, method::String, desc::String) = note!(C, string("processing ¦ ", method, " ¦ ", desc))

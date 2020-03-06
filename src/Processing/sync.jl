@@ -46,6 +46,10 @@ are filled with the mean; this isn't possible with irregularly-sampled data.
 * numeric, datetime, and non-reserved strings are treated as for `-s`.
 
 Related functions: time, Dates.DateTime, parsetimewin
+
+!!! warning
+
+    channels in `S` with no data are deleted by `sync!`.
 """ sync!
 function sync!(S::GphysData;
                 s="last"::Union{String,DateTime},
@@ -53,11 +57,12 @@ function sync!(S::GphysData;
                 v::Integer=KW.v,
                 )
 
-  # Dekete empty traces
+  # Delete empty traces
   deleteat!(S, findall([isempty(S.x[i]) for i =1:S.n]))     # delete empty channels
   S.n == 0 && return nothing                                # pointless to continue
 
   do_end = t=="none" ? false : true
+  proc_str = string("sync!(S, s = \"", s, "\", t = \"", t, "\")")
 
   # Do not edit order of operations -------------------------------------------
   start_times = zeros(Int64, S.n)
@@ -113,10 +118,10 @@ function sync!(S::GphysData;
     Lj = length(j)
     if Lj ≥ Lt
       dflag[i] = true
-      note!(S, i, string("processing ¦ sync!(S, s = \"", sstr, "\", t = \"", t_str, "\") ¦ synchronize, :x unchanged"))
+      proc_note!(S, i, proc_str, "synchronize, :x unchanged")
       continue
     else
-      note!(S, i, string("processing ¦ sync!(S, s = \"", sstr, "\", t = \"", t_str, "\") ¦ synchronize, deleted ", Lj, " samples from :x"))
+      proc_note!(S, i, proc_str, string("synchronize, deleted ", Lj, " samples from :x"))
     end
     ti = collect(1:Lt)
     deleteat!(S.x[i], j)
@@ -180,11 +185,10 @@ function sync!(S::GphysData;
         # Correct for length aberration if necessary
         S.t[i][end,1] = length(S.x[i])
       end
-      desc_str = string("processing ¦ sync!(S, s = \"", sstr, "\", t = \"", t_str, "\") ¦ synchronize")
       if length(sync_str) > 0
         desc_str *= string(", ", join(sync_str, ";"))
       end
-      note!(S, i, desc_str)
+      proc_note!(S, i, proc_str, desc_str)
     end
   end
   del_flagged!(S, dflag, "length 0 after sync")

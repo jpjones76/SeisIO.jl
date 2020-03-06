@@ -276,9 +276,8 @@ function merge!(S::Y; v::Integer=KW.v, purge_only::Bool=false) where Y<:GphysDat
       broadcast!(+, W, W, δts)
       setindex!(T, w_time(W, Δ), Ω)
       setindex!(X, X_Ω, Ω)
-      note!(S, Ω, string("¦ processing ¦ merge! ¦ combined channels ",
-                          replace(repr(subgrp), ","=>""),
-                          " (N = ", N, ") into :t, :x"))
+      proc_note!(S, Ω, "merge!", string("combined channels ",
+                 repr(subgrp), " (N = ", N, ") into :t, :x"))
       append!(to_delete, rest)
     end
     # Done with SUBGRPS

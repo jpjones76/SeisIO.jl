@@ -27,9 +27,9 @@ function ungap!(C::GphysChannel; m::Bool=true, tap::Bool=false)
   N = size(C.t,1)-2
   (N ≤ 0 || C.fs == 0) && return nothing
   gapfill!(C.x, C.t, C.fs, m=m)
-  note!(C, string("processing ¦ ungap!(C, m = ", m,
-            ", tap = ", tap, ") ¦ filled ", N, " gaps (sum = ",
-            sum(C.t[2:end-1, 2]), " μs)"))
+  proc_note!(C, string("ungap!(C, m = ", m, ", tap = ", tap, ")"),
+                string("filled ", N, " gaps (sum = ",
+                        sum(C.t[2:end-1, 2]), " μs)"))
   C.t = [C.t[1:1,:]; [length(C.x) 0]]
   return nothing
 end
@@ -53,9 +53,10 @@ function ungap!(S::GphysData;
       N = size(S.t[i],1)-2
       (N ≤ 0 || S.fs[i] == 0) && continue
       gapfill!(S.x[i], S.t[i], S.fs[i], m=m)
-      note!(S, i, string("processing ¦ ungap!(S, m = ", m,
-                  ", tap = ", tap, ") ¦ filled ", N, " gaps (sum = ",
-                  sum(S.t[i][2:end-1, 2]), " μs)"))
+      proc_note!(S, i, string("ungap!(S, chans=", i, ", m = ", m,
+                              ", tap = ", tap, ")"),
+                       string("filled ", N, " gaps (sum = ",
+                               sum(S.t[i][2:end-1, 2]), " μs)"))
       S.t[i] = [S.t[i][1:1,:]; [length(S.x[i]) 0]]
     end
   end
