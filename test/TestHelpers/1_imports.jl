@@ -65,6 +65,7 @@ import SeisIO: BUF,
   typ2code,
   w_time,
   webhdr,
+  x_inds,
   xtmerge!,
   μs
 import SeisIO.RandSeis: getyp2codes, pop_rand_dict!
