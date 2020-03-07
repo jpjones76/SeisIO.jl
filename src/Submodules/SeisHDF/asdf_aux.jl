@@ -104,7 +104,7 @@ function asdf_mktrace(S::GphysData, xml_buf::IO, chan_numbers::Array{Int64,1}, w
   return nothing
 end
 
-function asdf_write_chan(S::GphysData, sta::HDF5Group, i::Int64, tag::String, eid::String, v::Integer)
+function asdf_write_chan(S::GphysData, sta::HDF5Group, i::Int64, tag::String, eid::String, v::Integer, ovr::Bool)
   fs = S.fs[i]
   tx = S.t[i]
   t = t_win(tx, fs)
@@ -121,8 +121,18 @@ function asdf_write_chan(S::GphysData, sta::HDF5Group, i::Int64, tag::String, ei
     # create string like CI.SDD..HHZ__2019-07-07T00:00:00__2019-07-09T00:00:00__hhz_
     chan_str = join([S.id[i], s0, s1, tag], "__")
     if has(sta, chan_str)
-      (v > 0) && println("rewriting ", chan_str)
-      o_delete(sta, chan_str)
+      if ovr
+        (v > 0) && println("rewriting ", chan_str)
+        o_delete(sta, chan_str)
+      else
+        (v > 0) && println("incrementing tag of ", chan_str)
+        j = 0x2f
+        while has(sta, chan_str)
+          j += 0x01
+          tag1 = String(vcat(UInt8.(codeunits(tag)), j))
+          chan_str = join([S.id[i], s0, s1, tag1], "__")
+        end
+      end
     end
     sta[chan_str] = S.x[i][xi[k,1]:xi[k,2]]
 

@@ -173,7 +173,7 @@ function write_asdf( hdf_out::String,
         end
       else
         for i in chans
-          asdf_write_chan(S, sta, i, cha[i], evid, v)
+          asdf_write_chan(S, sta, i, cha[i], evid, v, true)
         end
       end
 
@@ -183,7 +183,7 @@ function write_asdf( hdf_out::String,
 
       # Create Waveforms/net.sta/chan_str
       for i in chans
-        asdf_write_chan(S, sta, i, isempty(tag) ? cha[i] : tag, evid, v)
+        asdf_write_chan(S, sta, i, isempty(tag) ? cha[i] : tag, evid, v, false)
       end
 
       # Write StationXML to sta
