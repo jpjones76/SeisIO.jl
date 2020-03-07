@@ -193,6 +193,7 @@ for (n,s) in enumerate(["2018-01-01T00:00:00.000001",
 end
 
 printstyled(stdout, "    t_extend\n", color=:light_green)
+printstyled(stdout, "      time-series\n", color=:light_green)
 nx = 6000
 Δ = 10000
 g = 300000
@@ -203,18 +204,23 @@ ts = t[1,2] + nx*Δ
 t2 = [1 ts; nx 0]
 
 # should have only 2 rows
-@test t_extend(t, ts, nx, fs) == [1 t0; 2nx 0]
+t1 = deepcopy(t)
+@test t_extend(t1, ts, nx, fs) == nothing
+@test t1 == [1 t0; 2nx 0]
 
 # should have a gap of Δ at point nx+1
 @test t_extend(t, ts + Δ, nx, fs) == [1 t0; nx+1 Δ; 2nx 0]
 
 # should correctly log the gaps at nx and nx+1
 t1 = [1 t0; nx g]
-@test t_extend(t1, ts + Δ, nx, fs) == [1 t0; nx g; nx+1 Δ; 2nx 0]
+@test t_extend(t1, ts+g+Δ, nx, fs) == [1 t0; nx g; nx+1 Δ; 2nx 0]
 
 # should only extend the expected length of nx to incorporate new start time
 for ts1 in ts : 100Δ : ts + nx
-  @test t_extend(t, ts1, 0, fs) == [1 t[1,2]; nx + div(ts1-endtime(t, Δ), Δ) 0]
+  t1 = deepcopy(t)
+  # @test t_extend(t, ts1, 0, fs) == [1 t[1,2]; nx + div(ts1-endtime(t, Δ), Δ) 0]
+  @test t_extend(t1, ts1, 0, fs) == nothing
+  @test t1 == [1 t[1,2]; nx-1 + div(ts1-endtime(t, Δ), Δ) 0]
 end
 
 # should initialize a new starter time array at ts
@@ -225,7 +231,8 @@ ts_new = 8348134123
 nx_new = 65536
 dt = 20000
 fs = 50.0
-t2 = t_extend(t, ts_new, 0, dt)
+t2 = deepcopy(t)
+t_extend(t2, ts_new, 0, dt)
 t1 = t_extend(t, ts_new, nx_new, dt)
  #     1       12356
  #  1231         333
@@ -234,12 +241,12 @@ t1 = t_extend(t, ts_new, nx_new, dt)
 @test size(t1) == (4,2)
 @test t1[end,1] == 79670
 @test endtime(t1, dt) == t_expand(t1, fs)[end]
-@test t1[1:end-1,:] == t2
+@test t1[1:end-2,:] == t2[1:end-1,:]
 
 t = [1 3301; 505 1200; 1024 3]
 ts_new = 1181381433
 nx_new = 3000
-t2 = t_extend(t, ts_new, 0, dt)
+t2 = t_extend(t, ts_new, 1, dt)
 t1 = t_extend(t, ts_new, nx_new, dt)
 # 1           3301
 # 505         1200
@@ -253,6 +260,24 @@ t1 = Array{Int64,2}(undef, 0, 0)
 t2 = Array{Int64,2}(undef, 0, 2)
 @test t_extend(t1, ts_new, nx_new, dt) == t_extend(t2, ts_new, nx_new, dt) == [1 ts_new; nx_new 0]
 @test t_extend(t1, ts_new, 0, dt) == t_extend(t2, ts_new, 0, dt) == [1 ts_new]
+
+printstyled(stdout, "      irregular\n", color=:light_green)
+nx = 200
+nn = 120
+t1 = zeros(Int64, nx, 2)
+t1[1:nx, 1] .= 1:nx
+t1[1:nx, 2] .= sort(abs.(rand(1262304000000000:t0, nx)))
+t2 = zeros(Int64, nn, 2)
+t2[1:nn, 1] .= 1:nn
+t2[1:nn, 2] .= sort(abs.(rand(t0+1:1583020800000000, nn)))
+t1o = deepcopy(t1)
+t2o = deepcopy(t2)
+t3 = t_extend(t1, t2[1,2], nn, 0.0)
+@test t1 == t1o
+@test t2 == t2o
+@test size(t3, 1) == nx+nn
+@test t3[:, 1] == collect(1:1:nx+nn)
+@test t3[nx+1, 2] == t2[1,2]
 
 # These were in test_time_utils.jl
 buf = BUF.date_buf
@@ -282,3 +307,41 @@ t_arr!(buf, t)
 t = round(Int64, d2u(DateTime("2020-03-01T13:49:00.003"))*1.0e6)
 t_arr!(buf, t)
 @test buf[1:6] == Int32[2020, 61, 13, 49, 0, 3]
+
+# Tests for x_inds
+printstyled("    x_inds\n", color=:light_green)
+function test_xinds(t::Array{Int64, 2})
+  # Check that the sets of indices match what's in :t
+  xi = x_inds(t)
+  nt = size(t, 1)
+  @test xi[1:nt-1,1] == t[1:nt-1,1]
+
+  # Check that the length is what we expect
+  @test size(xi, 1) == nt - (t[nt,2] == 0 ? 1 : 0)
+
+  # Check xi and t_win(t, dt) have the same content
+  for i in 1:size(xi,1)-1
+    @test xi[i,2] == xi[i+1,1]-1
+    for dt in ([250, 500, 1000, 10000, 20000, 100000])
+      w = t_win(t, dt)
+      @test xi[i,2]-xi[i,1] == div(w[i,2]-w[i,1], dt)
+    end
+  end
+end
+
+ts = 1583455810004000
+for t in [[1  ts; 639000 0],
+          [1  ts; 639000 57425593],
+          [1  ts; 638999 300; 639000 57425593],
+          [1  ts; 638998 1234; 638999 300; 639000 57425593],
+          [1  ts; 638998 -1234525827; 639000 0],
+          [1  ts; 638998 1234; 639000 0],
+          [1 ts; 8 1234; 9 100000; 10 134123; 11 12; 2400 -3; 3891 3030303; 3892 -30000000; 3893 1234; 3894 57425593],
+          [1 ts; 3894 0],
+          [1 ts; 10 13412300; 11 123123123; 184447 3030303; 184448 -30000000; 184449 12300045; 184450 57425593]]
+  test_xinds(t)
+end
+for i in 1:100
+  t = breaking_tstruct(ts, 39000, 100.0)
+  test_xinds(t)
+end
