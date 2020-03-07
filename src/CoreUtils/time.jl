@@ -196,7 +196,7 @@ function endtime(t::Array{Int64,2}, Δ::Int64)
     if L > 2
       t_end += getindex(sum(t, dims=1),2)
     else
-      t_end += t[1,2]
+      t_end += t[1,2] + t[2,2]
     end
     # t_end = getindex(sum(t, dims=1),2) + (t[L,1]-1)*Δ
   end
