@@ -125,8 +125,8 @@ redirect_stdout(out) do
   write_hdf5( hdf_out1, S3, ovr=true, v=3 )
   push!(S3, SeisChannel(id="YY.ZZTOP.00.LEG", fs=50.0, x=randn(1024)))
 
-  # This should work but throw a warning
-  write_hdf5( hdf_out1, S3, v=3 )
+  # This should now fail since :x[2] has no :t[2]
+  @test_throws ArgumentError write_hdf5( hdf_out1, S3, v=3 )
 
   # This should fail
   @test_throws ErrorException write_hdf5( hdf_out1, S3, ovr=true, v=3 )
@@ -146,7 +146,7 @@ redirect_stdout(out) do
 end
 
 # There should be 4 successful writes at this point
-@test sum([occursin("wrote to file " * hdf_out1, S3.notes[1][i]) for i in 1:length(S3.notes[1])]) == 5
+@test sum([occursin("wrote to file " * hdf_out1, S3.notes[1][i]) for i in 1:length(S3.notes[1])]) == 4
 
 @test scan_hdf5(hdf_out1, level="trace") == [
   "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-08T00:00:00__2019-07-08T02:00:00__hhz",
