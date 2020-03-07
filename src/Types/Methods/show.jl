@@ -1,5 +1,5 @@
 showtail(b::Bool) = b ? "…" : ""
-ngaps(t::Array{Int64,2}) = max(0, size(t,1)-2)
+ngaps(t::Array{Int64,2}) = max(0, size(t,1)-2 + t[end,2] == 0 ? 0 : 1)
 
 function str_trunc(str::String, W::Int64)
   i = 0
@@ -21,19 +21,13 @@ function show_str(io::IO, S::Array{String,1}, w::Int, N::Int64)
   println(io, showtail(N<length(S)))
   return nothing
 end
-#
-# function show_float(io::IO, X::FloatArray, w::Int, N::Int64)
-#   for i = 1:N
-#      print(io, rpad(@sprintf("%+10.3e", X[i]), w))
-#   end
-#   println(io, showtail(N<length(S)))
-#   return nothing
-# end
 
-function show_t(io::IO, T::Array{Array{Int64,2},1}, w::Int, N::Int64)
+function show_t(io::IO, T::Array{Array{Int64,2},1}, w::Int, N::Int64, fs::Array{Float64,1})
   for i = 1:N
     if isempty(T[i])
       s = ""
+    elseif fs[i] == 0.0
+      s = string(timestamp(T[i][1,2]*μs), " (", size(T[i], 1), " vals)")
     else
       s = string(timestamp(T[i][1,2]*μs), " (", ngaps(T[i]), " gaps)")
     end
@@ -145,13 +139,6 @@ end
 summary(S::GphysData) = string(typeof(S), " with ", S.n, " channel",  S.n == 1 ? "" : "s")
 summary(S::GphysChannel) = string(typeof(S), " with ",
   length(S.x), " sample", (length(S.x) == 1 ? "" : "s"), ", gaps: ", ngaps(S.t))
-# summary(H::SeisHdr) = string(typeof(H), ", ",
-#   repr("text/plain", H.loc, context=:compact=>true), ", ",
-#   repr("text/plain", H.mag, context=:compact=>true), ", ",
-#   repr("text/plain", H.mag, context=:compact=>true), ", ",
-#   H.int[2], " ", H.int[1])
-# summary(V::SeisEvent) = string("Event ", V.hdr.id, ": ", typeof(V), " with ",
-#   V.data.n, " channel", V.data.n == 1 ? "" : "s")
 
 # GphysData
 function show(io::IO, S::T) where {T<:GphysData}
@@ -175,7 +162,7 @@ function show(io::IO, S::T) where {T<:GphysData}
       elseif f == :pha
         show_str(io, String[string(length(getindex(targ, i)), " phases") for i = 1:M], w, N)
       elseif f == :t
-        show_t(io, targ, w, N)
+        show_t(io, targ, w, N, S.fs)
       elseif f == :x
         x_str = mkxstr(N, getfield(S, :x))
         show_x(io, x_str, w, N<nc)
@@ -215,7 +202,7 @@ function show(io::IO, C::T) where T<:GphysChannel
     elseif f == :pha
       println(io, string(length(targ), " phases"))
     elseif f == :t
-      show_t(io, [targ], w, 1)
+      show_t(io, [targ], w, 1, [C.fs])
     else
       x_str = mkxstr(getfield(C, :x))
       show_x(io, x_str, w, false)
