@@ -158,7 +158,7 @@ Type alias to `Union{DateTime, Real, String}`
 `check_for_gap!(S::GphysData, i::Int64, t::Int64, n::Integer, v::Integer)`
 
 Check for gaps between the end of *S.t[i]* and time *t*. Assumes the data
-segment being added is length-*n*.
+segment being added is length-*n*. Thin wrapper to *t_extend*.
 
 `x = d2u(D::DateTime)`
 
@@ -234,10 +234,6 @@ Extend SeisIO time matrix *T* sampled at interval *Δ* μs or frequency *fs* Hz.
 * *t_new* is the start time of the next segment in data vector *Xᵢ*
 * *n_new* is the expected number of samples in the next segment of *Xᵢ*
 
-`check_for_gap!` acts as a more specfic case of `t_extend` that operates on a
-GphysData structure where `n_new` is known and no time gaps are possible
-in the new segment.
-
 This function has a mini-API below.
 
 `W = t_win(T::Array{Int64, 2}, Δ::Int64)`
@@ -281,13 +277,6 @@ Get *x*-indices *j* corresponding to the start and end of each segment in *T*. T
 `t = y2μs(y::Integer)`
 
 Convert year *y* to integer μs from the Unix epoch.
-
-## **t_extend API**
-### No gaps possible && *nx_new* known
-Third argument should be numeric value of *nx_new*. Returns *T* extended by a segment whose sample times are described by `[1 ts_new; nx_new 0]`.
-
-## Gaps possible || *nx_new* unknown
-Third argument should be 0. Returns *T* with the start of the new segment appended. Assumes that the end of the current read will be appended in a final row later, of the form `[nx_new_true 0]`.
 
 ## **TimeSpec API**
 Functions that allow time specification use two reserved keywords or arguments to track time:
