@@ -117,9 +117,8 @@ function read_sac_stream(io::IO, full::Bool, swap::Bool)
     # fill ID
     if i == 0x01
       i = fill_id!(id, cv, i, 0x08, 0x04, 0x08)
-    elseif i == 0x11
-      i = fill_id!(id, cv, i, 0x18, 0x0a, 0x0b)
     elseif i == 0xa1
+      id[0x0c] = 0x2e
       i = fill_id!(id, cv, i, 0xa8, 0x0d, 0x0f)
     elseif i == 0xa9
       i = fill_id!(id, cv, i, 0xb0, 0x01, 0x02)
@@ -242,6 +241,7 @@ function fill_sac_id(id_str::String)
   # Chars, all segments
   ci = [169, 1, 25, 161]
   for j = 1:4
+    (j == 3) && continue
     sj = ci[j]
     if isempty(id[j])
       BUF.sac_cv[sj:sj+7] .= sac_nul_c
@@ -308,12 +308,12 @@ function write_sac_channel(S::GphysData, i::Int64, fn::String,  v::Integer)
 end
 
 """
-    writesac(S::Union{SeisData}[; fname="", v=0])
+    writesac(S::Union{GphysData,GphysChannel}[, fname="", v=0])
 
 Write all data in SeisData structure `S` to auto-generated SAC files.
 
 Keywords:
-* `fname=FF` uses filename FF, rather than creating file names automatically. (Only works with GphysChannel objects). Leave blank for automatic naming.
+* `fname="FF"` uses filename FF, rather than creating file names automatically. (Only works with GphysChannel objects). Leave blank for automatic naming.
 * `v` is verbosity.
 """
 function writesac(S::GphysData; chans::ChanSpec=Int64[], fname::String="", v::Integer=KW.v)
