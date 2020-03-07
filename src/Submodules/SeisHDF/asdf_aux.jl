@@ -108,16 +108,15 @@ function asdf_write_chan(S::GphysData, sta::HDF5Group, i::Int64, tag::String, ei
   fs = S.fs[i]
   tx = S.t[i]
   t = t_win(tx, fs)
-  n_seg = size(tx,1)-1
+  xi = x_inds(tx)
+  n_seg = size(t, 1)
   (n_seg == 0) && return
 
-  for k = 1:n_seg
+    for k = 1:n_seg
     t0 = t[k,1]
+    t1 = t[k,2]
     s0 = string(u2d(div(t0, 1000000)))
-    s1 = string(u2d(div(t[k,2], 1000000)))
-
-    si = S.t[i][k,1]
-    ei = S.t[i][k+1,1] - (k == n_seg ? 0 : 1)
+    s1 = string(u2d(div(t1, 1000000)))
 
     # create string like CI.SDD..HHZ__2019-07-07T00:00:00__2019-07-09T00:00:00__hhz_
     chan_str = join([S.id[i], s0, s1, tag], "__")
@@ -125,7 +124,7 @@ function asdf_write_chan(S::GphysData, sta::HDF5Group, i::Int64, tag::String, ei
       (v > 0) && println("rewriting ", chan_str)
       o_delete(sta, chan_str)
     end
-    sta[chan_str] = S.x[i][si:ei]
+    sta[chan_str] = S.x[i][xi[k,1]:xi[k,2]]
 
     # set dictionary attributes
     D = attrs(sta[chan_str])
