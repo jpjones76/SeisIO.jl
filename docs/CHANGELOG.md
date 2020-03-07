@@ -1,4 +1,16 @@
-# SeisIO v1.0.1 patch: 2020-03-05
+# SeisIO v1.0.1 patch: 2020-03-07?
+### 2020-03-07
+* SAC data files no longer track the LOC field of `:id` on read or write.
+  + We learned only recently that LOC has no standard SAC variable: some data sources store this as KHOLE, which convention we followed in the past, but this is an event property in the [format spec](http://ds.iris.edu/files/sac-manual/manual/file_format.html).
+* Increased the robustness of *t_extend*; it no longer needs a mini-API.
+* Tests now handle time and data comparison of re-read data more robustly.
+* *show*
+  - now reports correct number of gaps with a gap before the last sample in *:x*
+  - now identifies times in irregular data as "vals", not "gaps".
+* *write_asdf*
+    + When *ovr=false*, a sample window with the same ID, start time, end time as a trace in the output volume now never overwrites the trace in the output volume.
+* Fixed a very rare case in which two rows of a time matrix could correspond to the same sample index
+
 ### 2020-03-05
 * `show_writes` now prints filename in addition to write operation
 * `merge!` is now logged in a way that `show_processing` catches
