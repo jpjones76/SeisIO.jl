@@ -17,6 +17,7 @@ coreutils_flist = [ "test_calculus.jl",
                     "test_poly.jl",
                     "test_read_utils.jl",
                     "test_time.jl",
+                    "test_ts_timekeeping.jl",
                     "test_typ2code.jl" ]
 
 S = [
