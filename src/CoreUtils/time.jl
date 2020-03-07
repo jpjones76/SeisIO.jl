@@ -210,6 +210,19 @@ function endtime(t::Array{Int64,2}, fs::Float64)
   end
 end
 
+#=
+Changed 2020-03-06
+
+Bad behavior in old function for nx == 0 && nt > 0:
+if nx == 0
+  check for gap
+    if gap
+      increment T[end,2] by δt
+
+Extending a channel with nx=0 would change gap at end but not add samples.
+This should never happen.
+=#
+
 """
     t_extend(T::Array{Int64,2}, t_new::Int64, n_new::Int64, Δ::Int64)
 
@@ -225,38 +238,76 @@ This function has a mini-API in the time API (https://github.com/jpjones76/SeisI
 
 See also: `check_for_gap!`
 """
-function t_extend(t::Array{Int64,2}, ts::Integer, nx::Integer, Δ::Int64)
-  nt = size(t, 1)
+function t_extend(T::Array{Int64,2}, ts::Integer, nx::Integer, Δ::Int64)
+  nt = div(length(T), 2)
   n0 = 0
 
   # channel has some data already
   if nt > 0
-    n0 = t[nt, 1]
-    t0 = endtime(t, Δ)
-    if t[nt, 2] == 0
-      t = t[1:nt-1,:]
-    end
-    if nx > 0
-      if ts-t0 > 3*div(Δ,2)
-        t = vcat(t, [1+n0 ts-t0-Δ; nx+n0 0])
+    (nx == 0) && (return nothing)
+    n = T[nt, 1]
+    t0 = endtime(T, Δ)
+    δt = ts - t0 - Δ
+
+    if abs(δt) > div(Δ, 2)
+      if nx == 1
+        if T[nt, 2] == 0
+          # Case 3: normal, no gap from x[n] to x[n+1], nx=1
+          T1 = copy(T)
+          T1[nt, 1] = n+nx
+          T1[nt, 2] = δt
+          return T1
+
+        else
+          # Case 4: abnormal (gap before x[n]), gap from x[n] to x[n+1], nx=1
+          return vcat(T, [n+1 δt])
+        end
+
+      elseif T[nt, 2] == 0
+        # Case 5: normal, gap from x[n] to x[n+1], nx>1
+        T1 = vcat(T, [n+nx 0])
+        T1[nt, 1] = n+1
+        T1[nt, 2] = δt
+        return T1
       else
-        t = vcat(t, [nx+n0 0])
+        # Case 6: abnormal (gap before x[n]), gap from x[n] to x[n+1], nx>1
+        return vcat(T, [n+1 δt; n+nx 0])
       end
+
+    elseif T[nt, 2] > 0
+      # Case 2: abnormal (gap before x[n]), no gap from x[n] to x[n+1]
+      return vcat(T, [n+nx 0])
+
     else
-      t = vcat(t, [1+n0 ts-t0-Δ])
+      # Case 1: normal (no gap before x[n]), no gap from x[n] to x[n+1]
+      setindex!(T, n+nx, nt)
+      return nothing
     end
-    return t
 
   # extend t to end at ts (counterintuitive syntax)
   elseif nx == 0
     return mk_t(nx, ts)[1:1,:]
+  # I really don't like how this behaves...is it even used anymore?
 
   # behavior for a new channel
   else
     return mk_t(nx, ts)
   end
 end
-t_extend(T::Array{Int64,2}, ts::Integer, n::Integer, fs::Float64) = t_extend(T, ts, n, round(Int64, 1.0e6/fs))
+
+# Change 2020-03-07: Account for fs = 0.0
+function t_extend(T::Array{Int64,2}, ts::Integer, nx::Integer, fs::Float64)
+  T1 = (if fs == 0.0
+    nt = div(length(T), 2)
+    T2 = zeros(Int64, nx, 2)
+    T2[:,1].=nt.+(1:nx)
+    T2[1,2] = ts
+    vcat(T, T2)
+  else
+    t_extend(T, ts, nx, round(Int64, 1.0e6/fs))
+  end)
+  return T1
+end
 
 function t_expand(t::Array{Int64,2}, fs::Float64)
   fs == 0.0 && return t[:,2]
