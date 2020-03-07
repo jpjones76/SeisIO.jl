@@ -1,3 +1,33 @@
+# "Hall of Shame" time matrices that broke previous tests
+function breaking_tstruct(ts::Int64, nx::Int64, fs::Float64)
+  Δ = round(Int64, 1.0e6/fs)
+
+  t = rand([
+    [1 ts+Δ; nx-1 7000; nx 57425593],
+    [1 ts+Δ; nx-2 7000; nx-1 12345; nx 57425593],
+    [1 ts+Δ; nx-1 5001; nx 57425593],
+    [1 ts+Δ; 10 13412300; 11 123123123; nx-3 3030303; nx-2 -30000000; nx-1 12300045; nx 5700],
+    [1 ts+Δ; 10 13412300; 11 123123123; nx-3 303030300000; nx-1 12300045; nx 57425593],
+    [1 ts+Δ; 10 13412300; 11 123123123; nx-3 303030300000; nx-1 12300045; nx 57425593],
+    [1 ts+Δ; 10 13412300; 11 123123123; nx-3 3030303; nx-2 -30000000; nx-1 12300045; nx 57425593]
+  ])
+
+  δ = div(Δ, 2) + 1
+  i = findall(t[:,2] .< δ)
+  t[i, 2] .= δ
+
+  return t
+end
+#=
+Time matrices beyond program limitations:
+
+(1) Scenario  gap of length |δ| ≤ Δ/2 for any Δ
+    Example   δ = div(Δ,2); t = [1 ts+Δ; nx-1 δ; nx 57425593]
+    Test      write and reread
+    Outcome   last two windows combine
+    Cause     gap length in penultimate window too short
+=#
+
 function breaking_seis()
   S = SeisData(randSeisData(), randSeisEvent(), randSeisData(2, c=1.0, s=0.0)[2])
 
@@ -50,5 +80,12 @@ function breaking_seis()
   S.id[1] = "UW.VLL..EHZ"
   S.id[2] = "UW.VLM..EHZ"
   S.id[3] = "UW.TDH..EHZ"
+
+  # Breaking time structures in previous tests
+  for i in 1:3
+    if S.fs[i] > 0
+      S.t[i] = breaking_tstruct(S.t[i][1,2], length(S.x[i]), S.fs[i])
+    end
+  end
   return S
 end
