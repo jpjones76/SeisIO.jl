@@ -16,18 +16,14 @@ end
 function check_for_gap!(S::GphysData, i::Integer, ts_new::Int64, nx::Integer, v::Integer)
   Δ = round(Int64, sμ / getindex(getfield(S, :fs), i))
   T = getindex(getfield(S, :t), i)
-  nt = size(T, 1)
-  lxi = T[nt, 1]
-  te_old = endtime(T, Δ)
-  δt = ts_new - te_old - Δ
-  if abs(δt) > div(Δ, 2)
-    v > 1 && println(stdout, S.id[i], ": gap = ", δt, " μs (old end = ",
-    te_old, ", New start = ", ts_new)
-    setindex!(T, getindex(T, nt) + 1, nt)
-    setindex!(T, getindex(T, 2*nt) + δt, 2*nt)
-    setindex!(getfield(S, :t), vcat(T, [lxi + nx zero(Int64)]), i)
-  else
-    setindex!(T, lxi + nx, nt)
+  T1 = t_extend(T, ts_new, nx, Δ)
+  if T1 != nothing
+    if v > 1
+      te_old = endtime(T, Δ)
+      δt = ts_new - te_old
+      (v > 1) && println(stdout, lpad(S.id[i], 15), ": time difference = ", lpad(δt, 16), " μs (old end = ", lpad(te_old, 16), ", new start = ", lpad(ts_new, 16), ", gap = ", lpad(δt-Δ, 16), " μs)")
+    end
+    S.t[i] = T1
   end
   return nothing
 end
