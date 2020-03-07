@@ -233,6 +233,7 @@ function trunc_x!(S::GphysData)
       if length(x) > nx
         resize!(x, nx)
       end
+      ((t[L,1] == t[L-1,1]) && (t[L,2] == 0)) && (S.t[i] = t[1:L-1,:])
     end
   end
   return nothing
