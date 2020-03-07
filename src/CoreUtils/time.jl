@@ -294,6 +294,10 @@ function x_inds(t::Array{Int64,2})
     inds[i,1] = t[i,1]
     inds[i,2] = t[i+1,1] - (i == nt ? 0 : 1)
   end
+  if t[nt+1,2] != 0
+    inds[nt,2] -= 1
+    inds = vcat(inds, [t[nt+1,1] t[nt+1,1]])
+  end
   return inds
 end
 
