@@ -13,7 +13,7 @@ function compare_SeisHdr(H1::SeisHdr, H2::SeisHdr)
   @test H1.mag.nst == H2.mag.nst
   @test H1.id == H2.id
   @test H1.ot == H2.ot
-  # @test H1.src == H2.src
+  # :src isn't tested; in tests, :src changes depending on file/web origin
   @test H1.typ == H2.typ
   return nothing
 end
@@ -27,7 +27,7 @@ function compare_SeisSrc(R1::SeisSrc, R2::SeisSrc)
   @test R1.gap ≈ R2.gap
   @test R1.pax ≈ R2.pax
   @test R1.planes ≈ R2.planes
-  # @test R1.src == R2.src
+  # :src isn't tested; in tests, :src changes depending on file/web origin
   @test R1.st.desc == R2.st.desc
   @test R1.st.dur ≈ R2.st.dur
   @test R1.st.rise ≈ R2.st.rise
@@ -59,8 +59,26 @@ function compare_SeisData(S1::SeisData, S2::SeisData)
       @test isapprox(getfield(R1, f), getfield(R2,f))
     end
 
-    @test S1.t[i] == S2.t[i]
-    @test isapprox(S1.x[i],S2.x[i])
+    #=
+      Changed 2020-03-05
+
+      was:
+      @test S1.t[i] == S2.t[i]
+      @test isapprox(S1.x[i],S2.x[i])
+
+      reason:
+      :t, :x require more sophisticated testing because :t isn't a unique
+        representation of sample times.
+
+      in rare cases, writing and rereading :t, :x can yield a different time
+        matrix with the same data at the same sample times.
+    =#
+    t1 = t_expand(S1.t[i], S1.fs[i])
+    t2 = t_expand(S2.t[i], S2.fs[i])
+    ii = sortperm(t1)
+    jj = sortperm(t2)
+    @test isapprox(t1[ii], t2[jj])
+    @test isapprox(S1.x[i][ii], S2.x[i][jj])
   end
   return nothing
 end
@@ -112,16 +130,12 @@ function rse_wb(n::Int64)
       dep = rand()*1000.0,
       az = (rand()-0.5)*180.0,
       inc = rand()*90.0
-    )
-    Δ = round(Int64, 1.0e6/Ev.data.fs[j])
-    nt = size(Ev.data.t[j],1)
-    k = trues(nt)
-    for n in 2:nt-1
-      if Ev.data.t[j][n,2] ≤ Δ || (Ev.data.t[j][n+1,1]-Ev.data.t[j][n,1] < 2)
-        k[n] = false
+      )
+      if j == 1
+        Ev.data.t[j] = breaking_tstruct(Ev.data.t[j][1,2],
+                                        length(Ev.data.x[j]),
+                                        Ev.data.fs[j])
       end
-    end
-    Ev.data.t[j] = Ev.data.t[j][k,:]
   end
   return Ev
 end
