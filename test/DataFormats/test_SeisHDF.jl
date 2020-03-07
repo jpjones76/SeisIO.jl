@@ -126,7 +126,7 @@ redirect_stdout(out) do
   push!(S3, SeisChannel(id="YY.ZZTOP.00.LEG", fs=50.0, x=randn(1024)))
 
   # This should now fail since :x[2] has no :t[2]
-  @test_throws ArgumentError write_hdf5( hdf_out1, S3, v=3 )
+  # @test_throws ArgumentError write_hdf5( hdf_out1, S3, v=3 )
 
   # This should fail
   @test_throws ErrorException write_hdf5( hdf_out1, S3, ovr=true, v=3 )
