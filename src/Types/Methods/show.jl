@@ -1,5 +1,5 @@
 showtail(b::Bool) = b ? "…" : ""
-ngaps(t::Array{Int64,2}) = max(0, size(t,1)-2 + t[end,2] == 0 ? 0 : 1)
+ngaps(t::Array{Int64,2}) = max(0, size(t,1)-2 + (t[end,2] == 0 ? 0 : 1))
 
 function str_trunc(str::String, W::Int64)
   i = 0
