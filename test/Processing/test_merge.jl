@@ -890,3 +890,14 @@ read!(io, X2)
 close(io)
 X = map(Float32, X2)
 @test isapprox(C2.x, X)
+
+printstyled(stdout,"      merge_ext! on SeisData == nothing\n", color=:light_green)
+C = randSeisChannel(s=true)
+S = randSeisData(3, s=1.0)
+S.id = [C.id, C.id, C.id]
+S.fs = [C.fs, C.fs, C.fs]
+U = deepcopy(S)
+Ω = 3
+rest = [1,2]
+@test SeisIO.merge_ext!(S, Ω, rest) == nothing
+@test S==U
