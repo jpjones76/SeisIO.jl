@@ -8,7 +8,7 @@ pat = ["?????.D", "?????.D"]
 trl = ".??.???.D"
 sta_matrix = String.(reshape(split(sta[2],'.'), 1,2))
 
-printstyled("  SeedLink\n", color=:light_green, bold=true)
+printstyled("  SeedLink\n", color=:light_green)
 printstyled("  (SeedLink tests require up to 6 minutes)\n", color=:green)
 
 # has_stream
