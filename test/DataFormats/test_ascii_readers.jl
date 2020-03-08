@@ -38,6 +38,15 @@ nx = length(S.x[1])
 @test ≈(S.fs[1], 62.5)
 @test isapprox(C.x[1:nx], S.x[1])
 
+printstyled("    empty channel + check_for_gap!\n", color=:light_green)
+S.t[1] = Array{Int64}(undef, 0, 2)
+S.x[1] = Float32[]
+verified_read_data!(S, "slist", slist_file)
+@test S.id[1] == "YY.ERTA..EHZ"
+@test ≈(S.fs[1], 62.5)
+@test C.t[1,2] == S.t[1][1,2]
+@test isapprox(C.x[1:nx], S.x[1])
+
 printstyled("    wildcard support\n", color=:light_green)
 S = verified_read_data("slist", slist_pat)
 @test S.id[1] == "YY.ERTA..EHZ"
