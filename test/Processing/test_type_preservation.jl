@@ -15,11 +15,17 @@ for f in String["convert_seis!", "demean!", "detrend!", "filtfilt!", "merge!", "
     end
   end
   T = [eltype(S.x[i]) for i=1:S.n]
-  id = S.id
+  id = deepcopy(S.id)
   getfield(SeisIO, Symbol(f))(S)
   for i = 1:S.n
-    j = findfirst(id.==S.id[i])
-    @test T[j] == eltype(S.x[i])
+    j = findid(S.id[i], id)
+    if j > 0
+      @test T[j] == eltype(S.x[i])
+    else
+      str = string("id = ", id, " deleted from S; check randSeisChannel time ranges.")
+      @warn(str)
+      println(str)
+    end
   end
 end
 
