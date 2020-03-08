@@ -22,45 +22,41 @@ function randResp(n::Int64=0)
   return resp
 end
 
-function rand_t(Lx::Int64, n::Int64=0)
+# function rand_t(fs::Float64, nx::Int64)
+function rand_t(fs::Float64, nx::Int64, n::Int64)
   ts = time()-86400+randn()
-  L = n == 0 ? rand(0:9) : n
-  t = zeros(2+L, 2)
+  ngaps = n < 0 ? rand(0:9) : n
+  L = ngaps + 2
 
-  # first row is always start time
-  t[1,:] = [1 round(Int64, ts/μs)]
+  Δ = ceil(Int64, sμ/fs)
+  δ = Float64(div(Δ, 2) + 1)
+  t = zeros(Int64, L, 2)
 
-  # rest are random time gaps
-  if L > 0
-    gaps = unique(rand(2:Lx, L, 1))
+  # first row is always start time; no gap in last row for now
+  t[1,1] = 1
+  t[1,2] = round(Int64, ts/μs)
+  t[L,1] = nx
 
-    # try to create exactly L gaps
-    j = 0
-    while j < 5
-      j = j + 1
-      gaps_tmp = unique(rand(2:Lx, L, 1))
-      if length(gaps_tmp) > length(gaps)
-        gaps = gaps_tmp
-      end
-      (length(gaps) == L) && break
-    end
-    L = length(gaps)
-
-    t[2:L+1,1] = gaps
-    for i = 2:L+1
-      t[i,2] = round(Int64, (rand(1:100)+rand())*sμ)
+  # rest are random-length time gaps
+  if ngaps > 0
+    gi = sort(rand(2:nx, ngaps))
+    ui = unique(gi)
+    lg = length(ui)
+    while lg < ngaps
+      gi = copy(ui)
+      append!(gi, rand(2:nx, ngaps-lg))
+      sort!(gi)
+      ui = unique(gi)
+      lg = length(ui)
     end
 
-    # control for gap in last sample
-    if any(t[:,1].==Lx) == true
-      t = t[1:L+1,:]
-    else
-      t[L+2,:] = [Lx 0]
-    end
-  else
-    t[2,:] = [Lx 0]
+    # Generate exponentially-distributed gap lengths
+    gl = ceil.(Int64, max.(δ, Δ .* 10.0 .^ randexp(ngaps)))
+
+    t[2:ngaps+1,1] .= gi
+    t[2:ngaps+1,2] .= gl
   end
-  return sortslices(t, dims=1)
+  return t
 end
 
 function randLoc(randtype::Bool=true)
@@ -144,7 +140,7 @@ function populate_chan!(Ch::SeisChannel, s::Bool, nx::Int64)
     Lx = nx
   end
   Ch.x = randn(rand() < 0.5 ? Float32 : Float64, Lx)                  # x
-  Ch.t = rand_t(Lx)                                                   # t
+  Ch.t = rand_t(fs, Lx, -1)                                           # t
 
   pop_chan_tail!(Ch)
   note!(Ch, "+source ¦ " * Ch.src)
