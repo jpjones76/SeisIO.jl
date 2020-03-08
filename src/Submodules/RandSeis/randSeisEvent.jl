@@ -114,7 +114,7 @@ function randSeisHdr()
            4 + round(Int64, rand()*exp(mw)),
            rand(0x00:0x10:0xf0),
            rand_datum(),
-           "hypocenter",
+           rand(["HYPOCENTER", "CENTROID", "AMPLITUDE", "MACROSEISMIC", "RUPTURE_START", "RUPTURE_END"]),
            "",
            rand(["HYPOELLIPSE", "HypoDD", "Velest", "centroid"]))
 
@@ -135,21 +135,9 @@ function randSeisHdr()
                             src   = randstring(24)
                             )
             )
-  # setfield!(H, :mech, FocalMech(src = join([join([randstring(12),     # :mech
-  #                                     " ",
-  #                                     randstring(20)]) for i=1:5], ","),
-  #                               np  = 360.0.*(rand(Float64, 3, 2).-0.5),
-  #                               pax = vcat(360.0.*(rand(Float64, 2, 2).-0.5),
-  #                                     (rand(-1:2:1)*m0).*[rand() -1.0*rand()]),
-  #                               m0  = m0,
-  #                               mt  = m0.*(rand(Float64, 6).-0.5),
-  #                               dm  = m0.*(rand(Float64, 6).-0.5)
-  #                               )
-  #         ) # obviously not pure DC, jajaja "random"
   pop_rand_dict!(H.misc, rand(4:24))                                # :misc
   [note!(H, randstring(rand(16:256))) for i = 1:rand(1:6)]          # :notes
   setfield!(H, :ot, now())                                          # :ot
-  # setfield!(H, :src, "randSeisHdr")                                 # :src
   setfield!(H, :typ, typ)                                           # :typ
 
   # header :src
@@ -195,6 +183,8 @@ function randSeisEvent(N::Int64; c::Float64=0.0, s::Float64=1.0, nx::Int64=0)
   V = SeisEvent(hdr=randSeisHdr(),
                 source=randSeisSrc(),
                 data=convert(EventTraceData, randSeisData(N, c=c, s=s, nx=nx)))
+  V.source.eid = V.hdr.id
+  V.hdr.loc.src = V.hdr.id * "," * V.hdr.loc.src
 
   for i = 1:V.data.n
     setindex!(getfield(getfield(V, :data), :pha), randPhaseCat(), i)
