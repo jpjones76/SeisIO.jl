@@ -38,6 +38,8 @@ default for nev to 2.
 +--------+----------------+--------+------------------------------------------+
 | si     | true           | B      | autofill station info on data req? [#]_  |
 +--------+----------------+--------+------------------------------------------+
+| src    | "IRIS"         | S      |  data source; type *?seis_www* for list  |
++--------+----------------+--------+------------------------------------------+
 | to     | 30             | I      | read timeout for web requests (s)        |
 +--------+----------------+--------+------------------------------------------+
 | v      | 0              | I      | verbosity                                |
@@ -49,7 +51,7 @@ default for nev to 2.
 
 
 .. rubric:: Table Footnotes
-.. [#] Types: A = Array, B = Boolean, C = Char, DT = DateTime, F = Float, I = Integer, R = Real, S = String, U8 = Unsigned 8-bit integer
+.. [#] Types: A = Array, B = Boolean, C = Char, DT = DateTime, F = Float, I = Integer, S = String, U8 = Unsigned 8-bit integer (UInt8)
 .. [#] If KW.comp == 0x00, never compress data; if KW.comp == 0x01, only compress channel *i* if *length(S.x[i]) > KW.n_zip*; if comp == 0x02, always compress data.
 .. [#] String is passed as-is, e.g. "szsrecs=true&repo=realtime" for FDSN. String should not begin with an ampersand.
 .. [#] Specify region **[center_lat, center_lon, min_radius, max_radius, dep_min, dep_max]**, with lat, lon, and radius in decimal degrees (°) and depth in km with + = down. Depths are only used for earthquake searches.

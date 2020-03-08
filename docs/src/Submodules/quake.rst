@@ -57,52 +57,96 @@ QuakeML-compliant seismic source-time parameterization.
 ***********
 Web Queries
 ***********
+Keyword descriptions for web queries appear at the end of this section.
 
-Event Header Query
-==================
 .. function:: FDSNevq(ot)
    :noindex:
 
-:ref:`Shared keywords<dkw>`: evw, rad, reg, mag, nev, src, to, v, w
+Event header query. Multi-server query for the event(s) with origin time(s) closest to `ot`. Returns a tuple consisting of an Array{SeisHdr,1} and an Array{SeisSrc,1}, so that the `i`th entry of each array describes the header and source process of event `i`.
 
-Multi-server query for the event(s) with origin time(s) closest to `ot`. Returns
-a tuple consisting of an Array{SeisHdr,1} and an Array{SeisSrc,1}, so that
-the `i`th entry of each array describes the header and source process of event `i`.
+Keywords: evw, mag, nev, rad, reg, src, to, v
 
-Notes:
+Notes
+-----
 
-1. Specify `ot` as a string formatted YYYY-MM-DDThh:mm:ss in UTC (e.g. "2001-02-08T18:54:32"). Returns a SeisHdr array.
-2. Incomplete string queries are read to the nearest fully-specified time constraint; thus, `FDSNevq("2001-02-08")` returns the nearest event to 2001-02-08T00:00:00.
-3. If no event is found in the specified search window, FDSNevq exits with an error.
+* Specify `ot` as a string formatted YYYY-MM-DDThh:mm:ss in UTC (e.g. "2001-02-08T18:54:32").
+* Incomplete string queries are read to the nearest fully-specified time constraint; thus, `FDSNevq("2001-02-08")` returns the nearest event to 2001-02-08T00:00:00.
+* If no event is found in the specified search window, FDSNevq exits with an error.
+* For FDSNevq, keyword `src` can be a comma-delineated list of sources, provided each has a value in `?seis_www`; for example, ``src="IRIS, INGV, NCEDC"`` is valid.
 
-| :ref:`Shared keywords<dkw>`: evw, reg, mag, nev, src, to, w
-
-Event Header and Data Query
-===========================
 .. function:: FDSNevt(ot::String, chans::String)
 
-Get trace data for the event closest to origin time `ot` on channels `chans`.
-Returns a SeisEvent.
+Get header and trace data for the event closest to origin time `ot` on channels
+`chans`. Returns a SeisEvent structure.
 
-| :ref:`Shared keywords<dkw>`: fmt, mag, nd, opts, pha, rad, reg, src, to, v, w
-| Other keywords:
-| ``len``: desired record length *in minutes*.
+Keywords: evw, fmt, len, mag, model, nd, opts, pha, rad, reg, src, to, v, w
 
-Phase Onset Query
-=================
+Notes
+-----
+
+* Specify `ot` as a string formatted YYYY-MM-DDThh:mm:ss in UTC (e.g. "2001-02-08T18:54:32").
+* Incomplete string queries are read to the nearest fully-specified time constraint; thus, `FDSNevq("2001-02-08")` returns the nearest event to 2001-02-08T00:00:00.
+* If no event is found in the specified search window, FDSNevt exits with an error.
+* Unlike `FDSNevq`, number of events cannot be specified and `src` must be a single source String in `?seis_www`.
+
+
 .. function:: get_pha!(S::Data[, keywords])
 
-Keywords:
+Command-line interface to IRIS online travel time calculator, which calls TauP. Returns a matrix of strings.
 
-* pha: comma-separated String of phases ("P, S, SP")
-* model: velocity model ("iasp91")
-* to: timeout in seconds
-* v: verbosity
+Keywords: pha, model, to, v
 
-**References**
+References
+----------
+1. TauP manual: http://www.seis.sc.edu/downloads/TauP/taup.pdf
+2. Crotwell, H. P., Owens, T. J., & Ritsema, J. (1999). The TauP Toolkit: Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.
 
-* Crotwell, H. P., Owens, T. J., & Ritsema, J. (1999). The TauP Toolkit: Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.
-* TauP manual: http://www.seis.sc.edu/downloads/TauP/taup.pdf
+Web Query Keywords
+==================
+
++--------+----------------+--------+------------------------------------------+
+| KW     | Default        | T [#]_ | Meaning                                  |
++========+================+========+==========================================+
+| evw    | [600.0, 600.0] | A{F,1} | search window in seconds [#]_            |
++--------+----------------+--------+------------------------------------------+
+| fmt    | "miniseed"     | S      | request data format                      |
++--------+----------------+--------+------------------------------------------+
+| len    | 120.0          | I      | desired trace length [s]                 |
++--------+----------------+--------+------------------------------------------+
+| mag    | [6.0, 9.9]     | A{F,1} | magnitude range for queries              |
++--------+----------------+--------+------------------------------------------+
+| model  | "iasp91"       | S      | Earth velocity model for phase times     |
++--------+----------------+--------+------------------------------------------+
+| nd     | 1              | I      | number of days per subrequest            |
++--------+----------------+--------+------------------------------------------+
+| nev    | 0              | I      | number of events returned per query [#]_ |
++--------+----------------+--------+------------------------------------------+
+| opts   | ""             | S      | user-specified options [#]_              |
++--------+----------------+--------+------------------------------------------+
+| pha    | "P"            | S      | phases to get [#]_                       |
++--------+----------------+--------+------------------------------------------+
+| rad    | []             | A{F,1} | radial search region [#]_                |
++--------+----------------+--------+------------------------------------------+
+| reg    | []             | A{F,1} | rectangular search region [#]_           |
++--------+----------------+--------+------------------------------------------+
+| src    | "IRIS"         | S      |  data source; type *?seis_www* for list  |
++--------+----------------+--------+------------------------------------------+
+| to     | 30             | I      | read timeout for web requests [s]        |
++--------+----------------+--------+------------------------------------------+
+| v      | 0              | I      | verbosity                                |
++--------+----------------+--------+------------------------------------------+
+| w      | false          | B      | write requests to disk? [#]_             |
++--------+----------------+--------+------------------------------------------+
+
+.. rubric:: Table Footnotes
+.. [#] Types: A = Array, B = Boolean, C = Char, DT = DateTime, F = Float, I = Integer, S = String, U8 = Unsigned 8-bit integer (UInt8)
+.. [#] search range is always ``ot-|evw[1]| ≤ t ≤ ot+|evw[2]|``
+.. [#] nev=0 returns all events in the query
+.. [#] String is passed as-is, e.g. "szsrecs=true&repo=realtime" for FDSN. String should not begin with an ampersand.
+.. [#] Comma-separated String, like `"P, pP"`; use `"ttall"` for all phases
+.. [#] Specify region **[center_lat, center_lon, min_radius, max_radius, dep_min, dep_max]**, with lat, lon, and radius in decimal degrees (°) and depth in km with + = down. Depths are only used for earthquake searches.
+.. [#] Specify region **[lat_min, lat_max, lon_min, lon_max, dep_min, dep_max]**, with lat, lon in decimal degrees (°) and depth in km with + = down. Depths are only used for earthquake searches.
+.. [#] If **w=true**, a file name is automatically generated from the request parameters, in addition to parsing data to a SeisData structure. Files are created from the raw download even if data processing fails, in contrast to get_data(... wsac=true).
 
 Utility Functions
 =================

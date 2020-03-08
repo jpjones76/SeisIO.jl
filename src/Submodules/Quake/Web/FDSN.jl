@@ -7,16 +7,31 @@ Multi-server query for the events with the closest origin time to `ot`.
 Returns an Array{SeisHdr,1} in H with event headers and an Array{SeisSrc,1}
 in R in H with corresponding source process info.
 
-Keywords: evw, rad, reg, mag, nev, src, to
+### Keywords
+| KW       | Default      | T [^1]    | Meaning                        |
+|----------|:-----------  |:----------|:-------------------------------|
+| evw      | [600., 600.] | Float64   | search window in seconds [^2]  |
+| mag      | [6.0, 9.9]   | Float64   | search magitude range          |
+| nev      | 0            | Integer   | events per query [^3]          |
+| rad      | []           | Float64   | radius search                  |
+| reg      | []           | Float64   | geographic search region       |
+| src [^4] | "IRIS"       | String    | data source; `?seis_www` lists |
+| to       | 30           | Int64     | timeout (s) for web requests   |
+| v        | 0            | Integer   | verbosity                      |
 
-See also: SeisIO.KW
+[^1]: `Array{T, 1}` for `evw`, `mag`, `rad`, `reg`; `T` for others
+[^2]: search range is always `ot-|evw[1]| ≤ t ≤ ot+|evw[2]|`
+[^3]: if `nev=0`, all matches are returned.
+[^4]: In an event query, keyword `src` can be a comma-delineated list, like `"IRIS, INGV, NCEDC"`.
+
+See also: `SeisIO.KW`, `?seis_www`
 """
 function FDSNevq(ot::String;
-  evw::Union{Array{Real,1},Array{Float64,1},Array{Int64,1}} = KW.evw,
+  evw::Array{Float64,1} = [600.0, 600.0],
+  mag::Array{Float64,1} = [6.0, 9.9],
+  nev::Integer = 0,
   rad::Array{Float64,1} = KW.rad,
   reg::Array{Float64,1} = KW.reg,
-  mag::Array{Float64,1} = KW.mag,
-  nev::Integer = KW.nev,
   src::String = KW.src,
   to::Int = KW.to,
   v::Integer = KW.v)
@@ -105,26 +120,43 @@ end
 """
     FDSNevt(ot::String, chans::String)
 
-Get trace data for the event closest to origin time `ot` on channels `chans`.
-Returns a SeisEvent structure.
+Get header and trace data for the event closest to origin time `ot` on channels
+`chans`. Returns a SeisEvent structure.
 
-Standard keywords: fmt, mag, nd, opts, pha, rad, reg, src, to, v, w
+### Keywords
+| KW       | Default      | T [^1]    | Meaning                        |
+|----------|:-----------  |:----------|:-------------------------------|
+| evw      | [600., 600.] | Float64   | search window in seconds [^2]  |
+| fmt      | "miniseed"   | String    | request data format            |
+| len      | 120.0        | Float64   | desired trace length [s]       |
+| mag      | [6.0, 9.9]   | Float64   | search magitude range          |
+| model    | "iasp91"     | String    | velocity model for phases      |
+| nd       | 1            | Real      | number of days per subrequest  |
+| opts     | ""           | String    | user-specified options[^3]     |
+| pha      | "P"          | String    | phases to get  [^4]            |
+| rad      | []           | Float64   | radius search                  |
+| reg      | []           | Float64   | geographic search region       |
+| src      | "IRIS"       | String    | data source; `?seis_www` lists |
+| to       | 30           | Int64     | timeout (s) for web requests   |
+| v        | 0            | Integer   | verbosity                      |
+| w        | false        | Bool      | write requests to disk?        |
 
-Other keywords:
-* len::Real (120.0): desired record length in minutes
-* model::String ("iasp91"): Earth velocity model for phase calculations
+[^1]: KW is `Array{T, 1}` for `evw`, `mag`, `rad`, `reg`, type `T` for others
+[^2]: Search range is always `ot-|evw[1]| ≤ t ≤ ot+|evw[2]|`
+[^3]: Format like an http request string, e.g. "szsrecs=true&repo=realtime" for FDSN. String shouldn't begin with an ampersand.
+[^4]: Comma-separated String, like `"P, pP"`; use `"ttall"` for all phases
 
-See also: distaz!, FDSNevq, FDSNsta, SeisKW
+See also: `distaz!`, `FDSNevq`, `FDSNsta`
 """
 function FDSNevt(ot::String, chans::ChanOpts;
-  len::Real             = 120.0,
-  evw::Union{Array{Real,1},Array{Float64,1},Array{Int64,1}} = KW.evw,
+  evw::Array{Float64,1} = [600.0, 600.0],
   fmt::String           = KW.fmt,
-  mag::Array{Float64,1} = KW.mag,
+  len::Real             = 120.0,
+  mag::Array{Float64,1} = [6.0, 9.9],
   model::String         = "iasp91",
   nd::Real              = KW.nd,
   opts::String          = KW.opts,
-  pha::String           = KW.pha,
+  pha::String           = "P",
   rad::Array{Float64,1} = KW.rad,
   reg::Array{Float64,1} = KW.reg,
   src::String           = KW.src,
