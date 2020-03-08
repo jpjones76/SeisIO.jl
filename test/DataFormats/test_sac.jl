@@ -83,6 +83,12 @@ end
 @test safe_isfile("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")
 rm("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")
 
+printstyled("      check that write with fs=0.0 fails\n", color=:light_green)
+SAC1.id = "VU.FS0..NUL"
+SAC1.fs = 0.0
+writesac(SAC1)
+@test safe_isfile("1981.088.10.38.14.009.VU.FS0..NUL.R.SAC") == false
+
 # SACPZ
 printstyled("    SACPZ\n", color=:light_green)
 printstyled("      read\n", color=:light_green)
