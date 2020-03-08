@@ -125,6 +125,16 @@ end
 H1[1].loc = EQLoc()
 write_qml(xf, H1, R1)
 
+# Write with no magnitude
+Ev = randSeisEvent()
+Ev.hdr.mag = EQMag()
+write_qml(xf, Ev, v=3)
+H1, R1 = read_qml(xf)
+H1 = H1[end]
+R1 = R1[end]
+compare_SeisHdr(H1, Ev.hdr)
+compare_SeisSrc(R1, Ev.source)
+
 printstyled("      does trying to append a non-XML file error?\n", color=:light_green)
 io = open(xf, "w")
 write(io, rand(UInt8, 64))
