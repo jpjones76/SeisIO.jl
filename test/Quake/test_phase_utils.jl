@@ -72,13 +72,11 @@ J = findall([endswith(id, "EHZ") for id in S.id])
 
 printstyled("      default phase\n", color=:light_green)
 Ev = SeisEvent(hdr=H, data=S[J])
-SeisIO.KW.pha = "S"
-get_pha!(Ev, to=to)
+get_pha!(Ev, pha="S", to=to)
 for i = 1:Ev.data.n
   @test length(Ev.data.pha[i]) == 1
   @test haskey(Ev.data.pha[i], "S")
 end
-SeisIO.KW.pha = "P"
 
 printstyled("      user-specified phase list\n", color=:light_green)
 Ev = SeisEvent(hdr=H, data=S[J])
