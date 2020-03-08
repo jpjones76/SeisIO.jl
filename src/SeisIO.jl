@@ -102,6 +102,19 @@ end
 
 # =========================================================
 # Submodules
+#= Dependencies
+.FastIO
+    └---------------> Types/
+            ╭-----------┴-----------------------┐
+         .Quake                                 |
+    ╭-------┴---┬--------┬--------┐         ╭---┴---┐
+.RandSeis   .SeisHDF    .UW     .SUDS    .ASCII   .SEED
+                └--------+--------┘         └---┬---┘
+                         |                      |
+                         v                      |
+                      Wrappers/ <---------------┘
+=#
+
 include("Submodules/FormatGuide.jl")
 using .Formats
 
