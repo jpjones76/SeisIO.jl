@@ -181,7 +181,6 @@ function parse_dataless!(S::SeisData, io::IO, s::TimeSpec, t::TimeSpec, v::Integ
           # Not testable == not supported; no exceptions
           # send more test files if you want more blockette types covered!
           else
-            @warn("unsupported blockette type -- trying to skip.")
             fastskip(io, nb)
           end
         end

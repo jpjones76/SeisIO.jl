@@ -9,7 +9,6 @@ function get_sep(v_buf::Array{UInt8,1}, vi::Int8)
       return y
     end
   end
-  return nothing
 end
 
 function geocsv_mkid(v_buf::Array{UInt8,1}, vi::Int8)
@@ -66,9 +65,7 @@ function mkhdr(io::IO, c::UInt8, k_buf::Array{UInt8,1}, v_buf::Array{UInt8,1})
   j = zero(Int8)
 
   # skip space after a new line
-  while c == 0x20
-    c = fastread(io)
-  end
+  while c == 0x20; c = fastread(io); end
 
   while c != 0x0a
     if c == 0x23

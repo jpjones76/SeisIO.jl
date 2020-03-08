@@ -116,18 +116,10 @@ function uwpf(pickfile::String; v::Integer=KW.v)
       b = getindex(ei, j)
       s = getindex(eline, a:b)
       if j == 6
-        if s[1] == 'X'
-          locflags[1] = '1'
-        end
-        if s[2] == 'Y'
-          locflags[2] = '1'
-        end
-        if s[3] == 'Z'
-          locflags[3] = '1'
-        end
-        if s[4] == 'T'
-          locflags[4] = '1'
-        end
+        (s[1] == 'X') && (locflags[1] = '1')
+        (s[2] == 'Y') && (locflags[2] = '1')
+        (s[3] == 'Z') && (locflags[3] = '1')
+        (s[4] == 'T') && (locflags[4] = '1')
       elseif j == 7
         loc[4] = parse(Float64, s)
       elseif j == 8
