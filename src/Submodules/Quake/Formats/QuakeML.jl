@@ -235,6 +235,9 @@ function parse_qml(evt::XMLElement)
     end
   end
   MAG = EQMag(m, msc, nst, gap, pid * "," * oid * "," * auth)
+  if MAG.src == ",,"
+    MAG.src = ""
+  end
 
   # ==========================================================================
   # Location
@@ -285,27 +288,10 @@ function parse_qml(evt::XMLElement)
       for child in child_elements(orig)
         cname = name(child)
 
-        #= Removed 2019-11-01.
+        #= originUncertainty removed 2019-11-01
           No documentation of originUncertainty is known to exist;
           can't ascertain intended meaning/use of originUncertainty;
           can't tell if observatories use it uniformly
-
-        if cname == "originUncertainty"
-          dh_min = zero(Float64)
-          dh_max = zero(Float64)
-          for grandchild in child_elements(child)
-            gcname = name(grandchild)
-            if gcname == "horizontalUncertainty"
-              loc[4] = 500.0 * parse(Float64, content(grandchild))
-            elseif gcname == "minHorizontalUncertainty"
-              dh_min = parse(Float64, content(grandchild))
-            elseif gcname == "maxHorizontalUncertainty"
-              dh_max = parse(Float64, content(grandchild))
-            end
-          end
-          if (dh_min != zero(Float64)) && (dh_max != zero(Float64)) && (loc[4] == zero(Float64))
-            loc[4] = 500.0 * (dh_min + dh_max)
-          end
         =#
 
         if cname == "type"
@@ -635,6 +621,12 @@ function write_qml!(io::IO, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1}, v::Int
         write(io, "        </quality>\n")
       end
 
+      if !isempty(L.typ)
+        write(io, "        <type>")
+        print(io, L.typ)
+        write(io, "</type>\n")
+      end
+
       # Author
       if !isempty(loc_auth)
         write(io, "        <creationInfo>\n          <author>")
@@ -698,6 +690,13 @@ function write_qml!(io::IO, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1}, v::Int
         write(io, "        <azimuthalGap>")
         print(io, R.gap)
         write(io, "</azimuthalGap>\n")
+      end
+
+      # Polarity count
+      if R.npol != 0
+        write(io, "        <stationPolarityCount>")
+        print(io, R.npol)
+        write(io, "</stationPolarityCount>\n")
       end
 
       # methodID
@@ -888,3 +887,4 @@ end
 write_qml(fname::String, H::SeisHdr, R::SeisSrc; v::Integer=0) = write_qml(fname, [H], [R], v=v)
 write_qml(fname::String, HDR::Array{SeisHdr,1}; v::Integer=0) = write_qml(fname, HDR, SeisSrc[], v=v)
 write_qml(fname::String, H::SeisHdr; v::Integer=0) = write_qml(fname, [H], SeisSrc[], v=v)
+write_qml(fname::String, Ev::SeisEvent; v::Integer=0) = write_qml(fname, [Ev.hdr], [Ev.source], v=v)
