@@ -1,11 +1,12 @@
 function compare_SeisHdr(H1::SeisHdr, H2::SeisHdr)
   for f in fieldnames(EQLoc)
-    if typeof(getfield(H1.loc, f)) <: AbstractFloat
+    if typeof(getfield(H1.loc, f)) <: Union{AbstractFloat, Int64}
+      (f == :rms) && continue
       @test isapprox(getfield(H1.loc, f), getfield(H2.loc,f))
-    else
-      @test getfield(H1.loc, f) == getfield(H2.loc,f)
     end
   end
+  @test getfield(H1.loc, :typ) == getfield(H2.loc, :typ)
+  @test getfield(H1.loc, :src) == getfield(H2.loc, :src)
   @test H1.mag.val ≈ H2.mag.val
   @test H1.mag.gap ≈ H2.mag.gap
   @test H1.mag.src == H2.mag.src
@@ -105,7 +106,6 @@ function rse_wb(n::Int64)
   note!(Ev.source, "+origin ¦ " * Ev.source.src)
 
   Ev.hdr.int = (0x00, "")
-  Ev.hdr.loc.src = Ev.hdr.id * "," * Ev.hdr.loc.src
   Ev.hdr.loc.datum = ""
   Ev.hdr.loc.typ = ""
   Ev.hdr.loc.rms = 0.0
