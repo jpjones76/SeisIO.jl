@@ -1,7 +1,5 @@
-# SeisIO v1.0.1 patch: 2020-03-07?
+# SeisIO v1.1.0 patch: 2020-03-07
 ### 2020-03-07
-* SAC data files no longer track the LOC field of `:id` on read or write.
-  + We learned only recently that LOC has no standard SAC variable: some data sources store this as KHOLE, which convention we followed in the past, but this is an event property in the [format spec](http://ds.iris.edu/files/sac-manual/manual/file_format.html).
 * Increased the robustness of *t_extend*; it no longer needs a mini-API.
 * Tests now handle time and data comparison of re-read data more robustly.
 * *show*
@@ -10,6 +8,18 @@
 * *write_asdf*
     + When *ovr=false*, a sample window with the same ID, start time, end time as a trace in the output volume now never overwrites the trace in the output volume.
 * Fixed a very rare case in which two rows of a time matrix could correspond to the same sample index
+* *read_data*: formats "slist" and "lennartz" now use verbosity
+
+#### QuakeML
++ Reading QuakeML with no magnitude now returns an empty hdr.mag structure
++ *write_qml*
+  - now writes hdr.loc.typ to Origin/type
+  - now writes hdr.loc.npol to focalMechanism/stationPolarityCount
+  - added method for SeisEvent
+
+#### SAC
+Data files no longer track the LOC field of `:id` on read or write.
++ We learned only recently that LOC has no standard SAC header variable: some data sources store this as KHOLE, which we used in the past, but this is correctly an event property in the [format spec](http://ds.iris.edu/files/sac-manual/manual/file_format.html).
 
 ### 2020-03-05
 * `show_writes` now prints filename in addition to write operation
