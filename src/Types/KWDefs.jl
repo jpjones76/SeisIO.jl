@@ -40,17 +40,13 @@ mutable struct KWDefs
   SL::SLDefs
   Filt::FiltDefs
   comp::UInt8
-  evw::Array{Real,1}
   fmt::String
   full::Bool
-  mag::Array{Float64,1}
   nd::Real
-  nev::Int64
   n_zip::Int64
   nx_add::Int64
   nx_new::Int64
   opts::String
-  pha::String
   prune::Bool
   rad::Array{Float64,1}
   reg::Array{Float64,1}
@@ -69,7 +65,7 @@ A mutable structure containing default keyword argument values in SeisIO.
 Arguments that accept keywords in SeisIO.KW use the default values when a
 keyword isn't specified.
 
-### Main Module Keywords
+### Keywords
 
 | KW       | Default    | Allowed Data Types | Meaning                        |
 |----------|:-----------|:-------------------|:-------------------------------|
@@ -94,25 +90,14 @@ keyword isn't specified.
 |          |            |                    |   lat, lon in degrees (°)      |
 |          |            |                    |   dep in km with down = +      |
 | si       | true       | Bool               | autofill request station info? |
+| src      | "IRIS"     | String             | data source; `?seis_www` lists |
 | to       | 30         | Int64              | timeout (s) for web requests   |
 | v        | 0          | Integer            | verbosity                      |
-| w        | false      | Bool               | write requests to disc?        |
+| w        | false      | Bool               | write requests to disk?        |
 | y        | false      | Bool               | sync after web requests?       |
 
 [^1]: If `comp == 0x00`, never compress data; if `comp == 0x01`, only compress channel `i` if `length(S.x[i]) > KW.n_zip`; if `comp == 0x02`, always compress data.
-[^2]: Format as for an http request request URL, e.g. "szsrecs=true&repo=realtime" for FDSN (note: string should not begin with an ampersand).
-
-### Quake Submodule Keywords
-
-| KW       | Default    | Allowed Data Types | Meaning                        |
-|----------|:-----------|:-------------------|:-------------------------------|
-| evw      | [600,      | Array{Real,1}      | search for events in window    |
-|          |  600]      |                    |   [ot-abs(t1), ot+abs(t2)]     |
-| mag      | [6.0, 9.9] | Array{Float64,1}   | search magitude range          |
-| nev      | 0          | Int64              | number of events per query     |
-|          |            |                    | (if nev=0, return all matches) |
-| pha      | "P"        | String             | phases to get (comma-separated |
-|          |            |                    |   list; use "ttall" for all)   |
+[^2]: Format like an http request string, e.g. "szsrecs=true&repo=realtime" for FDSN. String shouldn't begin with an ampersand.
 
 ### SeisIO.KW.SL
 Seedlink-specific keyword default values. SeedLink also uses some general keywords.
@@ -163,17 +148,13 @@ const KW = KWDefs(
                  "Butterworth" ),  # dm::String
 
                             0x00,  # comp::Bool
-                      [600, 600],  # evw::Real
                       "miniseed",  # fmt::String
                            false,  # full::Bool
-               Float64[6.0, 9.9],  # mag::Array{Float64,1}
                                1,  # nd::Real
-                               0,  # nev::Int64
                           100000,  # n_zip::Int64
                           360000,  # nx_add::Int64
                          8640000,  # nx_new::Int64
                               "",  # opts::String
-                             "P",  # pha::String
                             true,  # prune::Bool
                        Float64[],  # rad: Array{Float64,1}
                        Float64[],  # reg: Array{Float64,1}
