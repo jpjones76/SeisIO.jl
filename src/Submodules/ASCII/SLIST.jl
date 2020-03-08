@@ -1,4 +1,4 @@
-function read_slist!(S::GphysData, fname::String, lennartz::Bool, memmap::Bool, strict::Bool)
+function read_slist!(S::GphysData, fname::String, lennartz::Bool, memmap::Bool, strict::Bool, v::Integer)
   # file read
   io = memmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   hdr = readline(io)
@@ -9,8 +9,8 @@ function read_slist!(S::GphysData, fname::String, lennartz::Bool, memmap::Bool, 
   i = 0
   while i < nx
     i += 1
-    v = stream_float(io, 0x00)
-    setindex!(X, v, i)
+    y = stream_float(io, 0x00)
+    setindex!(X, y, i)
   end
   close(io)
 
@@ -38,23 +38,8 @@ function read_slist!(S::GphysData, fname::String, lennartz::Bool, memmap::Bool, 
     i = channel_match(S, i, fs)
   end
   if (i > 0)
-    T = S.t[i]
-    Nt = size(T, 1)
-
-    # Channel has some data already
-    if Nt > 0
-      Δ = round(Int64, 1.0e6/fs)
-      if T[Nt, 2] == 0
-        T = T[1:Nt-1,:]
-      end
-      S.t[i] = vcat(T, [1+length(S.x[i]) ts-endtime(S.t[i], Δ)-Δ; nx+length(S.x[i]) 0])
-      append!(S.x[i], X)
-
-    # Channel exists but is empty
-    else
-      S.t[i] = mk_t(nx, ts)
-      S.x[i] = X
-    end
+    check_for_gap!(S, i, ts, nx, v)
+    append!(S.x[i], X)
   else
     # New channel
     push!(S, SeisChannel(id = id, fs = fs, t = mk_t(nx, ts), x = X))

@@ -169,16 +169,6 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
       end
     end
 
-  elseif fmt == "lennartz"
-    if one_file
-      read_slist!(S, filestr, true, memmap, strict)
-    else
-      for (j, fname) in enumerate(files)
-        read_slist!(S, fname, true, memmap, strict)
-        track_src!(S, j, nx, last_src)
-      end
-    end
-
   elseif fmt == "segy" || fmt == "passcal"
     passcal = fmt == "passcal"
 
@@ -193,12 +183,13 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     opt_strings = string("full = ", full,
                               ", swap = ", swap)
 
-  elseif fmt == "slist"
+  elseif fmt == "slist" || fmt == "lennartz"
+    lennartz = fmt == "lennartz"
     if one_file
-      read_slist!(S, filestr, false, memmap, strict)
+      read_slist!(S, filestr, lennartz, memmap, strict, v)
     else
       for (j, fname) in enumerate(files)
-        read_slist!(S, fname, false, memmap, strict)
+        read_slist!(S, fname, lennartz, memmap, strict, v)
         track_src!(S, j, nx, last_src)
       end
     end
