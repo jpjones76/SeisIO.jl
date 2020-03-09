@@ -10,6 +10,11 @@ S.t[3] = Array{Int64, 2}(undef, 0, 2)
 @test mkchans(1:3, S, f=:t) == [1,2]
 @test mkchans(1:3, S) == [1,3]
 
+S.t[3] = [1 S.t[1][1,2]; length(S.x[3]) 0]
+push!(S, randSeisChannel(c=true))
+@test mkchans(1:4, S, keepirr=false) == [1, 3]
+@test mkchans([2,3,4], S, keepirr=false) == [3]
+
 S = randSeisData(3, s=1.0, nx=1024)
 @test get_seis_channels(S, chans=3) == [3]
 @test get_seis_channels(S, chans=1:2) == [1,2]
