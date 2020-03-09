@@ -1,8 +1,8 @@
 .. _seedlink-section:
 
-########
+********
 SeedLink
-########
+********
 
 `SeedLink <https://www.seiscomp3.org/wiki/doc/applications/seedlink>`_ is a
 TCP/IP-based data transmission protocol that allows near-real-time access to
@@ -30,17 +30,11 @@ Initiate a SeedLink session in DATA mode to feed data from channels ``chans`` wi
 
 Keywords
 ========
-Pass keywords with `name=value` pairs.
-
-:ref:`Standard Keywords<dkw>`
-*****************************
-s, t, v, w
-
-.. _slkw:
-
-SeedLink Keywords
-*****************
-Change these with SeisIO.KW.SL.[key] = value, e.g., SeisIO.KW.SL.refresh = 30.
+| **:ref:`Data keywords<dkw>`**
+| v, w
+|
+| **SeedLink Keywords**
+|
 
 .. csv-table::
   :header: kw, def, type, meaning
@@ -59,36 +53,33 @@ Change these with SeisIO.KW.SL.[key] = value, e.g., SeisIO.KW.SL.refresh = 30.
 
 .. [#] This value is a base value; a small amount is added to this number by each new SeedLink session to minimize the risk of congestion
 
-Other Keywords
-**************
-``u`` specifies the URL, without "http://"
+Change these with SeisIO.KW.SL.[key] = value, e.g., SeisIO.KW.SL.refresh = 30.
 
-Special Rules
--------------
+Special Behavior
+================
 
 1. SeedLink follows unusual rules for wild cards in ``sta`` and ``patts``:
     a. ``*`` is not a valid SeedLink wild card.
     b. The LOC and CHA fields can be left blank in ``sta`` to select all locations and channels.
-2. DO NOT feed one data channel with multiple SeedLink streams. This can have severe consequences:
-    a. A channel fed by multiple live streams will have many small time sequences out of order. ``merge!`` is not guaranteed to fix it.
-    b. SeedLink will almost certainly crash.
-    c. Your data may be corrupted.
-    d. The Julia interpreter can freeze, requiring ``kill -9`` on the process.
-    e. This is not an "issue". There will never be a workaround. It's what happens when one intentionally causes TCP congestion on one's own machine while writing to open data streams in memory. Hint: don't do this.
+2. **DO NOT** feed one data channel from multiple SeedLink connections. This leads to TCP congestion on your computer, which can have *severe* consequences:
+    a. A channel fed by multiple SeedLink connections will have many small segments, all out of order. *merge!* might fix this if caught quickly, but with hundreds of disjoint segments, expect memory and CPU issues.
+    b. Your SeedLink connection will probably reset.
+    c. Julia may freeze, requiring ``kill -9``. To the best of our knowledge Julia has no special handling to mitigate TCP congestion.
+    d. Your data may be corrupted, including disk writes from *w=true*.
 
 Special Methods
 ---------------
 * ``close(S.c[i])`` ends SeedLink connection ``i``.
 * ``!deleteat(S.c, i)`` removes a handle to closed SeedLink connection ``i``.
 
-******************
+
 SeedLink Utilities
-******************
+==================
 
 .. function:: SL_info(v, url)
 
 Retrieve SeedLink information at verbosity level **v** from **url**. Returns XML as a string. Valid strings for **L** are ID, CAPABILITIES, STATIONS, STREAMS, GAPS, CONNECTIONS, ALL.
-
+:raw-html:`<br /><br />`
 
 .. function:: has_sta(sta[, u=url, port=n])
 
@@ -101,18 +92,9 @@ stations that exist. `sta` can also be the name of a valid config
 file or a 1d string array.
 
 Returns a BitArray with one value per entry in `sta.`
+:raw-html:`<br /><br />`
 
 .. function:: has_stream(cha::Union{String,Array{String,1}}, u::String)
-
-| SL keywords: gap, port
-| Other keywords: ``u`` specifies the URL without "http://"
-
-Check that streams with recent data exist at url `u` for channel spec
-`cha`, formatted NET.STA.LOC.CHA.DFLAG, e.g. "UW.TDH..EHZ.D,
-CC.HOOD..BH?.E". Use "?" to match any single character. Returns `true`
-for streams with recent data.
-
-`cha` can also be the name of a valid config file.
 
 .. function:: has_stream(sta::Array{String,1}, sel::Array{String,1}, u::String, port=N::Int, gap=G::Real)
    :noindex:
@@ -120,7 +102,12 @@ for streams with recent data.
 | SL keywords: gap, port
 | Other keywords: ``u`` specifies the URL without "http://"
 
-If two arrays are passed to has_stream, the first should be
-formatted as SeedLink STATION patterns (formated "SSSSS NN", e.g.
-["TDH UW", "VALT CC"]); the second be an array of SeedLink selector
-patterns (formatted LLCCC.D, e.g. ["??EHZ.D", "??BH?.?"]).
+Check that streams with recent data exist at url `u` for channel spec
+`cha`, formatted NET.STA.LOC.CHA.DFLAG, e.g. "UW.TDH..EHZ.D,
+CC.HOOD..BH?.E". Use "?" to match any single character. Returns `true`
+for streams with recent data. `cha` can also be the name of a valid config file.
+
+If two arrays are passed to *has_stream*, the first should be
+formatted as SeedLink STATION patterns (SSSSS NN, e.g.
+["TDH UW", "VALT CC"]); the second should be an array of SeedLink selector
+patterns (LLCCC.D, e.g. ["??EHZ.D", "??BH?.?"]).

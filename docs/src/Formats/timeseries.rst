@@ -162,15 +162,13 @@ Other File I/O Functions
 .. function:: rseis(fname)
 
 Read SeisIO native format data into an array of SeisIO structures.
+:raw-html:`<br /><br />`
 
 .. function:: sachdr(fname)
 
 Print headers from SAC file to stdout.
+:raw-html:`<br /><br />`
 
 .. function:: segyhdr(fname[, PASSCAL=true::Bool])
 
 Print headers from SEG Y file to stdout. Specify ``passcal=true`` for PASSCAL SEG Y.
-
-.. function:: uwdf(dfname)
-
-Parse UW event data file ``dfname`` into a new SeisEvent structure.

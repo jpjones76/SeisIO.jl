@@ -22,7 +22,7 @@ To invoke tutorial notebooks in your web browser, execute these commands at a Ju
 Examples
 ********
 
-Two sets of worked examples for web requests exist: a set of command-prompt examples with a step-by-step command walkthrough, and those in the :ref:`Examples appendix<webex>`.
+Several worked examples exist throughout these documents, in addition to *examples.jl* and the interactive tutorial.
 
 Invoke the command-prompt examples with the following command sequence:
 

@@ -1,3 +1,338 @@
+==========
+Appendices
+==========
+
+.. _timespec:
+
+###########
+Time Syntax
+###########
+Functions that allow time specification use two reserved keywords or arguments to track time:
+
+* *s*: Start (begin) time
+* *t*: Termination (end) time
+
+Specify each as a DateTime, Real, or String.
+
+* Real numbers are interpreted as seconds. Special behavior is invoked when both *s* and *t* are of Type Real.
+
+* DateTime values should follow `Julia documentation\ <https://docs.julialang.org/en/v1/stdlib/Dates/>`_
+
+* Strings have the expected format spec ``YYYY-MM-DDThh:mm:ss.ssssss``
+
+  * Fractional second is optional and accepts up to 6 decimal places (μs)
+
+  * Incomplete time Strings treat missing fields as 0.
+
+  * Example: `s="2016-03-23T11:17:00.333"`
+
+It isn't necessary to choose values so that *s* ≤ *t*. The two values are always sorted, so that *t* < *s* doesn't error.
+
+***********************
+Time Types and Behavior
+***********************
+
+.. csv-table::
+  :header: typeof(s), typeof(t), Behavior
+  :delim: |
+  :widths: 1, 1, 4
+
+  DateTime  | DateTime  | convert to String, then sort
+  DateTime  | Real      | add *t* seconds to *s*, convert to String, then sort
+  DateTime  | String    | convert *s* to String, then sort
+  Real      | DateTime  | add *s* seconds to *t*, convert to String, then sort
+  Real      | Real      | treat as relative (see below), convert to String, sort
+  Real      | String    | add *s* seconds to *t*, convert to String, then sort
+  String    | DateTime  | convert *t* to String, then sort
+  String    | Real      | add *t* seconds to *s*, convert to String, then sort
+  String    | String    | sort
+
+Special Behavior with two Real arguments
+========================================
+If *s* and *t* are both Real numbers, they're treated as seconds measured relative to the *start of the current minute*. This convention may seem unusual, but it greatly simplifies web requests; for example, specifying *s=-1200.0, t=0.0* is a convenient shorthand for "the last 20 minutes of data".
+
+####################
+Data Requests Syntax
+####################
+
+.. _cid:
+
+*****************
+Channel ID Syntax
+*****************
+``NN.SSSSS.LL.CC`` (net.sta.loc.cha, separated by periods) is the expected syntax for all web functions. The maximum field width in characters corresponds to the length of each field (e.g. 2 for network). Fields can't contain whitespace.
+
+``NN.SSSSS.LL.CC.T`` (net.sta.loc.cha.tflag) is allowed in SeedLink. ``T`` is a single-character data type flag and must be one of ``DECOTL``: Data, Event, Calibration, blOckette, Timing, or Logs. Calibration, timing, and logs are not in the scope of SeisIO and may crash SeedLink sessions.
+
+The table below specifies valid types and expected syntax for channel lists.
+
+.. csv-table::
+  :header: Type, Description, Example
+  :widths: 4, 8, 8
+  :delim: |
+
+  String          | Comma-delineated list of IDs          | \"PB.B004.01.BS1, PB.B002.01.BS1\"
+  Array{String,1} | String array, one ID string per entry | [\"PB.B004.01.BS1\", \"PB.B002.01.BS1\"]
+  Array{String,2} | String array, one set of IDs per row  | [\"PB\" \"B004\" \"01\" \"BS1\";
+  | | \"PB\" \"B002\" \"01\" \"BS1\"]
+
+The expected component order is always network, station, location, channel; thus, "UW.TDH..EHZ" is OK, but "UW.TDH.EHZ" fails.
+
+.. function:: chanspec()
+
+Type ``?chanspec`` in Julia to print the above info. to stdout.
+
+Wildcards and Blanks
+====================
+Allowed wildcards are client-specific.
+
+* The LOC field can be left blank in any client: ``"UW.ELK..EHZ"`` and ``["UW" "ELK" "" "EHZ"]`` are all valid. Blank LOC fields are set to ``--`` in IRIS, ``*`` in FDSN, and ``??`` in SeedLink.
+* ``?`` acts as a single-character wildcard in FDSN & SeedLink. Thus, ``CC.VALT..???`` is valid.
+* ``*`` acts as a multi-character wildcard in FDSN. Thus, ``CC.VALT..*`` and ``CC.VALT..???`` behave identically in FDSN.
+* Partial specifiers are OK, but a network and station are always required: ``"UW.EL?"`` is OK, ``".ELK.."`` fails.
+
+.. _ccfg:
+
+Channel Configuration Files
+===========================
+One entry per line, ASCII text, format NN.SSSSS.LL.CCC.D. Due to client-specific wildcard rules, the most versatile configuration files are those that specify each channel most completely:
+::
+
+  # This only works with SeedLink
+  GE.ISP..BH?.D
+  NL.HGN
+  MN.AQU..BH?
+  MN.AQU..HH?
+  UW.KMO
+  CC.VALT..BH?.D
+
+  # This works with FDSN and SeedLink, but not IRIS
+  GE.ISP..BH?
+  NL.HGN
+  MN.AQU..BH?
+  MN.AQU..HH?
+  UW.KMO
+  CC.VALT..BH?
+
+  # This works with all three:
+  GE.ISP..BHZ
+  GE.ISP..BHN
+  GE.ISP..BHE
+  MN.AQU..BHZ
+  MN.AQU..BHN
+  MN.AQU..BHE
+  MN.AQU..HHZ
+  MN.AQU..HHN
+  MN.AQU..HHE
+  UW.KMO..EHZ
+  CC.VALT..BHZ
+  CC.VALT..BHN
+  CC.VALT..BHE
+
+.. _servers:
+
+Server List
+===========
+
+  +--------+---------------------------------------+
+  | String | Source                                |
+  +========+=======================================+
+  | BGR    | http://eida.bgr.de                    |
+  +--------+---------------------------------------+
+  | EMSC   | http://www.seismicportal.eu           |
+  +--------+---------------------------------------+
+  | ETH    | http://eida.ethz.ch                   |
+  +--------+---------------------------------------+
+  | GEONET | http://service.geonet.org.nz          |
+  +--------+---------------------------------------+
+  | GFZ    | http://geofon.gfz-potsdam.de          |
+  +--------+---------------------------------------+
+  | ICGC   | http://ws.icgc.cat                    |
+  +--------+---------------------------------------+
+  | INGV   | http://webservices.ingv.it            |
+  +--------+---------------------------------------+
+  | IPGP   | http://eida.ipgp.fr                   |
+  +--------+---------------------------------------+
+  | IRIS   | http://service.iris.edu               |
+  +--------+---------------------------------------+
+  | ISC    | http://isc-mirror.iris.washington.edu |
+  +--------+---------------------------------------+
+  | KOERI  | http://eida.koeri.boun.edu.tr         |
+  +--------+---------------------------------------+
+  | LMU    | http://erde.geophysik.uni-muenchen.de |
+  +--------+---------------------------------------+
+  | NCEDC  | http://service.ncedc.org              |
+  +--------+---------------------------------------+
+  | NIEP   | http://eida-sc3.infp.ro               |
+  +--------+---------------------------------------+
+  | NOA    | http://eida.gein.noa.gr               |
+  +--------+---------------------------------------+
+  | ORFEUS | http://www.orfeus-eu.org              |
+  +--------+---------------------------------------+
+  | RESIF  | http://ws.resif.fr                    |
+  +--------+---------------------------------------+
+  | SCEDC  | http://service.scedc.caltech.edu      |
+  +--------+---------------------------------------+
+  | TEXNET | http://rtserve.beg.utexas.edu         |
+  +--------+---------------------------------------+
+  | USGS   | http://earthquake.usgs.gov            |
+  +--------+---------------------------------------+
+  | USP    | http://sismo.iag.usp.br               |
+  +--------+---------------------------------------+
+
+.. _dkw:
+
+########################
+SeisIO Standard Keywords
+########################
+
+SeisIO.KW is a memory-resident structure of default values for common keywords
+used by package functions. KW has one substructure, SL, with keywords specific
+to SeedLink. These defaults can be modified, e.g., SeisIO.KW.nev=2 changes the
+default for nev to 2.
+
++--------+----------------+--------+------------------------------------------+
+| KW     | Default        | T [#]_ | Meaning                                  |
++========+================+========+==========================================+
+| comp   | 0x00           | U8     |  compress data on write? [#]_            |
++--------+----------------+--------+------------------------------------------+
+| fmt    | "miniseed"     | S      | request data format                      |
++--------+----------------+--------+------------------------------------------+
+| mag    | [6.0, 9.9]     | A{F,1} | magnitude range for queries              |
++--------+----------------+--------+------------------------------------------+
+| n_zip  | 100000         | I      | compress if length(:x) > n_zip           |
++--------+----------------+--------+------------------------------------------+
+| nd     | 1              | I      | number of days per subrequest            |
++--------+----------------+--------+------------------------------------------+
+| nev    | 1              | I      | number of events returned per query      |
++--------+----------------+--------+------------------------------------------+
+| nx_add | 360000         | I      | length increase of undersized data array |
++--------+----------------+--------+------------------------------------------+
+| nx_new | 8640000        | I      | number of samples for a new channel      |
++--------+----------------+--------+------------------------------------------+
+| opts   | ""             | S      | user-specified options [#]_              |
++--------+----------------+--------+------------------------------------------+
+| prune  | true           | B      | call prune! after get_data?              |
++--------+----------------+--------+------------------------------------------+
+| rad    | []             | A{F,1} | radial search region [#]_                |
++--------+----------------+--------+------------------------------------------+
+| reg    | []             | A{F,1} | rectangular search region [#]_           |
++--------+----------------+--------+------------------------------------------+
+| si     | true           | B      | autofill station info on data req? [#]_  |
++--------+----------------+--------+------------------------------------------+
+| src    | "IRIS"         | S      |  data source; type *?seis_www* for list  |
++--------+----------------+--------+------------------------------------------+
+| to     | 30             | I      | read timeout for web requests (s)        |
++--------+----------------+--------+------------------------------------------+
+| v      | 0              | I      | verbosity                                |
++--------+----------------+--------+------------------------------------------+
+| w      | false          | B      | write requests to disk? [#]_             |
++--------+----------------+--------+------------------------------------------+
+| y      | false          | B      | sync data after web request?             |
++--------+----------------+--------+------------------------------------------+
+
+
+.. rubric:: Table Footnotes
+.. [#] Types: A = Array, B = Boolean, C = Char, DT = DateTime, F = Float, I = Integer, S = String, U8 = Unsigned 8-bit integer (UInt8)
+.. [#] If KW.comp == 0x00, never compress data; if KW.comp == 0x01, only compress channel *i* if *length(S.x[i]) > KW.n_zip*; if comp == 0x02, always compress data.
+.. [#] String is passed as-is, e.g. "szsrecs=true&repo=realtime" for FDSN. String should not begin with an ampersand.
+.. [#] Specify region **[center_lat, center_lon, min_radius, max_radius, dep_min, dep_max]**, with lat, lon, and radius in decimal degrees (°) and depth in km with + = down. Depths are only used for earthquake searches.
+.. [#] Specify region **[lat_min, lat_max, lon_min, lon_max, dep_min, dep_max]**, with lat, lon in decimal degrees (°) and depth in km with + = down. Depths are only used for earthquake searches.
+.. [#] FDSNWS timeseries only.
+.. [#] If **w=true**, a file name is automatically generated from the request parameters, in addition to parsing data to a SeisData structure. Files are created from the raw download even if data processing fails, in contrast to get_data(... wsac=true).
+.. _function_list:
+
+#################
+Utility Functions
+#################
+This appendix covers utility functions that belong in no other category.
+
+.. function:: d2u(DT::DateTime)
+
+Aliased to ``Dates.datetime2unix``.
+
+.. function:: fctoresp(fc, c)
+
+Generate a generic PZResp object for a geophone with critical frequency ``fc`` and damping constant ``c``. If no damping constant is specified, assumes c = 1/sqrt(2).
+
+.. function:: find_regex(path::String, r::Regex)
+
+OS-agnostic equivalent to Linux `find`. First argument is a path string, second is a Regex. File strings are postprocessed using Julia's native PCRE Regex engine. By design, `find_regex` only returns file names.
+
+.. function:: getbandcode(fs, fc=FC)
+
+Get SEED-compliant one-character band code corresponding to instrument sample rate ``fs`` and corner frequency ``FC``. If unset, ``FC`` is assumed to be 1 Hz.
+
+.. function:: get_file_ver(fname::String)
+
+Get the version of a SeisIO native format file.
+
+.. function:: get_seis_channels(S::GphysData)
+
+Get numeric indices of channels in S whose instrument codes indicate seismic data.
+
+.. function:: guess(fname::String)
+
+Attempt to guess data file format and endianness using known binary file markers.
+
+.. function:: inst_code(C::GphysChannel)
+.. function:: inst_code(S::GphysData, i::Int64)
+.. function:: inst_code(S::GphysData)
+
+Get instrument codes.
+
+.. function:: ls(s::String)
+
+Similar functionality to Bash ls with OS-agnostic output. Accepts wildcards in paths and file names.
+* Always returns the full path and file name.
+* Partial file name wildcards (e.g. "`ls(data/2006*.sac)`) invoke `glob`.
+* Path wildcards (e.g. `ls(/data/*/*.sac)`) invoke `find_regex` to circumvent glob limitations.
+* Passing ony "*" as a filename (e.g. "`ls(/home/*)`) invokes `find_regex` to recursively search subdirectories, as in the Bash shell.
+
+.. function:: ls()
+
+Return full path and file name of files in current working directory.
+
+.. function:: j2md(y, j)
+
+Convert Julian day **j** of year **y** to month, day.
+
+.. function:: md2j(y, m, d)
+
+Convert month **m**, day **d** of year **y** to Julian day **j**.
+
+.. function namestrip(s::String[, convention="File")
+
+Remove unwanted characters from S.
+
+.. function:: parsetimewin(s, t)
+
+Convert times **s** and **t** to strings :math:`\alpha, \omega` sorted :math:`\alpha < \omega`. **s** and **t** can be real numbers, DateTime objects, or ASCII strings. Expected string format is "yyyy-mm-ddTHH:MM:SS.nnn", e.g. 2016-03-23T11:17:00.333.
+
+.. function:: resp_a0!(R::InstrumentResponse)
+.. function:: resp_a0!(S::GphysData)
+
+Update sensitivity :a0 of PZResp/PZResp64 responses.
+
+.. function:: resptofc(R)
+
+Attempt to guess critical frequency from poles and zeros of a PZResp/PZResp64.
+
+.. function:: set_file_ver(fname::String)
+
+Sets the SeisIO file version of file fname.
+
+.. function:: u2d(x)
+
+Alias to ``Dates.unix2datetime``.
+
+.. function:: validate_units(S::GphysData)
+
+Validate strings in :units field to ensure UCUM compliance.
+
+.. function:: vucum(str::String)
+
+Check whether ``str`` contains valid UCUM units.
 .. _seisio_file_format:
 
 ####################

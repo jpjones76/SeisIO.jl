@@ -3,6 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. section-autonumbering
+.. role:: raw-html(raw)
+    :format: html
+
 ######
 SeisIO
 ######
@@ -10,21 +14,16 @@ SeisIO is a collection of utilities for reading and downloading geophysical time
 
 .. toctree::
    :caption: Intro
-   :maxdepth: 2
+   :maxdepth: 0
 
    src/intro.rst
    src/tutorial.rst
    src/working_with_data.rst
-
-.. toctree::
-   :caption: Help
-   :maxdepth: 2
-
-   src/help.rst
+   src/Help/help.rst
 
 .. toctree::
    :caption: Reading Files
-   :maxdepth: 2
+   :maxdepth: 0
 
    src/Formats/timeseries.rst
    src/Formats/metadata.rst
@@ -33,40 +32,33 @@ SeisIO is a collection of utilities for reading and downloading geophysical time
 
 .. toctree::
    :caption: Downloading
-   :maxdepth: 2
+   :maxdepth: 0
 
    src/Web/webclients.rst
    src/Web/seedlink.rst
 
 .. toctree::
   :caption: Writing Files
-  :maxdepth: 2
+  :maxdepth: 0
 
   src/writing.rst
 
 .. toctree::
   :caption: Processing
-  :maxdepth: 2
+  :maxdepth: 0
 
   src/Processing/processing.rst
 
 .. toctree::
   :caption: Submodules
-  :maxdepth: 2
+  :maxdepth: 0
 
-  src/Submodules/list.rst
+  src/Submodules/submodules.rst
   src/Submodules/quake.rst
-  src/Submodules/randseis.rst
   src/Submodules/seishdf.rst
-  src/Submodules/uw.rst
 
 .. toctree::
    :caption: Appendices
-   :maxdepth: 2
+   :maxdepth: 0
 
-   src/Appendices/time_syntax.rst
-   src/Appendices/web_syntax.rst
-   src/Appendices/keywords.rst
-   src/Appendices/examples.rst
-   src/Appendices/function_list.rst
-   src/Appendices/seisio_file_format.rst
+   src/Appendices/appendix.rst

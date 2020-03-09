@@ -12,42 +12,51 @@ See Type help text for field descriptions and SeisIO behavior.
 .. function:: EQMag
 
 Earthquake magnitude object.
+:raw-html:`<br /><br />`
 
 .. function:: EQLoc
 
-Computed earthquake location.
+Structure to hold computed earthquake location data.
+:raw-html:`<br /><br />`
 
 .. function:: EventChannel
 
 A single channel of trace data (digital seismograms) associated with a
 discrete event (earthquake).
+:raw-html:`<br /><br />`
 
 .. function:: EventTraceData
 
 A custom structure designed to describe trace data (digital seismograms)
 associated with a discrete event (earthquake).
+:raw-html:`<br /><br />`
 
 .. function:: PhaseCat
 
 A seismic phase catalog is a dictionary with phase names for keys (e.g. "pP", "PKP")
 and SeisPha objects for values.
+:raw-html:`<br /><br />`
 
 .. function:: SeisEvent
 
 A compound Type comprising a SeisHdr (event header), SeisSrc (source process),
 and EventTraceData (digital seismograms.)
+:raw-html:`<br /><br />`
 
 .. function:: SeisHdr
 
 Earthquake event header object.
+:raw-html:`<br /><br />`
 
 .. function:: SeisPha
 
 A description of a seismic phase measured on a data channel.
+:raw-html:`<br /><br />`
 
 .. function:: SeisSrc
 
 Seismic source process description.
+:raw-html:`<br /><br />`
 
 .. function:: SourceTime
 
@@ -58,16 +67,16 @@ QuakeML-compliant seismic source-time parameterization.
 Web Queries
 ***********
 Keyword descriptions for web queries appear at the end of this section.
+:raw-html:`<br /><br />`
 
 .. function:: FDSNevq(ot)
-   :noindex:
 
 Event header query. Multi-server query for the event(s) with origin time(s) closest to `ot`. Returns a tuple consisting of an Array{SeisHdr,1} and an Array{SeisSrc,1}, so that the `i`th entry of each array describes the header and source process of event `i`.
 
 Keywords: evw, mag, nev, rad, reg, src, to, v
 
 Notes
------
+=====
 
 * Specify `ot` as a string formatted YYYY-MM-DDThh:mm:ss in UTC (e.g. "2001-02-08T18:54:32").
 * Incomplete string queries are read to the nearest fully-specified time constraint; thus, `FDSNevq("2001-02-08")` returns the nearest event to 2001-02-08T00:00:00.
@@ -82,13 +91,14 @@ Get header and trace data for the event closest to origin time `ot` on channels
 Keywords: evw, fmt, len, mag, model, nd, opts, pha, rad, reg, src, to, v, w
 
 Notes
------
+=====
 
 * Specify `ot` as a string formatted YYYY-MM-DDThh:mm:ss in UTC (e.g. "2001-02-08T18:54:32").
 * Incomplete string queries are read to the nearest fully-specified time constraint; thus, `FDSNevq("2001-02-08")` returns the nearest event to 2001-02-08T00:00:00.
 * If no event is found in the specified search window, FDSNevt exits with an error.
 * Unlike `FDSNevq`, number of events cannot be specified and `src` must be a single source String in `?seis_www`.
 
+:raw-html:`<br />`
 
 .. function:: get_pha!(S::Data[, keywords])
 
@@ -97,7 +107,7 @@ Command-line interface to IRIS online travel time calculator, which calls TauP. 
 Keywords: pha, model, to, v
 
 References
-----------
+==========
 1. TauP manual: http://www.seis.sc.edu/downloads/TauP/taup.pdf
 2. Crotwell, H. P., Owens, T. J., & Ritsema, J. (1999). The TauP Toolkit: Flexible seismic travel-time and ray-path utilities, SRL 70(2), 154-160.
 
@@ -148,19 +158,29 @@ Web Query Keywords
 .. [#] Specify region **[lat_min, lat_max, lon_min, lon_max, dep_min, dep_max]**, with lat, lon in decimal degrees (°) and depth in km with + = down. Depths are only used for earthquake searches.
 .. [#] If **w=true**, a file name is automatically generated from the request parameters, in addition to parsing data to a SeisData structure. Files are created from the raw download even if data processing fails, in contrast to get_data(... wsac=true).
 
+Example
+=======
+Get seismic and strainmeter records for the P-wave of the Tohoku-Oki great earthquake on two borehole stations and write to native SeisData format:
+::
+
+  S = FDSNevt("201103110547", "PB.B004..EH?,PB.B004..BS?,PB.B001..BS?,PB.B001..EH?")
+  wseis("201103110547_evt.seis", S)
+
 Utility Functions
 =================
 
 .. function:: distaz!(Ev::SeisEvent)
 
-Compute distnace, azimuth, and backazimuth by the Haversine formula.
+Compute distance, azimuth, and backazimuth by the Haversine formula.
 Overwrites Ev.data.dist, Ev.data.az, and Ev.data.baz.
+:raw-html:`<br /><br />`
 
 .. function:: gcdist([lat_src, lon_src], rec)
 
 Compute great circle distance, azimuth, and backazimuth from a single source
 with coordinates `[s_lat, s_lon]` to receivers `rec` with coordinates
 `[r_lat r_lon]` in each row.
+:raw-html:`<br /><br />`
 
 .. function:: show_phases(P::PhaseCat)
 
@@ -204,8 +224,8 @@ Supported Keywords
   full    | suds, uw  | Bool    | false     | read full header into *:misc*?
   v       | all       | Integer | 0         | verbosity
 
-QuakeML Reader
-==============
+QuakeML
+=======
 
 .. function:: read_qml(fpat::String)
 
@@ -230,3 +250,9 @@ If multiple focal mechanisms, locations, or magnitudes are present in a single E
 |   3. First **Origin** element
 
 Non-essential QuakeML data are saved to `misc` in each SeisHdr or SeisSrc object as appropriate.
+:raw-html:`<br /><br />`
+
+.. function:: write_qml(fname, Ev::SeisEvent; v::Integer=0)
+   :noindex:
+
+See :ref:`writing<write>`.

@@ -20,18 +20,22 @@ The meanings of the field names are explained :ref:`here<dkw>`; you can also typ
 ``?SeisChannel`` at the Julia prompt. You can edit field values manually, e.g.,
 ::
 
-  Ch.loc = [-90.0, 0.0, 9300.0, 0.0, 0.0]
+  Ch.loc = [-90.0, 0.0, 2835.0, 0.0, 0.0]
   Ch.name = "South pole"
 
 or you can set them with keywords at creation:
 ::
 
-  Ch = SeisChannel(name="MANOWAR JAJAJA")
+  Ch = SeisChannel(name="Templo de San José de La Floresta, Ajijic")
 
+
+Note that Strings in field names support full Unicode, so even graffiti
+can be saved and read back in. This is useful for data containing non-English
+characters.
 
 SeisData structures are collections of channel data. They can be created with
-the SeisData() command, which can optionally create any number of empty channels
-at a time, e.g.,
+the SeisData() command, which can optionally create any number of empty
+channels at a time, e.g.,
 
 .. function:: S = SeisData(1)
     :noindex:
@@ -40,7 +44,7 @@ They can be explored similarly:
 ::
 
   S.name[1] = "South pole"
-  S.loc[1] = [-90.0, 0.0, 9300.0, 0.0, 0.0]
+  S.loc[1] = [-90.0, 0.0, 2835.0, 0.0, 0.0]
 
 A collection of channels becomes a SeisData structure:
 
@@ -87,8 +91,7 @@ These methods are aliased to the addition operator:
         loc=[46.1967, -122.1875, 1440, 0.0, 0.0]))
 
 Most web request functions can append to an existing SeisData object by placing
-an exclamation mark after the function call. You can see how this works by
-running the :ref:`examples<webex>`.
+an exclamation mark after the function call.
 
 Search, Sort, and Prune
 =======================

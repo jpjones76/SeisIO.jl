@@ -39,6 +39,7 @@ Methods for SeisEvent, SeisHdr, or SeisSrc are part of submodule SeisIO.Quake. *
 ***************
 Write Functions
 ***************
+Functions are organized by file format.
 
 HDF5/ASDF
 =========
@@ -84,41 +85,59 @@ If **ovr=true** is specified, but **add=false**, **write_hdf5** *only* overwrite
 
 .....
 
-XML Metadata
-============
+QuakeML
+=======
+
+.. function:: write_qml(fname, Ev::SeisEvent; v::Integer=0)
+
+Write event metadata from SeisEvent `Ev` to file `fname`.
+:raw-html:`<br /><br />`
+
+.. function:: write_qml(fname, SHDR::SeisHdr; v::Integer=0)
+.. function:: write_qml(fname, SHDR::Array{SeisHdr,1}; v::Integer=0)
+
+Write QML to file `fname` from `SHDR`.
+
+If `fname` exists, and is QuakeML, SeisIO appends the existing XML. If the
+file exists, but is NOT QuakeML, an error is thrown; the file isn't overwritten.
+:raw-html:`<br /><br />`
+
+write_qml(fname, SHDR::SeisHdr, SSRC::SeisSrc; v::Integer=0)
+write_qml(fname, SHDR::Array{SeisHdr,1}, SSRC::Array{SeisSrc,1}; v::Integer=0)
+
+Write QML to file `fname` from `SHDR` and `SSRC`.
+
+**Warning**: To write data from SeisSrc structure *R* in array *SSRC*, it must
+be true that R.eid == H.id for some *H* in array *SHDR*.
+
+.....
+
+SAC
+===
+
+.. function:: writesac(S::GphysData, chans=CC, v=V)
+.. function:: writesac(C::GphysChannel; chans=CC, fname=FF, v=V)
+
+Write SAC data to SAC files with auto-generated names. With any GphysChannel subtype, specifying *fname=FF* sets the filename to FF.
+:raw-html:`<br /><br />`
+
+.. function:: writesacpz(pzf, S[, chans=CC])
+
+Write fields from SeisIO structure *S* to SACPZ file *pzf*. Specify which channels to write in a GphysDaya structure with *chans=CC*.
+
+SeisIO Native
+=============
+
+.. function:: wseis(fname, S)
+.. function:: wseis(fname, S, T, U...)
+
+Write SeisIO data to file *fname*. Multiple objects can be written at once.
+
+Station XML
+===========
 
 .. function:: write_sxml(fname, S[, chans=CC])
 
 Write station XML from the fields of **S** to file **fname**. Specify channel numbers to write in a GphysData object with *chans=CC*.
 
 Use keyword **chans=Cha** to restrict station XML write to **Cha**. This keyword can accept an Integer, UnitRange, or Array{Int64,1} argument.
-
-.. function:: write_qml(fname, H, R[, v=V])
-.. function:: write_qml(fname, H, R[, v=V])
-    :noindex:
-
-.. function:: write_qml(fname, H[, v=V])
-.. function:: write_qml(fname, H[, v=V])
-    :noindex:
-
-Write QML to **fname** from SeisHdr (or Array{SeisHdr, 1})**H**, and (optionally) SeisSrc (or Array{SeisSrc, 1})**R**
-
-If **fname** exists, and is QuakeML, SeisIO appends the existing XML. If the file is NOT QuakeML, an error is thrown; the file isn't overwritten.
-
-.....
-
-Other Formats
-=============
-
-.. function:: writesac(S[, chans=CC, fname=FF, v=V])
-
-Write SAC data to SAC files with auto-generated names. Specify channel numbers to write in a GphysData object with *chans=CC*. With any GphysChannel subtype, specifying *fname=FF* sets the filename to FF.
-
-.. function:: writesacpz(pzf, S[, chans=CC])
-
-Write fields from SeisIO structure *S* to SACPZ file *pzf*. Specify which channels to write in a GphysDaya structure with *chans=CC*.
-
-.. function:: wseis(fname, S)
-.. function:: wseis(fname, S, T, U...)
-
-Write SeisIO data to file *fname*. Multiple objects can be written at once.

@@ -1,12 +1,16 @@
+###############
+Data Processing
+###############
+
 Supported processing operations are described below.
 
 In most cases, a "safe" version of each function can be invoked to create a new object with the processed output.
 
 Any function that can logically operate on a single-channel object will do so. Any function that operates on a SeisData object can be applied to the :data field of a SeisEvent object.
 
-###############
-Basic Functions
-###############
+****************
+Basic Operations
+****************
 
 These functions have no keywords that fundamentally change their behavior.
 
@@ -15,22 +19,26 @@ These functions have no keywords that fundamentally change their behavior.
 Remove the mean from all channels i with S.fs[i] > 0.0. Specify irr=true to also
 remove the mean from irregularly sampled channels. Specify chans=CC to restrict
 to channel number(s) CC. Ignores NaNs.
+:raw-html:`<br /><br />`
 
 .. function: detrend!(S::GphysData[, n=1, chans=CC, irr=false])
 
 Remove the polynomial trend of degree n from every regularly-sampled channel
 in S using a least-squares polynomial fit. Specify chans=CC to restrict
 to channel number(s) CC. Ignores NaNs.
+:raw-html:`<br /><br />`
 
 .. function: env!(S::GphysData[, chans=CC])
 
 Compute the envelope of channel data in S. Only affects regularly-sampled
 channels.
+:raw-html:`<br /><br />`
 
 .. function:: nanfill!(S)
 
 For each channel **i** in **S**, replace all NaNs in **S.x[i]** with the mean
 of non-NaN values.
+:raw-html:`<br /><br />`
 
 .. function:: resample!(S::GphysData [, chans=CC, fs=FS])
 .. function:: resample!(C::SeisChannel, fs::Float64)
@@ -41,6 +49,7 @@ of fs can lead to upsampling and other bad behaviors.
 
 Use keyword **chans=CC** to only resample channel numbers **CC**. By default,
 all channels **i** with **S.fs[i] > 0.0** are resampled.
+:raw-html:`<br /><br />`
 
 .. function:: unscale!(S[, chans=CC, irr=false])
 
@@ -48,13 +57,12 @@ Divide the gains from all channels **i** with **S.fs[i] > 0.0**. Specify
 chans=CC to restrict to channel number(s) CC. Specify **irr=true** to also
 remove gains of irregularly-sampled channels.
 
-######################
-Customizable Functions
-######################
+***********************
+Customizable Operations
+***********************
 
-*******************
 Convert Seismograms
-*******************
+===================
 
 Seismograms can be converted to or from displacement, velocity, or acceleration
 using convert_seis:
@@ -66,13 +74,13 @@ Converts all seismic data channels in `S` to velocity seismograms,
 differentiating or integrating as needed.
 
 Keywords
-========
+********
 * units_out=UU: specify output units: "m", "m/s" (default), or "m/s²"
 * chans=CC: restrict seismogram conversion to seismic data channels in CC
 * v=V: verbosity
 
 Behavior and Usage Warnings
----------------------------
+***************************
 
 **Long Seismograms**: convert_seis becomes less reversible as seismograms lengthen,
 especially at Float32 precision, due to `loss of significance
@@ -89,9 +97,8 @@ variant of `Kahan-Babuška-Neumaier summation <https://github.com/JuliaMath/Kaha
 
 .....
 
-*********
 Fill Gaps
-*********
+=========
 
 .. function:: ungap!(S[, chans=CC, m=true, tap=false])
 .. function:: ungap!(C[, m=true, tap=false])
@@ -99,7 +106,7 @@ Fill Gaps
 Fill time gaps in each channel with the mean of the channel data.
 
 Keywords
-========
+********
 * chans=CC: only ungap channels CC.
 * m=false: this flag fills gaps with NaNs instead of the mean.
 * tap=true: taper data before filling gaps.
@@ -109,15 +116,15 @@ Keywords
 .. _merge:
 
 
-*****
 Merge
-*****
+=====
 
 .. function:: merge!(S::GphysData, U::GphysData)
 
 Merge two GphysData structures. For timeseries data, a single-pass merge-and-prune
 operation is applied to value pairs whose sample times are separated by less than
 half the sampling interval.
+:raw-html:`<br /><br />`
 
 .. function:: merge!(S::GphysData)
 
@@ -125,7 +132,7 @@ half the sampling interval.
 
 
 Merge Behavior
-==============
+**************
 
 Which channels merge?
 ---------------------
@@ -158,6 +165,7 @@ What does ``merge!`` resolve?
   Overlapping windows, non-identical data | Samples averaged, windows merged
 
 :sup:`(a)` "Properties" here are ``:id``, ``:fs``, ``:loc``, ``:resp``, and ``:units``.
+:raw-html:`<br />`
 :sup:`(b)` Data offset >4 sample intervals are treated as overlapping and non-identical.
 
 When SeisIO Won't Merge
@@ -170,6 +178,7 @@ channels, each with id "XX.FOO..BHZ", but one has fs=100 Hz and the other fs=50 
 It's best to merge only unprocessed data. Data segments that were processed
 independently (e.g. detrended) will be averaged pointwise when merged, which
 can easily leave data in an unusuable state.
+:raw-html:`<br /><br />`
 
 .. function:: mseis!(S::GphysData, U::GphysData, ...)
 
@@ -177,15 +186,15 @@ Merge multiple GphysData structures into S.
 
 .....
 
-***************************
 Seismic Instrument Response
-***************************
+===========================
 
 .. function:: translate_resp!(S, resp_new[, chans=CC, wl=g])
 .. function:: translate_resp!(Ch, resp_new[, wl=g])
 
 Translate the instrument response of seismic data channels to **resp_new**.
 Replaces field **:resp** with **resp_new** for all affected channels.
+:raw-html:`<br /><br />`
 
 .. function:: remove_resp!(S, chans=CC, wl=g])
 .. function:: remove_resp!(Ch, wl=g])
@@ -195,13 +204,13 @@ channels **CC** in **S**. Replaces **:resp** with the appropriate (all-pass)
 response.
 
 Keywords
-========
+********
 * **C=cha** restricts response translation for GphysData object **S** to channel(s) **cha**. Accepts an Integer, UnitRange, or Array{Int64,1} argument; does *not* accept string IDs. By default, all seismic data channels in **S** have their responses translated to **resp_new**.
 * **wl=g** sets the waterlevel to g (default: g = eps(Float32) ~ 1.1f-7). The waterlevel is the minimum magnitude (absolute value) of the normalized old frequency response; in other words, if the old frequency response has a maximum magnitude of 1.0, then no response coefficient can be lower than g. This is useful to prevent "divide by zero" errors, but setting it too high will cause errors.
 
 
 Precision and Memory Optimization
-=================================
+*********************************
 To optimize speed and memory use, instrument response translation maps data to
 Complex{Float32} before translation; thus, with Float64 data, there can be
 minor rounding errors.
@@ -225,14 +234,8 @@ dynamically resized as the algorithm loops over each segment:
 
 .....
 
-***********
 Synchronize
-***********
-
-.. function:: sync!(S::GphysData)
-
-Synchronize the start times of all data in S to begin at or after the last
-start time in S.
+===========
 
 .. function:: sync!(S::GphysData[, s=ST, t=EN, v=VV])
 
@@ -242,7 +245,7 @@ For regularly-sampled channels, gaps between the specified and true times
 are filled with the mean; this isn't possible with irregularly-sampled data.
 
 Specifying start time (s)
-=========================
+*************************
 * s="last": (Default) sync to the last start time of any channel in `S`.
 * s="first": sync to the first start time of any channel in `S`.
 * A numeric value is treated as an epoch time (`?time` for details).
@@ -250,7 +253,7 @@ Specifying start time (s)
 * Any string other than "last" or "first" is parsed as a DateTime.
 
 Specifying end time (t)
-=======================
+***********************
 * t="none": (Default) end times are not synchronized.
 * t="last": synchronize all channels to end at the last end time in `S`.
 * t="first" synchronize to the first end time in `S`.
@@ -258,36 +261,36 @@ Specifying end time (t)
 
 .....
 
-*****
 Taper
-*****
+=====
 
-.. function:: taper!(S[, chans=CC, t_max::Real=10.0, :math:`\alpha`::Real=0.05, N_min::Int64=10])
+.. function:: taper!(S[, keywords])
 
 Cosine taper each channel in S around time gaps. Specify chans=CC to restrict
 to channel number(s) CC. Does not modify irregularly-sampled data channels.
+:raw-html:`<br /><br />`
 
-taper!(C[, t_max::Real=10.0, :math:`\alpha`::Real=0.05, N_min::Int64=10])
+.. function:: taper!(C[, keywords])
 
 Cosine taper each segment of time-series data in GphysChannel object C that
 contains at least `N_min` total samples. Returns if C is irregularly sampled.
 
 Keywords
-========
+********
 * chans: Only taper the specified channels.
 * N_min: Data segments with N < N_min total samples are not tapered.
 * t_max: Maximum taper edge in seconds.
-* :math:`\alpha`: Taper edge area; as for a Tukey window, the first and last 100*:math:`\alpha`% of samples in each window are tapered, up to `t_max` seconds of data.
+* α: Taper edge area; as for a Tukey window, the first and last 100*:math:`\alpha`% of samples in each window are tapered, up to `t_max` seconds of data.
 
 .....
 
-*****************
 Zero-Phase Filter
-*****************
+=================
 
 .. function:: filtfilt!(S::GphysData[; KWs])
 
 Apply a zero-phase filter to regularly-sampled data in **S**. Irregularly-sampled data are never processed by filtfilt!.
+:raw-html:`<br /><br />`
 
 .. function:: filtfilt!(C::SeisChannel[; KWs])
 
@@ -295,7 +298,7 @@ Apply zero-phase filter to **C.x**. Filtering is applied to each contiguous data
 segment in C separately.
 
 Keywords
-========
+********
 .. csv-table::
   :header: KW, Default, Type, Description
   :delim: |
