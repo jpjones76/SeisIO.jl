@@ -796,6 +796,10 @@ function write_qml!(io::IO, HDR::Array{SeisHdr,1}, SRC::Array{SeisSrc,1}, v::Int
 end
 
 @doc """
+    write_qml(fname, Ev::SeisEvent; v::Integer=0)
+
+Write event metadata from SeisEvent `Ev` to file `fname`.
+
     write_qml(fname, SHDR::SeisHdr; v::Integer=0)
     write_qml(fname, SHDR::Array{SeisHdr,1}; v::Integer=0)
 
