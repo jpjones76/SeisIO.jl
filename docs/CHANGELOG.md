@@ -1,4 +1,11 @@
-# SeisIO v1.1.0 patch: 2020-03-07
+### 2020-03-09
+* Rewrote SeisIO.RandSeis for faster structure generation
+  + randSeisChannel has two new keywords: fs_min and fc
+  + randSeisData has two new keywords: fs_min and a0
+* More documentation and docstring updates
+* The data processing functions *ungap!*, *taper!*, *env!*, *filtfilt!*, and *resample!* can no longer be forced to work on irregularly-sampled data by doing clever things with keywords.
+* *taper* now has a docstring
+
 ### 2020-03-07
 * Increased the robustness of *t_extend*; it no longer needs a mini-API.
 * Tests now handle time and data comparison of re-read data more robustly.

@@ -1,12 +1,12 @@
-v1.1.0: 2020-03-07
+v1.1.0: 2020-03-??
 
-New minor version because the SAC change could break user work flows that match on `:id` to/from SAC data files.
+Mostly a patch version with consistency changes and documentation updates. The minor version was incremented for strict semantic versioning because the SAC change breaks user work flows that match `:id` against SAC data files.
 
-# 1. **Public API Change**
+# 1. **Public API Changes**
 ## **SAC**
-* Data files no longer track the LOC field of `:id`; thus, IDs `NN.SSSSS.LL.CCC` and `NN.SSSSS..CCC` will be written (read) identically to (from) SAC.
+* SAC data files no longer track the LOC field of `:id`; thus, IDs `NN.SSSSS.LL.CCC` and `NN.SSSSS..CCC` will be written and read identically to/from SAC.
   + This change realigns SeisIO SAC handling with the format spec.
-  + *Explanation*: we learned only recently that LOC has no standard SAC header variable: some data sources stored this in KHOLE, which we used in the past, but this is correctly an *event* property (not a station property) in the [format spec](http://ds.iris.edu/files/sac-manual/manual/file_format.html).
+  + *Explanation*: we learned only recently that LOC has no standard SAC header variable: some data sources stored this in KHOLE (byte offset 464), which was the convention we followed in the past. However, this is an event property (not a station property) in the [format spec](http://ds.iris.edu/files/sac-manual/manual/file_format.html).
 
 # 2. **Bug Fixes**
 * SEED submodule support functions (e.g. `mseed_support()`) now correctly info dump to stdout
@@ -16,6 +16,9 @@ New minor version because the SAC change could break user work flows that match 
 * *show* now reports true number of gaps when `:x` has a gap before the last sample
 * *write_hdf5* with *ovr=false* no longer overwrites a trace in an output volume when two sample windows have the same ID, start time string, and end time string; instead, the tag is incremented
   + This was previously possible only with two segments from one channel that started on the same second and ended on the same second; it's unlikely that anyone encountered this situation with real data.
+* The data processing functions *ungap!*, *taper!*, *env!*, *filtfilt!*, and *resample!* can no longer be forced to work on irregularly-sampled data by doing clever things with keywords.
+* *taper* now has a docstring
+* Irregularly-sampled data channels are no longer writable to ASDF, which, by design, cannot handle irregularly-sampled data.
 
 # 3. **Consistency Changes**
 * *get_data* with *w=true* now logs the raw download write to *:notes*
@@ -52,6 +55,9 @@ Fixed some rare bugs that could break automated tests.
   * `read_sxml`
   * `sxml_mergehdr!`
   * `trid`
+* Rewrote SeisIO.RandSeis for faster structure generation
+  + randSeisChannel has two new keywords: *fs_min* and *fc*
+  + randSeisData has two new keywords: *fs_min* and *a0*
 * [Official documentation](https://seisio.readthedocs.io/) reorganized for better navigation
 * Many docstrings have been updated and standardized
 * Updated the tutorial
@@ -61,3 +67,4 @@ Fixed some rare bugs that could break automated tests.
   + previously, not all cases of time matrix extension were covered.
   + this rewrite cover all 7 possible cases of time matrix extension, with full tests
 * *check_for_gap!* is now a thin wrapper to *t_extend*, ensuring uniform behavior
+* The internal functions in SeisIO.RandSeis have changed significantly. This will break work flows that imported RandSeis internals.
