@@ -43,7 +43,7 @@ function translate_resp!(S::GphysData,
                          wl::Float32=eps(Float32))
 
   # first ensure that there is something to do
-  chans = mkchans(chans, S)
+  chans = mkchans(chans, S, keepirr=false)
   @inbounds for i in chans
     if S.resp[i] != resp_new
       break
@@ -98,7 +98,7 @@ function translate_resp!(S::GphysData,
     resp_old = RT == MultiStageResp ? deepcopy(S.resp[j].stage[1]) : deepcopy(S.resp[j])
     fs = Float32(S.fs[j])
 
-    if fs > 0.0f0 && resp_old != resp_new
+    if resp_old != resp_new
 
       # we'll need this for logging
       resp_str = string("processing ¦ translate_resp!(S, wl = ", wl, ", resp_old = ", typeof(resp_old),

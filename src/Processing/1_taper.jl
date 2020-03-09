@@ -139,9 +139,7 @@ function taper!(S::GphysData;
     return nothing
   end
 
-  if chans == Int64[]
-    chans = 1:S.n
-  end
+  chans = mkchans(chans, S, keepirr=false)
   proc_str = string("taper!(S, chans=", chans, ", t_max = ", t_max, ", ", "α = ", α, ", ", "N_min = ", N_min, ")")
 
   α = min(α, 0.5)
@@ -227,6 +225,8 @@ function taper!(S::GphysData;
   end
   return nothing
 end
+
+@doc (@doc taper!)
 function taper(C::GphysChannel; t_max::Real=10.0, α::Real=0.05, N_min::Int64=10)
   U = deepcopy(C)
   taper!(U, t_max = t_max, α=α, N_min=N_min)

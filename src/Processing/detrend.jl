@@ -21,27 +21,25 @@ function demean!(S::GphysData;
     chans = 1:S.n
   end
 
-  @inbounds for i = 1:S.n
-    if i in chans
-      (irr==false && S.fs[i]<=0.0) && continue
-      T = eltype(S.x[i])
-      K = findall(isnan.(S.x[i]))
-      if isempty(K)
-        L = length(S.x[i])
-        μ = T(sum(S.x[i]) / T(L))
-        for j = 1:L
-          S.x[i][j] -= μ
-        end
-      else
-        J = findall(isnan.(S.x[i]) .== false)
-        L = length(J)
-        μ = T(sum(S.x[i][J])/T(L))
-        for j in J
-          S.x[i][j] -= μ
-        end
+  for i in chans
+    (irr==false && S.fs[i]<=0.0) && continue
+    T = eltype(S.x[i])
+    K = findall(isnan.(S.x[i]))
+    if isempty(K)
+      L = length(S.x[i])
+      μ = T(sum(S.x[i]) / T(L))
+      for j = 1:L
+        S.x[i][j] -= μ
       end
-      proc_note!(S, i, string("demean!(S, chans=", i, ")"), "removed mean")
+    else
+      J = findall(isnan.(S.x[i]) .== false)
+      L = length(J)
+      μ = T(sum(S.x[i][J])/T(L))
+      for j in J
+        S.x[i][j] -= μ
+      end
     end
+    proc_note!(S, i, string("demean!(S, chans=", i, ")"), "removed mean")
   end
   return nothing
 end

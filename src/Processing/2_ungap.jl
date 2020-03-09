@@ -40,25 +40,21 @@ function ungap!(S::GphysData;
   m::Bool=true,
   tap::Bool=false)
 
-  if chans == Int64[]
-    chans = 1:S.n
-  end
+  chans = mkchans(chans, S, keepirr=false)
 
   if tap
     taper!(S, chans=chans)
   end
 
-  for i = 1:S.n
-    if i in chans
-      N = size(S.t[i],1)-2
-      (N ≤ 0 || S.fs[i] == 0) && continue
-      gapfill!(S.x[i], S.t[i], S.fs[i], m=m)
-      proc_note!(S, i, string("ungap!(S, chans=", i, ", m = ", m,
-                              ", tap = ", tap, ")"),
-                       string("filled ", N, " gaps (sum = ",
-                               sum(S.t[i][2:end-1, 2]), " μs)"))
-      S.t[i] = [S.t[i][1:1,:]; [length(S.x[i]) 0]]
-    end
+  for i in chans
+    N = size(S.t[i],1)-2
+    (N ≤ 0 || S.fs[i] == 0) && continue
+    gapfill!(S.x[i], S.t[i], S.fs[i], m=m)
+    proc_note!(S, i, string("ungap!(S, chans=", i, ", m = ", m,
+                            ", tap = ", tap, ")"),
+                     string("filled ", N, " gaps (sum = ",
+                             sum(S.t[i][2:end-1, 2]), " μs)"))
+    S.t[i] = [S.t[i][1:1,:]; [length(S.x[i]) 0]]
   end
   return nothing
 end

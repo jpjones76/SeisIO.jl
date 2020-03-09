@@ -30,9 +30,8 @@ function resample!(S::GphysData;
   chans::ChanSpec=Int64[],
   fs::Float64=0.0)
 
-  if chans == Int64[]
-    chans = 1:S.n
-  end
+  # preprocess data channels
+  chans = mkchans(chans, S, keepirr=false)
 
   f0 = fs == 0.0 ? minimum(S.fs[chans[S.fs[chans] .> 0.0]]) : fs
 

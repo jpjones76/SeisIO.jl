@@ -16,14 +16,7 @@ function env!(S::GphysData;
   v::Integer=KW.v)
 
   # preprocess data channels
-  chans = mkchans(chans, S)
-  k = Int64[]
-  for c in chans
-    if S.fs[c] == 0.0
-      push!(k, c)
-    end
-  end
-  deleteat!(chans, k)
+  chans = mkchans(chans, S, keepirr=false)
 
   proc_str = string("env!(S, chans=", chans, ")")
 

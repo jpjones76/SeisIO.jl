@@ -177,9 +177,7 @@ function filtfilt!(S::GphysData;
     )
 
   isempty(S) && return nothing
-  if chans == Int64[]
-    chans = 1:S.n
-  end
+  chans = mkchans(chans, S, keepirr=false)
   proc_str = string("filtfilt!(S, chans=", chans, ", fl = ", fl,
     ", fh = ", fh,
     ", np = ", np,

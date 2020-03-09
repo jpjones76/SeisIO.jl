@@ -37,13 +37,11 @@ function convert_seis!(S::GphysData;
   end
 
   # get seismic data channels
-  chans = mkchans(chans, S)
+  chans = mkchans(chans, S, keepirr=false)
   filt_seis_chans!(chans, S)
 
   # now loop over all seismic channels
   for i in chans
-    S.fs[i] == 0.0 && (@warn(string("Irregularly-sampled seismic data in channel ", i, "; skipped!")); continue)
-
     if v > 2
       println(stdout, "Begin channel ", i)
     end
