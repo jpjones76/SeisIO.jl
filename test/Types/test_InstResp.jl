@@ -47,7 +47,7 @@ redirect_stdout(out) do
   end
   R.i = i
   R.o = o
-  R.stage[1] = RandSeis.randResp()
+  R.stage[1] = RandSeis.rand_resp(20.0, 0)
   for i = 2:nr
     R.stage[i] = CoeffResp(b = rand(rand(1:1200)))
   end

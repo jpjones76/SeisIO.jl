@@ -136,7 +136,7 @@ sizetest(T, 1)
 @test findid(V.id[3], T.id) == 0
 V = sort(V)
 
-deleteat!(X,1)
+deleteat!(X, 1)
 # @test findid(V,X) == [2,3,1]
 Y = sort(X)
 @test V == Y
