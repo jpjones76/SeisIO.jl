@@ -1,48 +1,3 @@
-const evtypes = String[ "not_existing",
-                        "not_reported",
-                        "anthropogenic_event",
-                        "collapse",
-                        "cavity_collapse",
-                        "mine_collapse",
-                        "building_collapse",
-                        "explosion",
-                        "accidental_explosion",
-                        "chemical_explosion",
-                        "controlled_explosion",
-                        "experimental_explosion",
-                        "industrial_explosion",
-                        "mining_explosion",
-                        "quarry_blast",
-                        "road_cut",
-                        "blasting_levee",
-                        "nuclear_explosion",
-                        "induced_or_triggered_event",
-                        "rock_burst",
-                        "reservoir_loading",
-                        "fluid_injection",
-                        "fluid_extraction",
-                        "crash",
-                        "plane_crash",
-                        "train_crash",
-                        "boat_crash",
-                        "other_event",
-                        "atmospheric_event",
-                        "sonic_boom",
-                        "sonic_blast",
-                        "acoustic_noise",
-                        "thunder",
-                        "avalanche",
-                        "snow_avalanche",
-                        "debris_avalanche",
-                        "hydroacoustic_event",
-                        "ice_quake",
-                        "slide",
-                        "landslide",
-                        "rockslide",
-                        "meteorite",
-                        "volcanic_eruption"]
-
-
 """
     randSeisSrc()
 
@@ -51,34 +6,22 @@ Generate a SeisSrc structure filled with random values.
 function randSeisSrc(; mw::Float32=0.0f0)
   R = SeisSrc()
 
-#    src:
-#     st: dur 0.0, rise 0.0, decay 0.0
-
   m0 = 1.0e-7*(10^(1.5*((mw == zero(Float32) ? 10^(rand(Float64)-1.0) : Float64(mw))+10.7)))
 
-  setfield!(R, :id, string(rand(1:2^62)))                           # :id
+  setfield!(R, :id, string(rand(1:2^12)))                           # :id
   setfield!(R, :m0, m0)                                             # :m0
-  setfield!(R, :gap, rand(Float64)*180.0)                           # :gap
-  pop_rand_dict!(getfield(R, :misc), rand(4:24))                    # :misc
-  setfield!(R, :mt, m0.*(rand(Float64, 6).-0.5))                    # :mt
-  setfield!(R, :dm, m0.*(rand(Float64, 6).-0.5))                    # :dm
+  setfield!(R, :gap, abs(rand_lon()))                               # :gap
+  setfield!(R, :misc, rand_misc(rand(4:24)))                        # :misc
+  setfield!(R, :mt, m0.*(rand(6).-0.5))                             # :mt
+  setfield!(R, :dm, m0.*(rand(6).-0.5))                             # :dm
   setfield!(R, :npol, rand(Int64(6):Int64(120)))                    # :npol
   [note!(R, randstring(rand(16:256))) for i = 1:rand(1:6)]          # :notes
-  setfield!(R, :pax,
-    vcat(360.0.*(rand(Float64, 2, 3).-0.5),
-          (rand(-1:2:1)*m0).*[rand() -1.0*rand() rand()]))          # :pax
-  setfield!(R, :planes, 360.0.*(rand(Float64, 3, 2).-0.5))          # :planes
+  setfield!(R, :pax, vcat(rand_lon(2,3),
+      (m0*rand() < 0.5 ? -1 : 1) .* [rand() -1.0*rand() rand()]))   # :pax
+  setfield!(R, :planes, rand_lon(3,2))                              # :planes
   setfield!(R, :src, R.id * ",randSeisSrc")                         # :src
-  # setfield!(R, :src, join([join([randstring(12), " ",
-  #                           randstring(20)]) for i=1:5], ","
-  #                         ))                                        # :src
-  # source :src
   note!(R, "+origin ¦ " * R.src)
-
-  setfield!(R, :st, SourceTime( randstring(2^rand(6:8)),            # :st
-                                rand(Float64),
-                                rand(Float64),
-                                rand(Float64)))
+  setfield!(R, :st, SourceTime(randstring(2^rand(6:8)), rand(), rand(), rand()))
   return R
 end
 
@@ -114,9 +57,9 @@ function randSeisHdr()
            4 + round(Int64, rand()*exp(mw)),
            rand(0x00:0x10:0xf0),
            rand_datum(),
-           rand(["HYPOCENTER", "CENTROID", "AMPLITUDE", "MACROSEISMIC", "RUPTURE_START", "RUPTURE_END"]),
+           rand(("HYPOCENTER", "CENTROID", "AMPLITUDE", "MACROSEISMIC", "RUPTURE_START", "RUPTURE_END")),
            "",
-           rand(["HYPOELLIPSE", "HypoDD", "Velest", "centroid"]))
+           rand(("HYPOELLIPSE", "HypoDD", "Velest", "centroid")))
 
   # setfield!(loc, :sig, "1σ")
   # event type
@@ -128,14 +71,14 @@ function randSeisHdr()
   setfield!(H, :int, (mw < 0.0f0 ? 0x00 : floor(UInt8, mw),
     randstring(rand(2:4))))                                         # :int
   setfield!(H, :loc, loc)                                           # :loc
-  setfield!(H, :mag, EQMag( val   = mw,                             # :mag
-                            scale = rand(["M","m"]) * randstring(2),
+  setfield!(H, :mag, EQMag( val   = mw,          # :mag
+                            scale = rand(("M","m")) * randstring(2),
                             nst   = rand(3:100),
-                            gap   = 360.0*rand(Float64),
+                            gap   = abs(rand_lon()),
                             src   = randstring(24)
                             )
             )
-  pop_rand_dict!(H.misc, rand(4:24))                                # :misc
+  setfield!(H, :misc, rand_misc(rand(4:24)))                        # :misc
   [note!(H, randstring(rand(16:256))) for i = 1:rand(1:6)]          # :notes
   setfield!(H, :ot, now())                                          # :ot
   setfield!(H, :typ, typ)                                           # :typ
@@ -152,14 +95,9 @@ end
 Generate a random seismic phase catalog suitable for testing EventChannel,
 EventTraceData, and SeisEvent objects.
 """
-function randPhaseCat(n::Int64=0)
-  phase_list = String["P", "PKIKKIKP", "PKIKKIKS", "PKIKPPKIKP", "PKPPKP",
-  "PKiKP", "PP", "PS", "PcP", "S", "SKIKKIKP", "SKIKKIKS", "SKIKSSKIKS", "SKKS",
-  "SKS", "SKiKP", "SP", "SS", "ScS", "pP", "pPKiKP", "pS", "pSKS", "sP",
-  "sPKiKP", "sS", "sSKS"]
-  pol_list = Char['U', 'D', '-', '+', '_', ' ']
-
-  phase = Array{String,1}(undef, n == 0 ? rand(3:18) : n)
+function randPhaseCat(n::Int64)
+  npha = (n <= 0) ? rand(3:18) : n
+  phase = Array{String, 1}(undef, npha)
   for j = 1:length(phase)
     phase[j] = rand(phase_list)
   end
@@ -171,6 +109,7 @@ function randPhaseCat(n::Int64=0)
   end
   return P
 end
+randPhaseCat() = randPhaseCat(0)
 
 """
     randSeisEvent([, c=0.2, s=0.6])
@@ -178,6 +117,8 @@ end
 Generate a SeisEvent structure filled with random header and channel data.
 * 100*c is the percentage of :data channels _after the first_ with irregularly-sampled data (fs = 0.0)
 * 100*s is the percentage of :data channels _after the first_ with guaranteed seismic data.
+
+See also: `randSeisChannel`, `randSeisData`, `randSeisHdr`, `randSeisSrc`
 """
 function randSeisEvent(N::Int64; c::Float64=0.0, s::Float64=1.0, nx::Int64=0)
   V = SeisEvent(hdr=randSeisHdr(),
@@ -187,10 +128,10 @@ function randSeisEvent(N::Int64; c::Float64=0.0, s::Float64=1.0, nx::Int64=0)
   V.hdr.loc.src = V.hdr.id * "," * V.hdr.loc.src
 
   for i = 1:V.data.n
-    setindex!(getfield(getfield(V, :data), :pha), randPhaseCat(), i)
-    setindex!(getfield(getfield(V, :data), :az),   180*(rand()-0.5), i)
-    setindex!(getfield(getfield(V, :data), :baz),  180*(rand()-0.5), i)
-    setindex!(getfield(getfield(V, :data), :dist), 180*rand(),       i)
+    setindex!(getfield(getfield(V, :data), :pha),  randPhaseCat(),  i)
+    setindex!(getfield(getfield(V, :data), :az),   rand_lat(),      i)
+    setindex!(getfield(getfield(V, :data), :baz),  rand_lat(),      i)
+    setindex!(getfield(getfield(V, :data), :dist), abs(rand_lon()), i)
   end
   return V
 end
