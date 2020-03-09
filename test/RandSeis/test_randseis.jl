@@ -10,11 +10,9 @@ for fs in fs_range
   end
 end
 
-printstyled("  pop_rand_dict!\n", color=:light_green)
-# This should do it
-D = Dict{String,Any}()
-for i = 1:10
-  RandSeis.pop_rand_dict!(D, 1000)
+printstyled("  rand_misc\n", color=:light_green)
+for i = 1:100
+  D = rand_misc(1000)
 end
 
 # Similarly for the yp2 codes
@@ -36,17 +34,20 @@ printstyled("  rand_t\n", color=:light_green)
 fs = 100.0
 nx = 100
 
-printstyled("    controlled n_gaps\n", color=:light_green)
-t = RandSeis.rand_t(fs, nx, 10)
+printstyled("    controlled gaps\n", color=:light_green)
+t = RandSeis.rand_t(fs, nx, 10, 1)
 @test size(t, 1) == 12
-t = RandSeis.rand_t(fs, nx, 0)
+t = RandSeis.rand_t(fs, nx, 0, 1)
 @test size(t, 1) == 2
+t = RandSeis.rand_t(100.0, 1000, 4, 200)
+@test size(t, 1) == 6
+@test t[:,1] == [1, 200, 400, 600, 800, 1000]
 
 printstyled("    gap < Δ/2 + 1\n", color=:light_green)
 for i in 1:1000
   fs = rand(RandSeis.fs_vals)
   nx = round(Int64, rand(1200:7200)*fs)
-  t = RandSeis.rand_t(fs, nx, 0)
+  t = RandSeis.rand_t(fs, nx, 0, 1)
   δt = div(round(Int64, 1.0e6/fs), 2) + 1
   gaps = t[2:end-1, 2]
 
@@ -56,18 +57,9 @@ for i in 1:1000
   @test minimum(diff(t[:,1])) > 0
 end
 
-printstyled("  randResp\n", color=:light_green)
-R = RandSeis.randResp(8)
+printstyled("  rand_resp\n", color=:light_green)
+R = RandSeis.rand_resp(1.0, 8)
 @test length(R.z) == length(R.p) == 8
-
-printstyled("  randSeis*\n", color=:light_green)
-for i = 1:10
-  randSeisChannel()
-  randSeisData()
-  randSeisHdr()
-  randSeisSrc()
-  randSeisEvent()
-end
 
 printstyled("  namestrip\n", color=:light_green)
 str = String(0x00:0xff)
@@ -83,3 +75,19 @@ redirect_stdout(out) do
 end
 namestrip!(S)
 @test length(S.name[2]) == 210
+
+printstyled("  repop_id!\n", color=:light_green)
+S = randSeisData()
+S.id[end] = deepcopy(S.id[1])
+id = deepcopy(S.id)
+RandSeis.repop_id!(S)
+@test id != S.id
+
+printstyled("  randSeis*\n", color=:light_green)
+for i = 1:10
+  randSeisChannel()
+  randSeisData()
+  randSeisHdr()
+  randSeisSrc()
+  randSeisEvent()
+end
