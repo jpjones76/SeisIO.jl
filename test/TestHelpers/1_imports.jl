@@ -68,7 +68,7 @@ import SeisIO: BUF,
   x_inds,
   xtmerge!,
   μs
-import SeisIO.RandSeis: getyp2codes, pop_rand_dict!
+import SeisIO.RandSeis: getyp2codes, rand_misc
 import SeisIO.Quake: unsafe_convert
 import SeisIO.SeisHDF:read_asdf, read_asdf!, id_match, id_to_regex
 import Statistics: mean
