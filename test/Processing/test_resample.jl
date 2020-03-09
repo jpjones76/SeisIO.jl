@@ -3,6 +3,7 @@ printstyled("  resample!\n", color=:light_green)
 function naive_resample!(S::SeisData; fs::Float64=0.0)
   f0 = fs == 0.0 ? minimum(S.fs[S.fs .> 0.0]) : fs
   for i = 1:S.n
+    (S.fs[i] == 0.0) && continue
     T = eltype(S.x[i])
     rate = rationalize(fs/S.fs[i])
     n_seg = size(S.t[i],1)-1
@@ -26,8 +27,7 @@ function naive_resample!(S::SeisData; fs::Float64=0.0)
 end
 
 function compare_resamp()
-  S = randSeisData()
-  deleteat!(S, findall(S.fs.<20.0))
+  S = randSeisData(fs_min=20.0)
   U = deepcopy(S)
   sz = sizeof(S)
   (xx, ta, aa, xx, xx) = @timed resample(S, fs=10.0)

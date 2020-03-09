@@ -33,8 +33,7 @@ for i = 1:S.n
 end
 
 for k = 1:4
-  S = randSeisData(24, s=1.0)
-  deleteat!(S, findall(S.fs.<20.0))
+  S = randSeisData(24, s=1.0, fs_min=20.0)
   for i = 1:S.n
     nx = 2^16
     t = [1 0; 512 134235131; 2^14 100000; 2^15 12345678; nx 0]

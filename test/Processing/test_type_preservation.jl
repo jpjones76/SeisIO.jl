@@ -3,17 +3,7 @@ printstyled("  Type preservation after processing\n", color=:light_green)
 
 for f in String["convert_seis!", "demean!", "detrend!", "filtfilt!", "merge!", "sync!", "taper!", "ungap!", "unscale!"]
   printstyled(string("    ", f, "\n"), color=:light_green)
-  S = randSeisData(s=1.0)
-  if f == "filtfilt!"
-    while true
-      i = findall(S.fs .< 30.0)
-      deleteat!(S, i)
-      if S.n > 0
-        break
-      end
-      S = randSeisData(s=1.0)
-    end
-  end
+  S = randSeisData(s=1.0, fs_min=30.0)
   T = [eltype(S.x[i]) for i=1:S.n]
   id = deepcopy(S.id)
   getfield(SeisIO, Symbol(f))(S)

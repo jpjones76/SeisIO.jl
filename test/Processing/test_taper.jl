@@ -20,8 +20,7 @@ taper_seg!(X, W, L, μ)
 @test isapprox(abs.(X)./abs.(Y), W)
 
 # Test that tapering works on SeisData objects
-S = randSeisData(24, s=1.0)
-deleteat!(S, findall(S.fs.<1.0))
+S = randSeisData(24, s=1.0, fs_min=1.0)
 taper!(S)
 
 # Test that tapering works on SeisChannel objects
