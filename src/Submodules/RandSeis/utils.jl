@@ -1,23 +1,15 @@
-ur2() = uppercase(randstring(2))
+rand_lat() = 180 * (rand()-0.5)
+rand_lon() = 360 * (rand()-0.5)
+rand_lon(m::Int64, n::Int64) = 360.0.*rand(Float64, m, n).-0.5
 
-# Acceptable type codes in :misc
-OK = UInt8[0x00, 0x01,
-      0x10, 0x11, 0x12, 0x13, 0x14,
-      0x20, 0x21, 0x22, 0x23, 0x24,
-      0x30, 0x31, 0x32,
-      0x50, 0x51, 0x52, 0x53, 0x54,
-      0x60, 0x61, 0x62, 0x63, 0x64,
-      0x70, 0x71, 0x72,
-      0x80, 0x81,
-      0x90, 0x91, 0x92, 0x93, 0x94,
-      0xa0, 0xa1, 0xa2, 0xa3, 0xa4,
-      0xb0, 0xb1, 0xb2,
-      0xd0, 0xd1, 0xd2, 0xd3, 0xd4,
-      0xe0, 0xe1, 0xe2, 0xe3, 0xe4,
-      0xf0, 0xf1, 0xf2]
+function rand_datum()
+  x = rand()
+  return x > 0.2 ? "WGS-84 " : x > 0.1 ? "ETRS89 " : x > 0.05 ? "GRS 80 " : "JGD2011"
+end
 
 # Fill :misc with garbage
-function pop_rand_dict!(D::Dict{String,Any}, N::Int)
+function rand_misc(N::Integer)
+  D = Dict{String, Any}()
   for n = 1:N
     t = code2typ(rand(OK))
     k = randstring(rand(2:12))
@@ -32,9 +24,7 @@ function pop_rand_dict!(D::Dict{String,Any}, N::Int)
       end
     end
   end
-  if haskey(D, "hc")
-    delete!(D, "hc")
-  end
+  (haskey(D, "hc")) && (delete!(D, "hc"))
   return D
 end
 
@@ -48,62 +38,62 @@ data codes.
 function getyp2codes(b::Char, s=false::Bool)
   if s
     # Neglecting gravimeters ('G') and mass position sensors ('M')
-    i = rand(['H','L','N'])
+    i = rand(('H','L','N'))
     if rand() > 0.2
-      c = rand(['Z','N','E'])
+      c = rand(('Z','N','E'))
     else
-      c = rand(['A','B','C','1','2','3','U','V','W'])
+      c = rand(('A','B','C','1','2','3','U','V','W'))
     end
-    if Base.in(i, ['H','L'])
-      u = rand(["m", "m/s"])
+    if Base.in(i, ('H','L'))
+      u = rand(("m", "m/s"))
     else
       u = "m/s2"
     end
   else
-    i = rand(['A','B','D','F','G','I','J','K','M','O','P','Q','R','S','T','U','V','W','Z'])
+    i = rand(('A','B','D','F','G','I','J','K','M','O','P','Q','R','S','T','U','V','W','Z'))
     if i == 'A' # tiltmeter
-      c = rand(['N','E'])
+      c = rand(('N','E'))
       u = "rad"
     elseif i == 'B' # creep meter
       c = '_'
       u = "m"
       # C is calibration input
     elseif i == 'D' # pressure (barometer, infrasound, hydrophone ∈ 'D')
-      c = rand(['O','I','D','F','H','U'])
+      c = rand(('O','I','D','F','H','U'))
       u = "Pa"
       # E is an electronic test point
     elseif i == 'F' # magnetometer
-      c = rand(['Z','N','E'])
+      c = rand(('Z','N','E'))
       u = "T"
     elseif i == 'G' # tiltmeter
-        c = rand(['A','B','C','1','2','3','U','V','W'])
+        c = rand(('A','B','C','1','2','3','U','V','W'))
         u = "m/s2"
     elseif i == 'I' # humidity
-      c = rand(['O','I','D'])
+      c = rand(('O','I','D'))
       u = "%"
     elseif i == 'J' # rotational seismometer
-      c = rand(['Z','N','E','A','B','C','T','R','1','2','3','U','V','W'])
-      u = rand(["rad", "rad/s", "rad/s2"])
+      c = rand(('Z','N','E','A','B','C','T','R','1','2','3','U','V','W'))
+      u = rand(("rad", "rad/s", "rad/s2"))
     elseif i == 'K' # thermal (thermometer or radiometer)
-      c = rand(['O', 'I', 'D'])
-      u = rand(["Cel","K"])
+      c = rand(('O', 'I', 'D'))
+      u = rand(("Cel","K"))
     elseif i == 'M' # mass position sensor
-        c = rand(['A','B','C','1','2','3','U','V','W'])
+        c = rand(('A','B','C','1','2','3','U','V','W'))
         u = "m"
     elseif i == 'O' # current gauge
       c = '_'
       u = "m/s"
     elseif i == 'P' # very short-period geophone
-      c = rand(['Z','N','E'])
-      u = rand(["m", "m/s", "m/s2"])
+      c = rand(('Z','N','E'))
+      u = rand(("m", "m/s", "m/s2"))
     elseif i == 'Q' # voltmeter
       c = '_'
       u = "V"
     elseif i == 'R' # rain gauge
       c = '_'
-      u = rand(["m", "m/s"])
+      u = rand(("m", "m/s"))
     elseif i == 'S' # strain gauge
-      c = rand(['Z','N','E'])
+      c = rand(('Z','N','E'))
       u = "m/m"
     elseif i == 'T' # tide gauge
       c = 'Z'
@@ -115,15 +105,28 @@ function getyp2codes(b::Char, s=false::Bool)
       c = '_'
       u = "m3/m3"
     elseif i == 'W' # wind speed ('S') or direction ('D')
-      c = rand(['S','D'])
+      c = rand(('S','D'))
       u = c == 'S' ? "m/s" : "{direction_vector}"
 
     # X, Y are instrument-specific...excluded
-
     elseif i == 'Z' # synthesized beam or stack
-      c = rand(['I','C','F','O'])
-      u = rand(["m", "m/s", "m/s2"])
+      c = rand(('I','C','F','O'))
+      u = rand(("m", "m/s", "m/s2"))
     end
   end
   return i,c,u
+end
+
+function repop_id!(S::GphysData; s::Bool=true)
+  while length(unique(S.id)) < length(S.id)
+    for i = 1:S.n
+      fs = S.fs[i]
+      if fs == 0.0
+        S.id[i] = rand_irr_id()
+      else
+        S.id[i], S.units[i] = rand_reg_id(fs, s)
+      end
+    end
+  end
+  return nothing
 end
