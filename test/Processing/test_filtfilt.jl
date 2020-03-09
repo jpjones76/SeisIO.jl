@@ -1,5 +1,5 @@
 fs = 100.0
-nx = 10000000
+nx = 10000
 T = Float32
 
 printstyled("  filtfilt!\n", color=:light_green)
@@ -15,12 +15,7 @@ filtfilt!(C)
 @test C == D
 
 # test for channel ranges
-S = randSeisData(24, s=1.0)
-deleteat!(S, findall(S.fs.<40.0))
-while S.n < 4
-  S = randSeisData(24, s=1.0)
-  deleteat!(S, findall(S.fs.<40.0))
-end
+S = randSeisData(24, s=1.0, fs_min=40.0)
 for i in (1, S.n)
   S.fs[i] = fs
   S.t[i] = [1 0; nx 0]
@@ -55,7 +50,7 @@ for i = 1:10
   C = randSeisChannel(s=true)
   C.fs = fs
   C.t = [1 100; nx 0]
-  C.x = randn(Float64, 100000)
+  C.x = randn(Float64, nx)
   D = deepcopy(C)
   filtfilt!(C)
   naive_filt!(D)
@@ -72,8 +67,7 @@ C.t = [1 0; n_short 0]
 C.x = randn(Float32, n_short)
 filtfilt!(C)
 
-S = randSeisData(24, s=1.0)
-deleteat!(S, findall(S.fs.<40.0))
+S = randSeisData(24, s=1.0, fs_min=40.0)
 S.fs[S.n] = fs
 S.t[S.n] = [1 0; n_short 0]
 S.x[S.n] = randn(Float32, n_short)
@@ -82,8 +76,7 @@ filtfilt!(S)
 printstyled("      repeated segment lengths\n", color=:light_green)
 n_rep = 2048
 
-S = randSeisData(24, s=1.0)
-deleteat!(S, findall(S.fs.<40.0))
+S = randSeisData(24, s=1.0, fs_min=40.0)
 for i in (1, S.n)
   S.fs[i] = fs
   S.t[i] = [1 0; n_rep 0]
@@ -93,12 +86,7 @@ filtfilt!(S)
 GC.gc()
 
 # test for channel ranges
-S = randSeisData(24, s=1.0)
-deleteat!(S, findall(S.fs.<40.0))
-while S.n < 4
-  S = randSeisData(24, s=1.0)
-  deleteat!(S, findall(S.fs.<40.0))
-end
+S = randSeisData(24, s=1.0, fs_min=40.0)
 for i in (1, S.n)
   S.fs[i] = fs
   S.t[i] = [1 0; n_rep 0]
@@ -118,11 +106,7 @@ GC.gc()
 printstyled("    checking that all filters work\n", color=:light_green)
 for dm in String["Butterworth", "Chebyshev1", "Chebyshev2", "Elliptic"]
   for rt in String["Bandpass", "Bandstop", "Lowpass", "Highpass"]
-    S = randSeisData(3, s=1.0)
-    while maximum(S.fs) < 40.0
-      S = randSeisData(3, s=1.0)
-    end
-    deleteat!(S, findall(S.fs.<40.0))
+    S = randSeisData(3, s=1.0, fs_min=40.0)
     filtfilt!(S, rt=rt, dm=dm)
   end
 end
@@ -133,8 +117,7 @@ printstyled("    test all filters on SeisData\n\n", color = :light_green)
 
 for dm in String["Butterworth", "Chebyshev1", "Chebyshev2", "Elliptic"]
   for rt in String["Bandpass", "Bandstop", "Lowpass", "Highpass"]
-    S = randSeisData(24, s=1.0)
-    deleteat!(S, findall(S.fs.<40.0))
+    S = randSeisData(8, s=1.0, fs_min=40.0)
     (xx, t, b, xx, xx) = @timed filtfilt!(S, rt=rt, dm=dm)
     s = sum([sizeof(S.x[i]) for i = 1:S.n])
     r = b/s
@@ -145,6 +128,7 @@ for dm in String["Butterworth", "Chebyshev1", "Chebyshev2", "Elliptic"]
 end
 
 printstyled(string("\n    test all filters on a long, gapless ", T, " SeisChannel\n\n"), color = :light_green)
+nx = 3456000
 @printf("%12s | %10s |  data   |     filtfilt!    |  naive_filtfilt! |     ratio    |\n", "", "")
 @printf("%12s | %10s | sz (MB) | t (ms) | sz (MB) | t (ms) | sz (MB) | speed | size |\n", "Name (dm=)", "Type (rt=)")
 @printf("%12s | %10s | ------- | ------ | ------- | ------ | ------- | ----- | ---- |\n", " -----------", "---------")
