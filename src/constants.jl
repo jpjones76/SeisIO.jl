@@ -1,3 +1,5 @@
+export TimeSpec
+
 # Most constants are defined here, except:
 #
 # BUF           src/Types/SeisIOBuf.jl
@@ -12,6 +14,39 @@
 # Type aliases
 const ChanSpec    = Union{Integer, UnitRange, Array{Int64, 1}}
 const FloatArray  = Union{Array{Float64, 1}, Array{Float32, 1}}
+
+@doc """
+    TimeSpec = Union{Real, DateTime, String}
+
+# Time Specification
+Most functions that allow time specification use two reserved keywords to track
+time: `s` (start/begin) time and `t` (termination/end) time. Exact behavior
+of each is given in the table below.
+
+* Real numbers are interpreted as seconds
+* DateTime values are as in the Dates package
+* Strings should use ISO 8601 *without* time zone (`YYYY-MM-DDThh:mm:ss.s`); UTC is assumed. Equivalent Unix `strftime` format codes are `%Y-%m-%dT%H:%M:%S` or `%FT%T`.
+
+## **parsetimewin Behavior**
+In all cases, parsetimewin outputs a pair of strings, sorted so that the first string corresponds to the earlier start time.
+
+| typeof(s) | typeof(t) | Behavior                                          |
+|:------    |:------    |:-------------------------------------             |
+| DateTime  | DateTime  | sort                                              |
+| DateTime  | Real      | add *t* seconds to *s*, then sort                 |
+| DateTime  | String    | convert *t* => DateTime, then sort                |
+| DateTime  | String    | convert *t* => DateTime, then sort                |
+| Real      | DateTime  | add *s* seconds to *t*, then sort                 |
+| Real      | Real      | treat *s*, *t* as seconds from current time; sort |
+| String    | DateTime  | convert *s* => DateTime, then sort                |
+| String    | Real      | convert *s* => DateTime, then sort                |
+
+Special behavior with (Real, Real): *s* and *t* are converted to seconds from
+the start of the current minute. Thus, for `s=0` (the default), the data request
+begins (or ends) at the start of the minute in which the request is submitted.
+
+See also: `Dates.DateTime`
+""" TimeSpec
 const TimeSpec    = Union{Real, DateTime, String}
 const ChanOpts    = Union{String, Array{String, 1}, Array{String, 2}}
 const bad_chars = Dict{String, Any}(

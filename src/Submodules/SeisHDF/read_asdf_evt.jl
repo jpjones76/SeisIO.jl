@@ -37,7 +37,7 @@ SeisEvent structures. Matches any event ID in any matching file.
 | msr       | Bool    | true    | read full (MultiStageResp) instrument resp? |
 | v         | Integer | 0       | verbosity                                   |
 
-See also: `timespec`, `parsetimewin`, `read_data`, `read_hdf5`
+See also: `TimeSpec`, `parsetimewin`, `read_data`, `read_hdf5`
 """ read_asdf_evt
 function read_asdf_evt(filestr::String, event_id::Union{String, Regex};
   msr       ::Bool                  = true,                   # read multistage response?

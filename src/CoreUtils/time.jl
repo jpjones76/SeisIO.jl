@@ -86,43 +86,12 @@ function md2j(y::T, m::T, d::T) where T<:Integer
 end
 md2j(y::AbstractString, m::AbstractString, d::AbstractString) = md2j(parse(Int, y), parse(Int, m), parse(Int, d))
 
-
-@doc """
-# Time Specification
-
-Most functions that allow time specification use two reserved keywords to track
-time:
-* `s`: Start (begin) time
-* `t`: Termination (end) time
-
-The values passed to keywords `s` and `t` can be real numbers, DateTime objects,
-or ASCII strings; details and specific requirements are given in the time API (https://github.com/jpjones76/SeisIO.jl/blob/master/docs/DevGuides/time.md).
-
-## **parsetimewin Behavior**
-In all cases, parsetimewin outputs a pair of strings, sorted so that the first string corresponds to the earlier start time.
-
-| typeof(s) | typeof(t) | Behavior                                          |
-|:------    |:------    |:-------------------------------------             |
-| DateTime  | DateTime  | sort                                              |
-| DateTime  | Real      | add *t* seconds to *s*, then sort                 |
-| DateTime  | String    | convert *t* => DateTime, then sort                |
-| DateTime  | String    | convert *t* => DateTime, then sort                |
-| Real      | DateTime  | add *s* seconds to *t*, then sort                 |
-| Real      | Real      | treat *s*, *t* as seconds from current time; sort |
-| String    | DateTime  | convert *s* => DateTime, then sort                |
-| String    | Real      | convert *s* => DateTime, then sort                |
-
-### Timekeeping with Real values
-Numeric time values are interpreted relative to the start of the current minute. Thus, if `-s` or `-t` is 0, the data request begins (or ends) at the start of the minute in which the request is submitted.
-""" timespec
-timespec() = nothing
-
 """
     (str0, str1) = parsetimewin(ts1::TimeSpec, ts2::TimeSpec)
 
 Convert times `s` and `t` to strings and sorts s.t. d0 < d1.
 
-See also: `?timespec`
+See also: `TimeSpec`
 """
 function parsetimewin(s::DateTime, t::DateTime)
   if s < t
