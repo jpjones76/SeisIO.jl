@@ -89,3 +89,23 @@ for i = 1:10
   randSeisSrc()
   randSeisEvent()
 end
+
+printstyled("    keywords\n", color=:light_green)
+printstyled("      a0\n", color=:light_green)
+try
+  randSeisData(a0=true)
+catch err
+  println("a0 = true threw error ", err)
+end
+
+printstyled("      fc\n", color=:light_green)
+C = randSeisChannel(fc = 2.0)
+resp_a0!(C.resp)
+r1 = fctoresp(2.0f0, 1.0f0)
+r2 = fctoresp(2.0f0, Float32(1.0/sqrt(2)))
+resp_a0!(r1)
+resp_a0!(r2)
+r = C.resp
+for f in (:a0, :f0, :z, :p)
+  @test isapprox(getfield(r, f), getfield(r1, f), rtol=eps(Float32)) || isapprox(getfield(r, f), getfield(r2, f), rtol=eps(Float32))
+end
