@@ -138,8 +138,10 @@ function read_asdf!(  S::GphysData,
             jⱼ = iⱼ+nₒ-1
             load_data!(S.x[j], tr, iₜ:jₜ, iⱼ:jⱼ)
           end
+          HDF5.h5d_close(tr)
         end
       end
+      HDF5.h5g_close(sta)
     end
   end
 
@@ -148,6 +150,7 @@ function read_asdf!(  S::GphysData,
   trunc_x!(S)
 
   # Done
+  HDF5.h5g_close(wv)
   close(f)
   return S
 end
