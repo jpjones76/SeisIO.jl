@@ -9,6 +9,14 @@ function test_chan_ext(file::String, fmt::String, id::String, fs::Float64, i::In
   # Comparison struct
   S = verified_read_data(fmt, file)
   j = findid(id, S)
+  if j == 0
+    println("Test failing; cannot find ID!")
+    println(rpad("File: ", 12), file)
+    println(rpad("Format: ", 12), fmt)
+    println("Channel ID: ", id)
+    println("Output IDs: ", S.id)
+    throw("Test failed; ID not found!")
+  end
 
   # Create SeisData struct with data present using correct headers
   ny = max(100, round(Int64, 10*fs))
