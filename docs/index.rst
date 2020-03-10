@@ -17,8 +17,8 @@ SeisIO is a collection of utilities for reading and downloading geophysical time
    :maxdepth: 0
 
    src/intro.rst
-   src/tutorial.rst
-   src/working_with_data.rst
+   src/Help/tutorial.rst
+   src/Help/working_with_data.rst
    src/Help/help.rst
 
 .. toctree::
@@ -41,7 +41,7 @@ SeisIO is a collection of utilities for reading and downloading geophysical time
   :caption: Writing Files
   :maxdepth: 0
 
-  src/writing.rst
+  src/Formats/writing.rst
 
 .. toctree::
   :caption: Processing

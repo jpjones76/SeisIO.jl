@@ -4,9 +4,9 @@
 First Steps
 ###########
 SeisIO is designed around easy, fluid, and fast data access.
-At the most basic level, SeisIO uses an array-like custom object called a
-**SeisChannel** for single-channel data; **SeisData** objects store
-multichannel data and can be created by combining SeisChannels.
+At the most basic level, SeisIO uses an array-like structure called a
+**SeisChannel** for single-channel data, and a multichannel structure
+named **SeisData**.
 
 **********
 Start Here
@@ -132,9 +132,9 @@ a string to delete!(S, str) only matches channels where str is the exact ID.
 This is an efficient way to remove unresponsive subnets and unwanted channel
 types, but beware of clumsy over-matching.
 
-*************
+**********
 Next Steps
-*************
+**********
 Because tracking arbitrary operations can be difficult, several functions have
 been written to keep track of data and operations in a semi-automated way. See
 the next section, :ref:`working with data<wwd>`, for detailed discussion of

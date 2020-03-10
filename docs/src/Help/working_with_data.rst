@@ -3,7 +3,7 @@
 #################
 Working with Data
 #################
-This section describes how to track and manage SeisIO data.
+This section is a tutorial for tracking and managing SeisIO data.
 
 ************************
 Creating Data Containers
@@ -26,7 +26,7 @@ Acquiring Data
 *******************
 * Read files with :ref:`read_data<readdata>`
 * Make web requets with :ref:`get_data<getdata>`
-* Initiate real-time streaming sessions to SeisData objects with :ref:`SeedLink!<seedlink-section>`
+* Initiate real-time streaming sessions to SeisData objects with :ref:`seedlink<seedlink-section>`
 
 *******************
 Keeping Track
@@ -43,8 +43,7 @@ with "UW.".
 .. function:: findid(S::SeisData, id)
 
 Return the index of the first channel in **S** where id = **id**. Requires an
-exact string match; intended as a low-memory equivalent to findfirst for
-ids.
+exact string match; faster than Julia *findfirst* on small structures.
 
 .. function:: findid(S::SeisData, Ch::SeisChannel)
 
@@ -76,12 +75,12 @@ string (default is "File"):
 
 .. function:: timestamp()
 
-Return current UTC time formatted yyyy-mm-ddTHH:MM:SS.uuu.
+Return current UTC time formatted yyyy-mm-ddTHH:MM:SS.
 
 .. function:: track_off!(S)
 
 Turn off tracking in S and return a boolean vector of which channels were added
-or altered significantly.
+or changed.
 
 .. function:: track_on!(S)
 
@@ -92,16 +91,17 @@ Does not track data processing operations on any channel i unless
 length(S.x[i]) changes for channel i (e.g. filtering is not tracked).
 
 **Warning**: If you have or suspect gapped data in any channel, calling
-ungap! while tracking is active will flag a channel as changed.
+ungap! while tracking is active will always flag a channel as changed.
 
 
 Source Logging
 ==============
-The :src field records the *last* source used to populate each channel (usually
-a file name and path or a web request URL).
+The :src field records the *last* data source used to populate each channel;
+usually a file name or URL.
 
 When a data source is added to a channel, including the first time data are
-added, this is recorded in :notes with the syntax (timestamp) +src: (function) (src).
+added, it's also recorded in the *:notes* field. Use *show_src(S, i)* to print
+all data sources for channel *S[i]* to stdout (see below for details).
 
 
 *******************

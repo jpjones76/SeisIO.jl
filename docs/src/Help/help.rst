@@ -3,20 +3,14 @@
 ############
 Getting Help
 ############
-Numerous sources of help are available, including web-hosted documentation, command-line help, tutorials, worked examples, and tests.
+In addition to the Juypter notebooks and :ref:`online tutorial guide<tutorial>`,
+other sources of help are available:
 
-********
-Tutorial
-********
+* :ref:`Examples<examples>`
+* :ref:`Automated Tests<tests>`
+* :ref:`Command-Line Help<cli_help>`
 
-To invoke tutorial notebooks in your web browser, execute these commands at a Julia prompt:
-
-::
-
-  p = pathof(SeisIO)
-  d = dirname(realpath(p))
-  cd(d)
-  include("../tutorial/install.jl")
+.. _examples:
 
 ********
 Examples
@@ -33,6 +27,8 @@ Invoke the command-prompt examples with the following command sequence:
   cd(d)
   include("../test/examples.jl")
 
+.. _tests:
+
 *****
 Tests
 *****
@@ -47,19 +43,50 @@ The commands in *tests/* can be used as templates; to install test data and run 
   p = pathof(SeisIO)
   cd(realpath(dirname(p) * "/../test/"))
 
+.. _cli_help:
+
 *****************
 Command-Line Help
 *****************
 
-A great deal of additional help functions are available at the Julia command prompt. All exported SeisIO functions have docstrings.
+A great deal of additional help functions are available at the Julia command prompt. All SeisIO functions and structures have their own docstrings. For example, typing *?SeisData* at the Julia prompt produces the following:
+
+::
+
+  SeisData
+
+  A custom structure designed to contain the minimum necessary information
+  for processing univariate geophysical data.
+
+  SeisChannel
+
+  A single channel designed to contain the minimum necessary information
+  for processing univariate geophysical data.
+
+  Fields
+  ========
+
+  Field  Description
+  –––––– ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+  :n     Number of channels [^1]
+  :c     TCP connections feeding data to this object [^1]
+  :id    Channel id. Uses NET.STA.LOC.CHAN format when possible
+  :name  Freeform channel name
+  :loc   Location (position) vector; any subtype of InstrumentPosition
+  :fs    Sampling frequency in Hz; fs=0.0 for irregularly-sampled data.
+  :gain  Scalar gain
+  :resp  Instrument response; any subtype of InstrumentResponse
+  :units String describing data units. UCUM standards are assumed.
+  :src   Freeform string describing data source.
+  :misc  Dictionary for non-critical information.
+  :notes Timestamped notes; includes automatically-logged info.
+  :t     Matrix of time gaps in integer μs, formatted [Sample# Length]
+  :x     Time-series data
+
 
 Dedicated Help Functions
 ========================
 These functions take no arguments and dump information to stdout.
-
-Typing SeisIO.ChanSpec at the Julia prompt gives the union of Types that can be inputs to a channel selector keyword.
-
-Typing SeisIO.TimeSpec at the Julia prompt gives the union of Types that can be passed to start (*s=*) and end (*t=*) arguments/keywords.
 
 Submodule SEED
 **************
@@ -100,7 +127,7 @@ Help-Only Functions
 ===================
 These functions contain help docstrings but execute nothing. They exist to answer common questions.
 
-.. function:: ?chanspec
+.. function:: ?web_chanspec
 
 Answers: how do I specify channels in a web request? Outputs :ref:`channel id syntax <cid>` to stdout.
 
@@ -108,19 +135,9 @@ Answers: how do I specify channels in a web request? Outputs :ref:`channel id sy
 
 Answers: which servers are available for FDSN queries? Outputs :ref:`the FDSN server list<servers>` to stdout.
 
-.. function:: ?timespec
+.. function:: ?TimeSpec
 
 
 All About Keywords
 ==================
 Invoke keywords help with **?SeisIO.KW** for complete information on SeisIO shared keywords and meanings.
-
-
-Structure Docstrings
-====================
-The docstrings of every custom structure (Type) defined in SeisIO and its submodules provide detailed descriptions of what each field holds. For example:
-
-::
-
-  using SeisIO
-  ?SeisData
