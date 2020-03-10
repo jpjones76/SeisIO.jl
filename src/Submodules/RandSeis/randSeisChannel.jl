@@ -90,8 +90,8 @@ function rand_t(fs::Float64, nx::Int64, n::Int64, gs::Int64)
       lg = length(gi)
     end
 
-    # Generate exponentially-distributed gap lengths
-    gl = ceil.(Int64, max.(δ, min.(maxintfloat(), Δ .* 10.0 .^ randexp(ngaps))))
+    # Generate Gaussian-distributed gap lengths
+    gl = ceil.(Int64, max.(δ, Δ .* min.(1.0e5, 10.0 .^ abs.(randn(ngaps)))))
     # .* ((-1).^rand(Bool, ngaps))
 
     t[2:ngaps+1,1] .= gi
