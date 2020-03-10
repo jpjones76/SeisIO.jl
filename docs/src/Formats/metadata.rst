@@ -28,6 +28,10 @@ Supported File Formats
   SACPZ                     | sacpz
   SEED RESP                 | resp
 
+**Warning**: Dataless SEED, SACPZ, and RESP files must be Unix text files; DOS
+text files, whose lines end in "\\r\\n", will not read properly. Convert with
+`dos2unix` or equivalent Windows Powershell commands.
+
 ******************
 Supported Keywords
 ******************

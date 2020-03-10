@@ -49,6 +49,10 @@ wrapper; it reads only the first SeisIO object from each file that can be
 converted to a SeisData structure. For more complicated read operations,
 ``rseis`` should be used.
 
+**Warning**: GeoCSV files must be Unix text files; DOS text files, whose lines
+end in "\\r\\n", will not read properly. Convert with `dos2unix` or equivalent
+Windows Powershell commands.
+
 ******************
 Supported Keywords
 ******************

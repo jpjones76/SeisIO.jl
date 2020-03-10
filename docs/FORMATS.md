@@ -7,16 +7,16 @@
 | ASDF timeseries | read_hdf5     | write_hdf5   | asdf          | k           |
 | Bottle          | read_data     |              | bottle        |             |
 | Dataless SEED   | read_meta     |              | dataless      |             |
-| GeoCSV slist    | read_data     |              | geocsv.slist  |             |
-| GeoCSV tspair   | read_data     |              | geocsv        |             |
+| GeoCSV slist    | read_data     |              | geocsv.slist  | u           |
+| GeoCSV tspair   | read_data     |              | geocsv        | u           |
 | Lennartz ASCII  | read_data     |              | lennartz      |             |
 | Mini-SEED       | read_data     |              | mseed         | o           |
 | PASSCAL SEG Y   | read_data     |              | passcal       |             |
 | QuakeML         | read_qml      | write_qml    |               |             |
-| RESP            | read_meta     |              | resp          |             |
-| SAC polezero    | read_meta     |              | sacpz         |             |
+| RESP            | read_meta     |              | resp          | u           |
+| SAC polezero    | read_meta     | writesacpz   | sacpz         | u           |
 | SAC timeseries  | read_data     | writesac     | sac           |             |
-| SEG Y           | read_data     | writesacpz   | segy          | i           |
+| SEG Y           | read_data     |              | segy          | i           |
 | SeisIO          | rseis         | wseis        |               |             |
 | SLIST           | read_data     |              | slist         |             |
 | SUDS event      | read_quake    |              | suds          | o           |
@@ -42,3 +42,4 @@
 * **i**: incomplete
   + SEG Y rev 2 read support is NYI; send us test files if you need it!
 * **o**: out-of-scope blockettes/structures are skipped
+* **u**: UNIX-style text files only; uses a byte-wise parser and assumes lines end in "\n". DOS-style text files (whose lines end in "\r\n") must be converted with e.g. `dos2unix(fname)` or equivalent Windows Powershell command(s).
