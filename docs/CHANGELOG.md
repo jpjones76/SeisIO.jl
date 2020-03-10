@@ -1,3 +1,10 @@
+### 2020-03-10
+* Automated testing for Julia v.1.1-1.2 has ended. Tested versions of the language include v1.0 (LTS), v1.3 (stable), and v1.4 (upcoming release).
+* The docstring `?chanspec` was renamed `?web_chanspec` to avoid confusion with SeisIO internals.
+* The docstring `?timespec` was renamed to `?TimeSpec`.
+* Quake Type *SeisEvent* now has a real docstring.
+* Quake Type *EventChannel* has a docstring again.
+
 ### 2020-03-09
 * Rewrote SeisIO.RandSeis for faster structure generation
   + randSeisChannel has two new keywords: fs_min and fc
@@ -5,6 +12,7 @@
 * More documentation and docstring updates
 * The data processing functions *ungap!*, *taper!*, *env!*, *filtfilt!*, and *resample!* can no longer be forced to work on irregularly-sampled data by doing clever things with keywords.
 * *taper* now has a docstring
+* ASDF file reads now close all groups and datasets after reading
 
 ### 2020-03-07
 * Increased the robustness of *t_extend*; it no longer needs a mini-API.
@@ -73,7 +81,7 @@ Data files no longer track the LOC field of `:id` on read or write.
   can be changed with `SeisIO.KW.SL.u=URL` for string *URL*.
   + the docstring has been edited to list the correct keywords available.
 * `Quake.get_pha!` docstring corrected
-* The (potentially very long) tests to download data from the NCEDC and SCEDC servers have been removed, as has the dreaded `servers="all"` test in the Quake submodule. These changes shorten package tests by 3-5 minutes and eliminate most of the timeout errors in Appveyor and Travis-CI.
+* The (potentially very long) `servers="all"` test was removed from the Quake submodule. This change shortens automated tests by 3-5 minutes and eliminates many timeout errors in Appveyor and Travis-CI.
 * `examples.jl` no longer errors on the SeedLink examples when invoked outside the "tests" directory.
 
 ### 2020-02-29
