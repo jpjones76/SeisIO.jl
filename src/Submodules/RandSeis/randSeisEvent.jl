@@ -57,9 +57,9 @@ function randSeisHdr()
            4 + round(Int64, rand()*exp(mw)),
            rand(0x00:0x10:0xf0),
            rand_datum(),
-           rand(("HYPOCENTER", "CENTROID", "AMPLITUDE", "MACROSEISMIC", "RUPTURE_START", "RUPTURE_END")),
+           rand(loc_types),
            "",
-           rand(("HYPOELLIPSE", "HypoDD", "Velest", "centroid")))
+           rand(loc_methods))
 
   # setfield!(loc, :sig, "1σ")
   # event type
@@ -72,7 +72,7 @@ function randSeisHdr()
     randstring(rand(2:4))))                                         # :int
   setfield!(H, :loc, loc)                                           # :loc
   setfield!(H, :mag, EQMag( val   = mw,          # :mag
-                            scale = rand(("M","m")) * randstring(2),
+                            scale = (rand() < 0.5 ? "m" : "M") * randstring(2),
                             nst   = rand(3:100),
                             gap   = abs(rand_lon()),
                             src   = randstring(24)

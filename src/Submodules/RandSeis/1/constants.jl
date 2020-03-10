@@ -1,14 +1,14 @@
 const h_crit = Float32(1/sqrt(2))
 
-const fc_vals = Tuple(vcat(Float64[1/120, 1/60],  # STS-2, CMG-3T
+const fc_vals = vcat(Float64[1/120, 1/60],        # STS-2, CMG-3T
                        repeat([1/30], 2),         # CMG-40
                        [0.2],                     # Lennartz LE-3D
                        repeat([1.0], 5),          # ...everything...
                        repeat([2.0], 2),          # passive geophones
-                       [4.5]))                    # passive industry geophones
-const fs_vals = (0.1, 1.0, 2.0, 5.0, 10.0, 20.0, 25.0, 40.0, 50.0, 60.0, 62.5, 80.0, 100.0)
+                       [4.5])                     # passive industry geophones
+const fs_vals = [0.1, 1.0, 2.0, 5.0, 10.0, 20.0, 25.0, 40.0, 50.0, 60.0, 62.5, 80.0, 100.0]
 
-const irregular_units = ("%",
+const irregular_units = ["%",
  "%{cloud_cover}",
  "{direction_vector}",
  "Cel",
@@ -26,10 +26,10 @@ const irregular_units = ("%",
  "rad",
  "rad/s",
  "rad/s2",
- "t{SO_2}")
+ "t{SO_2}"]
 
 # Acceptable type codes in :misc
-const OK = (      0x00, 0x01,
+const OK =  UInt8[0x00, 0x01,
                   0x10, 0x11, 0x12, 0x13, 0x14,
                   0x20, 0x21, 0x22, 0x23, 0x24,
                   0x30, 0x31, 0x32,
@@ -42,9 +42,9 @@ const OK = (      0x00, 0x01,
                   0xb0, 0xb1, 0xb2,
                   0xd0, 0xd1, 0xd2, 0xd3, 0xd4,
                   0xe0, 0xe1, 0xe2, 0xe3, 0xe4,
-                  0xf0, 0xf1, 0xf2 )
+                  0xf0, 0xf1, 0xf2 ]
 
-const evtypes = (       "not_existing",
+const evtypes = [      "not_existing",
                         "not_reported",
                         "anthropogenic_event",
                         "collapse",
@@ -86,8 +86,8 @@ const evtypes = (       "not_existing",
                         "landslide",
                         "rockslide",
                         "meteorite",
-                        "volcanic_eruption" )
-const phase_list = ("P",
+                        "volcanic_eruption" ]
+const phase_list = ["P",
                     "PKIKKIKP",
                     "PKIKKIKS",
                     "PKIKPPKIKP",
@@ -113,8 +113,8 @@ const phase_list = ("P",
                     "sP",
                     "sPKiKP",
                     "sS",
-                    "sSKS")
+                    "sSKS"]
 
-const pol_list = ('U', 'D', '-', '+', '_', ' ')
-const loc_types = ("HYPOCENTER", "CENTROID", "AMPLITUDE", "MACROSEISMIC", "RUPTURE_START", "RUPTURE_END")
-const loc_methods = ("HYPOELLIPSE", "HypoDD", "Velest", "centroid")
+const pol_list = ['U', 'D', '-', '+', '_', ' ']
+const loc_types = ["HYPOCENTER", "CENTROID", "AMPLITUDE", "MACROSEISMIC", "RUPTURE_START", "RUPTURE_END"]
+const loc_methods = ["HYPOELLIPSE", "HypoDD", "Velest", "centroid"]
