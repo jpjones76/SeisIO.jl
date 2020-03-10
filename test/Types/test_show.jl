@@ -35,6 +35,5 @@ redirect_stdout(out) do
   mseed_support()
   dataless_support()
   resp_wont_read()
-  @test chanspec() == nothing
-  @test timespec() == nothing
+  @test web_chanspec() == nothing
 end

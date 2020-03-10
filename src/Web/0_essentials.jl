@@ -1,4 +1,4 @@
-export chanspec, seis_www, track_on!, track_off!
+export web_chanspec, seis_www, track_on!, track_off!
 
 # Generic handler for getting data by HTTP
 # Returns:
@@ -187,25 +187,39 @@ seis_www = Dict("BGR" => "http://eida.bgr.de",
 
 fdsn_uhead(src::String) = haskey(seis_www, src) ? seis_www[src] * "/fdsnws/" : src
 
-"""
-## CHANNEL ID SPECIFICATION
-Channel ID data can be passed to SeisIO web functions in three ways:
+@doc """
+    web_chanspec
 
-1. String: a comma-delineated list of IDs formatted `"NET.STA.LOC.CHA"` (e.g. `"PB.B004.01.BS1,PB.B004.01.BS2"`)
-2. Array{String,1}: one ID per entry, formatted `"NET.STA.LOC.CHA"` (e.g. `["PB.B004.01.BS1","PB.B004.01.BS2"]`)
-3. Array{String,2}: one ID per row, formatted `["NET" "STA" "LOC" "CHA"]` (e.g. `["PB" "B004" "01" "BS?"; "PB" "B001" "01" "BS?"]`)
+## Specifying Channel IDs in Web Requests
+| Str | L  | Meaning              | Example |
+|:--- |:---|:-----                |:-----   |
+| NET | 2  | Network code         | "IU"    |
+| STA | 5  | Station code         | "ANMO"  |
+| LOC | 2  | Location identifier  | "00"    |
+| CHA | 3  | Channel code         | "BHZ"   |
 
-The `LOC` field can be left blank (e.g. `"UW.ELK..EHZ", ["UW" "ELK" "" "EHZ"]`).
+A channel is uniquely specified by four substrings (NET, STA, LOC, CHA), which
+can be formatted as a String or a String array. Each substring has a maximum
+safe length of `L` characters (column 2 in the table).
 
-The allowed subfield widths before channel IDs break is identical to the FDSN
-standard: NN.SSSSS.LL.CCC (network name length ≤ 2 chars, etc.)
+### Acceptable Channel ID Formats
+| Type              | Example                                           |
+|:-----             |:-----                                             |
+| String            | "PB.B004.01.BS1, PB.B004.01.BS2"                  |
+| Array{String, 1}  | ["PB.B004.01.BS1","PB.B004.01.BS2"]               |
+| Array{String, 2}  | ["PB" "B004" "01" "BS?"; "PB" "B001" "01" "BS?"]  |
 
-#### SEEDLINK ONLY
+The `LOC` field can be blank in FDSN requests with get_data; for example,
+`chans="UW.ELK..EHZ"; get_data("FDSN", chans)`.
+
+#### SeedLink only
 For SeedLink functions (`seedlink!`, `has_stream`, etc.), channel IDs can
 include a fifth field (i.e. NET.STA.LOC.CHA.T) to set the "type" flag (one of
 DECOTL, for Data, Event, Calibration, blOckette, Timing, or Logs). Note that
-SeedLink calibration, timing, and logs are not supported by SeisIO.
+SeedLink calibration, timing, and logs are not in the scope of SeisIO.
+
+See also: `get_data`, `seedlink`
 """
-function chanspec()
+function web_chanspec()
   return nothing
 end

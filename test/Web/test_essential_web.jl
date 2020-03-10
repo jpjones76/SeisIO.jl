@@ -128,9 +128,9 @@ io = open(xml_stfile, "r")
 xsta = read(io, String)
 close(io)
 
-chanspec()
-chanspec()
-chanspec()
+web_chanspec()
+web_chanspec()
+web_chanspec()
 
 # Test tracking of changes in SeisData structure S ==========================
 # Does S change? Let's see.

@@ -32,7 +32,7 @@ Other keywords:
 * t: Termination (end) time
 * xf: Name of XML file to save station metadata
 
-See also: `chanspec`, `parsetimewin`, `get_data!`, `SeisIO.KW`
+See also: `web_chanspec`, `parsetimewin`, `get_data!`, `SeisIO.KW`
 """
 function FDSNsta( chans::ChanOpts="*";
                     msr::Bool              = false,          # MultiStageResp
