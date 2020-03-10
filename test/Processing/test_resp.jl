@@ -31,7 +31,7 @@ S.resp[2] = fctoresp(0.2f0)
 S.resp[3] = fctoresp(2.0f0)
 S.x[1] = randn(Float32, S.t[1][end,1])
 for i = 1:3
-  S.units[i] = rand(("m", "m/s", "m/s2"))
+  S.units[i] = rand(["m", "m/s", "m/s2"])
 end
 S.resp[3].z = ComplexF32[]
 C_a = deepcopy(S[3])
