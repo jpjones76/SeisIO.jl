@@ -17,10 +17,10 @@ end
 
 function rand_reg_id(fs::Float64, s::Bool)
   bc = getbandcode(fs)
-  ic, cc, units = getyp2codes(bc, s)
+  cha, units = iccodes_and_units(bc, s)
 
   # faster and less memory than join(), but looks clumsy
-  id = string(rand_net(), ".", randstring('A':'Z', rand(3:5)), ".", rand_loc(), ".", bc, ic, cc)
+  id = string(rand_net(), ".", randstring('A':'Z', rand(3:5)), ".", rand_loc(), ".", cha)
   return id, units
 end
 

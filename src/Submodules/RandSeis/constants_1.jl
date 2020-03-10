@@ -118,3 +118,14 @@ const phase_list = ["P",
 const pol_list = ['U', 'D', '-', '+', '_', ' ']
 const loc_types = ["HYPOCENTER", "CENTROID", "AMPLITUDE", "MACROSEISMIC", "RUPTURE_START", "RUPTURE_END"]
 const loc_methods = ["HYPOELLIPSE", "HypoDD", "Velest", "centroid"]
+
+const hln = ['H','L','N']
+const iclist = ['A','B','D','F','G','I','J','K','M','O','P','Q','R','S','T','U','V','W','Z']
+const oid = ['O','I','D']
+const zne = ['Z','N','E']
+const nvc = ['A','B','C','1','2','3','U','V','W']
+const oidfhu = ['O','I','D','F','H','U']
+const icfo = ['I','C','F','O']
+const junits = ["rad", "rad/s", "rad/s2"]
+
+const geodetic_datum = ["ETRS89", "GRS 80", "JGD2011"]
