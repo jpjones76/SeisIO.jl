@@ -16,16 +16,14 @@ for i = 1:100
 end
 
 # Similarly for the yp2 codes
-printstyled("  getyp2codes\n", color=:light_green)
+printstyled("  iccodes_and_units\n", color=:light_green)
 for i = 1:1000
-  i,c,u = RandSeis.getyp2codes('s', true)
-  @test isa(i, Char)
-  @test isa(c, Char)
+  cha, u = RandSeis.iccodes_and_units('s', true)
+  @test isa(cha, String)
   @test isa(u, String)
 
-  i,c,u = RandSeis.getyp2codes('s', false)
-  @test isa(i, Char)
-  @test isa(c, Char)
+  cha, u = RandSeis.iccodes_and_units('s', false)
+  @test isa(cha, String)
   @test isa(u, String)
 end
 
