@@ -1,24 +1,22 @@
-v1.1.0: 2020-03-??
-
-Mostly a patch version with consistency changes and documentation updates. The minor version was incremented for strict semantic versioning because the SAC change breaks user work flows that match `:id` against SAC data files.
+This is largely a patch for 1.0.0, focused on documentation updates, a few consistency changes, and fixes for several rare or minor bugs. The minor version has been incremented for strict compliance with semantic versioning, because the SAC change breaks user work flows that match `:id` against SAC data files.
 
 # 1. **Public API Changes**
 ## **SAC**
 * SAC data files no longer track the LOC field of `:id`; thus, IDs `NN.SSSSS.LL.CCC` and `NN.SSSSS..CCC` will be written and read identically to/from SAC.
   + This change realigns SeisIO SAC handling with the format spec.
-  + *Explanation*: we learned only recently that LOC has no standard SAC header variable: some data sources stored this in KHOLE (byte offset 464), which was the convention we followed in the past. However, this is an event property (not a station property) in the [format spec](http://ds.iris.edu/files/sac-manual/manual/file_format.html).
+  + *Explanation*: Some data sources store the LOC field of `:id` in KHOLE (byte offset 464). We followed this convention through SeisIO v1.0.0. However, KHOLE is an event property -- not a station property -- in the [format spec](http://ds.iris.edu/files/sac-manual/manual/file_format.html).
 
 # 2. **Bug Fixes**
 * SEED submodule support functions (e.g. `mseed_support()`) now correctly info dump to stdout
 * Fixed a very rare bug in which two rows of a time matrix could have the same sample index
 * *merge!* is now logged in a way that *show_processing* catches
-* *read_qml* on an event with no magnitude element now returns a header whose `:mag` field SeisIO considers empty
+* *read_qml* on an event with no magnitude element now yields an empty `:hdr.mag`
 * *show* now reports true number of gaps when `:x` has a gap before the last sample
-* *write_hdf5* with *ovr=false* no longer overwrites a trace in an output volume when two sample windows have the same ID, start time string, and end time string; instead, the tag is incremented
-  + This was previously possible only with two segments from one channel that started on the same second and ended on the same second; it's unlikely that anyone encountered this situation with real data.
+* *write_hdf5* with *ovr=false* no longer overwrites a trace in an output volume when two sample windows have the same ID, start time string, and end time string; instead, the tag string is incremented
+  + This was previously possible only with two segments from one channel that started and ended on the same second; it's very unlikely that this bug was seen in real data
 * The data processing functions *ungap!*, *taper!*, *env!*, *filtfilt!*, and *resample!* can no longer be forced to work on irregularly-sampled data by doing clever things with keywords.
-* *taper* now has a docstring
 * Irregularly-sampled data channels are no longer writable to ASDF, which, by design, cannot handle irregularly-sampled data.
+* HDF groups and datasets are now all closed after reading.
 
 # 3. **Consistency Changes**
 * *get_data* with *w=true* now logs the raw download write to *:notes*
@@ -44,27 +42,23 @@ Fixed some rare bugs that could break automated tests.
 * Most internal functions have now switched from keywords to positional args
   * RandSeis: `populate_arr!`, `populate_chan!`
   * SeisHDF: `write_asdf` (note: doesn't affect `write_hdf5`)
-  * `FDSN_sta_xml`
-  * `FDSNget!`
-  * `IRISget!`
-  * `fdsn_chp`
-  * `irisws`
-  * `parse_charr`
-  * `parse_chstr`
-  * `read_station_xml!`
-  * `read_sxml`
-  * `sxml_mergehdr!`
-  * `trid`
+  * SeisIO: `FDSN_sta_xml` , `FDSNget!` , `IRISget!` , `fdsn_chp` , `irisws` , `parse_charr` , `parse_chstr` , `read_station_xml!` , `read_sxml` , `sxml_mergehdr!` , `trid`
 * Rewrote SeisIO.RandSeis for faster structure generation
   + randSeisChannel has two new keywords: *fs_min* and *fc*
   + randSeisData has two new keywords: *fs_min* and *a0*
-* [Official documentation](https://seisio.readthedocs.io/) reorganized for better navigation
-* Many docstrings have been updated and standardized
-* Updated the tutorial
+* [Official documentation](https://seisio.readthedocs.io/) updated
+* Many docstrings have been updated and standardized. Notable changes:
+  + *?timespec* is now *?TimeSpec*
+  + *?chanspec* is now *?web_chanspec*
+  + *?taper* now exists
+  + *?seedlink* keywords table corrected
+  + Quake *?EventChannel* now exists
+  + Quake *?get_pha!* now describes the correct function
+* Updated and expanded the tutorial
 
 ## **Internals**
 * *t_extend* is now more robust and no longer needs a mini-API
-  + previously, not all cases of time matrix extension were covered.
-  + this rewrite cover all 7 possible cases of time matrix extension, with full tests
+  + previously, some rare cases of time matrix extension could break. They were likely never present in real data -- e.g., a time matrix with a gap before the last sample, extended by another sample -- but they were theoretically possible.
+  + the rewrite covers and tests all 7 possible cases of time matrix extension.
 * *check_for_gap!* is now a thin wrapper to *t_extend*, ensuring uniform behavior
 * The internal functions in SeisIO.RandSeis have changed significantly. This will break work flows that imported RandSeis internals.
