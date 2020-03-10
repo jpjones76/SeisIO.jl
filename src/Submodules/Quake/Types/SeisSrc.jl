@@ -22,7 +22,8 @@ Initialize an empty SeisSrc object. Fields can be initialized at creation with k
 | st      | SourceTime          | source-time subfield                    |
 | misc    | Dict{String,Any}    | dictionary of non-essential information |
 | notes   | Array{String,1}     | notes and automated logging             |
-See also: EQLoc, EQMag
+
+See also: `EQLoc`, `EQMag`, `SourceTime`
 """
 mutable struct SeisSrc
   id      ::String

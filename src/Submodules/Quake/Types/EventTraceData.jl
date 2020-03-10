@@ -13,31 +13,29 @@ discrete event (earthquake).
 
 ## Fields: EventTraceData, EventChannel, SeisEvent.data
 
-| **Field** | **Description** |
-|:-------|:------ |
-| :n     | Number of channels [^1] |
-| :id    | Channel ids. use NET.STA.LOC.CHAN format when possible  |
-| :name  | Freeform channel names |
-| :loc   | Location (position) vector; any subtype of InstrumentPosition  |
-| :fs    | Sampling frequency in Hz; set to 0.0 for irregularly-sampled data. |
-| :gain  | Scalar gain  |
-| :resp  | Instrument response; any subtype of InstrumentResponse |
-| :units | String describing data units. UCUM standards are assumed. |
-| :az    | Source azimuth  |
-| :baz   | Backazimuth to source  |
-| :dist  | Source-receiver distance |
-| :pha   | Seismic phase catalog |
-| :src   | Freeform string describing data source. |
-| :misc  | Dictionary for non-critical information. |
-| :notes | Timestamped notes; includes automatically-logged acquisition and |
-|        | processing information. |
-| :t     | Matrix of time gaps, formatted [Sample# GapLength] |
-|        | gaps are in μs measured from the Unix epoch |
-| :x     | Data |
+| **Field** | **Description**                                               |
+|:-------|:------                                                           |
+| :n     | Number of channels [^1]                                          |
+| :id    | Channel id. Uses NET.STA.LOC.CHA format when possible            |
+| :name  | Freeform channel name                                            |
+| :loc   | Location (position) vector; any subtype of InstrumentPosition    |
+| :fs    | Sampling frequency in Hz; fs=0.0 for irregularly-sampled data.   |
+| :gain  | Scalar gain                                                      |
+| :resp  | Instrument response; any subtype of InstrumentResponse           |
+| :units | String describing data units. UCUM standards are assumed.        |
+| :az    | Source azimuth                                                   |
+| :baz   | Backazimuth to source                                            |
+| :dist  | Source-receiver distance                                         |
+| :pha   | Seismic phase catalog                                            |
+| :src   | Freeform string describing data source.                          |
+| :misc  | Dictionary for non-critical information.                         |
+| :notes | Timestamped notes; includes automatically-logged information.    |
+| :t     | Matrix of time gaps in integer μs, formatted [Sample# Length]    |
+| :x     | Time-series data                                                 |
 
 [^1]: Not present in EventChannel objects.
 
-See also: PhaseCat, SeisPha, SeisData
+See also: `PhaseCat`, `SeisPha`, `SeisData`
 """ EventTraceData
 mutable struct EventTraceData <: GphysData
   n     ::Int64                         # number of channels

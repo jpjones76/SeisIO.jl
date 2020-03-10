@@ -1,6 +1,6 @@
 export EventChannel
 
-@doc (@doc EventChannel)
+@doc (@doc EventTraceData)
 mutable struct EventChannel <: GphysChannel
   id    ::String                # id
   name  ::String                # name

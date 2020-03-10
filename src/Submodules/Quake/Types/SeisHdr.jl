@@ -20,7 +20,7 @@ keywords, e.g., SeisHdr(ot=DateTime("2012-01-03T03:49:45"), int=(0x02, "MMI")).
 | src   | ""            | String             | Data source (URL/filename)     |
 | typ   | ""            | String             | Event type                     |
 
-See also: EQLoc, EQMag
+See also: `EQLoc`, `EQMag`
 """
 mutable struct SeisHdr
   id    ::String

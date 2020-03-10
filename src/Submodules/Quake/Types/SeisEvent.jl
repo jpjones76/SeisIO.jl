@@ -1,5 +1,16 @@
 export SeisEvent
 
+
+@doc """
+    SeisEvent
+
+A structure for discrete seismic events, comprising three structures:
+* :hdr, a SeisHdr for the event descriptor
+* :source, a SeisSrc for descrition of the seismic source process
+* :data, an EventTraceData structure for channel data, including phases
+
+See also: `SeisHdr`, `SeisSrc`, `EventTraceData`
+"""
 mutable struct SeisEvent
   hdr::SeisHdr
   source::SeisSrc

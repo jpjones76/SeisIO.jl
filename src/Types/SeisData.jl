@@ -12,39 +12,28 @@ processing univariate geophysical data.
 A single channel designed to contain the minimum necessary information for
 processing univariate geophysical data.
 
-    SeisHdr
+## Fields
 
-A container for earthquake source information; specific to seismology.
-
-    SeisEvent
-
-A structure for discrete seismic events, comprising a SeisHdr for the event
-  descriptor and a SeisData for data.
-
-## Fields: SeisData, SeisChannel
-
-| **Field** | **Description** |
-|:-------|:------ |
-| :n     | Number of channels [^1] |
-| :c     | TCP connections feeding data to this object [^1] |
-| :id    | Channel ids. use NET.STA.LOC.CHAN format when possible  |
-| :name  | Freeform channel names |
-| :loc   | Location (position) vector; any subtype of InstrumentPosition  |
-| :fs    | Sampling frequency in Hz; set to 0.0 for irregularly-sampled data. |
-| :gain  | Scalar gain; divide data by the gain to convert to units  |
-| :resp  | Instrument response; any subtype of InstrumentResponse |
-| :units | String describing data units. UCUM standards are assumed. |
-| :src   | Freeform string describing data source. |
-| :misc  | Dictionary for non-critical information. |
-| :notes | Timestamped notes; includes automatically-logged acquisition and |
-|        | processing information. |
-| :t     | Matrix of time gaps, formatted [Sample# GapLength] |
-|        | gaps are in μs measured from the Unix epoch |
-| :x     | Data |
+| **Field** | **Description**                                               |
+|:-------|:------                                                           |
+| :n     | Number of channels [^1]                                          |
+| :c     | TCP connections feeding data to this object [^1]                 |
+| :id    | Channel id. Uses NET.STA.LOC.CHA format when possible            |
+| :name  | Freeform channel name                                            |
+| :loc   | Location (position) vector; any subtype of InstrumentPosition    |
+| :fs    | Sampling frequency in Hz; fs=0.0 for irregularly-sampled data.   |
+| :gain  | Scalar gain                                                      |
+| :resp  | Instrument response; any subtype of InstrumentResponse           |
+| :units | String describing data units. UCUM standards are assumed.        |
+| :src   | Freeform string describing data source.                          |
+| :misc  | Dictionary for non-critical information.                         |
+| :notes | Timestamped notes; includes automatically-logged information.    |
+| :t     | Matrix of time gaps in integer μs, formatted [Sample# Length]    |
+| :x     | Time-series data                                                 |
 
 [^1]: Not present in SeisChannel objects.
 
-See documentation (https://seisio.readthedocs.io/) for more details.
+See also: `InstrumentPosition`, `PZResp`
 """ SeisData
 mutable struct SeisData <: GphysData
   n::Int64
