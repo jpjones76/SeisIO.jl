@@ -1,3 +1,10 @@
+### 2020-03-13
+* *sync!* has been rewritten based on @tclements suggestions (Issue #31). Notable changes:
+  * Much less memory use
+  * Much faster; ~6x speedup on tests with 3 channels of length ~10^7 samples
+  * More robust handling of unusual time matrices (e.g., segments out of order)
+* The [tutorial page](https://seisio.readthedocs.io/en/latest/src/Help/tutorial.html) has been updated. Fixes issue #39.
+
 ### 2020-03-10
 * Automated testing for Julia v.1.1-1.2 has ended. Tested versions of the language include v1.0 (LTS), v1.3 (stable), and v1.4 (upcoming release).
 * The docstring `?chanspec` was renamed `?web_chanspec` to avoid confusion with SeisIO internals.
