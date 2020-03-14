@@ -1,39 +1,48 @@
-using Dates
-printstyled("  sync!\n", color=:light_green)
+printstyled("testing new sync! routine\n", color=:light_green)
 
 fs = 100.0
+Δ = round(Int64, 1.0e6/fs)
+t0 = 1582934400000000
 ns = 10
-t = floor(Int64, time()-60.0)*sμ
-δ3 = 1.0
-dtμ = round(Int, 1.0e6/fs)
+Δ3 = 1.0
 
-# for k = 1:10
 # Test three seismic and three irregularly sampled channels
-S = randSeisData(4, s=1.0)[2:4] + randSeisData(4, c=1.0)[2:4]
+S = randSeisData(3, s=1.0)
 
 # seismic channels will be ns seconds of data sampled at 100 Hz with preset gaps
-nx = round(Int, ns * fs)
+nx = round(Int64, ns * fs)
 for i = 1:3
   S.x[i] = rand(nx)       # Set S.x to be 1000 samples each
   S.fs[i] = fs            # Set S.fs to be uniformly 100 Hz
 end
-S.t[1] = [1 t; nx 0]
-S.t[2] = [1 t-ns*1000000; nx 0]
-S.t[3] = [1 t; 2 round(Int, δ3*1.0e6); nx 0]
+S.t[1] = [1 t0; nx 0]
+S.t[2] = [1 t0-ns*1000000; nx 0]
+S.t[3] = [1 t0; 2 round(Int64, Δ3*1.0e6); nx 0]
 
 # irregular channels will be 100 points each, randomly sampled between the start and the end
-n_irr = div(nx,10)
+append!(S, randSeisData(3, c=1.0))
+n_irr = div(nx, 10)
+ni = div(n_irr, ns)
 for i = 4:6
   S.x[i] = rand(n_irr)
   S.fs[i] = 0.0
-  r = UnitRange{Int64}(0:ns*1000000)
-  S.t[i] = hcat(zeros(Int64, n_irr), t.+sort(rand(r, n_irr)))
+  S.t[i] = zeros(n_irr, 2)
+  tv = zeros(Int64, n_irr)
 
-  # Ensure the last sample is always <1s from the end
-  τ = view(S.t[i], :, 2)
-  if last(τ)-first(τ) < (ns-1)*1.0e6
-    τ[end] = first(τ) + (ns-0.5)*1.0e6
+  #= the definition of rmax here prevents rng giving us a value above tmax
+    in test (6), which breaks the test
+  =#
+  for j = 1:ns
+    si = 1 + (j-1)*ni
+    ei = j*ni
+    rmin = t0 + (j-1)*1000000
+    rmax = t0 - 1 + (j*1000000) - (j == ns ? 2Δ : 0)
+    r = UnitRange{Int64}(rmin:rmax)
+    tv[si:ei] .= rand(r, ni)
   end
+  sort!(tv)
+  S.t[i][:,1] .= 1:n_irr
+  S.t[i][:,2] .= tv
 end
 sx = Lx(S)
 
@@ -49,7 +58,7 @@ T = sync(S)
 basic_checks(T)
 ts_new, te_new = get_edge_times(T)
 
-# Expectation: T.t[2] is deleted
+# Expectation: T[2] is deleted
 @test T.n == 5
 @test S.id[1] == T.id[1]
 @test findid(S.id[2], T.id) == 0
@@ -65,7 +74,7 @@ end
 # Sync to last start; don't sync ends
 
 # change trace 2 to begin only 1s earlier; resync
-S.t[2] = [1 t-1000000; nx 0]
+S.t[2] = [1 t0-1000000; nx 0]
 ts, te = get_edge_times(S)
 ts₀ = minimum(ts)
 ts₁ = maximum(ts)
@@ -131,12 +140,20 @@ vx = Lx(V)
 
 # Expectation:
 @test minimum(vx.-sx.≥0) == true                # vx is always longer
-@test vx[1]-sx[1] == 199
-@test vx[1]-ux[1] == 199
+t1 = t_expand(V.t[1], V.fs[1])
+t2 = t_expand(S.t[1], S.fs[1])
+j = setdiff(t1, t2)
+@test vx[1]-sx[1] == length(j)
+t2 = t_expand(U.t[1], U.fs[1])
+j = setdiff(t1, t2)
+@test vx[1]-ux[1] == length(j)
 @test minimum(ts_new .≥ ts₀) == true           # Should still be true
 @test 2 ∈ findall((ts_new .== ts₀).== true)   # Defined earliest start time
 @test vx[2] == vx[1]                           # Due to how we set the gap
-@test vx[2] - vx[3] == 99
+t2 = t_expand(V.t[2], V.fs[2])
+t3 = t_expand(V.t[3], V.fs[3])
+j = setdiff(t2, t3)
+@test vx[2] - vx[3] == length(j)
 @test minimum(te_new .≤ te₁) == true
 @test maximum(te_new .== te₁) == true
 for i = 4:6
@@ -150,32 +167,34 @@ end
 # so should trace 2
 printstyled(stdout,"    sync to DateTime; don't sync ends\n", color=:light_green)
 ts₆ = S.t[1][1,2]
-te₆ = S.t[1][1,2] + round(Int, 1.0e6*nx/fs)
+te₆ = S.t[1][1,2] + Δ*(nx-1)
 ds₆ = u2d(ts₆*1.0e-6)
-de₆ =  u2d(te₆*1.0e-6)
+de₆ = u2d(te₆*1.0e-6)
 W = sync(S, s=ds₆)
 basic_checks(W)
 ts_new, te_new = get_edge_times(W)
 wx = Lx(W)
 
 # Expectations:
-@test sx[2]-wx[2] == 100                      # Trace 2 is 100 samples shorter
+@test sx[2]-wx[2] == 100                # Trace 2 is 100 samples shorter
 for i in [1,3,4,5,6]
-  @test sx[i] == wx[i]                        # No change in other trace lengths
+  @test sx[i] == wx[i]                  # No change in other trace lengths
 end
 @test minimum(ts_new .≥ ts₆) == true           # We start at ts₆, not before
 @test findfirst(ts_new .== ts₆).== 1          # Defined start time
 
 # Repeat with an end time
+# te₆ = S.t[1][1,2] + round(Int64, 1.0e6*(nx-1)/fs)
+# de₆ = u2d(te₆*1.0e-6)
 W = sync(S, s=ds₆, t=de₆)
 basic_checks(W)
 ts_new, te_new = get_edge_times(W)
 wx = Lx(W)
 
 # Expectations:
-@test sx[3]-wx[3] == 99                       # Trace 3 is 99 samples shorter
+@test sx[3]-wx[3] == 100                  # Trace 3 is 100 samples shorter
 for i in [1,2,4,5,6]
-  @test sx[i] == wx[i]                        # No change in other trace lengths; 2 gets padded
+  @test sx[i] == wx[i]    # No change in other trace lengths; 2 gets padded
 end
 @test minimum(ts_new .≥ ts₆) == true           # We start at ts₆, not before
 @test findfirst(ts_new .== ts₆).== 1          # Defined start time
@@ -194,7 +213,7 @@ xx = Lx(X)
 # Expectations:
 @test xx[1]-sx[1] == 101    # Trace 1 is 101 samples longer
 @test xx[2]-sx[2] == 101    # Trace 2 is also 101 samples longer
-@test xx[3]-sx[3] == 2      # Trace 3 loses 99 samples at the end, but gains 100 at end and 1 at start ... net gain +2
+@test xx[3]-sx[3] == 1      # Trace 3 loses 100 samples at the end, but gains 100 at end and 1 at start ... net gain +1
 for i = 4:6
   @test xx[i] == sx[i]
 end
@@ -238,9 +257,9 @@ printstyled(stdout,"    prune all irregular data when all times are out of range
 
 ss = string(ds₆)
 Z = deepcopy(S)
-t = deepcopy(Z.t[5])
-t = hcat(t[:,1:1], vcat(0, diff(t[:,2:2], dims=1)))
-Z.t[5] = deepcopy(t)
+t1 = deepcopy(Z.t[5])
+t1 = hcat(t1[:,1:1], vcat(0, diff(t1[:,2:2], dims=1)))
+Z.t[5] = deepcopy(t1)
 
 redirect_stdout(out) do
   sync!(Z, v=3); basic_checks(Z)
@@ -256,7 +275,7 @@ end
 # method extenson to SeisChannel
 printstyled(stdout,"    SeisChannel method extension\n", color=:light_green)
 ts₆ = S.t[1][1,2]
-te₆ = S.t[1][1,2] + round(Int, 1.0e6*nx/fs)
+te₆ = S.t[1][1,2] + Δ*(nx-1)
 ds₆ = u2d(ts₆*1.0e-6)
 de₆ =  u2d(te₆*1.0e-6)
 C = deepcopy(S[1])
@@ -277,7 +296,7 @@ wx = Lx(W)
 # method extenson to SeisEvent
 printstyled(stdout,"    SeisEvent method extension\n", color=:light_green)
 ts₆ = S.t[1][1,2]
-te₆ = S.t[1][1,2] + round(Int, 1.0e6*nx/fs)
+te₆ = S.t[1][1,2] + Δ*(nx-1)
 ds₆ = u2d(ts₆*1.0e-6)
 de₆ =  u2d(te₆*1.0e-6)
 Ev = SeisEvent(hdr = randSeisHdr(), data = deepcopy(S))
