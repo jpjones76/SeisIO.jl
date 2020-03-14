@@ -300,7 +300,7 @@ function sort_segs(t::Array{Int64, 2}, Δ::Int64)
   is_gapless(t) && return
   W = t_win(t, Δ)
   sort_segs!(W)
-  return w_time(t, Δ)
+  return w_time(W, Δ)
 end
 
 """

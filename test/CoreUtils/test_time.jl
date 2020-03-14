@@ -233,6 +233,9 @@ W0 = deepcopy(W)
 sort_segs!(W)
 @test W == W0[[2,1,3], :]
 
+t = sort_segs(w_time(W0, Δ), Δ)
+@test t == w_time(W, Δ)
+
 printstyled(stdout, "    t_extend\n", color=:light_green)
 printstyled(stdout, "      time-series\n", color=:light_green)
 nx = 6000
