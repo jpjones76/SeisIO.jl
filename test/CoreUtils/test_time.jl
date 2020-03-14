@@ -220,6 +220,19 @@ for (n,s) in enumerate(["2018-01-01T00:00:00.000001",
   end
 end
 
+printstyled(stdout, "    sort_segs!\n", color=:light_green)
+Δ = 20000
+ts = 1583455810004000
+nx = 40000
+gi = 10
+gl = 6
+W = ts .+ Δ.*[    0     gi-1
+                -gl       -1
+                 gi  nx-gl-1]
+W0 = deepcopy(W)
+sort_segs!(W)
+@test W == W0[[2,1,3], :]
+
 printstyled(stdout, "    t_extend\n", color=:light_green)
 printstyled(stdout, "      time-series\n", color=:light_green)
 nx = 6000

@@ -119,3 +119,9 @@ function sync_test!(S::GphysData)
   @test maximum(t) - minimum(t) ≤ maximum(2.0./S.fs)
   return nothing
 end
+
+function test_del_ranges(x_del::Array{UnitRange, 1}, ii::Array{Int64, 1})
+  rr = [collect(i) for i in x_del]
+  jj = vcat(rr...)
+  @test jj == ii
+end

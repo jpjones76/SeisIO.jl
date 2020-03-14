@@ -1,4 +1,332 @@
-printstyled("testing new sync! routine\n", color=:light_green)
+printstyled("  sync!\n", color=:light_green)
+
+# Method of time calculation in old sync!
+function sync_times(t::AbstractArray{Int64, 2}, fs::Float64, t_min::Int64, t_max::Int64)
+  t_x = t_expand(t, fs)
+  ii = vcat(findall(t_x.<t_min), findall(t_x.>t_max))
+  return ii
+end
+sync_times(t::AbstractArray{Int64, 2}, fs::Float64, t_min::Int64) = get_sync_inds(t, fs, t_min, endtime(t, fs))
+
+# Based on code in sync!
+function prune_x!(x::SeisIO.FloatArray, x_del::Array{UnitRange, 1})
+  nr = size(x_del, 1)
+  for i in nr:-1:1
+    if !isempty(x_del[i])
+      deleteat!(x, x_del[i])
+    end
+  end
+  return nothing
+end
+
+printstyled("    sync_t\n", color=:light_green)
+
+# Cases to consider
+printstyled("      nothing removed\n", color=:light_green)
+# most basic case: a well-formed time matrix
+Δ = 20000
+ts = 1583455810004000
+nx = 40000
+fs = 1.0e6/Δ
+
+t = [1 ts; nx 0]
+te = endtime(t, Δ)
+t_min = ts
+t_max = te
+(xi, W) = sync_t(t, Δ, t_min, t_max)
+
+@test xi == [1 nx]
+@test W == t_win(t, Δ)
+
+i2 = sync_times(t, fs, t_min, t_max)
+x_del = get_del_ranges(xi, t[end, 1])
+test_del_ranges(x_del, i2)
+
+printstyled("      empty window\n", color=:light_green)
+t = [1 ts-nx*Δ; nx 0]
+(xi, W) = sync_t(t, Δ, t_min, t_max)
+
+@test isempty(xi)
+@test isempty(W)
+
+printstyled("      simple truncations\n", color=:light_green)
+# truncate start
+t = [1 ts; nx 0]
+nclip = 4
+(xi, W) = sync_t(t, Δ, ts+nclip*Δ, te)
+
+@test xi == [nclip+1 nx]
+
+# truncate end
+t_min = ts
+t_max = te-nclip*Δ
+(xi, W) = sync_t(t, Δ, t_min, t_max)
+
+@test xi == [1 nx-nclip]
+
+i2 = sync_times(t, fs, t_min, t_max)
+x_del = get_del_ranges(xi, t[end, 1])
+test_del_ranges(x_del, i2)
+
+# a time matrix with one gap equal to n samples
+n = 1
+gi = 10
+t = [1 ts; gi n*Δ; nx 0]
+(xi, W) = sync_t(t, Δ, ts, te)
+
+@test xi == [1 gi-1; gi nx-n]
+
+n = 120
+gi = 10
+t = [1 ts; gi n*Δ; nx 0]
+(xi, W) = sync_t(t, Δ, ts, te)
+
+@test xi == [1 gi-1; gi nx-n]
+
+# two gaps, n and m samples
+m = 33
+gj = 2000
+t = [1 ts; gi n*Δ; gj m*Δ; nx 0]
+(xi, W) = sync_t(t, Δ, ts, te)
+
+@test xi == [1 gi-1; gi gj-1; gj nx-m-n]
+
+t_min = ts
+t_max = te
+i2 = sync_times(t, fs, t_min, t_max)
+x_del = get_del_ranges(xi, t[end, 1])
+test_del_ranges(x_del, i2)
+
+# negative gap
+t = [1 ts; gi -n*Δ; nx 0]
+(xi, W) = sync_t(t, Δ, ts, te)
+
+@test xi == [1 gi-1; n+1 nx]
+
+# here, the number of samples before ts in window 2 is n-gi, or 110; the first
+# n-gi samples of this window are samples gi to n-gi+gi = n; so the window
+# starts at n+1, or 121
+
+t_min = ts
+t_max = te
+i2 = sync_times(t, fs, t_min, t_max)
+x_del = get_del_ranges(xi, t[end, 1])
+test_del_ranges(x_del, i2)
+
+# truncate other (windows not in chronological order)
+n = 120
+gi = 10
+nx = 100
+
+# start of middle window
+W = ts .+ Δ.*([   1       gi
+               -n+1        0
+               gi+1       nx ] .- 1)
+t_min = ts - div(n,2)*Δ
+t_max = last(W)
+t = w_time(W, Δ)
+xi0 = x_inds(t)
+(xi, W) = sync_t(t, Δ, t_min, t_max)
+
+@test xi-xi0 == [0 0; div(n,2) 0; 0 0]
+
+i2 = sync_times(t, fs, t_min, t_max)
+x_del = get_del_ranges(xi, t[end, 1])
+test_del_ranges(x_del, i2)
+
+# end of middle window
+W = ts .+ Δ.*([   1       gi
+               nx+1       nx+n
+               gi+1       nx ] .- 1)
+t_min = ts
+t_max = ts + (nx - 1 + div(n,2))*Δ
+t = w_time(W, Δ)
+xi0 = x_inds(t)
+(xi, W) = sync_t(t, Δ, t_min, t_max)
+
+@test xi-xi0 == [0 0; 0 -div(n,2); 0 0]
+
+i2 = sync_times(t, fs, t_min, t_max)
+x_del = get_del_ranges(xi, t[end, 1])
+test_del_ranges(x_del, i2)
+
+printstyled("      segment removed\n", color=:light_green)
+# first window gets emptied
+gi = 10
+nx = 100
+gl = 6
+W = ts .+ Δ.*[  -gl       -1
+                  1     gi-1
+              gi+gl       nx]
+t_min = ts
+t_max = last(W)
+t = w_time(W, Δ)
+xi0 = x_inds(t)
+xi, W1 = sync_t(t, Δ, ts, last(W))
+
+@test size(xi, 1) == size(W1, 1) == 2
+@test sum(diff(xi, dims=2).+1) == nx-gl
+
+i2 = sync_times(t, fs, t_min, t_max)
+x_del = get_del_ranges(xi, t[end, 1])
+test_del_ranges(x_del, i2)
+
+# second window gets emptied (no gap, windows 1 and 2 are out of order)
+W = ts .+ Δ.*[    0     gi-1
+                -gl       -1
+                 gi  nx-gl-1]
+t = w_time(W, Δ)
+xi = x_inds(t)
+xi1, W1 = sync_t(t, Δ, ts, last(W))
+
+@test size(xi1, 1) == size(W1, 1) == 2
+@test xi1 == xi[[1,3],:]
+
+# last window gets emptied
+W = ts .+ Δ.*[    0       gi
+               gi+2       nx
+               nx+2    nx+gi]
+t_min = ts
+t_max = W[2,2]
+t = w_time(W, Δ)
+xi = x_inds(t)
+xi1, W1 = sync_t(t, Δ, t_min, t_max)
+
+@test size(xi1, 1) == size(W1, 1) == 2
+@test xi1 == xi[[1,2],:]
+
+printstyled("      multiple segs removed\n", color=:light_green)
+# first + last emptied
+gi = 10
+W = ts .+ Δ.*[    0     gi-1
+               gi+2       nx
+               nx+2    nx+gi]
+t_min = ts + gi*Δ
+t_max = ts + nx*Δ
+t = w_time(W, Δ)
+xi0 = x_inds(t)
+xi, W1 = sync_t(t, Δ, t_min, t_max)
+
+@test size(xi, 1) == size(W1, 1) == 1
+@test xi == xi0[[2],:]
+
+i2 = sync_times(t, fs, t_min, t_max)
+x_del = get_del_ranges(xi, t[end, 1])
+test_del_ranges(x_del, i2)
+
+# first + last emptied, middle truncated by os
+os = 10
+t_max = ts + (nx-os)*Δ
+t = w_time(W, Δ)
+xi0 = x_inds(t)
+xi, W1 = sync_t(t, Δ, t_min, t_max)
+
+@test size(xi, 1) == size(W1, 1) == 1
+@test xi0[[2],:] .- xi == [0 os]
+
+i2 = sync_times(t, fs, t_min, t_max)
+x_del = get_del_ranges(xi, t[end, 1])
+test_del_ranges(x_del, i2)
+
+# first emptied, last truncated, middle is one point
+gi = 666
+nx = gi + 100
+W = ts .+ Δ.*[    0     gi-1
+               gi+2       nx
+               nx+2    nx+gi]
+t_min = ts + nx*Δ
+t_max = ts + (nx+div(gi,2))*Δ
+t = w_time(W, Δ)
+xi0 = x_inds(t)
+xi, W1 = sync_t(t, Δ, t_min, t_max)
+
+@test size(xi, 1) == size(W1, 1) == 2
+@test W1[1,1] == W1[1,2]
+@test div(W1[2,2] - W1[2,1], Δ) + 2 == div(gi, 2)
+
+i2 = sync_times(t, fs, t_min, t_max)
+x_del = get_del_ranges(xi, t[end, 1])
+test_del_ranges(x_del, i2)
+
+# second and last emptied
+gi = 10
+W = ts .+ Δ.*[    0     gi-1
+               gi+2       nx
+               nx+2    nx+gi]
+t_min = ts + (gi+1)*Δ
+t_max = ts + nx*Δ
+t = w_time(W, Δ)
+xi = x_inds(t)
+xi1, W1 = sync_t(t, Δ, t_min, t_max)
+
+@test size(xi1, 1) == size(W1, 1) == 1
+@test xi1 == xi[[2],:]
+
+printstyled("      complicated cases\n", color=:light_green)
+# complex case with no completely emptied windows; formed as W and not :t
+nx = 40000
+W = ts .+ Δ.*[1     10
+              12    12
+              14    14
+              23    40
+              51    100
+              -1200 0
+              101   9500
+              12000 41318]
+
+t_min = ts - 300Δ
+t_max = last(W) - 2000Δ
+t = w_time(W, Δ)
+xi0 = x_inds(t)
+xi, W = sync_t(t, Δ, t_min, t_max)
+
+j = sortperm(W[:,1])
+W1 = W[j,:]
+t1 = w_time(W1, Δ)
+@test t1[1,2] == t_min
+@test endtime(t1, Δ) == t_max
+
+# check our work; sorted matrix should be from t_min to t_max
+t2 = w_time(W, Δ)
+@test diff(x_inds(t2), dims=2) == diff(xi, dims=2)
+
+i2 = sync_times(t, fs, t_min, t_max)
+x_del = get_del_ranges(xi, t[end, 1])
+test_del_ranges(x_del, i2)
+
+# last window emptied; previous window truncated; first window truncated
+nx = 1000
+gi = 17
+os = 50
+W = ts .+ Δ.*[ -1*os      gi
+               gi+2    nx+gi
+               nx+gi+2   2nx ]
+t_min = ts
+t_max = W[2,2] - Δ*gi
+t = w_time(W, Δ)
+xi = x_inds(t)
+xi1, W1 = sync_t(t, Δ, t_min, t_max)
+t1 = w_time(W1, Δ)
+
+@test size(xi1, 1) == size(W1, 1) == 2
+@test xi1[2,2] == nx+os
+@test W[[1,2],:] != W1
+@test xi1[[1,2],:] != xi
+@test t1[1,2] == t_min
+@test endtime(t1, Δ) == t_max
+
+nx_true = t[end,1]
+i2 = sync_times(t, fs, t_min, t_max)
+x_del = get_del_ranges(xi1, nx_true)
+test_del_ranges(x_del, i2)
+
+# Final step, putting it all together
+x = randn(Float32, nx_true)
+x1 = deepcopy(x)
+x2 = deepcopy(x)
+prune_x!(x1, x_del)
+deleteat!(x2, i2)
+@test x1 == x2
 
 fs = 100.0
 Δ = round(Int64, 1.0e6/fs)
