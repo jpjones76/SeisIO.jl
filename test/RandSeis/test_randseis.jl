@@ -98,6 +98,12 @@ catch err
   println("a0 = true threw error ", err)
 end
 
+printstyled("      c\n", color=:light_green)
+for i = 1:10
+  S = randSeisData(10, c=1.0)
+  @test maximum(S.fs) == 0.0
+end
+
 printstyled("      fc\n", color=:light_green)
 C = randSeisChannel(fc = 2.0)
 resp_a0!(C.resp)
@@ -108,4 +114,10 @@ resp_a0!(r2)
 r = C.resp
 for f in (:a0, :f0, :z, :p)
   @test isapprox(getfield(r, f), getfield(r1, f), rtol=eps(Float32)) || isapprox(getfield(r, f), getfield(r2, f), rtol=eps(Float32))
+end
+
+printstyled("      s\n", color=:light_green)
+for i = 1:10
+  S = randSeisData(10, s=1.0)
+  @test maximum(S.fs) > 0.0
 end
