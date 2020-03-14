@@ -46,7 +46,7 @@ for i in 1:1000
   fs = rand(RandSeis.fs_vals)
   nx = round(Int64, rand(1200:7200)*fs)
   t = RandSeis.rand_t(fs, nx, 0, 1)
-  δt = div(round(Int64, 1.0e6/fs), 2) + 1
+  δt = div(round(Int64, sμ/fs), 2) + 1
   gaps = t[2:end-1, 2]
 
   if length(gaps) > 0

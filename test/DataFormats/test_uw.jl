@@ -48,7 +48,7 @@ n = S.n
 append!(S, convert(SeisData, W.data))
 @test S.n == n + W.data.n
 
-δt = 1.0e-6*(rem(W.hdr.ot.instant.periods.value*1000 - SeisIO.dtconst, 60000000))
+δt = μs*(rem(W.hdr.ot.instant.periods.value*1000 - SeisIO.dtconst, 60000000))
 
 i = findfirst(W.data.id.=="UW.TDH..EHZ")
 pha = W.data[i].pha["P"].tt

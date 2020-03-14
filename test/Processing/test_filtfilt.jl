@@ -3,7 +3,7 @@ nx = 10000
 T = Float32
 
 printstyled("  filtfilt!\n", color=:light_green)
-Δ = round(Int, 1.0e6/fs)
+Δ = round(Int64, sμ/fs)
 
 # Methods
 C = randSeisChannel(s=true)

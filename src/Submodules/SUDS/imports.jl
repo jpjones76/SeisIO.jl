@@ -3,5 +3,6 @@ import SeisIO: BUF,
     check_for_gap!,
     checkbuf!,
     checkbuf_8!,
-    sμ
+    sμ,
+    μs
 import SeisIO.Formats: formats, FmtVer, FormatDesc, HistVec

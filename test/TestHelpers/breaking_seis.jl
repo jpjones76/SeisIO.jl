@@ -1,6 +1,6 @@
 # "Hall of Shame" time matrices that broke previous tests
 function breaking_tstruct(ts::Int64, nx::Int64, fs::Float64)
-  Δ = round(Int64, 1.0e6/fs)
+  Δ = round(Int64, sμ/fs)
   t = rand([
     [1 ts+Δ; nx-1 7000; nx 57425593],
     [1 ts+Δ; nx-2 7000; nx-1 12345; nx 57425593],

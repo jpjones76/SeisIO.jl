@@ -283,7 +283,7 @@ function w_time(W::Array{Int64,2}, Δ::Int64)
   end
   return T
 end
-w_time(W::Array{Int64,2}, fs::Float64) = w_time(W, round(Int64, 1000000.0/fs))
+w_time(W::Array{Int64,2}, fs::Float64) = w_time(W, round(Int64, sμ/fs))
 
 # Sort based on start of each time window
 function sort_segs!(W::Array{Int64, 2})
@@ -453,7 +453,7 @@ function t_extend(T::Array{Int64,2}, ts::Integer, nx::Integer, fs::Float64)
     T2[1,2] = ts
     vcat(T, T2)
   else
-    t_extend(T, ts, nx, round(Int64, 1.0e6/fs))
+    t_extend(T, ts, nx, round(Int64, sμ/fs))
   end)
   return T1
 end

@@ -14,7 +14,7 @@ S = verified_read_data("mseed", test_mseed_file, v=0, strict=false)
 @test isequal(S.id[1], "NL.HGN.00.BHZ")
 @test ≈(S.fs[1], 40.0)
 @test ≈(S.gain[1], 1.0)
-@test isequal(string(u2d(S.t[1][1,2]*1.0e-6)), "2003-05-29T02:13:22.043")
+@test isequal(string(u2d(S.t[1][1,2]*μs)), "2003-05-29T02:13:22.043")
 @test ≈(S.x[1][1:5], [ 2787, 2776, 2774, 2780, 2783 ])
 
 # mseed with mmap
@@ -76,7 +76,7 @@ if safe_isdir(path*"/SampleFiles/Restricted")
         println("testing read accuracy of SHW.UW with ", f)
         @test size(S.t[1],1) >= 158
         @test size(S.t[2],1) >= 8
-        @test string(u2d(S.t[1][1,2]*1.0e-6)) == "1980-03-22T20:45:18.349"
+        @test string(u2d(S.t[1][1,2]*μs)) == "1980-03-22T20:45:18.349"
         @test isequal(S.id, String[ "UW.SHW..EHZ", "UW.SHW..SHZ" ])
         @test ≈(S.fs, Float64[104.085000, 52.038997])
         @test ≈(S.x[1][1:5], Float64[-68.0, -57.0, -71.0, -61.0, -52.0])
@@ -87,16 +87,16 @@ if safe_isdir(path*"/SampleFiles/Restricted")
         t = t_win(C.t, C.fs)[:,1]
         W = Array{DateTime,1}(undef, 0)
         for i=1:length(t)
-          # push!(W, round(u2d(t[i]*1.0e-6), Second))
-          push!(W, u2d(t[i]*1.0e-6))
+          # push!(W, round(u2d(t[i]*μs), Second))
+          push!(W, u2d(t[i]*μs))
         end
 
         Y = Array{DateTime,1}(undef,0)
         for f in fnames
           seis = verified_read_data("sac", f)[1]
-          push!(Y, u2d(seis.t[1,2]*1.0e-6))
+          push!(Y, u2d(seis.t[1,2]*μs))
         end
-        #[round(u2d(i*1.0e-6), Second) for i in t]
+        #[round(u2d(i*μs), Second) for i in t]
         # println("W = ", string.(W))
         # println("Y = ", string.(Y))
         Δ = [abs(.001*(W[i]-Y[i]).value)*C.fs for i=1:length(Y)]
@@ -129,7 +129,7 @@ S2 = read_data("mseed", mseed_out, v=0)[1]
 # Check that skipping an unparseable data type on a new channel doesn't
 # affect channel start time or data read-in
 δx = length(S1.x)-length(S2.x)
-@test div(S2.t[1,2]-S1.t[1,2], round(Int64, 1.0e6/S1.fs)) == length(S1.x)-length(S2.x)
+@test div(S2.t[1,2]-S1.t[1,2], round(Int64, sμ/S1.fs)) == length(S1.x)-length(S2.x)
 @test S1.x[δx+1:end] == S2.x
 
 # Check that bytes skipped are accurately logged

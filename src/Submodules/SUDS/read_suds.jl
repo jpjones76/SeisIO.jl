@@ -156,7 +156,7 @@ function read_suds(fname::String;
 
       # First identify which start times get corrected
       net = 0x0000
-      tc = round(Int64, SB.tc*1.0e6)
+      tc = round(Int64, SB.tc*sμ)
       if SB.irig
         net = reinterpret(UInt16, SB.id[1:2])[1]
         for j = 1:xj

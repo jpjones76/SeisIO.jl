@@ -327,7 +327,7 @@ t3 = t_extend(t1, t2[1,2], nn, 0.0)
 buf = BUF.date_buf
 dstr = "2019-06-01T03:50:04.02"
 dt = DateTime(dstr)
-t = round(Int64, d2u(dt)*1.0e6)
+t = round(Int64, d2u(dt)*sμ)
 nx = 12345
 
 # Tests for mk_t
@@ -342,13 +342,13 @@ mk_t!(C, nx, t)
 printstyled("    t_arr!\n", color=:light_green)
 t_arr!(buf, t)
 @test buf[1:6] == Int32[2019, 152, 3, 50, 4, 20]
-t = round(Int64, d2u(DateTime("2020-03-01T13:49:00.3"))*1.0e6)
+t = round(Int64, d2u(DateTime("2020-03-01T13:49:00.3"))*sμ)
 t_arr!(buf, t)
 @test buf[1:6] == Int32[2020, 61, 13, 49, 0, 300]
-t = round(Int64, d2u(DateTime("2020-03-01T13:49:00.030"))*1.0e6)
+t = round(Int64, d2u(DateTime("2020-03-01T13:49:00.030"))*sμ)
 t_arr!(buf, t)
 @test buf[1:6] == Int32[2020, 61, 13, 49, 0, 30]
-t = round(Int64, d2u(DateTime("2020-03-01T13:49:00.003"))*1.0e6)
+t = round(Int64, d2u(DateTime("2020-03-01T13:49:00.003"))*sμ)
 t_arr!(buf, t)
 @test buf[1:6] == Int32[2020, 61, 13, 49, 0, 3]
 

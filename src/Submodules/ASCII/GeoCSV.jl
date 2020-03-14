@@ -166,7 +166,7 @@ function read_geocsv_slist!(S::GphysData, io::IO)
         end
         Nt = size(C.t, 1)
         if Nt > 0
-          t_old = endtime(C.t, round(Int64, 1.0e6/C.fs))
+          t_old = endtime(C.t, round(Int64, sμ/C.fs))
           i = C.t[Nt, 1] + 1
           if C.t[Nt, 2] == 0
             C.t = C.t[1:Nt-1,:]
@@ -193,7 +193,7 @@ function read_geocsv_slist!(S::GphysData, io::IO)
         Array{Float32,1}(undef, x) s setindex!
         =#
         X = Float32[]; sizehint!(X, nx)
-        Δ = round(Int64, 1.0e6/getfield(C, :fs))
+        Δ = round(Int64, sμ/getfield(C, :fs))
         if isempty(C.t)
           C.t = [1 ts]
         else
@@ -303,7 +303,7 @@ function read_geocsv_tspair!(S::GphysData, io::IO)
           end
           Nt = size(C.t, 1)
           if Nt > 0
-            t_old = endtime(C.t, round(Int64, 1.0e6/C.fs))
+            t_old = endtime(C.t, round(Int64, sμ/C.fs))
             i = C.t[Nt, 1] + 1
             if C.t[Nt, 2] == 0
               C.t = C.t[1:Nt-1,:]
@@ -331,7 +331,7 @@ function read_geocsv_tspair!(S::GphysData, io::IO)
           Array{Float32,1}(undef, x) s setindex!
           =#
           X = Float32[]; sizehint!(X, nx)
-          Δ = round(Int64, 1.0e6/getfield(C, :fs))
+          Δ = round(Int64, sμ/getfield(C, :fs))
           Δ_gap = div(3*Δ,2)
 
           # Flag that we're now reading data

@@ -76,7 +76,7 @@ function readuwevt(filename::String; v::Integer=KW.v, full::Bool=false)
       delete!(D_data, "comment")
 
       # Convert all phase arrival times to travel times
-      δt = 1.0e-6*(rem(hdr.ot.instant.periods.value*1000 - dtconst, 60000000))
+      δt = μs*(rem(hdr.ot.instant.periods.value*1000 - dtconst, 60000000))
       for i = 1:data.n
         D = getindex(getfield(data, :pha), i)
         for p in keys(D)

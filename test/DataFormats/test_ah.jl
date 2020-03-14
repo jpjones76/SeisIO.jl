@@ -24,7 +24,7 @@ redirect_stdout(out) do
   @test any([occursin("demeaned",s) for s in S.notes[1]])
   @test length(S.resp[1].p) == 24
   @test length(S.resp[1].z) == 7
-  @test u2d(S.t[1][1,2]*1.0e-6) == DateTime("1984-04-20T06:42:00.12")
+  @test u2d(S.t[1][1,2]*μs) == DateTime("1984-04-20T06:42:00.12")
   @test length(S.x[1]) == 720
   @test eltype(S.x[1]) == Float32
   @test isapprox(S.x[1][1:4], [-731.41247559, -724.41247559, -622.41247559, -470.4125061])
@@ -45,13 +45,13 @@ redirect_stdout(out) do
   @test length(C.x) == 1079
   @test eltype(C.x) == Float32
   @test C.fs == 1.0
-  @test u2d(C.t[1,2]*1.0e-6) == DateTime("1990-05-12T04:49:54.49")
+  @test u2d(C.t[1,2]*μs) == DateTime("1990-05-12T04:49:54.49")
 
   # Event
   @test isapprox(C.misc["ev_lat"], 49.037)
   @test isapprox(C.misc["ev_lon"], 141.847)
   @test isapprox(C.misc["ev_dep"], 606.0)
-  @test string(u2d(C.misc["ot"]*1.0e-6)) == "1990-05-12T04:50:08.7"
+  @test string(u2d(C.misc["ot"]*μs)) == "1990-05-12T04:50:08.7"
   @test startswith(C.misc["data_comment"], "Streckeisen STS-1V/VBB Seismometer")
   @test startswith(C.misc["event_comment"], "null")
 
@@ -93,7 +93,7 @@ redirect_stdout(out) do
   @test any([occursin("demeaned",s) for s in S.notes[1]])
   @test length(S.resp[1].p) == 24
   @test length(S.resp[1].z) == 7
-  @test u2d(S.t[1][1,2]*1.0e-6) == DateTime("1984-04-20T06:42:00.12")
+  @test u2d(S.t[1][1,2]*μs) == DateTime("1984-04-20T06:42:00.12")
   @test length(S.x[1]) == 720
   @test eltype(S.x[1]) == Float32
   @test isapprox(S.x[1][1:4], [-731.41247559, -724.41247559, -622.41247559, -470.4125061])

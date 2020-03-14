@@ -86,7 +86,7 @@ else
   t_max = maximum(t)
   try
     @test(L_max - L_min <= maximum(2 ./ S.fs))
-    @test(t_max - t_min <= round(Int64, 1.0e6 * 2.0/maximum(S.fs)))
+    @test(t_max - t_min <= round(Int64, sμ * 2.0/maximum(S.fs)))
   catch
     @warn(string("Unexpected request length; check for partial outage at IRIS for ", join(chans, ", "), "!"))
   end

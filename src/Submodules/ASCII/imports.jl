@@ -6,4 +6,6 @@ import SeisIO: buf_to_uint,
   is_u8_digit,
   mk_t,
   split_id,
-  stream_float
+  stream_float,
+  sμ,
+  μs

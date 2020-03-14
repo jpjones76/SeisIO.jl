@@ -84,7 +84,7 @@ function read_bottle!(S::GphysData, fstr::String, nx_new::Int64, nx_add::Int64, 
 
     # Read header ============================================================
     fastskip(io, 8)
-    t0 = round(Int64, fastread(io, Float64)*1.0e6)
+    t0 = round(Int64, fastread(io, Float64)*sμ)
     dt = fastread(io, Float32)
     nx = fastread(io, Int32)
     ty = fastread(io, Int32)

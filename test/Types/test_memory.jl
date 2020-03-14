@@ -28,7 +28,7 @@ S.units[1] *= "Unknown"
 S.src[1] *= "www"
 append!(S.notes[1], ["sadfasgasfg","kn4ntl42ntlk4n"])
 S.misc[1]["P"] = 2.0
-S.t[1] = [S.t[1]; [1 round(Int, time()*1.0e6); nx 0]]
+S.t[1] = [S.t[1]; [1 round(Int, time()*sμ); nx 0]]
 append!(S.x[1], rand(nx))
 
 for f in datafields
@@ -48,7 +48,7 @@ S.units[1] = "Unknown"
 S.src[1] = "www"
 S.notes[1] = ["sadfasgasfg","kn4ntl42ntlk4n"]
 S.misc[1] = Dict{String,Any}("P" => 2.0)
-S.t[1] = [1 round(Int, time()*1.0e6); nx 0]
+S.t[1] = [1 round(Int, time()*sμ); nx 0]
 S.x[1] = rand(nx)
 
 S.id[2] = "...zzz"
@@ -61,7 +61,7 @@ S.units[2] = "ms/2"
 S.src[2] = "file"
 S.notes[2] = ["0913840183","klnelgng"]
 S.misc[2] = Dict{String,Any}("S" => 6.5)
-S.t[2] = [1 round(Int, time()*1.0e6); nx 0]
+S.t[2] = [1 round(Int, time()*sμ); nx 0]
 S.x[2] = rand(nx)
 
 for i in datafields

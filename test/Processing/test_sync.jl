@@ -27,7 +27,7 @@ printstyled("      nothing removed\n", color=:light_green)
 Δ = 20000
 ts = 1583455810004000
 nx = 40000
-fs = 1.0e6/Δ
+fs = sμ/Δ
 
 t = [1 ts; nx 0]
 te = endtime(t, Δ)
@@ -329,7 +329,7 @@ deleteat!(x2, i2)
 @test x1 == x2
 
 fs = 100.0
-Δ = round(Int64, 1.0e6/fs)
+Δ = round(Int64, sμ/fs)
 t0 = 1582934400000000
 ns = 10
 Δ3 = 1.0
@@ -345,7 +345,7 @@ for i = 1:3
 end
 S.t[1] = [1 t0; nx 0]
 S.t[2] = [1 t0-ns*1000000; nx 0]
-S.t[3] = [1 t0; 2 round(Int64, Δ3*1.0e6); nx 0]
+S.t[3] = [1 t0; 2 round(Int64, Δ3*sμ); nx 0]
 
 # irregular channels will be 100 points each, randomly sampled between the start and the end
 append!(S, randSeisData(3, c=1.0))
@@ -496,8 +496,8 @@ end
 printstyled(stdout,"    sync to DateTime; don't sync ends\n", color=:light_green)
 ts₆ = S.t[1][1,2]
 te₆ = S.t[1][1,2] + Δ*(nx-1)
-ds₆ = u2d(ts₆*1.0e-6)
-de₆ = u2d(te₆*1.0e-6)
+ds₆ = u2d(ts₆*μs)
+de₆ = u2d(te₆*μs)
 W = sync(S, s=ds₆)
 basic_checks(W)
 ts_new, te_new = get_edge_times(W)
@@ -512,8 +512,8 @@ end
 @test findfirst(ts_new .== ts₆).== 1          # Defined start time
 
 # Repeat with an end time
-# te₆ = S.t[1][1,2] + round(Int64, 1.0e6*(nx-1)/fs)
-# de₆ = u2d(te₆*1.0e-6)
+# te₆ = S.t[1][1,2] + round(Int64, sμ*(nx-1)/fs)
+# de₆ = u2d(te₆*μs)
 W = sync(S, s=ds₆, t=de₆)
 basic_checks(W)
 ts_new, te_new = get_edge_times(W)
@@ -604,8 +604,8 @@ end
 printstyled(stdout,"    SeisChannel method extension\n", color=:light_green)
 ts₆ = S.t[1][1,2]
 te₆ = S.t[1][1,2] + Δ*(nx-1)
-ds₆ = u2d(ts₆*1.0e-6)
-de₆ =  u2d(te₆*1.0e-6)
+ds₆ = u2d(ts₆*μs)
+de₆ =  u2d(te₆*μs)
 C = deepcopy(S[1])
 sync!(C, s=ds₆)
 W = SeisData(C)
@@ -625,8 +625,8 @@ wx = Lx(W)
 printstyled(stdout,"    SeisEvent method extension\n", color=:light_green)
 ts₆ = S.t[1][1,2]
 te₆ = S.t[1][1,2] + Δ*(nx-1)
-ds₆ = u2d(ts₆*1.0e-6)
-de₆ =  u2d(te₆*1.0e-6)
+ds₆ = u2d(ts₆*μs)
+de₆ =  u2d(te₆*μs)
 Ev = SeisEvent(hdr = randSeisHdr(), data = deepcopy(S))
 sync!(Ev.data, s=ds₆)
 W = Ev.data

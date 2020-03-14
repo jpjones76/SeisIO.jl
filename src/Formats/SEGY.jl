@@ -129,7 +129,7 @@ function do_trace(f::IO,
 
     z = getindex(shorts, 5)
     δ = getindex(shorts, 21)
-    fs        = 1.0e6 / Float64(δ == one(Int16) ? dt : δ)
+    fs        = sμ / Float64(δ == one(Int16) ? dt : δ)
     gain      = 1.0 / (Float64(scale_fac)  * 10.0^(-1.0*Float64(shorts[24]) / 10.0) / Float64(shorts[23]))
     lat, lon  = auto_coords(ints[18:19], shorts[6:7])
     if abs(lat) < 0.1 && abs(lon) < 0.1
@@ -220,7 +220,7 @@ function do_trace(f::IO,
     ints    .= ntoh.(ints)
     z       = getindex(shorts, 5)
     δ       = getindex(shorts, 21)
-    fs      = 1.0e6 / Float64(δ)
+    fs      = sμ / Float64(δ)
 
     # not sure about meaning of "dB" in gain constants
     gain    = Float64(ints[25]) * 10.0^(shorts[55] + (shorts[23] + shorts[24])/10.0)

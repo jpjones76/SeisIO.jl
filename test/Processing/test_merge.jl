@@ -699,7 +699,7 @@ printstyled("    overlapping times\n", color=:light_green)
 os = 50
 nx = length(s1.x)
 lx = length(s1.x)/s1.fs
-τ = round(Int, 1.0e6*(2.0-os/fs1))
+τ = round(Int, sμ*(2.0-os/fs1))
 s2 = SeisChannel(fs = fs1, gain = 10.0, name = "DEAD.STA.EHZ", id = "DEAD.STA..EHZ",
   t = [1 t1+τ; 150 0], x=randn(150))
 C = (s1 * s2)[1]
@@ -712,7 +712,7 @@ printstyled("    two-sample offset\n", color=:light_green)
 os = 2
 nx = length(s1.x)
 lx = length(s1.x)/s1.fs
-τ = round(Int, 1.0e6*(2.0-(os-1)/fs1))
+τ = round(Int, sμ*(2.0-(os-1)/fs1))
 s2 = SeisChannel(fs = fs1, gain = 10.0, name = "DEAD.STA.EHZ", id = "DEAD.STA..EHZ",
   t = [1 t1+τ; 150 0], x=vcat(copy(s1.x[nx-os+1:nx]), randn(150-os)))
 @test s1.x[nx] == s2.x[os]
@@ -734,7 +734,7 @@ ungap!(T)
 
 printstyled("    one repeating segment in two channels\n", color=:light_green)
 fs1 = 50.0
-Δ = round(Int64, 1.0e6/fs1)
+Δ = round(Int64, sμ/fs1)
 g1 = 10.0
 ns = 2
 n1 = "DEAD.STA..EHZ"
@@ -793,7 +793,7 @@ S*=T[2]
 sizetest(S, 5)
 i = findid(A, S)
 @test ≈(S.t[i][2,1], 1+length(A.x))
-@test ≈(S.t[i][2,2], (5-1/S.fs[i])*1.0e6)
+@test ≈(S.t[i][2,2], (5-1/S.fs[i])*sμ)
 
 printstyled(stdout,"      common channels and \"splat\" notation (mseis!)\n", color=:light_green)
 (S,T) = mktestseis()

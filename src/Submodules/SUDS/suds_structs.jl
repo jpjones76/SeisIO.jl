@@ -418,7 +418,7 @@ function read_30!(S::GphysData, io::IO, v::Integer, full::Bool)
     SB.irig = true
   end
 
-  # return (round(Int64, tc*1.0e6), rc, t_eff*1000000, SB.id_str, netflg)
+  # return (round(Int64, tc*sμ), rc, t_eff*1000000, SB.id_str, netflg)
   return nothing
 end
 

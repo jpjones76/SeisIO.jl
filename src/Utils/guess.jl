@@ -212,7 +212,7 @@ function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Integer)
     fastskip(io, 4)
     date_hex = fastread(io, 8)
     t_new = datehex2μs!(date_arr, date_hex)
-    (v > 2) && println(u2d(t_new*1.0e-6))
+    (v > 2) && println(u2d(t_new*μs))
     @assert t_new > 0
     fastskip(io, 4)
     nb = (swap ? bswap : identity)(fastread(io, UInt32))

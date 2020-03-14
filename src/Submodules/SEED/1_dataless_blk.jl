@@ -470,8 +470,8 @@ function blk_052!(io::IO, nb::Int64, C::SeisChannel, ts_req::Int64, te_req::Int6
     if v > 2
       println(" "^16, "lat = ", lat, ", lon = ", lon, ", z = ", el, ", dep = ", dep, ", θ = ", az, ", ϕ = ", inc)
       println(" "^16, "fs = ", fs)
-      println(" "^16, "ts = ", u2d(div(ts, 1.0e6)))
-      println(" "^16, "te = ", u2d(div(te, 1.0e6)))
+      println(" "^16, "ts = ", u2d(div(ts, sμ)))
+      println(" "^16, "te = ", u2d(div(te, sμ)))
     end
   end
 

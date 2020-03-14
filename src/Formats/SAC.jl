@@ -513,7 +513,7 @@ function writesacpz(file::String, S::GphysData; chans::ChanSpec=Int64[])
   for i in cc
     id = split_id(S.id[i])
     created   = get(S.misc[i], "CREATED", string(u2d(time())))
-    ts_str    = isempty(S.t[i]) ? "1970-01-01T00:00:00" : string(u2d(starttime(S.t[i], S.fs[i])*1.0e-6))
+    ts_str    = isempty(S.t[i]) ? "1970-01-01T00:00:00" : string(u2d(starttime(S.t[i], S.fs[i])*μs))
     t_start   = get(S.misc[i], "START", ts_str)
     t_end     = get(S.misc[i], "END", "2599-12-31T23:59:59")
     unit_in   = get(S.misc[i], "INPUT UNIT", "?")

@@ -198,7 +198,7 @@ function readwin32( dfilestr::String,
         gap = t_new - t_old
         if ((gap - 1000000) > Δgap[k]) && (t_old > 0)
           gl = div((gap - 1000000), 1000000)
-          (v > 0) && @warn(string("Time gap detected! (channel ", hexID, ", length ", @sprintf("%.3f", gl*1.0e-6), "s, begin ", u2d(t_old*1.0e-6), ")"))
+          (v > 0) && @warn(string("Time gap detected! (channel ", hexID, ", length ", @sprintf("%.3f", gl*μs), "s, begin ", u2d(t_old*μs), ")"))
           P = Nh*gl
           push!(gapStart[k], ii + 1)
           push!(gapEnd[k], ii + P)

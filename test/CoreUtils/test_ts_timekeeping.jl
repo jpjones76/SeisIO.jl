@@ -1,6 +1,6 @@
 printstyled("  time test with synthetic timeseries data\n", color=:light_green)
 
-ts = round(Int64, 1.0e6*d2u(DateTime("2020-03-01T00:00:00")))
+ts = round(Int64, sμ*d2u(DateTime("2020-03-01T00:00:00")))
 fs = 100.0
 gain = 32.0
 id = "XX.STA..BHZ"
@@ -32,7 +32,7 @@ printstyled("    reading to test all channel-extension cases\n", color=:light_gr
 S = SeisData()
 read_data!(S, "sac", files[1])
 xi = cumsum(nx)
-δt = round.(Int64, tos.*1.0e6) .+ (nx.-1).*Δ
+δt = round.(Int64, tos.*sμ) .+ (nx.-1).*Δ
 
 # Expect:
 # no gaps, precise read
@@ -57,14 +57,14 @@ read_data!(S, "sac", files[4])
 @test S0.x[4] == S.x[1][xi[3]+1:xi[4]]
 
 # append file 5 to create case 3
-δt0 = round(Int64, 1.0e6*(tos[5]-tos[4]-nx[4]/fs)) # I canceled a +Δ and a -Δ
+δt0 = round(Int64, sμ*(tos[5]-tos[4]-nx[4]/fs)) # I canceled a +Δ and a -Δ
 read_data!(S, "sac", files[5])
 @test S.t[1] == [1 ts; xi[3] 20000; xi[5] δt0]
 @test S0.x[5] == S.x[1][xi[4]+1:xi[5]]
 
 # append file 6 to create case 6
 t_old = copy(S.t[1])
-δt0 = round(Int64, 1.0e6*(tos[6]-tos[5]-nx[5]/fs)) # I canceled a +Δ and a -Δ
+δt0 = round(Int64, sμ*(tos[6]-tos[5]-nx[5]/fs)) # I canceled a +Δ and a -Δ
 read_data!(S, "sac", files[6])
 @test S.t[1] == vcat(t_old, [xi[5]+1 δt0; xi[6] 0])
 @test S0.x[6] == S.x[1][xi[5]+1:xi[6]]
@@ -72,7 +72,7 @@ read_data!(S, "sac", files[6])
 # append file 7 to create case 5
 t_old = copy(S.t[1])
 read_data!(S, "sac", files[7])
-δt0 = round(Int64, 1.0e6*(tos[7]-tos[6]-nx[7]/fs))
+δt0 = round(Int64, sμ*(tos[7]-tos[6]-nx[7]/fs))
 @test S.t[1] == vcat(t_old[1:end-1,1:2], [t_old[end,1]+1 δt0], [xi[7] 0])
 
 # finally, did we get it all right?

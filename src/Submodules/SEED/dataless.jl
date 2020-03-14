@@ -42,11 +42,11 @@ function parse_dataless!(S::SeisData, io::IO, s::TimeSpec, t::TimeSpec, v::Integ
   BUF.k = 0
   if typeof(s) != String || typeof(t) != String
     d0, d1 = parsetimewin(s, t)
-    ts_req = round(Int64, d2u(DateTime(d0))*1.0e6)
-    te_req = round(Int64, d2u(DateTime(d1))*1.0e6)
+    ts_req = round(Int64, d2u(DateTime(d0))*sμ)
+    te_req = round(Int64, d2u(DateTime(d1))*sμ)
   else
-    ts_req = round(Int64, d2u(DateTime(s))*1.0e6)
-    te_req = round(Int64, d2u(DateTime(t))*1.0e6)
+    ts_req = round(Int64, d2u(DateTime(s))*sμ)
+    te_req = round(Int64, d2u(DateTime(t))*sμ)
   end
   skipping = false
   site_name = ""

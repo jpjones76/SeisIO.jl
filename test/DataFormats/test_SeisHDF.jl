@@ -64,7 +64,7 @@ S2 = SeisData(SeisChannel(id="CI.SDD..HHZ",
                           x=randn(40)))
 read_asdf!(S2, hdf, idr, ts, te, true, 0)
 @test S1.x[1] == S2.x[1][41:end]
-@test string(u2d(S2.t[1][1,2]*1.0e-6)) == "2019-07-07T23:59:00"
+@test string(u2d(S2.t[1][1,2]*μs)) == "2019-07-07T23:59:00"
 
 @test_throws ErrorException read_hdf5(hdf, ts, te, fmt="MatlabLol")
 

@@ -13,9 +13,11 @@ import SeisIO: ChanSpec,
   read_station_xml!,
   split_id,
   sxml_mergehdr!,
+  sμ,
   t_win,
   trunc_x!,
-  x_inds
+  x_inds,
+  μs
 import SeisIO.Quake: event_xml!,
   fwrite_note_quake!,
   new_qml!,
