@@ -39,7 +39,7 @@ All data described herein are univariate and discretely sampled.
 
 ## **Definition of SeisIO Time Matrix**
 A two-column Array{Int64,2}, in which:
-* `Tᵢ[:,1]` are indices *j* in *Xᵢ*
+* `Tᵢ[:,1]` are monotonically increasing indices *j* in *Xᵢ*
 * `Tᵢ[:,2]` are time values in μs
 
 ### **Time-series time matrix**
@@ -51,9 +51,10 @@ A two-column Array{Int64,2}, in which:
 
 #### `Tᵢ[:,2]`
 * `Tᵢ[1,2]` is the absolute time of *X₁* measured from Unix epoch
-  + Edge case warning: if time segments *Xᵢ* aren't in chronological order, and a later segment occurs *before* the first segment, this won't be the earliest sample time.
+  + `Tᵢ[1,2]` is usually the earliest sample time; however, if the time segments in *Xᵢ* aren't in chronological order, this isn't necessarily true.
 * `Tᵢ[2:end,2]` are time gaps *δt* in *Xᵢ*, defined *δt* ≡ *tᵢⱼ₋₁* - *tᵢⱼ* - *Δᵢ*.
   + **Important**: for time gap *δt* = *Tᵢ[k,2]* at index *j = Tᵢ[k,1]* in *Xᵢ*, the total time between samples *Xᵢⱼ₋₁* and *Xᵢⱼ* is *δt + Δᵢ* not *δt*. This may differ from time gap representations in other geophysical software.
+  + `Tᵢ[end,2]` is usually the latest sample time; however, if the time segments in *Xᵢ* aren't in chronological order, this isn't necessarily true.
 
 #### How gaps are logged
 1. A gap is denoted by a row in *Tᵢ* whenever samples *Xᵢⱼ*, *Xᵢⱼ₊₁* have sample times *tᵢⱼ₊₁*, *tᵢⱼ* that satisfy |*tᵢⱼ₋₁* - *tᵢⱼ* - *Δᵢ* | > 0.5 *Δᵢ*.
@@ -67,6 +68,16 @@ A two-column Array{Int64,2}, in which:
 * `Tᵢ[k,:] = [31337 -86400000000]` at *fsᵢ* = 100.0 Hz is a time gap of -86399.99 s before the 31337th sample of *Xᵢ*.
   + Check: `g = -86400000000; d = round(Int64,1.0e6/100.0); (g+d)/1.0e6`
     - Substituting `1.0e-6*(g+d)` for the last expression is slightly off due to floating-point rounding.
+* `Tᵢ = [1 1324100000000000; 8640000 0]` at *fsᵢ* = 100.0 Hz is a one-segment time matrix.
+* `Tᵢ = [1 1401000000000002; 100001 9975000; 200001 345000; 300000 0]` at *fsᵢ* = 40.0 Hz is a three-segment time matrix.
+* `Tᵢ = [1 1324100000000000; 8640000 50000]` at *fsᵢ* = 100.0 Hz is a two-segment time matrix.
+  + There is a gap of *δ* = 50000 μs between samples *j* = 8639999 and *j* = 8640000.
+  + The second segment is one sample long; it starts and ends at *j* = 8640000.
+  + The last two samples were recorded 0.06 s apart.
+* `Tᵢ = [1 1559347200000000; 31337 -86400010000; 120000 0]` at *fsᵢ* = 100.0 Hz is a two-segment time matrix where the first sample is not the earliest.
+  + The earliest sample is *j* = 31337, recorded at 2019-05-31T00:05:13.36 (UTC).
+  + If the data segments were in chronological order, the equivalent time matrix would be `Tᵢ = [1 1559261113350000; 88665 85200010000; 120000 0]`.
+
 * Recording a gap:
   + *tᵢⱼ₋₁* = 1582917371000000
   + *tᵢⱼ* = 1582917371008000
@@ -81,6 +92,8 @@ A two-column Array{Int64,2}, in which:
 
 ### **Irregular time matrix**
 #### `Tᵢ[:,1]` expected behavior
+* `Tᵢ[1,1] == 1`
+* `Tᵢ[end,1] == length(Xᵢ)`
 * `Tᵢ[:,1]` has the same length as *Xᵢ*
 * `Tᵢ[k,1]` < `Tᵢ[k+1,1]` for any `k` (row index `k` increases monotonically with data index `j`)
 * `Tᵢ[k,1] = k`; in other words, row number corresponds to index `k` in *Xᵢ*
