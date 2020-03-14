@@ -13,20 +13,24 @@ Start Here
 **********
 Create a new, empty **SeisChannel** object with
 
-.. function:: Ch = SeisChannel()
-    :noindex:
+::
+
+  Ch = SeisChannel()
 
 The meanings of the field names are explained :ref:`here<dkw>`; you can also type
 ``?SeisChannel`` at the Julia prompt. You can edit field values manually, e.g.,
+returning to the code block above,
+
 ::
 
-  Ch.loc = [-90.0, 0.0, 2835.0, 0.0, 0.0]
+  Ch = SeisChannel()
+  Ch.loc = GeoLoc(lat=-90.0, lon=0.0, el=2835.0, az=0.0, inc=0.0)
   Ch.name = "South pole"
 
 or you can set them with keywords at creation:
 ::
 
-  Ch = SeisChannel(name="Templo de San José de La Floresta, Ajijic")
+  Ch = SeisChannel(name="Templo de San José de La Floresta, Ajijic", fs=40.0)
 
 
 Note that Strings in field names support full Unicode, so even graffiti
@@ -37,27 +41,35 @@ SeisData structures are collections of channel data. They can be created with
 the SeisData() command, which can optionally create any number of empty
 channels at a time, e.g.,
 
-.. function:: S = SeisData(1)
-    :noindex:
+::
+
+  S = SeisData()      # empty structure, no channels
+  S1 = SeisData(12)   # empty 12-channel structure
 
 They can be explored similarly:
 ::
 
+  S = SeisData(1)
   S.name[1] = "South pole"
-  S.loc[1] = [-90.0, 0.0, 2835.0, 0.0, 0.0]
+  S.loc[1] = GeoLoc(lat=-90.0, lon=0.0, el=2835.0, az=0.0, inc=0.0)
 
-A collection of channels becomes a SeisData structure:
+A collection of channels becomes a SeisData structure; for example,
 
-.. function:: S = SeisData(SeisChannel(), SeisChannel())
-    :noindex:
+::
+
+  L = GeoLoc(lat=46.1967, lon=-122.1875, el=1440.0, az=0.0, inc=0.0)
+  S = SeisData(SeisChannel(), SeisChannel())
+  S = SeisData(randSeisData(5), SeisChannel(),
+        SeisChannel(id="UW.SEP..EHZ", name="Darth Exploded", loc=L))
 
 You can push channels onto existing SeisData structures, like adding one key
-to a dictionary:
+to a dictionary. For example,
 
-.. function:: push!(S, Ch)
-    :noindex:
+::
 
-Note that this copies Ch to a new channel in S -- S[3] is not a view into C.
+  push!(S, Ch)
+
+copies Ch to a new channel in S. Note that the new S[3] is not a view into Ch.
 This is deliberate, as otherwise the workspace quickly becomes a mess of
 redundant channels. Clean up with ``Ch = []`` to free memory before moving on.
 
@@ -75,62 +87,72 @@ Adding channels to a SeisData structure
 You've already seen one way to add a channel to SeisData: push!(S, SeisChannel())
 adds an empty channel. Here are others:
 
-.. function:: append!(S, SeisData(n))
+::
 
-Adds n channels to the end of S by creating a new n-channel SeisData and
-appending it, similar to adding two dictionaries together.
+  S = randSeisData(4)
+  n = 3
+  append!(S, SeisData(n))
 
-These methods are aliased to the addition operator:
+This initializes an empty n-channel SeisData structure and appends it to the
+end of S, similar to appending one array to another. S will have 7 channels,
+but the last three are empty.
+
+The addition operator, `+`, calls *push!* and *add!*, with one key difference:
+to ensure reflexivity (i.e., `S1 + S2 == S2 + S1`), the `+` operator sorts the
+output (command *sort!*) and prunes empty channels (command *prune!*). Thus,
 
 ::
 
-  S += SeisChannel()      # equivalent to push!(S, SeisChannel())
-  S += randseisdata(3)    # adds a random 3-element SeisData structure to S in place
-  S = SeisData(randseisdata(5), SeisChannel(),
-        SeisChannel(id="UW.SEP..EHZ", name="Darth Exploded",
-        loc=[46.1967, -122.1875, 1440, 0.0, 0.0]))
+  S = SeisData(2)
+  S1 = randSeisData(3)
+  S += S1
 
-Most web request functions can append to an existing SeisData object by placing
-an exclamation mark after the function call.
+outputs only the three channels of random data initialized in the second line of
+the code block; in addition, they're sorted by ID, so it's likely that S != S1.
 
 Search, Sort, and Prune
 =======================
-The easiest way to find channels of interest in a data structure is to
-use findid, but you can obtain an array of partial matches with findchan:
+The easiest way to find channels of interest in a data structure is to use
+*findid* or *findchan*. ``findid(id, S)`` returns the numeric index *i* of the first channel in *S* where ``S.id[i] == id``. ``findchan(cha, S)`` returns an array of numeric indices in *S* to all channels whose IDs satisfy ``occursin(cha, S.id[i])``.
+
+For example:
 
 ::
 
-  S = SeisData(randseisdata(5), SeisChannel(),
-        SeisChannel(id="UW.SEP..EHZ", name="Darth Exploded",
-        loc=[46.1967, -122.1875, 1440, 0.0, 0.0], x=rand(1024)))
-  findid(S, "UW.SEP..EHZ")    # 7
-  findchan(S, "EHZ")          # [7], maybe others depending on randseisdata
+  L = GeoLoc(lat=46.1967, lon=-122.1875, el=1440.0, az=0.0, inc=0.0)
+  S = SeisData(randSeisData(5), SeisChannel(id="YY.STA1..EHZ"),
+        SeisChannel(id="UW.SEP..EHZ", name="Darth Exploded", loc=L))
+  findid("UW.SEP..EHZ", S)    # 7
+  findchan("EHZ", S)          # [6, 7], maybe others (depending on randSeisData)
 
 
-You can sort by channel ID with the `sort` command.
+You can sort channels in a structure by channel ID with the `sort!` command.
 
 Several functions exist to prune empty and unwanted channels from SeisData
-structures.
+structures. Revisiting the previous code block, for example, try these:
 
 ::
 
-  delete!(S, 1:2)  # Delete first two channels of S
-  S -= 3           # Delete third channel of S
+  deleteat!(S, 1:2)   # Delete first two channels of S
+  S -= 3              # Delete third channel of S
 
   # Extract S[1] as a SeisChannel, removing it from S
   C = pull(S, 1)
 
-  # Delete all channels whose S.x is empty
-  prune!(S)
-
   # Delete channels containing ".SEP."
   delete!(S, ".SEP.", exact=false)
 
-In the last example, specifying exact=false means that any channel whose ID
-partly matches the string ".SEP." gets deleted; by default, passing
-a string to delete!(S, str) only matches channels where str is the exact ID.
-This is an efficient way to remove unresponsive subnets and unwanted channel
-types, but beware of clumsy over-matching.
+  # Delete all channels whose S.x is empty
+  prune!(S)
+  S
+
+S should have one channel left.
+
+In the *delete!* command, specifying `exact=false` means that any channel whose
+ID partly matches the string ".SEP." gets deleted; by default,
+``delete!(S, str)`` only matches channels where *str* is the exact ID. This is
+an efficient way to remove unresponsive subnets and unwanted channel types, but
+beware of accidental over-matching.
 
 **********
 Next Steps
