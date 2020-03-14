@@ -69,7 +69,7 @@ function get_edge_times(S::GphysData)
     if S.fs[i] == 0.0
       te[i] = S.t[i][end,2]
     else
-      te[i] += (sum(S.t[i][2:end,2]) + dtμ*length(S.x[i]))
+      te[i] = endtime(S.t[i], S.fs[i])
     end
   end
   return ts, te

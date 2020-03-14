@@ -67,7 +67,8 @@ d0, d1 = parsetimewin(s, t)
 @test ≈(7200000, (DateTime(d1)-DateTime(d0)).value)
 
 # t_collapse, t_expand
-T = Int64[1 1451606400000000; 100001 30000000; 250001 12330000; 352303 99000000; 360001 0]
+ts = 1451606400000000
+T = Int64[1 ts; 100001 30000000; 250001 12330000; 352303 99000000; 360001 0]
 fs = 100.0
 Δ = round(Int64, sμ/fs)
 t_long = t_expand(T, fs)
@@ -77,13 +78,40 @@ T1 = hcat(cumsum(ones(Int64,size(T,1))), cumsum(T[:,2]))
 fs1 = 0.0
 @test ≈(T1, t_collapse(t_expand(T1, fs1), fs1))
 
+# starttime
+printstyled(stdout, "    starttime\n", color=:light_green)
+@test starttime(T, fs) == first(t_long)
+@test starttime(T, Δ) == starttime(T, fs)
+@test starttime(Array{Int64,2}(undef, 0, 0), Δ) == 0
+@test starttime(Array{Int64,2}(undef, 0, 0), 100Δ) == 0
+@test starttime(Array{Int64,2}(undef, 0, 0), fs) == 0
+
+# why starttime exists: it handles segments that aren't in chronological order
+printstyled(stdout, "      non-chronological\n", color=:light_green)
+Tnco = Int64[1 ts; 1000 -2000Δ; 120000 0]
+t_long = t_expand(Tnco, fs);
+@test minimum(t_long) != first(t_long)
+@test starttime(Tnco, fs) == starttime(Tnco, Δ) == ts - 1001Δ == minimum(t_expand(Tnco, fs))
+
 # endtime
 printstyled(stdout, "    endtime\n", color=:light_green)
+T = Int64[1 ts; 100001 30000000; 250001 12330000; 352303 99000000; 360001 0]
+t_long = t_expand(T, fs)
 @test endtime(T, fs) == last(t_long)
 @test endtime(T, Δ) == endtime(T, fs)
 @test endtime(Array{Int64,2}(undef, 0, 0), Δ) == 0
 @test endtime(Array{Int64,2}(undef, 0, 0), 100Δ) == 0
 @test endtime(Array{Int64,2}(undef, 0, 0), fs) == 0
+
+# endtime must also handle segments that aren't in chronological order
+printstyled(stdout, "      non-chronological\n", color=:light_green)
+nx = 120000
+igap = 1000
+tgap = 10000
+Tnco = Int64[1 ts; nx-2000 tgap*Δ; nx-(igap-1) -8000Δ; nx 0]
+t_long = t_expand(Tnco, fs);
+@test maximum(t_long) != last(t_long)
+@test endtime(Tnco, fs) == endtime(Tnco, Δ) == ts + (nx-igap)*Δ + (tgap-1)*Δ == maximum(t_long)
 
 printstyled(stdout, "    t_win, w_time\n", color=:light_green)
 printstyled(stdout, "      faithful representation of gaps\n", color=:light_green)

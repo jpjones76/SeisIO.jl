@@ -1,5 +1,7 @@
 export d2u, j2md, md2j, parsetimewin, timestamp, u2d, timespec
 
+# =====================================================================
+# Time stamping
 function tstr(t::DateTime)
   Y, M, D, h, m, s, μ = year(t), month(t), day(t), hour(t), minute(t), second(t), millisecond(t)
   Y = lpad(Y, 4, "0")
@@ -27,6 +29,8 @@ timestamp(t::Real) = tstr(u2d(t))
 timestamp(t::String) = tstr(Dates.DateTime(t))
 tnote(s::String) = string(timestamp(), " ¦ ", s)
 
+# =====================================================================
+# Time and date converters
 """
     m,d = j2md(y,j)
 
@@ -86,6 +90,60 @@ function md2j(y::T, m::T, d::T) where T<:Integer
 end
 md2j(y::AbstractString, m::AbstractString, d::AbstractString) = md2j(parse(Int, y), parse(Int, m), parse(Int, d))
 
+@doc """
+    t_arr!(B::Array{Int32,1}, t::Int64)
+
+Convert `t` to [year, day of year, hour, minute, second, frac_second], overwriting the first 6 values in `B` with the result.
+""" t_arr!
+function t_arr!(tbuf::Array{Int32, 1}, t::Int64)
+  dt = u2d(t*μs)
+  tbuf[1] = Int32(year(dt))
+  tbuf[2] = md2j(tbuf[1], Int32(month(dt)), Int32(day(dt)))
+  tbuf[3] = Int32(hour(dt))
+  tbuf[4] = Int32(minute(dt))
+  tbuf[5] = Int32(second(dt))
+  tbuf[6] = Int32(millisecond(dt))
+  return nothing
+end
+
+function unpack_u8(v::UInt8)
+  a = signed(div(v,0x10))*Int8(10)
+  b = signed(rem(v,0x10))
+  return Int64(a+b)
+end
+
+function datehex2μs!(a::Array{Int64,1}, datehex::Array{UInt8,1})
+  a[1] = 100*unpack_u8(getindex(datehex, 1)) + unpack_u8(getindex(datehex, 2))
+  a[2] = md2j(getindex(a,1), unpack_u8(getindex(datehex, 3)), unpack_u8(getindex(datehex, 4))) - 1
+  setindex!(a, y2μs(getindex(a,1)), 1)
+  a[3] = unpack_u8(getindex(datehex, 5))
+  a[4] = unpack_u8(getindex(datehex, 6))
+  a[5] = unpack_u8(getindex(datehex, 7))
+  a[6] = unpack_u8(getindex(datehex, 8))
+  return a[1] + a[2]*86400000000 + a[3]*3600000000 + a[4]*60000000 + a[5]*1000000 + a[6]*10000
+end
+
+function y2μs(y::T) where T<:Integer
+  y = Int64(y)-1
+  return 86400000000 * (y*365 + div(y,4) - div(y,100) + div(y,400)) - 62135596800000000
+end
+
+# ts = round(Int64, d2u(DateTime(iv[1], m, d, iv[3], iv[4], iv[5], iv[6]))*sμ
+mktime(y::T, j::T, h::T, m::T, s::T, μ::T) where T<:Integer = (y2μs(y) +
+          Int64(j-one(T))*86400000000 +
+          Int64(h)*3600000000 +
+          Int64(m)*60000000 +
+          Int64(s)*1000000 +
+          Int64(μ))
+mktime(t::Array{T,1}) where T<:Integer =(y2μs(t[1]) +
+          Int64(t[2]-one(T))*86400000000 +
+          Int64(t[3])*3600000000 +
+          Int64(t[4])*60000000 +
+          Int64(t[5])*1000000 +
+          Int64(t[6]))
+
+# =====================================================================
+# TimeSpec parsing
 """
     (str0, str1) = parsetimewin(ts1::TimeSpec, ts2::TimeSpec)
 
@@ -108,27 +166,6 @@ parsetimewin(s::Union{Real,DateTime}, t::String) = parsetimewin(s, DateTime(t))
 parsetimewin(s::String, t::String) = parsetimewin(DateTime(s), DateTime(t))
 parsetimewin(s::Real, t::Real) = parsetimewin(u2d(60*floor(Int, time()/60) + s), u2d(60*floor(Int, time()/60) + t))
 
-# =========================================================
-# Not for export
-function y2μs(y::T) where T<:Integer
-  y = Int64(y)-1
-  return 86400000000 * (y*365 + div(y,4) - div(y,100) + div(y,400)) - 62135596800000000
-end
-
-# ts = round(Int64, d2u(DateTime(iv[1], m, d, iv[3], iv[4], iv[5], iv[6]))*sμ
-mktime(y::T, j::T, h::T, m::T, s::T, μ::T) where T<:Integer = (y2μs(y) +
-          Int64(j-one(T))*86400000000 +
-          Int64(h)*3600000000 +
-          Int64(m)*60000000 +
-          Int64(s)*1000000 +
-          Int64(μ))
-mktime(t::Array{T,1}) where T<:Integer =(y2μs(t[1]) +
-          Int64(t[2]-one(T))*86400000000 +
-          Int64(t[3])*3600000000 +
-          Int64(t[4])*60000000 +
-          Int64(t[5])*1000000 +
-          Int64(t[6]))
-
 # convert a formatted time string to integer μs from the Unix epoch
 function tstr2int(s::String)
   str = split(s, ".", limit=2)
@@ -149,16 +186,137 @@ function int2tstr(t::Int64)
   return s
 end
 
-# =========================================================
-# Time windowing functions
-"""
-    t = endtime(T::Array{Int64,2}, Δ::Int64)
+# =====================================================================
+# Functions for SeisIO time matrices (:t field)
 
-Compute the time of the last sample in *T* sampled at interval *Δ* [μs] or frequency *fs* [Hz]. Output is integer μs measured from the Unix epoch.
+# Check whether a time matrix has gaps
+function is_gapless(t::Array{Int64, 2})
+  (length(t) == 4) || return false
+
+  # Definition of a well-formed time matrix with no gaps
+  return ((t[1,1] == 1) && (t[2,1] > 1) && (t[2,2] == 0))
+end
+
+function mk_t(nx::Integer, ts::Int64)
+  t = Array{Int64, 2}(undef, 2, 2)
+  setindex!(t, one(Int64), 1)
+  setindex!(t, nx, 2)
+  setindex!(t, ts, 3)
+  setindex!(t, zero(Int64), 4)
+  return t
+end
+
+"""
+    tx = t_expand(t::Array{Int64,2}, fs::Float64)
+
+Expand SeisIO time matrix `t` for data sampled at `fs` Hz. If `x` is a data
+vector whose sample times are represented by `t`, then `tx` is a vector of
+sample times where `tx[i]` is the sample time of `x[i]`.
+"""
+function t_expand(t::Array{Int64,2}, fs::Float64)
+  fs == 0.0 && return t[:,2]
+  t[end,1] == 1 && return [t[1,2]]
+  dt = round(Int64, 1.0/(fs*μs))
+  tt = dt.*ones(Int64, t[end,1])
+  tt[1] -= dt
+  for i = 1:size(t,1)
+    tt[t[i,1]] += t[i,2]
+  end
+  cumsum!(tt, tt)
+  return tt
+end
+
+"""
+    t = t_collapse(tx::Array{Int64, 1}, fs::Float64)
+
+Collapse vector of sample times `tx` sampled at `fs` Hz to compact SeisIO time
+matrix representation `t`.
+"""
+function t_collapse(tt::Array{Int64,1}, fs::Float64)
+  if fs == 0.0
+    t = hcat(collect(1:1:length(tt)), tt)
+  else
+    dt = round(Int64, 1.0/(fs*μs))
+    ts = Array{Int64,1}([dt; diff(tt)::Array{Int64,1}])
+    L = length(tt)
+    i = findall(ts .!= dt)
+    t = Array{Int64,2}([[1 tt[1]];[i ts[i].-dt]])
+    if isempty(i) || i[end] != L
+      t = vcat(t, hcat(L,0))
+    end
+  end
+  return t
+end
+
+function t_win(T::Array{Int64,2}, Δ::Int64)
+  isempty(T) && return(T)
+  n = size(T,1)-1
+  if T[n+1,2] != 0
+    T = vcat(T, [T[n+1,1] 0])
+    n += 1
+  end
+  w0 = -(Δ)
+  W = Array{Int64,2}(undef,n,2)
+  for i = 1:n
+    W[i,1] = T[i,2] + w0 + Δ
+    W[i,2] = W[i,1] + Δ*(T[i+1,1]-T[i,1]-1)
+    w0 = W[i,2]
+  end
+  W[n,2] += Δ
+  return W
+end
+t_win(T::Array{Int64,2}, fs::Float64) = t_win(T, round(Int64, sμ/fs))
+
+function w_time(W::Array{Int64,2}, Δ::Int64)
+  n = size(W,1)+1
+  T = Array{Int64,2}(undef,n,2)
+  T[1,1] = Int64(1)
+  T[1,2] = W[1,1]
+  for i = 2:n-1
+    T[i,1] = T[i-1,1] + div(W[i-1,2]-W[i-1,1], Δ) + 1
+    T[i,2] = W[i,1] - W[i-1,2] - Δ
+  end
+  T[n,1] = T[n-1,1] + div(W[n-1,2]-W[n-1,1], Δ)
+  T[n,2] = 0
+  if T[n,1] == T[n-1,1]
+    T = T[1:n-1,:]
+  end
+  return T
+end
+w_time(W::Array{Int64,2}, fs::Float64) = w_time(W, round(Int64, 1000000.0/fs))
+
+# Sort based on start of each time window
+function sort_segs!(W::Array{Int64, 2})
+  (size(W, 1) < 2) && return
+  j = sortperm(W[:,1])
+  d = diff(j)
+  if (maximum(d) > 1) || (minimum(d) < 1)
+    W .= W[j,:]
+  end
+  return nothing
+end
+
+function sort_segs(t::Array{Int64, 2}, Δ::Int64)
+  is_gapless(t) && return
+  W = t_win(t, Δ)
+  sort_segs!(W)
+  return w_time(t, Δ)
+end
+
+"""
+    te = endtime(t::Array{Int64,2}, Δ::Int64)
+
+Compute the time of the last sample in `t`, a SeisIO time matrix sampled at
+interval `Δ` [μs] or frequency `fs` [Hz]. Output is integer μs measured from
+the Unix epoch.
 """
 function endtime(t::Array{Int64,2}, Δ::Int64)
   if isempty(t)
     t_end = 0
+  elseif is_gapless(t)
+    t_end = t[1,2] + (t[2,1]-1)*Δ
+  elseif minimum(t) < 0
+    t_end = maximum(t_win(t, Δ))
   else
     L = size(t,1)
     t_end = (t[L,1]-1)*Δ
@@ -167,20 +325,43 @@ function endtime(t::Array{Int64,2}, Δ::Int64)
     else
       t_end += t[1,2] + t[2,2]
     end
-    # t_end = getindex(sum(t, dims=1),2) + (t[L,1]-1)*Δ
   end
   return t_end
 end
 function endtime(t::Array{Int64,2}, fs::Float64)
   if fs == 0.0
-    return t[size(t,1), 2]
+    return isempty(t) ? 0 : t[size(t,1), 2]
   else
     return endtime(t, round(Int64, 1.0/(fs*μs)))
   end
 end
 
+"""
+    ts = starttime(t::Array{Int64,2}, Δ::Int64)
+
+Compute the time of the first sample in SeisIO time matrix `t`, sampled at
+interval `Δ` [μs] or frequency `fs` [Hz]. Output is integer μs measured from
+the Unix epoch.
+"""
+function starttime(t::Array{Int64,2}, Δ::Int64)
+  return (if isempty(t)
+            0
+          elseif minimum(t) < 0
+            minimum(t_win(t, Δ))
+          else
+            t[1,2]
+          end)
+end
+function starttime(t::Array{Int64,2}, fs::Float64)
+  if fs == 0.0
+    return isempty(t) ? 0 : minimum(t, dims=1)[2]
+  else
+    return starttime(t, round(Int64, sμ/fs))
+  end
+end
+
 #=
-Changed 2020-03-06
+Change to t_extend 2020-03-06
 
 Bad behavior in old function for nx == 0 && nt > 0:
 if nx == 0
@@ -191,7 +372,6 @@ if nx == 0
 Extending a channel with nx=0 would change gap at end but not add samples.
 This should never happen.
 =#
-
 """
     t_extend(T::Array{Int64,2}, t_new::Int64, n_new::Int64, Δ::Int64)
 
@@ -278,103 +458,6 @@ function t_extend(T::Array{Int64,2}, ts::Integer, nx::Integer, fs::Float64)
   return T1
 end
 
-function t_expand(t::Array{Int64,2}, fs::Float64)
-  fs == 0.0 && return t[:,2]
-  t[end,1] == 1 && return [t[1,2]]
-  dt = round(Int64, 1.0/(fs*μs))
-  tt = dt.*ones(Int64, t[end,1])
-  tt[1] -= dt
-  for i = 1:size(t,1)
-    tt[t[i,1]] += t[i,2]
-  end
-  cumsum!(tt, tt)
-  return tt
-end
-
-function t_collapse(tt::Array{Int64,1}, fs::Float64)
-  if fs == 0.0
-    t = hcat(collect(1:1:length(tt)), tt)
-  else
-    dt = round(Int64, 1.0/(fs*μs))
-    ts = Array{Int64,1}([dt; diff(tt)::Array{Int64,1}])
-    L = length(tt)
-    i = findall(ts .!= dt)
-    t = Array{Int64,2}([[1 tt[1]];[i ts[i].-dt]])
-    if isempty(i) || i[end] != L
-      t = vcat(t, hcat(L,0))
-    end
-  end
-  return t
-end
-
-function x_inds(t::Array{Int64,2})
-  nt = size(t, 1)-1
-  inds = zeros(Int64, nt, 2)
-  for i in 1:nt
-    inds[i,1] = t[i,1]
-    inds[i,2] = t[i+1,1] - (i == nt ? 0 : 1)
-  end
-  if t[nt+1,2] != 0
-    inds[nt,2] -= 1
-    inds = vcat(inds, [t[nt+1,1] t[nt+1,1]])
-  end
-  return inds
-end
-
-function t_win(T::Array{Int64,2}, Δ::Int64)
-  isempty(T) && return(T)
-  n = size(T,1)-1
-  if T[n+1,2] != 0
-    T = vcat(T, [T[n+1,1] 0])
-    n += 1
-  end
-  w0 = -(Δ)
-  W = Array{Int64,2}(undef,n,2)
-  for i = 1:n
-    W[i,1] = T[i,2] + w0 + Δ
-    W[i,2] = W[i,1] + Δ*(T[i+1,1]-T[i,1]-1)
-    w0 = W[i,2]
-  end
-  W[n,2] += Δ
-  return W
-end
-t_win(T::Array{Int64,2}, fs::Float64) = t_win(T, round(Int64, 1000000.0/fs))
-
-function w_time(W::Array{Int64,2}, Δ::Int64)
-  n = size(W,1)+1
-  T = Array{Int64,2}(undef,n,2)
-  T[1,1] = Int64(1)
-  T[1,2] = W[1,1]
-  for i = 2:n-1
-    T[i,1] = T[i-1,1] + div(W[i-1,2]-W[i-1,1], Δ) + 1
-    T[i,2] = W[i,1] - W[i-1,2] - Δ
-  end
-  T[n,1] = T[n-1,1] + div(W[n-1,2]-W[n-1,1], Δ)
-  T[n,2] = 0
-  if T[n,1] == T[n-1,1]
-    T = T[1:n-1,:]
-  end
-  return T
-end
-w_time(W::Array{Int64,2}, fs::Float64) = w_time(W, round(Int64, 1000000.0/fs))
-
-function unpack_u8(v::UInt8)
-  a = signed(div(v,0x10))*Int8(10)
-  b = signed(rem(v,0x10))
-  return Int64(a+b)
-end
-
-function datehex2μs!(a::Array{Int64,1}, datehex::Array{UInt8,1})
-  a[1] = 100*unpack_u8(getindex(datehex, 1)) + unpack_u8(getindex(datehex, 2))
-  a[2] = md2j(getindex(a,1), unpack_u8(getindex(datehex, 3)), unpack_u8(getindex(datehex, 4))) - 1
-  setindex!(a, y2μs(getindex(a,1)), 1)
-  a[3] = unpack_u8(getindex(datehex, 5))
-  a[4] = unpack_u8(getindex(datehex, 6))
-  a[5] = unpack_u8(getindex(datehex, 7))
-  a[6] = unpack_u8(getindex(datehex, 8))
-  return a[1] + a[2]*86400000000 + a[3]*3600000000 + a[4]*60000000 + a[5]*1000000 + a[6]*10000
-end
-
 function tx_float(t::Array{Int64,2}, fs::Float64)
   fs == 0.0 && return map(Float64, t[:,2])
   t[end,1] == 1 && return Float64[t[1,2]]
@@ -389,27 +472,16 @@ function tx_float(t::Array{Int64,2}, fs::Float64)
   return tt
 end
 
-function mk_t(nx::Integer, ts::Int64)
-  t = Array{Int64, 2}(undef, 2, 2)
-  setindex!(t, one(Int64), 1)
-  setindex!(t, nx, 2)
-  setindex!(t, ts, 3)
-  setindex!(t, zero(Int64), 4)
-  return t
-end
-
-@doc """
-    t_arr!(B::Array{Int32,1}, t::Int64)
-
-Convert `t` to [year, day of year, hour, minute, second, frac_second], overwriting the first 6 values in `B` with the result.
-""" t_arr!
-function t_arr!(tbuf::Array{Int32, 1}, t::Int64)
-  dt = u2d(t*μs)
-  tbuf[1] = Int32(year(dt))
-  tbuf[2] = md2j(tbuf[1], Int32(month(dt)), Int32(day(dt)))
-  tbuf[3] = Int32(hour(dt))
-  tbuf[4] = Int32(minute(dt))
-  tbuf[5] = Int32(second(dt))
-  tbuf[6] = Int32(millisecond(dt))
-  return nothing
+function x_inds(t::Array{Int64,2})
+  nt = size(t, 1)-1
+  inds = zeros(Int64, nt, 2)
+  for i in 1:nt
+    inds[i,1] = t[i,1]
+    inds[i,2] = t[i+1,1] - (i == nt ? 0 : 1)
+  end
+  if t[nt+1,2] != 0
+    inds[nt,2] -= 1
+    inds = vcat(inds, [t[nt+1,1] t[nt+1,1]])
+  end
+  return inds
 end

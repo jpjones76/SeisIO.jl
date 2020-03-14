@@ -246,7 +246,7 @@ function wseis(fname::String, S...)
         fs = getfield(seis, :fs)
         if !isempty(seis.t)
           t = getfield(seis, :t)
-          push!(TS, t[1,2])
+          push!(TS, starttime(t, seis.fs))
           push!(TE, fs == zero(Float64) ? t[end,2] : sum(t, dims=1)[2] +
             round(Int64, sμ*lastindex(seis.x)/fs))
         end
@@ -262,7 +262,7 @@ function wseis(fname::String, S...)
           t = seis.t[k]
           fs = seis.fs[k]
           if !isempty(seis.t)
-            setindex!(ts, t[1,2], i)
+            setindex!(ts, starttime(t, fs), i)
             setindex!(te, fs == zero(Float64) ? t[end,2] : sum(t, dims=1)[2] +
               round(Int64, sμ*lastindex(seis.x)/fs), i)
           end

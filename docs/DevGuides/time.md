@@ -51,6 +51,7 @@ A two-column Array{Int64,2}, in which:
 
 #### `Tᵢ[:,2]`
 * `Tᵢ[1,2]` is the absolute time of *X₁* measured from Unix epoch
+  + Edge case warning: if time segments *Xᵢ* aren't in chronological order, and a later segment occurs *before* the first segment, this won't be the earliest sample time.
 * `Tᵢ[2:end,2]` are time gaps *δt* in *Xᵢ*, defined *δt* ≡ *tᵢⱼ₋₁* - *tᵢⱼ* - *Δᵢ*.
   + **Important**: for time gap *δt* = *Tᵢ[k,2]* at index *j = Tᵢ[k,1]* in *Xᵢ*, the total time between samples *Xᵢⱼ₋₁* and *Xᵢⱼ* is *δt + Δᵢ* not *δt*. This may differ from time gap representations in other geophysical software.
 
@@ -205,6 +206,14 @@ Convert values in *A* to total integer μs from the Unix epoch. Expected format 
 `(str0, str1) = parsetimewin(ts1::TimeSpec, ts2::TimeSpec)`
 
 Convert *ts1*, *ts2* to String, and sort s.t. *DateTime(str0)* < *DateTime(str1)*. See **TimeSpec API** below.
+
+`t = starttime(T::Array{Int64, 2}, Δ::Int64)`
+
+`t = starttime(T::Array{Int64, 2}, fs::Float64)`
+
+Get the time of the first sample in SeisIO time matrix `t`, sampled at
+interval `Δ` [μs] or frequency `fs` [Hz]. Output is integer μs measured from
+the Unix epoch.
 
 `t_arr!(B::Array{Int32,1}, t::Int64)`
 

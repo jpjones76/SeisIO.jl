@@ -403,13 +403,13 @@ function sxml_mergehdr!(S::GphysData, T::GphysData, app::Bool, nofs::Bool, v::In
   for i = 1:length(T)
 
     # Match on ID, si, ei
-    si = isempty(T.t[i]) ? get(T.misc[i], "startDate", typemin(Int64)) : T.t[i][1,2]
+    si = isempty(T.t[i]) ? get(T.misc[i], "startDate", typemin(Int64)) : starttime(T.t[i], T.fs[i])
     ei = isempty(T.t[i]) ? get(T.misc[i], "endDate", typemax(Int64)) : endtime(T.t[i], T.fs[i])
     id = T.id[i]
     c = 0
     for j = 1:length(S.id)
       if S.id[j] == id
-        sj = isempty(S.t[j]) ? get(S.misc[j], "startDate", si) : S.t[j][1,2]
+        sj = isempty(S.t[j]) ? get(S.misc[j], "startDate", si) : starttime(S.t[j], S.fs[j])
         ej = isempty(S.t[j]) ? get(S.misc[j], "endDate", ei) : endtime(S.t[j], S.fs[j])
         if min(si ≤ ej, ei ≥ sj) == true
           c = j
@@ -598,7 +598,7 @@ function mk_xml!(io::IO, S::GphysData, chans::Array{Int64,1})
     locs[j] = id[3]
     chas[j] = id[4]
 
-    # precedence for start time: S.misc[i]["startDate"] > S.t[i][1,2] > blank_t0
+    # precedence for start time: S.misc[i]["startDate"] > starttime(S.t[i], S.fs[i]) > blank_t0
     if haskey(S.misc[i], "startDate")
       c_start = get(S.misc[i], "startDate", blank_t0)
       if typeof(c_start) == Int64
@@ -616,7 +616,7 @@ function mk_xml!(io::IO, S::GphysData, chans::Array{Int64,1})
 
     if isempty(S.t[i]) == false
       if t0[j] == blank_t0
-        t0[j] = S.t[i][1,2]
+        t0[j] = starttime(S.t[i], S.fs[i])
       end
       if t1[j] == xml_endtime
         t1[j] = endtime(S.t[i], S.fs[i])
