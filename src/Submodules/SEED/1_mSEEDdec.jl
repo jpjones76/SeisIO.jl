@@ -1,7 +1,7 @@
 SEED_Char(io::IO, BUF::SeisIOBuf, nb::UInt16) = replace(String(fastread(io, nb)),
                                             ['\r', '\0'] =>"")
 
-function SEED_Unenc!(io::IO, S::SeisData, c::Int64, xi::Int64, nb::UInt16, nx::UInt16)
+function SEED_Unenc!(io::IO, S::GphysData, c::Int64, xi::Int64, nb::UInt16, nx::UInt16)
   buf = getfield(BUF, :buf)
   checkbuf_8!(buf, xi)
   x = getindex(getfield(S, :x), c)
