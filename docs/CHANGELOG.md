@@ -1,3 +1,10 @@
+### 2020-04-07
+* Improved reading unencoded mini-SEED data with byte swap (part of issue #40)  
+* Bug fix for issue #42.
+
+### 2020-03-14
+* mini-SEED can now parse unencoded data to structures of any GphysData subtype
+
 ### 2020-03-13
 * *sync!* has been rewritten based on @tclements suggestions (Issue #31). Notable changes:
   * Much less memory use

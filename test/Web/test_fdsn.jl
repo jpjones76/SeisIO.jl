@@ -302,3 +302,8 @@ for i = 1:❄
     @warn(string("Request errored; error output below.\n\n", err))
   end
 end
+
+printstyled("    issue 42\n", color=:light_green)
+redirect_stdout(out) do
+  S = get_data("FDSN","IU.ANMO.00.LHZ",s="2019-02-14",t="2019-02-15",v=3)
+end

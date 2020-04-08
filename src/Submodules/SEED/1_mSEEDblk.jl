@@ -111,9 +111,9 @@ function blk_calib(S::SeisData, sid::IO, c::Int64, bt::UInt16)
     per = BUF.Calib.period
   end
   typ = (bt == 0x012c ? "Step" : (bt == 310 ? "Sine" : (bt == 320 ? "Pseudo-random" : "Generic")))
-  dur = bt == 0x012c ? string(BUF.Calib.dur1 * "," * BUF.Calib.dur2) : string(BUF.Calib.dur1)
-  amp = bt == 0x0136 ? join([string(per), string(amp)], ",") : string(amp)
-  flag = bt == 0x012c ? flag * "," * string(BUF.Calib.n) : flag
+  dur = bt == 0x012c ? string(BUF.Calib.dur1, ",", BUF.Calib.dur2) : string(BUF.Calib.dur1)
+  amp = bt == 0x0136 ? string(per, ",", amp) : string(amp)
+  flag = bt == 0x012c ? string(flag, ",", BUF.Calib.n) : flag
   calib_str = join( [ typ,
                       join(BUF.Calib.t, ","),
                       flag,
