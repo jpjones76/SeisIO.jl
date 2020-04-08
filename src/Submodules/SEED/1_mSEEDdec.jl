@@ -16,10 +16,10 @@ function SEED_Unenc!(io::IO, S::GphysData, c::Int64, xi::Int64, nb::UInt16, nx::
       Float64
     end)
   xr = reinterpret(T, buf)
-  copyto!(x, xi+1, xr, 1, nx)
   if BUF.swap
-    vx = view(x, xi+1:xi+nx)
-    vx .= bswap.(vx)
+    x[xi+1:xi+nx] .= bswap.(xr[1:nx])
+  else
+    copyto!(x, xi+1, xr, 1, nx)
   end
   setfield!(BUF, :k, Int64(nx))
   return nothing
