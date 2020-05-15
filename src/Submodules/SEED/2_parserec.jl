@@ -262,7 +262,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, nx_new::Int64, nx_add::
   if fmt > 0x00
     # Update S.x[c]
     if fmt > 0x05
-      unsafe_copyto!(x, xi+1, getfield(BUF, :x), 1, getfield(BUF, :k))
+      copyto!(x, xi+1, getfield(BUF, :x), 1, getfield(BUF, :k))
     end
 
     # Update S.t[c]
