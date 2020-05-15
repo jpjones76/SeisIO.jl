@@ -24,7 +24,7 @@ function irisws(cha::String,
 
   # Build query url
   url = "http://service.iris.edu/irisws/timeseries/1/query?" *
-          build_stream_query(c,d0,d1) * "&scale=AUTO&output=" * fmt
+          build_stream_query(c,d0,d1) * "&scale=AUTO&format=" * fmt
   v > 0 && println(url)
   req_info_str = datareq_summ("IRISWS data", ID, d0, d1)
 

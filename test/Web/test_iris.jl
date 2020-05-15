@@ -12,9 +12,12 @@ printstyled("    IRISWS continuous data requests\n", color=:light_green)
 printstyled("    SAC\n", color=:light_green)
 for i = 1:length(chans)
   cha = chans[i]
+  println("cha = ", cha)
   S = get_data("IRIS", cha, src="IRIS", s=ts, t=te, fmt="sacbl", v=0, w=true)
+  basic_checks(S)
   sleep(1)
   T = get_data("IRIS", cha, src="IRIS", s=ts, t=te, fmt="mseed", v=0, w=true)
+  basic_checks(T)
 
   if S.n == 0 || T.n == 0
     @warn(string(cha, " appears to be offline; trying next."))

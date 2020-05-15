@@ -27,7 +27,7 @@ req_info_str = datareq_summ("FDSNWS data", "UW.XNXNX.99.QQQ", d1, d2)
 @test parsable == false
 
 # From IRIS the response code is 400 and we can get an error
-url = "http://service.iris.edu/irisws/timeseries/1/query?net=DE&sta=NENA&loc=99&cha=LUFTBALLOONS&start="*d1*"&end="*d2*"&scale=AUTO&output=miniseed"
+url = "http://service.iris.edu/irisws/timeseries/1/query?net=DE&sta=NENA&loc=99&cha=LUFTBALLOONS&start="*d1*"&end="*d2*"&scale=AUTO&format=miniseed"
 req_info_str = datareq_summ("IRISWS data", "DE.NENA.99.LUFTBALLOONS", d1, d2)
 (req,parsable) = get_http_req(url, req_info_str, to, status_exception=false)
 @test typeof(req) == Array{UInt8,1}
