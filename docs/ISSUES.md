@@ -7,6 +7,7 @@ This document lists problems that are not our fault and can't be fixed by us. Gi
 * X = External; can't fix.
 
 # **List of Non-SeisIO Issues**
+* **32-bit support** (O): SeisIO is designed for 64-bit systems and won't work in 32-bit versions of Julia.
 * **ASDF support** (I)
   + `Waveform` group attributes `event_id`, `magnitude_id`, `focal_mechanism_id` are not yet matched to `QuakeML` group attributes.
   + `Provenance` is not fully supported.

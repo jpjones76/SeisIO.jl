@@ -2,7 +2,7 @@
 Introduction
 ************
 
-SeisIO is a framework for working with univariate geophysical data.
+SeisIO is a framework for working with univariate geophysical data on 64-bit systems.
 SeisIO is designed around three basic principles:
 
 * Ease of use: one shouldn't need a PhD to understand command syntax.
