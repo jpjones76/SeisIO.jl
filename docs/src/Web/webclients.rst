@@ -54,6 +54,8 @@ Special Behavior
 
 1. `autoname=true` attempts to emulate IRISWS channel file naming conventions. For this to work, however, each request must return *exactly one* channel. A wildcard ("*" or "?") in a channel string deactivates ``autoname=true``.
 2. Seismic processing keywords follow an order of operations that matches the ordering of the above list.
+3. IRISWS requests always remove the stage zero gain on the server side, because the service doesn't include the gain constant in the request. This ensures that `:gain` is accurate in SeisIO.
+4. IRISWS requests don't fill `:loc` or `:resp` fields.
 
 ****************
 Station Metadata
