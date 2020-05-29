@@ -10,9 +10,6 @@ function irisws(cha::String,
   # init
   parse_err = false
   parsable = false
-  if fmt == "mseed"
-    fmt = "miniseed"
-  end
   fname = ""
 
   # parse channel string cha
@@ -24,9 +21,10 @@ function irisws(cha::String,
 
   # Build query url
   url = "http://service.iris.edu/irisws/timeseries/1/query?" *
-          build_stream_query(c,d0,d1) * "&scale=AUTO&format=" * fmt
+          build_stream_query(c, d0, d1) * "&scale=" * (fmt == "miniseed" ? "AUTO" : "1.0") * "&format=" * fmt
   v > 0 && println(url)
   req_info_str = datareq_summ("IRISWS data", ID, d0, d1)
+  # see CHANGELOG, 2020-05-28
 
   # Do request
   (R, parsable) = get_http_req(url, req_info_str, to)
@@ -73,12 +71,11 @@ function irisws(cha::String,
   # fill :id and empty fields if no parse_err
   if parse_err == false
     setfield!(Ch, :id, ID)
-    if isempty(Ch.loc)
-      Ch.loc = GeoLoc()
-    end
     if isempty(Ch.name)
       Ch.name = deepcopy(ID)
     end
+    unscale!(Ch)        # see CHANGELOG, 2020-05-28
+    Ch.loc = GeoLoc()   # see CHANGELOG, 2020-05-28
   end
   if parsable && w
     push!(Ch.notes, string(timestamp(), " ¦ write ¦ get_data(\"IRIS\", ... w=true) ¦ wrote raw download to file ", fname))
@@ -100,6 +97,11 @@ function IRISget!(S::GphysData,
                   w::Bool)
 
   parse_err = false
+  if fmt == "mseed"
+    fmt = "miniseed"
+  elseif fmt == "sac"
+    fmt = "sacbl"
+  end
   U = SeisData()
   K = size(C, 1)
   v > 0 && println("IRISWS data request begins...")

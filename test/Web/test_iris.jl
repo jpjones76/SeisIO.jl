@@ -7,36 +7,43 @@ chans = [ "CC.JRO..BHZ",
           "UW.HOOD..ENN",
           "UW.HOOD..ENE" ]
 
-printstyled("  IRIS Web Services\n", color=:light_green)
-printstyled("    IRISWS continuous data requests\n", color=:light_green)
-printstyled("    SAC\n", color=:light_green)
+printstyled("  IRISWS continuous data requests\n", color=:light_green)
+printstyled("    SAC and GeoCSV requests\n", color=:light_green)
 for i = 1:length(chans)
   cha = chans[i]
-  println("cha = ", cha)
+  # println("cha = ", cha)
   S = get_data("IRIS", cha, src="IRIS", s=ts, t=te, fmt="sacbl", v=0, w=true)
   basic_checks(S)
   sleep(1)
   T = get_data("IRIS", cha, src="IRIS", s=ts, t=te, fmt="mseed", v=0, w=true)
   basic_checks(T)
+  U = get_data("IRIS", cha, src="IRIS", s=ts, t=te, fmt="geocsv", v=0)
+  basic_checks(U)
 
-  if S.n == 0 || T.n == 0
+  if S.n == 0 || T.n == 0 || U.n == 0
     @warn(string(cha, " appears to be offline; trying next."))
     if i == lastindex(chans)
       error("No data for any station; failing test due to connection errors.")
     end
   else
-    printstyled("     equivalence of SAC and MSEED requests\n", color=:light_green)
+    printstyled("     SAC == MSEED == GeoCSV\n", color=:light_green)
     sync!(S, s=ts, t=te)
     sync!(T, s=ts, t=te)
-    @test S.x[1] ≈ T.x[1]
+    sync!(U, s=ts, t=te)
+    @test S.x[1] ≈ T.x[1] ≈ U.x[1]
 
-    # Only notes and src should be different
-    for f in Symbol[:id, :name, :loc, :fs, :gain, :resp, :units, :misc , :t, :x]
-      @test getfield(S,f) == getfield(T,f)
+    # :notes and :src will be different; as of 2020-05-28, so will :loc
+    # :units is only set in GeoCSV
+    for f in Symbol[:id, :name, :fs, :gain, :resp, :t]
+      @test getfield(S,f) == getfield(T,f) == getfield(U,f)
     end
 
-    printstyled("    GeoCSV\n", color=:light_green)
-    U = get_data("IRIS", cha, src="IRIS", s=ts, t=te, fmt="geocsv", v=0)
+    #= Change 2020-05-28
+      after IRISWS timeseries issues (first reported to IRIS 2020-05-16),
+      :loc and :gain are being set in SAC requests.
+    =#
+
+    # printstyled("    GeoCSV\n", color=:light_green)
     break
   end
 end
