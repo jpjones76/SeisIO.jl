@@ -55,7 +55,15 @@ Special Behavior
 1. `autoname=true` attempts to emulate IRISWS channel file naming conventions. For this to work, however, each request must return *exactly one* channel. A wildcard ("*" or "?") in a channel string deactivates ``autoname=true``.
 2. Seismic processing keywords follow an order of operations that matches the ordering of the above list.
 3. IRISWS requests always remove the stage zero gain on the server side, because the service doesn't include the gain constant in the request. This ensures that `:gain` is accurate in SeisIO.
-4. IRISWS requests don't fill `:loc` or `:resp` fields.
+4. IRISWS requests don't fill `:loc` or `:resp` fields in mini-SEED and don't fill the `:resp` field in SAC. For cross-format consistency, the stage-zero (scalar) gain is removed from any request to IRISWS and the `:gain` field in such channels is 1.0.
+
+Data Formats
+------------
+SeisIO supports the following data format strings in timeseries web requests, subject to the limitations of the web service:
+
+* "miniseed" or "mseed" for mini-SEED
+* "sac" or "sacbl" for binary little-endian SAC
+* "geocsv" for two-column (tspair) GeoCSV
 
 ****************
 Station Metadata
@@ -69,7 +77,8 @@ Station Metadata
 Fill channels `chans` of SeisData structure `S` with information retrieved from
 remote station XML files by web query.
 
-| **:ref:`Data keywords<dkw>`**
+:ref:`Shared Keywords<dkw>`
+
 | src, to, v
 |
 | **Other Keywords**
