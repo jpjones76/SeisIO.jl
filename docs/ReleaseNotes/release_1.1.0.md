@@ -21,6 +21,7 @@ Functions *seedlink* and *seedlink!* now accept keyword *seq="* for starting seq
 * The data processing functions *ungap!*, *taper!*, *env!*, *filtfilt!*, and *resample!* now correctly skip irregularly-sampled channels.
 * Irregularly-sampled channels are no longer writable to ASDF, which, by design, does not handle irregularly-sampled data.
 * ASDF groups and datasets are now always closed after reading with *read_hdf5*.
+* Fixed issue #43; reading Steim-compressed mini-SEED into an existing channel with a Float64 data vector.
 
 # 3. **Consistency Changes**
 * *get_data* with *w=true* now logs the raw download write to *:notes*
@@ -32,6 +33,7 @@ Functions *seedlink* and *seedlink!* now accept keyword *seq="* for starting seq
   - has a method for direct write of *SeisEvent* structures
 * *write_sxml* now works with all GphysData subtypes
 * *read_data* now uses verbosity for formats "slist" and "lennartz"
+* *get_data("IRIS", ...)* now accepts `fmt="sac"` as an alias to `fmt="sacbl"`
 
 ## **SeisIO Test Scripts**
 Fixed some rare bugs that could break automated tests.
@@ -63,6 +65,7 @@ Fixed some rare bugs that could break automated tests.
 * Updated and expanded the tutorial
 * Updated and expanded the time API
 * Fixed issue #39
+* Documentation improvements to address issues #44, #45.
 
 ## *sync!*
 Rewritten based on @tclements suggestions (Issue #31). Notable changes:

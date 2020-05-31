@@ -196,7 +196,7 @@ default for nev to 2.
 +========+================+========+==========================================+
 | comp   | 0x00           | U8     |  compress data on write? [#]_            |
 +--------+----------------+--------+------------------------------------------+
-| fmt    | "miniseed"     | S      | request data format                      |
+| fmt    | "miniseed"     | S      | request data format [#]_                 |
 +--------+----------------+--------+------------------------------------------+
 | mag    | [6.0, 9.9]     | A{F,1} | magnitude range for queries              |
 +--------+----------------+--------+------------------------------------------+
@@ -235,6 +235,7 @@ default for nev to 2.
 .. rubric:: Table Footnotes
 .. [#] Types: A = Array, B = Boolean, C = Char, DT = DateTime, F = Float, I = Integer, S = String, U8 = Unsigned 8-bit integer (UInt8)
 .. [#] If KW.comp == 0x00, never compress data; if KW.comp == 0x01, only compress channel *i* if *length(S.x[i]) > KW.n_zip*; if comp == 0x02, always compress data.
+.. [#] Strings have the same names and spellings as file formats in `read_data`. Note that "sac" in a web request is aliased to "sacbl", i.e., binary little-endian SAC, to match the native endianness of the Julia language.
 .. [#] String is passed as-is, e.g. "szsrecs=true&repo=realtime" for FDSN. String should not begin with an ampersand.
 .. [#] Specify region **[center_lat, center_lon, min_radius, max_radius, dep_min, dep_max]**, with lat, lon, and radius in decimal degrees (°) and depth in km with + = down. Depths are only used for earthquake searches.
 .. [#] Specify region **[lat_min, lat_max, lon_min, lon_max, dep_min, dep_max]**, with lat, lon in decimal degrees (°) and depth in km with + = down. Depths are only used for earthquake searches.

@@ -1,3 +1,22 @@
+### 2020-05-28
+* `get_data("IRIS", ...)` now accepts `fmt="sac"` as an alias to `fmt="sacbl"`.
+
+#### IRISWS changes
+A server-side issue with IRISWS timeseries, affecting `get_data("IRIS", ... )`, has caused minor behavior changes:
+* While `:gain` still appear to be 1.0 in SeisIO, the channel gain is now set (and hence, unscaled, but logged to `:notes`) in SAC and GeoCSV requests. Other data formats still don't do this.
+* SAC and GeoCSV currently set lat, lon, and el in requests, but mini-SEED doesn't. Until requests return format-agnostic locations, `get_data("IRIS", ... )` will return an empty GeoLoc() object for the `:loc` field.
+
+##### Potential Inconsistencies
+However, as a result of the above changes:
+1. With `get_data("IRIS", ... , w=true)`, `:misc` is now always format-dependent.
+2. For formats "geocsv" and "sac", `S = get_data("IRIS", ... , w=true)` now differs slightly from calling `read_data` on the files created by the `get_data` command.
+  + `:loc` will be set in objects read from SAC and GeoCSV files, but not mini-SEED.
+  + Data in objects read from SAC or GeoCSV files will be scaled by the Stage 0 gain; fix this with `unscale!`.
+
+### 2020-05-16
+* Documentation improvements for issue #44 and #45.
+* Fixed issue #43; reading Steim-compressed mini-SEED into an existing channel with a Float64 data vector.
+
 ### 2020-04-07
 * Improved reading unencoded mini-SEED data with byte swap (part of issue #40)  
 * Bug fix for issue #42.

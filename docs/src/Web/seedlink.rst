@@ -30,7 +30,8 @@ Initiate a SeedLink session in DATA mode to feed data from channels ``chans`` wi
 
 Keywords
 ========
-| **:ref:`Data keywords<dkw>`**
+:ref:`Shared Keywords<dkw>`
+
 | v, w
 |
 | **SeedLink Keywords**
