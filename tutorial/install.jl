@@ -1,17 +1,7 @@
-using Pkg
-function pkg_check(pkgs::Array{String,1})
-  for p in pkgs
-    if get(Pkg.installed(), p, nothing) == nothing
-      println(p * " not found; installing.")
-      Pkg.add(p)
-    else
-      println(p * " found; NOT installing.")
-    end
-  end
-  return nothing
-end
-pkg_check(["DSP", "SeisIO", "IJulia"])
 using IJulia
 import SeisIO: get_svn
+path = Base.source_dir()
+include(path * "../test/TestHelpers/0_check_deps.jl")
+pkg_check(["DSP", "SeisIO", "IJulia"])
 get_svn("https://github.com/jpjones76/SeisIO-TestData/trunk/Tutorial", "DATA")
 jupyterlab(dir=pwd())
