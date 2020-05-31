@@ -1,3 +1,6 @@
+### 2020-05-30
+* Automated testing for Julia v.1.3 has ended. Tested versions of the language include v1.0 (LTS), v1.4 (stable), and v1.5 (upcoming release).
+
 ### 2020-05-28
 * `get_data("IRIS", ...)` now accepts `fmt="sac"` as an alias to `fmt="sacbl"`.
 
