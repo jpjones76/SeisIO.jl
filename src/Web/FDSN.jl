@@ -160,7 +160,8 @@ function FDSNget!(U::SeisData,
   # (2) Build ID strings for data query
   ID_str = Array{String,1}(undef, S.n)
   if S.n > 0
-    for i in 1:S.n
+    N_ch = S.n
+    for i in 1:N_ch
       ID_mat = split(S.id[i], ".")
       ID_mat[isempty.(ID_mat)] .= wc
       ID_str[i] = join(ID_mat, " ")
@@ -168,7 +169,8 @@ function FDSNget!(U::SeisData,
   else
     C = fdsn_chp(chans, v)[:,1:4]
     C[isempty.(C)] .= "*"
-    ID_str = [join(C[i, :], " ") for i in 1:size(C,1)]
+    N_ch = size(C,1)
+    ID_str = [join(C[i, :], " ") for i in 1:N_ch]
   end
   if v > 1
     printstyled("data query strings:\n", color=:light_green)
@@ -212,7 +214,7 @@ function FDSNget!(U::SeisData,
     t_str = int2tstr(t1)
     qtail = string(" ", s_str, " ", t_str, "\n")
     QUERY = identity(BODY)
-    for i = 1:S.n
+    for i = 1:N_ch
       QUERY *= ID_str[i]*qtail
     end
     if v > 1

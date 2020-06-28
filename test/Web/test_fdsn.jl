@@ -303,7 +303,11 @@ for i = 1:❄
   end
 end
 
-printstyled("    issue 42\n", color=:light_green)
+printstyled("    issues 42 & 43\n", color=:light_green)
 redirect_stdout(out) do
-  S = get_data("FDSN","IU.ANMO.00.LHZ",s="2019-02-14",t="2019-02-15",v=3)
+  S = get_data("FDSN", "IU.ANMO.00.LHZ", s="2019-02-14", t="2019-02-15", v=3)
+
+  # This should have two "fail" channels; one from each day with no data
+  S = get_data("FDSN", "C0.HAYD.00.LHZ", s="2019-01-01", t="2019-01-05", v=3)
+  @test S.n == 3
 end

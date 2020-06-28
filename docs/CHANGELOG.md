@@ -1,3 +1,8 @@
+### 2020-06-18
+* `get_data` should no longer error when a multiday request begins on a day when one channel has no data. (Issue #43)
+* Fixed behavior of reading a SEED Blockette 100 to match the mini-SEED C library. (Issue #48)
+* Parsing SEED Blockette 100 now logs `:fs` changes to `:notes`.
+
 ### 2020-05-30
 * Automated testing for Julia v.1.3 has ended. Tested versions of the language include v1.0 (LTS), v1.4 (stable), and v1.5 (upcoming release).
 
