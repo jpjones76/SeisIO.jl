@@ -67,9 +67,6 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, nx_new::Int64, nx_add::
   seekstart(BUF.dh_buf)
   read!(BUF.dh_buf, BUF.seq)
   read!(BUF.dh_buf, BUF.hdr)
-  if v > 2
-      println(stdout, join(map(Char,BUF.seq), map(Char,BUF.hdr)))
-  end
   u16[1]          = read(BUF.dh_buf, UInt16)
   u16[2]          = read(BUF.dh_buf, UInt16)
   hh              = read(BUF.dh_buf, UInt8)
@@ -110,6 +107,9 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, nx_new::Int64, nx_add::
 
   n = getfield(BUF, :n)
 
+  if v > 2
+    println(stdout, String(copy(BUF.seq)), " ", String(copy(BUF.hdr)), ", fs = ", 1.0/BUF.dt, ", n = ", n)
+  end
   # =========================================================================
   # Channel handling for S
 
@@ -125,7 +125,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, nx_new::Int64, nx_add::
   end
 
   if c == 0
-    if v > 2
+    if v > 1
       println(stdout, "New channel; ID = ", id, ", S.id = ", S.id)
     end
     x = Array{Float32, 1}(undef, nx_new)
@@ -165,7 +165,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, nx_new::Int64, nx_add::
   nsk = u16[4] - 0x0030
   u16[6] = u16[5] - 0x0030
   nblk = flags[4]
-  v > 2 && println(string("Blockettes to read: ", nblk))
+  v > 1 && println(string("Blockettes to read: ", nblk))
   @inbounds for i = 0x01:0x01:nblk
 
     # DND DND DND
@@ -182,7 +182,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, nx_new::Int64, nx_add::
     end
 
     # debug
-    if v > 2
+    if v > 1
       printstyled(string("Position = ", fastpos(sid), "\n"), color=:light_green)
       printstyled(string("Blockette type to read: ", bt, "\n"), color=:light_yellow)
       println(stdout, "Relative position u16[5] = ", u16[5], " bytes from record begin")
@@ -196,6 +196,14 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, nx_new::Int64, nx_add::
       blk_len = blk_1001(S, sid, c)
     elseif bt == 0x0064
       blk_len = blk_100(S, sid, c)
+
+      # Oral tradition: immediately update :fs
+      fs = 1.0/getfield(BUF, :dt)
+      if (xi == 0) || (fs != S.fs[c])
+        note!(S, c, string("mini-SEED Blockette 100, old fs = ", S.fs[c], ", new fs = ", fs))
+      end
+      S.fs[c] = fs
+
     elseif bt == 0x00c9
       blk_len = blk_201(S, sid, c)
     elseif bt == 0x01f4

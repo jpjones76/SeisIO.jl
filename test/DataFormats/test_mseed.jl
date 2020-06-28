@@ -1,12 +1,29 @@
 # The file test.mseed comes from an older IRIS libmseed, found by anowacki
 # It has a more complicated structure than the test.mseed file in more recent
 # versions of libmseed, which reads with no issues
-printstyled("  mini-SEED file read\n", color=:light_green)
+printstyled("  mini-SEED\n", color=:light_green)
+
+printstyled("    sample rate\n", color=:light_green)
+
+# Tests from SEED manual v2.4 page 110
+import SeisIO.SEED.update_dt!
+r1 = [33, 330, 3306, -60, 1, -10, -1]
+r2 = [10, 1, -10, 1, -10, 1, -10]
+fs = [330.0, 330.0, 330.6, 1.0/60.0, 0.1, 0.1, 0.1]
+
+for i = 1:length(r1)
+  BUF.r1 = r1[i]
+  BUF.r2 = r2[i]
+  update_dt!(BUF)
+  @test isapprox(1.0/BUF.dt, fs[i])
+end
 
 test_sac_file     = string(path, "/SampleFiles/SAC/test_le.sac")
 test_mseed_file   = string(path, "/SampleFiles/SEED/test.mseed")
 test_mseed_pat    = string(path, "/SampleFiles/SEED/t*.mseed")
 mseed_vals_file   = string(path, "/SampleFiles/SEED/test_mseed_vals.txt")
+
+printstyled("    file read\n", color=:light_green)
 
 @test_throws ErrorException verified_read_data("mseed", test_sac_file)
 
@@ -18,7 +35,7 @@ S = verified_read_data("mseed", test_mseed_file, v=0, strict=false)
 @test ≈(S.x[1][1:5], [ 2787, 2776, 2774, 2780, 2783 ])
 
 # mseed with mmap
-printstyled("    with mmap\n", color=:light_green)
+printstyled("    file read with mmap\n", color=:light_green)
 Sm = read_data("mseed", test_mseed_file, v=0, memmap=true)
 @test Sm == S
 
@@ -128,12 +145,14 @@ S2 = read_data("mseed", mseed_out, v=0)[1]
 
 # Check that skipping an unparseable data type on a new channel doesn't
 # affect channel start time or data read-in
+printstyled("    unparseable data\n", color=:light_green)
 δx = length(S1.x)-length(S2.x)
 @test div(S2.t[1,2]-S1.t[1,2], round(Int64, sμ/S1.fs)) == length(S1.x)-length(S2.x)
 @test S1.x[δx+1:end] == S2.x
 
 # Check that bytes skipped are accurately logged
-@test occursin("3968 bytes skipped", S2.notes[1])
+printstyled("    unparseable blockettes\n", color=:light_green)
+@test any([occursin("3968 bytes skipped", i) for i in S2.notes])
 
 # Done
 rm(mseed_out)

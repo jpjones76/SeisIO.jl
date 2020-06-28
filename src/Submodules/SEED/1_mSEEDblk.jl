@@ -27,7 +27,7 @@ end
 
 # [100] Sample Rate Blockette (12 bytes)
 function blk_100(S::SeisData, sid::IO, c::Int64)
-  BUF.dt = Float64(BUF.swap ? ntoh(fastread(sid, Float32)) : fastread(sid, Float32))
+  BUF.dt = 1.0 / Float64(BUF.swap ? ntoh(fastread(sid, Float32)) : fastread(sid, Float32))
   fastskip(sid, 4)
   return 0x000c
 end
