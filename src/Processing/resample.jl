@@ -1,13 +1,44 @@
 import DSP.resample
 export resample, resample!
 
-function mkresample(rate::T) where T<:Real
-  r = rationalize(rate)
-  h = T.(resample_filter(r))
-  ff = FIRFilter(h, r)
-  τ = timedelay(ff)
-  setphase!(ff, τ)
-  return ff
+function cheap_resample!(t::Array{Int64, 2}, x::FloatArray, fs_new::Float64, fs_old::Float64)
+  r = fs_new/fs_old
+  n_seg = size(t,1)-1
+  gap_inds = zeros(Int64, n_seg+1)
+
+  # resize S.x if we're upsampling
+  if (r > 1.0)
+    resize!(x, ceil(Int64, length(x)*r))
+  end
+
+  for k = n_seg:-1:1
+
+    # indexing
+    si            = t[k,1]
+    ei            = t[k+1,1] - (k == n_seg ? 0 : 1)
+    nx_in         = ei-si+1
+
+    xr = DSP.resample(x[si:ei], r)
+
+    # indexing
+    nx_out        = min(floor(Int64, nx_in*r), length(xr))
+    gap_inds[k+1] = nx_out
+
+    # resample and copy
+    copyto!(x, si, xr, 1, nx_out)
+
+    # resize S.x if we downsampled
+    (fs_new < fs_old) && (deleteat!(x, si+nx_out:ei))
+  end
+
+  for k = 2:n_seg+1
+    gap_inds[k] += gap_inds[k-1]
+  end
+  copyto!(t, 2, gap_inds, 2, n_seg)
+
+  # ensure length(S.x[i]) == S.t[i][end,1] if upsampled
+  (r > 1.0) && resize!(x, t[end, 1])
+  return nothing
 end
 
 @doc """
@@ -30,107 +61,18 @@ function resample!(S::GphysData;
   chans::ChanSpec=Int64[],
   fs::Float64=0.0)
 
-  # preprocess data channels
-  chans = mkchans(chans, S, keepirr=false)
-
-  f0 = fs == 0.0 ? minimum(S.fs[chans[S.fs[chans] .> 0.0]]) : fs
-
-  proc_str = string("resample!(S, chans=", chans, ", fs=",
+  chans     = mkchans(chans, S, keepirr=false)
+  f0        = fs == 0.0 ? minimum(S.fs[S.fs .> 0.0]) : fs
+  proc_str  = string("resample!(S, chans=", chans, ", fs=",
               repr("text/plain", f0, context=:compact=>true), ")")
 
-  # This setup is very similar to filtfilt!
-  N = nx_max(S, chans)
-  (N == 0) && return
-  T = unique([eltype(i) for i in S.x[chans]])
-  nT = length(T)
-
-  sz = 0
-  yy = Any
-  for i = 1:nT
-    zz = sizeof(T[i])
-    if zz > sz
-      yy = T[i]
-      sz = zz
-    end
-  end
-  Y = Array{yy,1}(undef, N+1)
-  Z = similar(Y)
-
-  # Get groups
-  GRPS = get_unique(S, ["fs", "eltype"], chans)
-  i = GRPS[1][1]
-  ty = eltype(S.x[i])
-  fs = ty(S.fs[i])
-  j = 1
-  while isapprox(fs, f0)
-    j += 1
-    (j > length(GRPS)) && return nothing
-    i = GRPS[j][1]
-    fs = ty(S.fs[i])
-  end
-  ff = mkresample(ty(f0/fs))
-  rate_old = f0/fs
-  si::Int = 0
-  ei::Int = 0
-
-  for grp in GRPS
-    # get fs, eltype
-    c = grp[1]
-    ty = eltype(S.x[c])
-    fs = ty(S.fs[c])
-    fs == f0 && continue
-    rate = f0/fs
-
-    # update rate, filter
-    if rate != rate_old || ty != eltype(Y)
-      ff = mkresample(ty(f0/fs))
-      rate_old = rate
-    end
-
-    # reinterpret Y if needed
-    if ty != eltype(Y)
-      Y = reinterpret(ty, isa(Y, Base.ReinterpretArray) ? Y.parent : Y)
-      Z = reinterpret(ty, isa(Z, Base.ReinterpretArray) ? Z.parent : Z)
-    end
-
-    # Here, things change. We loop in reverse over each segment in each
-    # element of grp
-    for i in grp
-      n_seg = size(S.t[i],1)-1
-      gap_inds = Array{Int64,1}(undef, n_seg+1)
-      gap_inds[1] = 1
-      for k = n_seg:-1:1
-        si            = S.t[i][k,1]
-        ei            = S.t[i][k+1,1] - (k == n_seg ? 0 : 1)
-
-        # determine boundaries
-        nx_in         = ei-si+1
-        nx_out        = ceil(Int, nx_in*rate)
-        nz_out        = inputlength(ff, nx_out)
-
-        # create padded version of this segment of S.x[i]
-        if nz_out > length(Z)
-          append!(Z, zeros(ty, nz_out-length(Z)))
-        end
-        copyto!(Z, 1, S.x[i], si, nx_in)
-        if nz_out > nx_in
-          Z[nx_in+1:nz_out] = zeros(ty, nz_out-nx_in)
-        end
-        n_out          = outputlength(ff, nz_out)
-
-        # basically the filt() call in DSP.jl/stream_filt.jl
-        ybuf           = view(Y, 1 : n_out)
-        ny             = filt!(ybuf, ff, Z[1:nz_out])
-        copyto!(S.x[i], si, Y, 1, ny)
-        deleteat!(S.x[i], si+ny:ei)
-        gap_inds[k+1]  = ceil(Int, ei*rate)
-      end
-      fs = S.fs[i]
-      copyto!(S.t[i], 1, gap_inds, 1, n_seg+1)
-      setindex!(S.fs, f0, i)
-    end
-    desc_str = string("resampled from ", fs, " to ", f0, "Hz")
-    proc_note!(S, grp, proc_str, desc_str)
+  for i = 1:S.n
+    (S.fs[i] == 0.0)  && continue
+    (S.fs[i] == f0)   && continue
+    cheap_resample!(S.t[i], S.x[i], f0, S.fs[i])
+    desc_str  = string("resampled from ", S.fs[i], " to ", f0, "Hz")
+    proc_note!(S, i, proc_str, desc_str)
+    S.fs[i]   = f0
   end
   return nothing
 end
@@ -139,67 +81,12 @@ function resample!(C::GphysChannel, f0::Float64)
   C.fs > 0.0 || error("Can't resample non-timeseries data!")
   (C.fs == f0) && return nothing
   @assert f0 > 0.0
-
-  # This setup is very similar to filtfilt!
-  N = nx_max(C)
-  (N == 0) && return
-  ty = eltype(C.x)
-  Y = Array{ty,1}(undef, N+1)
-  Z = similar(Y)
-  rate = f0/C.fs
-  ff = mkresample(rate)
-
-  if size(C.t,1) == 2
-    nx_in         = length(C.x)
-    nx_out        = ceil(Int, nx_in*rate)
-    nz_out        = inputlength(ff, nx_out)
-    if nz_out > length(Z)
-      append!(Z, zeros(ty, nz_out-length(Z)))
-    end
-    copyto!(Z, 1, C.x, 1, nx_in)
-    if nz_out > nx_in
-      Z[nx_in+1:nz_out] = zeros(ty, nz_out-nx_in)
-    end
-    n_out          = outputlength(ff, nz_out)
-    ybuf           = view(Y, 1 : n_out)
-    ny             = filt!(ybuf, ff, Z[1:nz_out])
-    copyto!(C.x, 1, Y, 1, ny)
-    deleteat!(C.x, ny+1:nx_in)
-  else
-    n_seg           = size(C.t, 1)-1
-    gap_inds        = ones(Int64, n_seg+1)
-    for k = n_seg:-1:1
-      si            = C.t[k,1]
-      ei            = C.t[k+1,1] - (k == n_seg ? 0 : 1)
-
-      # determine boundaries
-      nx_in         = ei-si+1
-      nx_out        = ceil(Int, nx_in*rate)
-      nz_out        = inputlength(ff, nx_out)
-
-      # create padded version of this segment of C.x
-      if nz_out > length(Z)
-        append!(Z, zeros(ty, nz_out-length(Z)))
-      end
-      copyto!(Z, 1, C.x, si, nx_in)
-      if nz_out > nx_in
-        Z[nx_in+1:nz_out] = zeros(ty, nz_out-nx_in)
-      end
-      n_out          = outputlength(ff, nz_out)
-
-      # basically the filt() call in DSP.jl/stream_filt.jl
-      ybuf           = view(Y, 1 : n_out)
-      ny             = filt!(ybuf, ff, Z[1:nz_out])
-      copyto!(C.x, si, Y, 1, ny)
-      deleteat!(C.x, si+ny:ei)
-      gap_inds[k+1]  = ceil(Int, ei*rate)
-    end
-    copyto!(C.t, 1, gap_inds, 1, n_seg+1)
-  end
-  fs = C.fs
-  setfield!(C, :fs, f0)
-  proc_note!(C, string("resample!(C, fs=", f0, ")"),
-                string("resampled from ", fs, " to ", f0, "Hz"))
+  proc_str = string("resample!(C, fs=",
+              repr("text/plain", f0, context=:compact=>true), ")")
+  cheap_resample!(C.t, C.x, f0, C.fs)
+  desc_str = string("resampled from ", C.fs, " to ", f0, "Hz")
+  proc_note!(C, proc_str, desc_str)
+  C.fs = f0
   return nothing
 end
 

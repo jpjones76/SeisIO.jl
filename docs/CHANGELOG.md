@@ -1,3 +1,9 @@
+### 2020-07-02
+* `resample!` has been rewritten, fixing issues #50 and #51. syntax and keywords
+are unchanged.
+  + The current version consumes slightly more memory than the previous one.
+  + There may be one further rewrite in coming weeks, to switch to FFT-based filtering.
+
 ### 2020-06-18
 * `get_data` should no longer error when a multiday request begins on a day when one channel has no data. (Issue #43)
 * Fixed behavior of reading a SEED Blockette 100 to match the mini-SEED C library. (Issue #48)
