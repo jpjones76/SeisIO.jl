@@ -1,4 +1,5 @@
 ### 2020-07-02
+* minor bug fix for Julia v1.5: calling `sizeof(R)` on an empty `MultiStageResp`
 * `resample!` has been rewritten, fixing issues #50 and #51. syntax and keywords
 are unchanged.
   + The current version consumes slightly more memory than the previous one.
