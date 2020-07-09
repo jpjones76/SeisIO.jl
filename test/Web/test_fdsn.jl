@@ -16,7 +16,7 @@ c1 = "CC.VALT..,PB.B001..BS?,PB.B001..E??,XX.YYY.00.BHZ"
 c2 = ["CC.VALT..", "PB.B001..BS?", "PB.B001..E??", "XX.YYY.00.BHZ"]
 c3 = ["CC" "VALT" "" ""; "PB" "B001" "" "BS?"; "PB" "B001" "" "E??"; "XX" "YYY" "00" "BHZ"]
 try
-  @test (minreq!(SeisIO.fdsn_chp(c1, 0)))[:,1:4] == SeisIO.fdsn_chp(c2, 0)[:,1:4] == minreq!(SeisIO.fdsn_chp(c3, 0))
+  @test (minreq(SeisIO.fdsn_chp(c1, 0)))[:,1:4] == SeisIO.fdsn_chp(c2, 0)[:,1:4] == minreq(SeisIO.fdsn_chp(c3, 0))
 catch err
   @warn("Inconsistent reslts from fdsn_chp!")
 end
@@ -310,4 +310,91 @@ redirect_stdout(out) do
   # This should have two "fail" channels; one from each day with no data
   S = get_data("FDSN", "C0.HAYD.00.LHZ", s="2019-01-01", t="2019-01-05", v=3)
   @test S.n == 3
+end
+
+# test IRISPH5 mseed
+printstyled("      mseed request from IRISPH5\n", color=:light_green)
+s = DateTime(2016,6,23)
+t = s + Minute(1) # this is 250 Hz data
+id = "YW.1002..DP?"
+try
+  printstyled("        station info\n", color=:light_green)
+  S = FDSNsta(id,src="IRISPH5",s=s,t=t,msr=true)
+  printstyled("        trace data\n", color=:light_green)
+  get_data!(S, "FDSN", id, src="IRISPH5", s=s, t=t, msr=true)
+  if isempty(S)
+    printstyled("        No data; check headers & connection!\n", color=:red)
+  end
+catch err
+  @warn(string("Request errored; error output below.\n\n", err))
+end
+
+# test IRISPH5 geocsv
+printstyled("      geocsv request from IRISPH5\n", color=:light_green)
+try
+  printstyled("        station info\n", color=:light_green)
+  S = FDSNsta(id,src="IRISPH5",s=s,t=t,msr=true)
+  printstyled("        trace data\n", color=:light_green)
+  get_data!(S, "FDSN", id, src="IRISPH5", s=s, t=t, msr=true,fmt="geocsv")
+  if isempty(S)
+    printstyled("        No data; check headers & connection!\n", color=:red)
+  end
+catch err
+  @warn(string("Request errored; error output below.\n\n", err))
+end
+
+# test IRISPH5 geocsv.tspair
+printstyled("      geocsv.tspair request from IRISPH5\n", color=:light_green)
+try
+  printstyled("        station info\n", color=:light_green)
+  S = FDSNsta(id,src="IRISPH5",s=s,t=t,msr=true)
+  printstyled("        trace data\n", color=:light_green)
+  get_data!(S, "FDSN", id, src="IRISPH5", s=s, t=t, msr=true,fmt="geocsv.tspair")
+  if isempty(S)
+    printstyled("        No data; check headers & connection!\n", color=:red)
+  end
+catch err
+  @warn(string("Request errored; error output below.\n\n", err))
+end
+
+# test IRISPH5 geocsv.slist
+printstyled("      geocsv.slist request from IRISPH5\n", color=:light_green)
+try
+  printstyled("        station info\n", color=:light_green)
+  S = FDSNsta(id,src="IRISPH5",s=s,t=t,msr=true)
+  printstyled("        trace data\n", color=:light_green)
+  get_data!(S, "FDSN", id, src="IRISPH5", s=s, t=t, msr=true,fmt="geocsv.slist")
+  if isempty(S)
+    printstyled("        No data; check headers & connection!\n", color=:red)
+  end
+catch err
+  @warn(string("Request errored; error output below.\n\n", err))
+end
+
+# test IRISPH5 sac
+# this will fail - need to implement multi-channel version of read_sac_stream
+printstyled("      sac request from IRISPH5\n", color=:light_green)
+try
+  printstyled("        trace data\n", color=:light_green)
+  S = get_data("FDSN", id, src="IRISPH5", s=s, t=t, msr=true,fmt="sac")
+  @test S.id[S.n] == "XX.FMT..001"
+  if isempty(S)
+    printstyled("        No data; check headers & connection!\n", color=:red)
+  end
+catch err
+  @warn(string("Request errored; error output below.\n\n", err))
+end
+
+# test IRISPH5 segy1
+# this will fail
+printstyled("      segy1 request from IRISPH5\n", color=:light_green)
+try
+  printstyled("        trace data\n", color=:light_green)
+  S = get_data("FDSN", id, src="IRISPH5", s=s, t=t, msr=true,fmt="segy1")
+  @test S.id[S.n] == "XX.FMT..001"
+  if isempty(S)
+    printstyled("        No data; check headers & connection!\n", color=:red)
+  end
+catch err
+  @warn(string("Request errored; error output below.\n\n", err))
 end
