@@ -161,6 +161,8 @@ end
 |TEXNET | http://rtserve.beg.utexas.edu |
 |USGS   | http://earthquake.usgs.gov |
 |USP    | http://sismo.iag.usp.br |
+|:------:|:-------------------|
+|IRISPH5| http://service.iris.edu/ph5ws/ |
 """
 seis_www = Dict("BGR" => "http://eida.bgr.de",
                 "EMSC" => "http://www.seismicportal.eu",
@@ -184,8 +186,15 @@ seis_www = Dict("BGR" => "http://eida.bgr.de",
                 "TEXNET" => "http://rtserve.beg.utexas.edu",
                 "USGS" => "http://earthquake.usgs.gov",
                 "USP" => "http://sismo.iag.usp.br")
+ph5_www = Dict("IRISPH5" => "http://service.iris.edu")
 
-fdsn_uhead(src::String) = haskey(seis_www, src) ? seis_www[src] * "/fdsnws/" : src
+function fdsn_uhead(src::String)
+  if !occursin("PH5",src)
+    return haskey(seis_www, src) ? seis_www[src] * "/fdsnws/" : src
+  else
+    return haskey(ph5_www, src) ? ph5_www[src] * "/ph5ws/" : src
+  end
+end
 
 @doc """
     web_chanspec

@@ -187,6 +187,26 @@ function FDSNget!(U::SeisData,
     if fmt != "miniseed"
       @warn(string("format ", fmt, " ignored; server only allows miniseed."))
     end
+  elseif occursin("ph5ws",URL)
+    BODY = "reqtype=FDSN\n"
+    if fmt ∉ ["mseed","miniseed","sac","segy1","segy2","geocsv","geocsv.tspair","geocsv.slist"]
+      @warn(string("format ", fmt, " ignored; server only allows:\n" *
+        "mseed\n" *
+        "sac\n" *
+        "segy1\n" *
+        "geocsv\n" *
+        "geocsv.tspair\n" *
+        "geocsv.slist")
+      )
+    end
+    fmt = fmt == "miniseed" ? "mseed" : fmt
+    BODY *= "format=" * fmt * "\n"
+    if !isempty(opts)
+      OPTS = split(opts, "&")
+      for opt in OPTS
+        BODY *= string(opt, "\n")
+      end
+    end
   else
     BODY = "format=" * fmt * "\n"
     if !isempty(opts)
