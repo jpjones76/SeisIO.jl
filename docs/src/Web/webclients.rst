@@ -4,7 +4,7 @@
 Web Services
 ############
 
-Data requests use ``get_data!`` for FDSN or IRIS data services; for (near)
+Data requests use ``get_data!`` for FDSN, IRISWS, and IRIS PH5WS data services; for (near)
 real-time streaming, see :ref:`SeedLink<seedlink-section>`.
 
 ****************
@@ -17,9 +17,10 @@ Time-Series Data
 | Retrieve time-series data from a web archive to SeisData structure **S**.
 |
 | **method**
-| **"IRIS"**: IRISWS timeseries.
 | **"FDSN"**: :FDSNWS dataselect. Change FDSN servers with keyword
 | ``src`` using the :ref:`server list<servers>` (see ``?seis_www``).
+| **"IRIS"**: IRISWS timeseries.
+| **"PH5"**: PH5WS timeseries.
 |
 | **channels**
 | :ref:`Channels to retrieve<cid>` -- string, string array, or parameter file.
@@ -93,7 +94,7 @@ remote station XML files by web query.
 ********
 Examples
 ********
-Note that the "src" keyword is used by FDSNWS dataselect queries, but not by IRISWS timeseries queries.
+Note that the "src" keyword is used by FDSNWS dataselect queries, but not by IRISWS or PH5WS timeseries queries.
 
 1. Download 10 minutes of data from four stations at Mt. St. Helens (WA, USA), delete the low-gain channels, and save as SAC files in the current directory.
 ::
