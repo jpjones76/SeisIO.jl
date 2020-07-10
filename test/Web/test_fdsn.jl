@@ -313,88 +313,30 @@ redirect_stdout(out) do
 end
 
 # test IRISPH5 mseed
-printstyled("      mseed request from IRISPH5\n", color=:light_green)
+printstyled("    IRISPH5\n", color=:light_green)
 s = DateTime(2016,6,23)
 t = s + Minute(1) # this is 250 Hz data
 id = "YW.1002..DP?"
-try
-  printstyled("        station info\n", color=:light_green)
-  S = FDSNsta(id,src="IRISPH5",s=s,t=t,msr=true)
-  printstyled("        trace data\n", color=:light_green)
-  get_data!(S, "FDSN", id, src="IRISPH5", s=s, t=t, msr=true)
-  if isempty(S)
-    printstyled("        No data; check headers & connection!\n", color=:red)
-  end
-catch err
-  @warn(string("Request errored; error output below.\n\n", err))
-end
+printstyled("      station info\n", color=:light_green)
+S = FDSNsta(id, src="IRISPH5", s=s, t=t, msr=true)
+printstyled("      trace data\n", color=:light_green)
+printstyled("        mini-SEED\n", color=:light_green)
+get_data!(S, "FDSN", id, src="IRISPH5", s=s, t=t, msr=true)
+S = get_data("FDSN", id, src="IRISPH5", s=s, t=t, opts="reduction=10")
+printstyled("        GeoCSV tspair\n", color=:light_green)
+S = get_data("FDSN", id, src="IRISPH5", s=s, t=t, msr=true, fmt="geocsv.tspair")
+printstyled("        GeoCSV slist\n", color=:light_green)
+S = get_data("FDSN", id, src="IRISPH5", s=s, t=t, msr=true, fmt="geocsv.slist")
 
-# test IRISPH5 geocsv
-printstyled("      geocsv request from IRISPH5\n", color=:light_green)
-try
-  printstyled("        station info\n", color=:light_green)
-  S = FDSNsta(id,src="IRISPH5",s=s,t=t,msr=true)
-  printstyled("        trace data\n", color=:light_green)
-  get_data!(S, "FDSN", id, src="IRISPH5", s=s, t=t, msr=true,fmt="geocsv")
-  if isempty(S)
-    printstyled("        No data; check headers & connection!\n", color=:red)
-  end
-catch err
-  @warn(string("Request errored; error output below.\n\n", err))
-end
+# these will fail
+# need to implement multi-channel version of read_sac_stream
+# segy in FDSN-like requests is NYI
+printstyled("        SAC (should fail)\n", color=:light_green)
+S = get_data("FDSN", id, src="IRISPH5", s=s, t=t, msr=true, fmt="sac")
+printstyled("        segy1 (NYI)\n", color=:light_green)
+S = get_data("FDSN", id, src="IRISPH5", s=s, t=t, msr=true, fmt="segy1")
+printstyled("        segy2 (NYI)\n", color=:light_green)
+S = get_data("FDSN", id, src="IRISPH5", s=s, t=t, msr=true, fmt="segy2")
 
-# test IRISPH5 geocsv.tspair
-printstyled("      geocsv.tspair request from IRISPH5\n", color=:light_green)
-try
-  printstyled("        station info\n", color=:light_green)
-  S = FDSNsta(id,src="IRISPH5",s=s,t=t,msr=true)
-  printstyled("        trace data\n", color=:light_green)
-  get_data!(S, "FDSN", id, src="IRISPH5", s=s, t=t, msr=true,fmt="geocsv.tspair")
-  if isempty(S)
-    printstyled("        No data; check headers & connection!\n", color=:red)
-  end
-catch err
-  @warn(string("Request errored; error output below.\n\n", err))
-end
-
-# test IRISPH5 geocsv.slist
-printstyled("      geocsv.slist request from IRISPH5\n", color=:light_green)
-try
-  printstyled("        station info\n", color=:light_green)
-  S = FDSNsta(id,src="IRISPH5",s=s,t=t,msr=true)
-  printstyled("        trace data\n", color=:light_green)
-  get_data!(S, "FDSN", id, src="IRISPH5", s=s, t=t, msr=true,fmt="geocsv.slist")
-  if isempty(S)
-    printstyled("        No data; check headers & connection!\n", color=:red)
-  end
-catch err
-  @warn(string("Request errored; error output below.\n\n", err))
-end
-
-# test IRISPH5 sac
-# this will fail - need to implement multi-channel version of read_sac_stream
-printstyled("      sac request from IRISPH5\n", color=:light_green)
-try
-  printstyled("        trace data\n", color=:light_green)
-  S = get_data("FDSN", id, src="IRISPH5", s=s, t=t, msr=true,fmt="sac")
-  @test S.id[S.n] == "XX.FMT..001"
-  if isempty(S)
-    printstyled("        No data; check headers & connection!\n", color=:red)
-  end
-catch err
-  @warn(string("Request errored; error output below.\n\n", err))
-end
-
-# test IRISPH5 segy1
-# this will fail
-printstyled("      segy1 request from IRISPH5\n", color=:light_green)
-try
-  printstyled("        trace data\n", color=:light_green)
-  S = get_data("FDSN", id, src="IRISPH5", s=s, t=t, msr=true,fmt="segy1")
-  @test S.id[S.n] == "XX.FMT..001"
-  if isempty(S)
-    printstyled("        No data; check headers & connection!\n", color=:red)
-  end
-catch err
-  @warn(string("Request errored; error output below.\n\n", err))
-end
+printstyled("        unsupported format\n", color=:light_green)
+S = get_data("FDSN", id, src="IRISPH5", s=s, t=t, fmt="nothing")
