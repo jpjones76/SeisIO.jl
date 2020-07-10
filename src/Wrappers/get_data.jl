@@ -6,7 +6,7 @@ export get_data!, get_data
 
 Wrapper to web requests for time-series data. Request data using `method` from channels `chans` using keywords `KWs`, storing the output in `S`.
 
-* Methods: IRIS, FDSN
+* Methods: FDSN, IRIS, PH5
 * Channels: See `?web_chanspec`
 * Keywords: autoname, demean, detrend, fmt, msr, nd, opts, rad, reg, rr, s, si, src, t, taper, to, ungap, unscale, v, w, xf, y
 
@@ -59,6 +59,15 @@ function get_data(method_in::String, C::ChanOpts="*";
     R = minreq(C)
     parse_err = FDSNget!(S, R, α, ω,
       autoname, fmt, msr, nd, opts, rad, reg, si, src, to, v, w, xf, y)
+  elseif method_in == "PH5"
+    if isa(C, String)
+      C = parse_chstr(C, ',', true, false)
+    elseif isa(C, Array{String,1})
+      C = parse_charr(C, '.', true)
+    end
+    R = minreq(C)
+    parse_err = FDSNget!(S, R, α, ω,
+      autoname, fmt, msr, nd, opts, rad, reg, si, src*"PH5", to, v, w, xf, y)
   elseif method_in == "IRIS"
     if isa(C, String)
       R = String[strip(String(j)) for j in split(C, ',')]

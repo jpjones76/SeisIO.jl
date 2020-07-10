@@ -149,6 +149,7 @@ end
 |INGV   | http://webservices.ingv.it |
 |IPGP   | http://eida.ipgp.fr |
 |IRIS   | http://service.iris.edu |
+|IRISPH5| http://service.iris.edu/ph5ws/ |
 |ISC    | http://isc-mirror.iris.washington.edu |
 |KOERI  | http://eida.koeri.boun.edu.tr |
 |LMU    | http://erde.geophysik.uni-muenchen.de |
@@ -161,8 +162,6 @@ end
 |TEXNET | http://rtserve.beg.utexas.edu |
 |USGS   | http://earthquake.usgs.gov |
 |USP    | http://sismo.iag.usp.br |
-|:------:|:-------------------|
-|IRISPH5| http://service.iris.edu/ph5ws/ |
 """
 seis_www = Dict("BGR" => "http://eida.bgr.de",
                 "EMSC" => "http://www.seismicportal.eu",
