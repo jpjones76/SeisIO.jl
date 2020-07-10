@@ -13,7 +13,7 @@ export TimeSpec
 
 # Type aliases
 const ChanSpec    = Union{Integer, UnitRange, Array{Int64, 1}}
-const FloatArray  = Union{Array{Float64, 1}, Array{Float32, 1}}
+const FloatArray  = Union{AbstractArray{Float64, 1}, AbstractArray{Float32, 1}}
 
 @doc """
     TimeSpec = Union{Real, DateTime, String}

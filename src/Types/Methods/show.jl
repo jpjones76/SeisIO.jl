@@ -37,10 +37,10 @@ function show_t(io::IO, T::Array{Array{Int64,2},1}, w::Int, N::Int64, fs::Array{
   return
 end
 
-function mkxstr(N::Int64, X::Union{ Array{Array{Float64,1},1},
-                                    Array{Array{Float32,1},1},
-                                    Array{Union{Array{Float64,1},
-                                          Array{Float32,1}},1} })
+function mkxstr(N::Int64, X::Union{ Array{AbstractArray{Float64,1},1},
+                                    Array{AbstractArray{Float32,1},1},
+                                    Array{Union{AbstractArray{Float64,1},
+                                          AbstractArray{Float32,1}},1} })
 
   # Fill matrix of X values
   vx = 5
