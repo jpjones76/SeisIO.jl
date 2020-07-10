@@ -6,6 +6,7 @@
 | FDSNWS event search         | Quake       | FDSNevq   |         |
 | FDSNWS station              |             | FDSNsta   |         |
 | IRISWS timeseries           |             | get_data  | IRIS    |
+| IRISPH5WS dataselect        |             | get_data  | FDSN    |
 | IRISWS traveltime (TauP)    | Quake       | get_pha!  |         |
 | SeedLink DATA mode          |             | seedlink  | DATA    |
 | SeedLink FETCH mode         |             | seedlink  | FETCH   |
@@ -45,6 +46,11 @@
 | TEXNET  | http://rtserve.beg.utexas.edu         |
 |  USGS   | http://earthquake.usgs.gov            |
 |  USP    | http://sismo.iag.usp.br               |
+
+# **List of PH5 Servers**
+| src=    | Base URL                              |
+|:-----   |:-----                                 |
+|IRISPH5  | https://service.iris.edu/ph5ws/       |
 
 ## Notes on Server List
 The string in column **src=** is a case-sensitive keyword, all caps, and enclosed in double-quotes: for example, specify ETH with keyword `src="ETH"`, not src=eth or src=ETH.

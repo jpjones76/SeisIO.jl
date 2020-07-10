@@ -15,7 +15,7 @@ function parse_charr(chan_in::Array{String, 1}, d::Char, fdsn::Bool)
       chan_data = vcat(chan_data, reshape(chan_line, 1, 5))
     end
 
-    return fdsn == true ? minreq!(String.(chan_data)) : map(String, chan_data)
+    return fdsn == true ? minreq(String.(chan_data)) : map(String, chan_data)
 end
 
 function parse_chstr(chan_in::String, d::Char, fdsn::Bool, SL::Bool)
@@ -98,6 +98,7 @@ function minreq!(S::Array{String,2})
     end
     S = Q
   end
-  return map(String, S)
+  S = map(String, S)
+  return nothing
 end
 minreq(S::Array{String,2}) = (T = deepcopy(S); minreq!(T); return T)
