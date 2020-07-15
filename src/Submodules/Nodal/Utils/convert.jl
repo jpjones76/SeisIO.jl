@@ -1,5 +1,3 @@
-convert(::Type{NodalData}, C::NodalChannel) = NodalData(C)
-
 function convert(::Type{NodalData}, S::SeisData)
   @assert minimum(S.fs) == maximum(S.fs)
   sync!(S, s="last", t="first")
