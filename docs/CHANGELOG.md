@@ -1,3 +1,13 @@
+# 2020-07-15
+Added SeisIO.Nodal for reading data files from nodal arrays
+* New types:
+  + NodalData <: GphysData
+  + NodalChannel <: GphysChannel
+  + NodalLoc <: InstrumentPosition
+* Wrapper: `read_nodal`
+  + Current file format support: Silixa TDMS (default, or use `fmt="silixa"`)
+* Utility functions: `info_dump`
+
 ### 2020-07-09
 * The data field `:x` of GphysData and GphysChannel objects can now be
   an AbstractArray{Float32, 1} or AbstractArray{Float64, 1}.
@@ -6,8 +16,9 @@ for mseed and geocsv. (Implements request in issue #52)
   + Both `get_data("PH5")` and `get_data("FDSN", ..., src="IRISPH5")` work.
   + SAC and SEGY support is NYI.
   + PH5 GeoCSV doesn't parse correctly at present, and will error if a
-  decimation key is passed to `opts=`. At issue is the expected precision of
-  GeoCSV floats was an oral tradition. This will be fixed in a future patch.
+  decimation key is passed to `opts=`. At issue is the precision of GeoCSV
+  floats was documented only by oral tradition. This will be fixed in a future
+  patch.
 
 # SeisIO v1.1.0 Release: 2020-07-07
 ### 2020-07-02

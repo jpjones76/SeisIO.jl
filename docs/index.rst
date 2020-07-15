@@ -54,6 +54,7 @@ SeisIO is a collection of utilities for reading and downloading geophysical time
   :maxdepth: 0
 
   src/Submodules/submodules.rst
+  src/Submodules/nodal.rst
   src/Submodules/quake.rst
   src/Submodules/seishdf.rst
 
