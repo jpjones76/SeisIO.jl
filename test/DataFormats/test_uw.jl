@@ -1,4 +1,3 @@
-using SeisIO.UW
 import SeisIO.UW: readuwevt, uwdf, uwdf!, uwpf, uwpf!
 
 printstyled("  UW\n", color=:light_green)

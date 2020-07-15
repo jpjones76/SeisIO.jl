@@ -5,7 +5,7 @@ printstyled("  read/write of EventTraceData with compression\n", color=:light_gr
 SeisIO.KW.comp = 0x02
 S = convert(EventTraceData, randSeisData())
 wseis(savfile1, S)
-R = rseis(savfile1, v=2)[1]
+R = rseis(savfile1)[1]
 @test R == S
 
 SeisIO.KW.comp = 0x01
@@ -16,7 +16,7 @@ C.t = [1 0; nx 0]
 C.x = randn(nx)
 push!(S, C)
 wseis(savfile1, S)
-R = rseis(savfile1, v=2)[1]
+R = rseis(savfile1)[1]
 @test R == S
 
 rm(savfile1)

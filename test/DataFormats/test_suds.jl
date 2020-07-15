@@ -1,5 +1,3 @@
-using SeisIO.SUDS
-
 vfname        = "SampleFiles/Restricted/10081701.WVP"
 sac_fstr      = "SampleFiles/Restricted/20081701.sac-0*"
 eq_wvm1_pat   = "SampleFiles/SUDS/*1991191072247.wvm1.sac"

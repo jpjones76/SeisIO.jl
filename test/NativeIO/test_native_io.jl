@@ -7,7 +7,9 @@ legf_052  = path * "/SampleFiles/SEIS/seisio_testfile_v0.52.seis"
 uw_file   = path * "/SampleFiles/UW/02062915175o"
 
 # Changing this test to guarantee at least one campaign-style measurement ... and test splat notation ... and something with no notes
-printstyled("  SeisData\n", color=:light_green)
+printstyled("Native I/O\n", color=:light_green)
+printstyled("  read/write of types\n", color=:light_green)
+printstyled("    SeisData\n", color=:light_green)
 S = breaking_seis()
 wseis(savfile1, S)
 @test all([any([occursin("wrote to file " * savfile1, n) for n in S.notes[i]]) for i in 1:S.n])
@@ -18,14 +20,14 @@ wseis(savfile1, S)
 R = rseis(savfile1)[1]
 @test(R!==S)
 
-printstyled("  SeisHdr\n", color=:light_green)
+printstyled("    SeisHdr\n", color=:light_green)
 H = randSeisHdr()
 wseis(savfile2, H)
 @test any([occursin("wrote to file " * savfile2, n) for n in H.notes])
 H2 = rseis(savfile2)[1]
 @test(H==H2)
 
-printstyled("  SeisEvent\n", color=:light_green)
+printstyled("    SeisEvent\n", color=:light_green)
 EV = SeisEvent(hdr=H, data=convert(EventTraceData, S))
 EV.data.misc[1] = breaking_dict
 wseis(savfile3, EV)
@@ -52,29 +54,29 @@ R1 = rseis(savfile3, memmap=true)
 
 # read one file with one record number
 printstyled("  read file with integer record number\n", color=:light_green)
-R = rseis("test.seis", c=1, v=1)
+R = rseis("test.seis", c=1)
 @test R[1] == S
 
 # read everything
 printstyled("  read a multi-record file\n", color=:light_green)
-R = rseis("test*", v=1)
+R = rseis("test*")
 @test R[3] == R[5] # Header is read twice, test.evt (file 1) record 3, test.hdr (file 2) record 1
 @test R[2] == R[6] # Seis is read twice, test.evt (file 1) record 2, test.seis (file 3) record 1
 
 # read when some files have record 3 but not all
 printstyled("  read file list with list of record numbers\n", color=:light_green)
-R = rseis("test.*", c = [1,3], v=1)
+R = rseis("test.*", c = [1,3])
 @test(R[3]==R[2])
 @test(R[1].data.misc[1]==R[4].misc[1])
 
 # read nothing as each target file has one record
 printstyled("  read nothing due to an intentionally poor choice of record numbers\n", color=:light_green)
-R = rseis(["test.seis", "test.h*"], c=[2, 3], v=1)
+R = rseis(["test.seis", "test.h*"], c=[2, 3])
 @test isempty(R)
 
 # read the first record of each file
 printstyled("  read first record from each SeisIO file using a wildcard list\n", color=:light_green)
-R = rseis("test*", c=1, v=1)
+R = rseis("test*", c=1)
 @test R[1] == EV
 @test R[2] == H
 @test R[3] == S
@@ -112,7 +114,7 @@ nx = 4
 S.t[1] = [1 0; nx 0]
 S.x[1] = randn(eltype(S.x[1]), nx)
 wseis(savfile1, S)
-R = rseis(savfile1, v=2)[1]
+R = rseis(savfile1)[1]
 @test R == S
 
 SeisIO.KW.comp = 0x01
@@ -131,7 +133,7 @@ C.t = hcat(collect(1:4), Int64.(cumsum(rand(UInt32,4))))
 C.x = randn(nx)
 push!(S.data, C)
 wseis(savfile1, S)
-R = rseis(savfile1, v=2)[1]
+R = rseis(savfile1)[1]
 @test R == S
 
 # read_data("seisio", ...)

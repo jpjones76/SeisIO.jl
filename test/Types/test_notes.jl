@@ -1,5 +1,3 @@
-using Statistics
-
 Ch = randSeisChannel()
 clear_notes!(Ch)
 @test length(Ch.notes) == 1
