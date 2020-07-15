@@ -1,4 +1,4 @@
-export InstrumentPosition, EQLoc, GenLoc, GeoLoc, UTMLoc, XYLoc
+export InstrumentPosition, EQLoc, GenLoc, GeoLoc, NodalLoc, UTMLoc, XYLoc
 
 @doc """
 **InstrumentPosition**
@@ -10,17 +10,17 @@ Additional structures can be added for custom types.
 
 Matrix of structure fields and rough equivalencies:
 
-| **GenLoc** | **GeoLoc** | **UTMLoc** | **XYLoc** | **EQLoc** |
-|:---|:---|:---|:---|:---|
-| datum | datum | datum | datum | datum |
-| loc | | | | |
-| | zone | orig | |
-| | lon | E | x | lon |
-| | lat | N | y | lat |
-| | el | el | z | |
-| | dep | dep | | dep |
-| | az | az | az | |
-| | inc | inc | inc | |
+| **GenLoc** | **GeoLoc** | **UTMLoc** | **XYLoc** | **EQLoc** | **NodalLoc |
+|:---|:---|:---|:---|:---|:---|
+| datum | datum | datum | datum | datum | |
+| loc | | | | | |
+| | zone | orig | | |
+| | lon | E | x | lon | x |
+| | lat | N | y | lat | |
+| | el | el | z | | |
+| | dep | dep | | dep | |
+| | az | az | az | | |
+| | inc | inc | inc | | |
 
 """ InstrumentPosition
 abstract type InstrumentPosition end
@@ -45,6 +45,8 @@ function loctyp2code(Loc::InstrumentPosition)
     0x02
   elseif T == XYLoc
     0x03
+  elseif T == NodalLoc
+    0x04
   else
     0x00
   end
@@ -60,6 +62,8 @@ function code2loctyp(c::UInt8)
     UTMLoc
   elseif c == 0x03
     XYLoc
+  elseif c == 0x04
+    NodalLoc
   else
     GenLoc
   end
@@ -460,3 +464,65 @@ end
 ==(S::XYLoc, U::XYLoc) = isequal(S, U)
 
 sizeof(Loc::XYLoc) = 136 + sizeof(getfield(Loc, :datum))
+
+"""
+    NodalLoc
+
+Instrument position along a nodal array
+* x::Float64 (meters)
+
+"""
+mutable struct NodalLoc <: InstrumentPosition
+  x::Float64
+  NodalLoc(
+          x     ::Float64,
+          ) = new(x)
+end
+NodalLoc(;
+        x     ::Float64 = zero(Float64)
+      ) = NodalLoc(x)
+
+function show(io::IO, loc::NodalLoc)
+  if get(io, :compact, false) == false
+    showloc_full(io, loc)
+  else
+    c = :compact => true
+    print(io, "x ", repr(getfield(loc, :x), context=c))
+  end
+  return nothing
+end
+
+function write(io::IO, Loc::NodalLoc)
+  write(io, Loc.x)
+  return nothing
+end
+
+read(io::IO, ::Type{NodalLoc}) = NodalLoc(
+  fastread(io, Float64)
+  )
+
+function isempty(Loc::NodalLoc)
+  q::Bool = true
+  for f in (:x, )
+    q = min(q, getfield(Loc, f) == 0.0)
+  end
+  return q
+end
+
+function hash(Loc::NodalLoc)
+  h = hash(zero(UInt64))
+  for f in (:x, )
+    h = hash(getfield(Loc, f), h)
+  end
+  return h
+end
+
+function isequal(S::NodalLoc, U::NodalLoc)
+  q = true
+  for f in (:x, )
+    q = min(q, getfield(S,f) == getfield(U,f))
+  end
+  return q
+end
+==(S::NodalLoc, U::NodalLoc) = isequal(S, U)
+sizeof(Loc::NodalLoc) = 8

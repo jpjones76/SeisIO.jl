@@ -60,6 +60,7 @@ const bad_chars = Dict{String, Any}(
                0x40, 0x5b, 0x5c, 0x5d, 0x5e, 0x60, 0x7b, 0x7c, 0x7d, 0x7e, 0x7f) )
 const datafields = (:id, :name, :loc, :fs, :gain, :resp, :units, :src, :notes, :misc, :t, :x)
 const days_per_month = Int32[31,28,31,30,31,30,31,31,30,31,30,31]
+const dtchars = (0x2d, 0x2e, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x54)
 const dtconst = 62135683200000000
 const regex_chars = String[Sys.iswindows() ? "/" : "\\", "\$", "(", ")", "+", "?", "[", "\\0",
 "\\A", "\\B", "\\D", "\\E", "\\G", "\\N", "\\P", "\\Q", "\\S", "\\U", "\\U",
@@ -101,7 +102,7 @@ const segy_units = Dict{Int16, String}(0 => "unknown", 1 => "Pa", 2 => "V", 3 =>
 const seis_inst_codes = ('H', 'J', 'L', 'M', 'N', 'P', 'Z')
 const seisio_file_begin = UInt8[0x53, 0x45, 0x49, 0x53, 0x49, 0x4f]
 const sμ = 1000000.0
-const vSeisIO = Float32(0.53)
+const vSeisIO = Float32(0.54)
 const unindexed_fields = (:c, :n)
 const webhdr = Dict("User-Agent" => "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36") # lol
 const xml_endtime = 19880899199000000

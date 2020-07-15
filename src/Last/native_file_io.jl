@@ -1,6 +1,7 @@
 export rseis, wseis
 
 # SeisIO file format version changes
+# 0.54  2020-07-14    added Types: NodalChannel, NodalData, NodalLoc
 # 0.53  2019-09-11    removed :i, :o from CoeffResp
 #                     added :i, :o to MultiStageResp
 # 0.52  2019-09-03    added Types: CoeffResp, MultiStageResp
@@ -22,12 +23,15 @@ export rseis, wseis
 
 const TNames = Type[  EventChannel,
                       SeisChannel,
+                      NodalChannel,
                       EventTraceData,
                       SeisData,
+                      NodalData,
                       GenLoc,
                       GeoLoc,
                       UTMLoc,
                       XYLoc,
+                      NodalLoc,
                       GenResp,
                       PZResp64,
                       PZResp,
@@ -44,12 +48,15 @@ const TNames = Type[  EventChannel,
 
 const TCodes = UInt32[ 0x20474330, # " GC0"  EventChannel
                        0x20474331, # " GC1"  SeisChannel
+                       0x20474332, # " GC2"  NodalChannel
                        0x20474430, # " GD0"  EventTraceData
                        0x20474431, # " GD1"  SeisData
+                       0x20474432, # " GD2"  NodalData
                        0x20495030, # " IP0"  GenLoc
                        0x20495031, # " IP1"  GeoLoc
                        0x20495032, # " IP2"  UTMLoc
                        0x20495033, # " IP3"  XYLoc
+                       0x20495034, # " IP4"  NodalLoc
                        0x20495230, # " IR0"  GenResp
                        0x20495231, # " IR1"  PZResp64
                        0x20495232, # " IR2"  PZResp

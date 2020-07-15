@@ -121,6 +121,10 @@ using .Formats
 include("Submodules/ASCII.jl")
 using .ASCII
 
+include("Submodules/Nodal.jl")
+using .Nodal
+import .Nodal: convert
+
 include("Submodules/SEED.jl")
 using .SEED
 using .SEED: parserec!, read_seed_resp!, seed_cleanup!
