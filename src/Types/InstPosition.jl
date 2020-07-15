@@ -525,4 +525,4 @@ function isequal(S::NodalLoc, U::NodalLoc)
   return q
 end
 ==(S::NodalLoc, U::NodalLoc) = isequal(S, U)
-sizeof(Loc::NodalLoc) = 8
+sizeof(Loc::NodalLoc) = 16
