@@ -174,8 +174,13 @@ function read_tdms(file::String, nn::String, s::TimeSpec, t::TimeSpec, ch_s::Int
   jmax = div(seg1_length, chunk_size)*chunk_size - si
   for i in first_chunk:last_chunk
     if j > jmax
-      vbuf = view(buf, :, 1:rem(seg1_length, chunk_size))
-      read!(io, vbuf)
+      if VERSION < v"1.4"
+        buf = Array{T, 2}(undef, TDMS.n_ch, rem(seg1_length, chunk_size))
+        read!(io, buf)
+      else
+        vbuf = view(buf, :, 1:rem(seg1_length, chunk_size))
+        read!(io, vbuf)
+      end
     else
       read!(io, buf)
     end
