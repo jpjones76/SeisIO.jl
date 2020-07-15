@@ -25,6 +25,7 @@ redirect_stdout(out) do
   show(SeisChannel())
   show(SeisData())
   show(randSeisChannel())
+  show(randSeisData(10, c=1.0))
 
   # summary
   summary(randSeisChannel())

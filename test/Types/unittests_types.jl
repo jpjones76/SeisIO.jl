@@ -53,6 +53,15 @@ redirect_stdout(out) do
   @test sizeof(L) > 114
   repr(L, context=:compact=>true)
   repr(L, context=:compact=>false)
+
+  L = NodalLoc()
+  show(stdout, L)
+  @test isempty(L)
+  @test hash(L) == hash(NodalLoc())
+  @test L == NodalLoc()
+  @test sizeof(L) == 16
+  repr(L, context=:compact=>true)
+  repr(L, context=:compact=>false)  
 end
 
 # Seismic phases

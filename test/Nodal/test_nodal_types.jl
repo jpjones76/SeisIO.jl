@@ -120,12 +120,18 @@ end
 @test S.data[:, n+1] == S.data[:, n]
 @test ===(S.data[:, n+1], S.data[:, n]) == false
 
+D = convert(SeisChannel, C)
+push!(S, D)
+
 printstyled("      setindex!\n", color=:light_green)
 S = deepcopy(U)
 S2 = getindex(S, j1:j2)
 setindex!(S, S2, j3:j4)
 @test S.data[:,j1:j2] == S.data[:, j3:j4]
 
+C = S[j2]
+setindex!(S, C, j1)
+@test S.data[:, j1] == S.data[:, j2]
 
 printstyled("      show\n", color=:light_green)
 redirect_stdout(out) do
@@ -138,6 +144,35 @@ redirect_stdout(out) do
     end
   end
 end
+
+printstyled("      sizeof\n", color=:light_green)
+S = deepcopy(U)
+
+# Add some notes
+for j in 1:3
+  j_min = rand(1:3)
+  j_max = rand(j_min:S.n)
+  note!(S, j_min:j_max, randstring(rand(1:100)))
+end
+
+# Add some things to :misc
+for i in 1:4
+  j_min = rand(1:3)
+  j_max = rand(j_min:S.n)
+
+  # add 1-6 entries each to the :misc field of each channel
+  for j in j_min:j_max
+    D = S.misc[j]
+    pop_nodal_dict!(D, n=rand(1:6))
+  end
+end
+@test sizeof(S) > 168
+
+C = S[1]
+note!(C, randstring(rand(1:100)))
+note!(C, randstring(rand(1:100)))
+pop_nodal_dict!(C.misc, n=rand(3:18))
+@test sizeof(C) > 120
 
 printstyled("      sort!\n", color=:light_green)
 S = deepcopy(U)

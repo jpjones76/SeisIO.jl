@@ -28,6 +28,7 @@ function wait_on_data!(S::GphysData, tmax::Real)
   t = 5.0
   printstyled(string("      (sleep up to ", tmax, " s)\n"), color=:green)
   redirect_stdout(out) do
+    show(S)
 
     # Here we actually wait for data to arrive
     while isempty(S)

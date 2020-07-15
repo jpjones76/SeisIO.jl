@@ -3,6 +3,7 @@ printstyled("  Silixa (TDMS variant)\n", color=:light_green)
 # Base read, no modifiers
 S1 = read_nodal(fstr)
 @test isapprox(S1.data, XX)
+@test_throws ErrorException read_nodal(fstr, fmt="foo")
 
 # Start and end time unit tests
 printstyled("    time & channel unit tests\n", color=:light_green)

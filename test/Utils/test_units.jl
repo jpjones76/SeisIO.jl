@@ -2,10 +2,12 @@ printstyled("  units\n", color=:light_green)
 
 # Cases from randSeisChannel
 printstyled("    check that RandSeis uses valid UCUM units\n", color=:light_green)
-u = join(SeisIO.RandSeis.irregular_units, '.')
-@test(vucum(u, v=2))
-for u in SeisIO.RandSeis.irregular_units
-  @test units2ucum(u) == u
+redirect_stdout(out) do
+  u = join(SeisIO.RandSeis.irregular_units, '.')
+  @test(vucum(u, v=2))
+  for u in SeisIO.RandSeis.irregular_units
+    @test units2ucum(u) == u
+  end
 end
 S = randSeisData()
 @test validate_units(S) == trues(S.n)
