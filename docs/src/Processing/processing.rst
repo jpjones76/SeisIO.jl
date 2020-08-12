@@ -232,6 +232,14 @@ dynamically resized as the algorithm loops over each segment:
 
 ...where **Nx** is the number of samples in the longest segment in **S**.
 
+
+Causality
+*********
+Response translation adds no additional processing to guarantee causality. At
+a minimum, most users will want to call ``detrend!`` and ``taper!`` before
+translating instrument responses.
+
+
 .....
 
 Synchronize

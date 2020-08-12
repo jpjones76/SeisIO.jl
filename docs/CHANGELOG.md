@@ -3,6 +3,7 @@
 * Changed internal function dtr! to accept `::AbstractArray{T,1}` in first
 positional argument; fixes Issue #54
 * Added tests for processing functions on a NodalData object; tests Issue #54
+* Added explicit warning that `translate_resp!` can be acausal; from discussion of Issue #47
 
 # 2020-07-15
 Added SeisIO.Nodal for reading data files from nodal arrays

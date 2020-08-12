@@ -36,6 +36,10 @@ Replaces field `:resp` with the appropriate (all-pass) response.
 
 ### Poles and zeros should be rad/s
 Always check when loading from an unsupported data format. Responses read from station XML are corrected to rad/s automatically (most use rad/s); responses read from a SACPZ or SEED RESP file already use rad/s.
+
+!!! warning
+
+    Response translation doesn't guarantee causality; if this is a problem, detrend and taper first!
 """ translate_resp!
 function translate_resp!(S::GphysData,
                          resp_new::Union{PZResp, PZResp64};
