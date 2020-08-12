@@ -1,3 +1,9 @@
+# 2020-08-11
+* Automated testing for Julia v.1.4 has ended. Tested versions of the language include v1.0 (LTS) and v1.5 (stable).
+* Changed internal function dtr! to accept `::AbstractArray{T,1}` in first
+positional argument; fixes Issue #54
+* Added tests for processing functions on a NodalData object; tests Issue #54
+
 # 2020-07-15
 Added SeisIO.Nodal for reading data files from nodal arrays
 * New types:
