@@ -71,7 +71,7 @@ demean(S::GphysData,
   irr::Bool=false) = (U = deepcopy(S); demean!(U, chans=chans, irr=irr); return U)
 demean(C::GphysChannel) = (U = deepcopy(C); demean!(U); return U)
 
-function dtr!(x::Array{T,1}, ti::Array{Int64,2}, fs::Float64, n::Int64) where T <: AbstractFloat
+function dtr!(x::AbstractArray{T,1}, ti::Array{Int64,2}, fs::Float64, n::Int64) where T <: AbstractFloat
   L = length(x)
 
   # check for nans
