@@ -52,7 +52,7 @@ mutable struct NodalData <: GphysData
   misc::Array{Dict{String,Any},1}     # misc
   notes::Array{Array{String,1},1}     # notes
   t::Array{Array{Int64,2},1}          # time
-  data::Array{Float32, 2}             # actual data
+  data::AbstractArray{Float32, 2}     # actual data
   x::Array{FloatArray,1}              # views to data
 
   function NodalData()
