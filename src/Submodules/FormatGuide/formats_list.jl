@@ -173,7 +173,7 @@ SEGY_fmt = FormatDesc(
   "\"segy\" (SEG Y 1.0 or SEG Y rev 1), \"passcal\" (PASSCAL SEG Y)",
   "Society of Exploration Geophysicists, Tulsa, Oklahoma, United States",
   "(no source code)",
-  "SEG Technical Standards Committee,\nhttps://seg.org/Publications/SEG-Technical-Standards",
+  "https://seg.org/Publications/SEG-Technical-Standards",
   HistVec(),
   ["machine-independent open-standard format for storing geophysical data",
   "SEG Y rev 1 and earlier have very few required header variables,",
@@ -183,6 +183,7 @@ SEGY_fmt = FormatDesc(
   ],
   [ "widely used in exploration geophysics",
     "petroleum and gas industry",
+    "some nodal array data",
     "Portable Array Seismic Studies of the Continental Lithosphere (PASSCAL) Instrument Center, Socorro, New Mexico, USA",
     "New Mexico Institute of Mining and Technology, Socorro, New Mexico, USA"
     ],

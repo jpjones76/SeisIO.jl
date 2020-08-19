@@ -6,9 +6,9 @@ Silixa_fmt = FormatDesc(
   "https://silixa.com/about-us/contact/",
   HistVec(),
   ["Silixa variant on NI LabVIEW TDMS file format"],
-  ["Silixa"],
+  ["Silixa (nodal array data)"],
   [""],
   0xfd
   )
 Silixa_fmt.ver = [  FmtVer(1, "2018-06-28", false) ]
-formats["silixa"] = Silixa_fmt
+formats["Silixa TDMS"] = Silixa_fmt
