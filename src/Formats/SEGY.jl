@@ -28,6 +28,14 @@ function trid(i::Int16, fs::Float64, fc::Float64)
   return string(getbandcode(fs, fc=fc), S[i])
 end
 
+function mk_lc(lv::Int32)
+  L1 = UInt8(div(lv, Int32(36)))
+  L2 = UInt8(rem(lv, Int32(36)))
+  c1 = 0x30 + L1 + (L1 > 0x09 ? 0x07 : 0x00)
+  c2 = 0x30 + L2 + (L2 > 0x09 ? 0x07 : 0x00)
+  return String([c1, c2])
+end
+
 function auto_coords(xy::Array{Int32, 1}, sc::Array{Int16, 1})
   xy == Int32[0,0] && return (0.0, 0.0)
   lon = Float64(xy[1])
@@ -60,7 +68,7 @@ end
 function do_trace(f::IO,
                   passcal::Bool,
                   full::Bool,
-                  src::String,
+                  ll::UInt8,
                   swap::Bool,
                   fh::Array{Int16,1}
                   )
@@ -80,9 +88,9 @@ function do_trace(f::IO,
   copyto!(ints, 16, intbuf, 19, 4)
 
   shortbuf = reinterpret(Int16, buf)
-  copyto!(shorts, 1, shortbuf, passcal ? 1 : 15, 4)
-  copyto!(shorts, 5, shortbuf, 35, 2)
-  copyto!(shorts, 7, shortbuf, 45, 46)
+  copyto!(shorts, 1, shortbuf, passcal ? 1 : 15, 4) # shorts[1:4]
+  copyto!(shorts, 5, shortbuf, 35, 2)               # shorts[5:6]
+  copyto!(shorts, 7, shortbuf, 45, 46)              # shorts[7:52]
 
   if passcal
     fast_readbytes!(f, buf, 40)
@@ -188,9 +196,9 @@ function do_trace(f::IO,
     ints[29]      = fastread(f, Int32)
 
     copyto!(ints, 20, intbuf, 1, 5)
-    copyto!(shorts, 53, shortbuf, 11, 2)
+    copyto!(shorts, 53, shortbuf, 11, 2)          # shorts[53:54]
     ints[25] = getindex(intbuf, 7)
-    copyto!(shorts, 55, shortbuf, 15, 5)
+    copyto!(shorts, 55, shortbuf, 15, 5)          # shorts[55:59]
 
     T = getindex(segy_ftypes, fmt)
     if (T == Any)
@@ -216,8 +224,10 @@ function do_trace(f::IO,
       x = ibmfloat.(y)
     end
 
+    if swap
     shorts  .= ntoh.(shorts)
     ints    .= ntoh.(ints)
+    end
     z       = getindex(shorts, 5)
     δ       = getindex(shorts, 21)
     fs      = sμ / Float64(δ)
@@ -228,8 +238,9 @@ function do_trace(f::IO,
 
     # Create ID
     sta = string(reinterpret(UInt16, shorts[57]))
+    lc = ll > 0x00 ? mk_lc(ints[ll]) : ""
     cha = Int16(10) < shorts[1] < Int16(18) ? trid(shorts[1]-Int16(10), fs, 1.0) : "YYY"
-    id = "." * sta[1:min(lastindex(sta),5)] * ".." * cha
+    id = string(".", sta[1:min(lastindex(sta),5)], ".", lc, ".", cha)
 
   end
   if full == true
@@ -254,15 +265,17 @@ function do_trace(f::IO,
         "device_id", "trace_time_sc", "src_type_code", "src_energy_dir",
         "src_exp", "src_units_code"])
 
-    ints_k = String["trace_seq_line", "trace_seq_file", "event_no", "channel_no",
-      "energy_src_pt", "cdp", "trace_in_ensemble", "src-rec_dist",
+    ints_k = String["trace_seq_line", "trace_seq_file", "rec_no", "channel_no",
+      "energy_src_pt", "ensemble_no", "trace_in_ensemble", "src-rec_dist",
       "rec_ele", "src_ele", "src_dep", "rec_datum_ele",
       "src_datum_ele", "src_water_dep", "rec_water_dep", "src_x",
       "src_y", "rec_x", "rec_y"]
     append!(ints_k, passcal ? String["samp_rate", "num_samps", "max", "min"] :
       String["cdp_x", "cdp_y", "inline_3d", "crossline_3d", "shot_point",
       "trans_mant", "unassigned_1", "unassigned_2"] )
-    misc = Dict{String,Any}(zip([shorts_k; ints_k],[shorts; ints]))
+    misc = Dict{String,Any}()
+    [misc[shorts_k[i]] = shorts[i] for i in 1:length(shorts_k)]
+    [misc[ints_k[i]] = ints[i] for i in 1:length(ints_k)]
     misc["scale_fac"] = gain
     if passcal
       sta = String(chars[1:6])
@@ -300,6 +313,7 @@ end
 
 function read_segy_file!( S::GphysData,
                           fname::String,
+                          ll::UInt8,
                           passcal::Bool,
                           memmap::Bool,
                           full::Bool,
@@ -309,7 +323,7 @@ function read_segy_file!( S::GphysData,
   f = memmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
   trace_fh = Array{Int16, 1}(undef, 3)
   if passcal == true
-    C = do_trace(f, true, full, fname, swap, trace_fh)
+    C = do_trace(f, true, full, ll, swap, trace_fh)
     add_chan!(S, C, strict)
     close(f)
   else
@@ -324,9 +338,9 @@ function read_segy_file!( S::GphysData,
     fillx_i16_be!(shorts, BUF.buf, 24, 0)
     fastskip(f, 240)
 
-    # My sample files have the Int16s in little endian order...?
+    # Some early sample files had these in little-endian byte order
     for i = 25:27
-      shorts[i] = fastread(f, Int16)
+      shorts[i] = bswap(fastread(f, Int16))
     end
     fastskip(f, 94)
 
@@ -359,9 +373,8 @@ function read_segy_file!( S::GphysData,
     # Channel headers
     nt = shorts[1]
     for i = 1:nt
-      # "swap" is not used here
-      # C = do_trace(f, buf, shorts, ints, false, full, fname, true, trace_fh)
-      C = do_trace(f, false, full, fname, true, trace_fh)
+      # "swap" is always true for valid SEG Y data
+      C = do_trace(f, false, full, ll, true, trace_fh)
       j = add_chan!(S, C, strict)
       if full == true
         merge!(S.misc[j], fhd)
@@ -376,17 +389,17 @@ end
 # ============================================================================
 
 """
-    segyhdr(f[; passcal=false, swap=false])
+    segyhdr(f[; passcal=false, ll=LL, swap=false])
 
 Print formatted, sorted SEG-Y headers of file `f` to stdout. Use keyword
 `passcal=true` for PASSCAL/NMT modified SEG Y; use `swap=true` for big-endian
-PASSCAL.
+PASSCAL. See SeisIO `read_data` documentation for `ll` codes.
 """
-function segyhdr(fname::String; passcal::Bool=false, swap::Bool=false)
+function segyhdr(fname::String; ll::UInt8=0x00, passcal::Bool=false, swap::Bool=false)
   if passcal
-    seis = read_data("passcal", fname::String, full=true, swap=swap)
+    seis = read_data("passcal", fname::String, full=true, ll=ll, swap=swap)
   else
-    seis = read_data("segy", fname::String, full=true)
+    seis = read_data("segy", fname::String, ll=ll, full=true)
   end
   if passcal
     printstyled(stdout, @sprintf("%20s: %s\n", "PASSCAL SEG-Y FILE", realpath(fname)), color=:green, bold=true)

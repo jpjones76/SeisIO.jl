@@ -4,6 +4,7 @@ segy_file_3   = string(path, "/SampleFiles/SEGY/04.322.18.06.46.92C3.1.coords1.s
 segy_file_4   = string(path, "/SampleFiles/SEGY/04.322.18.06.46.92C3.1.coords2.segy")
 segy_be_file  = string(path, "/SampleFiles/SEGY/02.104.00.00.08.7107.2")
 segy_fpat     = string(path, "/SampleFiles/SEGY/02.104.00.00.08.7107.2")
+segy_nodal    = string(path, "/SampleFiles/SEGY/FORGE_78-32_iDASv3-P11_UTC190428135038.sgy")
 
 printstyled("  SEG Y\n", color=:light_green)
 printstyled("    Helper functions\n", color=:light_green)
@@ -94,7 +95,7 @@ SEG = verified_read_data("passcal", segy_file_1, full=true)
 @test lastindex(SEG.x[1]) == 247698
 @test SEG.misc[1]["trace_seq_line"] == 3
 @test SEG.misc[1]["trace_seq_file"] == 3
-@test SEG.misc[1]["event_no"] == 1
+@test SEG.misc[1]["rec_no"] == 1
 @test SEG.misc[1]["channel_no"] == 2
 @test SEG.misc[1]["trace_id_code"] == 3
 @test SEG.misc[1]["h_units_code"] == 2
@@ -158,3 +159,22 @@ SEG = verified_read_data("passcal", segy_fpat, full=true, swap=true)
 @test Float64(SEG.misc[1]["min"]) == minimum(SEG.x[1]) == -54454.0
 @test ≈(SEG.x[1][1:5], [-615.0, -3994.0, -4647.0, -895.0, 190.0])
 @test length(SEG.x[1]) == SEG.misc[1]["num_samps"] == 180027
+
+printstyled("    keyword ll\n", color=:light_green)
+for ll in (0x01, 0x04, 0x07)
+  S = read_data("segy", segy_nodal, ll=ll)
+  @test S.n == 1280
+  @test first(S.id) == ".0.01.YYY"
+  @test last(S.id) == ".0.ZK.YYY"
+end
+
+for ll in (0x02, 0x05, 0x06)
+  S = read_data("segy", segy_nodal, ll=ll)
+  @test S.n == 1
+  @test S.id[1] == ".0.00.YYY"
+end
+
+S = read_data("segy", segy_nodal)
+@test S.n == 1
+@test S.id[1] == ".0..YYY"
+@test_throws InexactError read_data("segy", segy_nodal, ll=0x03)

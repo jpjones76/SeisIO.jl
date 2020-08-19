@@ -54,6 +54,7 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
   cf      ::String  = "",                 # win32 channel info file
   full    ::Bool    = false,              # full SAC/SEGY hdr
   jst     ::Bool    = true,               # are sample times JST (UTC+9)?
+  ll      ::UInt8   = 0x00,               # auto-set location field in :id?
   memmap  ::Bool    = false,              # use mmap? (DANGEROUS)
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
@@ -173,15 +174,16 @@ function read_data!(S::GphysData, fmt::String, fpat::Union{String, Array{String,
     passcal = fmt == "passcal"
 
     if one_file
-      read_segy_file!(S, filestr, passcal, memmap, full, swap, strict)
+      read_segy_file!(S, filestr, ll, passcal, memmap, full, swap, strict)
     else
       for (j, fname) in enumerate(files)
-        read_segy_file!(S, fname, passcal, memmap, full, swap, strict)
+        read_segy_file!(S, fname, ll, passcal, memmap, full, swap, strict)
         track_src!(S, j, nx, last_src)
       end
     end
     opt_strings = string("full = ", full,
-                              ", swap = ", swap)
+                          ", ll = ", ll,
+                          ", swap = ", swap)
 
   elseif fmt == "slist" || fmt == "lennartz"
     lennartz = fmt == "lennartz"
@@ -298,6 +300,7 @@ function read_data(fmt::String, filestr::Union{String, Array{String, 1}};
   full    ::Bool    = false,              # full SAC/SEGY hdr
   cf      ::String  = "",                 # win32 channel info file
   jst     ::Bool    = true,               # are sample times JST (UTC+9)?
+  ll      ::UInt8   = 0x00,               # auto-set location field in :id?
   memmap  ::Bool    = false,              # use mmap? (DANGEROUS)
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
@@ -312,6 +315,7 @@ function read_data(fmt::String, filestr::Union{String, Array{String, 1}};
     full    = full,
     cf      = cf,
     jst     = jst,
+    ll      = ll,
     memmap  = memmap,
     nx_add  = nx_add,
     nx_new  = nx_new,
@@ -327,6 +331,7 @@ function read_data(filestr::Union{String, Array{String, 1}};
   full    ::Bool    = false,              # full SAC/SEGY hdr
   cf      ::String  = "",                 # win32 channel info file
   jst     ::Bool    = true,               # are sample times JST (UTC+9)?
+  ll      ::UInt8   = 0x00,               # auto-set location field in :id?
   memmap  ::Bool    = false,              # use mmap? (DANGEROUS)
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
@@ -350,6 +355,7 @@ function read_data(filestr::Union{String, Array{String, 1}};
     full    = full,
     cf      = cf,
     jst     = jst,
+    ll      = ll,
     memmap  = memmap,
     nx_add  = nx_add,
     nx_new  = nx_new,
@@ -365,6 +371,7 @@ function read_data!(S::GphysData, filestr::Union{String, Array{String, 1}};
   full    ::Bool    = false,              # full SAC/SEGY hdr
   cf      ::String  = "",                 # win32 channel info file
   jst     ::Bool    = true,               # are sample times JST (UTC+9)?
+  ll      ::UInt8   = 0x00,               # auto-set location field in :id?
   memmap  ::Bool    = false,              # use mmap? (DANGEROUS)
   nx_add  ::Int64   = KW.nx_add,          # append nx_add to overfull channels
   nx_new  ::Int64   = KW.nx_new,          # new channel samples
@@ -388,6 +395,7 @@ function read_data!(S::GphysData, filestr::Union{String, Array{String, 1}};
     full    = full,
     cf      = cf,
     jst     = jst,
+    ll      = ll,
     memmap  = memmap,
     nx_add  = nx_add,
     nx_new  = nx_new,
