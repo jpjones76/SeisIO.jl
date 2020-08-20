@@ -1,7 +1,33 @@
+# 2020-08-18
+* `read_nodal` now requires a format string as the first argument
+  + This change makes syntax identical to `read_data(fmt, file, ...)`
+* Implemented `read_nodal` SEG Y format in SeisIO.Nodal; requested in Issue #55
+  + Note that `read_nodal("segy", ... )` produces different `:id` values
+* Fixed a bug where `read_data("segy", ..., full=true)` could copy some SEGY file header values to `:misc` keys in the wrong byte order.
+
+## Dev/Backend:
+* `do_trace` no longer uses `fname` as a positional, but needs a UInt8 for `ll`
+
+# 2020-08-17
+* Fixed Issue #56
+* When calling `read_data("segy", ..., full=true)`, two key names have changed:
+  + `:misc["cdp"]` => `:misc["ensemble_no"]`
+  + `:misc["event_no"]` => `:misc["rec_no"]`
+* Fixed Issue #57 : `read_data("segy", ...)` has a new keyword: `ll=` sets the
+two-character location field in `:id` (NNN.SSS.**LL**.CC), using values in the
+SEG Y trace header:
+  * 0x00 None (don't set location subfield) -- default
+  * 0x01 Trace sequence number within line
+  * 0x02 Trace sequence number within SEG Y file
+  * 0x03 Original field record number
+  * 0x04 Trace number within the original field record
+  * 0x05 Energy source point number
+  * 0x06 Ensemble number
+  * 0x07 Trace number within the ensemble
+
 # 2020-08-11
 * Automated testing for Julia v.1.4 has ended. Tested versions of the language include v1.0 (LTS) and v1.5 (stable).
-* Changed internal function dtr! to accept `::AbstractArray{T,1}` in first
-positional argument; fixes Issue #54
+* Changed internal function `SeisIO.dtr!` to accept `::AbstractArray{T,1}` in first positional argument; fixes Issue #54
 * Added tests for processing functions on a NodalData object; tests Issue #54
 * Added explicit warning that `translate_resp!` can be acausal; from discussion of Issue #47
 

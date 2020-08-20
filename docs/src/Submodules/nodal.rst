@@ -9,9 +9,9 @@ segments are usually synchronized.
 ************************
 Reading Nodal Data Files
 ************************
-.. function:: S = read_nodal(filename [, KWs])
+.. function:: S = read_nodal(fmt, fname [, KWs])
 
-Read data from file *filename* into memory. Returns a NodalData object.
+Read data in file format *fmt* from file *fname* into memory. Returns a NodalData object.
 
 Supported Keywords
 ==================
@@ -23,8 +23,7 @@ Supported Keywords
 
   ch_s    | Int64     | 1                     | first channel index
   ch_e    | Int64     | (last channel)        | last channel index
-  fmt     | String    | silixa                | nodal data format
-  nn      | String    |                       | network name in `:id`
+  nn      | String    | "N0"                  | network name in `:id`
   s       | TimeSpec  | 0001-01-01T00:00:00   | start time
   t       | TimeSpec  | 9999-12-31T12:59:59   | end time
   v       | Integer   | 0                     | verbosity
@@ -41,6 +40,7 @@ Supported File Formats
   :widths: 1, 1, 3
 
   Silixa TDMS | silixa    | Limited support; see below
+  SEG Y       | segy      | Field values are different from *read_data* output
 
 
 Silixa TDMS Support Status
@@ -62,6 +62,12 @@ Silixa TDMS Support Status
   * position along cable; currently ``:loc.x = 0.0`` for all channels
 
   * frequency response; currently ``:resp`` is an all-pass placeholder
+
+
+Nodal SEG Y Support Status
+--------------------------
+Some headers may not be fully implemented or may be non-standardized. We are attempting to acquire more test data from other vendors to determine whether nodal SEG Y has better standardization than industry files.
+
 
 ******************************
 Working with NodalData objects
@@ -91,7 +97,7 @@ Other Differences from SeisData objects
 
 * Attempting to *push!* or *append!* same-length channels with different ``:t`` or ``:fs`` won't synchronize them! You will instead have columns in ``:data`` that aren't time-aligned.
 
-* Irregularly-sampled data (``:fs = 0.0``) are not supported. 
+* Irregularly-sampled data (``:fs = 0.0``) are not supported.
 
 
 *****

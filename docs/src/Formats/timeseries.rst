@@ -64,6 +64,8 @@ Supported Keywords
 +---------+---------+---------+-----------+----------------------------------+
 | full    | [#]_    | Bool    | false     | read full header into :misc?     |
 +---------+---------+---------+-----------+----------------------------------+
+| ll      | segy    | UInt8   | 0x00      | set loc in :id? (see below)      |
++---------+---------+---------+-----------+----------------------------------+
 | memmap  | \*      | Bool    | false     | use Mmap.mmap to buffer file?    |
 +---------+---------+---------+-----------+----------------------------------+
 | nx_add  | [#]_    | Int64   | 360000    | minimum size increase of x       |
@@ -83,6 +85,7 @@ Supported Keywords
 
 .. rubric:: Table Footnotes
 .. [#] used by ah1, ah2, sac, segy, suds, uw; information read into ``:misc`` varies by file format.
+.. [#] see table below.
 .. [#] used by bottle, mseed, suds, win32
 .. [#] used by bottle, mseed, suds, win32
 .. [#] used by mseed, passcal, segy; swap is automatic for sac.
@@ -138,6 +141,31 @@ Memory Mapping
 `memmap=true` is considered unsafe because Julia language handling of SIGBUS/SIGSEGV and associated risks is undocumented as of SeisIO v1.0.0. Thus, for example, we don't know what a connection failure during memory-mapped file I/O does. In some languages, this situation without additional signal handling was notorious for corrupting files.
 
 **Under no circumstances** should `mmap=true` be used to read files directly from a drive whose host device power management is independent of the destination computer's. This includes all work flows that involve reading files directly into memory from a connected data logger. It is *not* a sufficient workaround to set a data logger to "always on".
+
+Setting the Location Subfield
+=============================
+The location subfield within *:id* ("LL" in NN.SSSS.LL.CC) is normally blank, but can be set from an arbitrary Int32 quantity in SEG Y. The reason for this behavior is that SEG Y has at least six "recommended" quantities that can indicate a unique channel. Use one by passing the corresponding value from the table below to keyword "ll":
+
+.. csv-table::
+  :header: Value, Bytes, Usual trace header quantity
+  :delim: |
+  :widths: 1, 2, 5
+
+  0x00 | None  | None (don't set location subfield)
+  0x01 | 01-04 | Trace sequence number within line
+  0x02 | 05-08 | Trace sequence number within SEG Y file
+  0x03 | 09-12 | Original field record number
+  0x04 | 13-16 | Trace number within the original field record
+  0x05 | 17-20 | Energy source point number
+  0x06 | 21-24 | Ensemble number
+  0x07 | 25-28 | Trace number within the ensemble
+
+For example, "ll=0x04" uses bytes 13-16 (trace number).
+
+Warnings
+--------
+1. A numeric value > 1296 for the chosen quantity leads to nonstandard characters in LL.
+2. Numeric values >7200 for the chosen quantity lead to non-unique location fields; values > 9216 causes *read_data* to throw an InexactError.
 
 *****************************
 Format Descriptions and Notes
