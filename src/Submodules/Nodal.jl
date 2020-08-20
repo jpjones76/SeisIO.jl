@@ -14,8 +14,11 @@ include("Nodal/Types/NodalData.jl")
 include("Nodal/Types/NodalChannel.jl")
 
 # Formats
-include("Nodal/Formats/desc.jl")
-include("Nodal/Formats/tdms.jl")
+for i in ls(path*"/Nodal/Formats/")
+  if endswith(i, ".jl")
+    include(i)
+  end
+end
 
 # Utils
 for i in ls(path*"/Nodal/Utils/")

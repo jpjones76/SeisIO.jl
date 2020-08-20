@@ -85,7 +85,7 @@ function tdms_header!(TDMS::TDMSbuf, io::IO, v::Integer)
   return nothing
 end
 
-function read_tdms(file::String, nn::String, s::TimeSpec, t::TimeSpec, ch_s::Int64,
+function read_silixa_tdms(file::String, nn::String, s::TimeSpec, t::TimeSpec, ch_s::Int64,
   ch_e::Int64, memmap::Bool, v::Integer)
 
   io = memmap ? IOBuffer(Mmap.mmap(file)) : open(file, "r")
@@ -207,7 +207,7 @@ function read_tdms(file::String, nn::String, s::TimeSpec, t::TimeSpec, ch_s::Int
   catch
     ""
   end)
-  id_stub = (nn == "" ? "N0." : (nn * "."))
+  net = nn * "."
   cha = string("..O", getbandcode(TDMS.fs), "0")
 
   # -----------------------------------------------------------------
@@ -227,9 +227,8 @@ function read_tdms(file::String, nn::String, s::TimeSpec, t::TimeSpec, ch_s::Int
   S.oy = TDMS.oy
   S.oz = TDMS.oz
   for i in 1:S.n
-    S.id[i] = string(id_stub, lpad(i, 5, '0'), cha)
+    S.id[i] = string(net, lpad(i, 5, '0'), cha)
     S.name[i] = string(name, "_", i)
-    # TO DO: "StartPosition[m]", "Start Distance (m)", etc.
   end
   # =================================================================
 
