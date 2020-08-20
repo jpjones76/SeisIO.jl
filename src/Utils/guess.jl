@@ -172,13 +172,32 @@ function guess_ftype(io::IO, swap::Bool, sz::Int64, v::Integer)
   seekstart(io)
   try
     fastseek(io, 3212)
-    shorts = (swap ? bswap : identity).(read!(io, zeros(Int16, 12)))
+
+    # First few Int16s; 3, 5, 7 are mandatory
+    shorts = read!(io, zeros(Int16, 7))
+    swap && (shorts .= bswap.(shorts))
+    if v > 2
+      println("δ = ", shorts[3], " μs, nx = ", shorts[5], ", fmt = ", shorts[7])
+    end
     @assert shorts[3] > zero(Int16)               # sample interval in μs
     @assert shorts[5] ≥ zero(Int16)               # number of samples per trace
     @assert shorts[7] in one(Int16):Int16(8)      # data format code
+
+    # Three UInt16s/Int16s, all mandatory
     fastseek(io, 3501)
-    @assert (swap ? bswap : identity)(fastread(io, UInt16)) in 0x0000:0x0200    # SEGY version number
-    @assert (swap ? bswap : identity)(fastread(io, Int16)) ≥ zero(Int16)        # trace length; 0 = variable
+    u16 = read!(io, zeros(UInt16, 3))
+    swap && (u16 .= bswap.(u16))
+    try
+      @assert u16[1] < 0x0400
+      @assert u16[2] in (0x0000, 0x0001)
+      @assert u16[3] < 0x8000 # equivalently, a positive Int16 value
+    catch
+      u16 .= bswap.(u16)
+      swap && @warn("Inconsistent file header endianness!")
+    end
+    @assert u16[1] < 0x0400
+    @assert u16[2] in (0x0000, 0x0001)
+    @assert u16[3] < 0x8000
     push!(str, "segy")
 
   catch err
@@ -273,18 +292,16 @@ Returns a tuple: (ftype::String, swap::Bool)
   uniquely determined.
 * `swap` determines whether or not file should be byte-swapped by `read_data`.
 Generally `swap=true` for big-Endian files, with two exceptions:
-  wasn't determined uniquely.
   + in SAC and mini-SEED, tests for endianness are built into the file format,
   so the value of `swap` is irrelevant.
-  + if ftype = "unknown", swap=nothing.
+  + if ftype = "unknown", swap=nothing is possible.
 
-!!! warning
-
-    `guess` cannot identify SACPZ files from content alone.
-
-!!! danger
-
-    false positives are possible with file formats outside the scope of SeisIO.
+### Warnings
+1. false positives are possible for file formats outside the scope of SeisIO.
+2. SEGY endianness isn't reliable. In theory, SEGY headers are bigendian; in
+practice, SEGY headers are whatever the manufacturer imagines them to be, and
+endianness can be little, or mixed (e.g., a common situation is little-endian
+file header and big-endian trace header).
 
 """ guess
 function guess(file::String; v::Integer=KW.v)

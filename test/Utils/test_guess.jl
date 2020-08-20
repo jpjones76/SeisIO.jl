@@ -12,6 +12,7 @@ sac     = path .* [ "/SampleFiles/SAC/test_be.sac",
                     "/SampleFiles/SAC/test_le.sac" ]
 segyf   = path*"/SampleFiles/SEGY/03.334.12.09.00.0362.1"
 segpat  = path*"/SampleFiles/SEGY/03*"
+segyf2  = path*"/SampleFiles/SEGY/FORGE_78-32_iDASv3-P11_UTC190428135038.sgy"
 sudsf   = path*"/SampleFiles/Restricted/10081701.WVP"
 uw      = path*"/SampleFiles/UW/" .* ["00012502123W"]
 geocsv1 = path*"/SampleFiles/ASCII/geo-tspair.csv"
@@ -20,7 +21,9 @@ lennf   = path*"/SampleFiles/ASCII/0215162000.c00"
 seisf   = path*"/SampleFiles/SEIS/2019_M7.1_Ridgecrest.seis"
 # xml_stfile = path*"/SampleFiles/fdsnws-station_2017-01-12T03-17-42Z.xml"
 # resp_file = path*"/SampleFiles/RESP.cat"
-self = path*"/Utils/test_guess.jl"
+self    = path*"/Utils/test_guess.jl"
+
+printstyled("    known file formats\n", color=:light_green)
 
 redirect_stdout(out) do
   @test guess(ah1f, v=3) == ("ah1", true)
@@ -31,6 +34,7 @@ end
 [@test guess(i) == ("mseed", false) for i in ls(path*"/SampleFiles/SEED/*seed")]
 [@test guess(i) == ("sac", false) for i in sac]
 [@test guess(i) == ("sac", false) for i in ls(path*"/SampleFiles/SUDS/*sac")]
+@test guess(segyf2) == ("segy", true)
 if safe_isfile(sudsf)
   @test guess(sudsf) == ("suds", false)
 end
@@ -61,7 +65,7 @@ SEG = read_data(segyf, full=true)
 @test lastindex(SEG.x[1]) == 247698
 @test SEG.misc[1]["trace_seq_line"] == 3
 @test SEG.misc[1]["trace_seq_file"] == 3
-@test SEG.misc[1]["event_no"] == 1
+@test SEG.misc[1]["rec_no"] == 1
 @test SEG.misc[1]["channel_no"] == 2
 @test SEG.misc[1]["trace_id_code"] == 3
 @test SEG.misc[1]["h_units_code"] == 2
