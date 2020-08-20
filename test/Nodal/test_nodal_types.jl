@@ -13,7 +13,7 @@ v2 = 4.0
 J = j1:j2
 
 printstyled("      append!\n", color=:light_green)
-U = read_nodal(fstr)
+U = read_nodal("silixa", fstr)
 S = deepcopy(U)
 S2 = S[j1:j2]
 n = S.n
@@ -106,7 +106,7 @@ L2 = NodalLoc()
 @test L1 == L2
 
 printstyled("      push!\n", color=:light_green)
-U = read_nodal(fstr)
+U = read_nodal("silixa", fstr)
 S = deepcopy(U)
 n = S.n
 C = S[S.n]
