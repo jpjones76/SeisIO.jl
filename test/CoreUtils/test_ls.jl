@@ -8,7 +8,6 @@ printstyled("  safe_isdir\n", color=:light_green)
 
 printstyled("  ls\n", color=:light_green)
 
-cfile = path*"/SampleFiles/Restricted/03_02_27_20140927.euc.ch"
 @test any([occursin("test", i) for i in ls()])
 coreutils_flist = [ "test_calculus.jl",
                     "test_get_svn.jl",
@@ -55,28 +54,29 @@ if arch_allowed
   @test change_sep(ls(S[5])) == change_sep(regex_find("SampleFiles/", r"02.*o$"))
 end
 
-if safe_isfile(cfile) && arch_allowed
+if has_restricted && arch_allowed
   println("extended ls tests")
   T = path .* [
-                "/SampleFiles/Restricted/*.cnt",
                 "/SampleFiles/*",
+                "/SampleFiles/Restricted/*.cnt",
                 "/SampleFiles/Restricted/2014092709*cnt"
               ]
-  T_expect =  [63, 547, 60]
-  if safe_isfile(path .* "/SampleFiles/restricted.tar.gz")
-    T_expect[2] += 1
-  end
+  T_expect =  [540, 63, 60]
 
   # Test that ls finds the same number of files as bash `ls -1`
   for (n,v) in enumerate(T)
     files = ls(v)
     @test (isempty(files) == false)
-    @test (length(files) == T_expect[n])
+    if n == 1
+      @test length(files) ≥ T_expect[n]
+    else
+      @test length(files) == T_expect[n]
+    end
     [@test isfile(f) for f in files]
   end
 
   # Test that ls invokes find_regex under the right circumstances
-  @test change_sep(ls(T[2])) == change_sep(regex_find("SampleFiles", r".*$"))
+  @test change_sep(ls(T[1])) == change_sep(regex_find("SampleFiles", r".*$"))
   @test change_sep(ls(T[3])) == change_sep(regex_find("SampleFiles", r"Restricted/2014092709.*cnt$"))
 else
   printstyled("  extended ls tests skipped. (files not found; is this Appveyor?)\n", color=:green)
