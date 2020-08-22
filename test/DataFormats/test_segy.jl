@@ -163,9 +163,9 @@ SEG = verified_read_data("passcal", segy_fpat, full=true, swap=true)
 printstyled("    keyword ll\n", color=:light_green)
 for ll in (0x01, 0x04, 0x07)
   S = read_data("segy", segy_nodal, ll=ll)
-  @test S.n == 1280
+  @test S.n == 33
   @test first(S.id) == ".0.01.YYY"
-  @test last(S.id) == ".0.ZK.YYY"
+  @test last(S.id) == ".0.0X.YYY"
 end
 
 for ll in (0x02, 0x05, 0x06)
