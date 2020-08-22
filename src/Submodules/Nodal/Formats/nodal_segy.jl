@@ -2,8 +2,7 @@ function read_nodal_segy(fname::String,
   nn::String,
   s::TimeSpec,
   t::TimeSpec,
-  ch_s::Int64,
-  ch_e::Int64,
+  chans::ChanSpec,
   memmap::Bool)
 
   # Preprocessing
@@ -57,9 +56,12 @@ function read_nodal_segy(fname::String,
 
   # ==========================================================================
   # initialize NodalData container; set variables
+  if isempty(chans)
+    chans = 1:nt
+  end
   fs = sμ / Float64(trace_fh[1])
   data = Array{Float32, 2}(undef, trace_fh[2], nt)
-  S = NodalData(data, fhd, t0, ch_s=ch_s, ch_e=ch_e)
+  S = NodalData(data, fhd, chans, t0)
   net = nn * "."
   cha = string("..O", getbandcode(fs), "0")
 
@@ -69,7 +71,7 @@ function read_nodal_segy(fname::String,
 
   for i = 1:nt
     C = do_trace(f, false, true, 0x00, true, trace_fh)
-    if i in ch_s:ch_e
+    if i in chans
       j += 1
       S.id[j]       = string(net, lpad(i, 5, '0'), cha)
       S.name[j]     = string(C.misc["rec_no"], "_", i)

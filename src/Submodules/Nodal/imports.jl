@@ -4,6 +4,7 @@ import Base: ==, -, *, +, append!, convert, copy, delete!, deleteat!,
   sort, summary, write
 import SeisIO.Formats: formats, FmtVer, FormatDesc, HistVec
 import SeisIO: BUF,
+  ChanSpec,
   FloatArray,
   KW,
   NodalLoc,

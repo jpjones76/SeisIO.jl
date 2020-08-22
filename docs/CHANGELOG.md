@@ -1,3 +1,11 @@
+# 2020-08-22
+* `read_nodal` has switched channel syntax to use `chans=` for numeric channel
+values, lists, or ranges, as the data processing functions. The keywords `ch_s`
+and `ch_e` have been removed.
+* Channel names and IDs in `read_nodal` now use the channel number from the file.
+* Changed the initialization method for NodalData to avoid using any keywords:
+`NodalData(data, info, ts; ch_s, ch_e` is now `NodalData(data, info, chans, ts)`
+
 # 2020-08-18
 * `read_nodal` now requires a format string as the first argument
   + This change makes syntax identical to `read_data(fmt, file, ...)`

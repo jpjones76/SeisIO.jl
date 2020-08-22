@@ -85,8 +85,7 @@ function tdms_header!(TDMS::TDMSbuf, io::IO, v::Integer)
   return nothing
 end
 
-function read_silixa_tdms(file::String, nn::String, s::TimeSpec, t::TimeSpec, ch_s::Int64,
-  ch_e::Int64, memmap::Bool, v::Integer)
+function read_silixa_tdms(file::String, nn::String, s::TimeSpec, t::TimeSpec, chans::ChanSpec, memmap::Bool, v::Integer)
 
   io = memmap ? IOBuffer(Mmap.mmap(file)) : open(file, "r")
   tdms_header!(TDMS, io, v)
@@ -217,18 +216,19 @@ function read_silixa_tdms(file::String, nn::String, s::TimeSpec, t::TimeSpec, ch
 
   # =================================================================
   # Parse to NodalData
-  ch_s = max(ch_s, 1)
-  ch_e = min(ch_e, Int64(TDMS.n_ch))
-  S = NodalData(data, TDMS.hdr, ts, ch_s=ch_s, ch_e=ch_e)
+  if isempty(chans)
+    chans = 1:TDMS.n_ch
+  end
+  S = NodalData(data, TDMS.hdr, chans, ts)
   fill!(S.fs, TDMS.fs)
   fill!(S.src, realpath(file))
   fill!(S.units, "m/m")
   S.ox = TDMS.ox
   S.oy = TDMS.oy
   S.oz = TDMS.oz
-  for i in 1:S.n
-    S.id[i] = string(net, lpad(i, 5, '0'), cha)
-    S.name[i] = string(name, "_", i)
+  for (i,j) in enumerate(chans)
+    S.id[i] = string(net, lpad(j, 5, '0'), cha)
+    S.name[i] = string(name, "_", j)
   end
   # =================================================================
 

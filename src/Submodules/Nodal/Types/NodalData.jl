@@ -102,13 +102,16 @@ mutable struct NodalData <: GphysData
     return S
   end
 
-  function NodalData(data::Array{Float32, 2}, info::Dict{String, Any}, ts::Int64; ch_s::Int64=zero(Int64), ch_e::Int64=typemax(Int64))
+  function NodalData(data::Array{Float32, 2}, info::Dict{String, Any}, chans::ChanSpec, ts::Int64)
     dims = size(data)
     m = dims[1]
     n₀ = dims[2]
-    ch_s = max(ch_s, one(Int64))
-    ch_e = min(ch_e, n₀)
-    n = ch_e-ch_s+1
+    if isempty(chans)
+      chans = 1:n₀
+    elseif isa(chans, Integer)
+      chans = [chans]
+    end
+    n = length(chans)
 
     S = new(n,
             zero(Float64),
@@ -126,7 +129,7 @@ mutable struct NodalData <: GphysData
             Array{Dict{String, Any}, 1}(undef, n),
             Array{Array{String, 1}, 1}(undef, n),
             Array{Array{Int64, 2}, 1}(undef, n),
-            data[:, ch_s:ch_e],
+            data[:, chans],
             Array{FloatArray, 1}(undef, n)
             )
 

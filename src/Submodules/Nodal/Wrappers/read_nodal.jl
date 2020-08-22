@@ -6,8 +6,7 @@ Read nodal data from file `filestr` into new NodalData object `S`.
 ## Keywords
 |KW     | Type      | Default   | Used By   | Meaning                         |
 |:---   |:---       |:---       |:---       |:---                             |
-| ch_s  | Int64     | 1         | all       | first channel index             |
-| ch_e  | Int64     |           | all       | last channel index              |
+| chans | ChanSpec  | Int64[]   | all       | channel numbers to read in      |
 | nn    | String    | "N0"      | all       | network name in `:id`           |
 | s     | TimeSpec  |           | silixa    | start time [^1]                 |
 | t     | TimeSpec  |           | silixa    | end time                        |
@@ -18,8 +17,7 @@ Read nodal data from file `filestr` into new NodalData object `S`.
 See also: `TimeSpec`, `parsetimewin`, `read_data`
 """ read_nodal
 function read_nodal(fmt::String, fstr::String;
-  ch_s    ::Int64     = one(Int64)                , # starting channel number
-  ch_e    ::Int64     = Int64(2147483647)         , # ending channel number
+  chans   ::ChanSpec  = Int64[]                   , # channels to proess
   memmap  ::Bool      = false                     , # use mmap? (DANGEROUS)
   nn      ::String    = "N0"                      , # network name
   s       ::TimeSpec  = "0001-01-01T00:00:00"     , # Start
@@ -28,9 +26,9 @@ function read_nodal(fmt::String, fstr::String;
   )
 
   if fmt == "silixa"
-    S = read_silixa_tdms(fstr, nn, s, t, ch_s, ch_e, memmap, v)
+    S = read_silixa_tdms(fstr, nn, s, t, chans, memmap, v)
   elseif fmt == "segy"
-    S = read_nodal_segy(fstr, nn, s, t, ch_s, ch_e, memmap)
+    S = read_nodal_segy(fstr, nn, s, t, chans, memmap)
   else
     error("Unrecognized format String!")
   end

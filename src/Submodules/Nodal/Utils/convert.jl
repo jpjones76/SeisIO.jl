@@ -14,7 +14,7 @@ function convert(::Type{NodalData}, S::SeisData)
   for i in 1:S.n
     data[:, i] .= S.x[i]
   end
-  TD = NodalData(data, TDMS.hdr, ts)
+  TD = NodalData(data, TDMS.hdr, 1:S.n, ts)
   for f in convertible_fields
     setfield!(TD, f, deepcopy(getfield(S, f)))
   end
