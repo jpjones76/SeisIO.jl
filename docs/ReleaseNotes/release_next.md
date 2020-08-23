@@ -1,14 +1,15 @@
-v1.2.0 adds `SeisIO.Nodal` for working with nodal data and limited IRISPH5 support.
-
-A minor change to SEGY file read can break user work flows that use `full=true` and retrieve either renamed key.
-
-Other changes include code consistency improvements for GPU compatibility.
+v1.2.0 has two main additions: `SeisIO.Nodal` for working with nodal data, and IRISPH5 request support.
 
 # 1. **Public API Changes**
+A minor change to SEGY file support can break user work flows that depend on
+`read_data("segy", ..., full=true)`. Two keys have been renamed:
+* `:misc["cdp"]` => `:misc["ensemble_no"]`
+* `:misc["event_no"]` => `:misc["rec_no"]`
 
 ## New: IRISPH5 support
 Pull request #53 from @tclements: `get_data` now supports IRISPH5 requests for
-mseed and geocsv. (Issue #52)
+mini-SEED ("mseed"). (Issue #52)
+* SAC and SEG Y requests to IRISPH5 are not yet implemented.
 
 ## New: .Nodal submodule
 Added SeisIO.Nodal for reading data files from nodal arrays
@@ -19,14 +20,17 @@ Added SeisIO.Nodal for reading data files from nodal arrays
 * Wrapper: `read_nodal(fmt, file, ...)`
   + Current file format support:
     + Silixa TDMS ("silixa")
-    + Nodal SEG Y ("segy")
+    + Nodal SEG Y ("segy") -- Issue #55
 * Utility functions: `info_dump`
 
+## New: `read_data("segy", ll=...)`
+From issue #57, `read_data("segy", ...)` has a new keyword: `ll=` sets the
+two-character location field in `:id` (NNN.SSS.**LL**.CC), using values in the
+SEG Y trace header. Specify using UInt8 codes; see official documentation.
+
 # 2. **Bug Fixes**
-* When calling `read_data("segy", ..., full=true)`, two key names have changed:
-  + `:misc["cdp"]` => `:misc["ensemble_no"]`
-  + `:misc["event_no"]` => `:misc["rec_no"]`
-* `guess` now tests all six required SEG Y file header values, rather than five.
+* `guess` now tests all six required SEG Y file header values, rather than only five.
+* A minor bug with SEG Y endianness in `guess` was fixed.
 
 # 3. **Consistency, Performance**
 * The field `:x` of GphysData and GphysChannel objects now accepts either AbstractArray{Float64, 1} or AbstractArray{Float32, 1}.

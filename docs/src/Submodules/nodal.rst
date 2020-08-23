@@ -21,9 +21,8 @@ Supported Keywords
   :delim: |
   :widths: 1, 1, 2, 2
 
-  ch_s    | Int64     | 1                     | first channel index
-  ch_e    | Int64     | (last channel)        | last channel index
-  nn      | String    | "N0"                  | network name in `:id`
+  chans   | ChanSpec  | Int64[]               | channels to read
+  nn      | String    | N0                    | network subfield in `:id`
   s       | TimeSpec  | 0001-01-01T00:00:00   | start time
   t       | TimeSpec  | 9999-12-31T12:59:59   | end time
   v       | Integer   | 0                     | verbosity
@@ -66,7 +65,7 @@ Silixa TDMS Support Status
 
 Nodal SEG Y Support Status
 --------------------------
-Some headers may not be fully implemented or may be non-standardized. We are attempting to acquire more test data from other vendors to determine whether nodal SEG Y has better standardization than industry files.
+See :ref:`SEG Y Support<segy-support>`.
 
 
 ******************************
