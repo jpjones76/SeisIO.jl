@@ -1,3 +1,4 @@
+# SeisIO v1.2.0 Release: 2020-08-26
 # 2020-08-26
 * HDF5 compatibility has changed to "0.12, 0.13" as HDF5.jl v0.13.5 fixes the
 read slowdown issue. Versions of HDF5 in range 0.12.3 < VERSION < 0.13.5 might
