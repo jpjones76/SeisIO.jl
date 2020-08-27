@@ -1,4 +1,4 @@
-v1.1.0 includes only minor changes. The change to SAC file handling can break user work flows that match `:id` against SAC headers. Other changes include fixes to several rare and/or minor bugs, code consistency improvements, a much-needed *sync!* rewrite, and ongoing documentation improvements.
+SeisIO v1.1.0 adds submodule `SeisIO.Nodal` for nodal data, plus initial support for IRISPH5 requests. Other changes include fixes to several rare and/or minor bugs, code consistency improvements, a much-needed *sync!* rewrite, and documentation updates.
 
 # 1. **Public API Changes**
 ## **SAC**
@@ -9,6 +9,18 @@ v1.1.0 includes only minor changes. The change to SAC file handling can break us
 ## **SeedLink**
 Functions *seedlink* and *seedlink!* now accept keyword *seq="* for starting sequence number, consistent with [SeisComp3 protocols](https://www.seiscomp3.org/doc/seattle/2012.279/apps/seedlink.html).
 
+## **SEG Y**
+A minor change to SEGY file support could break user work flows that depend on
+`read_data("segy", ..., full=true)`. Two keys have been renamed:
+* `:misc["cdp"]` => `:misc["ensemble_no"]`
+* `:misc["event_no"]` => `:misc["rec_no"]`
+
+### New: `read_data("segy", ll=...)`
+`read_data("segy", ...)` has a new keyword: `ll=` sets the
+two-character location field in `:id` (NNN.SSS.**LL**.CC), using values in the
+SEG Y trace header. Specify using UInt8 codes; see official documentation for
+codes and meanings.
+
 ## **IRISWS timeseries**
 SeisIO has made some minor changes to `get_data("IRIS", ... )` behavior, due to server-side changes to IRISWS timeseries:
 * The Stage 0 (scalar) gain of each channel is logged to `:notes` for fmt="sacbl" ("sac") and fmt="geocsv".
@@ -17,7 +29,21 @@ SeisIO has made some minor changes to `get_data("IRIS", ... )` behavior, due to 
   + `:loc` will be set in objects read from SAC and GeoCSV files, but not mini-SEED.
   + Data in objects read from SAC or GeoCSV files will be scaled by the Stage 0 gain; fix this with `unscale!`.
 
+## **New: .Nodal submodule**
+Added SeisIO.Nodal for reading data files from nodal arrays
+* New types:
+  + NodalData <: GphysData
+  + NodalChannel <: GphysChannel
+  + NodalLoc <: InstrumentPosition
+* Wrapper: `read_nodal(fmt, file, ...)`
+  + Current file format support:
+    - Silixa TDMS ("silixa")
+    - Nodal SEG Y ("segy")
+* Utility functions: `info_dump`
+
 # 2. **Bug Fixes**
+* Fixed a minor bug with SEG Y endianness when calling `guess`.
+* `guess` now tests all six required SEG Y file header values, rather than five.
 * SEED submodule support functions (e.g. `mseed_support()`) now correctly info dump to stdout
 * *merge!* is now logged in a way that *show_processing* catches
 * *read_qml* on an event with no magnitude element now yields an empty `:hdr.mag`
@@ -32,13 +58,20 @@ SeisIO has made some minor changes to `get_data("IRIS", ... )` behavior, due to 
 * In Julia v1.5+, calling `sizeof(R)` on an empty `MultiStageResp` object should no longer error.
 
 ## GitHub Issues Fixed
+* #31 : *sync!* has been rewritten and optimized.
+* #39 : tutorial updated.
 * #42 : mini-SEED calibration blockettes parse correctly again.
 * #43 : reading Steim-compressed mini-SEED into an existing channel with an empty Float64 data vector should no longer error.
   + `get_data` should no longer error when the first part of a segmented request includes no data from some channels.
 * #48 : mini-SEED Blockette 100 should now be handled as in the IRIS mini-SEED C library.
+* #49 : the read speed issue in HDF5.jl has been resolved.
 * #50 : `resample!` now consistently allows upsampling.
 * #51 : `resample!` now correctly updates `:t` of a gapless SeisChannel.
   + The new `resample!` consumes slightly more memory than the previous incarnation, but behavior should be nearly identical.
+* #54 : `SeisIO.dtr!` now accepts `::AbstractArray{T,1}` in first positional argument
+* #55 : added `read_nodal("segy")`
+* #56 : implemented as part of initial SeisIO.Nodal release
+* #57 : fixed by addition of KW `read_data("segy", ..., ll=U)`
 
 ## **SeisIO Test Scripts**
 Fixed some rare bugs that could break automated tests.
@@ -49,6 +82,8 @@ Fixed some rare bugs that could break automated tests.
 * Tests now handle time and data comparison of re-read data more robustly
 
 # 3. **Consistency, Performance**
+* The field `:x` of GphysData and GphysChannel objects now accepts either
+`AbstractArray{Float64, 1}` or `AbstractArray{Float32, 1}`.
 * *get_data* with *w=true* now logs the raw download write to *:notes*
 * *show* now identifies times in irregular data as "vals", not "gaps"
 * *show_writes* now prints the filename in addition to the write operation
@@ -68,6 +103,7 @@ Fixed some rare bugs that could break automated tests.
     + *randSeisData* has two new keywords: *fs_min*, *a0*
 
 # 4. **Developer API Changes**
+* Internal function `SeisIO.dtr!` now accepts `::AbstractArray{T,1}` in first positional argument.
 * Most internal functions have switched from keywords to positional arguments. This includes:
   * SeisIO: `FDSN_sta_xml` , `FDSNget!` , `IRISget!` , `fdsn_chp` , `irisws` , `parse_charr` , `parse_chstr` , `read_station_xml!` , `read_sxml` , `sxml_mergehdr!` , `trid`
   * SeisIO.RandSeis: `populate_arr!`, `populate_chan!`

@@ -1,4 +1,4 @@
-# SeisIO v1.2.0 Release: 2020-08-26
+# SeisIO v1.1.0 Release: 2020-08-26
 # 2020-08-26
 * HDF5 compatibility has changed to "0.12, 0.13" as HDF5.jl v0.13.5 fixes the
 read slowdown issue. Versions of HDF5 in range 0.12.3 < VERSION < 0.13.5 might
@@ -67,7 +67,6 @@ for mseed and geocsv. (Implements request in issue #52)
   floats was documented only by oral tradition. This will be fixed in a future
   patch.
 
-# SeisIO v1.1.0 Release: 2020-07-07
 ### 2020-07-02
 * minor bug fix: in Julia v1.5+, calling `sizeof(R)` on an empty `MultiStageResp`
   object should no longer throw an error
