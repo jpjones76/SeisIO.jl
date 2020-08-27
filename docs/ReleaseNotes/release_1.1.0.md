@@ -4,10 +4,10 @@ SeisIO v1.1.0 adds submodule `SeisIO.Nodal` for nodal data, plus initial support
 ## **SAC**
 * SAC data files no longer track the LOC field of `:id`; thus, IDs `NN.SSSSS.LL.CCC` and `NN.SSSSS..CCC` will be written and read identically to/from SAC.
   + This change realigns SeisIO SAC handling with the [official format spec](http://ds.iris.edu/files/sac-manual/manual/file_format.html).
-  + *Explanation*: Some data sources store the LOC field of `:id` in KHOLE (byte offset 464). We followed this convention through SeisIO v1.0.0. However, KHOLE is an event property, not a station property.
+  + *Explanation*: Some data sources store the LOC field of `:id` in KHOLE (byte offset 464). We followed this convention through SeisIO v1.0.0. However, KHOLE is usually an event property.
 
 ## **SeedLink**
-Functions *seedlink* and *seedlink!* now accept keyword *seq="* for starting sequence number, consistent with [SeisComp3 protocols](https://www.seiscomp3.org/doc/seattle/2012.279/apps/seedlink.html).
+Functions *seedlink* and *seedlink!* now accept keyword *seq=* for starting sequence number, consistent with [SeisComp3 protocols](https://www.seiscomp3.org/doc/seattle/2012.279/apps/seedlink.html).
 
 ## **SEG Y**
 A minor change to SEGY file support could break user work flows that depend on
@@ -56,22 +56,6 @@ Added SeisIO.Nodal for reading data files from nodal arrays
 * Irregularly-sampled channels are no longer writable to ASDF, which, by design, does not handle irregularly-sampled data.
 * ASDF groups and datasets are now always closed after reading with *read_hdf5*.
 * In Julia v1.5+, calling `sizeof(R)` on an empty `MultiStageResp` object should no longer error.
-
-## GitHub Issues Fixed
-* #31 : *sync!* has been rewritten and optimized.
-* #39 : tutorial updated.
-* #42 : mini-SEED calibration blockettes parse correctly again.
-* #43 : reading Steim-compressed mini-SEED into an existing channel with an empty Float64 data vector should no longer error.
-  + `get_data` should no longer error when the first part of a segmented request includes no data from some channels.
-* #48 : mini-SEED Blockette 100 should now be handled as in the IRIS mini-SEED C library.
-* #49 : the read speed issue in HDF5.jl has been resolved.
-* #50 : `resample!` now consistently allows upsampling.
-* #51 : `resample!` now correctly updates `:t` of a gapless SeisChannel.
-  + The new `resample!` consumes slightly more memory than the previous incarnation, but behavior should be nearly identical.
-* #54 : `SeisIO.dtr!` now accepts `::AbstractArray{T,1}` in first positional argument
-* #55 : added `read_nodal("segy")`
-* #56 : implemented as part of initial SeisIO.Nodal release
-* #57 : fixed by addition of KW `read_data("segy", ..., ll=U)`
 
 ## **SeisIO Test Scripts**
 Fixed some rare bugs that could break automated tests.
@@ -126,4 +110,21 @@ Fixed some rare bugs that could break automated tests.
     - *?get_pha!* once again describes the correct function
 * Updated and expanded the Jupyter tutorial
 * Updated and expanded the time API
-* GitHub issues addressed by documentation fixes: #39, #44, #45
+
+# **Index**: GitHub Issues Fixed
+* #31 : *sync!* rewritten.
+* #39 : tutorial updated.
+* #42 : mini-SEED calibration blockettes of this type parse correctly again.
+* #43 : reading Steim-compressed mini-SEED into an existing channel with an empty Float64 data vector should no longer error. `get_data` should no longer error when the first part of a segmented request includes no data from some channels.
+* #44 : documentation updated.
+* #45 : documentation updated.
+* #48 : mini-SEED Blockette 100 handling should now match the IRIS mini-SEED C library.
+* #49 : the read speed slowdown in HDF5.jl was fixed; SeisIO no longer requires HDF5 v0.12.3.
+* #50 : `resample!` now consistently allows upsampling.
+* #51 : `resample!` now correctly updates `:t` of a gapless SeisChannel.
+* #54 : `SeisIO.dtr!` now accepts `::AbstractArray{T,1}` in first positional argument
+* #55 : added `read_nodal("segy")`
+* #56 : implemented as part of initial SeisIO.Nodal release
+* #57 : fixed by addition of KW `ll=` to `read_data`
+
+**Note**: This is a re-release of v1.1.0, originally released 2020-07-07, with updated content that we originally intended to name v1.2.0. Combining these into a re-release fixes an issue that prevented Julia from automatically registering the new version.
