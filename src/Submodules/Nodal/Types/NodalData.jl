@@ -91,7 +91,7 @@ mutable struct NodalData <: GphysData
             misc::Array{Dict{String,Any},1}     , # misc
             notes::Array{Array{String,1},1}     , # notes
             t::Array{Array{Int64,2},1}          , # time
-            data::Array{Float32, 2}             , # data
+            data::AbstractArray{Float32, 2}     , # data
             )
 
 
@@ -102,7 +102,7 @@ mutable struct NodalData <: GphysData
     return S
   end
 
-  function NodalData(data::Array{Float32, 2}, info::Dict{String, Any}, chans::ChanSpec, ts::Int64)
+  function NodalData(data::AbstractArray{Float32, 2}, info::Dict{String, Any}, chans::ChanSpec, ts::Int64)
     dims = size(data)
     m = dims[1]
     n₀ = dims[2]
