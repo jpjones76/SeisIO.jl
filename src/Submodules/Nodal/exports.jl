@@ -1,4 +1,6 @@
 export NodalChannel,
 NodalData,
 info_dump,
-read_nodal
+read_nodal, 
+resample!, 
+resample
