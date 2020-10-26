@@ -470,40 +470,54 @@ sizeof(Loc::XYLoc) = 136 + sizeof(getfield(Loc, :datum))
 
 Instrument position along a nodal array
 * x::Float64 (meters)
+* y::Float64 (meters)
+* z::Float64 (meters)
 
 """
 mutable struct NodalLoc <: InstrumentPosition
   x::Float64
+  y::Float64
+  z::Float64
   NodalLoc(
           x     ::Float64,
-          ) = new(x)
+          y     ::Float64,
+          z     ::Float64,
+          ) = new(x,y,z)
 end
 NodalLoc(;
-        x     ::Float64 = zero(Float64)
-      ) = NodalLoc(x)
+        x     ::Float64 = zero(Float64),
+        y     ::Float64 = zero(Float64),
+        z     ::Float64 = zero(Float64),
+      ) = NodalLoc(x,y,z)
 
 function show(io::IO, loc::NodalLoc)
   if get(io, :compact, false) == false
     showloc_full(io, loc)
   else
     c = :compact => true
-    print(io, "x ", repr(getfield(loc, :x), context=c))
+    print(io, "x ", repr(getfield(loc, :x), context=c),
+              ", y ", repr(getfield(loc, :x), context=c),
+              ", z ", repr(getfield(loc, :x), context=c))
   end
   return nothing
 end
 
 function write(io::IO, Loc::NodalLoc)
   write(io, Loc.x)
+  write(io, Loc.y)
+  write(io, Loc.z)
   return nothing
 end
 
 read(io::IO, ::Type{NodalLoc}) = NodalLoc(
-  fastread(io, Float64)
+  fastread(io, Float64),
+  fastread(io, Float64),
+  fastread(io, Float64),
   )
 
 function isempty(Loc::NodalLoc)
   q::Bool = true
-  for f in (:x, )
+  for f in (:x, :y, :z)
     q = min(q, getfield(Loc, f) == 0.0)
   end
   return q
@@ -511,7 +525,7 @@ end
 
 function hash(Loc::NodalLoc)
   h = hash(zero(UInt64))
-  for f in (:x, )
+  for f in (:x, :y, :z)
     h = hash(getfield(Loc, f), h)
   end
   return h
@@ -519,10 +533,10 @@ end
 
 function isequal(S::NodalLoc, U::NodalLoc)
   q = true
-  for f in (:x, )
+  for f in (:x, :y, :z)
     q = min(q, getfield(S,f) == getfield(U,f))
   end
   return q
 end
 ==(S::NodalLoc, U::NodalLoc) = isequal(S, U)
-sizeof(Loc::NodalLoc) = 16
+sizeof(Loc::NodalLoc) = 48

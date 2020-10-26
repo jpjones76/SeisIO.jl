@@ -59,7 +59,7 @@ redirect_stdout(out) do
   @test isempty(L)
   @test hash(L) == hash(NodalLoc())
   @test L == NodalLoc()
-  @test sizeof(L) == 16
+  @test sizeof(L) == 48
   repr(L, context=:compact=>true)
   repr(L, context=:compact=>false)  
 end
