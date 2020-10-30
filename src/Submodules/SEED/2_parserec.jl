@@ -288,13 +288,7 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, nx_new::Int64, nx_add::
     Δ = getfield(BUF, :Δ)
 
     # Elapsed time since S.t[c] ended
-    τ = y2μs(u16[1]) +
-        Int64(u16[2]-one(UInt16))*86400000000 +
-        Int64(hh)*3600000000 +
-        Int64(mm)*60000000 +
-        Int64(ss)*1000000 +
-        Int64(u16[3])*100 +
-        δt
+    τ = seed_time(u16, hh, mm, ss, δt)
 
     # New channel
     if te == 0

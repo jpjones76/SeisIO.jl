@@ -114,3 +114,7 @@ function blk_string_read(io::IO, nb::Int64, v::Integer)
   sio = IOBuffer(BUF.buf)
   return sio
 end
+
+seed_time(u16::Array{UInt16, 1}, hh::UInt8, mm::UInt8, ss::UInt8, δt::Int64) =
+  y2μs(u16[1]) + Int64(u16[2] - one(UInt16))*86400000000 + Int64(u16[3])*100 +
+  Int64(hh)*3600000000 + Int64(mm)*60000000 + Int64(ss)*1000000 + δt
