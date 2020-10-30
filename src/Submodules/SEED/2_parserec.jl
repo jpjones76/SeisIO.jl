@@ -198,11 +198,12 @@ function parserec!(S::SeisData, BUF::SeisIOBuf, sid::IO, nx_new::Int64, nx_add::
       blk_len = blk_100(S, sid, c)
 
       # Oral tradition: immediately update :fs
-      fs = 1.0/getfield(BUF, :dt)
+      fs = 1.0 / getfield(BUF, :dt)
       if (xi == 0) || (fs != S.fs[c])
+        setfield!(BUF, :Δ, round(Int64, sμ*BUF.dt))
         note!(S, c, string("mini-SEED Blockette 100, old fs = ", S.fs[c], ", new fs = ", fs))
+        S.fs[c] = fs
       end
-      S.fs[c] = fs
 
     elseif bt == 0x00c9
       blk_len = blk_201(S, sid, c)
