@@ -1,5 +1,6 @@
 module SEED
 using Dates, Markdown, Mmap, Printf, SeisIO, SeisIO.FastIO, SeisIO.Formats
+path = Base.source_dir()
 
 const id_positions  = Int8[11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 const id_spacer     = 0x2e
@@ -24,6 +25,13 @@ include("SEED/dataless.jl")
 include("SEED/readmseed.jl")
 include("SEED/seed_resp.jl")
 include("SEED/seed_support.jl")
+
+# Utils
+for i in ls(path*"/SEED/Utils/")
+  if endswith(i, ".jl")
+    include(i)
+  end
+end
 
 # exports
 include("SEED/exports.jl")
