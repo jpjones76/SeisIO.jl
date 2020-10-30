@@ -11,7 +11,7 @@ function parsemseed!(S::SeisData, io::IO, nx_new::Int64, nx_add::Int64, strict::
     parserec!(S, BUF, io, nx_new, nx_add, strict, v)
   end
   seed_cleanup!(S, BUF)
-  return S
+  return nothing
 end
 
 function read_mseed_file!(S::SeisData, fname::String,  nx_new::Int64, nx_add::Int64, memmap::Bool, strict::Bool, v::Integer)
