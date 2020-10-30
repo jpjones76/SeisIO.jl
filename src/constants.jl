@@ -104,6 +104,6 @@ const seisio_file_begin = UInt8[0x53, 0x45, 0x49, 0x53, 0x49, 0x4f]
 const sμ = 1000000.0
 const vSeisIO = Float32(0.54)
 const unindexed_fields = (:c, :n)
-const webhdr = Dict("User-Agent" => "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36") # lol
+const webhdr = Dict("User-Agent" => "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36") # lol
 const xml_endtime = 19880899199000000
 const μs = 1.0e-6
