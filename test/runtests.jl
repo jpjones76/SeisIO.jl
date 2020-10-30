@@ -24,7 +24,7 @@ printstyled(stdout,
 # =====================================================================
 # Run all tests
 # grep "include(joinpath" runtests.jl | awk -F "(" '{print $3}' | awk -F "," {'print $1'}
-for d in ["CoreUtils", "Types", "RandSeis", "Utils", "NativeIO", "DataFormats", "Processing", "Nodal", "Quake", "Web"]
+for d in ["CoreUtils", "Types", "RandSeis", "Utils", "NativeIO", "DataFormats", "SEED", "Processing", "Nodal", "Quake", "Web"]
   ld = length(d)
   ll = div(ltn - ld - 2, 2)
   lr = ll + (isodd(ld) ? 1 : 0)
