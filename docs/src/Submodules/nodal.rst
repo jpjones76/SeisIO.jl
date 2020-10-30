@@ -58,7 +58,7 @@ Silixa TDMS Support Status
 
   * parameters in *:info*
 
-  * position along cable; currently ``:loc.x = 0.0`` for all channels
+  * position along cable; currently loc.(x,y,z) = 0.0 for all channels
 
   * frequency response; currently ``:resp`` is an all-pass placeholder
 

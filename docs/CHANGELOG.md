@@ -1,8 +1,24 @@
+# 2020-10-29
+* Added utility `scan_seed` to submodule `SeisIO.SEED` for SEED volumes.
+  + `scan_seed` can report changes within a SEED file, including:
+    - Samples per channel (KW `npts`)
+    - Gaps (KW `ngaps`), or exact gap times (`seg_times=true`)
+    - Changes in sampling frequency (KW `nfs`), or exact times of fs changes (`fs_times=true`)
+  + Reports to stdout (suppress with `quiet=true`)
+  + Returns a String array of comma-delineated outputs, one entry per channel.
+  + Please open feature request Issues if you need to scan for additional changes within SEED volumes.
+  + This won't interact directly with online SEED requests. To use `scan_seed` with an online request for a seed volume, use `w=true` to dump the raw request to disk, and scan the file(s) created by the download.
+
+# 2020-10-27
+* NodalData no longer errors on `resample!`; fixes issue #65. (Merged PR #68 from tclements/Resample)
+
+# 2020-10-26
+* NodalLoc (:loc field of NodalData) now has x, y, z subfields. (Merged PR #64 from tclements/NodalLoc)
+* NodalData now uses AbstractArray{Float32, 2} for the :data field, rather than Array{Float32, 2}. (Merged PR #66 from tclements/Nodal)
+
 # SeisIO v1.1.0 Release: 2020-08-26
 # 2020-08-26
-* HDF5 compatibility has changed to "0.12, 0.13" as HDF5.jl v0.13.5 fixes the
-read slowdown issue. Versions of HDF5 in range 0.12.3 < VERSION < 0.13.5 might
-still have slow HDF5 read times. Resolves issue #49.
+* HDF5 compatibility has changed to "0.12, 0.13" as HDF5.jl v0.13.5 fixes the read slowdown issue. Versions of HDF5 in range 0.12.3 < VERSION < 0.13.5 might still have slow HDF5 read times. Resolves issue #49.
 
 # 2020-08-22
 * `read_nodal` has switched channel syntax to use `chans=` for numeric channel

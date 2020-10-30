@@ -10,16 +10,12 @@ SeisIO v1.1.0 adds submodule `SeisIO.Nodal` for nodal data, plus initial support
 Functions *seedlink* and *seedlink!* now accept keyword *seq=* for starting sequence number, consistent with [SeisComp3 protocols](https://www.seiscomp3.org/doc/seattle/2012.279/apps/seedlink.html).
 
 ## **SEG Y**
-A minor change to SEGY file support could break user work flows that depend on
-`read_data("segy", ..., full=true)`. Two keys have been renamed:
+A minor change to SEGY file support could break user work flows that depend on `read_data("segy", ..., full=true)`. Two keys have been renamed:
 * `:misc["cdp"]` => `:misc["ensemble_no"]`
 * `:misc["event_no"]` => `:misc["rec_no"]`
 
 ### New: `read_data("segy", ll=...)`
-`read_data("segy", ...)` has a new keyword: `ll=` sets the
-two-character location field in `:id` (NNN.SSS.**LL**.CC), using values in the
-SEG Y trace header. Specify using UInt8 codes; see official documentation for
-codes and meanings.
+`read_data("segy", ...)` has a new keyword: `ll=` sets the two-character location field in `:id` (NNN.SSS.**LL**.CC), using values in the SEG Y trace header. Specify using UInt8 codes; see official documentation for codes and meanings.
 
 ## **IRISWS timeseries**
 SeisIO has made some minor changes to `get_data("IRIS", ... )` behavior, due to server-side changes to IRISWS timeseries:
@@ -66,8 +62,7 @@ Fixed some rare bugs that could break automated tests.
 * Tests now handle time and data comparison of re-read data more robustly
 
 # 3. **Consistency, Performance**
-* The field `:x` of GphysData and GphysChannel objects now accepts either
-`AbstractArray{Float64, 1}` or `AbstractArray{Float32, 1}`.
+* The field `:x` of GphysData and GphysChannel objects now accepts either `AbstractArray{Float64, 1}` or `AbstractArray{Float32, 1}`.
 * *get_data* with *w=true* now logs the raw download write to *:notes*
 * *show* now identifies times in irregular data as "vals", not "gaps"
 * *show_writes* now prints the filename in addition to the write operation
@@ -122,9 +117,10 @@ Fixed some rare bugs that could break automated tests.
 * #49 : the read speed slowdown in HDF5.jl was fixed; SeisIO no longer requires HDF5 v0.12.3.
 * #50 : `resample!` now consistently allows upsampling.
 * #51 : `resample!` now correctly updates `:t` of a gapless SeisChannel.
+* #52 :  merged PR #53, adding initial support for IRISPH5 requests
 * #54 : `SeisIO.dtr!` now accepts `::AbstractArray{T,1}` in first positional argument
 * #55 : added `read_nodal("segy")`
 * #56 : implemented as part of initial SeisIO.Nodal release
 * #57 : fixed by addition of KW `ll=` to `read_data`
 
-**Note**: This is a re-release of v1.1.0, originally released 2020-07-07, with updated content that we originally intended to name v1.2.0. Combining these into a re-release fixes an issue that prevented Julia from automatically registering the new version.
+**Note**: v1.1.0 was originally released 2020-07-07. Re-releasing, rather than incrementing to v1.2.0, fixes an issue that prevented Julia from automatically registering v1.1.0.

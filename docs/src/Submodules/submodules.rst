@@ -82,6 +82,55 @@ Generate a SeisHdr structure filled with random values.
 
 Generate a SeisSrc structure filled with random values.
 
+****
+SEED
+****
+Submodule for the Standard for the Exchange of Earthquake Data (SEED) file format; includes additional functionality.
+
+.. function:: dataless_support()
+Dump status of dataless SEED blockette support to stdout.
+
+.. function:: mseed_support()
+
+Dump status of mini-SEED blockette support to stdout.
+
+.. function:: seed_support()
+
+Dump status of SEED blockette support to stdout.
+
+Scanning SEED Volumes
+*********************
+
+.. function:: scan_seed(fname)
+
+Scan a single SEED file and report on the contents. Much faster than *read_data* as no samples are decoded/read and most blockettes are skipped. Control output behavior with keywords.
+
+Supported Keywords
+------------------
+
+.. csv-table::
+  :header: KW, Type, Default, Meaning
+  :delim: |
+  :widths: 1, 1, 1, 3
+
+  memmap    | Bool      | false     | memory-map file?
+  npts      | Bool      | true      | output samples per channel?
+  ngaps     | Bool      | true      | output time gaps per channel?
+  nfs       | Bool      | true      | output number of fs vals per channel?
+  quiet     | Bool      | false     | `true` prints nothing to stdout
+  seg_times | Bool      | false     | output exact gap times?
+  fs_times  | Bool      | false     | output exact times of fs changes?
+  v         | Integer   | 0         | verbosity
+
+Note that *seg_times* and *fs_times* dump verbose per-channel tabulation to stdout.
+
+Users are encourage to submit feature request Issues if there's a need to scan for other changes within a SEED volume.
+
+Interaction with Online Requests
+--------------------------------
+*scan_seed* cannot interact directly with online SEED requests. As a workaround, do ``get_data(..., w=true)`` to dump the raw request directly to disk, then scan the file(s) created.
+
+
 
 **
 UW
