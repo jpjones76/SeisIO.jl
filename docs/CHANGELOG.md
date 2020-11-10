@@ -1,5 +1,12 @@
+# 2020-10-31
+* `scan_seed` now always parses Blockette [1000]. (Fixes issue #73)
+
+# 2020-10-30
+* Fixed one of several performance issues when reading a large file whose data contain very many negative time gaps. (#72)
+  + Excessive memory use and slow read speeds when a file has ~10^5 negative time gaps are probably inherently unfixable. This is an inherently turgid (and very rare) use case. It may be addressed in the distant future.
+
 # 2020-10-29
-* Added utility `scan_seed` to submodule `SeisIO.SEED` for SEED volumes.
+* Added utility `scan_seed` to submodule `SeisIO.SEED` for SEED volumes. (#62)
   + `scan_seed` can report changes within a SEED file, including:
     - Samples per channel (KW `npts`)
     - Gaps (KW `ngaps`), or exact gap times (`seg_times=true`)

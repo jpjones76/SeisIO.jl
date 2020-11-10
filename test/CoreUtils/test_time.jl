@@ -169,6 +169,41 @@ printstyled(stdout, "      negative gap at end\n", color=:light_green)
 t = [1 0; 6 2Δ; 7 4Δ; 8 Δ; 10 -5Δ]
 @test w_time(t_win(t, Δ), Δ) == t
 
+printstyled(stdout, "    t_bounds\n", color=:light_green)
+function test_t_bounds(t::Array{Int64, 2}, Δ::Int64)
+  (t0, t1) = t_bounds(t, Δ)
+  W = t_win(t, Δ)
+  @assert t0 == minimum(W)
+  @assert t1 == maximum(W)
+  return nothing
+end
+
+fs = 100.0
+Δ = round(Int64, sμ/fs)
+t = [1 0; 6 980000; 8 100000; 10 0]
+test_t_bounds(t, Δ)
+
+t = [1 999999998990000; 101 10000; 297 0]
+test_t_bounds(t, Δ)
+
+t = [1 999999998990000; 101 10000; 297 1000000; 303 40000; 500 1000000; 10000 0]
+test_t_bounds(t, Δ)
+
+t = [1 0; 6 0; 8 0; 10 0]
+test_t_bounds(t, Δ)
+
+t = [1 0; 6 -2Δ; 8 -10Δ; 10 0]
+test_t_bounds(t, Δ)
+
+t = [1 0; 6 2Δ; 7 4Δ; 8 Δ; 10 0]
+test_t_bounds(t, Δ)
+
+t = [1 0; 6 2Δ; 7 4Δ; 8 Δ; 10 Δ]
+test_t_bounds(t, Δ)
+
+t = [1 0; 6 2Δ; 7 4Δ; 8 Δ; 10 -5Δ]
+test_t_bounds(t, Δ)
+
 printstyled(stdout, "    mktime\n", color=:light_green)
 fv = 0.0005
 iv = Array{Int32,1}([1980, 082, 10, 35, 39, 890])

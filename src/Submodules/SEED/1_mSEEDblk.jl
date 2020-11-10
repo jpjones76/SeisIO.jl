@@ -164,7 +164,7 @@ end
 function blk_1000(S::SeisData, sid::IO, c::Int64)
   BUF.fmt  = fastread(sid)
   BUF.wo   = fastread(sid)
-  lx        = fastread(sid)
+  lx       = fastread(sid)
   fastskip(sid, 1)
   BUF.nx   = 2^lx
   BUF.xs   = ((BUF.swap == true) && (BUF.wo == 0x01))

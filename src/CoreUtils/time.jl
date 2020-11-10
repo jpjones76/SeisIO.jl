@@ -248,6 +248,36 @@ function t_collapse(tt::Array{Int64,1}, fs::Float64)
   return t
 end
 
+function t_bounds(T::Array{Int64,2}, Δ::Int64)
+  tmin = typemax(Int64)
+  tmax = typemin(Int64)
+  isempty(T) && return(tmin, tmax)
+  t0 = 0
+  t1 = 0
+  n = size(T,1)-1
+  if T[n+1,2] != 0
+    T = vcat(T, [T[n+1,1] 0])
+    n += 1
+  end
+  w0 = -(Δ)
+  for i = 1:n
+    t0 = T[i,2] + w0 + Δ
+    t1 = t0 + Δ*(T[i+1,1]-T[i,1]-1)
+    w0 = t1
+    if t0 < tmin
+      tmin = t0
+    end
+    if t1 > tmax
+      tmax = t1
+    end
+  end
+  t1 += Δ
+  if t1 > tmax
+    tmax = t1
+  end
+  return (tmin, tmax)
+end
+
 function t_win(T::Array{Int64,2}, Δ::Int64)
   isempty(T) && return(T)
   n = size(T,1)-1
@@ -316,7 +346,7 @@ function endtime(t::Array{Int64,2}, Δ::Int64)
   elseif is_gapless(t)
     t_end = t[1,2] + (t[2,1]-1)*Δ
   elseif minimum(t) < 0
-    t_end = maximum(t_win(t, Δ))
+    t_end = t_bounds(t, Δ)[2]
   else
     L = size(t,1)
     t_end = (t[L,1]-1)*Δ
@@ -347,7 +377,7 @@ function starttime(t::Array{Int64,2}, Δ::Int64)
   return (if isempty(t)
             0
           elseif minimum(t) < 0
-            minimum(t_win(t, Δ))
+            t_bounds(t, Δ)[1]
           else
             t[1,2]
           end)
