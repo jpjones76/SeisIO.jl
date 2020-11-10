@@ -7,7 +7,7 @@ function find_idvec(id::Array{UInt8, 1}, ids::Array{Array{UInt8, 1}, 1})
   return -1
 end
 
-function scanrec!(BUF::SeisIOBuf, sid::IO,
+function scanrec!(sid::IO,
   ints::Array{Int64, 1},
   ff::Array{Array{Float64, 1}, 1},
   segs::Array{Array{Int64, 1}, 1},
@@ -133,6 +133,16 @@ function scanrec!(BUF::SeisIOBuf, sid::IO,
     if bt == 0x0064             # [100] Sample Rate Blockette
       BUF.dt = 1.0 / Float64(BUF.swap ? ntoh(fastread(sid, Float32)) : fastread(sid, Float32))
       setfield!(BUF, :Δ, round(Int64, sμ*BUF.dt))
+
+    # must still be parsed (nearly) in full ... could skip fmt
+    elseif bt == 0x03e8         # [1000] Data Only SEED Blockette
+      BUF.fmt  = fastread(sid)
+      BUF.wo   = fastread(sid)
+      lx       = fastread(sid)
+      fastskip(sid, 1)
+
+      BUF.nx   = 2^lx
+      BUF.xs   = ((BUF.swap == true) && (BUF.wo == 0x01))
     elseif bt == 0x03e9         # [1001] Data Extension Blockette
       fastskip(sid, 1)
       BUF.tc += signed(fastread(sid))
@@ -218,7 +228,7 @@ function scanrec!(BUF::SeisIOBuf, sid::IO,
   v > 2 && printstyled(string("Position = ", fastpos(sid), "\n"), color=:light_green)
 
   # Append number of samples to ints[4j-3]
-  ints[4j-3] += getfield(BUF, :n)
+  ints[4j-3] = ints[4j-3] + getfield(BUF, :n)
 
   # Logging if fs_times == true
   if fs_times
@@ -226,6 +236,10 @@ function scanrec!(BUF::SeisIOBuf, sid::IO,
       ff[j][end-1] = τ*1.0e-6
     end
     ff[j][end] = ints[4j]*1.0e-6
+  end
+
+  if v > 2
+    println("ints[", 4j-3, "]:ints[", 4j, "] = ", ints[4j-3:4j])
   end
 
   # Done
@@ -241,9 +255,11 @@ function scan_seed!(io::IO,
   fs_times::Bool,
   seg_times::Bool,
   v::Integer)
+
   while !eof(io)
-    scanrec!(BUF, io, ints, ff, segs, ids, fs_times, seg_times, v)
+    scanrec!(io, ints, ff, segs, ids, fs_times, seg_times, v)
   end
+
   fill!(getfield(BUF, :hdr_old), zero(UInt8))
   setfield!(BUF, :r1_old, zero(Int16))
   setfield!(BUF, :r2_old, zero(Int16))
