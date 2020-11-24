@@ -1,3 +1,5 @@
+export mseis!
+
 function SeisData(U...)
   S = SeisData()
   for i = 1:length(U)
