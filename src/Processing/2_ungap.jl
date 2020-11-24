@@ -25,7 +25,8 @@ function ungap!(C::GphysChannel; m::Bool=true, tap::Bool=false)
     taper!(C)
   end
   N = size(C.t,1)-2
-  (N ≤ 0 || C.fs == 0) && return nothing
+  (N < 0 || C.fs == 0) && return nothing
+  (N == 0 && C.t[2,2] == 0) && return nothing
   gapfill!(C.x, C.t, C.fs, m=m)
   proc_note!(C, string("ungap!(C, m = ", m, ", tap = ", tap, ")"),
                 string("filled ", N, " gaps (sum = ",
@@ -48,7 +49,8 @@ function ungap!(S::GphysData;
 
   for i in chans
     N = size(S.t[i],1)-2
-    (N ≤ 0 || S.fs[i] == 0) && continue
+    (N < 0 || S.fs[i] == 0) && continue
+    (N == 0 && S.t[i][2,2] == 0) && continue
     gapfill!(S.x[i], S.t[i], S.fs[i], m=m)
     proc_note!(S, i, string("ungap!(S, chans=", i, ", m = ", m,
                             ", tap = ", tap, ")"),

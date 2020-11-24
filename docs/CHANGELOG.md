@@ -1,3 +1,6 @@
+# 2020-11-23
+* `ungap!` should now work correctly on a channel whose only time gap occurs before the last sample. (Fixes issue #74)
+
 # 2020-10-31
 * `scan_seed` now always parses Blockette [1000]. (Fixes issue #73)
 
