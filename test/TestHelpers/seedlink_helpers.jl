@@ -7,7 +7,7 @@ function SL_wait(ta::Array{Union{Task,Nothing}, 1}, t_interval::Int64)
     elseif t ≥ 60
       println("      one or more queries incomplete after 60 s; skipping test.")
       for i = 1:4
-        ta[i] = Nothing
+        ta[i] = nothing
         GC.gc()
       end
       break
