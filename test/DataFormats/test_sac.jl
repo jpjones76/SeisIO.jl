@@ -10,6 +10,9 @@ sac_pz_out2 = path*"/local_sac_2.pz"
 sac_pz_out3 = path*"/local_sac_3.pz"
 sac_pz_out4 = path*"/local_sac_4.pz"
 sac_pz_out5 = path*"/local_sac_5.pz"
+f_stub      = "1981.088.10.38.23.460"
+f_out       = f_stub * "..CDV...R.SAC"
+f_out_new   = f_stub * ".VU.CDV..NUL.R.SAC"
 
 printstyled("  SAC\n", color=:light_green)
 printstyled("    read\n", color=:light_green)
@@ -20,7 +23,7 @@ SAC1 = verified_read_data("sac", sac_file)[1]
 @test ≈(length(SAC1.x), 1000)
 
 # SAC with mmap
-printstyled("    with mmap\n", color=:light_green)
+printstyled("      mmap\n", color=:light_green)
 SACm = read_data("sac", sac_file, memmap=true)[1]
 @test SAC1 == SACm
 
@@ -28,10 +31,10 @@ SAC2 = verified_read_data("sac", sac_file, full=true)[1]
 @test ≈(1/SAC1.fs, SAC2.misc["delta"])
 @test ≈(length(SAC1.x), SAC2.misc["npts"])
 
-printstyled("    wildcard read\n", color=:light_green)
+printstyled("      wildcard\n", color=:light_green)
 SAC = verified_read_data("sac", sac_pat, full=true)
 
-printstyled("    bigendian read\n", color=:light_green)
+printstyled("      bigendian\n", color=:light_green)
 SAC3 = verified_read_data("sac", sac_be_file, full=true)[1]
 @test ≈(1/SAC3.fs, SAC3.misc["delta"])
 @test ≈(length(SAC3.x), SAC3.misc["npts"])
@@ -44,15 +47,27 @@ end
 printstyled("    write\n", color=:light_green)
 S = SeisData(SAC2)
 writesac(S) # change 2019-07-15 to cover writesac on GphysData
-@test safe_isfile("1981.088.10.38.14.009..CDV...R.SAC")
-@test any([occursin("wrote to file 1981.088.10.38.14.009..CDV...R.SAC", S.notes[1][i]) for i in 1:length(S.notes[1])])
-safe_rm("1981.088.10.38.14.009..CDV...R.SAC")
+@test safe_isfile(f_out)
+@test any([occursin(string("wrote to file ", f_out), S.notes[1][i]) for i in 1:length(S.notes[1])])
 
-fn = "81.088.10.38.14.009..CDV...R.SAC"
-writesac(S, fname=fn)
+printstyled("      reproducibility\n", color=:light_green)
+SAC4 = verified_read_data("sac", f_out, full=true)[1]
+for f in SeisIO.datafields
+  (f in [:src, :notes, :misc]) && continue
+  @test isequal(getfield(SAC2, f), getfield(SAC4, f))
+end
+fn = f_out[3:end]
+writesac(SAC4, fname=fn)
 @test safe_isfile(fn)
+SAC5 = verified_read_data("sac", fn, full=true)[1]
+for f in SeisIO.datafields
+  (f in [:src, :notes, :misc]) && continue
+  @test isequal(getfield(SAC2, f), getfield(SAC4, f))
+  @test isequal(getfield(SAC4, f), getfield(SAC5, f))
+end
 safe_rm(fn)
-printstyled("      check write logging\n", color=:light_green)
+
+printstyled("      logging\n", color=:light_green)
 @test any([occursin("write", n) for n in S.notes[1]])
 redirect_stdout(out) do
   show_writes(S, 1)
@@ -63,31 +78,31 @@ end
 SAC1.id = "VU.CDV..NUL"
 SAC1.name = "VU.CDV..NUL"
 writesac(SAC1)
-@test safe_isfile("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")
+@test safe_isfile(f_out_new)
 writesac(SAC1, fname="POTATO.SAC")
 @test safe_isfile("POTATO.SAC")
 
 # testing custom naming formats
 writesac(SAC1, fname="test_write_1.sac")
 @test safe_isfile("test_write_1.sac")
-rm("test_write_1.sac")
+safe_rm("test_write_1.sac")
 
 # testing that appending ".sac" to a file string works
 writesac(SAC1, fname="test_write_2", v=1)
 @test safe_isfile("test_write_2.sac")
-rm("test_write_2.sac")
+safe_rm("test_write_2.sac")
 
 redirect_stdout(out) do
   writesac(SAC1, v=1)
 end
-@test safe_isfile("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")
-rm("1981.088.10.38.14.009.VU.CDV..NUL.R.SAC")
+@test safe_isfile(f_out_new)
+safe_rm(f_out_new)
 
-printstyled("      check that write with fs=0.0 fails\n", color=:light_green)
+printstyled("      skip if fs==0.0\n", color=:light_green)
 SAC1.id = "VU.FS0..NUL"
 SAC1.fs = 0.0
 writesac(SAC1)
-@test safe_isfile("1981.088.10.38.14.009.VU.FS0..NUL.R.SAC") == false
+@test safe_isfile(f_stub*"VU.FS0..NUL.R.SAC") == false
 
 # SACPZ
 printstyled("    SACPZ\n", color=:light_green)
@@ -132,7 +147,7 @@ S.resp[1].resp = rand(ComplexF64, 12, 2)
 S.resp[3].stage[2] = nothing
 writesacpz(sac_pz_out4, S)
 
-printstyled("        extension to GphysChannel\n", color=:light_green)
+printstyled("        GphysChannel\n", color=:light_green)
 writesacpz(sac_pz_out5, S[1])
 
 safe_rm(sac_pz_out1)
