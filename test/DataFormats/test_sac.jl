@@ -13,6 +13,7 @@ sac_pz_out5 = path*"/local_sac_5.pz"
 f_stub      = "1981.088.10.38.23.460"
 f_out       = f_stub * "..CDV...R.SAC"
 f_out_new   = f_stub * ".VU.CDV..NUL.R.SAC"
+sacv7_out   = "v7_out.sac"
 
 printstyled("  SAC\n", color=:light_green)
 printstyled("    read\n", color=:light_green)
@@ -155,3 +156,54 @@ safe_rm(sac_pz_out2)
 safe_rm(sac_pz_out3)
 safe_rm(sac_pz_out4)
 safe_rm(sac_pz_out5)
+
+printstyled("    SAC file v7 (SAC v102.0)\n", color=:light_green)
+test_fs = 62.5
+test_lat = 48.7456
+test_lon = -122.4126
+
+printstyled("      big endian\n", color=:light_green)
+io = open(sac_be_file, "r")
+sac_raw = read(io)
+close(io)
+sac_raw[308] = 0x07
+
+reset_sacbuf()
+dv     = BUF.sac_dv
+dv[1]  = 1.0/test_fs
+dv[19] = test_lon
+dv[20] = test_lat
+dv    .= bswap.(dv)
+sac_dbl_buf = reinterpret(UInt8, dv)
+
+io = open(sacv7_out, "w")
+write(io, sac_raw)
+write(io, sac_dbl_buf)
+close(io)
+
+C = read_data("sac", sacv7_out, full=true)[1]
+@test C.fs == test_fs
+@test C.loc.lat == test_lat
+@test C.loc.lon == test_lon
+
+printstyled("      little endian\n", color=:light_green)
+io = open(sac_file, "r")
+sac_raw = read(io)
+close(io)
+sac_raw[305] = 0x07
+
+reset_sacbuf()
+dv[1]  = 1.0/test_fs
+dv[19] = test_lon
+dv[20] = test_lat
+sac_dbl_buf = reinterpret(UInt8, dv)
+
+io = open(sacv7_out, "w")
+write(io, sac_raw)
+write(io, sac_dbl_buf)
+close(io)
+
+C = read_data("sac", sacv7_out, full=true)[1]
+@test C.fs == test_fs
+@test C.loc.lat == test_lat
+@test C.loc.lon == test_lon

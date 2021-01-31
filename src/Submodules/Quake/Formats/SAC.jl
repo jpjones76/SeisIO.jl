@@ -1,5 +1,5 @@
-# export readuwevt, uwpf, uwpf!
-#
+export fill_sac_evh!
+
 """
     writesac(W::SeisEvent[, v=0])
 
@@ -11,24 +11,83 @@ function writesac(S::SeisEvent; v::Integer=KW.v)
   tdata = Array{Float32,1}(undef, 0)
   reset_sacbuf()
 
-  evid  = codeunits(S.hdr.id == "" ? "-12345  " : S.hdr.id)
-  evid  = evid[1:min(length(evid),16)]
-  BUF.sac_cv[9:length(evid)+8] .= evid
+  ev_id  = codeunits(S.hdr.id == "" ? "-12345  " : S.hdr.id)
+  ev_id  = ev_id[1:min(length(ev_id),16)]
+  BUF.sac_cv[9:length(ev_id)+8] .= ev_id
 
   # Values from event header
-  S.hdr.loc.lat == 0.0 || setindex!(BUF.sac_fv, Float32(S.hdr.loc.lat), 40)
-  S.hdr.loc.lon == 0.0 || setindex!(BUF.sac_fv, Float32(S.hdr.loc.lon), 41)
+  if S.hdr.loc.lat != 0.0
+    setindex!(BUF.sac_fv, Float32(S.hdr.loc.lat), 40)
+    setindex!(BUF.sac_dv, S.hdr.loc.lat, 18)
+  end
+  if S.hdr.loc.lon != 0.0
+    setindex!(BUF.sac_fv, Float32(S.hdr.loc.lon), 41)
+    setindex!(BUF.sac_dv, S.hdr.loc.lon, 17)
+  end
   S.hdr.loc.dep == 0.0 || setindex!(BUF.sac_fv, Float32(S.hdr.loc.dep), 42)
   S.hdr.mag.val == -5.0f0 || setindex!(BUF.sac_fv, Float32(S.hdr.mag.val), 44)
-  BUF.sac_cv[9:length(evid)+8] .= evid
+  BUF.sac_cv[9:length(ev_id)+8] .= ev_id
   t_evt = d2u(S.hdr.ot)
 
-  # Ints, always
-  BUF.sac_iv[7] = Int32(6)
+  # Ints
+  BUF.sac_iv[7] = Int32(7)
+  try
+    BUF.sac_iv[9] = parse(Int32, S.hdr.id)
+  catch err
+    @warn(string("Can't write non-integer event ID ", S.hdr.id, " to SAC."))
+  end
 
   for i = 1:S.data.n
-    BUF.sac_fv[8] = t_evt - S.data.t[i][1,2]*μs
+    BUF.sac_fv[8] = Float32(t_evt - S.data.t[i][1,2]*μs)
+    BUF.sac_dv[2] = t_evt - S.data.t[i][1,2]*μs
     write_sac_channel(S.data, i, "", v)
   end
+  return nothing
+end
+
+"""
+    fill_sac_evh!(Ev::SeisEvent, fname::String)
+
+Fill (overwrite) `Ev.hdr` values with data from SAC file `fname`.
+"""
+function fill_sac_evh!(Ev::SeisEvent, fname::String)
+  reset_sacbuf()
+  io = open(fname, "r")
+  swap = should_bswap(io)
+  fv = BUF.sac_fv
+  iv = BUF.sac_iv
+  cv = BUF.sac_cv
+
+  # read
+  seekstart(io)
+  fastread!(io, fv)
+  fastread!(io, iv)
+  fastread!(io, cv)
+  if swap == true
+    fv .= bswap.(fv)
+    iv .= bswap.(iv)
+  end
+  sac_v = getindex(iv, 7)
+  (iv[9] == sac_nul_i)  || (Ev.hdr.id = string(iv[9]))                # id
+  (fv[8] == sac_nul_f)  || (Ev.hdr.ot = u2d(d2u(Ev.hdr.ot) + fv[8]))  # ot
+  (fv[36] == sac_nul_f) || (Ev.hdr.loc.lat = Float64(fv[36]))         # lat
+  (fv[37] == sac_nul_f) || (Ev.hdr.loc.lat = Float64(fv[37]))         # lon
+  (fv[39] == sac_nul_f) || (Ev.hdr.loc.lat = Float64(fv[39]))         # dep
+  (fv[40] == sac_nul_f) || (Ev.hdr.mag.val = fv[40])                  # mag
+
+  if sac_v > 6
+    fastskip(io, 4*getindex(iv, 10))
+    dv = BUF.sac_dv
+    fastread!(io, dv)
+    swap && (dv .= bswap.(dv))
+
+    # parse doubles 4 (o), 17 (evlo), 18 (evla)
+    (dv[4] == sac_nul_d)  || (Ev.hdr.ot = u2d(d2u(Ev.hdr.ot) + dv[4]))  # ot
+    (dv[17] == sac_nul_d) || (Ev.hdr.loc.lat = Float64(fv[17]))         # lat
+    (dv[18] == sac_nul_d) || (Ev.hdr.loc.lat = Float64(fv[18]))         # lon
+  end
+
+  reset_sacbuf()
+  close(io)
   return nothing
 end

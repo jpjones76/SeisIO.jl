@@ -25,14 +25,16 @@ function reset_sacbuf()
   checkbuf_strict!(BUF.sac_fv, 70)
   checkbuf_strict!(BUF.sac_iv, 40)
   checkbuf_strict!(BUF.sac_cv, 192)
+  checkbuf_strict!(BUF.sac_dv, 22)
 
   fill!(BUF.sac_fv, sac_nul_f)
+  fill!(BUF.sac_dv, sac_nul_d)
   fill!(BUF.sac_iv, sac_nul_i)
   for i in 1:24
     BUF.sac_cv[1+8*(i-1):8*i] = sac_nul_c
   end
   BUF.sac_cv[17:24] .= 0x20
-  BUF.sac_iv[7] = Int32(6)
+  BUF.sac_iv[7] = Int32(7)
 end
 
 # =====================================================================
@@ -92,6 +94,7 @@ function write_sac_file(fname::String, x::AbstractArray{T,1}) where T
     else
       write(io, Float32.(x))
     end
+    write(io, BUF.sac_dv)
   end
   return nothing
 end
@@ -102,7 +105,9 @@ function write_sac_channel(S::GphysData, i::Int64, fn::String,  v::Integer)
   t = S.t[i]
 
   # Floats, all segments
-  BUF.sac_fv[1] = (fs == 0.0 ? 0.0f0 : Float32(1.0/fs))
+  dt = (fs == 0.0 ? 0.0 : 1.0/fs)
+  BUF.sac_dv[1] = dt
+  BUF.sac_fv[1] = Float32(dt)
   BUF.sac_fv[4] = Float32(S.gain[i])
   for i in (32, 33, 34, 58, 59)
     BUF.sac_fv[i] = 0.0f0
@@ -110,11 +115,17 @@ function write_sac_channel(S::GphysData, i::Int64, fn::String,  v::Integer)
   if !isempty(S.loc[i])
     loc = S.loc[i]
     if typeof(loc) == GeoLoc
-      BUF.sac_fv[32] = Float32(getfield(loc, :lat))
-      BUF.sac_fv[33] = Float32(getfield(loc, :lon))
+      lat = getfield(loc, :lat)
+      lon = getfield(loc, :lon)
+      BUF.sac_fv[32] = Float32(lat)
+      BUF.sac_fv[33] = Float32(lon)
       BUF.sac_fv[34] = Float32(getfield(loc, :el))
       BUF.sac_fv[58] = Float32(getfield(loc, :az))
       BUF.sac_fv[59] = Float32(getfield(loc, :inc))
+
+      # IRIS docs claim STLA, STLO order is reversed w.r.t. single floats
+      BUF.sac_dv[19] = lon
+      BUF.sac_dv[20] = lat
     end
   end
 
@@ -275,6 +286,41 @@ function read_sac_stream(io::IO, full::Bool, swap::Bool)
     end
   end
 
+  # SAC v102.0 (NVHDR == 7) adds a footer
+  if iv[7] > 6
+    dv = BUF.sac_dv
+    fastread!(io, dv)
+    swap && (dv .= bswap.(dv))
+
+    # DELTA
+    if dv[1] != sac_nul_d
+      C.fs = 1.0/dv[1]
+    end
+
+    # B
+    if (b != sac_nul_f) && (dv[2] != sac_nul_d)
+      C.t[1,2] += (round(Int64, dv[2]*sμ) - round(Int64, b*sμ))
+    end
+
+    # STLO, STLA? (IRIS docs claim order is reversed w.r.t. single floats)
+    if dv[19] != sac_nul_d
+      C.loc.lon = dv[19]
+    end
+
+    if dv[20] != sac_nul_d
+      C.loc.lat = dv[20]
+    end
+
+    if full == true
+      m = 0x00
+      while m < 0x16
+        m += 0x01
+        if dv[m] != sac_nul_d
+          C.misc[sac_double_k[m]] = getindex(dv, m)
+        end
+      end
+    end
+  end
   return C
 end
 
@@ -405,6 +451,7 @@ function writesac(S::GphysData; chans::ChanSpec=Int64[], fname::String="", v::In
   chans = mkchans(chans, S)
   for i in chans
     write_sac_channel(S, i, fname, v)
+    reset_sacbuf()
   end
   return nothing
 end

@@ -125,6 +125,7 @@ mutable struct SeisIOBuf
   sac_fv::Array{Float32,1}
   sac_iv::Array{Int32,1}
   sac_cv::Array{UInt8,1}
+  sac_dv::Array{Float64,1}
   flags::Array{UInt8,1}       # SEED flags (Stored as four UInt8s)
 
   # For parsing dates
@@ -179,6 +180,7 @@ mutable struct SeisIOBuf
         Array{Float32,1}(undef, 70),        # sac_fv::Array{Float32,1}
         Array{Int32,1}(undef, 40),          # sac_iv::Array{Int32,1}
         Array{UInt8,1}(undef, 192),         # sac_cv::Array{UInt8,1}
+        Array{Float64,1}(undef,22),         # sac_dv::Array{Float64,1}
         Array{UInt8,1}(undef, 4),           # flags::Array{UInt8,1}
 
         # dedicated array for parsing dates
