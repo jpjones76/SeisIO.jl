@@ -1,3 +1,6 @@
+SeisIO v1.1.0
+2020-08-27
+
 SeisIO v1.1.0 adds submodule `SeisIO.Nodal` for nodal data, plus initial support for IRISPH5 requests. Other changes include fixes to several rare and/or minor bugs, code consistency improvements, a much-needed *sync!* rewrite, and documentation updates.
 
 # 1. **Public API Changes**

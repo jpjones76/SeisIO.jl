@@ -1,3 +1,27 @@
+# 2021-01-29
+* New developer (internal) function `cmatch_p!`:
+  + Matches a pair of GphysChannel objects on (:fs, :id, :loc, :resp, :units)
+  * Declares a match even if some fields are unset in one object
+  * On a match, unset fields in each object are copied from the other object
+* SAC read/write support extended to SAC v7 (files produced by/for SAC v102.0).
+
+# 2021-01-27
+* `merge!` has been extended to pairs of GphysChannel objects. Non-default values must be identical in :fs, :id, :loc, :resp, :units.
+* `convert` expansion:
+  + `convert(NodalData, S)` and `convert(EventTraceData, S)` should now work for all GphysData subtypes.
+  + `convert(NodalChannel, C)` and `convert(EventChannel, C)` should now work for all GphysChannel subtypes.
+  + `EventTraceData(S::T) where T<:GphysData` is now aliased to `convert(EventTraceData, C)`.
+  + `EventChannel(C::T) where T<:GphysChannel` is now defined as an alias to `convert(EventChannel, C)`.
+* Calling `writesac` on a SeisEvent object now writes event IDs that can be parsed to Int32.
+* New function `fill_sac_evh!` in submodule Quake fills SeisEvent header info from a SAC file.
+
+# 2020-12-03
+* `ChanSpec` now includes `StepRange{Int, Int}` in its Type union
+* Added processing function `rescale!` for fast conversion and matching of scalar gains
+
+# 2020-12-02
+* `writesac` should now write begin time (word 5) in a way that never shifts sample times, even by subsample values. (Fixes issue #60)
+
 # 2020-11-23
 * `ungap!` should now work correctly on a channel whose only time gap occurs before the last sample. (Fixes issue #74)
 
@@ -5,8 +29,7 @@
 * `scan_seed` now always parses Blockette [1000]. (Fixes issue #73)
 
 # 2020-10-30
-* Fixed one of several performance issues when reading a large file whose data contain very many negative time gaps. (#72)
-  + Excessive memory use and slow read speeds when a file has ~10^5 negative time gaps are probably inherently unfixable. This is an inherently turgid (and very rare) use case. It may be addressed in the distant future.
+* Fixed a performance issue when reading a large file whose data contain many negative time gaps. (#72)
 
 # 2020-10-29
 * Added utility `scan_seed` to submodule `SeisIO.SEED` for SEED volumes. (#62)
