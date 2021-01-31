@@ -1,5 +1,54 @@
 merge_ext!(S::SeisData, Ω::Int64, rest::Array{Int64, 1}) = nothing
 
+function merge_ext!(C::T1, D::T2) where {T1<:GphysChannel, T2<:GphysChannel}
+  if T1 == T2
+    ff = setdiff(fieldnames(T1), SeisIO.datafields)
+    for f in ff
+      setfield!(C, f, deepcopy(getfield(D, f)))
+    end
+  end
+  return nothing
+end
+
+function dup_check!(subgrp::Array{Int64, 1}, to_delete::Array{Int64, 1}, T::Array{Array{Int64, 2}, 1}, X::Array{FloatArray, 1})
+  N = length(subgrp)
+  if N > 1
+    # Check for duplicates
+    sort!(subgrp)
+    u = falses(N)
+    while N > 1
+      t1 = getindex(T, getindex(subgrp, N))
+      x1 = getindex(X, getindex(subgrp, N))
+
+      # if a channel is already known to be a duplicate, skip it
+      if getindex(u, N) == false
+        j = N
+        while j > 1
+          j = j-1
+          t2 = getindex(T, getindex(subgrp, j))
+          x2 = getindex(X, getindex(subgrp, j))
+          if t1 == t2 && x1 == x2
+            setindex!(u, true, j)
+          end
+        end
+      end
+
+      N = N-1
+    end
+
+    # flag duplicates for deletion
+    for i in 1:length(u)
+      if u[i]
+        push!(to_delete, subgrp[i])
+      end
+    end
+
+    # remove duplicates from merge targets
+    deleteat!(subgrp, u)
+  end
+  return length(subgrp)
+end
+
 function get_δt(t::Int64, Δ::Int64)
   δts = rem(t, Δ)
   if δts > div(Δ,2)
@@ -163,6 +212,186 @@ function get_next_pair(W::Array{Int64,2})
   return zeros(Int64, 7), zeros(Int64, 7)
 end
 
+function get_merge_w(Δ::Int64, subgrp::Array{Int64,1}, T::Array{Array{Int64, 2}, 1}, X::Array{FloatArray, 1})
+
+  N = length(subgrp)
+  w_tmp = Array{Array{Int64,2}, 1}(undef, N)
+  te    = Array{Int64, 1}(undef, N)
+  for i = 1:N
+    m     = getindex(subgrp, i)
+    w_m   = t_win(getindex(T, m), Δ)
+    n_w   = size(w_m, 1)
+
+    # Store: w_start, w_end, channel_number, window_number, x_start, x_end
+    w = hcat(w_m, Array{Int64,2}(undef, n_w, 4))
+    j  = 0
+    ws = 0
+    we = 0
+    while j < n_w
+      j       = j + 1
+      we      = max(we, getindex(w_m, j, 2))
+      setindex!(w, m, j, 3)                     # channel number
+      setindex!(w, j, j, 4)                     # window number
+      setindex!(w, ws+1, j, 5)                  # x_start
+      ws      = ws + div(w[j,2]-w[j,1], Δ)+1    # x_end
+      setindex!(w, ws, j, 6)
+    end
+    setindex!(te, we, i)
+    setindex!(w_tmp, w, i)
+  end
+  W   = vcat(w_tmp...)
+  ii  = sortperm(W[:,2], rev=true)
+  W   = W[ii,:]
+
+  #= added 2019-11-19:
+  fixes a rare off-by-one bug with slightly-offset windows (issue #29)
+  issue creator only sees bug in one file from 20 years of data
+
+  clumsy fix based on sound principles:
+  * force X to start an integer # of samples from the epoch
+    - prevents a discrepancy between length(X) and length(T)
+  * add the offset back to the start time of the merged channel data
+  =#
+
+  # Let Ω be the channel number in subgrp with the last end time
+  Ω = subgrp[argmax(te)]
+
+  return W, Ω
+end
+
+function segment_merge(Δ::Int64, Ω::Int64, W::Array{Int64, 2}, X::Array{FloatArray, 1})
+  nW = size(W,1)
+  i = argmin(W[:,1])
+  δts = get_δt(W[i,1], Δ)
+  if δts != 0
+    for i in 1:size(W,1)
+      W[i,1] -= δts
+      W[i,2] -= δts
+    end
+  end
+  (src, dest) = get_next_pair(W)
+
+  while (src, dest) != (zeros(Int64, 7), zeros(Int64, 7))
+    ts_i = src[1];  te_i = src[2];  p = src[3];  p_i = src[4];  os_p = src[5];  W_p = src[7]
+    ts_j = dest[1]; te_j = dest[2]; q = dest[3]; q_i = dest[4]; os_q = dest[5]; W_q = dest[7]
+    ts_max = max(ts_i, ts_j); ts_max -= get_δt(ts_max, Δ)
+    te_min = min(te_i, te_j); te_min -= get_δt(te_min, Δ)
+    nov = 1 + div(te_min - ts_max, Δ)
+    Xq = getindex(X, q)
+
+    # (1) determine the times and indices of overlap within each pair
+    # a. determine sample times of overlap
+    Ti = collect(ts_max:Δ:te_min)
+    Tj = deepcopy(Ti)
+
+    # b. get sample indices within each overlap window
+    # i
+    xsi_i = round(Int64, (ts_max - ts_i)/Δ) + os_p
+    xei_i = xsi_i + nov - 1
+    # j
+    xsi_j = round(Int64, (ts_max - ts_j)/Δ) + os_q
+    xei_j = xsi_j + nov - 1
+
+    # (2) Extract sample windows
+    Xi = getindex(getindex(X, p), xsi_i:xei_i)
+    Xj = getindex(getindex(X, q), xsi_j:xei_j)
+    lxp = length(getindex(X, p))
+    lxq = length(getindex(X, q))
+
+    # ================================================================
+    # check for duplicate windows
+    if (ts_i == ts_j) && (te_i == te_j) && (Xi == Xj)
+      # delete time window
+      W = W[setdiff(1:end, W_p), :]
+    else
+      # Check for misalignment:
+      τ, χ, do_xtmerge, δj = check_alignment(Ti, Tj, Xi, Xj, Δ)
+      if do_xtmerge
+        xtmerge!(τ, χ, div(Δ,2))
+      end
+      if δj != 0
+        xsi_i += δj
+        xei_j -= δj
+      end
+
+      # (3) Merge X,T into S[q]
+      deleteat!(Xq, xsi_j:xei_j)
+      if xsi_j == 1
+        prepend!(Xq, χ)
+      else
+        splice!(Xq, xsi_j:xsi_j-1, χ)
+      end
+
+      # (4) Adjust start, end indices of windows ≥ q_i in q
+      # structure: w_start, w_end, channel_number, window_number, x_start, x_end
+      nxq = length(Xq) - lxq
+      i = 0
+      while i < nW
+        i += 1
+        if W[i, 3] == q && W[i, 4] ≥ q_i
+          W[i, 1] += nxq*Δ
+          W[i, 2] += nxq*Δ
+          W[i, 5] += nxq
+          W[i, 6] += nxq
+        end
+      end
+
+      #= if xsi_i ≤ os_p (which is always true, at this point in
+      the control flow), we decrease W[W_p, 1:2] =#
+      nxp = xei_i-xsi_i+1
+      W[W_p, 1] -= δj*Δ
+      W[W_p, 2] -= (nxp + δj)*Δ
+
+      #= Control for when window P is emptied; the above two statements
+      make this possible =#
+      if (W[W_p, 2] < W[W_p, 1])
+        W = W[setdiff(1:end, W_p), :]
+      else
+        W[W_p, 6] -= nxp
+      end
+    end
+    # Sort by end time, to ensure we pick the window with latest end next
+    k = sortperm(W[:, 2], rev=true)
+    W = W[k, :]
+    nW = size(W, 1)
+
+    # Repeat until no further merges are possible
+    (src, dest) = get_next_pair(W)
+  end
+
+  kk = sortperm(W[:, 1])
+  W = W[kk, :]
+  #= At this point, we have nothing left that can be merged. So we're going
+  to arrange T[subgrp] and X[subgrp] in windows using t_win =#
+
+  n = size(W, 1)
+  nx = broadcast(+, getindex(W, :, 6).-getindex(W, :,5), 1)
+  X_Ω = Array{eltype(X[Ω]),1}(undef, sum(nx))
+  xi = 1
+  i = 0
+  while i < n
+    i   = i + 1
+    p   = getindex(W, i, 3)
+    lx  = getindex(nx, i)
+    copyto!(X_Ω, xi, getindex(X, p), getindex(W, i, 5), lx)
+    xi  = xi + lx
+  end
+
+  # Shrink W and eliminate windows with no actual gap between them
+  m = trues(n)
+  while n > 1
+    if W[n-1, 2] + Δ == W[n,1]
+      W[n-1, 2] = W[n,2]
+      m[n] = false
+    end
+    n = n - 1
+  end
+  W = W[m,[1,2]]
+  broadcast!(+, W, W, δts)
+  T_Ω = w_time(W, Δ)
+  return T_Ω, X_Ω
+end
+
 # merges into the channel with the most recent data
 function merge_non_ts!(S::GphysData, subgrp::Array{Int64,1})
   te = [maximum(t[:,2]) for t in S.t[subgrp]]
@@ -176,4 +405,16 @@ function merge_non_ts!(S::GphysData, subgrp::Array{Int64,1})
   S.t[Ω] = hcat(collect(1:1:length(T)), T[ii])
   S.x[Ω] = X[ii]
   return Ω
+end
+
+function merge_non_ts!(C::GphysChannel, D::GphysChannel)
+  T = vcat(C.t, D.t)[:, 2]
+  X = vcat(C.x, D.x)
+  Z = unique(collect(zip(T,X)))
+  T = first.(Z)
+  X = last.(Z)
+  ii = sortperm(T)
+  C.t = hcat(collect(1:length(T)), T[ii])
+  C.x = X[ii]
+  return nothing
 end

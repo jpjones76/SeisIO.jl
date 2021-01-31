@@ -795,36 +795,6 @@ i = findid(A, S)
 @test ≈(S.t[i][2,1], 1+length(A.x))
 @test ≈(S.t[i][2,2], (5-1/S.fs[i])*sμ)
 
-printstyled(stdout,"      common channels and \"splat\" notation (mseis!)\n", color=:light_green)
-(S,T) = mktestseis()
-U = merge(S,T)
-sizetest(U, 7)
-
-V = SeisData(S,T)
-merge!(V)
-@test U == V
-
-mseis!(S,T)
-@test S == V
-
-printstyled(stdout,"      mseis! with Types from SeisIO.Quake\n", color=:light_green)
-S = randSeisData()
-Ev = randSeisEvent(2)
-C = ungap(deepcopy(Ev.data[1]))
-Ev.data[1] = deepcopy(C)
-C.t[1,2] += 1000000
-C.x = randn(eltype(C.x), length(C.x))
-C.az = 0.0
-C.baz = 0.0
-C.dist = 0.0
-Ev.data[2] = deepcopy(C)
-mseis!(S,   randSeisChannel(),
-            convert(EventChannel, randSeisChannel()),
-            rand(Float64, 23),  # should warn
-            convert(EventTraceData, randSeisData()),
-            Ev,
-            randSeisEvent())
-
 printstyled(stdout,"      two independent channels ==> same as \"+\"\n", color=:light_green)
 (S,T) = mktestseis()
 U = S[1] * T[2]
@@ -891,7 +861,7 @@ close(io)
 X = map(Float32, X2)
 @test isapprox(C2.x, X)
 
-printstyled(stdout,"      merge_ext! on SeisData == nothing\n", color=:light_green)
+printstyled(stdout,"  merge_ext!\n", color=:light_green)
 C = randSeisChannel(s=true)
 S = randSeisData(3, s=1.0)
 S.id = [C.id, C.id, C.id]
@@ -901,3 +871,294 @@ U = deepcopy(S)
 rest = [1,2]
 @test SeisIO.merge_ext!(S, Ω, rest) == nothing
 @test S==U
+
+printstyled(stdout,"  merge! with GphysChannel objects\n", color=:light_green)
+nx = 100
+fs = 100.0
+id = "VV.STA1.00.EHZ"
+Δ = round(Int64, 1000000/fs)
+
+# ===========================================================================
+printstyled(stdout,"    simple merges\n", color=:light_green)
+printstyled(stdout,"      two channels, same params, no overlap\n", color=:light_green)
+C1 = mkC1()
+C2 = mkC2()
+
+# Is the group merged correctly?
+U1 = deepcopy(C1)
+U2 = deepcopy(C2)
+merge!(C1, C2)
+@test C1.id == id
+@test vcat(U1.x, U2.x)==C1.x
+@test mk_tcat([U1.t, U2.t], fs) == C1.t
+
+# Do the notes log the extra source?
+@test any([occursin("New channel 1", i) for i in C1.notes])
+@test any([occursin("test channel 1", i) for i in C1.notes])
+
+# Are dictionaries merging correctly?
+@test haskey(C1.misc, "P")
+@test haskey(C1.misc, "S")
+
+printstyled(stdout, "      \"zipper\" merge\n", color=:light_green)
+C1 = mkC1()
+C2 = mkC2()
+W = Array{Int64,2}(undef, 8, 2);
+for i = 1:8
+  W[i,:] = t0 .+ [(i-1)*nx*Δ ((i-1)*nx + nx-1)*Δ]
+end
+w1 = W[[1,3,5,7], :]
+w2 = W[[2,4,6,8], :]
+C1.t = w_time(w1, Δ)
+C2.t = w_time(w2, Δ)
+C1.x = randn(4*nx)
+C2.x = randn(4*nx)
+U1 = deepcopy(C1)
+U2 = deepcopy(C2)
+merge!(C1, C2)
+basic_checks(SeisData(C1))
+@test C1.t == [1 t0; 8*nx 0]
+
+# ===========================================================================
+printstyled(stdout,"    two channels, one with a time gap\n", color=:light_green)
+C1 = mkC1()
+C2 = mkC2()
+C2.x = rand(2*nx)
+C2.t = vcat(C2.t[1:1,:], [nx 2*Δ], [2*nx 0])
+
+# Is the group merged correctly?
+U1 = deepcopy(C1)
+U2 = deepcopy(C2)
+merge!(C1, C2)
+basic_checks(SeisData(C1))
+@test U1.x == C1.x[1:nx]
+@test U2.x[1:nx] == C1.x[nx+1:2nx]
+@test U2.x[nx+1:2nx] == C1.x[2nx+1:3nx]
+@test C2.x == U2.x
+@test mk_tcat([U1.t, U2.t], fs) == C1.t
+@test C2.t == U2.t
+
+# ===========================================================================
+printstyled(stdout,"    non-duplicate samples at overlapping times\n", color=:light_green)
+printstyled(stdout,"      check for averaging\n", color=:light_green)
+nov = 3
+C1 = mkC1()
+C2 = C2_ov()
+U1 = deepcopy(C1)
+U2 = deepcopy(C2)
+
+# Is the group merged correctly?
+merge!(C1, C2)
+basic_checks(SeisData(C1))
+@test C1.x[1:nx-nov] == U1.x[1:nx-nov]
+@test C1.x[nx-nov+1:nx] == 0.5*(U1.x[nx-nov+1:nx] + U2.x[1:nov])
+@test C1.x[nx+1:2nx-nov] == U2.x[nov+1:nx]
+@test C1.t == [1 U1.t[1,2]; 2nx-nov 0]
+
+# Do the notes log the extra source?
+@test findfirst([occursin("New channel 1", i) for i in C1.notes]) != nothing
+@test findfirst([occursin("test channel 1", i) for i in C1.notes]) != nothing
+
+# Are dictionaries merging correctly?
+@test haskey(C1.misc, "P")
+@test haskey(C1.misc, "S")
+
+printstyled(stdout,"      src overlap window is NOT first\n", color=:light_green)
+os = 2
+C1 = mkC1()
+C2 = C2_ov()
+U1 = deepcopy(C1)
+U2 = deepcopy(C2)
+C1.x = rand(2*nx)
+C1.t = vcat(C1.t[1:1,:], [nx os*Δ], [2*nx 0])
+C2.t[1,2] += (os+nx)*Δ
+U1 = deepcopy(C1)
+U2 = deepcopy(C2)
+merge!(C1, C2)
+basic_checks(SeisData(C1))
+@test C1.x[1:2nx-nov] == U1.x[1:2nx-nov]
+@test C1.x[2nx-nov+1:2nx] == 0.5*(U1.x[2nx-nov+1:2nx] + U2.x[1:nov])
+@test C1.x[2nx+1:3nx-nov] == U2.x[nov+1:nx]
+@test C1.t == vcat(U1.t[1:2,:], [length(C1.x) 0])
+
+printstyled(stdout,"      dest overlap window is NOT first\n", color=:light_green)
+nov = 3
+C1 = mkC1()
+C2 = C2_ov()
+C2.x = rand(2*nx)
+C2.t = [1 t0-nx*Δ; nx+1 Δ*(nx-nov); 2*nx 0]
+
+U1 = deepcopy(C1)
+U2 = deepcopy(C2)
+merge!(C1, C2)
+basic_checks(SeisData(C1))
+@test C1.x[1:nx] == U2.x[1:nx]
+@test C1.x[nx+1:2nx-nov] == U1.x[1:nx-nov]
+@test C1.x[2nx-nov+1:2nx] == 0.5*(U1.x[nx-nov+1:nx] + U2.x[nx+1:nx+nov])
+@test C1.x[2nx+1:3nx-nov] == U2.x[nx+nov+1:2nx]
+@test mk_tcat([U1.t, U2.t], fs) == C1.t
+
+# ===========================================================================
+printstyled(stdout,"    overlap with time mismatch\n", color=:light_green)
+
+#= mk_tcat stops working here as merge shifts one window back in
+time one sample to account for the intentional one-Δ time mismatch =#
+
+printstyled(stdout,"      one sample off\n", color=:light_green)
+
+# (a) 3_sample overlap with wrong time (C2[1:2] == C1[99:100])
+nov = 2
+C1 = mkC1()
+C2 = C2_ov()
+C2.x = vcat(copy(C1.x[nx-nov+1:nx]), rand(nx-nov))
+U1 = deepcopy(C1)
+U2 = deepcopy(C2)
+merge!(C1, C2)
+basic_checks(SeisData(C1))
+@test length(C1.x) == 2nx-nov
+@test C1.x[1:nx-nov] == U1.x[1:nx-nov]
+@test C1.x[nx-nov+1:nx] == U1.x[nx-nov+1:nx] == U2.x[1:nov]
+@test C1.x[nx+1:2nx-nov] == U2.x[nov+1:nx]
+@test C1.t == [1 U1.t[1,2]-Δ; 2nx-nov 0]
+
+printstyled(stdout,"      src overlap window is NOT first\n", color=:light_green)
+C1 = deepcopy(U1)
+C2 = deepcopy(U2)
+C1.x = rand(2*nx)
+C1.t = vcat(C1.t[1:1,:], [nx os*Δ], [2*nx 0])
+C2.x = vcat(copy(C1.x[2nx-nov+1:2nx]), rand(nx-nov))
+C2.t[1,2] += (os+nx)*Δ
+U1 = deepcopy(C1)
+U2 = deepcopy(C2)
+merge!(C1, C2)
+basic_checks(SeisData(C1, C2))
+@test C1.x[1:2nx-nov] == U1.x[1:2nx-nov]
+@test C1.x[2nx-nov+1:2nx] == U1.x[2nx-nov+1:2nx] == U2.x[1:nov]
+@test C1.x[2nx+1:3nx-nov] == U2.x[nov+1:nx]
+@test C1.t == [1 0; U1.t[2,1] U1.t[2,2]-Δ; 3nx-nov 0]
+
+#= mk_tcat starts working again here as the time shift is now
+applied to the second window, rather than the first. =#
+
+printstyled(stdout,"      dest overlap window is NOT first\n", color=:light_green)
+C1 = mkC1()
+C2 = C2_ov()
+C2.t = [1 t0-nx*Δ; nx+1 Δ*(nx-nov); 2*nx 0]
+C2.x = vcat(randn(nx), copy(C1.x[nx-nov+1:nx]), randn(nx-nov))
+U1 = deepcopy(C1)
+U2 = deepcopy(C2)
+merge!(C1, C2)
+basic_checks(SeisData(C1, C2))
+@test C1.x[1:nx] == U2.x[1:nx]
+@test C1.x[nx+1:2nx-nov] == U1.x[1:nx-nov]
+@test C1.x[2nx-nov+1:2nx] == U1.x[nx-nov+1:nx] == U2.x[nx+1:nx+nov]
+@test C1.x[2nx+1:3nx-nov] == U2.x[nx+nov+1:2nx]
+@test mk_tcat([U1.t, U2.t], fs) == C1.t
+
+# ===========================================================================
+printstyled(stdout,"    ignore traces with no data or time info\n", color=:light_green)
+C1 = mkC1()
+C2 = mkC2()
+U1 = deepcopy(C1)
+C2.x = Float64[]
+C2.t = Array{Int64,2}(undef,2,0)
+merge!(C1, C2)
+@test C1 == U1
+
+printstyled(stdout,"    irregularly-sampled data\n", color=:light_green)
+C1 = prandSC(true)
+namestrip!(C1)
+C2 = prandSC(true)
+namestrip!(C2)
+C2.id = identity(C1.id)
+C2.gain = C1.gain
+C2.resp = deepcopy(C1.resp)
+C2.loc = deepcopy(C1.loc)
+C2.units = identity(C1.units)
+C3 = prandSC(true)
+namestrip!(C3)
+C3.id = identity(C1.id)
+C3.resp = deepcopy(C1.resp)
+C3.loc = deepcopy(C1.loc)
+C3.units = identity(C1.units)
+merge!(C1, C2)
+merge!(C1, C3)
+nt = size(C1.t, 1)
+nx = length(C1.x)
+@test nt > 1000
+@test nx > 1000
+@test nt == nx
+
+printstyled(stdout,"  mseis!\n", color=:light_green)
+(S,T) = mktestseis()
+U = merge(S,T)
+sizetest(U, 7)
+
+V = SeisData(S,T)
+merge!(V)
+@test U == V
+
+mseis!(S,T)
+@test S == V
+
+printstyled(stdout,"    with SeisIO.Quake\n", color=:light_green)
+S = randSeisData()
+Ev = randSeisEvent(2)
+C = ungap(deepcopy(Ev.data[1]))
+Ev.data[1] = deepcopy(C)
+C.t[1,2] += 1000000
+C.x = randn(eltype(C.x), length(C.x))
+C.az = 0.0
+C.baz = 0.0
+C.dist = 0.0
+Ev.data[2] = deepcopy(C)
+mseis!(S,   randSeisChannel(),
+            convert(EventChannel, randSeisChannel()),
+            rand(Float64, 23),  # should warn
+            convert(EventTraceData, randSeisData()),
+            Ev,
+            randSeisEvent())
+
+printstyled(stdout,"    target is a SeisChannel\n", color=:light_green)
+(S, T) = mktestseis()
+C = S[4]
+C1 = deepcopy(C)
+C2 = deepcopy(C)
+mseis!(C, C, T)
+mseis!(C2, T)
+@test C == C2
+
+printstyled(stdout,"      with SeisIO.Quake\n", color=:light_green)
+C = convert(EventChannel, C1)
+mseis!(C, T)
+
+C2 = convert(EventChannel, C2)
+mseis!(C, C2)
+
+Ev = randSeisEvent(2)
+C3 = ungap(deepcopy(Ev.data[1]))
+for f in (:id, :fs, :gain, :loc, :resp, :units)
+  setfield!(C3, f, getfield(C, f))
+end
+Ev.data[1] = deepcopy(C3)
+mseis!(C, Ev)
+@test (C == C2) == false
+
+printstyled(stdout,"        type conversion\n", color=:light_green)
+(S, T) = mktestseis()
+C = convert(EventChannel, S[4])
+ϕ = 1.0*rand(0:179) + rand()
+C.baz = ϕ
+D = T[3]
+merge!(C, D)
+@test typeof(D) == SeisChannel
+@test typeof(C) == EventChannel
+@test C.baz == ϕ
+
+C = convert(EventChannel, S[4])
+C.baz = ϕ
+D = T[3]
+merge!(D, C)
+@test typeof(C) == EventChannel
+@test typeof(D) == SeisChannel
+@test C.baz == ϕ
