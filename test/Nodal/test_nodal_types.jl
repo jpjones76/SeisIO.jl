@@ -29,11 +29,21 @@ end
 @test S.data[:, n+1:n+S2.n] == S2.data
 
 printstyled("      convert\n", color=:light_green)
+printstyled("        NodalChannel ⟺ SeisChannel\n", color=:light_green)
 C = randSeisChannel()
 C1 = convert(NodalChannel, C)
 C2 = convert(SeisChannel, C1)
 @test C == C2
 
+printstyled("        NodalChannel ⟺ EventChannel\n", color=:light_green)
+C1 = EventChannel(C)
+C2 = convert(NodalChannel, C1)
+C3 = convert(SeisChannel, C2)
+@test typeof(C1) == EventChannel
+@test typeof(C2) == NodalChannel
+@test C == C3
+
+printstyled("        NodalData ⟺ SeisData\n", color=:light_green)
 S = randSeisData(nc, nx=nx, s=1.0)
 t = mk_t(nx, S.t[1][1,2])
 for i in 1:S.n
@@ -50,6 +60,15 @@ S = convert(SeisData, U)
 for i in 1:S.n
   @test isapprox(S.x[i], U.x[i])
 end
+
+printstyled("        NodalData ⟺ EventTraceData\n", color=:light_green)
+Ev = convert(EventTraceData, S)
+TD = convert(NodalData, Ev)
+@test typeof(Ev) == EventTraceData
+for f in SeisIO.Nodal.nodalfields
+  @test length(getfield(TD, f)) == S.n
+end
+@test size(TD.data) == size(U.data)
 
 printstyled("      deleteat!\n", color=:light_green)
 S = deepcopy(U)

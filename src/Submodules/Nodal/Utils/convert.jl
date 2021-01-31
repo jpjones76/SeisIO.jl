@@ -1,5 +1,9 @@
-function convert(::Type{NodalData}, S::SeisData)
+function convert(::Type{NodalData}, S::T) where T <: GphysData
+  (T == NodalData) && (return deepcopy(S))
   @assert minimum(S.fs) == maximum(S.fs)
+  if T != SeisData
+    S = convert(SeisData, S)
+  end
   sync!(S, s="last", t="first")
 
   L = [length(i) for i in S.x]
@@ -20,6 +24,7 @@ function convert(::Type{NodalData}, S::SeisData)
   end
   return TD
 end
+NodalData(S::T) where T <: GphysData = convert(NodalData, S)
 
 function convert(::Type{SeisData}, TD::NodalData)
   S = SeisData(getfield(TD, :n))
@@ -46,12 +51,18 @@ function convert(::Type{SeisChannel}, D::NodalChannel)
   return C
 end
 
-function convert(::Type{NodalChannel}, C::SeisChannel)
+function convert(::Type{NodalChannel}, C::T) where T<:GphysChannel
+  (T == NodalChannel) && (return deepcopy(C))
+  if T != SeisChannel
+    C = convert(SeisChannel, C)
+  end
+
   D = NodalChannel()
   for f in datafields
     setfield!(D, f, deepcopy(getfield(C, f)))
   end
   return D
 end
+NodalChannel(C::T) where T <: GphysChannel = convert(NodalChannel, C)
 
 push!(TD::NodalData, C::SeisChannel) = push!(TD, convert(NodalChannel, C))
