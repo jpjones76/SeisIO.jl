@@ -111,8 +111,8 @@ mutable struct SeisData <: GphysData
     fill!(S.name, "")                                       # name
     fill!(S.src, "")                                        # src
     fill!(S.units, "")                                      # units
-    fill!(S.fs, 0.0)                                        # fs
-    fill!(S.gain, 1.0)                                      # gain
+    fill!(S.fs, default_fs)                                 # fs
+    fill!(S.gain, default_gain)                             # gain
     for i = 1:n
       S.notes[i]  = Array{String,1}(undef,0)                # notes
       S.misc[i]   = Dict{String,Any}()                      # misc

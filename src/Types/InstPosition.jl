@@ -540,3 +540,5 @@ function isequal(S::NodalLoc, U::NodalLoc)
 end
 ==(S::NodalLoc, U::NodalLoc) = isequal(S, U)
 sizeof(Loc::NodalLoc) = 48
+
+const default_loc = GeoLoc()

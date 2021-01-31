@@ -581,3 +581,5 @@ sizeof(R::MultiStageResp) = 80 + 8*length(R.i) + 8*length(R.o) +
   (isempty(R.stage) ? 0 : sum([sizeof(i) for i in R.stage])) +
   sum([sizeof(j) for j in R.i]) +
   sum([sizeof(j) for j in R.o])
+
+const default_resp = PZResp()

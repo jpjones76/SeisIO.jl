@@ -45,13 +45,13 @@ EventChannel(;
   id    ::String                = "",
   name  ::String                = "",
   loc   ::InstrumentPosition    = GeoLoc(),
-  fs    ::Float64               = zero(Float64),
-  gain  ::Float64               = one(Float64),
+  fs    ::Float64               = default_fs,
+  gain  ::Float64               = default_gain,
   resp  ::InstrumentResponse    = PZResp(),
   units ::String                = "",
-  az    ::Float64               = zero(Float64),    # source azimuth
-  baz   ::Float64               = zero(Float64),    # backazimuth
-  dist  ::Float64               = zero(Float64),    # distance
+  az    ::Float64               = default_fs,    # source azimuth
+  baz   ::Float64               = default_fs,    # backazimuth
+  dist  ::Float64               = default_fs,    # distance
   pha   ::PhaseCat              = PhaseCat(),
   src   ::String                = "",
   misc  ::Dict{String,Any}      = Dict{String,Any}(),
@@ -70,9 +70,9 @@ setindex!(S::EventTraceData, C::EventChannel, j::Int) = (
   return S)
 
 function isempty(Ch::EventChannel)
-  q::Bool = Ch.gain == 1.0
+  q::Bool = Ch.gain == default_gain
   for f in (:az, :baz, :dist, :fs)
-    q = min(q, getfield(Ch, f) == 0.0)
+    q = min(q, getfield(Ch, f) == default_fs)
     (q == false) && return q
   end
   for f in (:id, :loc, :misc, :name, :notes, :pha, :resp, :src, :t, :units, :x)

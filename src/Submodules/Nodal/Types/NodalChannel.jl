@@ -18,12 +18,12 @@ mutable struct NodalChannel <: GphysChannel
 
   function NodalChannel()
     return new(
-                0.0, 0.0, 0.0,
+                default_fs, default_fs, default_fs,
                 "",
                 "",
                 NodalLoc(),
-                0.0,
-                1.0,
+                default_fs,
+                default_gain,
                 PZResp(),
                 "",
                 "",
@@ -94,9 +94,9 @@ function setindex!(S::NodalData, C::NodalChannel, j::Int)
 end
 
 function isempty(C::NodalChannel)
-  q::Bool = C.gain == 1.0
+  q::Bool = C.gain == default_gain
   for f in (:ox, :oy, :oz, :fs)
-    q = min(q, getfield(C, f) == 0.0)
+    q = min(q, getfield(C, f) == default_fs)
     (q == false) && return q
   end
   for f in (:id, :loc, :misc, :name, :notes, :resp, :src, :units, :t, :x)

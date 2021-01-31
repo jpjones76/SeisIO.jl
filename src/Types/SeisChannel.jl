@@ -39,8 +39,8 @@ SeisChannel(;
             id    ::String              = "",
             name  ::String              = "",
             loc   ::InstrumentPosition  = GeoLoc(),
-            fs    ::Float64             = zero(Float64),
-            gain  ::Float64             = one(Float64),
+            fs    ::Float64             = default_fs,
+            gain  ::Float64             = default_gain,
             resp  ::InstrumentResponse  = PZResp(),
             units ::String              = "",
             src   ::String              = "",
@@ -62,7 +62,7 @@ setindex!(S::SeisData, C::SeisChannel, j::Int) = (
   return S)
 
 function isempty(Ch::SeisChannel)
-  q::Bool = min(Ch.gain == 1.0, Ch.fs == 0.0)
+  q::Bool = min(Ch.gain == default_gain, Ch.fs == default_fs)
   if q == true
     for f in (:id, :loc, :misc, :name, :notes, :resp, :src, :t, :units, :x)
       q = min(q, isempty(getfield(Ch, f)))

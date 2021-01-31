@@ -60,6 +60,8 @@ const bad_chars = Dict{String, Any}(
                0x40, 0x5b, 0x5c, 0x5d, 0x5e, 0x60, 0x7b, 0x7c, 0x7d, 0x7e, 0x7f) )
 const datafields = (:id, :name, :loc, :fs, :gain, :resp, :units, :src, :notes, :misc, :t, :x)
 const days_per_month = Int32[31,28,31,30,31,30,31,31,30,31,30,31]
+const default_fs    = zero(Float64)
+const default_gain  = one(Float64)
 const dtchars = (0x2d, 0x2e, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3a, 0x54)
 const dtconst = 62135683200000000
 const regex_chars = String[Sys.iswindows() ? "/" : "\\", "\$", "(", ")", "+", "?", "[", "\\0",
@@ -77,10 +79,14 @@ const sac_float_k = String[ "delta", "depmin", "depmax", "scale", "odelta",
                             "evla", "evlo", "evel", "evdp", "mag",
                             "user0", "user1", "user2", "user3", "user4",
                             "user5", "user6", "user7", "user8", "user9",
-                            "dist", "az", "baz", "gcarc", "internal2",
-                            "internal3", "depmen", "cmpaz", "cmpinc", "xminimum",
-                            "xmaximum", "yminimum", "ymaximum", "unused1", "unused2",
+                            "dist", "az", "baz", "gcarc", "sb",
+                            "sdelta", "depmen", "cmpaz", "cmpinc", "xminimum",
+                            "xmaximum", "yminimum", "ymaximum", "adjtm", "unused2",
                             "unused3", "unused4", "unused5", "unused6", "unused7" ]
+# was:                      "dist", "az", "baz", "gcarc", "internal2",
+#                           "internal3", "depmen", "cmpaz", "cmpinc", "xminimum",
+#                           "xmaximum", "yminimum", "ymaximum", "unused1", "unused2",
+#                           "unused3", "unused4", "unused5", "unused6", "unused7" ]
 const sac_int_k = String[   "nzyear", "nzjday", "nzhour", "nzmin", "nzsec",
                             "nzmsec", "nvhdr", "norid", "nevid", "npts",
                             "internal4", "nwfid", "nxsize", "nysize", "unused8",
@@ -92,8 +98,13 @@ const sac_int_k = String[   "nzyear", "nzjday", "nzhour", "nzmin", "nzsec",
 const sac_string_k = String["kstnm", "kevnm", "khole", "ko", "ka", "kt0", "kt1", "kt2",
                             "kt3", "kt4", "kt5", "kt6", "kt7", "kt8", "kt9", "kf", "kuser0",
                             "kuser1", "kuser2", "kcmpnm", "knetwk", "kdatrd", "kinst" ]
+const sac_double_k = String[  "delta", "b", "e", "o", "a",
+                              "t0", "t1", "t2", "t3", "t4",
+                              "t5", "t6", "t7", "t8", "t9",
+                              "f", "evlo", "evla", "stlo", "stla", "sb", "sdelta"]
 const sac_nul_c = UInt8[0x2d, 0x31, 0x32, 0x33, 0x34, 0x35, 0x20, 0x20]
 const sac_nul_f = -12345.0f0
+const sac_nul_d = -12345.0
 const sac_nul_i = Int32(-12345)
 const sac_nul_start = 0x2d
 const sac_nul_Int8 = UInt8[0x31, 0x32, 0x33, 0x34, 0x35]
