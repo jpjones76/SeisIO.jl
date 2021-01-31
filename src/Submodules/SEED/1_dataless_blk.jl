@@ -767,6 +767,4 @@ function blk_061(io::IO, nb::Int64, v::Integer, R::MultiStageResp, units::Bool)
     @inbounds R.o[stage] = fix_units(units_lookup[uoc])
   end
   return stage
-
-  return nothing
 end
