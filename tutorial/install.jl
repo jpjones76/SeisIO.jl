@@ -1,7 +1,7 @@
 using IJulia
 import SeisIO: get_svn
-path = Base.source_dir()
-include(path * "../test/TestHelpers/0_check_deps.jl")
+path = joinpath(Base.source_dir(),"../test/TestHelpers/0_check_deps.jl")
+include(path)
 pkg_check(["DSP", "SeisIO", "IJulia"])
 get_svn("https://github.com/jpjones76/SeisIO-TestData/trunk/Tutorial", "DATA")
-jupyterlab(dir=pwd())
+jupyterlab(dir=joinpath(dirname(dirname(pathof(SeisIO))),"tutorial"))

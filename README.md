@@ -16,15 +16,24 @@ Designed for speed, efficiency, and ease of use. Includes web clients, readers f
 ## Getting Started | [Formats](docs/FORMATS.md) | [Web Clients](docs/WEB.md)
 Start the tutorials in your browser from the Julia prompt with
 
-`cd(dirname(pathof(SeisIO))); include("../tutorial/install.jl")`
+```julia
+using SeisIO
+cd(dirname(pathof(SeisIO)))
+include("../tutorial/install.jl")
+```
 
 To run SeisIO package tests and download sample data, execute
 
-`using Pkg, SeisIO; Pkg.test("SeisIO")`
+```julia
+using Pkg, SeisIO; Pkg.test("SeisIO")
+```
 
 Sample data downloaded for the tests can be found thereafter at
 
-`cd(dirname(pathof(SeisIO))); sfdir = realpath("../test/SampleFiles/")`
+```julia
+cd(dirname(pathof(SeisIO))) 
+sfdir = realpath("../test/SampleFiles/")
+```
 
 ## Publications | [Changelog](docs/CHANGELOG.md) | [Issues](docs/ISSUES.md)
 Jones, J.P.,  Okubo, K., Clements. T., \& Denolle, M. (2020). SeisIO: a fast, efficient geophysical data architecture for the Julia language. *Seismological Research Letters* doi: https://doi.org/10.1785/0220190295
