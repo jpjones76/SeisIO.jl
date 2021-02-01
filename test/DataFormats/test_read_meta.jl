@@ -198,3 +198,6 @@ end
 for i in 1:S3.n
   @test any([occursin(dataless_name, n) for n in S3.notes[i]])
 end
+
+printstyled("    array of inputs\n", color=:light_green)
+S = read_meta("sacpz", [sacpz_file, sacpz_wc])
