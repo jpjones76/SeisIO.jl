@@ -6,11 +6,11 @@ function SeisData(U...)
     Y = getindex(U,i)
     if typeof(Y) == SeisChannel
       push!(S, Y)
-    elseif typeof(Y) == EventChannel
+    elseif typeof(Y) <: GphysChannel
         push!(S, convert(SeisChannel, Y))
     elseif typeof(Y) == SeisData
       append!(S, Y)
-    elseif typeof(Y) == EventTraceData
+    elseif typeof(Y) <: GphysData
       append!(S, convert(SeisData, Y))
     elseif typeof(Y) == SeisEvent
       append!(S, convert(SeisData, getfield(Y, :data)))

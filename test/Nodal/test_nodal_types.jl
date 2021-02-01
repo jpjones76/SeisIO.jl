@@ -50,25 +50,29 @@ for i in 1:S.n
   S.fs[i] = fs
   S.t[i] = copy(t)
 end
-TD = convert(NodalData, S)
+D = convert(NodalData, S)
 for f in SeisIO.Nodal.nodalfields
-  @test length(getfield(TD, f)) == nc
+  @test length(getfield(D, f)) == nc
 end
-@test size(TD.data) == (nx, nc)
+@test size(D.data) == (nx, nc)
+@test NodalData(S) == D
 
 S = convert(SeisData, U)
 for i in 1:S.n
   @test isapprox(S.x[i], U.x[i])
 end
+@test SeisData(U) == S
 
 printstyled("        NodalData ⟺ EventTraceData\n", color=:light_green)
 Ev = convert(EventTraceData, S)
-TD = convert(NodalData, Ev)
+D = convert(NodalData, Ev)
 @test typeof(Ev) == EventTraceData
 for f in SeisIO.Nodal.nodalfields
-  @test length(getfield(TD, f)) == S.n
+  @test length(getfield(D, f)) == S.n
 end
-@test size(TD.data) == size(U.data)
+@test size(D.data) == size(U.data)
+@test NodalData(Ev) == D
+@test EventTraceData(D) == Ev
 
 printstyled("      deleteat!\n", color=:light_green)
 S = deepcopy(U)
