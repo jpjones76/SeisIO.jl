@@ -28,6 +28,8 @@ New processing function `rescale!` quickly scales data in a structure and adjust
 * Attempting to call `resample!` on a NodalData object should no longer error. Merged PR #68 from tclements/Resample. (Fixes issue #65.)
 * `writesac` should now write begin time (word 5) in a way that never shifts sample times, even by subsample values. (Fixes issue #60)
 * Parsing a SEED Blockette [061] now correctly returns the stage, rather than nothing.
+* Quake submodule
+  + Calling `writesac` on a SeisEvent object now always writes event header values to the correct byte indices for SAC v101 and above.
 
 # 3. **Consistency, Performance**
 * Performance will be slightly better when reading large files whose data contain many negative time gaps. (Partly fixes issue #72)
@@ -42,6 +44,7 @@ New processing function `rescale!` quickly scales data in a structure and adjust
   + `EventChannel(C::T) where T<:GphysChannel` is now defined as an alias to `convert(EventChannel, C)`.
   + `NodalData(S::T) where T<:GphysData` is now aliased to `convert(NodalData, C)`.
   + `NodalChannel(C::T) where T<:GphysChannel` is now defined as an alias to `convert(NodalChannel, C)`.
+  + `SeisData(S::T) where T<:GphysData` should now be aliased to `convert(SeisData, S)` for all GphysData subtypes.
 * `merge!` has been extended to GphysChannel subtypes. For this functionality, the values of each fields in (:id, :fs, :gain, :loc, :resp) must be either the same for both objects, or unset in at least one object.
 
 # 4. **Developer API Changes**

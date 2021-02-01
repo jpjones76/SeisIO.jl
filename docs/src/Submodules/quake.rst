@@ -186,6 +186,13 @@ with coordinates `[s_lat, s_lon]` to receivers `rec` with coordinates
 
 Formatted display of seismic phases in dictionary P.
 
+.. function:: fill_sac_evh!(Ev::SeisEvent, fname[; k=N])
+
+Fill (overwrite) values in *Ev.hdr* with data from SAC file *fname*. Keyword
+*k=i* specifies the reference channel *i* from which the absolute origin time
+*Ev.hdr.ot* is set. Potentially affects header fields *:id*, *:loc* (subfields
+.lat, .lon, .dep only), and *:ot*.
+
 *****************************
 Reading Earthquake Data Files
 *****************************

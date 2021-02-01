@@ -49,9 +49,12 @@ mk_ot!(Ev::SeisEvent, i::Int, o::T) where T<:AbstractFloat = (Ev.hdr.ot =
   u2d(o + Ev.data.t[i][1,2]*μs))
 
 """
-    fill_sac_evh!(Ev::SeisEvent, fname::String)
+    fill_sac_evh!(Ev::SeisEvent, fname::String; k=i)
 
-Fill (overwrite) `Ev.hdr` values with data from SAC file `fname`.
+Fill (overwrite) values in `Ev.hdr` with data from SAC file `fname`. Keyword
+`k=i` specifies the reference channel `i` from which the absolute origin time
+`Ev.hdr.ot` is set. Potentially affects header fields `:id`, `:loc` (subfields
+.lat, .lon, .dep), and `:ot`.
 """
 function fill_sac_evh!(Ev::SeisEvent, fname::String; k::Int=1)
   reset_sacbuf()

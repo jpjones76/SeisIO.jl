@@ -1,3 +1,7 @@
+# 2021-01-31
+* Calling `writesac` on a SeisEvent object now always writes event header values to the correct byte indices for SAC v101 and above.
+* `SeisData(S::T) where T<:GphysData` should now be aliased to `convert(SeisData, S)` for all GphysData subtypes.
+
 # 2021-01-29
 * New developer (internal) function `cmatch_p!`:
   + Matches a pair of GphysChannel objects on (:fs, :id, :loc, :resp, :units)
