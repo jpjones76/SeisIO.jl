@@ -10,6 +10,7 @@ for f in (:convert_seis!, :demean!, :detrend!, :sync!, :taper!, :ungap!, :unscal
 end
 
 @test_throws ErrorException merge!(S1)
+@test Nodal.merge_ext!(S, 1, collect(2:S1.n)) == nothing
 
 # test resampling
 printstyled(string("    ", "resample!", "\n"), color=:light_green)
