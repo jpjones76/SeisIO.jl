@@ -17,15 +17,15 @@ function writesac(S::SeisEvent; v::Integer=KW.v)
 
   # Values from event header
   if S.hdr.loc.lat != 0.0
-    setindex!(BUF.sac_fv, Float32(S.hdr.loc.lat), 40)
+    setindex!(BUF.sac_fv, Float32(S.hdr.loc.lat), 36)
     setindex!(BUF.sac_dv, S.hdr.loc.lat, 18)
   end
   if S.hdr.loc.lon != 0.0
-    setindex!(BUF.sac_fv, Float32(S.hdr.loc.lon), 41)
+    setindex!(BUF.sac_fv, Float32(S.hdr.loc.lon), 37)
     setindex!(BUF.sac_dv, S.hdr.loc.lon, 17)
   end
-  S.hdr.loc.dep == 0.0 || setindex!(BUF.sac_fv, Float32(S.hdr.loc.dep), 42)
-  S.hdr.mag.val == -5.0f0 || setindex!(BUF.sac_fv, Float32(S.hdr.mag.val), 44)
+  S.hdr.loc.dep == 0.0 || setindex!(BUF.sac_fv, Float32(S.hdr.loc.dep), 39)
+  S.hdr.mag.val == -5.0f0 || setindex!(BUF.sac_fv, Float32(S.hdr.mag.val), 40)
   BUF.sac_cv[9:length(ev_id)+8] .= ev_id
   t_evt = d2u(S.hdr.ot)
 
@@ -45,12 +45,15 @@ function writesac(S::SeisEvent; v::Integer=KW.v)
   return nothing
 end
 
+mk_ot!(Ev::SeisEvent, i::Int, o::T) where T<:AbstractFloat = (Ev.hdr.ot =
+  u2d(o + Ev.data.t[i][1,2]*μs))
+
 """
     fill_sac_evh!(Ev::SeisEvent, fname::String)
 
 Fill (overwrite) `Ev.hdr` values with data from SAC file `fname`.
 """
-function fill_sac_evh!(Ev::SeisEvent, fname::String)
+function fill_sac_evh!(Ev::SeisEvent, fname::String; k::Int=1)
   reset_sacbuf()
   io = open(fname, "r")
   swap = should_bswap(io)
@@ -69,10 +72,10 @@ function fill_sac_evh!(Ev::SeisEvent, fname::String)
   end
   sac_v = getindex(iv, 7)
   (iv[9] == sac_nul_i)  || (Ev.hdr.id = string(iv[9]))                # id
-  (fv[8] == sac_nul_f)  || (Ev.hdr.ot = u2d(d2u(Ev.hdr.ot) + fv[8]))  # ot
+  (fv[8] == sac_nul_f)  || (mk_ot!(Ev, k, fv[8]))                     # ot
   (fv[36] == sac_nul_f) || (Ev.hdr.loc.lat = Float64(fv[36]))         # lat
-  (fv[37] == sac_nul_f) || (Ev.hdr.loc.lat = Float64(fv[37]))         # lon
-  (fv[39] == sac_nul_f) || (Ev.hdr.loc.lat = Float64(fv[39]))         # dep
+  (fv[37] == sac_nul_f) || (Ev.hdr.loc.lon = Float64(fv[37]))         # lon
+  (fv[39] == sac_nul_f) || (Ev.hdr.loc.dep = Float64(fv[39]))         # dep
   (fv[40] == sac_nul_f) || (Ev.hdr.mag.val = fv[40])                  # mag
 
   if sac_v > 6
@@ -82,9 +85,9 @@ function fill_sac_evh!(Ev::SeisEvent, fname::String)
     swap && (dv .= bswap.(dv))
 
     # parse doubles 4 (o), 17 (evlo), 18 (evla)
-    (dv[4] == sac_nul_d)  || (Ev.hdr.ot = u2d(d2u(Ev.hdr.ot) + dv[4]))  # ot
-    (dv[17] == sac_nul_d) || (Ev.hdr.loc.lat = Float64(fv[17]))         # lat
-    (dv[18] == sac_nul_d) || (Ev.hdr.loc.lat = Float64(fv[18]))         # lon
+    (dv[4] == sac_nul_d)  || mk_ot!(Ev, k, dv[4])                     # ot
+    (dv[17] == sac_nul_d) || (Ev.hdr.loc.lon = Float64(dv[17]))       # lon
+    (dv[18] == sac_nul_d) || (Ev.hdr.loc.lat = Float64(dv[18]))       # lat
   end
 
   reset_sacbuf()
