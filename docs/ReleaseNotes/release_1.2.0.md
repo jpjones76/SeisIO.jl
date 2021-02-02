@@ -1,5 +1,5 @@
 SeisIO v1.2.0
-2021-XX-YY
+2021-02-02
 
 SeisIO v1.2.0 introduces `scan_seed` for rapid scans of mini-SEED files.
 
@@ -45,10 +45,11 @@ New processing function `rescale!` quickly scales data in a structure and adjust
   + `NodalData(S::T) where T<:GphysData` is now aliased to `convert(NodalData, C)`.
   + `NodalChannel(C::T) where T<:GphysChannel` is now defined as an alias to `convert(NodalChannel, C)`.
   + `SeisData(S::T) where T<:GphysData` should now be aliased to `convert(SeisData, S)` for all GphysData subtypes.
-* `merge!` has been extended to GphysChannel subtypes. For this functionality, the values of each fields in (:id, :fs, :gain, :loc, :resp) must be either the same for both objects, or unset in at least one object.
+* `merge!` has been extended to GphysChannel subtypes. For this functionality, the values of each field in (:id, :fs, :gain, :loc, :resp) must be either the same for both objects, or unset in at least one object.
 
 # 4. **Developer API Changes**
 * Added function `t_bounds(t, Δ)` to the suite of internal time functions. This is a fast, low-memory alternative to `t_win(t, Δ)[1]`.
+* Added function `cmatch_p!(C1, C2)` for partial matches of paired GphysChannels. Given two objects C1, C2, if the values of (:id, :fs, :gain, :loc, :resp) are the same between objects, or unset, they're considered a match. On a match, unset field values are filled automatically from the corresponding field of the matching object.
 
 # 5. **Documentation**
-* Lorem ipsum dolor sit amit.
+* Merged pull request #77 from tclements/master. (Fixes issue #76)
