@@ -12,7 +12,7 @@ platform:
 #
 branches:
   only:
-    - master
+    - main
     - dev
 
 notifications:
