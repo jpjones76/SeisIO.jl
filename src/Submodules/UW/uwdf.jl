@@ -9,7 +9,7 @@ function uwdf!( S::GphysData,
   # Open data file
   fid = memmap ? IOBuffer(Mmap.mmap(fname)) : open(fname, "r")
 
-  # Process master header
+  # Process main header
   N             = Int64(bswap(fastread(fid, Int16)))
   mast_fs       = bswap(fastread(fid, Int32))
   mast_lmin     = bswap(fastread(fid, Int32))
@@ -194,7 +194,7 @@ function uwdf!( S::GphysData,
           D["mast_nx"]    = mast_nx
           D["extra"]      = String(extra)
 
-          # Go back to master header; grab what we skipped
+          # Go back to main header; grab what we skipped
           p = fastpos(fid)
           fastseek(fid, 18)         # we have the first few fields already
           D["mast_tape_no"]   = bswap(fastread(fid, Int16))

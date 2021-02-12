@@ -413,7 +413,7 @@ Extend SeisIO time matrix *T* sampled at interval *Δ* μs or frequency *fs* Hz.
 GphysData structure where `n_new` is known and no time gaps are possible
 in the new segment.
 
-This function has a mini-API in the time API (https://github.com/jpjones76/SeisIO.jl/blob/master/docs/DevGuides/time.md).
+This function has a mini-API in the time API (/docs/DevGuides/time.md).
 
 See also: `check_for_gap!`
 """

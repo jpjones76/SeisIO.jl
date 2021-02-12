@@ -126,7 +126,7 @@ function taper!(C::GphysChannel; t_max::Real=10.0, α::Real=0.05, N_min::Int64=1
 end
 
 # This approach leads to heinous-looking code but uses virtually no memory.
-# I could probably clean it up by creating one master taper
+# I could probably clean it up by creating one main taper
 # and passing/editing views into the taper.
 
 function taper!(S::GphysData;

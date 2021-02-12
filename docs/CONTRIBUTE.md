@@ -2,16 +2,16 @@
 0. **Please contact us first**. Describe the intended contribution(s). In addition to being polite, this ensures that you aren't doing the same thing as someone else.
 1. Fork the code: in Julia, type `] dev SeisIO`.
 2. Choose an appropriate branch:
-  - For **bug fixes**, please use `master`.
-  - For **new features** or **changes**, don't use `master`. Create a new branch or push to `dev`.
-3. When ready to submit, push to your fork (please, not to `master`) and submit a Pull Request (please, not to `master`).
+  - For **bug fixes**, please use `main`.
+  - For **new features** or **changes**, don't use `main`. Create a new branch or push to `dev`.
+3. When ready to submit, push to your fork (please, not to `main`) and submit a Pull Request (please, not to `main`).
 4. Please wait while we review the request.
 
 # **General Rules**
 
 ## **Include tests for new code**
 * We expect at least 95% code coverage on each file.
-* Our target code coverage is 99% on both [CodeCov](https://codecov.io/gh/jpjones76/SeisIO.jl) and [Coveralls](https://coveralls.io/github/jpjones76/SeisIO.jl?branch=master). Code coverage has exceeded 97% consistenly since at least June 2019. Please don't break that for us.
+* Our target code coverage is 99% on both [CodeCov](https://codecov.io/gh/jpjones76/SeisIO.jl) and [Coveralls](https://coveralls.io/github/jpjones76/SeisIO.jl?branch=main). Code coverage has exceeded 97% consistenly since at least June 2019. Please don't break that for us.
 * Good tests include a mix of [unit testing](https://en.wikipedia.org/wiki/Unit_testing) and [use cases](https://en.wikipedia.org/wiki/Use_case).
 
 Data formats with rare encodings can be exceptions to the 95% rule.
