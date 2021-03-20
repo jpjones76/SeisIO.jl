@@ -1,3 +1,14 @@
+# 2021-03-19
+* `writesac` now allows the user to specify SAC file header version (SAC variable NVHDR) using keyword `nvhdr=`. The default is 6. Versions 6 and 7 are supported.
+  + Reason for change: SAC won't read a file if NVHDR is greater than expected.
+    - Example: SAC v101.x (NVHDR = 6) *will not* read a SAC file created in/for SAC v102.x (NVHDR = 7), even though the two file header versions are effectively interchangeable.
+* `filtfilt!`: breaking combinations of data and filter parameters should now be identical in `DSP.filtfilt` and `SeisIO.filtfilt!`, even on Float32 data.
+  + Implicit feature request from issue #82.
+  + This should never force data conversion to Float64. (We already test this.)
+  + It's always possible to choose a filter that outputs NaNs, but the two filtering functions should now behave identically in this regard.
+
+# SeisIO v1.2.0 Release: 2021-02-02
+
 # 2021-01-31
 * Calling `writesac` on a SeisEvent object now always writes event header values to the correct byte indices for SAC v101 and above.
 * `SeisData(S::T) where T<:GphysData` should now be aliased to `convert(SeisData, S)` for all GphysData subtypes.
@@ -24,7 +35,7 @@
 * Added processing function `rescale!` for fast conversion and matching of scalar gains
 
 # 2020-12-02
-* `writesac` should now write begin time (word 5) in a way that never shifts sample times, even by subsample values. (Fixes issue #60)
+* `writesac` should now write begin time (word 6) in a way that never shifts sample times, even by subsample values. (Fixes issue #60)
 
 # 2020-11-23
 * `ungap!` should now work correctly on a channel whose only time gap occurs before the last sample. (Fixes issue #74)

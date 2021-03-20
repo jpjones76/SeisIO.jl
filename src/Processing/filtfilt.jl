@@ -29,10 +29,10 @@ function update_filt(fl::T, fh::T, fs::T, np::Int64, rp::Int, rs::Int, rt::Strin
   pr = convert(PolynomialRatio, digitalfilter(ff, zp))
 
   # create and scale coeffs
-  a = T.(coefa(pr))
-  b = T.(coefb(pr))
+  a = coefa(pr)
+  b = coefb(pr)
   scale_factor = a[1]
-  (scale_factor == 1.0) || (r = T(1.0/scale_factor); rmul!(a, r); rmul!(b, r))
+  (scale_factor == 1.0) || (r = 1.0/scale_factor; rmul!(a, r); rmul!(b, r))
 
   # size
   bs = length(b)
@@ -40,11 +40,11 @@ function update_filt(fl::T, fh::T, fs::T, np::Int64, rp::Int, rs::Int, rt::Strin
   sz = max(bs, as)
 
   # Pad the coefficients with zeros if needed
-  bs < sz && (b = copyto!(zeros(T, sz), b))
-  as < sz && (a = copyto!(zeros(T, sz), a))
+  bs < sz && (b = copyto!(zeros(Float64, sz), b))
+  as < sz && (a = copyto!(zeros(Float64, sz), a))
 
   # construct the companion matrix A and vector B:
-  A = [-a[2:sz] [I; zeros(T, 1, sz-2)]]
+  A = [-a[2:sz] [I; zeros(Float64, 1, sz-2)]]
   B = b[2:sz] - a[2:sz] * b[1]
 
   # Solve for Z: (I - A)*si = B
@@ -90,8 +90,11 @@ function zero_phase_filt!(X::AbstractArray,
     end
 
     # Filtering
-    reverse!(filt!(Y, b, a, Y, mul!(z_copy, zi, first(Y))))
-    filt!(Y, b, a, Y, mul!(z_copy, zi, first(Y)))
+    mul!(z_copy, zi, first(Y))
+    filt!(Y, b, a, Y, z_copy)
+    reverse!(Y)
+    mul!(z_copy, zi, first(Y))
+    filt!(Y, b, a, Y, z_copy)
     j = length(Y)-p+1
     @inbounds for i = 1:nx
       j -= 1
@@ -125,6 +128,7 @@ function do_filtfilt!(X::AbstractArray,
     yview = view(Y, 1 : L+2*p)
     last_L = L
   end
+  fill!(yview, zero(eltype(X)))
 
   # Zero-phase filter in X using Y
   zero_phase_filt!(X, yview, b, a, zi, p)

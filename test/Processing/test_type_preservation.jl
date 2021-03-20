@@ -6,11 +6,18 @@ for f in String["convert_seis!", "demean!", "detrend!", "filtfilt!", "merge!", "
   S = randSeisData(s=1.0, fs_min=30.0)
   T = [eltype(S.x[i]) for i=1:S.n]
   id = deepcopy(S.id)
+  ns = [length(findall(isnan.(S.x[i]))) for i in 1:S.n]
   getfield(SeisIO, Symbol(f))(S)
   for i = 1:S.n
     j = findid(S.id[i], id)
     if j > 0
       @test T[j] == eltype(S.x[i])
+      nn = length(findall(isnan.(S.x[j])))
+      if ns[j] == 0 && nn > 0
+        str = string("channel = ", i, " output ", nn, " NaNs; input had none!")
+        @warn(str)    # goes to warning buffer
+        println(str)  # replicate warning to STDOUT
+      end
     else
       str = string("id = ", id, " deleted from S; check randSeisChannel time ranges.")
       @warn(str)
