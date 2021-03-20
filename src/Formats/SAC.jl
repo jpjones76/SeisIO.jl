@@ -70,7 +70,7 @@ function fill_sac(si::Int64, nx::Int32, ts::Int64, id::Array{String,1})
 
   # Floats
   b = ts - round(Int64, ts/1000)*1000
-  (b == 0) || (BUF.sac_fv[6] = b*1.0f-6)
+  BUF.sac_fv[6] = (b == 0) ? 0.0f0 : b*1.0f-6
   BUF.sac_fv[7] = BUF.sac_fv[6] + BUF.sac_fv[1]*nx
 
   # Filename
@@ -94,19 +94,25 @@ function write_sac_file(fname::String, x::AbstractArray{T,1}) where T
     else
       write(io, Float32.(x))
     end
-    write(io, BUF.sac_dv)
+
+    # Switching this to a user option
+    if BUF.sac_iv[7] == Int32(7)
+      write(io, BUF.sac_dv)
+    end
   end
   return nothing
 end
 
-function write_sac_channel(S::GphysData, i::Int64, fn::String,  v::Integer)
+function write_sac_channel(S::GphysData, i::Integer, nvhdr::Integer, fn::String, v::Integer)
   id = fill_sac_id(S.id[i])
   fs = S.fs[i]
   t = S.t[i]
 
   # Floats, all segments
   dt = (fs == 0.0 ? 0.0 : 1.0/fs)
-  BUF.sac_dv[1] = dt
+  if nvhdr == 7
+    BUF.sac_dv[1] = dt
+  end
   BUF.sac_fv[1] = Float32(dt)
   BUF.sac_fv[4] = Float32(S.gain[i])
   for i in (32, 33, 34, 58, 59)
@@ -124,8 +130,10 @@ function write_sac_channel(S::GphysData, i::Int64, fn::String,  v::Integer)
       BUF.sac_fv[59] = Float32(getfield(loc, :inc))
 
       # IRIS docs claim STLA, STLO order is reversed w.r.t. single floats
-      BUF.sac_dv[19] = lon
-      BUF.sac_dv[20] = lat
+      if nvhdr == 7
+        BUF.sac_dv[19] = lon
+        BUF.sac_dv[20] = lat
+      end
     end
   end
 
@@ -135,6 +143,7 @@ function write_sac_channel(S::GphysData, i::Int64, fn::String,  v::Integer)
   else
     W = t_win(S.t[i], fs)
     inds = x_inds(S.t[i])
+    BUF.sac_iv[7] = Int32(nvhdr)
     BUF.sac_iv[16] = one(Int32)
     BUF.sac_iv[36] = one(Int32)
     for j in 1:size(inds,1)
@@ -437,20 +446,26 @@ function sachdr(fname::String)
 end
 
 """
-    writesac(S::Union{GphysData,GphysChannel}[, fname="", v=0])
+    writesac(S::Union{GphysData,GphysChannel}[, chans, nvhdr=6, fname="", v=0])
 
 Write all data in SeisData structure `S` to auto-generated SAC files.
 
 Keywords:
-* `fname="FF"` uses filename FF, rather than creating file names automatically. (Only works with GphysChannel objects). Leave blank for automatic naming.
+* `chans="CC"` writes data from ChanSpec CC (GphysData only)
+* `fname="FF"` uses filename FF (GphysChannel only)
+* `nvhdr` is SAC NVHDR, the file header version (6 or 7). Default is 6.
 * `v` is verbosity.
 """
-function writesac(S::GphysData; chans::ChanSpec=Int64[], fname::String="", v::Integer=KW.v)
+function writesac(S::GphysData;
+  chans::ChanSpec=Int64[],
+  fname::String="",
+  nvhdr::Integer=6,
+  v::Integer=KW.v)
   reset_sacbuf()
 
   chans = mkchans(chans, S)
   for i in chans
-    write_sac_channel(S, i, fname, v)
+    write_sac_channel(S, i, nvhdr, fname, v)
     reset_sacbuf()
   end
   return nothing
@@ -458,6 +473,7 @@ end
 
 function writesac(S::GphysChannel;
   fname::String="",
+  nvhdr::Integer=6,
   v::Integer=KW.v)
 
   fstr = String(
@@ -471,7 +487,7 @@ function writesac(S::GphysChannel;
       end
     end
     )
-  writesac(SeisData(S), fname=fstr, v=v)
+  writesac(SeisData(S), nvhdr=nvhdr, fname=fstr, v=v)
   return nothing
 end
 

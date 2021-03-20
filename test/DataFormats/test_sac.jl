@@ -40,7 +40,6 @@ SAC3 = verified_read_data("sac", sac_be_file, full=true)[1]
 @test ≈(1/SAC3.fs, SAC3.misc["delta"])
 @test ≈(length(SAC3.x), SAC3.misc["npts"])
 
-
 redirect_stdout(out) do
   sachdr(sac_be_file)
 end
@@ -161,6 +160,30 @@ printstyled("    SAC file v7 (SAC v102.0)\n", color=:light_green)
 test_fs = 62.5
 test_lat = 48.7456
 test_lon = -122.4126
+
+printstyled("      writesac(..., nvhdr=N)\n", color=:light_green)
+C = read_data("sac", sac_file)[1]
+
+writesac(C, fname=sacv7_out, nvhdr=6)
+sz6 = stat(sacv7_out).size
+
+writesac(C, fname=sacv7_out, nvhdr=7)
+sz7 = stat(sacv7_out).size
+
+# The only difference should be the addition of a length-22 Vector{Float64
+@test sz7-sz6 == 176
+
+# In fact, we can open the file, skip to byte sz6, and read in the array
+io = open(sacv7_out, "r")
+seek(io, sz6)
+sac_buf_tmp = read(io)
+close(io)
+dv = reinterpret(Float64, sac_buf_tmp)
+
+# ...and the variables we write to the header should be identical
+@test C.fs == 1.0/dv[1]
+@test C.loc.lon == dv[19]
+@test C.loc.lat == dv[20]
 
 printstyled("      big endian\n", color=:light_green)
 io = open(sac_be_file, "r")
