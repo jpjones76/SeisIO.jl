@@ -16,9 +16,10 @@ function pkg_check(pkgs::Array{String,1})
 
   for p in pkgs
     if get(installs, p, nothing) == nothing
+      @warn(string(p * " not found! Installing."))
       Pkg.add(p)
     else
-      println(p * " found, not installing.")
+      println(p * " found. Not installing.")
     end
   end
   return nothing
