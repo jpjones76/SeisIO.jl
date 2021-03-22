@@ -88,13 +88,17 @@ SEED
 Submodule for the Standard for the Exchange of Earthquake Data (SEED) file format; includes additional functionality.
 
 .. function:: dataless_support()
+   :noindex:
+
 Dump status of dataless SEED blockette support to stdout.
 
 .. function:: mseed_support()
+   :noindex:
 
 Dump status of mini-SEED blockette support to stdout.
 
 .. function:: seed_support()
+   :noindex:
 
 Dump status of SEED blockette support to stdout.
 

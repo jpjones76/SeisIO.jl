@@ -326,3 +326,29 @@ Keywords
 | Highpass filter, and fh is used in a Lowpass filter.
 
 Default filtering KW values can be changed by adjusting the :ref:`shared keywords<dkw>`, e.g., ``SeisIO.KW.Filt.np = 2`` changes the default number of poles to 2.
+
+Troubleshooting NaNs in Output
+==============================
+NaNs in the output of filtering operations (e.g., *filtfilt!*, *translate_resp!*) are nearly always the result of zeros in the denominator of the filter transfer function.
+
+This is not a bug in SeisIO.
+
+In particular, the increased speed of data processing at 32-bit precision comes with an increased risk of NaN output. The reason is that 32-bit machine epsilon (``eps(Float32)`` in Julia) is ~1.0e-7; by comparison, 64-bit machine epsilon is ~1.0e-16.
+
+Please check for common signal processing issues before reporting NaNs to SeisIO maintainers. For example:
+
+Filtering
+*********
+* Is the pass band too narrow?
+* Is the lower corner frequency too close to DC?
+* Is the filter order (or number of poles) too high?
+
+Instrument Responses
+********************
+* Are the roll-off frequencies of the old and new responses too far apart?
+* Is the water level appropriate for the data scaling?
+
+Suggested References
+********************
+Oppenheim, A.V., Buck, J.R. and Schafer, R.W., 2009. Discrete-time signal processing (3rd edition). Upper Saddle River, NJ, USA: Prentice Hall.
+Orfanidis, S.J., 1995. Introduction to signal processing. Upper Saddle River, NJ, USA: Prentice Hall.
