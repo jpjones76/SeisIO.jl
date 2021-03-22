@@ -350,5 +350,5 @@ Instrument Responses
 
 Suggested References
 ********************
-Oppenheim, A.V., Buck, J.R. and Schafer, R.W., 2009. Discrete-time signal processing (3rd edition). Upper Saddle River, NJ, USA: Prentice Hall.
-Orfanidis, S.J., 1995. Introduction to signal processing. Upper Saddle River, NJ, USA: Prentice Hall.
+1. Oppenheim, A.V., Buck, J.R. and Schafer, R.W., 2009. Discrete-time signal processing (3rd edition). Upper Saddle River, NJ, USA: Prentice Hall.
+2. Orfanidis, S.J., 1995. Introduction to signal processing. Upper Saddle River, NJ, USA: Prentice Hall.
