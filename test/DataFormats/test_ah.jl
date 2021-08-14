@@ -51,7 +51,8 @@ redirect_stdout(out) do
   @test isapprox(C.misc["ev_lat"], 49.037)
   @test isapprox(C.misc["ev_lon"], 141.847)
   @test isapprox(C.misc["ev_dep"], 606.0)
-  @test string(u2d(C.misc["ot"]*μs)) == "1990-05-12T04:50:08.7"
+  teststr = VERSION < v"1.6" ? "1990-05-12T04:50:08.7" : "1990-05-12T04:50:08.700"
+  @test string(u2d(C.misc["ot"]*μs)) == teststr
   @test startswith(C.misc["data_comment"], "Streckeisen STS-1V/VBB Seismometer")
   @test startswith(C.misc["event_comment"], "null")
 

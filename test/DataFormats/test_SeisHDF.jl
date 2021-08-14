@@ -205,7 +205,22 @@ if has_restricted
   redirect_stdout(out) do
     write_hdf5(hdf_out1, S, add=true, ovr=true, v=3, tag="raw")
   end
-  @test scan_hdf5(hdf_out1, level="trace") == [
+  scan_expect = VERSION >= v"1.6" ? [
+  "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-07T00:00:00__2019-07-07T23:59:59.975__raw",
+  "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-08T00:00:00__2019-07-08T23:59:59.975__raw",
+  "/Waveforms/CI.SDD/StationXML",
+  "/Waveforms/JP.VONTA/JP.VONTA..E__2014-09-27T00:00:00__2014-09-27T23:59:59.990__raw",
+  "/Waveforms/JP.VONTA/JP.VONTA..H__2014-09-27T00:00:00__2014-09-27T23:59:59.990__raw",
+  "/Waveforms/JP.VONTA/JP.VONTA..N__2014-09-27T00:00:00__2014-09-27T23:59:59.990__raw",
+  "/Waveforms/JP.VONTA/JP.VONTA..U__2014-09-27T00:00:00__2014-09-27T23:59:59.990__raw",
+  "/Waveforms/JP.VONTA/StationXML",
+  "/Waveforms/JP.VONTN/JP.VONTN..E__2014-09-27T00:00:00__2014-09-27T23:59:59.990__raw",
+  "/Waveforms/JP.VONTN/JP.VONTN..H__2014-09-27T00:00:00__2014-09-27T23:59:59.990__raw",
+  "/Waveforms/JP.VONTN/JP.VONTN..N__2014-09-27T00:00:00__2014-09-27T23:59:59.990__raw",
+  "/Waveforms/JP.VONTN/JP.VONTN..U__2014-09-27T00:00:00__2014-09-27T23:59:59.990__raw",
+  "/Waveforms/JP.VONTN/StationXML"
+  ] :
+  [
   "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-07T00:00:00__2019-07-07T23:59:59.975__raw",
   "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-08T00:00:00__2019-07-08T23:59:59.975__raw",
   "/Waveforms/CI.SDD/StationXML",
@@ -220,13 +235,22 @@ if has_restricted
   "/Waveforms/JP.VONTN/JP.VONTN..U__2014-09-27T00:00:00__2014-09-27T23:59:59.99__raw",
   "/Waveforms/JP.VONTN/StationXML"
   ]
+  @test scan_hdf5(hdf_out1, level="trace") == scan_expect
 
   # test 2: ONLY write CI.SDD..HHZ, JP.VONTA..H, JP.VONTA..N, JP.VONTA..U
   printstyled("        write with a channel sublist\n", color=:light_green)
   redirect_stdout(out) do
     write_hdf5(hdf_out2, S, chans=[2,3,4,9], add=true, ovr=true, v=3)
   end
-  @test scan_hdf5(hdf_out2, level="trace") == [
+  scan_expect = VERSION >= v"1.6" ? [
+  "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-07T00:00:00__2019-07-07T23:59:59.975__hhz",
+  "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-08T00:00:00__2019-07-08T23:59:59.975__hhz",
+  "/Waveforms/CI.SDD/StationXML",
+  "/Waveforms/JP.VONTA/JP.VONTA..H__2014-09-27T00:00:00__2014-09-27T23:59:59.990__h",
+  "/Waveforms/JP.VONTA/JP.VONTA..N__2014-09-27T00:00:00__2014-09-27T23:59:59.990__n",
+  "/Waveforms/JP.VONTA/JP.VONTA..U__2014-09-27T00:00:00__2014-09-27T23:59:59.990__u",
+  "/Waveforms/JP.VONTA/StationXML"
+  ] : [
   "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-07T00:00:00__2019-07-07T23:59:59.975__hhz",
   "/Waveforms/CI.SDD/CI.SDD..HHZ__2019-07-08T00:00:00__2019-07-08T23:59:59.975__hhz",
   "/Waveforms/CI.SDD/StationXML",
@@ -235,6 +259,8 @@ if has_restricted
   "/Waveforms/JP.VONTA/JP.VONTA..U__2014-09-27T00:00:00__2014-09-27T23:59:59.99__u",
   "/Waveforms/JP.VONTA/StationXML"
   ]
+
+  @test scan_hdf5(hdf_out2, level="trace") == scan_expect
 
   # ensure the right trace data were written to these names
   S1 = read_hdf5(hdf_out2, "2014-09-27T09:00:00", "2014-09-27T09:59:59.99", id="*.VONTA..*", msr=false)
