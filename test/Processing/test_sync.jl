@@ -620,6 +620,23 @@ basic_checks(W)
 ts_new, te_new = get_edge_times(W)
 wx = Lx(W)
 
+printstyled(stdout,"      Issue #79\n", color=:light_green)
+S79 = randSeisData(s=1.,c=0.,nx=100000,fs_min=10.)
+ungap!(S79)
+C79 = deepcopy(S79[1])
+s79 = u2d(SeisIO.starttime(C79.t, C79.fs) * 1e-6)
+
+# do an allocating sync
+C79new = sync(C79,s=s79,t=s79+Minute(1))
+
+# do an in-place sync!
+sync!(C79,s=s79,t=s79+Minute(1))
+
+# check time matrices
+@test (C79.t == C79new.t)
+@test C79.t != S79.t[1]
+@test C79.x == C79new.x
+
 # ===========================================================================
 # method extenson to SeisEvent
 printstyled(stdout,"    SeisEvent method extension\n", color=:light_green)

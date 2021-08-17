@@ -298,6 +298,10 @@ function sync!(C::SeisChannel;
                 v::Integer=KW.v )
   S = SeisData(C)
   sync!(S, pad=pad, s=s, t=t, v=v)
+
+  # To avoid the scoping abyss... (e.g. Issue #79)
+  (S.t[1] === C.t) || (C.t = deepcopy(S.t[1]))
+  (S.x[1] === C.x) || (C.x = deepcopy(S.x[1]))
   return nothing
 end
 
