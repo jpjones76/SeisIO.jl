@@ -11,11 +11,10 @@ function fill_id!(id::Array{UInt8,1}, cv::Array{UInt8,1}, i::T, i_max::T, j::T, 
   while true
     c = getindex(cv, i)
     i = i+o
-    i > i_max && break
     c < 0x2f && continue
     setindex!(id, c, j)
     j = j+o
-    j > j_max && break
+		(i > i_max || j > jmax) && break
   end
   if j_max < T(15)
     id[j_max+1] = 0x2e
