@@ -230,3 +230,38 @@ C = read_data("sac", sacv7_out, full=true)[1]
 @test C.fs == test_fs
 @test C.loc.lat == test_lat
 @test C.loc.lon == test_lon
+
+printstyled("      Issues #87, #88\n", color=:light_green)
+ts = round(Int64, sμ*d2u(DateTime("2020-03-01T00:00:00")))
+fs = 100.0
+gain = 32.0
+id = "XX.STA..BHZ"
+loc = GeoLoc( lat = 45.560121, lon = -122.617068, el = 53.04 )
+fname = "test.sac"
+C = SeisChannel(id = id,
+                gain = gain,
+                loc = loc,
+                fs = fs,
+                t = [1 ts; 1024 0],
+                x = randn(Float32, 1024)
+                )
+writesac(C, fname=fname)
+S = SeisData()
+# Read with characters at start of each string
+read_data!(S, "sac", fname)
+
+# Move characters to end of each string
+tmp_sac_buf = read(fname)
+charbuf = tmp_sac_buf[441:632]
+charbuf[1:3] .= 0x20
+charbuf[6:8] .= [0x53, 0x54, 0x41] # "STA"
+charbuf[161:163] .= 0x20
+charbuf[166:168] .= [0x42, 0x48, 0x5a] # BHZ
+charbuf[169:170] .= 0x20
+charbuf[175:176] .= 0x58
+tmp_sac_buf[441:632] .= charbuf
+io = open("fname", "w")
+write(io, tmp_sac_buf)
+close(io)
+S2 = read_data("sac", fname)
+@test S.id[1] == S2.id[1]
