@@ -1,4 +1,4 @@
-function save_data!(A::Array{T,1}, dset::HDF5Dataset, src_ind::AbstractRange{Int}, dest_ind::AbstractRange{Int}) where T
+function save_data!(A::Array{T,1}, dset::HDF5.Dataset, src_ind::AbstractRange{Int}, dest_ind::AbstractRange{Int}) where T
   dsel_id = HDF5.hyperslab(dset, src_ind)
   V = view(A, dest_ind)
   memtype = HDF5.datatype(A)

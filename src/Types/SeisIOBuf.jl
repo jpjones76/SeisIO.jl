@@ -133,7 +133,7 @@ mutable struct SeisIOBuf
 
   # For mini-SEED data header
   dh_arr::Array{UInt8, 1}
-  dh_buf::Base.GenericIOBuffer{Array{UInt8,1}}
+  dh_buf                      # dh_buf::Base.GenericIOBuffer{Array{UInt8,1}}
 
   # Blockette containers
   B201::Blk201
