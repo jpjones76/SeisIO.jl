@@ -10,14 +10,14 @@ function mk_netsta(S::GphysData)
   return netsta, cha, nsid
 end
 
-function asdf_wsxml(xbuf::IOBuffer, S::GphysData, chans::Array{Int64,1}, sta::HDF5Group)
+function asdf_wsxml(xbuf::IOBuffer, S::GphysData, chans::Array{Int64,1}, sta::HDF5.Group)
   seekstart(xbuf)
   mk_xml!(xbuf, S, chans)
   sta["StationXML"] = take!(xbuf)
   return nothing
 end
 
-function asdf_mktrace(S::GphysData, xml_buf::IO, chan_numbers::Array{Int64,1}, wav::HDF5Group, ts::Array{Int64,1}, te::Array{Int64,1}, len::Int64, v::Integer, tag::String)
+function asdf_mktrace(S::GphysData, xml_buf::IO, chan_numbers::Array{Int64,1}, wav::HDF5.Group, ts::Array{Int64,1}, te::Array{Int64,1}, len::Int64, v::Integer, tag::String)
   nc = length(chan_numbers)
   netsta, cha, nsid = mk_netsta(S)
   trace_names = Array{Array{String,1},1}(undef, nc)
@@ -102,7 +102,7 @@ function asdf_mktrace(S::GphysData, xml_buf::IO, chan_numbers::Array{Int64,1}, w
   return nothing
 end
 
-function asdf_write_chan(S::GphysData, sta::HDF5Group, i::Int64, tag::String, eid::String, v::Integer)
+function asdf_write_chan(S::GphysData, sta::HDF5.Group, i::Int64, tag::String, eid::String, v::Integer)
   fs = S.fs[i]
   tx = S.t[i]
   t = t_win(tx, fs)

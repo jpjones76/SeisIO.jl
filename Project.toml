@@ -1,7 +1,7 @@
 name = "SeisIO"
 uuid = "b372bb87-02dd-52bb-bcf6-c30dd83fd342"
-authors = ["Joshua P. Jones"]
 version = "1.2.1"
+authors = ["Joshua P. Jones"]
 
 [deps]
 Blosc = "a74b3585-a348-5f62-a45c-50e91977d574"
@@ -26,12 +26,11 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [compat]
 Blosc = "≥ 0.5"
 DSP = "≥ 0.5"
-FFTW = "≥ 1.1"
+FFTW = "1.10.0"
 Glob = "≥ 1.2"
-HDF5 = "0.12.3, 0.13"
-HTTP = "≥ 0.8"
-LightXML = "≥ 0.8"
-julia = "1"
+HDF5 = "0.17.2"
+HTTP = "1.10.19"
+LightXML = "0.9.3"
 
 [extras]
 Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
